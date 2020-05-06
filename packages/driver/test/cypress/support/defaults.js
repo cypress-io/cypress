@@ -1,20 +1,10 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const {
-  _,
-} = Cypress
-const {
-  $,
-} = Cypress
+const { _, $ } = Cypress
 
-//# backup the original config
+// backup the original config
 const ORIG_CONFIG = _.clone(Cypress.config())
 
-beforeEach(function () {
-  //# restore it before each test
+beforeEach(() => {
+  // restore it before each test
   Cypress.config(ORIG_CONFIG)
 
   const isActuallyInteractive = Cypress.config('isInteractive')
@@ -30,11 +20,11 @@ beforeEach(function () {
     Cypress.config('numTestsKeptInMemory', 1)
   }
 
-  //# remove all event listeners
-  //# from the window
-  //# this could fail if this window
-  //# is a cross origin window
+  // remove all event listeners
+  // from the window
+  // this could fail if this window
+  // is a cross origin window
   try {
-    return $(cy.state('window')).off()
-  } catch (error) {}
+    $(cy.state('window')).off()
+  } catch (error) {} // eslint-disable-line no-empty
 })

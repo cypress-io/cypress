@@ -1,374 +1,430 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const { _, Location, Promise } = Cypress;
+const { _, Location } = Cypress
 
 const urls = {
-  blank:    "about:blank",
-  cypress:  "http://0.0.0.0:2020/__/#/tests/app.coffee",
-  signin:   "http://localhost:2020/signin",
-  users:    "http://localhost:2020/users/1",
-  google:   "https://www.google.com",
-  ember:    "http://localhost:2020/index.html#/posts",
-  app:      "http://localhost:2020/app/#posts/1",
-  search:   "http://localhost:2020/search?q=books",
-  pathname: "http://localhost:2020/app/index.html",
-  local:    "http://127.0.0.1:8080/foo/bar",
-  stack:    "https://stackoverflow.com/",
-  trailHash:"http://localhost:3500/index.html?foo=bar#",
-  email:    "http://localhost:3500/?email=brian@cypress.io",
-  heroku:   "https://example.herokuapp.com",
-  herokuSub:"https://foo.example.herokuapp.com",
-  unknown:  "http://what.is.so.unknown",
-  auth:     "http://cypress:password123@localhost:8080/foo"
-};
+  blank: 'about:blank',
+  cypress: 'http://0.0.0.0:2020/__/#/tests/app.coffee',
+  signin: 'http://localhost:2020/signin',
+  users: 'http://localhost:2020/users/1',
+  google: 'https://www.google.com',
+  ember: 'http://localhost:2020/index.html#/posts',
+  app: 'http://localhost:2020/app/#posts/1',
+  search: 'http://localhost:2020/search?q=books',
+  pathname: 'http://localhost:2020/app/index.html',
+  local: 'http://127.0.0.1:8080/foo/bar',
+  stack: 'https://stackoverflow.com/',
+  trailHash: 'http://localhost:3500/index.html?foo=bar#',
+  email: 'http://localhost:3500/?email=brian@cypress.io',
+  heroku: 'https://example.herokuapp.com',
+  herokuSub: 'https://foo.example.herokuapp.com',
+  unknown: 'http://what.is.so.unknown',
+  auth: 'http://cypress:password123@localhost:8080/foo',
+}
 
-describe("src/cypress/location", function() {
-  beforeEach(function() {
-    return this.setup = remote => {
-      return new Location(urls[remote]);
-    };
-  });
+describe('src/cypress/location', () => {
+  beforeEach(function () {
+    this.setup = (remote) => {
+      return new Location(urls[remote])
+    }
+  })
 
-  context("#getAuth", () => it("returns string with username + password", function() {
-    const str = this.setup("auth").getAuth();
-    return expect(str).to.eq("cypress:password123");
-  }));
+  context('#getAuth', () => {
+    it('returns string with username + password', function () {
+      const str = this.setup('auth').getAuth()
 
-  context("#getAuthObj", function() {
-    it("returns an object with username and password", function() {
-      const obj = this.setup("auth").getAuthObj();
-      return expect(obj).to.deep.eq({
-        username: "cypress",
-        password: "password123"
-      });
-    });
+      expect(str).to.eq('cypress:password123')
+    })
+  })
 
-    return it("returns undefined when no username or password", function() {
-      return expect(this.setup("app").getAuthObj()).to.be.undefined;
-    });
-  });
+  context('#getAuthObj', () => {
+    it('returns an object with username and password', function () {
+      const obj = this.setup('auth').getAuthObj()
 
-  context("#getHash", function() {
-    it("returns the hash fragment prepended with #", function() {
-      const str = this.setup("app").getHash();
-      return expect(str).to.eq("#posts/1");
-    });
+      expect(obj).to.deep.eq({
+        username: 'cypress',
+        password: 'password123',
+      })
+    })
 
-    it("returns empty string when no hash", function() {
-      const str = this.setup("signin").getHash();
-      return expect(str).to.eq("");
-    });
+    it('returns undefined when no username or password', function () {
+      expect(this.setup('app').getAuthObj()).to.be.undefined
+    })
+  })
 
-    return it("returns empty when only hash is present", function() {
-      //# its weird, but this matches current browser behavior
-      const str = this.setup("hash").getHash();
-      return expect(str).to.eq("");
-    });
-  });
+  context('#getHash', () => {
+    it('returns the hash fragment prepended with #', function () {
+      const str = this.setup('app').getHash()
 
-  context("#getHref", function() {
-    it("returns the full url", function() {
-      const str = this.setup("signin").getHref();
-      return expect(str).to.eq("http://localhost:2020/signin");
-    });
+      expect(str).to.eq('#posts/1')
+    })
 
-    it("does not apply a leading slash after removing query params", function() {
-      const str = this.setup("ember").getHref();
-      return expect(str).to.eq("http://localhost:2020/index.html#/posts");
-    });
+    it('returns empty string when no hash', function () {
+      const str = this.setup('signin').getHash()
 
-    return it("includes hash even when hash is empty", function() {
-      const str = this.setup("trailHash").getHref();
-      return expect(str).to.eq(urls.trailHash);
-    });
-  });
+      expect(str).to.eq('')
+    })
 
-  context("#getHost", function() {
-    it("returns port if port is present", function() {
-      const str = this.setup("signin").getHost();
-      return expect(str).to.eq("localhost:2020");
-    });
+    it('returns empty when only hash is present', function () {
+      // its weird, but this matches current browser behavior
+      const str = this.setup('hash').getHash()
 
-    return it("omits port if port is blank", function() {
-      const str = this.setup("google").getHost();
-      return expect(str).to.eq("www.google.com");
-    });
-  });
+      expect(str).to.eq('')
+    })
+  })
 
-  context("#getHostName", () => it("returns host without port", function() {
-    const str = this.setup("signin").getHostName();
-    return expect(str).to.eq("localhost");
-  }));
+  context('#getHref', () => {
+    it('returns the full url', function () {
+      const str = this.setup('signin').getHref()
 
-  context("#getOrigin", function() {
-    it("returns the origin including port", function() {
-      const str = this.setup("signin").getOrigin();
-      return expect(str).to.eq("http://localhost:2020");
-    });
+      expect(str).to.eq('http://localhost:2020/signin')
+    })
 
-    it("returns the origin without port", function() {
-      const str = this.setup("google").getOrigin();
-      return expect(str).to.eq("https://www.google.com");
-    });
+    it('does not apply a leading slash after removing query params', function () {
+      const str = this.setup('ember').getHref()
 
-    return it("returns the origin as null for about:blank", function() {
-      const origin = this.setup("blank").getOrigin();
-      return expect(origin).to.eq(null);
-    });
-  });
+      expect(str).to.eq('http://localhost:2020/index.html#/posts')
+    })
 
-  context("#getPathName", function() {
-    it("returns the path", function() {
-      const str = this.setup("signin").getPathName();
-      return expect(str).to.eq("/signin");
-    });
+    it('includes hash even when hash is empty', function () {
+      const str = this.setup('trailHash').getHref()
 
-    it("returns a / with no path", function() {
-      const str = this.setup("google").getPathName();
-      return expect(str).to.eq("/");
-    });
+      expect(str).to.eq(urls.trailHash)
+    })
+  })
 
-    return it("returns the full pathname without a host", function() {
-      const str = this.setup("pathname").getPathName();
-      return expect(str).to.eq("/app/index.html");
-    });
-  });
+  context('#getHost', () => {
+    it('returns port if port is present', function () {
+      const str = this.setup('signin').getHost()
 
-  context("#getPort", function() {
-    it("returns the port", function() {
-      const str = this.setup("signin").getPort();
-      return expect(str).to.eq("2020");
-    });
+      expect(str).to.eq('localhost:2020')
+    })
 
-    return it("returns empty string if port is blank", function() {
-      const str = this.setup("google").getPort();
-      return expect(str).to.eq("");
-    });
-  });
+    it('omits port if port is blank', function () {
+      const str = this.setup('google').getHost()
 
-  context("#getProtocol", function() {
-    it("returns the http protocol", function() {
-      const str = this.setup("signin").getProtocol();
-      return expect(str).to.eq("http:");
-    });
+      expect(str).to.eq('www.google.com')
+    })
+  })
 
-    return it("returns the https protocol", function() {
-      const str = this.setup("google").getProtocol();
-      return expect(str).to.eq("https:");
-    });
-  });
+  context('#getHostName', () => {
+    it('returns host without port', function () {
+      const str = this.setup('signin').getHostName()
 
-  context("#getSearch", function() {
-    it("returns the search params with ? prepended", function() {
-      const str = this.setup("search").getSearch();
-      return expect(str).to.eq("?q=books");
-    });
+      expect(str).to.eq('localhost')
+    })
+  })
 
-    return it("returns an empty string with no seach params", function() {
-      const str = this.setup("google").getSearch();
-      return expect(str).to.eq("");
-    });
-  });
+  context('#getOrigin', () => {
+    it('returns the origin including port', function () {
+      const str = this.setup('signin').getOrigin()
 
-  context("#getToString", () => it("returns the toString function", function() {
-    const str = this.setup("signin").getToString();
-    return expect(str).to.eq("http://localhost:2020/signin");
-  }));
+      expect(str).to.eq('http://localhost:2020')
+    })
 
-  context("#getOriginPolicy", function() {
-    it("handles ip addresses", function() {
-      const str = this.setup("local").getOriginPolicy();
-      return expect(str).to.eq("http://127.0.0.1:8080");
-    });
+    it('returns the origin without port', function () {
+      const str = this.setup('google').getOrigin()
 
-    it("handles 1 part localhost", function() {
-      const str = this.setup("users").getOriginPolicy();
-      return expect(str).to.eq("http://localhost:2020");
-    });
+      expect(str).to.eq('https://www.google.com')
+    })
 
-    it("handles 2 parts stack", function() {
-      const str = this.setup("stack").getOriginPolicy();
-      return expect(str).to.eq("https://stackoverflow.com");
-    });
+    it('returns the origin as null for about:blank', function () {
+      const origin = this.setup('blank').getOrigin()
 
-    it("handles subdomains google", function() {
-      const str = this.setup("google").getOriginPolicy();
-      return expect(str).to.eq("https://google.com");
-    });
+      expect(origin).to.eq(null)
+    })
+  })
 
-    it("issue: #255 two domains in the url", function() {
-      const str = this.setup("email").getOriginPolicy();
-      return expect(str).to.eq("http://localhost:3500");
-    });
+  context('#getPathName', () => {
+    it('returns the path', function () {
+      const str = this.setup('signin').getPathName()
 
-    it("handles private tlds in the public suffix", function() {
-      const str = this.setup("heroku").getOriginPolicy();
-      return expect(str).to.eq("https://example.herokuapp.com");
-    });
+      expect(str).to.eq('/signin')
+    })
 
-    it("handles subdomains of private tlds in the public suffix", function() {
-      const str = this.setup("herokuSub").getOriginPolicy();
-      return expect(str).to.eq("https://example.herokuapp.com");
-    });
+    it('returns a / with no path', function () {
+      const str = this.setup('google').getPathName()
 
-    return it("falls back to dumb check when invalid tld", function() {
-      const str = this.setup("unknown").getOriginPolicy();
-      return expect(str).to.eq("http://so.unknown");
-    });
-  });
+      expect(str).to.eq('/')
+    })
 
-  context(".create", function() {
-    it("returns an object literal", function() {
-      const obj = Location.create(urls.cypress, urls.signin);
-      const keys = ["auth", "authObj", "hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "toString", "originPolicy", "superDomain"];
-      return expect(obj).to.have.keys(keys);
-    });
+    it('returns the full pathname without a host', function () {
+      const str = this.setup('pathname').getPathName()
 
-    return it("can invoke toString function", function() {
-      const obj = Location.create(urls.signin);
-      return expect(obj.toString()).to.eq("http://localhost:2020/signin");
-    });
-  });
+      expect(str).to.eq('/app/index.html')
+    })
+  })
 
-  context(".mergeUrlWithParams", function() {
-    beforeEach(function() {
-      return this.url = function(str, expected, params) {
-        const url = Location.mergeUrlWithParams(str, params);
-        return expect(url).to.eq(expected);
-      };
-    });
+  context('#getPort', () => {
+    it('returns the port', function () {
+      const str = this.setup('signin').getPort()
 
-    it("merges params into a URL", function() {
-      return this.url("http://example.com/a", "http://example.com/a?foo=bar", { foo: 'bar' });
-  });
+      expect(str).to.eq('2020')
+    })
 
-    it("overrides existing queryparams", function() {
-      return this.url("http://example.com/a?foo=quux", "http://example.com/a?foo=bar", { foo: 'bar' });
-  });
+    it('returns empty string if port is blank', function () {
+      const str = this.setup('google').getPort()
 
-    return it("appends and overrides existing queryparams", function() {
-      return this.url("http://example.com/a?foo=quux", "http://example.com/a?foo=bar&baz=quuz", { foo: 'bar', baz: 'quuz' });
-  });
-});
+      expect(str).to.eq('')
+    })
+  })
 
-  context(".normalize", function() {
-    beforeEach(function() {
-      return this.url = function(source, expected) {
-        const url = Location.normalize(source);
-        return expect(url).to.eq(expected);
-      };
-    });
+  context('#getProtocol', () => {
+    it('returns the http protocol', function () {
+      const str = this.setup('signin').getProtocol()
 
-    describe("http urls", function() {
-      it("does not trim url", function() {
-        return this.url("http://github.com/foo/", "http://github.com/foo/");
-      });
+      expect(str).to.eq('http:')
+    })
 
-      it("adds trailing slash to host", function() {
-        return this.url("https://localhost:4200", "https://localhost:4200/");
-      });
+    it('returns the https protocol', function () {
+      const str = this.setup('google').getProtocol()
 
-      it("does not mutate hash when setting path to slash", function() {
-        return this.url("http://0.0.0.0:3000#foo/bar", "http://0.0.0.0:3000/#foo/bar");
-      });
+      expect(str).to.eq('https:')
+    })
+  })
 
-      return it("does not mutate path when it exists", function() {
-        return this.url("http://localhost:3000/foo/bar", "http://localhost:3000/foo/bar");
-      });
-    });
+  context('#getSearch', () => {
+    it('returns the search params with ? prepended', function () {
+      const str = this.setup('search').getSearch()
 
-    describe("http-less urls", function() {
-      it("trims url", function() {
-        return this.url("/index.html/", "/index.html/");
-      });
+      expect(str).to.eq('?q=books')
+    })
 
-      it("does not add trailing slash with query params", function() {
-        return this.url("timeout?ms=1000", "timeout?ms=1000");
-      });
+    it('returns an empty string with no seach params', function () {
+      const str = this.setup('google').getSearch()
 
-      it("does not strip path segments", function() {
-        return this.url("fixtures/sinon.html", "fixtures/sinon.html");
-      });
+      expect(str).to.eq('')
+    })
+  })
 
-      it("formats urls with protocols", function() {
-        return this.url("beta.cypress.io", "http://beta.cypress.io/");
-      });
+  context('#getToString', () => {
+    it('returns the toString function', function () {
+      const str = this.setup('signin').getToString()
 
-      it("formats urls with protocols and query params", function() {
-        return this.url("beta.cypress.io?foo=bar", "http://beta.cypress.io/?foo=bar");
-      });
+      expect(str).to.eq('http://localhost:2020/signin')
+    })
+  })
 
-      it("formats urls with 3 segments and path", function() {
-        return this.url("aws.amazon.com/s3/bucket", "http://aws.amazon.com/s3/bucket");
-      });
+  context('#getOriginPolicy', () => {
+    it('handles ip addresses', function () {
+      const str = this.setup('local').getOriginPolicy()
 
-      it("formats urls with 4 segments", function() {
-        return this.url("foo.bar.co.uk", "http://foo.bar.co.uk/");
-      });
+      expect(str).to.eq('http://127.0.0.1:8080')
+    })
 
-      return it("formats urls with 4 segments and path", function() {
-        return this.url("foo.bar.co.uk/baz/quux", "http://foo.bar.co.uk/baz/quux");
-      });
-    });
+    it('handles 1 part localhost', function () {
+      const str = this.setup('users').getOriginPolicy()
 
-    describe("localhost, 0.0.0.0, 127.0.0.1", () => _.each(["localhost", "0.0.0.0", "127.0.0.1"], host => {
-      return it(`inserts http:// automatically for ${host}`, function() {
-        return this.url(`${host}:4200`, `http://${host}:4200/`);
-      });
-    }));
+      expect(str).to.eq('http://localhost:2020')
+    })
 
-    return describe("localhost", () => it("keeps path / query params / hash around", function() {
-      return this.url("localhost:4200/foo/bar?quux=asdf#/main", "http://localhost:4200/foo/bar?quux=asdf#/main");
-    }));
-  });
+    it('handles 2 parts stack', function () {
+      const str = this.setup('stack').getOriginPolicy()
 
-  return context(".fullyQualifyUrl", function() {
-    beforeEach(function() {
-      return this.normalize = url => Location.normalize(url);
-    });
+      expect(str).to.eq('https://stackoverflow.com')
+    })
 
-    it("does not append trailing slash on a sub directory", function() {
-      let url = this.normalize("http://localhost:4200/app");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://localhost:4200/app");
-    });
+    it('handles subdomains google', function () {
+      const str = this.setup('google').getOriginPolicy()
 
-    it("does not append a trailing slash to url with hash", function() {
-      let url = this.normalize("http://localhost:4000/#/home");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://localhost:4000/#/home");
-    });
+      expect(str).to.eq('https://google.com')
+    })
 
-    it("does not append a trailing slash to protocol-less url with hash", function() {
-      let url = this.normalize("www.github.com/#/home");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://www.github.com/#/home");
-    });
+    it('issue: #255 two domains in the url', function () {
+      const str = this.setup('email').getOriginPolicy()
 
-    it("handles urls without a host", function() {
-      let url = this.normalize("index.html");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://localhost:3500/index.html");
-    });
+      expect(str).to.eq('http://localhost:3500')
+    })
 
-    it("does not insert trailing slash without a host", function() {
-      const url = Location.fullyQualifyUrl("index.html");
-      return expect(url).to.eq("http://localhost:3500/index.html");
-    });
+    it('handles private tlds in the public suffix', function () {
+      const str = this.setup('heroku').getOriginPolicy()
 
-    it("handles no host + query params", function() {
-      let url = this.normalize("timeout?ms=1000");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://localhost:3500/timeout?ms=1000");
-    });
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
 
-    return it("does not strip off path", function() {
-      let url = this.normalize("fixtures/sinon.html");
-      url = Location.fullyQualifyUrl(url);
-      return expect(url).to.eq("http://localhost:3500/fixtures/sinon.html");
-    });
-  });
-});
+    it('handles subdomains of private tlds in the public suffix', function () {
+      const str = this.setup('herokuSub').getOriginPolicy()
+
+      expect(str).to.eq('https://example.herokuapp.com')
+    })
+
+    it('falls back to dumb check when invalid tld', function () {
+      const str = this.setup('unknown').getOriginPolicy()
+
+      expect(str).to.eq('http://so.unknown')
+    })
+  })
+
+  context('.create', () => {
+    it('returns an object literal', () => {
+      const obj = Location.create(urls.cypress, urls.signin)
+      const keys = ['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'toString', 'originPolicy', 'superDomain']
+
+      expect(obj).to.have.keys(keys)
+    })
+
+    it('can invoke toString function', () => {
+      const obj = Location.create(urls.signin)
+
+      expect(obj.toString()).to.eq('http://localhost:2020/signin')
+    })
+  })
+
+  context('.mergeUrlWithParams', () => {
+    beforeEach(function () {
+      this.url = (str, expected, params) => {
+        const url = Location.mergeUrlWithParams(str, params)
+
+        expect(url).to.eq(expected)
+      }
+    })
+
+    it('merges params into a URL', function () {
+      this.url('http://example.com/a', 'http://example.com/a?foo=bar', { foo: 'bar' })
+    })
+
+    it('overrides existing queryparams', function () {
+      this.url('http://example.com/a?foo=quux', 'http://example.com/a?foo=bar', { foo: 'bar' })
+    })
+
+    it('appends and overrides existing queryparams', function () {
+      this.url('http://example.com/a?foo=quux', 'http://example.com/a?foo=bar&baz=quuz', { foo: 'bar', baz: 'quuz' })
+    })
+  })
+
+  context('.normalize', () => {
+    beforeEach(function () {
+      this.url = (source, expected) => {
+        const url = Location.normalize(source)
+
+        expect(url).to.eq(expected)
+      }
+    })
+
+    describe('http urls', () => {
+      it('does not trim url', function () {
+        this.url('http://github.com/foo/', 'http://github.com/foo/')
+      })
+
+      it('adds trailing slash to host', function () {
+        this.url('https://localhost:4200', 'https://localhost:4200/')
+      })
+
+      it('does not mutate hash when setting path to slash', function () {
+        this.url('http://0.0.0.0:3000#foo/bar', 'http://0.0.0.0:3000/#foo/bar')
+      })
+
+      it('does not mutate path when it exists', function () {
+        this.url('http://localhost:3000/foo/bar', 'http://localhost:3000/foo/bar')
+      })
+    })
+
+    describe('http-less urls', () => {
+      it('trims url', function () {
+        this.url('/index.html/', '/index.html/')
+      })
+
+      it('does not add trailing slash with query params', function () {
+        this.url('timeout?ms=1000', 'timeout?ms=1000')
+      })
+
+      it('does not strip path segments', function () {
+        this.url('fixtures/sinon.html', 'fixtures/sinon.html')
+      })
+
+      it('formats urls with protocols', function () {
+        this.url('beta.cypress.io', 'http://beta.cypress.io/')
+      })
+
+      it('formats urls with protocols and query params', function () {
+        this.url('beta.cypress.io?foo=bar', 'http://beta.cypress.io/?foo=bar')
+      })
+
+      it('formats urls with 3 segments and path', function () {
+        this.url('aws.amazon.com/s3/bucket', 'http://aws.amazon.com/s3/bucket')
+      })
+
+      it('formats urls with 4 segments', function () {
+        this.url('foo.bar.co.uk', 'http://foo.bar.co.uk/')
+      })
+
+      it('formats urls with 4 segments and path', function () {
+        this.url('foo.bar.co.uk/baz/quux', 'http://foo.bar.co.uk/baz/quux')
+      })
+    })
+
+    describe('localhost, 0.0.0.0, 127.0.0.1', () => {
+      _.each(['localhost', '0.0.0.0', '127.0.0.1'], (host) => {
+        it(`inserts http:// automatically for ${host}`, function () {
+          this.url(`${host}:4200`, `http://${host}:4200/`)
+        })
+      })
+    })
+
+    describe('localhost', () => {
+      it('keeps path / query params / hash around', function () {
+        this.url('localhost:4200/foo/bar?quux=asdf#/main', 'http://localhost:4200/foo/bar?quux=asdf#/main')
+      })
+    })
+  })
+
+  context('.fullyQualifyUrl', () => {
+    beforeEach(function () {
+      this.normalize = (url) => {
+        return Location.normalize(url)
+      }
+    })
+
+    it('does not append trailing slash on a sub directory', function () {
+      let url = this.normalize('http://localhost:4200/app')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://localhost:4200/app')
+    })
+
+    it('does not append a trailing slash to url with hash', function () {
+      let url = this.normalize('http://localhost:4000/#/home')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://localhost:4000/#/home')
+    })
+
+    it('does not append a trailing slash to protocol-less url with hash', function () {
+      let url = this.normalize('www.github.com/#/home')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://www.github.com/#/home')
+    })
+
+    it('handles urls without a host', function () {
+      let url = this.normalize('index.html')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://localhost:3500/index.html')
+    })
+
+    it('does not insert trailing slash without a host', () => {
+      const url = Location.fullyQualifyUrl('index.html')
+
+      expect(url).to.eq('http://localhost:3500/index.html')
+    })
+
+    it('handles no host + query params', function () {
+      let url = this.normalize('timeout?ms=1000')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://localhost:3500/timeout?ms=1000')
+    })
+
+    it('does not strip off path', function () {
+      let url = this.normalize('fixtures/sinon.html')
+
+      url = Location.fullyQualifyUrl(url)
+
+      expect(url).to.eq('http://localhost:3500/fixtures/sinon.html')
+    })
+  })
+})
