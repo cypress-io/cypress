@@ -33,7 +33,7 @@ cypress.run({
 const runConfig: Cypress.UserConfigOptions = {
   baseUrl: 'http://localhost:8080',
   env: {
-    'login': false
+    login: false
   },
 }
 cypress.run({ config: runConfig })
