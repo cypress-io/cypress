@@ -71,14 +71,22 @@ class Socket {
 
   // TODO: clean this up by sending the spec object instead of
   // the url path
-  watchTestFileByPath (config, originalFilePath, options) {
-    // files are always sent as integration/foo_spec.js
-    // need to take into account integrationFolder may be different so
-    // integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
-    debug('watch test file %o', originalFilePath)
-    let filePath = path.join(config.integrationFolder, originalFilePath.replace(`integration${path.sep}`, ''))
+  watchTestFileByPath (config, originalFilePathOrSpecConfig, options) {
+    let filePath
 
-    filePath = path.relative(config.projectRoot, filePath)
+    if (typeof originalFilePathOrSpecConfig === 'string') {
+      // files are always sent as integration/foo_spec.js
+      // need to take into account integrationFolder may be different so
+      // integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
+      debug('watch test file %o', originalFilePathOrSpecConfig)
+      const originalFilePath = originalFilePathOrSpecConfig
+
+      filePath = path.join(config.integrationFolder, originalFilePath.replace(`integration${path.sep}`, ''))
+      filePath = path.relative(config.projectRoot, filePath)
+    } else {
+      debug('watching spec with config %o', originalFilePathOrSpecConfig)
+      filePath = originalFilePathOrSpecConfig.absolute
+    }
 
     // bail if this is special path like "__all"
     // maybe the client should not ask to watch non-spec files?
@@ -287,8 +295,10 @@ class Socket {
         return options.onSpecChanged(spec)
       })
 
-      socket.on('watch:test:file', (filePath, cb = function () {}) => {
-        this.watchTestFileByPath(config, filePath, options)
+      socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+        debug('watch:test:file %o', specInfo)
+
+        this.watchTestFileByPath(config, specInfo, options)
 
         // callback is only for testing purposes
         return cb()
