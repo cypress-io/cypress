@@ -2458,7 +2458,11 @@ declare namespace Cypress {
     experimentalGetCookiesSameSite: boolean
   }
 
-  type UserConfigOptions = Partial<AllConfigOptions>
+  /**
+   * When users specify config options, they can provide only
+   * some properties.
+   */
+  type ConfigOptions = Partial<AllConfigOptions>
 
   interface PluginConfigOptions extends AllConfigOptions {
     /**
