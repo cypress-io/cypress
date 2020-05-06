@@ -323,11 +323,12 @@ describe "lib/socket", ->
           done()
 
     context "on(watch:test:file)", ->
-      it "calls socket#watchTestFileByPath with config, filePath", (done) ->
+      it "calls socket#watchTestFileByPath with config, spec argument", (done) ->
         sinon.stub(@socket, "watchTestFileByPath")
 
-        @client.emit "watch:test:file", "path/to/file", =>
-          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, "path/to/file")
+        specArgument = {}
+        @client.emit "watch:test:file", specArgument, =>
+          expect(@socket.watchTestFileByPath).to.be.calledWith(@cfg, specArgument)
           done()
 
     context "on(app:connect)", ->
@@ -497,6 +498,15 @@ describe "lib/socket", ->
       it "watches file by path", ->
         @socket.watchTestFileByPath(@cfg, "integration#{path.sep}test2.coffee")
         expect(preprocessor.getFile).to.be.calledWith("tests#{path.sep}test2.coffee", @cfg)
+
+      it "watches file by relative path in spec object", ->
+        # this is what happens now with component / integration specs
+        spec = {
+          absolute: "#{path.sep}foo#{path.sep}bar",
+          relative: "relative#{path.sep}to#{path.sep}root#{path.sep}test2.coffee"
+        }
+        @socket.watchTestFileByPath(@cfg, spec)
+        expect(preprocessor.getFile).to.be.calledWith(spec.relative, @cfg)
 
       it "triggers watched:file:changed event when preprocessor 'file:updated' is received", (done) ->
         sinon.stub(fs, "statAsync").resolves()
