@@ -87,10 +87,16 @@ commands:
               echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
             fi
 
-  run-driver-integration-tests:
+  run-integration-tests:
     parameters:
       browser:
         description: browser shortname to target
+        type: string
+      working_directory:
+        description: directory of package to run integration tests
+        type: string
+      group_name:
+        description: cypress --group name prefix
         type: string
     steps:
       - attach_workspace:
@@ -98,15 +104,15 @@ commands:
       - run:
           command: yarn start
           background: true
-          working_directory: packages/driver
+          working_directory: << parameters.working_directory >>
       - run:
           command: yarn wait-on http://localhost:3500
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
-          working_directory: packages/driver
+            yarn cypress:run --record --parallel --group << parameters.group_name >>-<< parameters.browser >> --browser << parameters.browser >>
+          working_directory: << parameters.working_directory >>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -577,52 +583,28 @@ jobs:
     <<: *defaults
     parallelism: 2
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn workspace @packages/driver start
-          background: true
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --group runner-integration-chrome --browser chrome
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - run-integration-tests:
+          browser: chrome
+          working_directory: "packages/runner"
+          group_name: "runner-integration"
 
   "runner-integration-tests-firefox":
     <<: *defaults
     parallelism: 2
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn workspace @packages/driver start
-          background: true
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-chrome --browser firefox
-      - store_test_results:
-          path: /tmp/cypress
-      - store_artifacts:
-          path: /tmp/artifacts
-      - store-npm-logs
+      - run-integration-tests:
+          browser: firefox
+          working_directory: "packages/runner"
+          group_name: "runner-integration"
 
   "driver-integration-tests-chrome":
     <<: *defaults
     parallelism: 5
     steps:
-      - run-driver-integration-tests:
+      - run-integration-tests:
           browser: chrome
+          working_directory: "packages/driver"
+          group_name: "driver-integration"
 
   # "driver-integration-tests-electron":
   #   <<: *defaults
@@ -635,8 +617,10 @@ jobs:
     <<: *defaults
     parallelism: 5
     steps:
-      - run-driver-integration-tests:
+      - run-integration-tests:
           browser: firefox
+          working_directory: "packages/driver"
+          group_name: "driver-integration"
 
   "desktop-gui-integration-tests-2x":
     <<: *defaults
