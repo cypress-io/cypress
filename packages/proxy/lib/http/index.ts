@@ -43,6 +43,7 @@ type HttpMiddlewareCtx<T> = {
   res: CypressResponse
 
   middleware: MiddlewareStacks
+  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
 } & T
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
@@ -61,7 +62,6 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
 type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
   buffers: HttpBuffers
   config: any
-  deferSourceMapRewrite: Http['deferSourceMapRewrite']
   getFileServerToken: () => string
   getRemoteState: () => any
   request: any
@@ -208,18 +208,23 @@ export class Http {
     }
   }
 
-  handle (req, res) {
+  handle (req: Request, res: Response) {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
 
       buffers: this.buffers,
-      deferSourceMapRewrite: this.deferSourceMapRewrite,
       config: this.config,
       getFileServerToken: this.getFileServerToken,
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
+      deferSourceMapRewrite: (opts) => {
+        return this.deferredSourceMapCache.defer({
+          resHeaders: ctx.incomingRes.headers,
+          ...opts,
+        })
+      },
     }
 
     return _runStage(HttpStages.IncomingRequest, ctx)
@@ -232,11 +237,7 @@ export class Http {
     })
   }
 
-  deferSourceMapRewrite = (opts) => {
-    return this.deferredSourceMapCache.defer(opts)
-  }
-
-  async handleSourceMapRequest (req, res) {
+  async handleSourceMapRequest (req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
 

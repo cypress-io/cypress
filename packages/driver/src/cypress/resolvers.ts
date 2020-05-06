@@ -70,14 +70,16 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
     return actualValue
   }
 
-  throw new Error('unhandled')
+  throw new Error('unhandled resolveWindowReference')
 }
 
 /**
  * Fix a bug that can cause `window.location.href = 'relative-url'` to resolve to the wrong URL.
  */
 export function resolveLocationReference (currentWindow: Window) {
+  // @ts-ignore
   if (currentWindow.__cypressFakeLocation) {
+    // @ts-ignore
     return currentWindow.__cypressFakeLocation
   }
 
@@ -107,6 +109,7 @@ export function resolveLocationReference (currentWindow: Window) {
     return acc
   }, {})
 
+  // @ts-ignore
   return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
     get (target, prop, _receiver) {
       if (prop === 'assign') {

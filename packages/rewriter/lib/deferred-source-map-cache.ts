@@ -10,6 +10,21 @@ export type DeferredSourceMapRequest = {
   url: string
   js?: string
   sourceMap?: any
+  resHeaders?: string
+}
+
+const caseInsensitiveGet = (obj, lowercaseProperty) => {
+  for (let key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      return obj[key]
+    }
+  }
+}
+
+const getSourceMapHeader = (headers) => {
+  // sourcemap has precedence
+  // @see https://searchfox.org/mozilla-central/rev/dc4560dcaafd79375b9411fdbbaaebb0a59a93ac/devtools/shared/DevToolsUtils.js#611-619
+  return caseInsensitiveGet(headers, 'sourcemap') || caseInsensitiveGet(headers, 'x-sourcemap')
 }
 
 /**
@@ -57,6 +72,40 @@ export class DeferredSourceMapCache {
     return _.find(this.requests, { uniqueId })
   }
 
+  async _getInputSourceMap (request: DeferredSourceMapRequest, headers: any) {
+    const sourceMapUrl = getSourceMapHeader(request.resHeaders) || sourceMaps.getMappingUrl(request.js!)
+
+    if (!sourceMapUrl) {
+      return
+    }
+
+    // try to decode it as a base64 string
+    const inline = sourceMaps.tryDecodeInlineUrl(sourceMapUrl)
+
+    if (inline) {
+      return inline
+    }
+
+    // try to load it from the web
+    const req = {
+      url: request.url,
+      // TODO: this assumes that the sourcemap is on the same base domain, so it's safe to send the same headers
+      // the browser sent for this sourcemap request - but if sourcemap is on a different domain, this will not
+      // be true. need to use browser's cookiejar instead.
+      headers,
+      timeout: 5000,
+    }
+
+    try {
+      const { body } = await this.requestLib(req, true)
+
+      return body
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      debug('got an error loading user-provided sourcemap, serving proxy-generated sourcemap only %o', { url: request.url, headers, error })
+    }
+  }
+
   async resolve (uniqueId: string, headers: any) {
     const request = this._getRequestById(uniqueId)
 
@@ -72,39 +121,12 @@ export class DeferredSourceMapCache {
       throw new Error('Missing JS for source map rewrite')
     }
 
-    const sourceMapUrl = sourceMaps.getMappingUrl(request.js)
-
-    let inputSourceMap
-
-    if (sourceMapUrl) {
-      // try to decode it as a base64 string
-      inputSourceMap = sourceMaps.tryDecodeInlineUrl(sourceMapUrl)
-
-      if (!inputSourceMap) {
-        // try to load it from the web
-        const req = {
-          url: request.url,
-          // TODO: this assumes that the sourcemap is on the same base domain, so it's safe to send the same headers
-          // the browser sent for this sourcemap request - but if sourcemap is on a different domain, this will not
-          // be true. need to use browser's cookiejar instead.
-          headers,
-          timeout: 5000,
-        }
-
-        try {
-          const { body } = await this.requestLib(req, true)
-
-          inputSourceMap = body
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          debug('got an error loading user-provided sourcemap, serving proxy-generated sourcemap only %o', { url: request.url, headers, error })
-        }
-      }
-    }
+    const inputSourceMap = await this._getInputSourceMap(request, headers)
 
     // cache the sourceMap so we don't need to regenerate it
     request.sourceMap = await rewriteJsSourceMapAsync(request.url, request.js, inputSourceMap)
     delete request.js // won't need this again
+    delete request.resHeaders
 
     return request.sourceMap
   }
