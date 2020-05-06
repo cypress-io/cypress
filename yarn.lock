@@ -1487,16 +1487,6 @@
   resolved "https://registry.yarnpkg.com/@cypress/icons/-/icons-0.7.0.tgz#415d3729a8dc8c7eb5cd24f79f2404a65751d303"
   integrity sha1-QV03KajcjH61zST3nyQEpldR0wM=
 
-"@cypress/json-schemas@5.34.1":
-  version "5.34.1"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.34.1.tgz#ddf52da1ee469d1e8638216a138ee63d705428ee"
-  integrity sha512-iLBkT1xQrdfjN4/EiKtGsYjQ9ZJM4DKqLyM9OeRSHgL6dfair6scKllfpjY6tgkcp/bRoXlVM0ZHX4JGw/fwcg==
-  dependencies:
-    "@cypress/schema-tools" "4.7.3"
-    lodash.clonedeep "^4.5.0"
-    lodash.merge "^4.6.2"
-    lodash.omit "^4.5.0"
-
 "@cypress/json-schemas@5.34.2":
   version "5.34.2"
   resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.34.2.tgz#0b5b6c8519573c99faedfa22b9c0a410b86aad7c"
@@ -1584,24 +1574,6 @@
     tough-cookie "~2.5.0"
     tunnel-agent "^0.6.0"
     uuid "^3.3.2"
-
-"@cypress/schema-tools@4.7.3":
-  version "4.7.3"
-  resolved "https://registry.yarnpkg.com/@cypress/schema-tools/-/schema-tools-4.7.3.tgz#75b0c217fba998b4fb8cfb79f582299f0f7cb329"
-  integrity sha512-1uiaIDc9l72LgwkZ8341GDBSDdLuTKOOivLkq+HQ+Y90FNRHa8+GR5+7+LvyM66wVh3c0IPkLFD//TFeBChkAw==
-  dependencies:
-    "@bahmutov/all-paths" "1.0.2"
-    "@bahmutov/is-my-json-valid" "2.17.3"
-    "@types/ramda" "0.25.47"
-    debug "4.1.1"
-    json-stable-stringify "1.0.1"
-    json2md "1.6.3"
-    lodash.camelcase "4.3.0"
-    lodash.get "4.4.2"
-    lodash.reduce "^4.6.0"
-    lodash.set "4.3.2"
-    quote "0.4.0"
-    ramda "0.25.0"
 
 "@cypress/schema-tools@4.7.4":
   version "4.7.4"
