@@ -127,7 +127,7 @@ declare module 'cypress' {
     /**
      * Specify configuration
      */
-    config: Partial<Cypress.AllConfigOptions>
+    config: Partial<Cypress.ResolvedConfigOptions>
     /**
      * Path to the config file to be used.
      *
@@ -281,8 +281,7 @@ declare module 'cypress' {
     osName: string
     osVersion: string
     cypressVersion: string
-    // TODO add resolved object to the configuration
-    config: Cypress.AllConfigOptions
+    config: Cypress.ResolvedConfigOptions
   }
 
   /**
