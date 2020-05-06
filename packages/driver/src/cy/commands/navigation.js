@@ -771,8 +771,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         // the onLoad callback should only be skipped if specified
         if (runOnLoadCallback !== false) {
-          if (options.onLoad != null) {
-            options.onLoad.call(runnable.ctx, win)
+          try {
+            options.onLoad?.call(runnable.ctx, win)
+          } catch (err) {
+            // mark these as onLoad errors, so they're treated differently
+            // than Node.js errors when caught below
+            err.isOnLoadError = true
+            throw err
           }
         }
 
@@ -981,6 +986,15 @@ module.exports = (Commands, Cypress, cy, state, config) => {
                 args,
               })
             })
+
+            return
+          }
+
+          // if it came from the user's onLoad callback, it's not a network
+          // failure, and we should just throw the original error
+          if (err.isOnLoadError) {
+            delete err.isOnLoadError
+            throw err
           }
 
           visitFailedByErr(err, url, () => {
@@ -989,9 +1003,13 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               args: {
                 url,
                 error: err,
-                stack: err.stack,
               },
-              noStackTrace: true,
+              errProps: {
+                appendToStack: {
+                  title: 'From Node.js Internals',
+                  content: err.stack,
+                },
+              },
             })
           })
         })

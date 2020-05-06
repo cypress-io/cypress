@@ -38,9 +38,9 @@ exports['e2e js error handling / fails'] = `
   1) s1
        without an afterEach hook
          t1:
-     Uncaught ReferenceError: foo is not defined
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -52,9 +52,9 @@ https://on.cypress.io/uncaught-exception-from-application
   2) s1
        without an afterEach hook
          t2:
-     Uncaught ReferenceError: bar is not defined
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > bar is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -66,9 +66,9 @@ https://on.cypress.io/uncaught-exception-from-application
   3) s1
        with an afterEach hook
          t4:
-     Uncaught ReferenceError: foo is not defined
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -86,7 +86,9 @@ https://on.cypress.io/uncaught-exception-from-application
   5) s1
        cross origin script errors
          explains where script errored:
-     Uncaught Error: Script error.
+     CypressError: The following error originated from your application code, not from Cypress.
+
+  > Script error.
 
 Cypress detected that an uncaught error was thrown from a cross origin script.
 
@@ -96,15 +98,13 @@ Check your Developer Tools Console for the actual error - it should be printed t
 
 It's possible to enable debugging these scripts by adding the \`crossorigin\` attribute and setting a CORS header.
 
-https://on.cypress.io/cross-origin-script-error
-
-This error originated from your application code, not from Cypress.
-
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
 This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
 
 https://on.cypress.io/uncaught-exception-from-application
+
+https://on.cypress.io/cross-origin-script-error
       [stack trace lines]
 
 

@@ -148,6 +148,10 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
+if (options.headed) {
+  env.HEADED = true
+}
+
 if (options.exit === false) {
   env.NO_EXIT = '1'
 }

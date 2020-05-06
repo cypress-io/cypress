@@ -104,7 +104,7 @@ https://on.cypress.io/api/task
      CypressError: \`cy.task('errors')\` failed with the following error:
 
 > Error: Error thrown in task handler
-    [stack trace lines]
+      [stack trace lines]
 
 
 
