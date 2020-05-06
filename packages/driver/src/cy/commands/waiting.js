@@ -70,12 +70,12 @@ module.exports = (Commands, Cypress, cy, state) => {
         return Promise.resolve(xhr)
       }
 
-      options.error = $errUtils.errMsgByPath('wait.timed_out', {
+      options.error = $errUtils.errByPath('wait.timed_out', {
         timeout: options.timeout,
         alias,
         num,
         type,
-      })
+      }).message
 
       const args = [alias, type, index, num, options]
 

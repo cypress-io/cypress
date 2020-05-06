@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 
 const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
+const $stackUtils = require('../../cypress/stack_utils')
 const $Server = require('../../cypress/server')
 const $Location = require('../../cypress/location')
 
@@ -221,10 +222,10 @@ const startXhrServer = (cy, state, config) => {
     onXhrAbort: (xhr, stack) => {
       setResponse(state, xhr)
 
-      const err = new Error($errUtils.errMsgByPath('xhr.aborted'))
+      const err = $errUtils.errByPath('xhr.aborted')
 
       err.name = 'AbortError'
-      err.stack = stack
+      err.stack = $stackUtils.replacedStack(err, stack)
 
       const log = logs[xhr.id]
 

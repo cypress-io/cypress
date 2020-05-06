@@ -96,7 +96,6 @@ class Test extends Component<Props> {
           </div>
         </div>
         {this._contents()}
-        <TestError model={model} />
       </div>
     )
   }
@@ -119,6 +118,7 @@ class Test extends Component<Props> {
         <div className='runnable-commands-region'>
           {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
         </div>
+        <TestError model={model} />
       </div>
     )
   }

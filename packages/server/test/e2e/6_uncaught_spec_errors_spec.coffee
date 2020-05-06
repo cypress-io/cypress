@@ -18,7 +18,7 @@ describe "e2e uncaught errors", ->
   e2e.it "failing3", {
     spec: "uncaught_during_test_spec.coffee"
     snapshot: true
-    expectedExitCode: 1
+    expectedExitCode: 3
   }
 
   e2e.it "failing4", {

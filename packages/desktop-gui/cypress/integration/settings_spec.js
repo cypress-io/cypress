@@ -385,7 +385,7 @@ describe('Settings', () => {
       })
 
       it('opens ci guide when learn more is clicked', () => {
-        cy.get('.settings-record-key').contains('Learn More').click().then(function () {
+        cy.get('.settings-record-key').contains('Learn more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
         })
       })
@@ -748,6 +748,79 @@ describe('Settings', () => {
 
           cy.percySnapshot()
         })
+      })
+    })
+  })
+
+  describe('file preference panel', () => {
+    const availableEditors = [
+      { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
+      { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
+      { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
+      { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
+      { id: 'other', name: 'Other', isOther: true, openerId: '' },
+    ]
+
+    beforeEach(function () {
+      this.getUserEditor = this.util.deferred()
+      cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
+      cy.stub(this.ipc, 'setUserEditor').resolves()
+
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('File Opener Preference').click()
+    })
+
+    it('displays file preference section', () => {
+      cy.contains('Your preference is used to open files')
+    })
+
+    it('opens file preference guide when learn more is clicked', () => {
+      cy.get('.file-preference').contains('Learn more').click().then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-opener-preference')
+      })
+    })
+
+    it('loads preferred editor and available editors', function () {
+      expect(this.ipc.getUserEditor).to.be.called
+    })
+
+    it('shows spinner', () => {
+      cy.get('.loading-editors')
+    })
+
+    describe('when editors load with preferred editor', () => {
+      beforeEach(function () {
+        this.getUserEditor.resolve({ availableEditors, preferredOpener: availableEditors[3] })
+      })
+
+      it('displays available editors with preferred one selected', () => {
+        cy.get('.loading-editors').should('not.exist')
+        cy.contains('Atom')
+        cy.contains('Other')
+        cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
+      })
+
+      it('sets editor through ipc when a different editor is selected', function () {
+        cy.contains('Atom').click()
+        .closest('li').should('have.class', 'is-selected')
+
+        cy.wrap(this.ipc.setUserEditor).should('be.calledWith', availableEditors[0])
+      })
+    })
+
+    describe('when editors load without preferred editor', () => {
+      beforeEach(function () {
+        this.getUserEditor.resolve({ availableEditors })
+      })
+
+      it('does not select an editor', () => {
+        cy.get('.loading-editors').should('not.exist')
+        cy.get('.editor-picker li').should('not.have.class', 'is-selected')
       })
     })
   })

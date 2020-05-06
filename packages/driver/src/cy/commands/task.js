@@ -3,6 +3,7 @@ const Promise = require('bluebird')
 
 const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
+const $stackUtils = require('../../cypress/stack_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
@@ -72,24 +73,24 @@ module.exports = (Commands, Cypress, cy) => {
           args: { task, timeout: options.timeout, error: error.message },
         })
       })
-      .catch((error) => {
+      .catch((err) => {
         // re-throw if timedOut error from above
-        if (error.name === 'CypressError') {
-          throw error
+        if ($errUtils.isCypressErr(err)) {
+          throw err
         }
 
-        $errUtils.normalizeErrorStack(error)
+        err.stack = $stackUtils.normalizedStack(err)
 
-        if (error?.isKnownError) {
+        if (err?.isKnownError) {
           $errUtils.throwErrByPath('task.known_error', {
             onFail: options._log,
-            args: { task, error: error.message },
+            args: { task, error: err.message },
           })
         }
 
         $errUtils.throwErrByPath('task.failed', {
           onFail: options._log,
-          args: { task, error: error?.stack || error?.message || error },
+          args: { task, error: err?.stack || err?.message || err },
         })
       })
     },
