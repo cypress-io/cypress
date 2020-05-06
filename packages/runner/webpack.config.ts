@@ -1,6 +1,23 @@
 import _ from 'lodash'
-import commonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
+import webpack from 'webpack'
+
+const commonConfig = getCommonConfig()
+
+// @ts-ignore
+const babelLoader = _.find(commonConfig.module.rules, (rule) => {
+  // @ts-ignore
+  return _.includes(rule.use.loader, 'babel-loader')
+})
+
+// @ts-ignore
+babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
+  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+  'plugins': ['line-numbers', 'line-highlight'],
+  'theme': 'default',
+  'css': false,
+}])
 
 let pngRule
 // @ts-ignore
@@ -21,7 +38,8 @@ pngRule.use[0].options = {
   publicPath: '/__cypress/runner/img/',
 }
 
-const config: typeof commonConfig = {
+// @ts-ignore
+const config: webpack.Configuration = {
   ...commonConfig,
   module: {
     rules: [

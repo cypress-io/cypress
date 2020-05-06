@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const $errUtils = require('../cypress/error_utils')
 
 const create = (state) => {
@@ -9,7 +10,7 @@ const create = (state) => {
         $errUtils.throwErrByPath('miscellaneous.outside_test')
       }
 
-      if (ms) {
+      if (_.isFinite(ms)) {
         // if delta is true then we add (or subtract) from the
         // runnables current timeout instead of blanketingly setting it
         ms = delta ? runnable.timeout() + ms : ms

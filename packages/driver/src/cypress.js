@@ -30,6 +30,7 @@ const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
+const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const debug = require('debug')('cypress:driver:cypress')
 
@@ -90,6 +91,8 @@ class $Cypress {
     this.runner = null
     this.Commands = null
     this._RESUMED_AT_TEST = null
+    this.$autIframe = null
+    this.onSpecReady = null
 
     this.events = $Events.extend(this)
 
@@ -169,8 +172,9 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ($autIframe) {
-    return this.cy.initialize($autIframe)
+  initialize ({ $autIframe, onSpecReady }) {
+    this.$autIframe = $autIframe
+    this.onSpecReady = onSpecReady
   }
 
   run (fn) {
@@ -186,7 +190,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow) {
+  onSpecWindow (specWindow, scripts) {
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -206,7 +210,17 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
-    return null
+    $scriptUtils.runScripts(specWindow, scripts)
+    .catch((err) => {
+      err = $errUtils.createUncaughtException('spec', err)
+
+      this.runner.onScriptError(err)
+    })
+    .then(() => {
+      this.cy.initialize(this.$autIframe)
+
+      this.onSpecReady()
+    })
   }
 
   action (eventName, ...args) {

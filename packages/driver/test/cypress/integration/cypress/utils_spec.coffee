@@ -127,3 +127,24 @@ describe "driver/src/cypress/utils", ->
       memoizedFn("input-1")
       ## cache for input-1 is cleared, so it calls the function again
       expect(fn.callCount).to.be.equal(4)
+
+  context ".indent", ->
+    it "indents each line by the given amount", ->
+      str = "line 1\n line 2\n  line 3\n   line 4\n    line 5"
+
+      expect($utils.indent(str, 3)).to.equal("   line 1\n    line 2\n     line 3\n      line 4\n       line 5")
+
+  context ".normalizeNewLines", ->
+    it "removes newlines in excess of max newlines, replacing with max newlines by default", ->
+      oneLineResult = $utils.normalizeNewLines("one new line\ntwo new lines\n\nthree new lines\n\n\nend", 1)
+      twoLinesResult = $utils.normalizeNewLines("one new line\ntwo new lines\n\nthree new lines\n\n\nend", 2)
+
+      expect(oneLineResult).to.equal("one new line\ntwo new lines\nthree new lines\nend")
+      expect(twoLinesResult).to.equal("one new line\ntwo new lines\n\nthree new lines\n\nend")
+
+    it "replaces with specified newlines", ->
+      oneLineResult = $utils.normalizeNewLines("one new line\ntwo new lines\n\nthree new lines\n\n\nend", 1, 2)
+      twoLinesResult = $utils.normalizeNewLines("one new line\ntwo new lines\n\nthree new lines\n\n\nend", 2, 1)
+
+      expect(oneLineResult).to.equal("one new line\n\ntwo new lines\n\nthree new lines\n\nend")
+      expect(twoLinesResult).to.equal("one new line\ntwo new lines\nthree new lines\nend")

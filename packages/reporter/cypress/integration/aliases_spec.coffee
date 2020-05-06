@@ -19,7 +19,7 @@ addLog = (runner, log) ->
 describe "aliases", ->
   context "route aliases", ->
     beforeEach ->
-      cy.fixture("aliases_runnables").as("runnables")
+      cy.fixture("runnables_aliases").as("runnables")
 
       @runner = new EventEmitter()
 
@@ -233,7 +233,7 @@ describe "aliases", ->
 
   context "element aliases", ->
     beforeEach ->
-      cy.fixture("aliases_runnables").as("runnables")
+      cy.fixture("runnables_aliases").as("runnables")
 
       @runner = new EventEmitter()
 
@@ -438,4 +438,3 @@ describe "aliases", ->
 
         cy.get(".cy-tooltip span").should ($tooltip) ->
           expect($tooltip).to.contain("Found an alias for: 'dropdown'")
-

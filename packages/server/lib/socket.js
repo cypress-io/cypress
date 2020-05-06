@@ -3,6 +3,9 @@ const path = require('path')
 const debug = require('debug')('cypress:server:socket')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket')
+
+const editors = require('./util/editors')
+const { openFile } = require('./util/file-opener')
 const fs = require('./util/fs')
 const open = require('./util/open')
 const exec = require('./exec')
@@ -426,6 +429,19 @@ class Socket {
         debug('received external:open %o', { url })
 
         return require('electron').shell.openExternal(url)
+      })
+
+      socket.on('get:user:editor', (cb) => {
+        editors.getUserEditor(false)
+        .then(cb)
+      })
+
+      socket.on('set:user:editor', (editor) => {
+        editors.setUserEditor(editor)
+      })
+
+      socket.on('open:file', (fileDetails) => {
+        openFile(fileDetails)
       })
 
       reporterEvents.forEach((event) => {
