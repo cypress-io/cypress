@@ -39,7 +39,7 @@ The CDP port requested was 7777.
 Error details:
 
 Error: connect ECONNREFUSED 127.0.0.1:7777
-    [stack trace lines]
+      [stack trace lines]
 
 
 `
@@ -69,7 +69,7 @@ exports['e2e cdp / handles disconnections as expected'] = `
 There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
 Error: connect ECONNREFUSED 127.0.0.1:7777
-    [stack trace lines]
+      [stack trace lines]
 
 
   (Results)

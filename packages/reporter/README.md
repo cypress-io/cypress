@@ -66,4 +66,3 @@ Run enzyme component tests found in `*.spec` files in `src`:
 ```bash
 yarn lerna run test --scope @packages/reporter --stream
 ```
-

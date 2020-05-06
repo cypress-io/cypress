@@ -1344,15 +1344,7 @@ describe "src/cy/commands/connectors", ->
             expect(@lastLog.invoke("consoleProps")).to.deep.eq {
               Command: "its"
               Property: ".fizz.buzz"
-              Error: """
-              CypressError: Timed out retrying: `cy.its()` errored because the property: `fizz` does not exist on your subject.
-
-              `cy.its()` waited for the specified property `fizz` to exist, but it never did.
-
-              If you do not expect the property `fizz` to exist, then add an assertion such as:
-
-              `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
-              """
+              Error: @lastLog.get("error").stack
               Subject: {foo: "bar"}
               Yielded: undefined
             }

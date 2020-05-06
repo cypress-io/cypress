@@ -124,10 +124,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           action,
           cmd: command,
           browserDisplayName: Cypress.browser.displayName,
-          errMessage: err.message,
-          errStack: err.stack,
+          error: err,
         },
         onFail,
+        errProps: {
+          appendToStack: {
+            title: 'From Node.js Internals',
+            content: err.stack,
+          },
+        },
       })
     }
   }

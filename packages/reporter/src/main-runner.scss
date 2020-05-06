@@ -3,16 +3,7 @@
 @import 'lib/variables';
 @import 'lib/base';
 @import 'lib/tooltip';
+@import 'lib/modal';
+@import '../../../node_modules/@reach/dialog/styles.css';
+@import '../../ui-components/src/editor-picker';
 @import './!(lib)*/**/*';
-
-/* Used to provide additional context for screen readers */
-.visually-hidden {
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}

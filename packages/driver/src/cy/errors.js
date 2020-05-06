@@ -1,7 +1,5 @@
-const _ = require('lodash')
 const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
-const $errorMessages = require('../cypress/error_messages')
 
 const crossOriginScriptRe = /^script error/i
 
@@ -35,57 +33,33 @@ const create = (state, config, log) => {
   }
 
   const createUncaughtException = (type, args) => {
-    // @ts-ignore
     let [msg, source, lineno, colno, err] = args // eslint-disable-line no-unused-vars
-
-    const current = state('current')
+    let message
+    let docsUrl
 
     // reset the msg on a cross origin script error
     // since no details are accessible
     if (crossOriginScriptRe.test(msg)) {
-      msg = $errUtils.errMsgByPath('uncaught.cross_origin_script')
+      const crossOriginErr = $errUtils.errByPath('uncaught.cross_origin_script')
+
+      message = crossOriginErr.message
+      docsUrl = crossOriginErr.docsUrl
     }
 
-    const createErrFromMsg = () => {
-      return new Error($errUtils.errMsgByPath('uncaught.error', {
-        msg, source, lineno,
-      }))
-    }
-
-    // if we have the 5th argument it means we're in a super
-    // modern browser making this super simple to work with.
-    err = err ?? createErrFromMsg()
-
-    let uncaughtErrLookup = ''
-
-    if (type === 'app') {
-      uncaughtErrLookup = 'uncaught.fromApp'
-    } else if (type === 'spec') {
-      uncaughtErrLookup = 'uncaught.fromSpec'
-    }
-
-    const uncaughtErrObj = $errUtils.errObjByPath($errorMessages, uncaughtErrLookup)
-
-    const uncaughtErrProps = $errUtils.modifyErrMsg(err, uncaughtErrObj.message, (msg1, msg2) => {
-      return `${msg1}\n\n${msg2}`
+    // if we have the 5th argument it means we're in a modern browser with an
+    // error object already provided. otherwise, we create one
+    err = err ?? $errUtils.errByPath('uncaught.error', {
+      message, source, lineno,
     })
 
-    _.defaults(uncaughtErrProps, uncaughtErrObj)
+    err.docsUrl = docsUrl
 
-    const uncaughtErr = $errUtils.mergeErrProps(err, uncaughtErrProps)
-
-    $errUtils.modifyErrName(err, `Uncaught ${err.name}`)
+    const uncaughtErr = $errUtils.createUncaughtException(type, err)
+    const current = state('current')
 
     uncaughtErr.onFail = () => {
-      const l = current && current.getLastLog()
-
-      if (l) {
-        return l.error(uncaughtErr)
-      }
+      current?.getLastLog()?.error(uncaughtErr)
     }
-
-    // normalize error message for firefox
-    $errUtils.normalizeErrorStack(uncaughtErr)
 
     return uncaughtErr
   }

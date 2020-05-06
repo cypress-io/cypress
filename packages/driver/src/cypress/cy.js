@@ -6,6 +6,7 @@ const Promise = require('bluebird')
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const $stackUtils = require('./stack_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
@@ -58,6 +59,10 @@ const setWindowDocumentProps = function (contentWindow, state) {
 
 const setRemoteIframeProps = ($autIframe, state) => {
   return state('$autIframe', $autIframe)
+}
+
+function __stackReplacementMarker (fn, ctx, args) {
+  return fn.apply(ctx, args)
 }
 
 // We only set top.onerror once since we make it configurable:false
@@ -133,7 +138,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
-  const { expect } = $Chai.create(specWindow, assertions.assert)
+  const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
   const aliases = $Aliases.create(state)
@@ -345,7 +350,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // run the command's fn with runnable's context
       try {
-        ret = command.get('fn').apply(state('ctx'), args)
+        ret = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
       } catch (err) {
         throw err
       } finally {
@@ -556,14 +561,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       state('resolve', resolve)
-
-      return state('reject', rejectOuterAndCancelInner)
+      state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
-
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
@@ -673,12 +676,53 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return state('index', queue.length)
   }
 
-  const fail = function (err, runnable) {
+  const getUserInvocationStack = (err) => {
+    const current = state('current')
+    const currentAssertionCommand = current?.get('currentAssertionCommand')
+    const withInvocationStack = currentAssertionCommand || current
+    // user assertion errors (expect().to, etc) get their invocation stack
+    // attached to the error thrown from chai
+    // command errors and command assertion errors (default assertion or cy.should)
+    // have the invocation stack attached to the current command
+    let userInvocationStack = state('currentAssertionUserInvocationStack')
+
+    // if there is no user invocation stack from an assertion or it is the default
+    // assertion, meaning it came from a command (e.g. cy.get), prefer the
+    // command's user invocation stack so the code frame points to the command.
+    // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+    // points to the `cy.should`, but the error came from inside the callback,
+    // so we need to prefer that.
+    if (
+      !userInvocationStack
+      || err.isDefaultAssertionErr
+      || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+    ) {
+      userInvocationStack = withInvocationStack?.get('userInvocationStack')
+    }
+
+    if (!userInvocationStack) return
+
+    if (
+      $errUtils.isCypressErr(err)
+      || $errUtils.isAssertionErr(err)
+      || $errUtils.isChaiValidationErr(err)
+    ) {
+      return userInvocationStack
+    }
+  }
+
+  const fail = (err) => {
     let rets
 
     stopped = true
 
-    err = $errUtils.normalizeErrorStack(err)
+    err.stack = $stackUtils.normalizedStack(err)
+
+    err = $errUtils.enhanceStack({
+      err,
+      userInvocationStack: getUserInvocationStack(err),
+      projectRoot: config('projectRoot'),
+    })
 
     err = $errUtils.processErr(err, config)
 
@@ -718,11 +762,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     try {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
-    } catch (err2) {
-      $errUtils.normalizeErrorStack(err2)
-
+    } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
-      return finish(err2)
+      cyFailErr.stack = $stackUtils.normalizedStack(cyFailErr)
+
+      return finish(cyFailErr)
     }
 
     // bail if we had callbacks attached
@@ -962,13 +1006,17 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
+        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
+          (new specWindow.Error('command invocation stack')).stack,
+        )
+
         let ret
 
         ensures.ensureRunnable(name)
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, args)
+        const chain = $Chainer.create(name, userInvocationStack, specWindow, args)
 
         // store the chain so we can access it later
         state('chain', chain)
@@ -1009,7 +1057,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return chain
       }
 
-      return cy.addChainer(name, (chainer, args) => {
+      return cy.addChainer(name, (chainer, userInvocationStack, args) => {
         const { firstCall, chainerId } = chainer
 
         // dont enqueue / inject any new commands if
@@ -1027,6 +1075,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           args,
           type,
           chainerId,
+          userInvocationStack,
           fn: wrap(firstCall),
         })
 
@@ -1123,30 +1172,22 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     onSpecWindowUncaughtException () {
       // create the special uncaught exception err
-      let runnable
       const err = errors.createUncaughtException('spec', arguments)
+      const runnable = state('runnable')
 
-      runnable = state('runnable')
+      if (!runnable) return err
 
-      if (runnable) {
-        // we're using an explicit done callback here
-        let d; let r
-
-        d = state('done')
-
-        if (d) {
-          d(err)
-        }
-
-        r = state('reject')
+      try {
+        fail(err)
+      } catch (failErr) {
+        const r = state('reject')
 
         if (r) {
           return r(err)
         }
-      }
 
-      // else pass the error along
-      return err
+        return failErr
+      }
     },
 
     onUncaughtException () {
@@ -1254,7 +1295,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             state('done', done)
           }
 
-          let ret = fn.apply(this, arguments)
+          let ret = __stackReplacementMarker(fn, this, arguments)
 
           // if we returned a value from fn
           // and enqueued some new commands
@@ -1317,13 +1358,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // else just return ret
           return ret
-        } catch (error) {
-          // if our runnable.fn throw synchronously
-          // then it didnt fail from a cypress command
-          // but we should still teardown and handle
+        } catch (err) {
+          // if runnable.fn threw synchronously, then it didnt fail from
+          // a cypress command, but we should still teardown and handle
           // the error
-          const err = error
-
           return fail(err, runnable)
         }
       }

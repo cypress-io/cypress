@@ -118,13 +118,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: connect ECONNREFUSED 127.0.0.1:16795
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: connect ECONNREFUSED 127.0.0.1:16795
+      [stack trace lines]
+    
 
 
 
@@ -581,13 +580,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
   2) response timeouts result in an error
        handles no response errors when not initially visiting:
@@ -606,13 +604,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
   3) response timeouts result in an error
        fails after reducing the responseTimeout option:
@@ -631,13 +628,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
 
 

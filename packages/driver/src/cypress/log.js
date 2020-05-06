@@ -359,13 +359,7 @@ const Log = function (cy, state, config, obj) {
     },
 
     getError (err) {
-      // dont log stack traces on cypress errors
-      // or assertion errors
-      if ($errUtils.CypressErrorRe.test(err.name)) {
-        return err.toString()
-      }
-
-      return err.stack
+      return err.stack || err.message
     },
 
     setElAttrs () {
