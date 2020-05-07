@@ -57,7 +57,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -294,7 +294,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ConfigOptions
+    config(): ResolvedConfigOptions
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -304,7 +304,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ConfigOptions[K]
+    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -313,7 +313,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ConfigOptions[K]): void
+    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -325,7 +325,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: Partial<ConfigOptions>): void
+    config(Object: ConfigOptions): void
 
     // no real way to type without generics
     /**
@@ -2287,7 +2287,7 @@ declare namespace Cypress {
     multiple: boolean
   }
 
-  interface ConfigOptions {
+  interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
      * @default null
@@ -2458,7 +2458,12 @@ declare namespace Cypress {
     experimentalGetCookiesSameSite: boolean
   }
 
-  interface PluginConfigOptions extends ConfigOptions {
+  /**
+   * All configuration items are optional.
+   */
+  type ConfigOptions = Partial<ResolvedConfigOptions>
+
+  interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
     * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
     */

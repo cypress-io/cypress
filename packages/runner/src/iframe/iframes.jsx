@@ -1,4 +1,3 @@
-import Promise from 'bluebird'
 import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
@@ -105,24 +104,15 @@ export default class Iframes extends Component {
 
     this.props.eventManager.setup(config, specPath)
 
-    this._loadIframes(specPath)
-    .then(($autIframe) => {
-      this.props.eventManager.initialize($autIframe, config)
-    })
-  }
+    const $autIframe = this._loadIframes(specPath)
 
-  _loadSpecInIframe (iframe, specSrc) {
-    return new Promise((resolve) => {
-      iframe.prop('src', specSrc).one('load', resolve)
-    })
+    this.props.eventManager.initialize($autIframe, config)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (specPath) {
-    // TODO: config should have "iframeUrl": "/__cypress/iframes"
     const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
-
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
@@ -132,8 +122,9 @@ export default class Iframes extends Component {
     if (this.props.config.spec.specType === 'component') {
       // In mount mode we need to render something right from spec file
       // So load application tests to the aut frame
-      return this._loadSpecInIframe($autIframe, specSrc)
-      .then(() => $autIframe)
+      $autIframe.prop('src', specSrc)
+
+      return $autIframe
     }
 
     const $specIframe = $('<iframe />', {
@@ -141,8 +132,9 @@ export default class Iframes extends Component {
       class: 'spec-iframe',
     }).appendTo($container)
 
-    return this._loadSpecInIframe($specIframe, specSrc)
-    .then(() => $autIframe)
+    $specIframe.prop('src', specSrc)
+
+    return $autIframe
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {

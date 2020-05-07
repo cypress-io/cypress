@@ -17,7 +17,8 @@ const command = function (ctx, name, ...args) {
 
 module.exports = function (Commands, Cypress, cy) {
   Commands.addChainer({
-    command (chainer, args) {
+    // userInvocationStack has to be passed in here, but can be ignored
+    command (chainer, userInvocationStack, args) {
       return command(chainer, ...args)
     },
   })

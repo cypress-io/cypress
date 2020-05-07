@@ -13,7 +13,7 @@ zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
-coffeeify       = require("coffeeify")
+coffeeify     = require("coffeeify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -41,17 +41,25 @@ zlib = Promise.promisifyAll(zlib)
 ## force supertest-session to use promises provided in supertest
 session = proxyquire("supertest-session", {supertest: supertest})
 
+absolutePathRegex = /"\/[^{}]*?\.projects/g
+sourceMapRegex = /\n\/\/# sourceMappingURL=.*$/im
+
+replaceAbsolutePaths = (content) ->
+  content.replace(absolutePathRegex, "\"/<path-to-project>")
+
+removeSourceMap = (content) ->
+  content.replace(sourceMapRegex, ";")
+
 removeWhitespace = (c) ->
   c = str.clean(c)
   c = str.lines(c).join(" ")
   c
 
+cleanResponseBody = (body) ->
+  replaceAbsolutePaths(removeWhitespace(body))
+
 trimString = (s) -> _.trim(s)
 nonEmpty = (s) -> !_.isEmpty(s)
-
-# removes leading whitespace and blank lines
-removeLeadingWhitespace = (text) ->
-  text.split("\n").map(trimString).filter(nonEmpty).join("\n")
 
 sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
@@ -504,7 +512,7 @@ describe "Routes", ->
         })
 
       checkTranspilation = (body, file) ->
-        b = removeSourceMapContents(body).replace(/\n/g, '')
+        b = removeSourceMap(body).replace(/\n/g, '')
         f = file.toString().replace(/\n/g, '')
 
         expect(b).to.equal f
@@ -553,19 +561,21 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
       it "processes dom.jsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/baz.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
 
       it "serves error javascript file when the file is missing", ->
@@ -606,19 +616,21 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=my-tests/test1.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFileTs(Fixtures.path("projects/no-server/my-tests/test1.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
       it "processes helpers/includes.js javascripts", ->
         @rp("http://localhost:2020/__cypress/tests?p=helpers/includes.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFileTs(Fixtures.path("projects/no-server/helpers/includes.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
   context "ALL /__cypress/xhrs/*", ->
     beforeEach ->
@@ -904,23 +916,23 @@ describe "Routes", ->
         })
 
       it "renders iframe with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/integration/test2.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeLeadingWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_all_tests_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeLeadingWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "no-server", ->
@@ -941,7 +953,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "no-server with supportFile: false", ->
@@ -961,7 +973,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "e2e", ->
@@ -981,7 +993,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "ids", ->
@@ -997,7 +1009,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "can send back all tests", ->
@@ -1007,7 +1019,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
   context "GET *", ->
@@ -2071,7 +2083,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "injects even when head tag is missing", ->
@@ -2092,7 +2104,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "injects when head is capitalized", ->
@@ -2329,7 +2341,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents
 
       it "injects into https://www.google.com", ->
@@ -2390,7 +2402,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "continues to inject on the same https superdomain but different subdomain", ->
@@ -2409,7 +2421,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "injects document.domain on https requests to same superdomain but different subdomain", ->
@@ -2429,7 +2441,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq "<html><head> <script type='text/javascript'> document.domain = 'foobar.com'; </script></head><body>https server</body></html>"
 
       it "injects document.domain on other http requests", ->
@@ -2449,7 +2461,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2470,7 +2482,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2548,7 +2560,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head></head></html>")
 
@@ -2573,7 +2585,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
 
             expect(body).to.eq("<html><head></head></html>")
 
