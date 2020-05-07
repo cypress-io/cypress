@@ -585,11 +585,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = function (hook, err, hookName) {
-  // finds the test by returning the first test from
-  // the parent or looping through the suites until
-  // it finds the first test
-  const test = getTestFromHook(hook)
+const hookFailed = function (hook, err, hookName, getTestById) {
+  // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
+  // event, so this hook might not have currentTest set correctly
+  // in which case we need to lookup the test
+  const test = getTestFromHookOrFindTest(hook, getTestById)
 
   test.err = err
   test.state = 'failed'
@@ -791,7 +791,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
+      return hookFailed(runnable, runnable.err, hookName, getTestById)
     }
   })
 }

@@ -198,7 +198,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "\"after all\" hook for \"test 2\"",
       "hookName": "after all",
       "hookId": "h1",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "hook",
@@ -209,6 +209,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "[Array 16]",
       "actual": null,
       "showDiff": false
     }
@@ -221,7 +223,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "order": 2,
       "title": "test 2",
       "hookName": "after all",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -439,7 +441,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "\"after each\" hook for \"test 1\"",
       "hookName": "after each",
       "hookId": "h1",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "hook",
@@ -450,6 +452,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "[Array 16]",
       "actual": null,
       "showDiff": false
     }
@@ -462,7 +466,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "order": 1,
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -603,7 +607,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "\"before all\" hook for \"test 1\"",
       "hookName": "before all",
       "hookId": "h1",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "hook",
@@ -614,6 +618,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "[Array 16]",
       "actual": null,
       "showDiff": false
     }
@@ -626,7 +632,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "order": 1,
       "title": "test 1",
       "hookName": "before all",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -775,7 +781,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "\"before each\" hook for \"test 1\"",
       "hookName": "before each",
       "hookId": "h1",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "hook",
@@ -786,6 +792,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "[Array 16]",
       "actual": null,
       "showDiff": false
     }
@@ -798,7 +806,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "order": 1,
       "title": "test 1",
       "hookName": "before each",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -1021,7 +1029,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
     {
       "id": "r5",
       "title": "test 2",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "test",
@@ -1068,6 +1076,8 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "[Array 16]",
       "actual": null,
       "showDiff": false
     }
@@ -1078,7 +1088,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
     {
       "id": "r5",
       "title": "test 2",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "test",
@@ -1182,7 +1192,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
     {
       "id": "r5",
       "title": "test 2",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "test",

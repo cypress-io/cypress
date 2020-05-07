@@ -415,13 +415,13 @@ describe('src/cypress/runner', () => {
         .then(() => {
           cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
           cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: beforeEach').scrollIntoView().should('be.visible')
+          cy.contains('.runnable-err', 'beforeEach').scrollIntoView().should('be.visible')
 
           cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
           cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
           cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: afterEach').should('be.visible')
+          cy.contains('.runnable-err', 'afterEach').should('be.visible')
 
           cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
 
@@ -429,7 +429,7 @@ describe('src/cypress/runner', () => {
 
           cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
           cy.contains('.command', 'after').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: after').should('be.visible')
+          cy.contains('.runnable-err', 'after').should('be.visible')
         })
       })
 
