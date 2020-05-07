@@ -73,12 +73,12 @@ function getReplaceablePropOfMemberExpression (node: n.MemberExpression) {
   const { property } = node
 
   // something.(top|parent)
-  if (n.Identifier.check(property) && ['parent', 'top', 'location', 'frames'].includes(property.name)) {
+  if (n.Identifier.check(property) && ['parent', 'top', 'location'].includes(property.name)) {
     return property.name
   }
 
   // something['(top|parent)']
-  if (n.Literal.check(property) && ['parent', 'top', 'location', 'frames'].includes(String(property.value))) {
+  if (n.Literal.check(property) && ['parent', 'top', 'location'].includes(String(property.value))) {
     return String(property.value)
   }
 
@@ -161,7 +161,7 @@ export const jsRules: Visitor<{}> = {
       return false
     }
 
-    if (['parent', 'top', 'frames'].includes(node.name)) {
+    if (['parent', 'top'].includes(node.name)) {
       path.replace(resolveWindowReference(globalIdentifier, node.name))
 
       return false
