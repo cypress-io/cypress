@@ -2,6 +2,9 @@ import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 import Fetch from './fetch'
 
+// https://testing-library.com/docs/cypress-testing-library/intro
+import '@testing-library/cypress/add-commands'
+
 it('loads and displays greeting (testing-lib)', () => {
   cy.server()
   cy.route('/greeting', { greeting: 'Hello there' }).as('greet')
