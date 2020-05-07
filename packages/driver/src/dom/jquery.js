@@ -33,6 +33,11 @@ const isJquery = (obj) => {
   // on its prototype?
   const prop = _.get(obj, 'constructor.prototype.jquery')
 
+  // an HTML element with id="jquery" will show up
+  // as the jquery property of the window constructor
+  // note: instanceof HTMLElement is ineffective
+  // on objects from a different window/frame
+  // so the nodeType and nodeName is used to check if it is an HTML element
   return hasJqueryProperty && !!prop && prop.nodeType !== 1 && typeof prop.nodeName !== 'string'
 }
 
