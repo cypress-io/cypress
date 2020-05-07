@@ -776,10 +776,20 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
   source rewriting spec
     ✓ obstructive code is replaced
     issue 3975
-      - can redirect in a xhr onload
+      ✓ can relative redirect in a xhr onload
+      ✓ can relative redirect in a onclick handler
+      ✓ can relative redirect in a settimeout with a base tag
       - Login demo
+      it can relative redirect in a settimeout
+        ✓ with location.href
+        ✓ with window.location.href
+        ✓ with location.replace()
+        ✓ with location.assign()
+        ✓ with location = ...
+        ✓ with window.location = ...
+        ✓ with location.search
+        ✓ with location.pathname
     can load some well-known sites in a timely manner
-      ✓ http://apple.com
       ✓ http://google.com
       ✓ http://facebook.com
       ✓ http://cypress.io
@@ -787,17 +797,17 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
       ✓ http://github.com
 
 
-  7 passing
-  2 pending
+  17 passing
+  1 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        9                                                                                │
-  │ Passing:      7                                                                                │
+  │ Tests:        18                                                                               │
+  │ Passing:      17                                                                               │
   │ Failing:      0                                                                                │
-  │ Pending:      2                                                                                │
+  │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -819,9 +829,9 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  source_rewriting_spec.js                 XX:XX        9        7        -        2        - │
+  │ ✔  source_rewriting_spec.js                 XX:XX       18       17        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        9        7        -        2        -  
+    ✔  All specs passed!                        XX:XX       18       17        -        1        -  
 
 
 `

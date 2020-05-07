@@ -84,7 +84,8 @@ describe('source rewriting spec', function () {
 
   context('can load some well-known sites in a timely manner', () => {
     [
-      'https://apple.com', // FIXME: has to be HTTPS - https://github.com/cypress-io/cypress/issues/7268
+      // FIXME: has to be HTTPS - https://github.com/cypress-io/cypress/issues/7268
+      // 'http://apple.com',
       'http://google.com',
       'http://facebook.com',
       'http://cypress.io',
