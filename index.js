@@ -1,6 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 const debug = require('debug')('cypress:webpack')
+const debugStats = require('debug')('cypress:webpack:stats')
 
 const createDeferred = require('./deferred')
 const stubbableRequire = require('./stubbable-require')
@@ -149,6 +150,11 @@ const preprocessor = (options = {}) => {
       }
 
       debug('finished bundling', outputPath)
+      if (debugStats.enabled) {
+        /* eslint-disable-next-line no-console */
+        console.error(stats.toString({ colors: true }))
+      }
+
       // resolve with the outputPath so Cypress knows where to serve
       // the file from
       latestBundle.resolve(outputPath)
