@@ -2459,8 +2459,7 @@ declare namespace Cypress {
   }
 
   /**
-   * When users specify config options, they can provide only
-   * some properties.
+   * All configuration items are optional.
    */
   type ConfigOptions = Partial<ResolvedConfigOptions>
 
