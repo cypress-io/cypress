@@ -10,6 +10,8 @@ const webpackOptions = {
       react: path.resolve('./node_modules/react'),
     },
   },
+  mode: 'development',
+  devtool: false,
   module: {
     rules: [
       {

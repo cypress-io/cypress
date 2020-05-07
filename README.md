@@ -225,7 +225,8 @@ You can use any [Visual Testing plugin](https://on.cypress.io/plugins#visual-tes
 
 ## Common problems
 
-### Node Sass
+<details id="node-sass">
+  <summary>Node Sass</summary>
 
 When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.cypress.io/configuration#Node-version) rather than its bundled version. In `cypress.json` set option:
 
@@ -234,6 +235,23 @@ When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.
   "nodeVersion": "system"
 }
 ```
+
+</details>
+
+<details id="speed">
+  <summary>Slow bundling</summary>
+
+When you bundle spec file, you are now bundling React, Read DOM and other libraries, which is might be slow. For now, you can disable inline source maps by adding to your Webpack config settings (if available) the following:
+
+```js
+const webpackOptions = {
+  devtool: false,
+}
+```
+
+Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unit-test/issues/156) for more information.
+
+</details>
 
 ## Development
 
