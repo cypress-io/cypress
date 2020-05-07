@@ -439,7 +439,7 @@ exports['e2e plugins / fails when there is an async error at the root'] = `
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
 
  Error: Root async error from plugins file
-    [stack trace lines]
+      [stack trace lines]
 
   (Results)
 
