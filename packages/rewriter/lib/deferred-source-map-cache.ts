@@ -2,6 +2,7 @@ import _ from 'lodash'
 import Debug from 'debug'
 import { rewriteJsSourceMapAsync } from './async-rewriters'
 import * as sourceMaps from './util/source-maps'
+import url from 'url'
 
 const debug = Debug('cypress:rewriter:deferred-source-map-cache')
 
@@ -10,7 +11,7 @@ export type DeferredSourceMapRequest = {
   url: string
   js?: string
   sourceMap?: any
-  resHeaders?: string
+  resHeaders?: any
 }
 
 const caseInsensitiveGet = (obj, lowercaseProperty) => {
@@ -44,11 +45,7 @@ export class DeferredSourceMapCache {
     this.requestLib = requestLib
   }
 
-  reset () {
-    this.requests = []
-  }
-
-  defer = (request: DeferredSourceMapRequest): string => {
+  defer = (request: DeferredSourceMapRequest) => {
     debug('caching request %o', request)
 
     if (this._getRequestById(request.uniqueId)) {
@@ -60,8 +57,6 @@ export class DeferredSourceMapCache {
     this._removeRequestsByUrl(request.url)
 
     this.requests.push(request)
-
-    return request.uniqueId
   }
 
   _removeRequestsByUrl (url: string) {
@@ -73,7 +68,8 @@ export class DeferredSourceMapCache {
   }
 
   async _getInputSourceMap (request: DeferredSourceMapRequest, headers: any) {
-    const sourceMapUrl = getSourceMapHeader(request.resHeaders) || sourceMaps.getMappingUrl(request.js!)
+    // prefer inline sourceMappingURL over headers
+    const sourceMapUrl = sourceMaps.getMappingUrl(request.js!) || getSourceMapHeader(request.resHeaders)
 
     if (!sourceMapUrl) {
       return
@@ -88,7 +84,7 @@ export class DeferredSourceMapCache {
 
     // try to load it from the web
     const req = {
-      url: request.url,
+      url: url.resolve(request.url, sourceMapUrl),
       // TODO: this assumes that the sourcemap is on the same base domain, so it's safe to send the same headers
       // the browser sent for this sourcemap request - but if sourcemap is on a different domain, this will not
       // be true. need to use browser's cookiejar instead.
@@ -110,7 +106,7 @@ export class DeferredSourceMapCache {
     const request = this._getRequestById(uniqueId)
 
     if (!request) {
-      return
+      throw new Error(`Missing request with ID '${uniqueId}'`)
     }
 
     if (request.sourceMap) {

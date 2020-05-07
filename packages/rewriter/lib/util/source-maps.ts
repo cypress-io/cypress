@@ -1,7 +1,7 @@
 import path from 'path'
 import url from 'url'
 
-const sourceMapRe = /\n\/\/ ?(?:#|@) sourceMappingURL=([^\s]+)\s*$/
+const sourceMapRe = /\n\/\/[ \t]*(?:#|@) sourceMappingURL=([^\s]+)\s*$/
 const dataUrlRe = /^data:application\/json;(?:charset=utf-8;)base64,([^\s]+)\s*$/
 
 export const getMappingUrl = (js: string) => {

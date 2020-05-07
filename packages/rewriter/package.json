@@ -23,6 +23,7 @@
     "fs-extra": "9.0.0",
     "nock": "12.0.3",
     "sinon": "9.0.2",
+    "sinon-chai": "3.5.0",
     "snap-shot-it": "7.9.3"
   },
   "files": [
