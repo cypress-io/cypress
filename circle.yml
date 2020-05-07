@@ -104,8 +104,7 @@ commands:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn cypress:run --record --parallel --group driver-integration-<< parameters.browser >> --browser << parameters.browser >>
-          working_directory: packages/driver
+            yarn workspace @packages/driver cypress:run --record --parallel --group driver-integration-<< parameters.browser >> --browser << parameters.browser >>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -130,7 +129,7 @@ commands:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --group runner-integration-<< parameters.browser >> --browser <<parameters.browser>>
+            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<< parameters.browser >> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
