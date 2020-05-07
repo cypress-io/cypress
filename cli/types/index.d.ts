@@ -2466,7 +2466,7 @@ declare namespace Cypress {
      */
     experimentalGetCookiesSameSite: boolean
     /**
-     * Enables improved JS/HTML rewriting. This may fix issues caused by the naive JS/HTML replacement
+     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
      */
