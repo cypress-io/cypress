@@ -1,4 +1,5 @@
 _ = require("lodash")
+capitalize = require('underscore.string/capitalize')
 
 divider = (num, char) ->
   Array(num).join(char)
@@ -27,7 +28,7 @@ formatProp = (memo, field) ->
   {key, value} = field
 
   if value?
-    memo.push(_.capitalize(key) + ": " + format(value))
+    memo.push(capitalize(key) + ": " + format(value))
   memo
 
 cmd = (command, args = "") ->

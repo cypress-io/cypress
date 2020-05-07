@@ -1,4 +1,5 @@
 _ = require("lodash")
+capitalize = require('underscore.string/capitalize')
 minimatch = require("minimatch")
 
 $utils = require("./utils")
@@ -16,7 +17,7 @@ setHeader = (xhr, key, val, transformer) ->
     if transformer
       val = transformer(val)
 
-    key = "X-Cypress-" + _.capitalize(key)
+    key = "X-Cypress-" + capitalize(key)
     xhr.setRequestHeader(key, encodeURI(val))
 
 normalize = (val) ->

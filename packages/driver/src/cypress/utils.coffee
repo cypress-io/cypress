@@ -1,5 +1,6 @@
 $ = require("jquery")
 _ = require("lodash")
+capitalize = require('underscore.string/capitalize')
 methods = require("methods")
 moment = require("moment")
 
@@ -99,7 +100,7 @@ module.exports = {
     @normalizeObjWithLength(filter)
 
     whereFilterHasSameKeyButDifferentValue = (value, key) ->
-      upperKey = _.capitalize(key)
+      upperKey = capitalize(key)
 
       (_.has(filter, key) or _.has(filter, upperKey)) and
         filter[key] isnt value
