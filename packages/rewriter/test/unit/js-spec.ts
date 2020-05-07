@@ -5,6 +5,8 @@ import fse from 'fs-extra'
 import Bluebird from 'bluebird'
 import rp from '@cypress/request-promise'
 import snapshot from 'snap-shot-it'
+import * as astTypes from 'ast-types'
+import sinon from 'sinon'
 import {
   testSourceWithExternalSourceMap,
   testSourceWithInlineSourceMap,
@@ -28,6 +30,10 @@ function testExpectedJs (string: string, expected: string) {
 }
 
 describe('js rewriter', function () {
+  afterEach(() => {
+    sinon.restore()
+  })
+
   context('.rewriteJs', function () {
     context('transformations', function () {
       context('injects Cypress window property resolver', () => {
@@ -130,6 +136,14 @@ describe('js rewriter', function () {
             testExpectedJs(string, expected)
           })
         })
+      })
+
+      it('throws an error via the driver if AST visiting throws an error', () => {
+        // if astTypes.visit throws, that indicates a bug in our js-rules, and so we should stop rewriting
+        sinon.stub(astTypes, 'visit').throws(new Error('foo'))
+        const actual = _rewriteJsUnsafe(URL, 'console.log()')
+
+        snapshot(actual)
       })
 
       it('replaces jira window getter', () => {

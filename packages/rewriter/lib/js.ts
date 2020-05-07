@@ -13,6 +13,16 @@ const defaultPrintOpts: recast.Options = {
 
 type OriginalSourceInfo = { url: string, js: string }
 
+function _generateDriverError (url: string, err: Error) {
+  const args = JSON.stringify({
+    errMessage: err.message,
+    errStack: err.stack,
+    url,
+  })
+
+  return `window.top.Cypress.utils.throwErrByPath('proxy.js_rewriting_failed', { args: ${args} })`
+}
+
 // a function that, given source info, returns an id that can be used to build the sourcemap later
 export type DeferSourceMapRewriteFn = (sourceInfo: OriginalSourceInfo) => string
 
@@ -40,7 +50,12 @@ export function rewriteJsSourceMap (url: string, js: string, inputSourceMap: any
 export function _rewriteJsUnsafe (url: string, js: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
   const ast = recast.parse(js)
 
-  astTypes.visit(ast, jsRules)
+  try {
+    astTypes.visit(ast, jsRules)
+  } catch (err) {
+    // if visiting fails, it points to a bug in our rewriting logic, so raise the error to the driver
+    return _generateDriverError(url, err)
+  }
 
   const { code } = recast.print(ast, defaultPrintOpts)
 
