@@ -89,7 +89,7 @@
     "resolve-pkg": "2.0.0",
     "shelljs": "0.8.3",
     "sinon": "7.2.2",
-    "snap-shot-it": "7.9.2",
+    "snap-shot-it": "7.9.3",
     "spawn-mock": "1.0.0",
     "strip-ansi": "4.0.0"
   },
