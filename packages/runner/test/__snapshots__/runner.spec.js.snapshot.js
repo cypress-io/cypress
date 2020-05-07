@@ -210,7 +210,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "[Array 16]",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }
@@ -453,7 +453,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "[Array 16]",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }
@@ -619,7 +619,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "[Array 16]",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }
@@ -793,7 +793,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "[Array 16]",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }
@@ -1077,7 +1077,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "[Array 16]",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }

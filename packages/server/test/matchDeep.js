@@ -150,6 +150,10 @@ const getFake = (matcherType) => {
   if (matcherType === 'string') {
     return 'foobar'
   }
+
+  if (matcherType === 'array') {
+    return []
+  }
 }
 
 module.exports = {

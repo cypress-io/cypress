@@ -25,9 +25,8 @@ const eventCleanseMap = {
   wallClockDuration: match.number,
   stack: match.string,
   sourceMappedStack: match.string,
-  parsedStack: stringifyShort,
+  parsedStack: match.array,
   message: '[error message]',
-
 }
 
 const mochaEventCleanseMap = {
@@ -94,9 +93,9 @@ function createCypress () {
   }
 
   const visit = (mochaTests, opts = {}) => {
-    _.defaults(opts, {
+    _.defaultsDeep(opts, {
       state: {},
-      config: {},
+      config: { video: false },
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
