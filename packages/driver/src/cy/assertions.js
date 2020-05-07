@@ -111,6 +111,10 @@ const create = function (state, queue, retryFn) {
       // them up with existing ones
       cmd.set('assertionIndex', 0)
 
+      if (state('current') != null) {
+        state('current').set('currentAssertionCommand', cmd)
+      }
+
       return cmd.get('fn').originalFn.apply(
         state('ctx'),
         [subject].concat(cmd.get('args')),
@@ -201,6 +205,8 @@ const create = function (state, queue, retryFn) {
       } catch (e2) {
         err = e2
       }
+
+      err.isDefaultAssertionErr = isDefaultAssertionErr
 
       options.error = err
 

@@ -10,6 +10,15 @@ const webpack = require('@cypress/webpack-preprocessor')
 process.env.NO_LIVERELOAD = '1'
 const webpackOptions = require('@packages/runner/webpack.config.ts').default
 
+const babelLoader = _.find(webpackOptions.module.rules, (rule) => {
+  return _.includes(rule.use.loader, 'babel-loader')
+})
+
+// get rid of prismjs plugin. the driver doesn't need it
+babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plugin) => {
+  return _.includes(plugin[0], 'babel-plugin-prismjs')
+})
+
 /**
  * @type {Cypress.PluginConfig}
  */

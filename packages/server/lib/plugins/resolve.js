@@ -19,6 +19,10 @@ module.exports = {
         basedir: config.projectRoot,
       }
 
+      if (!config.projectRoot) {
+        throw new Error('Config is missing projet root')
+      }
+
       debug('resolving typescript with options %o', options)
 
       const resolved = resolve.sync('typescript', options)

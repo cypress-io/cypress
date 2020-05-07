@@ -232,7 +232,7 @@ const find = (config, specPattern) => {
     })
 
     /* eslint-disable no-console */
-    console.log(table.toString())
+    console.error(table.toString())
   }
 
   return Promise.all([

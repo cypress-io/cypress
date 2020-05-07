@@ -190,6 +190,14 @@ const events: Events = {
       runner.emit('focus:tests')
     })
 
+    localBus.on('get:user:editor', (cb) => {
+      runner.emit('get:user:editor', cb)
+    })
+
+    localBus.on('set:user:editor', (editor) => {
+      runner.emit('set:user:editor', editor)
+    })
+
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,
@@ -198,6 +206,10 @@ const events: Events = {
 
     localBus.on('external:open', (url) => {
       runner.emit('external:open', url)
+    })
+
+    localBus.on('open:file', (fileDetails) => {
+      runner.emit('open:file', fileDetails)
     })
   },
 
