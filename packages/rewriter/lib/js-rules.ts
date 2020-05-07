@@ -117,12 +117,19 @@ export const jsRules: Visitor<{}> = {
     if (path.parentPath) {
       const parentNode = path.parentPath.node
 
+      // like `identifer = 'foo'`
+      const isAssignee = n.AssignmentExpression.check(parentNode) && parentNode.left === node
+
+      if (isAssignee && node.name === 'location') {
+        // `location = 'something'`, rewrite to intercepted href setter since relative urls can break this
+        return path.replace(b.memberExpression(resolveLocationReference(), b.identifier('href')))
+      }
+
       // some Identifiers do not refer to a scoped variable, depending on how they're used
       if (
         // like `var top = 'foo'`
         (n.VariableDeclarator.check(parentNode) && parentNode.id === node)
-        // like top = 'foo'
-        || (n.AssignmentExpression.check(parentNode) && parentNode.left === node)
+        || (isAssignee)
         || (
           [
             'LabeledStatement', // like `top: foo();`

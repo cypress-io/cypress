@@ -126,6 +126,10 @@ describe('js rewriter', function () {
             'location.href = "bar"',
             `${matchLocation()}.href = "bar"`,
           ],
+          [
+            'location = "bar"',
+            `${matchLocation()}.href = "bar"`,
+          ],
         ]
         .forEach(([string, expected]) => {
           if (!expected) {
@@ -140,7 +144,12 @@ describe('js rewriter', function () {
 
       it('throws an error via the driver if AST visiting throws an error', () => {
         // if astTypes.visit throws, that indicates a bug in our js-rules, and so we should stop rewriting
-        sinon.stub(astTypes, 'visit').throws(new Error('foo'))
+        const err = new Error('foo')
+
+        err.stack = 'stack'
+
+        sinon.stub(astTypes, 'visit').throws(err)
+
         const actual = _rewriteJsUnsafe(URL, 'console.log()')
 
         snapshot(actual)
