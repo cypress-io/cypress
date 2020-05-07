@@ -1,3 +1,6 @@
+// @ts-ignore
+const isComponentSpec = () => Cypress.spec.specType === 'component'
+
 /** Initialize an empty document with root element */
 function renderTestingPlatform() {
   // Let's mount components under a new div with this id
@@ -17,6 +20,10 @@ function renderTestingPlatform() {
 }
 
 before(() => {
+  if (!isComponentSpec()) {
+    return
+  }
+
   renderTestingPlatform()
 })
 
@@ -26,6 +33,9 @@ before(() => {
  *
  */
 function cleanupStyles() {
+  if (!isComponentSpec()) {
+    return
+  }
   const document = cy.state('document') as Document
 
   const styles = document.body.querySelectorAll('style')

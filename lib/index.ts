@@ -5,9 +5,12 @@ import { injectStylesBeforeElement } from './utils'
 
 const rootId = 'cypress-root'
 
+// @ts-ignore
+const isComponentSpec = () => Cypress.spec.specType === 'component'
+
 function checkMountModeEnabled() {
   // @ts-ignore
-  if (Cypress.spec.specType !== 'component') {
+  if (!isComponentSpec()) {
     throw new Error(
       `In order to use mount or unmount functions please place the spec in component folder`,
     )
