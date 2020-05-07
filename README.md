@@ -151,6 +151,21 @@ module.exports = (on) => {
 }
 ```
 
+## Debugging
+
+You can see debug messages from this module by running with environment variable
+
+```
+DEBUG=cypress:webpack
+```
+
+You can see Webpack bundle diagnostic output (timings, chunks, sizes) by running with environment variable
+
+```
+DEBUG=cypress:webpack:stats
+```
+![Webpack stats](images/webpack-stats.png)
+
 ## Contributing
 
 Use the [version of Node that matches Cypress](https://github.com/cypress-io/cypress/blob/develop/.node-version).
