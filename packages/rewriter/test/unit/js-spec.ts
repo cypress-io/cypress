@@ -3,13 +3,12 @@ import { expect } from 'chai'
 import { _rewriteJsUnsafe } from '../../lib/js'
 import fse from 'fs-extra'
 import Bluebird from 'bluebird'
-import * as sourceMaps from '../../lib/util/source-maps'
 import rp from '@cypress/request-promise'
 import snapshot from 'snap-shot-it'
-import fs from 'fs'
-
-const testSource = fs.readFileSync(`${__dirname}/../fixtures/test.js`).toString()
-const testSourceMap = fs.readFileSync(`${__dirname}/../fixtures/test.js.map`).toString()
+import {
+  testSourceWithExternalSourceMap,
+  testSourceWithInlineSourceMap,
+} from '../fixtures'
 
 const URL = 'http://example.com/foo.js'
 
@@ -28,95 +27,95 @@ function testExpectedJs (string: string, expected: string) {
   expect(actual).to.eq(expected)
 }
 
-describe('lib/js', function () {
+describe('js rewriter', function () {
   context('.rewriteJs', function () {
     context('transformations', function () {
       context('injects Cypress window property resolver', () => {
         [
-          // ['window.top', match('window', 'top')],
-          // ['window.parent', match('window', 'parent')],
-          // ['window[\'top\']', match('window', 'top')],
-          // ['window[\'parent\']', match('window', 'parent')],
-          // ['window["top"]', match('window', 'top')],
-          // ['window["parent"]', match('window', 'parent')],
-          // ['foowindow.top', match('foowindow', 'top')],
-          // ['foowindow[\'top\']', match('foowindow', 'top')],
-          // ['window.topfoo'],
-          // ['window[\'topfoo\']'],
-          // ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
-          // ['window.top.foo', `${match('window', 'top')}.foo`],
-          // ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
-          // ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
-          // [
-          //   'if (window["top"] != window["parent"]) run()',
-          //   `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
-          // ],
-          // [
-          //   'if (top != self) run()',
-          //   `if (${match('globalThis', 'top')} != self) run()`,
-          // ],
-          // [
-          //   'if (window != top) run()',
-          //   `if (window != ${match('globalThis', 'top')}) run()`,
-          // ],
-          // [
-          //   'if (top.location != self.location) run()',
-          //   `if (${match('top', 'location')} != ${match('self', 'location')}) run()`,
-          // ],
-          // [
-          //   'n = (c = n).parent',
-          //   `n = ${match('c = n', 'parent')}`,
-          // ],
-          // [
-          //   'e.top = "0"',
-          //   `globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0")`,
-          // ],
-          // ['e.top += 0'],
-          // [
-          //   'e.bottom += e.top',
-          //   `e.bottom += ${match('e', 'top')}`,
-          // ],
-          // [
-          //   'if (a = (e.top = "0")) { }',
-          //   `if (a = (globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0"))) { }`,
-          // ],
-          // // test that double quotes remain double-quoted
-          // [
-          //   'a = "b"; window.top',
-          //   `a = "b"; ${match('window', 'top')}`,
-          // ],
-          // ['({ top: "foo", parent: "bar" })'],
-          // ['top: "foo"; parent: "bar";'],
-          // ['top: break top'],
-          // ['top: continue top;'],
-          // [
-          //   'function top() { window.top }; function parent(...top) { window.top }',
-          //   `function top() { ${match('window', 'top')} }; function parent(...top) { ${match('window', 'top')} }`,
-          // ],
-          // [
-          //   '(top, ...parent) => { window.top }',
-          //   `(top, ...parent) => { ${match('window', 'top')} }`,
-          // ],
-          // [
-          //   '(function top() { window.top }); (function parent(...top) { window.top })',
-          //   `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
-          // ],
-          // [
-          //   'top += 4',
-          // ],
-          // [
-          //   // test that arguments are not replaced
-          //   'function foo(location) { location.href = \'bar\' }',
-          // ],
-          // [
-          //   // test that global variables are replaced
-          //   'function foo(notLocation) { location.href = \'bar\' }',
-          //   `function foo(notLocation) { ${match('globalThis', 'location')}.href = \'bar\' }`,
-          // ],
-          // [
-          //   // test that scoped declarations are not replaced
-          //   'let location = "foo"; location.href = \'bar\'',
-          // ],
+          ['window.top', match('window', 'top')],
+          ['window.parent', match('window', 'parent')],
+          ['window[\'top\']', match('window', 'top')],
+          ['window[\'parent\']', match('window', 'parent')],
+          ['window["top"]', match('window', 'top')],
+          ['window["parent"]', match('window', 'parent')],
+          ['foowindow.top', match('foowindow', 'top')],
+          ['foowindow[\'top\']', match('foowindow', 'top')],
+          ['window.topfoo'],
+          ['window[\'topfoo\']'],
+          ['window[\'top\'].foo', `${match('window', 'top')}.foo`],
+          ['window.top.foo', `${match('window', 'top')}.foo`],
+          ['window.top["foo"]', `${match('window', 'top')}["foo"]`],
+          ['window[\'top\']["foo"]', `${match('window', 'top')}["foo"]`],
+          [
+            'if (window["top"] != window["parent"]) run()',
+            `if (${match('window', 'top')} != ${match('window', 'parent')}) run()`,
+          ],
+          [
+            'if (top != self) run()',
+            `if (${match('globalThis', 'top')} != self) run()`,
+          ],
+          [
+            'if (window != top) run()',
+            `if (window != ${match('globalThis', 'top')}) run()`,
+          ],
+          [
+            'if (top.location != self.location) run()',
+            `if (${match('top', 'location')} != ${match('self', 'location')}) run()`,
+          ],
+          [
+            'n = (c = n).parent',
+            `n = ${match('c = n', 'parent')}`,
+          ],
+          [
+            'e.top = "0"',
+            `globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0")`,
+          ],
+          ['e.top += 0'],
+          [
+            'e.bottom += e.top',
+            `e.bottom += ${match('e', 'top')}`,
+          ],
+          [
+            'if (a = (e.top = "0")) { }',
+            `if (a = (globalThis.top.Cypress.resolveWindowReference(globalThis, e, 'top', "0"))) { }`,
+          ],
+          // test that double quotes remain double-quoted
+          [
+            'a = "b"; window.top',
+            `a = "b"; ${match('window', 'top')}`,
+          ],
+          ['({ top: "foo", parent: "bar" })'],
+          ['top: "foo"; parent: "bar";'],
+          ['top: break top'],
+          ['top: continue top;'],
+          [
+            'function top() { window.top }; function parent(...top) { window.top }',
+            `function top() { ${match('window', 'top')} }; function parent(...top) { ${match('window', 'top')} }`,
+          ],
+          [
+            '(top, ...parent) => { window.top }',
+            `(top, ...parent) => { ${match('window', 'top')} }`,
+          ],
+          [
+            '(function top() { window.top }); (function parent(...top) { window.top })',
+            `(function top() { ${match('window', 'top')} }); (function parent(...top) { ${match('window', 'top')} })`,
+          ],
+          [
+            'top += 4',
+          ],
+          [
+            // test that arguments are not replaced
+            'function foo(location) { location.href = \'bar\' }',
+          ],
+          [
+            // test that global variables are replaced
+            'function foo(notLocation) { location.href = \'bar\' }',
+            `function foo(notLocation) { ${matchLocation()}.href = \'bar\' }`,
+          ],
+          [
+            // test that scoped declarations are not replaced
+            'let location = "foo"; location.href = \'bar\'',
+          ],
           [
             'location.href = "bar"',
             `${matchLocation()}.href = "bar"`,
@@ -291,10 +290,7 @@ describe('lib/js', function () {
       })
 
       it('emits info about existing inline sourcemap', function (done) {
-        // replace existing sourceMappingURL with inline
-        const inlinedJs = sourceMaps.urlFormatter(`data:application/json;base64,${Buffer.from(testSourceMap).toString('base64')}`, testSource)
-
-        _rewriteJsUnsafe(URL, inlinedJs, (sourceInfo) => {
+        _rewriteJsUnsafe(URL, testSourceWithInlineSourceMap, (sourceInfo) => {
           snapshot(sourceInfo)
           done()
 
@@ -303,7 +299,7 @@ describe('lib/js', function () {
       })
 
       it('emits info about existing external sourcemap', function (done) {
-        _rewriteJsUnsafe(URL, testSource, (sourceInfo) => {
+        _rewriteJsUnsafe(URL, testSourceWithExternalSourceMap, (sourceInfo) => {
           snapshot(sourceInfo)
           done()
 

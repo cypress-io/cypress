@@ -1,15 +1,13 @@
 import { expect } from 'chai'
 import { rewriteHtmlJs } from '../../lib/html'
 import snapshot from 'snap-shot-it'
-import fs from 'fs'
-
-const original = fs.readFileSync(`${__dirname}/../fixtures/test.html`).toString()
+import { testHtml } from '../fixtures'
 
 const URL = 'http://example.com/foo.html'
 
 const rewriteNoSourceMap = (html) => rewriteHtmlJs(URL, html)
 
-describe('lib/html', function () {
+describe('html rewriter', function () {
   context('.rewriteHtmlJs', function () {
     // https://github.com/cypress-io/cypress/issues/2393
     it('strips SRI', function () {
@@ -26,7 +24,7 @@ describe('lib/html', function () {
     it('rewrites a real-ish document with sourcemaps for inline js', () => {
       const actual: any = {}
 
-      actual.html = rewriteHtmlJs(URL, original, (sourceInfo) => {
+      actual.html = rewriteHtmlJs(URL, testHtml, (sourceInfo) => {
         actual.sourceInfo = sourceInfo
 
         return 'foo'

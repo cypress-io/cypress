@@ -141,19 +141,24 @@ export const jsRules: Visitor<{}> = {
       }
     }
 
+    if (path.scope.declares(node.name)) {
+      // identifier has been declared in local scope, don't care about replacing
+      return this.traverse(path)
+    }
+
     if (node.name === 'location') {
       path.replace(resolveLocationReference())
 
       return false
     }
 
-    if (['parent', 'top', 'location', 'frames'].includes(node.name) && !path.scope.declares(node.name)) {
+    if (['parent', 'top', 'frames'].includes(node.name)) {
       path.replace(resolveWindowReference(globalIdentifier, node.name))
 
       return false
     }
 
-    return this.traverse(path)
+    this.traverse(path)
   },
   visitAssignmentExpression (path) {
     const { node } = path

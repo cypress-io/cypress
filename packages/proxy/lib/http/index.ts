@@ -220,7 +220,7 @@ export class Http {
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
       deferSourceMapRewrite: (opts) => {
-        return this.deferredSourceMapCache.defer({
+        this.deferredSourceMapCache.defer({
           resHeaders: ctx.incomingRes.headers,
           ...opts,
         })
