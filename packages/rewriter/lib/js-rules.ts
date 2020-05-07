@@ -122,7 +122,9 @@ export const jsRules: Visitor<{}> = {
 
       if (isAssignee && node.name === 'location') {
         // `location = 'something'`, rewrite to intercepted href setter since relative urls can break this
-        return path.replace(b.memberExpression(resolveLocationReference(), b.identifier('href')))
+        path.replace(b.memberExpression(resolveLocationReference(), b.identifier('href')))
+
+        return false
       }
 
       // some Identifiers do not refer to a scoped variable, depending on how they're used
