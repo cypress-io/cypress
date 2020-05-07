@@ -151,7 +151,7 @@ module.exports = (Commands, Cypress, cy) => {
         })
 
         _.each(optionEls, ($el) => {
-          if ($el.parent('optgroup').prop('disabled')) {
+          if ($el.closest('optgroup').prop('disabled')) {
             node = $dom.stringify($el)
 
             $errUtils.throwErrByPath('select.optgroup_disabled', {
@@ -257,8 +257,6 @@ module.exports = (Commands, Cypress, cy) => {
             change.initEvent('change', true, false)
 
             options.$el.get(0).dispatchEvent(change)
-
-            return undefined
           })
         }).then(() => {
           const verifyAssertions = () => {
