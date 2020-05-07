@@ -130,6 +130,14 @@ describe('js rewriter', function () {
             'location = "bar"',
             `${matchLocation()}.href = "bar"`,
           ],
+          [
+            'window.location.href = "bar"',
+            `${match('window', 'location')}.href = "bar"`,
+          ],
+          [
+            'window.location = "bar"',
+            `globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'location', "bar")`,
+          ],
         ]
         .forEach(([string, expected]) => {
           if (!expected) {

@@ -22,6 +22,11 @@ describe('source rewriting spec', function () {
         cy.location('pathname').should('eq', '/static/index.html')
       })
 
+      it('with window.location.href', function () {
+        cy.visit('/static/settimeout_redirect_window_href.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
       it('with location.replace()', function () {
         cy.visit('/static/settimeout_redirect_replace.html')
         cy.location('pathname').should('eq', '/static/index.html')
@@ -34,6 +39,11 @@ describe('source rewriting spec', function () {
 
       it('with location = ...', function () {
         cy.visit('/static/settimeout_redirect_set_location.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with window.location = ...', function () {
+        cy.visit('/static/settimeout_redirect_set_window_location.html')
         cy.location('pathname').should('eq', '/static/index.html')
       })
 
@@ -74,7 +84,7 @@ describe('source rewriting spec', function () {
 
   context('can load some well-known sites in a timely manner', () => {
     [
-      'http://apple.com',
+      'https://apple.com', // FIXME: has to be HTTPS - https://github.com/cypress-io/cypress/issues/7268
       'http://google.com',
       'http://facebook.com',
       'http://cypress.io',

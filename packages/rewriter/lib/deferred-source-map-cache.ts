@@ -46,8 +46,6 @@ export class DeferredSourceMapCache {
   }
 
   defer = (request: DeferredSourceMapRequest) => {
-    debug('caching request %o', request)
-
     if (this._getRequestById(request.uniqueId)) {
       // prevent duplicate uniqueIds from ever existing
       throw new Error(`Deferred sourcemap key "${request.uniqueId}" is not unique`)

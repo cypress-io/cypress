@@ -10,10 +10,37 @@ import $Cypress from '../..'
  * @param value the right-hand side of an assignment operation (accessedObject.accessedProp = value)
  */
 export function resolveWindowReference (this: typeof $Cypress, currentWindow: Window, accessedObject: Window | any, accessedProp: string, value?: any) {
-  const Cypress = this
-  const { dom } = Cypress
-  const state = Cypress.state
-  const actualValue = accessedObject[accessedProp]
+  const { dom, state } = this
+
+  const getTargetValue = () => {
+    const targetValue = accessedObject[accessedProp]
+
+    if (dom.isWindow(accessedObject) && accessedProp === 'location') {
+      const targetLocation = resolveLocationReference(accessedObject)
+
+      if (isValPassed) {
+        return targetLocation.href = value
+      }
+
+      return targetLocation
+    }
+
+    if (_.isFunction(targetValue)) {
+      return targetValue.bind(accessedObject)
+    }
+
+    return targetValue
+  }
+
+  const setTargetValue = () => {
+    if (dom.isWindow(accessedObject) && accessedProp === 'location') {
+      const targetLocation = resolveLocationReference(accessedObject)
+
+      return targetLocation.href = value
+    }
+
+    return (accessedObject[accessedProp] = value)
+  }
 
   const isValPassed = arguments.length === 4
 
@@ -22,40 +49,31 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
   if (!$autIframe) {
     // missing AUT iframe, resolve the property access normally
     if (isValPassed) {
-      return (accessedObject[accessedProp] = value)
+      return setTargetValue()
     }
 
-    return actualValue
+    return getTargetValue()
   }
 
   const contentWindow = $autIframe.prop('contentWindow')
 
-  if (accessedObject === currentWindow.top && ['frames', 'location'].includes(accessedProp)) {
-    // doing a property access on topmost window
+  if (accessedObject === currentWindow.top) {
+    // doing a property access on topmost window, adjust accessedObject
+    accessedObject = contentWindow
+  }
+
+  const targetValue = getTargetValue()
+
+  if (!dom.isWindow(targetValue) || dom.isJquery(targetValue)) {
     if (isValPassed) {
-      return (contentWindow[accessedProp] = value)
+      return setTargetValue()
     }
 
-    if (accessedProp === 'location') {
-      return resolveLocationReference(contentWindow)
-    }
-
-    return contentWindow[accessedProp]
+    return targetValue
   }
 
-  if (!isValPassed && _.isFunction(actualValue)) {
-    return actualValue.bind(accessedObject)
-  }
+  // targetValue is a reference to a Window object
 
-  if (!dom.isWindow(actualValue) || dom.isJquery(actualValue)) {
-    if (isValPassed) {
-      return (accessedObject[accessedProp] = value)
-    }
-
-    return actualValue
-  }
-
-  // actualValue is a reference to a Window object
   if (accessedProp === 'top') {
     // note: `isValPassed` is not considered here because `window.top` is readonly
     return contentWindow
@@ -63,18 +81,20 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
 
   if (accessedProp === 'parent') {
     // note: `isValPassed` is not considered here because `window.parent` is readonly
-    if (actualValue === currentWindow.top) {
+    if (targetValue === currentWindow.top) {
       return contentWindow
     }
 
-    return actualValue
+    return targetValue
   }
 
   throw new Error('unhandled resolveWindowReference')
 }
 
 /**
- * Fix a bug that can cause `window.location.href = 'relative-url'` to resolve to the wrong URL.
+ * Fix `window.location` usages that would otherwise navigate to the wrong URL.
+ *
+* @param currentWindow the value of `globalThis` from the scope of the location reference in question
  */
 export function resolveLocationReference (currentWindow: Window) {
   // @ts-ignore
@@ -88,30 +108,36 @@ export function resolveLocationReference (currentWindow: Window) {
 
     a.href = href
 
-    // a.href will be resolved into the fully-qualified URL
+    // a.href will be resolved into the correct fully-qualified URL
     return a.href
   }
 
   function assign (href: string) {
-    return currentWindow.location.href = _resolveHref(href)
+    return currentWindow.location.assign(_resolveHref(href))
   }
 
   function replace (href: string) {
     return currentWindow.location.replace(_resolveHref(href))
   }
 
+  function setHref (href: string) {
+    return currentWindow.location.href = _resolveHref(href)
+  }
+
   const locationKeys = Object.keys(currentWindow.location)
 
-  const fakeLocation = _.reduce(locationKeys, (acc, cur) => {
+  const fakeLocation = {}
+
+  _.reduce(locationKeys, (acc, cur) => {
     // set a dummy value, the proxy will handle sets/gets
-    acc[cur] = null
+    acc[cur] = Symbol.for('Proxied')
 
     return acc
   }, {})
 
   // @ts-ignore
   return currentWindow.__cypressFakeLocation = new Proxy(fakeLocation, {
-    get (target, prop, _receiver) {
+    get (_target, prop, _receiver) {
       if (prop === 'assign') {
         return assign
       }
@@ -122,9 +148,9 @@ export function resolveLocationReference (currentWindow: Window) {
 
       return currentWindow.location[prop]
     },
-    set (obj, prop, value) {
+    set (_obj, prop, value) {
       if (prop === 'href') {
-        return assign(value)
+        return setHref(value)
       }
 
       return currentWindow.location[prop] = value
