@@ -20148,6 +20148,11 @@ ramda@0.26.1, ramda@^0.26.0, ramda@^0.26.1:
   resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.26.1.tgz#8d41351eb8111c55353617fc3bbffad8e4d35d06"
   integrity sha512-hLWjpy7EnsDBb0p+Z3B7rPi3GDeRG5ZtiI33kJhTt+ORCd38AbAIjB/9zRIUoeTbE/AVX5ZkU7m6bznsvrf8eQ==
 
+ramda@0.27.0:
+  version "0.27.0"
+  resolved "https://registry.yarnpkg.com/ramda/-/ramda-0.27.0.tgz#915dc29865c0800bf3f69b8fd6c279898b59de43"
+  integrity sha512-pVzZdDpWwWqEVVLshWUHjNwuVP7SfcmPraYuqocJp1yo2U1R7P+5QAfDhdItkuoGqIBnBYrtPp7rEPqDn9HlZA==
+
 randexp@0.4.6:
   version "0.4.6"
   resolved "https://registry.yarnpkg.com/randexp/-/randexp-0.4.6.tgz#e986ad5e5e31dae13ddd6f7b3019aa7c87f60ca3"
@@ -22336,10 +22341,10 @@ snap-shot-core@10.2.0:
     quote "0.4.0"
     ramda "0.26.1"
 
-snap-shot-it@7.9.1:
-  version "7.9.1"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.1.tgz#a5787d5b4fe354aa258cdd5254f3e85f66093281"
-  integrity sha512-whb2ikrl9VT7rDe6uAgFtR8bWoYTAaB1JSs3jYS2zsCpD65r2OOO36PhKprXpsxo23kqp5InO6qeCVhy6TITQA==
+snap-shot-it@7.9.3:
+  version "7.9.3"
+  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.3.tgz#7eadbe78e2f1e180998d50620290840d2cb532cf"
+  integrity sha512-S5e59fbbc02AGA94LFWGVl/y/+jLMLr0/aykCtPYBE5rcyV9pSa63Aoik66/L8SkZ9piqqSmBmRAYm46+QvqBA==
   dependencies:
     "@bahmutov/data-driven" "1.0.0"
     check-more-types "2.24.0"
@@ -22349,24 +22354,7 @@ snap-shot-it@7.9.1:
     its-name "1.0.0"
     lazy-ass "1.6.0"
     pluralize "8.0.0"
-    ramda "0.26.1"
-    snap-shot-compare "3.0.0"
-    snap-shot-core "10.2.0"
-
-snap-shot-it@7.9.2:
-  version "7.9.2"
-  resolved "https://registry.yarnpkg.com/snap-shot-it/-/snap-shot-it-7.9.2.tgz#575302f8b3881fde851bdaa99c65e1fd9760bb98"
-  integrity sha512-MYrlKx9zLDizbOkqyW1dIagwBwDqecu+jlcxpTKXZA+t2Q+D7m5BU45+Z3zhb2JPtWo+t7sieZks5nW0dw0rQw==
-  dependencies:
-    "@bahmutov/data-driven" "1.0.0"
-    check-more-types "2.24.0"
-    common-tags "1.8.0"
-    debug "4.1.1"
-    has-only "1.1.1"
-    its-name "1.0.0"
-    lazy-ass "1.6.0"
-    pluralize "8.0.0"
-    ramda "0.26.1"
+    ramda "0.27.0"
     snap-shot-compare "3.0.0"
     snap-shot-core "10.2.0"
 
