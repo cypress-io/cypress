@@ -128,6 +128,7 @@ Spec | Description
 --- | ---
 [app-action-example](cypress/component/advanced/app-action-example) | App actions against components
 [context](cypress/component/advanced/context) | Confirms components that use React context feature work
+[custom-command](cypress/component/custom-command) | Wraps `mount` in a custom command for convenience
 [forward-ref](cypress/component/advanced/forward-ref) | Tests a component that uses a forward ref feature
 [hooks](cypress/component/advanced/hooks) | Tests several components that use React Hooks like `useState`, `useCallback`
 [lazy-loaded](cypress/component/advanced/lazy-loaded) | Confirms components that use `React.lazy` and dynamic imports work
