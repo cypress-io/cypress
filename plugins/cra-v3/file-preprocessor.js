@@ -42,8 +42,9 @@ module.exports = config => {
     addFolderToTranspile: config.componentFolder,
     coverage: !coverageIsDisabled,
   }
-  const options = getWebpackOptions(opts)
-  debug('final webpack options %o', options.webpackOptions)
+  const preprocessorOptions = getWebpackOptions(opts)
 
-  return webpackPreprocessor(options)
+  debug('final webpack options %o', preprocessorOptions.webpackOptions)
+
+  return webpackPreprocessor(preprocessorOptions)
 }
