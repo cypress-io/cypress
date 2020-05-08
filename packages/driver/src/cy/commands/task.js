@@ -31,6 +31,7 @@ module.exports = (Commands, Cypress, cy) => {
 
         options._log = Cypress.log({
           message,
+          options: userOptions,
           consoleProps () {
             return consoleOutput
           },

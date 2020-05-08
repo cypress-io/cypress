@@ -42,6 +42,12 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
     ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
+    const message = $utils.stringify([
+      position ? `position: ${position}` : undefined,
+      x ? `x: ${x}` : undefined,
+      y ? `y: ${y}` : undefined,
+    ])
+
     const options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
@@ -74,7 +80,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         deltaOptions = $utils.filterOutOptions(options, defaultOptions)
 
         options._log = Cypress.log({
-          message: deltaOptions,
+          message,
+          options: userOptions,
           $el,
         })
 

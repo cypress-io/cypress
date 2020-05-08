@@ -77,6 +77,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       if (options.log) {
         options._log = Cypress.log({
+          options: userOptions,
         })
       }
 
@@ -99,7 +100,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({
+          options: userOptions,
+        })
       }
 
       const getWindow = () => {
@@ -141,7 +144,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({
+          options: userOptions,
+        })
       }
 
       const getDocument = () => {

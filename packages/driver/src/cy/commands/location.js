@@ -13,6 +13,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          options: userOptions,
         })
       }
 
@@ -39,6 +40,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          options: userOptions,
         })
       }
 
@@ -83,6 +85,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: key != null ? key : '',
+          options: userOptions,
         })
       }
 

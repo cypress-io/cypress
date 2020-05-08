@@ -46,6 +46,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: arg,
+          options: userOptions,
         })
 
         if ($dom.isElement(arg)) {

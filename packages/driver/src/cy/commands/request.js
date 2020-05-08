@@ -235,6 +235,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       if (options.log) {
         options._log = Cypress.log({
           message: '',
+          options: userOptions,
           consoleProps () {
             const resp = options.response || {}
             let rr = resp.allRequestResponses || []

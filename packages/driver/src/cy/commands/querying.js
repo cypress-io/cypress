@@ -16,6 +16,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (options.log) {
         options._log = Cypress.log({
+          options: userOptions,
         })
       }
 
@@ -369,6 +370,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          options: userOptions,
         })
       }
 
@@ -474,6 +476,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         options._log = Cypress.log({
           message: _.compact([filter, text]),
+          options: userOptions,
           type: subject ? 'child' : 'parent',
           consoleProps: () => {
             return consoleProps
