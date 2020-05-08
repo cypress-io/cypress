@@ -48,6 +48,18 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          name: Example Webpack options
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/webpack-options
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Test
           parallelism: 4
           requires:
@@ -78,6 +90,7 @@ workflows:
             - Test
             - Example React Scripts
             - Example Component Folder
+            - Example Webpack options
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
           no-workspace: true
