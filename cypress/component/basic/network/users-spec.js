@@ -10,7 +10,7 @@ context('Users', () => {
     it('fetches 3 users from remote API', () => {
       mount(<Users />)
       // fetching users can take a while
-      cy.get('li', { timeout: 20000 }).should('have.length', 3)
+      cy.get('li', { timeout: 60000 }).should('have.length', 3)
     })
   })
 
