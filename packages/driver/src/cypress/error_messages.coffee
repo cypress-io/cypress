@@ -1138,6 +1138,10 @@ module.exports = {
       message: "#{cmd('select')} failed because this `<option>` you are trying to select is currently disabled:\n\n`{{node}}`"
       docsUrl: "https://on.cypress.io/select"
     }
+    optgroup_disabled: {
+      message: "#{cmd('select')} failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:\n\n`{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
 
   selector_playground:
     defaults_invalid_arg: {

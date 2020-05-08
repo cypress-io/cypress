@@ -453,11 +453,20 @@
       </select>
 
       <select name="disabled" disabled>
-        <option>foo</option>
+        <option value="foo">foo</option>
+        <option value="bar">bar</option>
+      </select>
+
+      <select name="optgroup-disabled">
+        <optgroup label="foobar" disabled>
+          <option value="foo">foo</option>
+          <option value="bar">bar</option>
+        <optgroup>
       </select>
 
       <select name="opt-disabled">
-        <option disabled>bar</option>
+        <option value="foo">foo</option>
+        <option disabled value="bar">bar</option>
       </select>
 
       <select name="starwars">
