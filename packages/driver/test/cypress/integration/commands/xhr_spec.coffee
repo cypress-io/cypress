@@ -1580,26 +1580,24 @@ describe "src/cy/commands/xhr", ->
           done()
 
         cy.route()
-      _.times 50, ->
 
-        it "sets err on log when caused by the XHR response", (done) ->
-          @route.restore()
+      it "sets err on log when caused by the XHR response", (done) ->
+        @route.restore()
 
-          cy.on "fail", (err) =>
-            lastLog = @lastLog
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
 
-            ## route + window + xhr log === 3
-            expect(@logs.length).to.eq(3)
-            expect(lastLog.get("name")).to.eq("xhr")
-            expect(err).to.eq(lastLog.get("error"))
-            done()
+          ## route + window + xhr log === 3
+          expect(@logs.length).to.eq(3)
+          expect(lastLog.get("name")).to.eq("xhr")
+          expect(err).to.eq(lastLog.get("error"))
+          done()
 
-          cy
-            .route(/foo/, {}).as("getFoo")
-            .window().then (win) ->
-              win.$.get("foo_bar").done ->
-                foo.bar()
-      
+        cy
+          .route(/foo/, {}).as("getFoo")
+          .window().then (win) ->
+            win.$.get("foo_bar").done ->
+              foo.bar()
 
       ## FIXME: I have no idea why this is skipped, this test is rly old
       it.skip "explodes if response fixture signature errors", (done) ->
