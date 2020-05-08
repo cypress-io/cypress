@@ -2,6 +2,8 @@
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
+**Jump to:** [Comparison](#comparison), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Commoon problems](#common-problems)
+
 ## TLDR
 
 - What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your React components with zero effort. Here is a typical component testing, notice there is not external URL shown, since it is mounting the component directly.
@@ -63,8 +65,6 @@ module.exports = (on, config) => {
 ```
 
 See [Recipes](./docs/recipes.md) for more examples.
-
-**⚠️ Note:** when using `react-scripts` you must place component specs in the `src` folder too, otherwise they won't be transpiled correctly.
 
 3. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For example, to have them located in `src` folder use:
 
@@ -145,7 +145,18 @@ Spec | Description
 [react-bootstrap](cypress/component/advanced/react-bootstrap) | Confirms [react-bootstrap](https://react-bootstrap.github.io/) components are working
 <!-- prettier-ignore-end -->
 
-### Large examples
+### Full examples
+
+We have several subfolders in [examples](examples) folder that have complete projects with just their dependencies installed in the root folder.
+
+<!-- prettier-ignore-start -->
+Folder Name | Description
+--- | ---
+[react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
+[react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
+<!-- prettier-ignore-end -->
+
+### External examples
 
 This way of component testing has been verified in a number of forked 3rd party projects.
 

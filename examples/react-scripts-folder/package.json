@@ -1,0 +1,12 @@
+{
+  "name": "example-react-scripts-folder",
+  "description": "Handles component tests from cypress folder",
+  "private": true,
+  "scripts": {
+    "test": "../../node_modules/.bin/cypress run",
+    "cy:open": "../../node_modules/.bin/cypress open"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}
