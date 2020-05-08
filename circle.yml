@@ -9,6 +9,7 @@ workflows:
       # then the workspace will be passed to other jobs
       - cypress/install:
           name: Install
+          executor: cypress/base-12
           build: npm run transpile
           post-steps:
             - run:
@@ -37,6 +38,7 @@ workflows:
           # react-scripts example with component tests not in "src" folder
           # but in "cypress/component" folder
           name: Example Component Folder
+          executor: cypress/base-12
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
@@ -49,6 +51,7 @@ workflows:
 
       - cypress/run:
           name: Example Webpack options
+          executor: cypress/base-12
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
@@ -61,6 +64,7 @@ workflows:
 
       - cypress/run:
           name: Test
+          executor: cypress/base-12
           parallelism: 4
           requires:
             - Install
@@ -84,7 +88,7 @@ workflows:
       - cypress/run:
           name: NPM release
           # we need newer Node for semantic release
-          executor: cypress/base-12-6-0
+          executor: cypress/base-12
           requires:
             - Install
             - Test
