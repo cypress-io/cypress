@@ -106,7 +106,7 @@
     "@cypress/webpack-preprocessor": "5.2.0",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
-    "find-webpack": "1.7.2",
+    "find-webpack": "1.7.3",
     "mime-types": "2.1.26"
   },
   "release": {

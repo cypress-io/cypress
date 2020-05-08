@@ -34,6 +34,20 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          # react-scripts example with component tests not in "src" folder
+          # but in "cypress/component" folder
+          name: Example Component Folder
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/react-scripts-folder
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Test
           parallelism: 4
           requires:
@@ -63,6 +77,7 @@ workflows:
             - Install
             - Test
             - Example React Scripts
+            - Example Component Folder
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
           no-workspace: true

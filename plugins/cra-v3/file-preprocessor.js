@@ -35,11 +35,15 @@ module.exports = config => {
   const coverageIsDisabled =
     config && config.env && config.env.coverage === false
   debug('coverage is disabled? %o', { coverageIsDisabled })
+  debug('component test folder: %s', config.componentFolder)
 
   const opts = {
     reactScripts: true,
+    addFolderToTranspile: config.componentFolder,
     coverage: !coverageIsDisabled,
   }
   const options = getWebpackOptions(opts)
+  debug('final webpack options %o', options.webpackOptions)
+
   return webpackPreprocessor(options)
 }
