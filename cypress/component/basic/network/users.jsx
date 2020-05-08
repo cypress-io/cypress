@@ -11,7 +11,7 @@ export class Users extends React.Component {
 
   componentDidMount() {
     axios
-      .get('http://jsonplaceholder.typicode.com/users?_limit=3')
+      .get('https://jsonplaceholder.cypress.io/users?_limit=3')
       .then(response => {
         // JSON responses are automatically parsed.
         this.setState({
