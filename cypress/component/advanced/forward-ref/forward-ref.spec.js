@@ -2,7 +2,6 @@
 /// <reference types="../../lib" />
 
 import React from 'react'
-import ReactDom from 'react-dom'
 import { mount } from 'cypress-react-unit-test'
 import Button from './forward-ref.jsx'
 
