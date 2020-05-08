@@ -442,13 +442,17 @@ const e2e = {
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: options.noExit ? 3000000 : 120000,
+      timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
     })
+
+    if (options.noExit) {
+      options.timeout = 3000000
+    }
 
     if (options.exit != null) {
       throw new Error(`
