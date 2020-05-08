@@ -4,16 +4,13 @@ const findWebpack = require('find-webpack')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
-const getWebpackOptions = opts => {
+const getWebpackPreprocessorOptions = opts => {
   debug('top level opts %o', opts)
 
   const webpackOptions = findWebpack.getWebpackOptions()
   if (!webpackOptions) {
     console.error('⚠️ Could not find Webpack options, using defaults')
-    return {
-      webpackOptions: webpackPreprocessor.defaultOptions,
-      watchOptions: {},
-    }
+    return webpackPreprocessor.defaultOptions
   }
   debug('webpack options: %o', webpackOptions)
   findWebpack.cleanForCypress(opts, webpackOptions)
@@ -42,7 +39,7 @@ module.exports = config => {
     addFolderToTranspile: config.componentFolder,
     coverage: !coverageIsDisabled,
   }
-  const preprocessorOptions = getWebpackOptions(opts)
+  const preprocessorOptions = getWebpackPreprocessorOptions(opts)
 
   debug('final webpack options %o', preprocessorOptions.webpackOptions)
 
