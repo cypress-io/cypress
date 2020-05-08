@@ -155,6 +155,7 @@ Folder Name | Description
 --- | ---
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
+[webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
 <!-- prettier-ignore-end -->
 
 ### External examples
