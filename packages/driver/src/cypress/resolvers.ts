@@ -94,7 +94,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
 /**
  * Fix `window.location` usages that would otherwise navigate to the wrong URL.
  *
-* @param currentWindow the value of `globalThis` from the scope of the location reference in question
+ * @param currentWindow the value of `globalThis` from the scope of the location reference in question
  */
 export function resolveLocationReference (currentWindow: Window) {
   // @ts-ignore
