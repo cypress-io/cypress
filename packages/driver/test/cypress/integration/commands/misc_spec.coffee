@@ -146,6 +146,13 @@ describe "src/cy/commands/misc", ->
         win.jquery = ->
 
         return win
+    
+    it "can extend the default timeout", ->
+        cy.wrap (new Promise((resolve, reject) ->
+          setTimeout (->
+            resolve null
+          ), 4500
+        )), timeout: 5000
 
     describe "errors", ->
       it "throws when wrapping an array of windows", (done) ->
@@ -167,6 +174,28 @@ describe "src/cy/commands/misc", ->
 
         cy.document().then (doc) ->
           cy.wrap([doc]).screenshot()
+      
+      it "throws when exceeding default timeout", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "`cy.wrap()` timed out waiting `4000ms` to complete."
+          done()
+
+        cy.wrap (new Promise((resolve, reject) ->
+          setTimeout (->
+            resolve null
+          ), 4500
+        ))
+
+      it "throws when exceeding custom timeout", (done) ->
+        cy.on "fail", (err) ->
+          expect(err.message).to.include "`cy.wrap()` timed out waiting `500ms` to complete."
+          done()
+
+        cy.wrap (new Promise((resolve, reject) ->
+          setTimeout (->
+            resolve null
+          ), 2000
+        )), timeout: 500
 
     describe ".log", ->
       beforeEach ->

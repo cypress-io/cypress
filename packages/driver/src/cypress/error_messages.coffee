@@ -1662,6 +1662,12 @@ module.exports = {
       message: "#{cmd('within')} must be called with a function."
       docsUrl: "https://on.cypress.io/within"
     }
+  
+  wrap:
+    timed_out: {
+      message: "#{cmd('wrap')} timed out waiting `{{timeout}}ms` to complete."
+      docsUrl: "https://on.cypress.io/wrap"
+    }
 
   xhr:
     aborted: "This XHR was aborted by your code -- check this stack trace below."
