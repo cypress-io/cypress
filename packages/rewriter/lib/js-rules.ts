@@ -45,9 +45,6 @@ function resolveWindowReference (accessedObject: ExpressionKind, prop: string, m
 
 /**
  * Generate a CallExpression for Cypress.resolveLocationReference
- * @param accessedObject object being accessed
- * @param prop name of property being accessed
- * @param maybeVal if an assignment is being made, this is the RHS of the assignment
  */
 function resolveLocationReference () {
   return b.callExpression(
