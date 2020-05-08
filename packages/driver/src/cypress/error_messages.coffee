@@ -1,4 +1,5 @@
 _ = require("lodash")
+capitalize = require('underscore.string/capitalize')
 
 divider = (num, char) ->
   Array(num).join(char)
@@ -27,7 +28,7 @@ formatProp = (memo, field) ->
   {key, value} = field
 
   if value?
-    memo.push(_.capitalize(key) + ": " + format(value))
+    memo.push(capitalize(key) + ": " + format(value))
   memo
 
 cmd = (command, args = "") ->
@@ -1136,6 +1137,10 @@ module.exports = {
     }
     option_disabled: {
       message: "#{cmd('select')} failed because this `<option>` you are trying to select is currently disabled:\n\n`{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
+    optgroup_disabled: {
+      message: "#{cmd('select')} failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:\n\n`{{node}}`"
       docsUrl: "https://on.cypress.io/select"
     }
 
