@@ -22,7 +22,15 @@ const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const formatOptions = (options: Record<string, any>) => {
-  return JSON.stringify(options).replace(/"/g, '')
+  let obj = Object.assign({}, options)
+
+  Object.keys(obj).forEach((k) => {
+    if (obj[k] === undefined) {
+      obj[k] = 'undefined'
+    }
+  })
+
+  return JSON.stringify(obj).replace(/"/g, '')
 }
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
@@ -114,7 +122,7 @@ const Message = observer(({ model }: MessageProps) => (
         dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
       />
     </span>
-    { model.options
+    { model.options && Object.keys(model.options).length > 0
       ? <span className='command-message-options'>{formatOptions(model.options)}</span>
       : null
     }
