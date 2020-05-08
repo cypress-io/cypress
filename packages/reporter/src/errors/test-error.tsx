@@ -6,15 +6,36 @@ import Markdown from 'markdown-it'
 import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
+import ErrorCodeFrame from '../errors/error-code-frame'
+import ErrorStack from '../errors/error-stack'
 
 import events from '../lib/events'
 import TestModel from '../test/test-model'
 
-interface Props {
+interface DocsUrlProps {
+  url: string | string[]
+}
+
+const DocsUrl = ({ url }: DocsUrlProps) => {
+  if (!url) return null
+
+  const urlArray = _.castArray(url)
+
+  return (<>
+    {_.map(urlArray, (url) => (
+      <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
+        Learn more
+        <i className='fas fa-external-link-alt'></i>
+      </a>
+    ))}
+  </>)
+}
+
+interface TestErrorProps {
   model: TestModel
 }
 
-const TestError = observer((props: Props) => {
+const TestError = observer((props: TestErrorProps) => {
   const md = new Markdown('zero')
 
   md.enable(['backticks', 'emphasis', 'escape'])
@@ -30,6 +51,7 @@ const TestError = observer((props: Props) => {
   }
 
   const { err } = props.model
+  const { codeFrame } = err
 
   if (!err.displayMessage) return null
 
@@ -50,12 +72,7 @@ const TestError = observer((props: Props) => {
         </div>
         <div className='runnable-err-message'>
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
-          {err.docsUrl &&
-            <a className='runnable-err-docs-url' href={err.docsUrl} target='_blank'>
-              Learn more
-              <i className='fas fa-external-link-alt'></i>
-            </a>
-          }
+          <DocsUrl url={err.docsUrl} />
         </div>
 
         {err.stack &&
@@ -64,9 +81,10 @@ const TestError = observer((props: Props) => {
             headerClass='runnable-err-stack-expander'
             contentClass='runnable-err-stack-trace'
           >
-            {err.stack}
+            <ErrorStack err={err} />
           </Collapsible>
         }
+        {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
       </div>
     </div>
   )

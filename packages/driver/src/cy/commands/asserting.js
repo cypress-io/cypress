@@ -8,14 +8,20 @@ const reExistence = /exist/
 const reEventually = /^eventually/
 const reHaveLength = /length/
 
-module.exports = function (Commands, Cypress, cy) {
+module.exports = function (Commands, Cypress, cy, state) {
   const shouldFnWithCallback = function (subject, fn) {
+    state('current')?.set('followedByShouldCallback', true)
+
     return Promise
     .try(() => {
       const remoteSubject = cy.getRemotejQueryInstance(subject)
 
       return fn.call(this, remoteSubject ? remoteSubject : subject)
-    }).return(subject)
+    })
+    .tap(() => {
+      state('current')?.set('followedByShouldCallback', false)
+    })
+    .return(subject)
   }
 
   const shouldFn = function (subject, chainers, ...args) {

@@ -42,6 +42,7 @@ const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|js
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+const whiteSpaceBetweenNewlines = /\n\s+\n/
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
@@ -49,21 +50,14 @@ const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin fr
 // 'at' will be present in chrome stack trace lines
 const replaceStackTraceLines = (str) => {
   return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    let pre = parts[0]
     const isFirefoxStack = parts[1] === '@'
     let post = parts[4]
 
     if (isFirefoxStack) {
-      if (pre === '\n') {
-        pre = '\n    '
-      } else {
-        pre += pre.slice(1).repeat(2)
-      }
-
-      post = post.slice(-1)
+      post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
-    return `${pre}[stack trace lines]${post}`
+    return `\n      [stack trace lines]${post}`
   })
 }
 
@@ -446,18 +440,15 @@ const e2e = {
   options (ctx, options = {}) {
     _.defaults(options, {
       browser: 'electron',
+      headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: 120000,
+      timeout: options.noExit ? 3000000 : 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
     })
-
-    if (options.noExit) {
-      options.timeout = 3000000
-    }
 
     if (options.exit != null) {
       throw new Error(`

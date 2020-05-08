@@ -123,6 +123,27 @@ describe('driver/src/cypress/cy', () => {
         )
       })
     })
+
+    it('stores invocation stack for first command', () => {
+      cy
+      .get('input:first')
+      .then(() => {
+        const userInvocationStack = cy.queue.find({ name: 'get' }).get('userInvocationStack')
+
+        expect(userInvocationStack).to.include('cy_spec.js')
+      })
+    })
+
+    it('stores invocation stack for chained command', () => {
+      cy
+      .get('div')
+      .find('input')
+      .then(() => {
+        const userInvocationStack = cy.queue.find({ name: 'find' }).get('userInvocationStack')
+
+        expect(userInvocationStack).to.include('cy_spec.js')
+      })
+    })
   })
 
   context('custom commands', () => {
@@ -150,6 +171,36 @@ describe('driver/src/cypress/cy', () => {
 
       cy.command('dashboard.selectRenderer').then(($ce) => {
         expect($ce.get(0)).to.eq(ce.get(0))
+      })
+    })
+
+    describe('invocation stack', () => {
+      beforeEach(() => {
+        Cypress.Commands.add('getInput', () => cy.get('input'))
+        Cypress.Commands.add('findInput', { prevSubject: 'element' }, (subject) => {
+          subject.find('input')
+        })
+      })
+
+      it('stores invocation stack for first command', () => {
+        cy
+        .getInput()
+        .then(() => {
+          const userInvocationStack = cy.queue.find({ name: 'getInput' }).get('userInvocationStack')
+
+          expect(userInvocationStack).to.include('cy_spec.js')
+        })
+      })
+
+      it('stores invocation stack for chained command', () => {
+        cy
+        .get('div')
+        .findInput()
+        .then(() => {
+          const userInvocationStack = cy.queue.find({ name: 'findInput' }).get('userInvocationStack')
+
+          expect(userInvocationStack).to.include('cy_spec.js')
+        })
       })
     })
 

@@ -685,7 +685,7 @@ We searched for the reporter in these paths:
 The error we received was:
 
 Error: this reporter threw an error
-    [stack trace lines]
+      [stack trace lines]
 
 Learn more at https://on.cypress.io/reporters
 

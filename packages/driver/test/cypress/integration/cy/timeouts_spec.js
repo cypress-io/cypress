@@ -1,4 +1,4 @@
-import Timeouts from '../../../../src/cy/timeouts.coffee'
+import Timeouts from '../../../../src/cy/timeouts'
 
 describe('driver/src/cy/timeouts', () => {
   beforeEach(() => {
