@@ -327,7 +327,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('nestedIndex', state('index'))
 
       return command.get('args')
-    }).all()
+    })
 
     .then((args) => {
       // store this if we enqueue new commands
