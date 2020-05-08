@@ -150,13 +150,13 @@ describe('src/cypress/resolvers', function () {
       })
     })
 
-    it('.href setter calls location.assign with resolved URL', () => {
+    it('.href setter sets location.href with resolved URL', () => {
       // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       loc.href = 'foo'
 
-      expect(fakeWindow.location.assign).to.be.calledWith('http://localhost:3500/fixtures/foo')
+      expect(fakeWindow.location.href).to.eq('http://localhost:3500/fixtures/foo')
     })
 
     it('.assign() calls location.assign with resolved URL', () => {
