@@ -66,8 +66,11 @@ function wrapProcessExit () {
   // note - process.exit is normally synchronous, so this could potentially cause strange behavior
   // @ts-ignore
   process.exit = _.once(async (...args) => {
+    debug('intercepted process.exit called, closing worker threads')
     terminateAllWorkers()
+    .delay(100)
     .finally(() => {
+      debug('all workers terminated, exiting for real')
       originalProcessExit.call(process, ...args)
     })
   })
