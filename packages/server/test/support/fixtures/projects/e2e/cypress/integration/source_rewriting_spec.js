@@ -82,7 +82,8 @@ describe('source rewriting spec', function () {
     })
   })
 
-  context('can load some well-known sites in a timely manner', () => {
+  // NOTE: skip in CI for now - can be flaky
+  context.skip('can load some well-known sites in a timely manner', () => {
     [
       // FIXME: has to be HTTPS - https://github.com/cypress-io/cypress/issues/7268
       // 'http://apple.com',

@@ -790,24 +790,24 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
         ✓ with location.search
         ✓ with location.pathname
     can load some well-known sites in a timely manner
-      ✓ http://google.com
-      ✓ http://facebook.com
-      ✓ http://cypress.io
-      ✓ http://docs.cypress.io
-      ✓ http://github.com
+      - http://google.com
+      - http://facebook.com
+      - http://cypress.io
+      - http://docs.cypress.io
+      - http://github.com
 
 
-  17 passing
-  1 pending
+  12 passing
+  6 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Tests:        18                                                                               │
-  │ Passing:      17                                                                               │
+  │ Passing:      12                                                                               │
   │ Failing:      0                                                                                │
-  │ Pending:      1                                                                                │
+  │ Pending:      6                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
@@ -829,9 +829,9 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  source_rewriting_spec.js                 XX:XX       18       17        -        1        - │
+  │ ✔  source_rewriting_spec.js                 XX:XX       18       12        -        6        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       18       17        -        1        -  
+    ✔  All specs passed!                        XX:XX       18       12        -        6        -  
 
 
 `
