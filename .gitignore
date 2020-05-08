@@ -1,5 +1,8 @@
 public/
 node_modules/
 dist
-cypress/videos
-cypress/screenshots
+**/cypress/videos
+**/cypress/screenshots
+package-lock.json
+.nyc_output
+coverage

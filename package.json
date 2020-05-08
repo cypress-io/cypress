@@ -80,6 +80,7 @@
     "react-google-maps": "9.4.5",
     "react-router": "6.0.0-alpha.1",
     "react-router-dom": "6.0.0-alpha.1",
+    "react-scripts": "3.4.1",
     "semantic-release": "17.0.7",
     "standard": "14.3.3",
     "style-loader": "0.23.1",
@@ -105,7 +106,7 @@
     "@cypress/webpack-preprocessor": "5.2.0",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
-    "find-webpack": "1.6.1",
+    "find-webpack": "1.7.2",
     "mime-types": "2.1.26"
   },
   "release": {
