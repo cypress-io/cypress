@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  cypress: cypress-io/cypress@1
+  cypress: cypress-io/cypress@1.21.0
 workflows:
   build:
     jobs:
@@ -22,6 +22,18 @@ workflows:
                 command: npm run build
 
       - cypress/run:
+          name: Example React Scripts
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/react-scripts
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Test
           parallelism: 4
           requires:
@@ -32,6 +44,7 @@ workflows:
           # we are not going to use results from this job anywhere else
           no-workspace: true
           record: false
+          store_artifacts: true
           # following examples from
           # https://circleci.com/docs/2.0/parallelism-faster-jobs/
           command: |
@@ -49,7 +62,9 @@ workflows:
           requires:
             - Install
             - Test
-          install-command: echo 'Nothing to install in this job'
+            - Example React Scripts
+          install-command: echo 'Already installed'
+          verify-command: echo 'Already verified'
           no-workspace: true
           # instead of "cypress run" do NPM release 😁
           # clear environment variables to trick semantic-release
