@@ -3,7 +3,7 @@ Folder /foo/bar/.projects/read-only-project-root is not writable.
 
 Writing to this directory is required by Cypress in order to store screenshots and videos.
 
-Enable write permissions to this directory to ensure screenshots and videos are stored. 
+Enable write permissions to this directory to ensure screenshots and videos are stored.
 
 If you don't require screenshots or videos to be stored you can safely ignore this warning.
 ✅ not running as root
