@@ -394,11 +394,6 @@ declare namespace Cypress {
     log(options: Partial<LogConfig>): Log
 
     /**
-     * Access and set Cypress's internal state.
-     */
-    state: State
-
-    /**
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
@@ -2210,10 +2205,6 @@ declare namespace Cypress {
      * @default true
      */
     log: boolean
-  }
-
-  interface State {
-    (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
   }
 
   /**

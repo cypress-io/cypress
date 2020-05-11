@@ -1,2 +1,0 @@
-lib/*.js
-!lib/worker-shim.js

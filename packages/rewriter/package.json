@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "build-test": "yarn build-prod --noEmit",
     "clean-deps": "rm -rf node_modules",
     "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
   },
