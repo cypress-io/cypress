@@ -438,16 +438,18 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
+    const noExit = process.env.NO_EXIT
+
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: options.noExit ? 3000000 : 120000,
+      timeout: noExit ? 3000000 : 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
-      noExit: process.env.NO_EXIT,
+      noExit,
     })
 
     if (options.exit != null) {
