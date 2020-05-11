@@ -598,7 +598,7 @@ module.exports = {
       message: """
         #{cmd('{{cmd}}')} timed out after waiting `{{timeout}}ms`.
 
-        Your callback function returned a promise which never resolved.
+        Your callback function returned a promise that never resolved.
 
         The callback function was:
 
@@ -1682,7 +1682,11 @@ module.exports = {
   
   wrap:
     timed_out: {
-      message: "#{cmd('wrap')} timed out waiting `{{timeout}}ms` to complete."
+      message: """
+      #{cmd('wrap')} timed out waiting `{{timeout}}ms` to complete.
+
+      You called `cy.wrap()` with a promise that never resolved.
+      """
       docsUrl: "https://on.cypress.io/wrap"
     }
 
