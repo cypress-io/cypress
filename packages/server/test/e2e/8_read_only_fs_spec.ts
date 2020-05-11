@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 const path = require('path')
@@ -34,6 +35,7 @@ describe('e2e project dir access', function () {
     } catch (e) {
       err = e
     }
+
     expect(err).to.include({ code: 'EACCES' })
 
     return exec().finally(() => {
@@ -41,18 +43,8 @@ describe('e2e project dir access', function () {
     })
   }
 
-  e2e.it('warns when unable to write to dir', {
+  e2e.it('warns when unable to write to disk', {
     project: projectPath,
-    browser: 'chrome',
-    expectedExitCode: 0,
-    spec: 'simple_spec.coffee',
-    snapshot: true,
-    onRun,
-  })
-
-  e2e.it('warns when unable to write a screenshot to disk', {
-    project: projectPath,
-    browser: 'chrome',
     expectedExitCode: 2,
     spec: 'simple_failing_spec.coffee',
     snapshot: true,
