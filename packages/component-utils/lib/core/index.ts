@@ -13,6 +13,7 @@ export {
   ComponentTestInstance,
 } from './options'
 
+// Tim magic
 type InjectableComponent<T> = T extends infer U ? U extends { mountComponent: infer C } ? C : any : any
 
 /**  Mount Entry point */
@@ -36,23 +37,23 @@ export function mount (component: InjectableComponent<MountOptions>, options: Mo
 }
 
 
-// Other module
-declare global {
-  namespace CypressComponentUtils {
-    interface MountOptionExtensions {
-      mountComponent: React.ReactDOM
-      react: {
-        component: boolean
-      }
-    }
-  }
-}
-
-mount({}, {
-  react: {
-    component: true
-  }
-})
+// // Other module
+// declare global {
+//   namespace CypressComponentUtils {
+//     interface MountOptionExtensions {
+//       mountComponent: React.ReactDOM
+//       react: {
+//         component: boolean
+//       }
+//     }
+//   }
+// }
+//
+// mount({}, {
+//   react: {
+//     component: true
+//   }
+// })
 
 /** Usage Scratchpad
  * This is how a framework adapter can "hook into" setup, mount, etc...

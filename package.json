@@ -45,6 +45,7 @@
     "lint-coffee": "coffeelint scripts/**/*.coffee && lerna run lint-coffee --parallel --stream && yarn stop-only-all",
     "lint-fix": "yarn lint --fix",
     "move-binaries": "node ./scripts/binary.js move-binaries",
+    "semantic-release": "yarn lerna run semantic-release",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
@@ -75,6 +76,10 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "semantic-release": "17.0.7",
+    "semantic-release-monorepo": "7.0.2"
   },
   "devDependencies": {
     "@cypress/bumpercar": "2.0.12",

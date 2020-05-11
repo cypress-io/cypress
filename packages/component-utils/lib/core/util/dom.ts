@@ -6,7 +6,7 @@ export function getRoot (id = rootId, _document: Document = getDocument()): HTML
 }
 
 export function getDocument (): Document {
-  return cy.get('document')
+  return cy.get('document') as unknown as Document
 }
 
 export function renderTarget (_document: Document = getDocument()) {

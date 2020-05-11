@@ -370,6 +370,16 @@ jobs:
           command: yarn lerna exec  --scope cypress "yarn dtslint"
       - store-npm-logs
 
+  semantic-release:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      # trigger the semantic-release for packages with changes
+      - run: yarn semantic-release
+      - store-npm-logs
+
   build-system-unit-tests:
     <<: *defaults
     parallelism: 1
@@ -1239,6 +1249,16 @@ linux-workflow: &linux-workflow
     - unit-tests:
         requires:
           - build
+    - semantic-release:
+        filters:
+          branches:
+            only:
+              - develop
+        requires:
+            - build
+            - unit-tests
+            - "Linux lint"
+            - lint-types
     - server-unit-tests:
         requires:
           - build
