@@ -122,7 +122,7 @@ By necessity, this preprocessor sets the entry point for webpack as the spec fil
 **Example**:
 
 ```javascript
-const webpack = require('@cypress/webpack-preprocessor')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 module.exports = (on) => {
   const options = {
@@ -130,7 +130,7 @@ module.exports = (on) => {
     additionalEntries: ['./app/some-module.js'],
   }
 
-  on('file:preprocessor', webpack(options))
+  on('file:preprocessor', webpackPreprocessor(options))
 }
 ```
 
@@ -141,13 +141,13 @@ The default options are provided as `webpack.defaultOptions` so they can be more
 If, for example, you want to update the options for the `babel-loader` to add the [stage-3 preset](https://babeljs.io/docs/plugins/preset-stage-3/), you could do the following:
 
 ```javascript
-const webpack = require('@cypress/webpack-preprocessor')
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 module.exports = (on) => {
   const options = webpack.defaultOptions
   options.webpackOptions.module.rules[0].use[0].options.presets.push('babel-preset-stage-3')
 
-  on('file:preprocessor', webpack(options))
+  on('file:preprocessor', webpackPreprocessor(options))
 }
 ```
 

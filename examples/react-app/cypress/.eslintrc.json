@@ -6,5 +6,7 @@
     "eslint:recommended",
     "plugin:cypress/recommended"
   ],
-  "plugins": ["cypress"]
+  "plugins": [
+    "cypress"
+  ]
 }

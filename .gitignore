@@ -5,3 +5,4 @@ _test-output
 cypress/videos
 cypress/screenshots
 examples/react-app/build/
+dist

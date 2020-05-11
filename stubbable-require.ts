@@ -1,5 +1,5 @@
-module.exports = {
-  resolve (dependency) {
+export = {
+  resolve (dependency: string) {
     return require.resolve(dependency)
   },
 }

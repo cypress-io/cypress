@@ -1,16 +1,23 @@
+import * as webpack from 'webpack'
+import * as Promise from 'bluebird'
+import * as events from 'events'
+
+import { createDeferred } from './deferred'
+
 const path = require('path')
-const webpack = require('webpack')
 const debug = require('debug')('cypress:webpack')
 const debugStats = require('debug')('cypress:webpack:stats')
 
-const createDeferred = require('./deferred')
 const stubbableRequire = require('./stubbable-require')
 
-let bundles = {}
+type FilePath = string
+
+// bundle promises from input spec filename to output bundled file paths
+let bundles: {[key: string]: Promise<FilePath>} = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
-const getDefaultWebpackOptions = () => {
+const getDefaultWebpackOptions = (): webpack.Configuration => {
   debug('load default options')
 
   return {
@@ -33,12 +40,43 @@ const getDefaultWebpackOptions = () => {
   }
 }
 
-// export a function that returns another function, making it easy for users
-// to configure like so:
-//
-// on('file:preprocessor', webpack(options))
-//
-const preprocessor = (options = {}) => {
+/**
+ * Configuration object for this Webpack preprocessor
+ */
+interface PreprocessorOptions {
+  webpackOptions?: webpack.Configuration
+  watchOptions?: Object
+  additionalEntries?: string[]
+}
+
+interface FileEvent extends events.EventEmitter {
+  filePath: FilePath
+  outputPath: string
+  shouldWatch: boolean
+}
+
+/**
+ * Cypress asks file preprocessor to bundle the given file
+ * and return the full path to produced bundle.
+ */
+type FilePreprocessor = (file: FileEvent) => Promise<FilePath>
+
+type WebpackPreprocessorFn = (options: PreprocessorOptions) => FilePreprocessor
+
+interface WebpackPreprocessor extends WebpackPreprocessorFn {
+  defaultOptions: Omit<PreprocessorOptions, 'additionalEntries'>
+}
+
+/**
+ * Webpack preprocessor configuration function. Takes configuration object
+ * and returns file preprocessor.
+ * @example
+  ```
+  on('file:preprocessor', webpackPreprocessor(options))
+  ```
+ */
+// @ts-ignore
+const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
   debug('user options:', options)
 
   // we return function that accepts the arguments provided by
@@ -52,7 +90,7 @@ const preprocessor = (options = {}) => {
   // when running in the GUI, it will likely get called multiple times
   // with the same filePath, as the user could re-run the tests, causing
   // the supported file and spec file to be requested again
-  return (file) => {
+  return (file: FileEvent) => {
     const filePath = file.filePath
 
     debug('get', filePath)
@@ -67,7 +105,7 @@ const preprocessor = (options = {}) => {
     }
 
     // user can override the default options
-    let webpackOptions = options.webpackOptions || getDefaultWebpackOptions()
+    let webpackOptions: webpack.Configuration = options.webpackOptions || getDefaultWebpackOptions()
     const watchOptions = options.watchOptions || {}
 
     debug('webpackOptions: %o', webpackOptions)
@@ -103,13 +141,14 @@ const preprocessor = (options = {}) => {
     // it's a deferred object that will be resolved or rejected in
     // the `handle` function below and its promise is what is ultimately
     // returned from this function
-    let latestBundle = createDeferred()
+    let latestBundle = createDeferred<string>()
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
     bundles[filePath] = latestBundle.promise
 
-    const rejectWithErr = (err) => {
+    const rejectWithErr = (err: Error) => {
+      // @ts-ignore
       err.filePath = filePath
       debug(`errored bundling ${outputPath}`, err.message)
 
@@ -118,7 +157,7 @@ const preprocessor = (options = {}) => {
 
     // this function is called when bundling is finished, once at the start
     // and, if watching, each time watching triggers a re-bundle
-    const handle = (err, stats) => {
+    const handle = (err: Error, stats: webpack.Stats) => {
       if (err) {
         debug('handle - had error', err.message)
 
@@ -167,7 +206,7 @@ const preprocessor = (options = {}) => {
       debug('compile', filePath)
       // we overwrite the latest bundle, so that a new call to this function
       // returns a promise that resolves when the bundling is finished
-      latestBundle = createDeferred()
+      latestBundle = createDeferred<string>()
       bundles[filePath] = latestBundle.promise
 
       bundles[filePath].finally(() => {
@@ -190,6 +229,9 @@ const preprocessor = (options = {}) => {
       debug('watching')
 
       if (compiler.hooks) {
+        // TODO compile.tap takes "string | Tap"
+        // so seems we just need to pass plugin.name
+        // @ts-ignore
         compiler.hooks.compile.tap(plugin, onCompile)
       } else {
         compiler.plugin('compile', onCompile)
@@ -205,7 +247,8 @@ const preprocessor = (options = {}) => {
       delete bundles[filePath]
 
       if (file.shouldWatch) {
-        bundler.close(cb)
+        // in this case the bundler is webpack.Compiler.Watching
+        (bundler as webpack.Compiler.Watching).close(cb)
       }
     })
 
@@ -228,13 +271,14 @@ Object.defineProperty(preprocessor, 'defaultOptions', {
   },
 })
 
-// for testing purposes
+// for testing purposes, but do not add this to the typescript interface
+// @ts-ignore
 preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err) {
+function cleanseError (err: string) {
   return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
-module.exports = preprocessor
+export = preprocessor

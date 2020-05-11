@@ -1,3 +1,5 @@
+!.*
+**/node_modules
 test/_test-output
 cypress/tests/e2e/compile-error.js
 test/fixtures
@@ -8,4 +10,6 @@ examples/react-app/package.json
 examples/react-app/cypress/integration/dynamic-import-spec.js
 # contains nullish operator
 examples/use-babelrc/cypress/integration/spec.js
-*.ts
+dist
+tsconfig.json
+.vscode/
