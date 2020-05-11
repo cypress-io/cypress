@@ -235,7 +235,7 @@ If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the
 
 ## Visual testing
 
-You can use any [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) from these component tests. This repo uses [Percy.io](https://percy.io) visual diffing service as a GitHub pull request check.
+You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo uses [Percy.io](https://percy.io) visual diffing service as a GitHub pull request check, see [visual-testing](examples/visual-testing) example.
 
 ## Common problems
 

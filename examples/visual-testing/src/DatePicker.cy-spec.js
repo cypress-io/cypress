@@ -6,7 +6,7 @@ describe('Material UI date picker', () => {
   it('works', () => {
     mount(<MaterialUIPickers />)
     // confirm the DOM has rendered the widget
-    cy.get('#date-picker-inline').should('have.value', '08/10/2014')
+    cy.get('#date-picker-inline').should('have.value', '08/18/2014')
     // then take visual snapshot
     cy.percySnapshot('Datepicker initial')
 

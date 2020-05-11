@@ -24,4 +24,8 @@ cy.percySnapshot('Datepicker opened')
 
 ### Visual change
 
+If a pull request introduces visual changes, they are caught and shown as a diff
+
+![Visual change](images/diff.gif)
+
 **Tip:** you can use any [visual testing](https://on.cypress.io/visual-testing) plugin with component testing.
