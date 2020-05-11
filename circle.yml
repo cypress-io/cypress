@@ -106,13 +106,13 @@ commands:
             CYPRESS_KONFIG_ENV: production
           command: |
             # wrong variable on purpose to test internally
-            if [[ -v PACKAGES_RECORD_KEY_rEmOvE ]]; then
+            if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
               yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
             else
               # external PR
-              TESTFILES=$(circleci tests glob "cypress/integration/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
               yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
             fi
