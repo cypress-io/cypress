@@ -63,6 +63,21 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          name: Example Visual Testing
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing
+          # run Percy agent and then run Cypress component tests
+          # https://docs.percy.io/docs/cypress
+          command: npx percy exec -- npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Test
           executor: cypress/base-12
           parallelism: 4
@@ -95,6 +110,7 @@ workflows:
             - Example React Scripts
             - Example Component Folder
             - Example Webpack options
+            - Example Visual Testing
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
           no-workspace: true
