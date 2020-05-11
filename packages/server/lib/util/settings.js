@@ -122,7 +122,7 @@ module.exports = {
 
       return this._err('CONFIG_FILE_NOT_FOUND', this.configFile(options), projectRoot)
     }).catch({ code: 'EACCES' }, () => {
-      // we cannot read due to folder permissions
+      // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_ACCESSIBLE', projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
