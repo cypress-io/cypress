@@ -22,6 +22,11 @@ If you don't require screenshots or videos to be stored you can safely ignore th
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  simple_failing_spec.coffee                                                      (1 of 1)
+Warning: We failed to record the video.
+
+This error will not alter the exit code.
+
+Error: EACCES: permission denied, mkdir '/foo/bar/.projects/e2e/cypress/videos'
 
 
   simple failing spec
@@ -34,13 +39,13 @@ If you don't require screenshots or videos to be stored you can safely ignore th
 
   1) simple failing spec
        fails1:
-     Error: EACCES: permission denied, mkdir '/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee'
+     Error: EACCES: permission denied, mkdir '/foo/bar/.projects/e2e/cypress/screenshots'
   
   
 
   2) simple failing spec
        fails2:
-     Error: EACCES: permission denied, mkdir '/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee'
+     Error: EACCES: permission denied, mkdir '/foo/bar/.projects/e2e/cypress/screenshots'
   
   
 
@@ -61,19 +66,11 @@ If you don't require screenshots or videos to be stored you can safely ignore th
   │ Spec Ran:     simple_failing_spec.coffee                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
-Warning: We failed to record the video.
-
-This error will not alter the exit code.
-
-Error: ffmpeg exited with code 1: /foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4: Permission denied
-
-      [stack trace lines]
-
 Warning: We failed processing this video.
 
 This error will not alter the exit code.
 
-Error: ffmpeg exited with code 1: /foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4: Permission denied
+Error: ffmpeg exited with code 1: /foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4: No such file or directory
 
       [stack trace lines]
 

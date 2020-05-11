@@ -1,10 +1,10 @@
 import { expect } from 'chai'
+import * as fs from 'fs'
+import * as path from 'path'
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
-const path = require('path')
-import * as fs from 'fs'
 
-describe('e2e project dir access', function () {
+describe('e2e readonly fs', function () {
   e2e.setup()
 
   const projectPath = Fixtures.projectPath('e2e') // copied from `test/support/fixtures/projects/e2e`
@@ -21,10 +21,6 @@ describe('e2e project dir access', function () {
   }
 
   const onRun = (exec) => {
-    // Manually create these directories to prevent cypress crashing.
-    fs.mkdirSync(path.join(projectPath, 'cypress', 'videos'))
-    fs.mkdirSync(path.join(projectPath, 'cypress', 'screenshots'))
-
     chmodr(projectPath, 0o500)
 
     // test that we setup the folder structure correctly
