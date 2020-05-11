@@ -53,21 +53,22 @@ module.exports = (Commands, Cypress, cy) => {
         }
       }
 
-      const resolveWrap = () => {
-        return cy.verifyUpcomingAssertions(arg, options, {
-          onRetry: resolveWrap,
+      const resolveWrap = (subject) => {
+        return cy.verifyUpcomingAssertions(subject, options, {
+          onRetry: () => resolveWrap(subject),
         })
-        .return(arg)
-        .timeout(options.timeout)
-        .catch(Promise.TimeoutError, () => {
-          $errUtils.throwErrByPath('wrap.timed_out', {
-            onFail: options._log,
-            args: { timeout: options.timeout },
-          })
-        })
+        .return(subject)
       }
 
-      return resolveWrap()
+      return Promise.resolve(arg)
+      .timeout(options.timeout)
+      .catch(Promise.TimeoutError, () => {
+        $errUtils.throwErrByPath('wrap.timed_out', {
+          onFail: options._log,
+          args: { timeout: options.timeout },
+        })
+      })
+      .then(resolveWrap)
     },
   })
 }

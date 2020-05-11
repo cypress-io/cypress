@@ -148,11 +148,12 @@ describe "src/cy/commands/misc", ->
         return win
     
     it "can extend the default timeout", ->
-        cy.wrap (new Promise((resolve, reject) ->
-          setTimeout (->
-            resolve null
-          ), 4500
-        )), timeout: 5000
+      Cypress.config('defaultCommandTimeout', 100);
+      cy.wrap (new Promise((resolve, reject) ->
+        setTimeout (->
+          resolve null
+        ), 200
+      )), timeout: 300
 
     describe "errors", ->
       it "throws when wrapping an array of windows", (done) ->
@@ -176,26 +177,28 @@ describe "src/cy/commands/misc", ->
           cy.wrap([doc]).screenshot()
       
       it "throws when exceeding default timeout", (done) ->
+        Cypress.config('defaultCommandTimeout', 100);
+
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.wrap()` timed out waiting `4000ms` to complete."
+          expect(err.message).to.include "`cy.wrap()` timed out waiting `100ms` to complete."
           done()
 
         cy.wrap (new Promise((resolve, reject) ->
           setTimeout (->
             resolve null
-          ), 4500
+          ), 200
         ))
 
       it "throws when exceeding custom timeout", (done) ->
         cy.on "fail", (err) ->
-          expect(err.message).to.include "`cy.wrap()` timed out waiting `500ms` to complete."
+          expect(err.message).to.include "`cy.wrap()` timed out waiting `100ms` to complete."
           done()
 
         cy.wrap (new Promise((resolve, reject) ->
           setTimeout (->
             resolve null
-          ), 2000
-        )), timeout: 500
+          ), 200
+        )), timeout: 100
 
     describe ".log", ->
       beforeEach ->
