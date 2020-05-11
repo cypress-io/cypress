@@ -1,33 +1,60 @@
 import * as inject from './inject'
-import { strip, stripStream } from './security'
+import * as astRewriter from './ast-rewriter'
+import * as regexRewriter from './regex-rewriter'
+
+export type SecurityOpts = {
+  isHtml?: boolean
+  url: string
+  useAstSourceRewriting: boolean
+  deferSourceMapRewrite: (opts: any) => string
+}
+
+export type InjectionOpts = {
+  domainName: string
+  wantsInjection: WantsInjection
+  wantsSecurityRemoved: any
+}
 
 const doctypeRe = /(<\!doctype.*?>)/i
 const headRe = /(<head(?!er).*?>)/i
 const bodyRe = /(<body.*?>)/i
 const htmlRe = /(<html.*?>)/i
 
-export function html (html: string, domainName: string, wantsInjection, wantsSecurityRemoved) {
+type WantsInjection = 'full' | 'partial' | false
+
+function getRewriter (useAstSourceRewriting: boolean) {
+  return useAstSourceRewriting ? astRewriter : regexRewriter
+}
+
+function getHtmlToInject ({ domainName, wantsInjection }: InjectionOpts) {
+  switch (wantsInjection) {
+    case 'full':
+      return inject.full(domainName)
+    case 'partial':
+      return inject.partial(domainName)
+    default:
+      return
+  }
+}
+
+export async function html (html: string, opts: SecurityOpts & InjectionOpts) {
   const replace = (re, str) => {
     return html.replace(re, str)
   }
 
-  const htmlToInject = (() => {
-    switch (wantsInjection) {
-      case 'full':
-        return inject.full(domainName)
-      case 'partial':
-        return inject.partial(domainName)
-      default:
-        return
-    }
-  })()
+  const htmlToInject = getHtmlToInject(opts)
 
   // strip clickjacking and framebusting
   // from the HTML if we've been told to
-  if (wantsSecurityRemoved) {
-    html = strip(html)
+  if (opts.wantsSecurityRemoved) {
+    html = await Promise.resolve(getRewriter(opts.useAstSourceRewriting).strip(html, opts))
   }
 
+  if (!htmlToInject) {
+    return html
+  }
+
+  // TODO: move this into regex-rewriting and have ast-rewriting handle this in its own way
   switch (false) {
     case !headRe.test(html):
       return replace(headRe, `$1 ${htmlToInject}`)
@@ -47,4 +74,6 @@ export function html (html: string, domainName: string, wantsInjection, wantsSec
   }
 }
 
-export const security = stripStream
+export function security (opts: SecurityOpts) {
+  return getRewriter(opts.useAstSourceRewriting).stripStream(opts)
+}
