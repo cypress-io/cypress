@@ -1686,6 +1686,8 @@ module.exports = {
       #{cmd('wrap')} timed out waiting `{{timeout}}ms` to complete.
 
       You called `cy.wrap()` with a promise that never resolved.
+
+      To set a custom timeout, use `{ timeout: number }`
       """
       docsUrl: "https://on.cypress.io/wrap"
     }
