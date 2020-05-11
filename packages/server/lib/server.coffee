@@ -20,6 +20,7 @@ debug        = require("debug")("cypress:server:server")
   uri
 } = require("@packages/network")
 { NetworkProxy } = require("@packages/proxy")
+{ createInitialWorkers } = require("@packages/rewriter")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
@@ -182,6 +183,9 @@ class Server
       getFileServerToken = => @_fileServer.token
 
       @_networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: @_request })
+
+      if config.experimentalSourceRewriting
+        createInitialWorkers()
 
       @createHosts(config.hosts)
 
