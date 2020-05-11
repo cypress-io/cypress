@@ -478,11 +478,11 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an object is a window object.
        */
-      isWindow(obj: any): boolean
+      isWindow(obj: any): obj is Window
       /**
        * Returns a boolean indicating whether an object is a jQuery object.
        */
-      isJquery(obj: any): boolean
+      isJquery(obj: any): obj is JQuery
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
@@ -2456,6 +2456,12 @@ declare namespace Cypress {
      * @default false
      */
     experimentalGetCookiesSameSite: boolean
+    /**
+     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
+     * algorithm.
+     * @default false
+     */
+    experimentalSourceRewriting: boolean
   }
 
   /**
