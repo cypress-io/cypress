@@ -10,7 +10,7 @@ const sinonChai = require('sinon-chai')
 chai.use(sinonChai)
 const { expect } = chai
 
-const preprocessor = require('../../index')
+const preprocessor = require('../../dist/index')
 
 describe('webpack preprocessor - e2e', () => {
   const outputPath = path.join(__dirname, '..', '_test-output', 'output.js')

@@ -16,8 +16,8 @@ mockery.enable({
 
 mockery.registerMock('webpack', webpack)
 
-const preprocessor = require('../../index')
-const stubbableRequire = require('../../stubbable-require')
+const preprocessor = require('../../dist/index')
+const stubbableRequire = require('../../dist/stubbable-require')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {

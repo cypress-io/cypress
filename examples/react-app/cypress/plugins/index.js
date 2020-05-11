@@ -1,3 +1,6 @@
+/// <reference types="cypress" />
+/// <reference types="../../../.." />
+// @ts-check
 const findWebpack = require('find-webpack')
 const webpackPreprocessor = require('../../../..')
 
