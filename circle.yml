@@ -105,7 +105,6 @@ commands:
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
-            # wrong variable on purpose to test internally
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
