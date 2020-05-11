@@ -21431,10 +21431,10 @@ retry@^0.10.0:
   resolved "https://registry.yarnpkg.com/retry/-/retry-0.10.1.tgz#e76388d217992c252750241d3d3956fed98d8ff4"
   integrity sha1-52OI0heZLCUnUCQdPTlW/tmNj/Q=
 
-return-deep-diff@0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/return-deep-diff/-/return-deep-diff-0.3.0.tgz#674693fa9bade51fc4cde4bcbf8c196ee916ffe8"
-  integrity sha512-wGy41lh8lngHo+0ZK2qovjf+UciIjAYK7gPXRdHwcvQFjIdCJNuLfN+zFfs5uqZXiW4lKmVAsuLIvJgjLVjTMw==
+return-deep-diff@0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/return-deep-diff/-/return-deep-diff-0.4.0.tgz#ba498d66ee77324187cf3842e5017f8cc30d5155"
+  integrity sha512-DylfLe8+8Gr+8shfvzEwUsx2PlkFhEV2dGiUD02kdHhLKTpfweN8tO63k1fJPL8e3gTNUiau5XN/u4L9W1skZA==
 
 reusify@^1.0.4:
   version "1.0.4"
