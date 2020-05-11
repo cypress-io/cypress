@@ -841,6 +841,18 @@ module.exports = {
   ng:
     no_global: "Angular global (`window.angular`) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
 
+  proxy:
+    js_rewriting_failed: """
+    An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress.
+
+    JS URL: {{url}}
+
+    Original error:
+
+    {{errMessage}}
+    {{errStack}}
+    """
+
   reload:
     invalid_arguments: {
       message: "#{cmd('reload')} can only accept a boolean or `options` as its arguments."

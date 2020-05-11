@@ -1,0 +1,13 @@
+{
+  "version": 3,
+  "file": "test.js",
+  "sourceRoot": "",
+  "sources": [
+    "test.coffee"
+  ],
+  "names": [],
+  "mappings": ";AAAA;EAAA;;;EAIA,UAAA,CAAW,QAAA,CAAA,CAAA;IACT;AAAA,QAAA;WACA,GAAA,GAAM,CAAA,CAAA,CAAG,MAAM,CAAC,GAAG,CAAC,GAAd,CAAA;EAFG,CAAX,EAGE,IAHF;AAJA",
+  "sourcesContent": [
+    "# just an example of transpilation w/ sourcemap -\n# `test.coffee` is not directly transpiled/executed by any test code\n# regenerate JS + sourcemap with `coffee -c -m test.coffee`\n\nsetTimeout ->\n  window\n  foo = \"#{window.top.foo}\"\n, 1000\n"
+  ]
+}

@@ -32,6 +32,7 @@ const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
 const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
+const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
@@ -607,6 +608,8 @@ $Cypress.prototype.Location = $Location
 $Cypress.prototype.Log = $Log
 $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
+$Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
+$Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
 $Cypress.prototype.Mouse = $Mouse
 $Cypress.prototype.Runner = $Runner
 $Cypress.prototype.Server = $Server

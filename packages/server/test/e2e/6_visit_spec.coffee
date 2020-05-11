@@ -99,17 +99,22 @@ describe "e2e visit", ->
       }
     })
 
-    ## this tests that hashes are applied during a visit
-    ## which forces the browser to scroll to the div
-    ## additionally this tests that jquery.js is not truncated
-    ## due to __cypress.initial cookies not being cleared by
-    ## the hash.html response
-
-    ## additionally this tests that xhr request headers + body
-    ## can reach the backend without being modified or changed
-    ## by the cypress proxy in any way
     e2e.it "passes", {
       spec: "visit_spec.coffee"
+      snapshot: true
+      onRun: (exec) ->
+        startTlsV1Server(6776)
+        .then (serv) ->
+          exec()
+          .then ->
+            serv.destroy()
+    }
+
+    e2e.it "passes with experimentalSourceRewriting", {
+      spec: "source_rewriting_spec.js"
+      config: {
+        experimentalSourceRewriting: true
+      }
       snapshot: true
       onRun: (exec) ->
         startTlsV1Server(6776)
