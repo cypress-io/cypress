@@ -1,10 +1,23 @@
 import React from 'react'
 import { getProducts } from '../products'
 
+class AProduct extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      name: props.name,
+    }
+  }
+
+  render() {
+    return <div className="product">{this.state.name}</div>
+  }
+}
+
 const Products = ({ products }) => (
   <React.Fragment>
     {products.map(product => (
-      <div>{product.name}</div>
+      <AProduct key={product.id} name={product.name} />
     ))}
   </React.Fragment>
 )
@@ -25,7 +38,11 @@ class ProductsContainer extends React.Component {
   }
 
   render() {
-    return <Products products={this.state.products} />
+    return (
+      <div className="product-container">
+        <Products products={this.state.products} />
+      </div>
+    )
   }
 }
 

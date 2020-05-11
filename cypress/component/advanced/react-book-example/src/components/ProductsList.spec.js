@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import 'cypress-react-selector'
 import { mount } from 'cypress-react-unit-test'
 import React from 'react'
 import ProductsList from './ProductsList.jsx'
@@ -10,9 +11,22 @@ it('renders without crashing', () => {
     .withArgs('http://myapi.com/products')
     .resolves({
       json: cy.stub().resolves({
-        products: [{ id: 1, name: 'Mocked data' }],
+        products: [
+          { id: 1, name: 'First item' },
+          { id: 2, name: 'Second item' },
+        ],
       }),
     })
   mount(<ProductsList />)
-  cy.contains('Mocked data').should('be.visible')
+  cy.contains('First item').should('be.visible')
+  cy.get('.product').should('have.length', 2)
+
+  // use https://github.com/abhinaba-ghosh/cypress-react-selector
+  // to find DOM elements by React component constructor name or state
+  cy.waitForReact(1000, '#cypress-root')
+  cy.react('ProductsContainer').should('have.class', 'product-container')
+  cy.react('AProduct').should('have.length', 2)
+  cy.react('AProduct', { name: 'Second item' })
+    .should('be.visible')
+    .and('have.text', 'Second item')
 })
