@@ -102,10 +102,20 @@ commands:
       - run:
           command: yarn wait-on http://localhost:3500
       - run:
+          environment:
+            CYPRESS_KONFIG_ENV: production
           command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            # wrong variable on purpose to test internally
+            if [[ -v PACKAGES_RECORD_KEY_rEmOvE ]]; then
+              # internal PR
+              CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+              yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "test/cypress/integration/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+              yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
+            fi
           working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
