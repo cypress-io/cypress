@@ -184,7 +184,7 @@
     "shelljs": "0.8.3",
     "shx": "0.3.2",
     "sinon": "7.3.2",
-    "snap-shot-it": "7.9.1",
+    "snap-shot-it": "7.9.3",
     "start-server-and-test": "1.10.8",
     "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",

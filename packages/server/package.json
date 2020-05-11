@@ -182,7 +182,7 @@
     "react": "16.12.0",
     "repl.history": "0.1.4",
     "sinon": "5.1.1",
-    "snap-shot-it": "7.9.2",
+    "snap-shot-it": "7.9.3",
     "ssestream": "1.0.1",
     "stream-to-promise": "1.1.1",
     "supertest": "4.0.2",
