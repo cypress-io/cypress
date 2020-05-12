@@ -105,6 +105,9 @@ commands:
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
             if [[ -v PACKAGES_RECORD_KEY_ReMoVe ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
