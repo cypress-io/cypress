@@ -100,17 +100,24 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
         }
       }
 
-      return cy
-        .wrap(CypressTestComponent, { log: false })
-        .as(options.alias || displayName)
-        .then(() => {
-          if (logInstance) {
-            logInstance.snapshot('mounted')
-            logInstance.end()
-          }
+      return (
+        cy
+          .wrap(CypressTestComponent, { log: false })
+          .as(options.alias || displayName)
+          // by waiting, we give the component's hook a chance to run
+          // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+          .wait(1, { log: false })
+          .then(() => {
+            if (logInstance) {
+              logInstance.snapshot('mounted')
+              logInstance.end()
+            }
 
-          return undefined
-        })
+            // by returning undefined we keep the previous subject
+            // which is the mounted component
+            return undefined
+          })
+      )
     })
 }
 
