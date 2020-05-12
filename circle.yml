@@ -116,6 +116,10 @@ commands:
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
+
+              if [[ -z "$TESTFILES" ]]; then
+                echo "Empty list oftest files"
+              fi
               yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
             fi
           working_directory: packages/driver
