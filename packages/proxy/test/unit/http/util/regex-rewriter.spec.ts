@@ -4,7 +4,7 @@ import { expect } from 'chai'
 import fs from 'fs'
 import Promise from 'bluebird'
 import rp from '@cypress/request-promise'
-import * as security from '../../../../lib/http/util/security'
+import * as regexRewriter from '../../../../lib/http/util/regex-rewriter'
 
 const original = `\
 <html>
@@ -168,10 +168,10 @@ const expected = `\
 </html>\
 `
 
-describe('http/util/security', () => {
+describe('http/util/regex-rewriter', () => {
   context('.strip', () => {
     it('replaces obstructive code', () => {
-      expect(security.strip(original)).to.eq(expected)
+      expect(regexRewriter.strip(original)).to.eq(expected)
     })
 
     it('replaces jira window getter', () => {
@@ -207,17 +207,17 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
 }\
 `
 
-      expect(security.strip(jira)).to.eq(`\
+      expect(regexRewriter.strip(jira)).to.eq(`\
 for (; !function (n) {
   return n === n.parent || n.parent.__Cypress__
 }(n)\
 `)
 
-      expect(security.strip(jira2)).to.eq(`\
+      expect(regexRewriter.strip(jira2)).to.eq(`\
 function(n){for(;!function(l){return l===l.parent || l.parent.__Cypress__}(l)&&function(l){try{if(void 0==l.location.href)return!1}catch(l){return!1}return!0}(l.parent);)l=l.parent;return l}\
 `)
 
-      expect(security.strip(jira3)).to.eq(`\
+      expect(regexRewriter.strip(jira3)).to.eq(`\
 function satisfiesSameOrigin(w) {
     try {
         // Accessing location.href from a window on another origin will throw an exception.
@@ -317,8 +317,8 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
             fs.readFile(pathToLib, 'utf8', cb)
           })
           .catch(downloadFile)
-          .then((libCode) => {
-            let stripped = security.strip(libCode)
+          .then((libCode: string) => {
+            let stripped = regexRewriter.strip(libCode)
             // nothing should have changed!
 
             // TODO: this is currently failing but we're
@@ -348,7 +348,7 @@ while (!isTopMostWindow(parentOf) && satisfiesSameOrigin(parentOf.parent)) {
     it('replaces obstructive code', (done) => {
       const haystacks = original.split('\n')
 
-      const replacer = security.stripStream()
+      const replacer = regexRewriter.stripStream()
 
       replacer.pipe(concatStream({ encoding: 'string' }, (str) => {
         const string = str.toString().trim()

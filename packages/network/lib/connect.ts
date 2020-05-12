@@ -43,7 +43,7 @@ export function getAddress (port: number, hostname: string) {
     return Array.prototype.concat.call(addresses).map(fn)
   })
   .tapCatch((err) => {
-    debug('error getting address', { hostname, port, err })
+    debug('error getting address %o', { hostname, port, err })
   })
   .any()
 }

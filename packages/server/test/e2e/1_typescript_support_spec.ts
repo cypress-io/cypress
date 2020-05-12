@@ -4,7 +4,7 @@ const Fixtures = require('../support/helpers/fixtures')
 const snapshot = require('snap-shot-it')
 
 describe('e2e typescript', function () {
-  e2e.setup({ npmInstall: true })
+  e2e.setup()
 
   it('spec passes', function () {
     return e2e.exec(this, {
