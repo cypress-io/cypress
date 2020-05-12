@@ -195,7 +195,7 @@ const eventManager = {
     }
   },
 
-  setup (config, specPath) {
+  setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -203,7 +203,7 @@ const eventManager = {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', specPath)
+    ws.emit('watch:test:file', config.spec)
   },
 
   isBrowser (browserName) {

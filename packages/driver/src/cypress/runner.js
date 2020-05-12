@@ -208,19 +208,38 @@ const eachHookInSuite = function (suite, fn) {
   return null
 }
 
-const onFirstTest = function (suite, fn) {
-  let test
-
-  for (test of suite.tests) {
+// iterates over a suite's tests (including nested suites)
+// and will return as soon as the callback is true
+const findTestInSuite = function (suite, fn = _.identity) {
+  for (const test of suite.tests) {
     if (fn(test)) {
       return test
     }
   }
 
   for (suite of suite.suites) {
-    test = onFirstTest(suite, fn)
+    const test = findTestInSuite(suite, fn)
 
     if (test) {
+      return test
+    }
+  }
+}
+
+// same as findTestInSuite but iterates backwards
+const findLastTestInSuite = function (suite, fn = _.identity) {
+  for (let i = suite.suites.length - 1; i >= 0; i--) {
+    const test = findLastTestInSuite(suite.suites[i], fn)
+
+    if (test) {
+      return test
+    }
+  }
+
+  for (let i = suite.tests.length - 1; i >= 0; i--) {
+    const test = suite.tests[i]
+
+    if (fn(test)) {
       return test
     }
   }
@@ -259,7 +278,8 @@ const getTestFromHook = function (hook) {
     return test
   }
 }
-const getTestFromHookOrFindTest = function (hook, getTestById) {
+
+const getTestFromHookOrFindTest = function (hook) {
   const test = getTestFromHook(hook)
 
   if (test) {
@@ -268,17 +288,12 @@ const getTestFromHookOrFindTest = function (hook, getTestById) {
 
   const suite = hook.parent
 
-  // TODO: make performant, use findTestInSuite()
   if (hook.hookName === 'after all') {
-    const siblings = getAllSiblingTests(suite, getTestById)
-
-    return _.findLast(siblings, isNotAlreadyRunTest)
+    return findLastTestInSuite(suite, isNotAlreadyRunTest)
   }
 
   if (hook.hookName === 'before all') {
-    const siblings = getAllSiblingTests(suite, getTestById)
-
-    return _.find(siblings, isNotAlreadyRunTest)
+    return findTestInSuite(suite, isNotAlreadyRunTest)
   }
 }
 
@@ -329,7 +344,7 @@ const isLastSuite = function (suite, tests) {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests) => {
-  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return !test.parent._afterAll.length || isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
 const isLastTest = (test, tests) => {
@@ -395,19 +410,20 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         if (t) {
           const siblings = getAllSiblingTests(t.parent, getTestById)
 
-          // 1. if we're the very last test in the entire allTests
+          // 1. if we have another afterAll hook left to run, obviously this isn't the last hook
+          // 2. if we're the very last test in the entire allTests
           //    we wait until the root suite fires
-          // 2. else we wait until the very last possible moment by waiting
+          // 3. else we wait until the very last possible moment by waiting
           //    until the root suite is the parent of the current suite
           //    since that will bubble up IF we're the last nested suite
-          // 3. else if we arent the last nested suite we fire if we're
+          // 4. else if we arent the last nested suite we fire if we're
           //    the last test that will run
 
-          // TODO: move middle conditional into method
           if (
+            // !this.suite.parent._afterAll.length &&
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
               (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
-              (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
+              (!isLastSuite(this.suite, allTests) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
           }
@@ -450,7 +466,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   let hasTests = false
 
   // only loop until we find the first test
-  onFirstTest(suite, (test) => {
+  findTestInSuite(suite, (test) => {
     return hasTests = true
   })
 
@@ -585,11 +601,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = function (hook, err, hookName, getTestById) {
+const hookFailed = function (hook, err, hookName) {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
-  const test = getTestFromHookOrFindTest(hook, getTestById)
+  const test = getTestFromHookOrFindTest(hook)
 
   test.err = err
   test.state = 'failed'
@@ -662,7 +678,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTestFromHookOrFindTest(hook, getTestById)
+    const test = getTestFromHookOrFindTest(hook)
 
     if (!test) {
       // we couldn't find a test to run with this hook

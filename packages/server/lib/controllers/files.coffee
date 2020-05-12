@@ -31,11 +31,13 @@ module.exports = {
     .then (specs) =>
       @getJavascripts(config)
       .then (js) =>
-        res.render iframePath, {
+        iframeOptions = {
           title: @getTitle(test)
           domain: getRemoteState().domainName
           scripts:  JSON.stringify(js.concat(specs))
         }
+        debug("iframe %s options %o", test, iframeOptions)
+        res.render iframePath, iframeOptions
 
   getSpecs: (spec, config) ->
     debug("get specs %o", { spec })
