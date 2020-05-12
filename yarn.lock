@@ -1350,10 +1350,10 @@
     through2 "^2.0.0"
     watchify "3.11.1"
 
-"@cypress/browserify-preprocessor@2.2.3":
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.2.3.tgz#73cd0fc91fee90a9fb9a81a675ad52f6f1abddaf"
-  integrity sha512-NjumJpUlWeolsGICIseYblCRYsQDQA01W1ZxPcWZkG1hK01EI1HxMtX7fBnyeg2jY/i1xjrZV27PczmdGKAhXQ==
+"@cypress/browserify-preprocessor@2.2.4":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@cypress/browserify-preprocessor/-/browserify-preprocessor-2.2.4.tgz#a2ff5a6a06938f7f1e78eb6de0e492641cf8561c"
+  integrity sha512-kMjkIFe6qka8Tkm9N3BrMB+Nn7WEAHIzEd3gfVoDL17Tr40xyOnKGuMhEkff1scd3RV3bjQxwQ9BQ6kI2nToAQ==
   dependencies:
     "@babel/core" "7.4.5"
     "@babel/plugin-proposal-class-properties" "7.3.0"

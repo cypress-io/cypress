@@ -309,6 +309,11 @@ const processErr = (errObj = {}, config) => {
     return errObj
   }
 
+  // backup, and then delete the docsUrl property in runMode
+  // so that it does not add the 'Learn More' link to the UI
+  // for screenshots or videos
+  delete errObj.docsUrl
+
   docsUrl = _(docsUrl).castArray().compact().join('\n\n')
 
   // append the docs url when not interactive so it appears in the stdout
