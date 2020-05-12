@@ -105,7 +105,7 @@ commands:
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
-            if [[ -v PACKAGES_RECORD_KEY ]]; then
+            if [[ -v PACKAGES_RECORD_KEY_ReMoVe ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
               yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
