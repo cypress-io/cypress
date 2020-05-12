@@ -77,11 +77,11 @@ const ErrorFilePath = observer(({ fileDetails }: Props) => {
     openFile(editor, fileDetails)
   }
 
-  const { relativeFile, line, column } = fileDetails
+  const { originalFile, line, column } = fileDetails
 
   return (
     <a className='runnable-err-file-path' onClick={attemptOpenFile} href='#'>
-      {relativeFile}:{line}:{column}
+      {originalFile}:{line}:{column}
       <EditorPickerModal
         chosenEditor={state.chosenEditor}
         editors={state.editors}

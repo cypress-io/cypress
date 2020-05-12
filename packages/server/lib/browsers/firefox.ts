@@ -8,7 +8,9 @@ import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
+import * as launcherDebug from '@packages/launcher/lib/log'
 import { Browser } from './types'
+const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -281,6 +283,8 @@ const defaultPreferences = {
   // allow getUserMedia APIs on insecure domains
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
+
+  'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
 }
 
 export async function open (browser: Browser, url, options: any = {}) {
@@ -411,6 +415,9 @@ export async function open (browser: Browser, url, options: any = {}) {
   const browserInstance = await utils.launch(browser, 'about:blank', launchOptions.args)
 
   await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
+  .catch((err) => {
+    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
+  })
 
   return browserInstance
 }

@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import ProjectId from './project-id'
 import { mount } from 'cypress-react-unit-test'

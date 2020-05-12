@@ -16,6 +16,8 @@ const ws = client.connect({
   parser: circularParser,
 })
 
+window.runnerWs = ws
+
 ws.on('connect', () => {
   ws.emit('runner:connected')
 })
@@ -195,7 +197,7 @@ const eventManager = {
     }
   },
 
-  setup (config, specPath) {
+  setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -203,7 +205,7 @@ const eventManager = {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', specPath)
+    ws.emit('watch:test:file', config.spec)
   },
 
   isBrowser (browserName) {

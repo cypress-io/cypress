@@ -1,4 +1,4 @@
-const webpack = require('@cypress/webpack-preprocessor')
+const wp = require('@cypress/webpack-preprocessor')
 const webpackOptions = {
   mode: 'none',
   resolve: {
@@ -52,5 +52,5 @@ const webpackOptions = {
 }
 
 module.exports = (on) => {
-  on('file:preprocessor', webpack({ webpackOptions }))
+  on('file:preprocessor', wp({ webpackOptions }))
 }

@@ -25,7 +25,6 @@ export default class Iframes extends Component {
         className={cs('iframes-container', { 'has-error': !!scriptError })}
         style={{
           top: headerHeight,
-          left: this.props.state.absoluteReporterWidth,
         }}
       >
         <div
@@ -102,7 +101,7 @@ export default class Iframes extends Component {
     logger.clearLog()
     this._setScriptError(null)
 
-    this.props.eventManager.setup(config, specPath)
+    this.props.eventManager.setup(config)
 
     const $autIframe = this._loadIframes(specPath)
 

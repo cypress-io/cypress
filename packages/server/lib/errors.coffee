@@ -884,7 +884,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "CDP_COULD_NOT_CONNECT"
       """
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
       This usually indicates there was a problem opening the Chrome browser.
 
@@ -894,6 +894,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg2.stack}
       """
+    when "FIREFOX_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to Firefox.
+
+      This usually indicates there was a problem opening the Firefox browser.
+
+      Error details:
+
+      #{arg1.stack}
+      """
     when "CDP_COULD_NOT_RECONNECT"
       """
       There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
@@ -902,7 +912,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "CDP_RETRYING_CONNECTION"
       """
-      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/62)
       """
     when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
       """
@@ -943,6 +953,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       #{arg2}
 
       To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
+      """
+    when "FOLDER_NOT_WRITABLE"
+      """
+      Folder #{arg1} is not writable.
+
+      Writing to this directory is required by Cypress in order to store screenshots and videos.
+
+      Enable write permissions to this directory to ensure screenshots and videos are stored.
+
+      If you don't require screenshots or videos to be stored you can safely ignore this warning.
       """
 
 get = (type, arg1, arg2, arg3) ->

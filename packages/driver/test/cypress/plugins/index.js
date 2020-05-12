@@ -5,10 +5,19 @@ const _ = require('lodash')
 const path = require('path')
 const fs = require('fs-extra')
 const Promise = require('bluebird')
-const webpack = require('@cypress/webpack-preprocessor')
+const wp = require('@cypress/webpack-preprocessor')
 
 process.env.NO_LIVERELOAD = '1'
 const webpackOptions = require('@packages/runner/webpack.config.ts').default
+
+// set mode to development which overrides
+// the 'none' value of the base webpack config
+// https://webpack.js.org/configuration/mode/
+webpackOptions.mode = 'development'
+
+// remove the evalDevToolPlugin which comes from the base
+// webpack config - otherwise we won't get code frames
+webpackOptions.plugins = _.reject(webpackOptions.plugins, { evalDevToolPlugin: true })
 
 const babelLoader = _.find(webpackOptions.module.rules, (rule) => {
   return _.includes(rule.use.loader, 'babel-loader')
@@ -23,7 +32,7 @@ babelLoader.use.options.plugins = _.reject(babelLoader.use.options.plugins, (plu
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on) => {
-  on('file:preprocessor', webpack({ webpackOptions }))
+  on('file:preprocessor', wp({ webpackOptions }))
 
   on('task', {
     'return:arg' (arg) {

@@ -151,7 +151,7 @@ describe "src/cy/commands/task", ->
           expect(lastLog.get("state")).to.eq("failed")
 
           expect(err.message).to.include("`cy.task('foo')` failed with the following error:")
-          expect(err.message).to.include("Error: task failed")
+          expect(err.message).to.include("> task failed")
           done()
 
         cy.task("foo")

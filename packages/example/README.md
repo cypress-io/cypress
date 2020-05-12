@@ -17,7 +17,7 @@ After [releasing a new version](https://github.com/cypress-io/cypress-example-ki
 
 2. Run `yarn` and `yarn lerna run build --scope @packages/example` to build the app and spec files.
 CONTRIBUTING
-3. Create a new pull-request following this repo's [pull request instructions](.github/CONTRIBUTING.md#pull-requests).
+3. Create a new pull-request following this repo's [pull request instructions](CONTRIBUTING.md#pull-requests).
 
 ## Building
 

@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import { EventEmitter } from 'events'
 
 describe('controls', function () {
