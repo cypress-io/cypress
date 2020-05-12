@@ -58,7 +58,15 @@ describe('controls', function () {
       })
     })
 
-    it('resumes tests', () => {
+    it('does not stop tests when paused', () => {
+      runner.on.withArgs('paused').callArgWith(1, 'next command')
+
+      cy.get('body').type('s').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+      })
+    })
+
+    it('restarts tests', () => {
       cy.get('body').then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })

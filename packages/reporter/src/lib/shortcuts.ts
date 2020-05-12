@@ -20,7 +20,7 @@ class Shortcuts {
     switch (event.key) {
       case 'r': appState.isPaused ? events.emit('resume') : events.emit('restart')
         break
-      case 's': events.emit('stop')
+      case 's': !appState.isPaused && events.emit('stop')
         break
       case 'f': events.emit('focus:tests')
         break
