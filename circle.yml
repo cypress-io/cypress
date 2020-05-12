@@ -102,10 +102,26 @@ commands:
       - run:
           command: yarn wait-on http://localhost:3500
       - run:
+          environment:
+            CYPRESS_KONFIG_ENV: production
           command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v PACKAGES_RECORD_KEY ]]; then
+              # internal PR
+              CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+              yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "test/cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              if [[ -z "$TESTFILES" ]]; then
+                echo "Empty list of test files"
+              fi
+              yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
+            fi
           working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
