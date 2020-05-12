@@ -843,7 +843,7 @@ module.exports = {
 
   proxy:
     js_rewriting_failed: """
-    An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress.
+    An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.
 
     JS URL: {{url}}
 
