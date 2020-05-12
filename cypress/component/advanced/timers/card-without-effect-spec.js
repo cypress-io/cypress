@@ -6,8 +6,10 @@ import { unmountComponentAtNode } from 'react-dom'
 
 it('should select null after timing out', () => {
   const onSelect = cy.stub()
+  // https://on.cypress.io/clock
   cy.clock()
   mount(<Card onSelect={onSelect} />)
+
   cy.tick(100).then(() => {
     expect(onSelect).to.not.have.been.called
   })
