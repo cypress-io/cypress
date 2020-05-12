@@ -56,4 +56,11 @@ describe('e2e firefox', function () {
     project: Fixtures.projectPath('screen-size'),
     spec: 'maximized.spec.js',
   })
+
+  // https://github.com/cypress-io/cypress/issues/6392
+  e2e.it.only('can run multiple specs', {
+    browser: 'firefox',
+    project: Fixtures.projectPath('e2e'),
+    spec: 'simple_spec.coffee,simple_passing_spec.coffee',
+  })
 })
