@@ -52,7 +52,8 @@ describe('controls', function () {
     it('resumes tests when paused', () => {
       runner.on.withArgs('paused').callArgWith(1, 'next command')
 
-      cy.get('body').type('s').then(() => {
+      cy.get('body').type('r').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
         expect(runner.emit).to.have.been.calledWith('runner:resume')
       })
     })
@@ -104,7 +105,7 @@ describe('controls', function () {
 
       cy.window().then(() => runner.on.withArgs('paused').callArgWith(1, 'next command'))
       cy.get('button.play').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'Resume S')
+      cy.get('.cy-tooltip').should('have.text', 'Resume R')
     })
   })
 })
