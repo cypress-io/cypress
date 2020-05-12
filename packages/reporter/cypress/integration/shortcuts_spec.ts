@@ -72,6 +72,7 @@ describe('controls', function () {
       })
 
       cy.get('body').type('r').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:resume')
         expect(runner.emit).to.have.been.calledWith('runner:restart')
       })
     })
