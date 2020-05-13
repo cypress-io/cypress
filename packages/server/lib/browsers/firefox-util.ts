@@ -5,7 +5,7 @@ import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
-import protocol from './protocol'
+import * as protocol from './protocol'
 
 const errors = require('../errors')
 

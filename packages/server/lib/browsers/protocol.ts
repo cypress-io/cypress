@@ -1,13 +1,16 @@
-const _ = require('lodash')
-const CRI = require('chrome-remote-interface')
-const { connect } = require('@packages/network')
+import _ from 'lodash'
+import CRI from 'chrome-remote-interface'
+import { connect } from '@packages/network'
+import Bluebird from 'bluebird'
+import la from 'lazy-ass'
+import Debug from 'debug'
+import { Socket } from 'net'
 const errors = require('../errors')
-const Promise = require('bluebird')
-const la = require('lazy-ass')
 const is = require('check-more-types')
-const debug = require('debug')('cypress:server:protocol')
 
-function _getDelayMsForRetry (i) {
+const debug = Debug('cypress:server:browsers:protocol')
+
+export function _getDelayMsForRetry (i) {
   if (i < 10) {
     return 100
   }
@@ -21,15 +24,17 @@ function _getDelayMsForRetry (i) {
 
     return 1000
   }
+
+  return
 }
 
-function _connectAsync (opts) {
-  return Promise.fromCallback((cb) => {
+export function _connectAsync (opts) {
+  return Bluebird.fromCallback((cb) => {
     connect.createRetryingSocket(opts, cb)
   })
   .then((sock) => {
     // can be closed, just needed to test the connection
-    sock.end()
+    (sock as Socket).end()
   })
 }
 
@@ -72,7 +77,7 @@ const findStartPageTarget = (connectOpts) => {
  * Waits for the port to respond with connection to Chrome Remote Interface
  * @param {number} port Port number to connect to
  */
-const getWsTargetFor = (port) => {
+export const getWsTargetFor = (port) => {
   debug('Getting WS connection to CRI on port %d', port)
   la(is.port(port), 'expected port number', port)
 
@@ -109,7 +114,7 @@ const getWsTargetFor = (port) => {
           throw err
         }
 
-        return Promise.delay(delay)
+        return Bluebird.delay(delay)
         .then(retry)
       })
     }
@@ -119,10 +124,4 @@ const getWsTargetFor = (port) => {
   .tapCatch((err) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
   })
-}
-
-module.exports = {
-  _connectAsync,
-  _getDelayMsForRetry,
-  getWsTargetFor,
 }
