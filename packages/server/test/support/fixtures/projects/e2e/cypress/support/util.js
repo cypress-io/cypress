@@ -39,18 +39,28 @@ export const fail = (ctx, test) => {
 }
 
 export const verify = (ctx, options) => {
-  const { hasCodeFrame = true, column, codeFrameText, message, stack } = options
-  let { regex } = options
+  const { hasCodeFrame = true, verifyDocsContent, verifyDocsLearnMore, column, codeFrameText, message, stack } = options
+  let { regex, line } = options
+
+  // if no specific line, just accept any number
+  line = line || '\\d+'
 
   // test only the column number because the line number is brittle
   // since any changes to this file can affect it
   if (!regex) {
     regex = shouldVerifyStackLineIsSpecFile ?
-      new RegExp(`${Cypress.spec.relative}:\\d+:${column}`) :
-      new RegExp(`cypress\/support\/commands\.js:\\d+:${column}`)
+      new RegExp(`${Cypress.spec.relative}:${line}:${column}`) :
+      new RegExp(`cypress\/support\/commands\.js:${line}:${column}`)
   }
 
-  it(`✓ VERIFY`, () => {
+  it(`✓ VERIFY`, function () {
+    const currTest = this.test
+    const currTestIndex = Cypress._.findIndex(ctx.tests, (test) => {
+      return test === currTest
+    })
+    // find the previous test in the suite
+    const prevTest = ctx.tests[currTestIndex - 1]
+
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(ctx)}`)
@@ -80,6 +90,34 @@ export const verify = (ctx, options) => {
 
       cy.get('.runnable-err-stack-trace')
       .should('not.include.text', '__stackReplacementMarker')
+
+      const docsUrl = _.get(prevTest, 'err.docsUrl')
+
+      if (verifyDocsLearnMore) {
+        expect(docsUrl).to.eq(verifyDocsLearnMore)
+
+        // make sure Learn More is there
+        // and the docs url is not embedded
+        // in the error message
+        cy
+        .get('.runnable-err-message')
+        .should('not.contain', docsUrl)
+        .contains('Learn more')
+        .should('have.attr', 'href', docsUrl)
+      }
+
+      if (verifyDocsContent) {
+        expect(docsUrl).to.be.undefined
+
+        // verify that the docsUrl is
+        // embedded in the content, but
+        // that there's no Learn More link
+        cy
+        .get('.runnable-err-message')
+        .should('contain', verifyDocsContent)
+        .contains('Learn more')
+        .should('not.exist')
+      }
 
       if (!hasCodeFrame) return
 
