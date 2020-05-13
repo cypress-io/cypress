@@ -63,7 +63,7 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
-          name: Example Visual Testing
+          name: Visual with Percy
           executor: cypress/base-12
           requires:
             - Install
@@ -71,10 +71,23 @@ workflows:
           install-command: npm install
           verify-command: echo 'Already verified'
           no-workspace: true
-          working_directory: examples/visual-testing
+          working_directory: examples/visual-testing-with-percy
           # run Percy agent and then run Cypress component tests
           # https://docs.percy.io/docs/cypress
           command: npx percy exec -- npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Visual with Happo
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-happo
+          command: npm test
           store_artifacts: true
 
       - cypress/run:
@@ -102,6 +115,11 @@ workflows:
       # only we will run semantic release script instead
       - cypress/run:
           name: NPM release
+          # only run NPM release from specific branch(es)
+          filters:
+            branches:
+              only:
+                - master
           # we need newer Node for semantic release
           executor: cypress/base-12
           requires:
@@ -110,7 +128,8 @@ workflows:
             - Example React Scripts
             - Example Component Folder
             - Example Webpack options
-            - Example Visual Testing
+            - Visual with Percy
+            - Visual with Happo
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
           no-workspace: true
