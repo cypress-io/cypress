@@ -1755,7 +1755,6 @@ describe('src/cy/commands/actions/click', () => {
       // https://github.com/cypress-io/cypress/issues/7319
       it('can specify x and/or y to be 0', () => {
         const $btn = $('<button id="click-button">button</button>')
-        .css({ position: 'absolute', left: 150, top: 50, margin: 0 })
         .prependTo(cy.$$('body'))
 
         cy.on('log:changed', (log, attr) => {
@@ -1764,8 +1763,8 @@ describe('src/cy/commands/actions/click', () => {
             const coords = attr._emittedAttrs.coords
             const position = Cypress.dom.getElementPositioning($btn).fromAutWindow
 
-            expect(coords.x).to.equal(coords.left).to.equal(position.left + args[0]).to.equal(150 + args[0])
-            expect(coords.y).to.equal(coords.top).to.equal(position.top + args[1]).to.equal(50 + args[1])
+            expect(coords.x).to.equal(coords.left).to.equal(position.left + args[0])
+            expect(coords.y).to.equal(coords.top).to.equal(position.top + args[1])
           }
         })
 
