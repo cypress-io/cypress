@@ -28,7 +28,7 @@ This version is only compatible with webpack 4.x+ and Babel 7.x+.
 * If you need webpack 2 or 3 support, use `@cypress/webpack-preprocessor` 1.x
 * If you need Babel 6 support, use `@cypress/webpack-preprocessor` <= 2.x
 
-This plugin (and all Cypress plugins) run in Cypress's own version of Node. If you require npm packages or your own code into the pluginsFile, they needs to be compatible with [the version of Node that Cypress uses]((https://github.com/cypress-io/cypress/blob/develop/.node-version)).
+By default, this plugin (and all Cypress plugins) run in the Node version that is bundled with Cypress. Alternatively, you can use the Node found on your system by setting [nodeVersion: system](https://on.cypress.io/configuration#Node-version) configuration option. A common use case for using the system Node are native dependencies like `node-sass`.
 
 ## Usage
 
@@ -144,7 +144,7 @@ If, for example, you want to update the options for the `babel-loader` to add th
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 module.exports = (on) => {
-  const options = webpack.defaultOptions
+  const options = webpackPreprocessor.defaultOptions
   options.webpackOptions.module.rules[0].use[0].options.presets.push('babel-preset-stage-3')
 
   on('file:preprocessor', webpackPreprocessor(options))
