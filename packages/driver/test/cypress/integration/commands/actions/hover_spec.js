@@ -1,23 +1,33 @@
-$ = Cypress.$.bind(Cypress)
-_ = Cypress._
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const $ = Cypress.$.bind(Cypress);
+const {
+  _
+} = Cypress;
 
-describe "src/cy/commands/actions/hover", ->
-  before ->
-    cy
-      .visit("/fixtures/dom.html")
-      .then (win) ->
-        @body = win.document.body.outerHTML
+describe("src/cy/commands/actions/hover", function() {
+  before(() => cy
+    .visit("/fixtures/dom.html")
+    .then(function(win) {
+      return this.body = win.document.body.outerHTML;
+  }));
 
-  beforeEach ->
-    doc = cy.state("document")
+  beforeEach(function() {
+    const doc = cy.state("document");
 
-    $(doc.body).empty().html(@body)
+    return $(doc.body).empty().html(this.body);
+  });
 
-  context "#hover", ->
-    it "throws when invoking", (done) ->
-      cy.on "fail", (err) ->
-        expect(err.message).to.include "`cy.hover()` is not currently implemented."
-        expect(err.docsUrl).to.eq "https://on.cypress.io/hover"
-        done()
+  return context("#hover", () => it("throws when invoking", function(done) {
+    cy.on("fail", function(err) {
+      expect(err.message).to.include("`cy.hover()` is not currently implemented.");
+      expect(err.docsUrl).to.eq("https://on.cypress.io/hover");
+      return done();
+    });
 
-      cy.get("button").hover()
+    return cy.get("button").hover();
+  }));
+});
