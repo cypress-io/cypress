@@ -1757,12 +1757,11 @@ describe('src/cy/commands/actions/click', () => {
         const $btn = $('<button id="click-button">button</button>')
         .prependTo(cy.$$('body'))
 
-        const position = $btn.offset()
-
         cy.on('log:changed', (log, attr) => {
           if (log.name === 'click' && attr._emittedAttrs.coords) {
             const args = attr._emittedAttrs.message.split(', ').map((i) => parseInt(i))
             const coords = attr._emittedAttrs.coords
+            const position = Cypress.dom.getElementPositioning($btn).fromAutWindow
 
             expect(coords.x).to.equal(coords.left).to.equal(position.left + args[0])
             expect(coords.y).to.equal(coords.top).to.equal(position.top + args[1])
