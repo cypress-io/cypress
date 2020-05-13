@@ -156,7 +156,8 @@ Folder Name | Description
 --- | ---
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
-[visual-testing](examples/visual-testing) | [Visual testing](https://on.cypress.io/visual-testing) for components using 3rd party service Percy
+[visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](https://on.cypress.io/visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
+[visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](https://on.cypress.io/visual-testing) for components using 3rd party service [Happo](https://happo.io/)
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
 <!-- prettier-ignore-end -->
 
@@ -237,7 +238,7 @@ If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the
 
 ## Visual testing
 
-You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo uses [Percy.io](https://percy.io) visual diffing service as a GitHub pull request check, see [visual-testing](examples/visual-testing) example.
+You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo has several example projects, see [visual-testing-with-percy](examples/visual-testing-with-percy) and [visual-testing-with-happo](examples/visual-testing-with-happo)
 
 ## Common problems
 
