@@ -105,9 +105,18 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
     when "BROWSER_NOT_FOUND_BY_NAME"
       str = """
       Can't run because you've entered an invalid browser name.
+      """
 
-      Browser: '#{arg1}' was not found on your system.
-
+      if arg1 is 'safari'
+        str += """
+        Browser: '#{arg1}' is not supported.
+        """
+      else
+        str += """
+        Browser: '#{arg1}' was not found on your system.
+        """
+      
+      str += """
       Available browsers found are: #{arg2}
       """
 
