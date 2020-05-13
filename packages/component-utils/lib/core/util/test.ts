@@ -1,7 +1,10 @@
 declare const Cypress: any
 
-// Split out for unit testing purposes
+/**
+ * Get a key for a specific test, by name
+ */
 export function key (): string {
+  // Split out for unit testing purposes
   if (Cypress && Cypress.mocha) {
     const runner = Cypress.mocha.getRunner()
 

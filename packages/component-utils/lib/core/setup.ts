@@ -7,7 +7,7 @@ function checkMountModeEnabled () {
   // @ts-ignore
   if (Cypress.spec.specType !== 'component') {
     throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
+      `In order to use mount or unmount functions please place the spec in the component folder defined in cypress.json`,
     )
   }
 }
@@ -20,6 +20,11 @@ const injectGlobalStyles = (options: MountOptions, _document: Document = getDocu
   return injectStylesBeforeElement(options, _document, el)
 }
 
+/**
+ * Setup prepares the document for mounting
+ * Handles things like style injection
+ * @param componentTestInstance
+ */
 export function setup (componentTestInstance: ComponentTestInstance) {
   const { options } = componentTestInstance
 

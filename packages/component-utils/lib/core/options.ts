@@ -8,52 +8,60 @@ export interface StyleOptions {
    * Creates <link href="..." /> element for each stylesheet
    * @alias stylesheet
    */
-  stylesheets: string | string[]
+  stylesheets?: string | string[]
   /**
    * Creates <link href="..." /> element for each stylesheet
    * @alias stylesheets
    */
-  stylesheet: string | string[]
+  stylesheet?: string | string[]
   /**
    * Creates <style>...</style> element and inserts given CSS.
    * @alias styles
    */
-  style: string | string[]
+  style?: string | string[]
   /**
    * Creates <style>...</style> element for each given CSS text.
    * @alias style
    */
-  styles: string | string[]
+  styles?: string | string[]
   /**
    * Loads each file and creates a <style>...</style> element
    * with the loaded CSS
    * @alias cssFile
    */
-  cssFiles: string | string[]
+  cssFiles?: string | string[]
   /**
    * Single CSS file to load into a <style></style> element
    * @alias cssFile
    */
-  cssFile: string | string[]
+  cssFile?: string | string[]
 }
 
 export interface MountHook { (componentTestInstance: ComponentTestInstance): any }
 
-interface MountHooks { setup: MountHook, mount: MountHook }
+/**
+ * MountHooks give the framework entry points to hook into
+ * @example
+ * CypressComponentUtils
+ */
+interface MountHooks { setup?: MountHook, mount?: MountHook }
 
+/**
+ * Declaring the global namespace for
+ * dependency injection of types and interfaces
+ * */
 declare global {
   namespace CypressComponentUtils {
+    // Framework-specific options go here
     interface MountOptionExtensions {}
   }
 }
 
 export interface MountOptions extends CypressComponentUtils.MountOptionExtensions, MountHooks, StyleOptions {
-  mountModeEnabled: boolean
-  rootId: string
+  mountModeEnabled?: boolean
+  rootId?: string
 
-  // Namespace the framework-specific options
-  // react?: any
-  // vue?: any
+  // Framework-specific options will be passed in via MountOptionExtensions
 }
 
 export type Component = ReactElement | VueConstructor | HTMLElement | string | unknown
@@ -73,26 +81,29 @@ export type ComponentTestInstance = {
   rootEl?: HTMLElement
 }
 
+/** Default Options */
+
 const NoopMountHook: MountHook = (_) => {}
-const DefaultMountHooks = {
-  setup: NoopMountHook,
-  mount: NoopMountHook,
+
+class DefaultMountOptions implements MountOptions {
+  mountModeEnabled = true
+  rootId = rootId
+
+  // Default Style Options
+  cssFile = ''
+  cssFiles = []
+  styles = ''
+  style = ''
+  stylesheet = ''
+  stylesheets = []
+
+  // Default Mount Hooks
+  setup = NoopMountHook
+  mount = NoopMountHook
 }
 
-/** Mount Options */
-// TODO: do we really need six ways to add stylesheets? Can we just overload one option?
-export const DefaultStyleOptions = {
-  cssFile: '',
-  cssFiles: [],
-  styles: '',
-  style: '',
-  stylesheet: '',
-  stylesheets: [],
-}
-
-export const DefaultMountOptions: MountOptions = {
-  ...DefaultMountHooks,
-  ...DefaultStyleOptions,
-  mountModeEnabled: true,
-  rootId,
-}
+/**
+ * Composing default options together
+ * These will become merged together inside of the mount command
+ */
+export const defaultMountOptions = new DefaultMountOptions()

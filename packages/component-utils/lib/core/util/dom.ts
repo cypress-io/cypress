@@ -1,5 +1,5 @@
-import { DefaultMountOptions } from '../options'
-const { rootId } = DefaultMountOptions
+import { defaultMountOptions } from '../options'
+const { rootId } = defaultMountOptions
 
 export function getRoot (id = rootId, _document: Document = getDocument()): HTMLElement | null {
   return _document.getElementById(id)
