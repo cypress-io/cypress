@@ -1673,6 +1673,28 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.get('#button-covered-in-span').click(75, 78, { force: true })
       })
+
+      // https://github.com/cypress-io/cypress/issues/7319
+      it('can specify x and/or y to be 0', () => {
+        const $btn = $('<button id="click-button">button</button>')
+        .prependTo(cy.$$('body'))
+
+        cy.on('log:changed', (log, attr) => {
+          if (log.name === 'click' && attr._emittedAttrs.coords) {
+            const args = attr._emittedAttrs.message.split(', ').map((i) => parseInt(i))
+            const coords = attr._emittedAttrs.coords
+            const position = Cypress.dom.getElementPositioning($btn).fromAutWindow
+
+            expect(coords.x).to.equal(coords.left).to.equal(position.left + args[0])
+            expect(coords.y).to.equal(coords.top).to.equal(position.top + args[1])
+          }
+        })
+
+        cy.get('#click-button').click(2, 2)
+        cy.get('#click-button').click(0, 0)
+        cy.get('#click-button').click(0, 2)
+        cy.get('#click-button').click(2, 0)
+      })
     })
 
     describe('iframes', () => {
