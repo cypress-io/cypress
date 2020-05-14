@@ -63,7 +63,26 @@ type FilePreprocessor = (file: FileEvent) => Promise<FilePath>
 
 type WebpackPreprocessorFn = (options: PreprocessorOptions) => FilePreprocessor
 
+/**
+ * Cypress file preprocessor that can bundle specs
+ * using Webpack.
+ */
 interface WebpackPreprocessor extends WebpackPreprocessorFn {
+  /**
+   * Default options for Cypress Webpack preprocessor.
+   * You can modify these options then pass to the preprocessor.
+   * @example
+    ```
+    const defaults = webpackPreprocessor.defaultOptions
+    module.exports = (on) => {
+      delete defaults.webpackOptions.module.rules[0].use[0].options.presets
+      on('file:preprocessor', webpackPreprocessor(defaults))
+    }
+    ```
+   *
+   * @type {Omit<PreprocessorOptions, 'additionalEntries'>}
+   * @memberof WebpackPreprocessor
+   */
   defaultOptions: Omit<PreprocessorOptions, 'additionalEntries'>
 }
 
