@@ -24,8 +24,8 @@ const getElementPositioning = ($el) => {
   // elements that span multiple lines. Which would cause us to click
   // click in the center and thus miss...
   //
-  // sometimes the first client rect has no width, which also causes a miss
-  // so a simple loop is used to find the first with a width
+  // sometimes the first client rect has no height or width, which also causes a miss
+  // so a simple loop is used to find the first with non-zero dimensions
   //
   // however we have a fallback to getBoundingClientRect() such as
   // when the element is hidden or detached from the DOM. getClientRects()
