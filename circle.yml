@@ -1032,6 +1032,31 @@ jobs:
           working_directory: test-binary
           command: $(npm bin)/cypress info
 
+  test-types-cypress-and-jest:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir test-cypress-and-jest
+      - run: node --version
+      - run: npm --version
+      - run:
+          name: Create new NPM package
+          working_directory: test-cypress-and-jest
+          command: npm init -y
+      - run:
+          name: Test types clash
+          working_directory: test-cypress-and-jest
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          command: |
+            npm install /root/cypress/cypress.tgz typescript jest @types/jest
+            echo "console.log('hello world')" > hello.ts
+            npx tsc --noEmit
+
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
     <<: *defaults
@@ -1351,6 +1376,10 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
+        requires:
+          - build-binary
+          - build-npm-package
+    - test-types-cypress-and-jest:
         requires:
           - build-binary
           - build-npm-package
