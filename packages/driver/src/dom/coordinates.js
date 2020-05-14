@@ -32,7 +32,7 @@ const getElementPositioning = ($el) => {
   // returns a zero length DOMRectList in that case, which becomes undefined.
   // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
   // with all properties 0'd out
-  const rect = [...el.getClientRects()].find((e) => e.width) || el.getBoundingClientRect()
+  const rect = [...el.getClientRects()].find((e) => e.width && e.height) || el.getBoundingClientRect()
 
   // we want to return the coordinates from the autWindow to the element
   // which handles a situation in which the element is inside of a nested
