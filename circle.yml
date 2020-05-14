@@ -57,14 +57,33 @@ workflows:
           no-workspace: true
           working_directory: examples/use-babelrc
 
+      - cypress/run:
+          name: Test ts-loader
+          requires:
+            - Install
+          executor: cypress/base-12-14-0
+          # we still need to install local TypeScript and Cypress
+          install-command: npm install
+          # not really a build command, just TS check
+          build: npm run types
+          timeout: '1m'
+          no-workspace: true
+          working_directory: examples/use-ts-loader
+
       # wait for all jobs to finish and possible run NPM release
       - cypress/run:
           name: NPM release
+          # only run NPM release from specific branch(es)
+          filters:
+            branches:
+              only:
+                - master
           requires:
             - Install
             - Tests
             - Test React App
             - Test babelrc
+            - Test ts-loader
           executor: cypress/base-12-14-0
           # nothing to install - cypress/install job does it
           # and nothing to pass to the next job

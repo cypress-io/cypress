@@ -2,7 +2,7 @@ node_modules/
 .DS_Store
 *.log*
 _test-output
-cypress/videos
+**/cypress/videos
 cypress/screenshots
 examples/react-app/build/
 dist
