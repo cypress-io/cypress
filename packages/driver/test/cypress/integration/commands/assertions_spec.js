@@ -2553,7 +2553,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('css', () => {
       beforeEach(function () {
-        this.$div = $('<div style=\'display: none\'>div</div>')
+        this.$div = $('<div style=\'display: none; position: absolute;\'>div</div>')
         this.$div.css = function () {
           throw new Error('css called')
         }
@@ -2618,6 +2618,24 @@ describe('src/cy/commands/assertions', () => {
         })
 
         expect({}).to.have.css('foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('can accept an object as a parameter', function () {
+        expect(this.$div).to.have.css({ display: 'none' })
+        expect(this.$div).to.have.css({ position: 'absolute' })
+
+        try {
+          expect(this.$div).to.have.css({ display: 'block' })
+        } catch (error) {} // eslint-disable-line no-empty
+
+        expect(this.$div).not.to.have.css({ display: 'inline' })
+        expect(this.$div).not.to.have.css({ position: 'fixed' })
+        expect(this.$div).not.to.have.css({ foo: 'bar' })
+
+        try {
+          expect(this.$div).not.to.have.css({ display: 'none' })
+        } catch (error) {} // eslint-disable-line no-empty
       })
     })
   })

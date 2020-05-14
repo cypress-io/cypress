@@ -251,55 +251,57 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   _.each(attrs, (description, attr) => {
-    return chai.Assertion.addMethod(attr, function (name, val) {
-      assertDom(
-        this,
-        attr,
-        `expected #{this} to have ${description} #{exp}`,
-        `expected #{this} not to have ${description} #{exp}`,
-        name,
-      )
+    return chai.Assertion.addMethod(attr, function (name, value) {
+      const input = _.isPlainObject(name) ? name : { [name]: value }
 
-      const actual = wrap(this)[attr](name)
-
-      // when we only have 1 argument dont worry about val
-      if (arguments.length === 1) {
-        assert(
+      _.forOwn(input, (val, key) => {
+        assertDom(
           this,
           attr,
-          actual !== undefined,
           `expected #{this} to have ${description} #{exp}`,
           `expected #{this} not to have ${description} #{exp}`,
-          name,
+          key,
         )
 
-        // change the subject
-        this._obj = actual
-      } else {
-        // if we don't have an attribute here at all we need to
-        // have a different failure message
-        let message; let negatedMessage
+        const actual = wrap(this)[attr](key)
 
-        if (_.isUndefined(actual)) {
-          message = `expected \#{this} to have ${description} ${inspect(name)}`
+        // when we only have 1 argument dont worry about val
+        if (val === undefined) {
+          assert(
+            this,
+            attr,
+            actual !== undefined,
+            `expected #{this} to have ${description} #{exp}`,
+            `expected #{this} not to have ${description} #{exp}`,
+            key,
+          )
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)}`
+          // change the subject
+          this._obj = actual
         } else {
-          message = `expected \#{this} to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          // if we don't have an attribute here at all we need to
+          // have a different failure message
+          let message; let negatedMessage
 
-          negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
+          if (_.isUndefined(actual)) {
+            message = `expected \#{this} to have ${description} ${inspect(key)}`
+            negatedMessage = `expected \#{this} not to have ${description} ${inspect(key)}`
+          } else {
+            message = `expected \#{this} to have ${description} ${inspect(key)} with the value \#{exp}, but the value was \#{act}`
+            negatedMessage = `expected \#{this} not to have ${description} ${inspect(key)} with the value \#{exp}, but the value was \#{act}`
+          }
+
+          assert(
+            this,
+            attr,
+            (actual != null) && (actual === val),
+            message,
+            negatedMessage,
+            val,
+            actual,
+          )
         }
-
-        assert(
-          this,
-          attr,
-          (actual != null) && (actual === val),
-          message,
-          negatedMessage,
-          val,
-          actual,
-        )
-      }
+      })
 
       return this
     })
