@@ -127,7 +127,6 @@ export const injectStylesBeforeElement = (
 /**
  * Remove any style or extra link elements from the iframe placeholder
  * left from any previous test
- *
  */
 export function cleanupStyles () {
   const _document = getDocument()
