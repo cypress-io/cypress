@@ -1055,7 +1055,7 @@ jobs:
           command: |
             npm install /root/cypress/cypress.tgz typescript jest @types/jest
             echo "console.log('hello world')" > hello.ts
-            npx tsc --noEmit
+            npx tsc hello.ts --noEmit
 
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
