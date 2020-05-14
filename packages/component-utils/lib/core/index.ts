@@ -22,7 +22,7 @@ export {
  *
  * @example
  * declare global {
- *   namespace CypressComponentUtils {lmk
+ *   namespace CypressComponentUtils {
  *     interface MountOptionExtensions {
  *       mountComponent?: React.ReactDom
  *       react: {
