@@ -2,6 +2,13 @@ const bodyParser = require('body-parser')
 const e2e = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 
+const WEBPACK_PREPROCESSOR_PROJECTS = [
+  'webpack-preprocessor',
+  'webpack-preprocessor-ts-loader',
+  'webpack-preprocessor-ts-loader-compiler-options',
+  'webpack-preprocessor-awesome-typescript-loader',
+]
+
 const onServer = function (app) {
   app.use(bodyParser.json())
 
@@ -50,19 +57,14 @@ describe('e2e error ui', function () {
     },
   })
 
-  // FIXME: this doesn't currently work. even though webpack is put into watch
-  // mode and set with devtool: 'inline-source-map', it doesn't output a
-  // source map and it doesn't use the webpack:/// protocol
-  // also, the test itself needs to be updated to click the error file path
-  // links and test they open the correct path
-  e2e.it.skip('handles webpack default protocol', {
-    project: Fixtures.projectPath('webpack-preprocessor'),
-    spec: 'failing_spec.ts',
-    expectedExitCode: 1,
-    config: {
-      env: {
-        CYPRESS_INTERNAL_FORCE_FILEWATCH: '1',
+  WEBPACK_PREPROCESSOR_PROJECTS.forEach((project) => {
+    e2e.it(`handles sourcemaps in webpack for project: ${project}`, {
+      project: Fixtures.projectPath(project),
+      spec: 'failing_spec.*',
+      expectedExitCode: 1,
+      onRun (exec) {
+        return exec().then(verifyPassedAndFailedAreSame(1))
       },
-    },
+    })
   })
 })
