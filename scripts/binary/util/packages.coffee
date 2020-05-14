@@ -2,6 +2,7 @@ _ = require("lodash")
 fs = require("fs-extra")
 cp = require("child_process")
 path = require("path")
+# we wrap glob to handle EMFILE error
 glob = require("glob")
 Promise = require("bluebird")
 retry = require("bluebird-retry")
@@ -12,6 +13,8 @@ R = require("ramda")
 os = require("os")
 prettyMs = require("pretty-ms")
 pluralize = require('pluralize')
+debug = require("debug")("cypress:binary")
+externalUtils = require("./3rd-party")
 
 fs = Promise.promisifyAll(fs)
 glob = Promise.promisify(glob)
@@ -40,24 +43,10 @@ createCLIExecutable = (command) ->
 yarn = createCLIExecutable('yarn')
 npx = createCLIExecutable('npx')
 
-runAllBuildJs = _.partial(npx, ["lerna", "run", "build-js", "--ignore", "cli"])
+runAllBuild = _.partial(npx, ["lerna", "run", "build-prod", "--ignore", "cli"])
 
 # removes transpiled JS files in the original package folders
 runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])
-
-# builds all the packages except for cli
-runAllBuild = (args...) ->
-  getPackagesWithScript('build')
-  .then (pkgNameArr) ->
-    pkgs = pkgNameArr
-      .map((pkgName) ->
-        "@packages/#{pkgName}"
-      )
-      .join(',')
-    npx(
-      ["lerna", "run", "build-prod", "--scope", "\"{#{pkgs}}\"", "--ignore", "cli"]
-      args...
-    )
 
 ## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
 getPackagesWithScript = (scriptName) ->
@@ -79,22 +68,36 @@ copyAllToDist = (distDir) ->
       fs.copyAsync(relative, dest)
 
   copyPackage = (pkg) ->
+    console.log('** copy package: %s **', pkg)
+
     ## copies the package to dist
     ## including the default paths
     ## and any specified in package.json files
     Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
     .then (json) ->
-      ## grab all the files
+      ## grab all the files that match "files" wildcards
+      ## but without all negated files ("!src/**/*.spec.js" for example)
       ## and default included paths
       ## and convert to relative paths
-      Promise.resolve(
-        DEFAULT_PATHS
+      DEFAULT_PATHS
         .concat(json.files or [])
         .concat(json.main or [])
-        .map (file) ->
-          path.join(pkg, file)
-      )
-      .map(copyRelativePathToDist, {concurrency: 1})
+    .then (pkgFileMasks) ->
+      debug("for pkg %s have the following file masks %o", pkg, pkgFileMasks)
+      globOptions = {
+        cwd: pkg, # search in the package folder
+        absolute: false # and return relative file paths
+        followSymbolicLinks: false # do not follow symlinks
+      }
+      externalUtils.globby(pkgFileMasks, globOptions)
+    # we find paths like "src/main.js" wrt "packages/foo"
+    # now we need to get the file path wrt current working directory
+    # like "packages/foo/src/main.js" so when we copy
+    # into the dist folder we get "<dist?/packages/foo/src/main.js"
+    .map (foundFileRelativeToPackageFolder) ->
+      path.join(pkg, foundFileRelativeToPackageFolder)
+    .tap(debug)
+    .map(copyRelativePathToDist, {concurrency: 1})
 
         ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
         ## 1/1  41688
@@ -114,13 +117,14 @@ copyAllToDist = (distDir) ->
     glob("./packages/*")
     .map(copyPackage, {concurrency: 1})
   .then ->
-    console.log("Finished Copying", new Date() - started)
+    console.log("Finished Copying %dms", new Date() - started)
+    console.log("")
 
 forceNpmInstall = (packagePath, packageToInstall) ->
   console.log("Force installing %s", packageToInstall)
   console.log("in %s", packagePath)
   la(check.unemptyString(packageToInstall), "missing package to install")
-  yarn(["install", "--force", "--ignore-engines", packageToInstall], packagePath)
+  yarn(["install", "--force", packageToInstall], packagePath)
 
 removeDevDependencies = (packageFolder) ->
   packagePath = pathToPackageJson(packageFolder)
@@ -155,7 +159,7 @@ npmInstallAll = (pathToPackages) ->
 
     # force installing only PRODUCTION dependencies
     # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(yarn, ["install", "--production", "--silent", "--ignore-engines"])
+    npmInstall = _.partial(yarn, ["install", "--production"])
 
     npmInstall(pkg, {NODE_ENV: "production"})
     .catch {code: "EMFILE"}, ->
@@ -226,8 +230,6 @@ symlinkAll = (pathToDistPackages, pathTo) ->
 
 module.exports = {
   runAllBuild
-
-  runAllBuildJs
 
   copyAllToDist
 

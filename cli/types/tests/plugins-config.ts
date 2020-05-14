@@ -5,8 +5,10 @@ const pluginConfig: Cypress.PluginConfig = (on, config) => {}
 
 // allows synchronous returns
 const pluginConfig2: Cypress.PluginConfig = (on, config) => {
-  config // $ExpectType ConfigOptions
+  config // $ExpectType PluginConfigOptions
   config.baseUrl // $ExpectType: string
+  config.configFile // $ExpectType: string | false
+  config.projectRoot // $ExpectType: string
 
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string

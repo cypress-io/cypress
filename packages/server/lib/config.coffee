@@ -20,7 +20,7 @@ findSystemNode = require("./util/find_system_node")
 CYPRESS_ENV_PREFIX = "CYPRESS_"
 CYPRESS_ENV_PREFIX_LENGTH = "CYPRESS_".length
 CYPRESS_RESERVED_ENV_VARS = [
-  "CYPRESS_ENV"
+  "CYPRESS_INTERNAL_ENV"
 ]
 CYPRESS_SPECIAL_ENV_VARS = [
   "CI_KEY"
@@ -49,6 +49,9 @@ folders = toWords """
   screenshotsFolder  supportFile      supportFolder       unitFolder
   videosFolder
 """
+
+# for experimentalComponentTesting
+folders.push("componentFolder")
 
 # Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
@@ -79,6 +82,9 @@ configKeys = toWords """
   firefoxGcInterval
 """
 
+# experimentalComponentTesting
+configKeys.push("componentFolder")
+
 # Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
   videoRecording
@@ -90,6 +96,11 @@ breakingConfigKeys = toWords """
 systemConfigKeys = toWords """
   browsers
 """
+
+# Know experimental flags / values
+# each should start with "experimental" and be camel cased
+# example: experimentalComponentTesting
+experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting', 'experimentalComponentTesting']
 
 CONFIG_DEFAULTS = {
   port:                          null
@@ -145,6 +156,16 @@ CONFIG_DEFAULTS = {
 
   ## deprecated
   javascripts:                   []
+
+  ## experimental keys (should all start with "experimental" prefix)
+  experimentalComponentTesting:  false
+
+  ## setting related to component testing experiments
+  componentFolder:               "cypress/component"
+  # TODO: example for component testing with subkeys
+  # experimentalComponentTesting: { componentFolder: 'cypress/component' }
+  experimentalGetCookiesSameSite: false
+  experimentalSourceRewriting: false
 }
 
 validationRules = {
@@ -184,6 +205,13 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
   firefoxGcInterval: v.isValidFirefoxGcInterval
+  # experimental flag validation here
+  experimentalComponentTesting: v.isBoolean
+  # validation for component testing experiment
+  componentFolder: v.isStringOrFalse
+  # experimental flag validation below
+  experimentalGetCookiesSameSite: v.isBoolean
+  experimentalSourceRewriting: v.isBoolean
 }
 
 convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) ->
@@ -227,15 +255,19 @@ hideSpecialVals = (val, key) ->
   return val
 
 module.exports = {
-  getConfigKeys: -> configKeys
+  getConfigKeys: -> configKeys.concat(experimentalConfigKeys)
 
-  isValidCypressEnvValue: (value) ->
+  isValidCypressInternalEnvValue: (value) ->
     # names of config environments, see "config/app.yml"
     names = ["development", "test", "staging", "production"]
     _.includes(names, value)
 
   whitelist: (obj = {}) ->
-    propertyNames = configKeys.concat(breakingConfigKeys).concat(systemConfigKeys)
+    propertyNames = configKeys
+      .concat(breakingConfigKeys)
+      .concat(systemConfigKeys)
+      .concat(experimentalConfigKeys)
+
     _.pick(obj, propertyNames)
 
   get: (projectRoot, options = {}) ->
@@ -298,15 +330,15 @@ module.exports = {
     ## and delete envFile
     config.env = @parseEnv(config, options.env, resolved)
 
-    config.cypressEnv = process.env["CYPRESS_ENV"]
-    debug("using CYPRESS_ENV %s", config.cypressEnv)
-    if not @isValidCypressEnvValue(config.cypressEnv)
-      errors.throw("INVALID_CYPRESS_ENV", config.cypressEnv)
+    config.cypressEnv = process.env["CYPRESS_INTERNAL_ENV"]
+    debug("using CYPRESS_INTERNAL_ENV %s", config.cypressEnv)
+    if not @isValidCypressInternalEnvValue(config.cypressEnv)
+      errors.throw("INVALID_CYPRESS_INTERNAL_ENV", config.cypressEnv)
 
     delete config.envFile
 
     ## when headless
-    if config.isTextTerminal
+    if config.isTextTerminal && !process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH
       ## dont ever watch for file changes
       config.watchForFileChanges = false
 
@@ -394,6 +426,7 @@ module.exports = {
     ## and change the resolved values of cfg
     ## to point to the plugin
     if diffs
+      debug("resolved config before diffs %o", cfg.resolved)
       @setPluginResolvedOn(cfg.resolved, diffs)
       debug("resolved config object %o", cfg.resolved)
 
@@ -426,7 +459,7 @@ module.exports = {
     ## pick out only known configuration keys
     _
     .chain(config)
-    .pick(configKeys.concat(systemConfigKeys))
+    .pick(configKeys.concat(systemConfigKeys).concat(experimentalConfigKeys))
     .mapValues (val, key) ->
       source = (s) ->
         {
@@ -587,6 +620,7 @@ module.exports = {
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"
     ## integrationFolder:        "/path/to/project/cypress/integration"
+    ## componentFolder:          "/path/to/project/cypress/components"
     ## parentTestsFolder:        "/path/to/project/cypress"
     ## parentTestsFolderDisplay: "project/cypress"
 

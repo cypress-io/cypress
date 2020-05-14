@@ -1,6 +1,8 @@
 import _ from 'lodash'
-import { computed, observable, action } from 'mobx'
+import { action, computed, observable, toJS } from 'mobx'
+
 import Browser from '../lib/browser-model'
+import Warning from './warning-model'
 
 const cacheProps = [
   'id',
@@ -57,7 +59,7 @@ export default class Project {
   @observable resolvedConfig
   @observable error
   /** @type {{[key: string] : {warning:Error & {dismissed: boolean}}}} */
-  @observable warnings = {}
+  @observable _warnings = {}
   @observable apiError
   @observable parentTestsFolderDisplay
   @observable integrationExampleName
@@ -121,6 +123,10 @@ export default class Project {
 
   @computed get defaultBrowser () {
     return this.browsers[0]
+  }
+
+  @computed get warnings () {
+    return _.reject(this._warnings, { isDismissed: true })
   }
 
   @action update (props) {
@@ -220,28 +226,24 @@ export default class Project {
   }
 
   @action addWarning (warning) {
-    const id = warning.type
+    const type = warning.type
 
-    if (id && this.warnings[id] && this.warnings[id].dismissed) {
+    if (type && this._warnings[type] && this._warnings[type].isDismissed) {
       return
     }
 
-    this.warnings[id] = { ...warning }
+    this._warnings[type] = new Warning(warning)
   }
 
-  @action clearWarning (warning) {
+  @action dismissWarning (warning) {
     if (!warning) {
       // calling with no warning clears all warnings
-      return _.each(this.warnings, ((warning) => {
-        return this.clearWarning(warning)
+      return _.each(this._warnings, ((warning) => {
+        return this.dismissWarning(warning)
       }))
     }
 
-    warning.dismissed = true
-  }
-
-  _serializeWarning (warning) {
-    return `${warning.type}:${warning.name}:${warning.message}`
+    warning.setDismissed(true)
   }
 
   @action setApiError = (err = {}) => {
@@ -256,6 +258,12 @@ export default class Project {
 
   clientDetails () {
     return _.pick(this, 'id', 'path')
+  }
+
+  getConfigValue (key) {
+    if (!this.resolvedConfig) return
+
+    return toJS(this.resolvedConfig[key]).value
   }
 
   serialize () {

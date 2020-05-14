@@ -2,7 +2,7 @@ import debugModule from 'debug'
 import { HttpMiddleware } from '.'
 import { InterceptError } from '@packages/net-stubbing/server'
 import { Readable } from 'stream'
-import { Request } from 'request'
+import { Request } from '@cypress/request'
 
 const debug = debugModule('cypress:proxy:http:error-middleware')
 

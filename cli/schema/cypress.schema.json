@@ -103,6 +103,19 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "experimentalComponentTesting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enabled experimental component testing, see https://github.com/cypress-io/cypress/issues/5922"
+    },
+    "componentFolder": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "default": false,
+      "description": "Path to folder containing component test files (Pass false to disable)"
+    },
     "pluginsFile": {
       "type": [
         "string",
@@ -210,6 +223,16 @@
       ],
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
+    },
+    "experimentalGetCookiesSameSite": {
+      "type": "boolean",
+      "default": false,
+      "description": "If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0."
+    },
+    "experimentalSourceRewriting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
     }
   }
 }

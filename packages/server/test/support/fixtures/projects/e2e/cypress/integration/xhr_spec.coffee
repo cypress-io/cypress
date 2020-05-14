@@ -103,6 +103,9 @@ describe "xhrs", ->
       xhr.onload = finish
       xhr.onerror = finish
 
+  it "spawns tasks with original NODE_OPTIONS", ->
+    cy.task('assert:http:max:header:size', 8192)
+
   describe "server with 1 visit", ->
     before ->
       cy.visit("/xhr.html")

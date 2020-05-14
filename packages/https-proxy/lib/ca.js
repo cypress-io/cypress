@@ -1,9 +1,15 @@
 const _ = require('lodash')
+const debug = require('debug')('cypress:https-proxy:ca')
 const os = require('os')
 const path = require('path')
 const Forge = require('node-forge')
 const Promise = require('bluebird')
 let fs = require('fs-extra')
+
+// if this is higher than the user's cached CA version, the Cypress
+// certificate cache will be cleared so that new certificates can
+// supersede older ones
+const CA_VERSION = 1
 
 fs = Promise.promisifyAll(fs)
 
@@ -142,7 +148,7 @@ class CA {
   }
 
   generateCA () {
-    return generateKeyPairAsync({ bits: 512 })
+    return generateKeyPairAsync({ bits: 2048 })
     .then((keys) => {
       const cert = pki.createCertificate()
 
@@ -164,6 +170,7 @@ class CA {
         fs.outputFileAsync(path.join(this.certsFolder, 'ca.pem'), pki.certificateToPem(cert)),
         fs.outputFileAsync(path.join(this.keysFolder, 'ca.private.key'), pki.privateKeyToPem(keys.privateKey)),
         fs.outputFileAsync(path.join(this.keysFolder, 'ca.public.key'), pki.publicKeyToPem(keys.publicKey)),
+        this.writeCAVersion(),
       ])
     })
   }
@@ -189,7 +196,7 @@ class CA {
     hosts = [].concat(hosts)
 
     const mainHost = hosts[0]
-    const keysServer = pki.rsa.generateKeyPair(1024)
+    const keysServer = pki.rsa.generateKeyPair(2048)
     const certServer = pki.createCertificate()
 
     certServer.publicKey = keysServer.publicKey
@@ -247,11 +254,42 @@ class CA {
     return path.join(this.certsFolder, 'ca.pem')
   }
 
+  getCAVersionPath () {
+    return path.join(this.baseCAFolder, 'ca_version.txt')
+  }
+
+  getCAVersion () {
+    return fs.readFileAsync(this.getCAVersionPath())
+    .then(Number)
+    .catch(function (err) {
+      debug('error reading cached CA version: %o', { err })
+
+      return 0
+    })
+  }
+
+  writeCAVersion () {
+    return fs.outputFileAsync(this.getCAVersionPath(), CA_VERSION)
+  }
+
+  assertMinimumCAVersion () {
+    return this.getCAVersion().then(function (actualVersion) {
+      debug('checking CA version %o', { actualVersion, CA_VERSION })
+      if (actualVersion >= CA_VERSION) {
+        return
+      }
+
+      throw new Error(`expected ca_version to be >= ${CA_VERSION}, but it was ${actualVersion}`)
+    })
+  }
+
   static create (caFolder) {
     const ca = new CA(caFolder)
 
     return fs.statAsync(path.join(ca.certsFolder, 'ca.pem'))
     .bind(ca)
+    .then(ca.assertMinimumCAVersion)
+    .tapCatch(ca.removeAll)
     .then(ca.loadCA)
     .catch(ca.generateCA)
     .return(ca)

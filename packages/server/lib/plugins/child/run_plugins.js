@@ -4,10 +4,15 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
+
+const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
-const errors = require('../../errors')
+const validateEvent = require('./validate_event')
+const tsNodeOptions = require('../../util/ts-node-options')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -16,21 +21,7 @@ const registeredEvents = {}
 const invoke = (eventId, args = []) => {
   const event = registeredEvents[eventId]
 
-  if (!event) {
-    sendError(new Error(`No handler registered for event id ${eventId}`))
-
-    return
-  }
-
   return event.handler(...args)
-}
-
-const sendError = (ipc, err) => {
-  ipc.send('error', util.serializeError(err))
-}
-
-const sendWarning = (ipc, warningErr) => {
-  ipc.send('warning', util.serializeError(warningErr))
 }
 
 let plugins
@@ -44,6 +35,14 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
+    const { isValid, error } = validateEvent(event, handler)
+
+    if (!isValid) {
+      ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
+
+      return
+    }
+
     if (event === 'task') {
       const existingEventId = _.findKey(registeredEvents, { event: 'task' })
 
@@ -74,12 +73,16 @@ const load = (ipc, config, pluginsFile) => {
 
   Promise
   .try(() => {
+    debug('run plugins function')
+
     return plugins(register, config)
   })
   .then((modifiedCfg) => {
+    debug('plugins file successfully loaded')
     ipc.send('loaded', modifiedCfg, registrations)
   })
   .catch((err) => {
+    debug('plugins file errored:', err && err.stack)
     ipc.send('load:error', 'PLUGINS_FUNCTION_ERROR', pluginsFile, err.stack)
   })
 }
@@ -113,10 +116,9 @@ const execute = (ipc, event, ids, args = []) => {
 
           hasEmittedWarning = true
 
-          sendWarning(ipc,
-            errors.get(
-              'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS',
-            ))
+          const warning = errors.get('DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS')
+
+          ipc.send('warning', util.serializeError(warning))
 
           // eslint-disable-next-line prefer-rest-params
           return boundFn.apply(this, arguments)
@@ -155,8 +157,14 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-module.exports = (ipc, pluginsFile) => {
+let tsRegistered = false
+
+module.exports = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
+  debug('project root:', projectRoot)
+  if (!projectRoot) {
+    throw new Error('Unexpected: projectRoot should be a string')
+  }
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
@@ -174,9 +182,35 @@ module.exports = (ipc, pluginsFile) => {
     return false
   })
 
+  if (!tsRegistered) {
+    try {
+      const tsPath = resolve.sync('typescript', {
+        basedir: projectRoot,
+      })
+
+      const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
+
+      debug('typescript path: %s', tsPath)
+      debug('registering plugins TS with options %o', tsOptions)
+
+      tsnode.register(tsOptions)
+    } catch (e) {
+      debug(`typescript doesn't exist. ts-node setup failed.`)
+      debug('error message: %s', e.message)
+    }
+
+    // ensure typescript is only registered once
+    tsRegistered = true
+  }
+
   try {
     debug('require pluginsFile')
     plugins = require(pluginsFile)
+
+    // Handle export default () => {}
+    if (plugins && typeof plugins.default === 'function') {
+      plugins = plugins.default
+    }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)

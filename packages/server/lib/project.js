@@ -6,6 +6,8 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const tsnode = require('ts-node')
+const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -28,6 +30,8 @@ const fs = require('./util/fs')
 const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
+const { escapeFilenameInUrl } = require('./util/escape_filename')
+const tsNodeOptions = require('./util/ts-node-options')
 
 const localCwd = cwd()
 
@@ -77,8 +81,6 @@ class Project extends EE {
     debug('project options %o', options)
     this.options = options
 
-    this.onWarning = options.onWarning
-
     return this.getConfig(options)
     .tap((cfg) => {
       process.chdir(this.projectRoot)
@@ -101,6 +103,24 @@ class Project extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     }).then((cfg) => {
+      try {
+        const tsPath = resolve.sync('typescript', {
+          basedir: this.projectRoot,
+        })
+
+        const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
+
+        debug('typescript path: %s', tsPath)
+        debug('registering project TS with options %o', tsOptions)
+
+        tsnode.register(tsOptions)
+      } catch (e) {
+        debug(`typescript doesn't exist. ts-node setup failed.`)
+        debug('error message %s', e.message)
+      }
+
+      return cfg
+    }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {
         debug('plugin config yielded: %o', modifiedCfg)
@@ -112,7 +132,7 @@ class Project extends EE {
         return updatedConfig
       })
     }).then((cfg) => {
-      return this.server.open(cfg, this, options.onWarning)
+      return this.server.open(cfg, this, options.onError, options.onWarning)
       .spread((port, warning) => {
         // if we didnt have a cfg.port
         // then get the port once we
@@ -159,6 +179,8 @@ class Project extends EE {
     cfg = config.whitelist(cfg)
 
     return plugins.init(cfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
       onError (err) {
         debug('got plugins error', err.stack)
 
@@ -413,6 +435,8 @@ class Project extends EE {
     }
 
     if (this.cfg) {
+      debug('project has config %o', this.cfg)
+
       return Promise.resolve(this.cfg)
     }
 
@@ -455,7 +479,7 @@ class Project extends EE {
 
     const newState = _.merge({}, this.cfg.state, stateChanges)
 
-    return savedState(this.projectRoot, this.cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, this.cfg.isTextTerminal)
     .then((state) => state.set(newState))
     .then(() => {
       this.cfg.state = newState
@@ -467,7 +491,7 @@ class Project extends EE {
   _setSavedState (cfg) {
     debug('get saved state')
 
-    return savedState(this.projectRoot, cfg.isTextTerminal)
+    return savedState.create(this.projectRoot, cfg.isTextTerminal)
     .then((state) => state.get())
     .then((state) => {
       cfg.state = state
@@ -476,12 +500,16 @@ class Project extends EE {
     })
   }
 
-  getSpecUrl (absoluteSpecPath) {
+  getSpecUrl (absoluteSpecPath, specType) {
     return this.getConfig()
     .then((cfg) => {
-      // if we dont have a absoluteSpecPath or its __all
+      // if we don't have a absoluteSpecPath or its __all
       if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-        return this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+
+        debug('returning url to run all specs: %s', url)
+
+        return url
       }
 
       // TODO:
@@ -491,14 +519,17 @@ class Project extends EE {
       // the unit folder?
       // once we determine that we can then prefix it correctly
       // with either integration or unit
-      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath)
+      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
+      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
 
-      return this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+
+      return url
     })
   }
 
   getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
-    const { integrationFolder, projectRoot } = cfg
+    const { integrationFolder, componentFolder, projectRoot } = cfg
 
     // for now hard code the 'type' as integration
     // but in the future accept something different here
@@ -510,10 +541,17 @@ class Project extends EE {
     // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.coffee
     //
     // becomes /integration/foo.coffee
-    return `/${path.join(type, path.relative(
-      integrationFolder,
+
+    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+
+    const url = `/${path.join(type, path.relative(
+      folderToUse,
       path.resolve(projectRoot, pathToSpec),
     ))}`
+
+    debug('prefixed path for spec %o', { pathToSpec, type, url })
+
+    return url
   }
 
   normalizeSpecUrl (browserUrl, specUrl) {
@@ -522,7 +560,7 @@ class Project extends EE {
     return [
       browserUrl,
       '#/tests',
-      specUrl,
+      escapeFilenameInUrl(specUrl),
     ].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 
@@ -588,9 +626,18 @@ class Project extends EE {
   }
 
   createCiProject (projectDetails) {
+    debug('create CI project with projectDetails %o', projectDetails)
+
     return user.ensureAuthToken()
     .then((authToken) => {
-      return commitInfo.getRemoteOrigin(this.projectRoot)
+      const remoteOrigin = commitInfo.getRemoteOrigin(this.projectRoot)
+
+      debug('found remote origin at projectRoot %o', {
+        remoteOrigin,
+        projectRoot: this.projectRoot,
+      })
+
+      return remoteOrigin
       .then((remoteOrigin) => {
         return api.createProject(projectDetails, remoteOrigin, authToken)
       })
@@ -802,6 +849,7 @@ class Project extends EE {
       // file path from projectRoot
       // ie: **/* turns into /Users/bmann/dev/project/**/*
       specPattern = path.resolve(projectRoot, specPattern)
+      debug('full spec pattern "%s"', specPattern)
     }
 
     return new Project(projectRoot)

@@ -1,6 +1,6 @@
 _         = require("lodash")
 Bluebird  = require("bluebird")
-cert      = require("https-pem")
+cert      = require("@packages/https-proxy/test/helpers/certs")
 https     = require("https")
 useragent = require("express-useragent")
 { allowDestroy } = require("@packages/network")
@@ -69,8 +69,22 @@ onServer = (app) ->
     ## dont ever end this response
     res.type("html").write("foo\n")
 
+  ## https://github.com/cypress-io/cypress/issues/5602
+  app.get "/invalid-header-char", (req, res) ->
+    ## express/node may interfere if we just use res.setHeader
+    res.connection.write(
+        """
+        HTTP/1.1 200 OK
+        Content-Type: text/html
+        Set-Cookie: foo=bar-#{String.fromCharCode(1)}-baz
+
+        foo
+        """
+    )
+
+    res.connection.end()
+
 describe "e2e visit", ->
-  require("mocha-banner").register()
 
   context "low response timeout", ->
     e2e.setup({
@@ -85,17 +99,22 @@ describe "e2e visit", ->
       }
     })
 
-    ## this tests that hashes are applied during a visit
-    ## which forces the browser to scroll to the div
-    ## additionally this tests that jquery.js is not truncated
-    ## due to __cypress.initial cookies not being cleared by
-    ## the hash.html response
-
-    ## additionally this tests that xhr request headers + body
-    ## can reach the backend without being modified or changed
-    ## by the cypress proxy in any way
     e2e.it "passes", {
       spec: "visit_spec.coffee"
+      snapshot: true
+      onRun: (exec) ->
+        startTlsV1Server(6776)
+        .then (serv) ->
+          exec()
+          .then ->
+            serv.destroy()
+    }
+
+    e2e.it "passes with experimentalSourceRewriting", {
+      spec: "source_rewriting_spec.js"
+      config: {
+        experimentalSourceRewriting: true
+      }
       snapshot: true
       onRun: (exec) ->
         startTlsV1Server(6776)

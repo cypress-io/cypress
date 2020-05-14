@@ -1,9 +1,9 @@
 const fs = require('fs')
 const server = require('socket.io')
-const path = require('path')
-const pkg = require('socket.io-client/package.json')
+const { version } = require('socket.io-client/package.json')
 const { client, circularParser } = require('./browser')
-const resolvePkg = require('resolve-pkg')
+
+const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
 
 module.exports = {
   server,
@@ -13,17 +13,11 @@ module.exports = {
   circularParser,
 
   getPathToClientSource () {
-    const clientSource = resolvePkg('socket.io-client/dist/socket.io.js', { cwd: path.join(__dirname, '..', '..', '..') })
-
-    if (fs.existsSync(clientSource)) {
-      return clientSource
-    }
-
-    return require.resolve('socket.io-client/dist/socket.io.js')
+    return clientSource
   },
 
   getClientVersion () {
-    return pkg.version
+    return version
   },
 
   getClientSource () {

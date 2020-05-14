@@ -29,7 +29,10 @@ const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
+const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
+const resolvers = require('./cypress/resolvers')
+const debug = require('debug')('cypress:driver:cypress')
 
 const proxies = {
   runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
@@ -52,7 +55,7 @@ $Log.command = () => {
   return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
 }
 
-const throwDeprecatedCommandInterface = (key, method) => {
+const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 
   switch (method) {
@@ -88,6 +91,8 @@ class $Cypress {
     this.runner = null
     this.Commands = null
     this._RESUMED_AT_TEST = null
+    this.$autIframe = null
+    this.onSpecReady = null
 
     this.events = $Events.extend(this)
 
@@ -167,8 +172,9 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ($autIframe) {
-    return this.cy.initialize($autIframe)
+  initialize ({ $autIframe, onSpecReady }) {
+    this.$autIframe = $autIframe
+    this.onSpecReady = onSpecReady
   }
 
   run (fn) {
@@ -184,7 +190,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow) {
+  onSpecWindow (specWindow, scripts) {
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -204,13 +210,24 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
-    return null
+    $scriptUtils.runScripts(specWindow, scripts)
+    .catch((err) => {
+      err = $errUtils.createUncaughtException('spec', err)
+
+      this.runner.onScriptError(err)
+    })
+    .then(() => {
+      this.cy.initialize(this.$autIframe)
+
+      this.onSpecReady()
+    })
   }
 
   action (eventName, ...args) {
     // normalizes all the various ways
     // other objects communicate intent
     // and 'action' to Cypress
+    debug(eventName)
     switch (eventName) {
       case 'recorder:frame':
         return this.emit('recorder:frame', args[0])
@@ -323,8 +340,11 @@ class $Cypress {
 
       case 'runner:fail': {
         // mocha runner calculated a failure
-
         const err = args[0].err
+
+        if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+          err.showDiff = false
+        }
 
         if (err.actual) {
           err.actual = chai.util.inspect(err.actual)
@@ -501,7 +521,7 @@ class $Cypress {
           // attaching long stace traces
           // which otherwise make this err
           // unusably long
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.__stackCleaned__ = true
           err.backend = true
@@ -523,7 +543,7 @@ class $Cypress {
         const e = reply.error
 
         if (e) {
-          const err = $errUtils.cloneErr(e)
+          const err = $errUtils.makeErrFromObj(e)
 
           err.automation = true
 
@@ -587,6 +607,8 @@ $Cypress.prototype.Location = $Location
 $Cypress.prototype.Log = $Log
 $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
+$Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
+$Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
 $Cypress.prototype.Mouse = $Mouse
 $Cypress.prototype.Runner = $Runner
 // $Cypress.prototype.Server = $Server

@@ -1,10 +1,11 @@
 require("../../spec_helper")
 
+resolve = require('resolve')
 EE = require("events")
 Fixtures = require("../../support/helpers/fixtures")
 path = require("path")
 appData = require("#{root}../lib/util/app_data")
-{ toHashName } = require("#{root}../lib/util/saved_state")
+savedState = require("#{root}../lib/saved_state")
 
 plugins = require("#{root}../lib/plugins")
 preprocessor = require("#{root}../lib/plugins/preprocessor")
@@ -39,12 +40,12 @@ describe "lib/plugins/preprocessor", ->
 
     it "executes the plugin with output path", ->
       preprocessor.getFile(@filePath, @config)
-      expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
+      expectedPath = appData.projectsPath(savedState.toHashName(@todosPath), "bundles", @filePath)
       expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
 
     it "executes the plugin with output path when integrationFolder was defined", ->
       preprocessor.getFile(@integrationFolder + @filePath, Object.assign({integrationFolder: @integrationFolder}, @config))
-      expectedPath = appData.projectsPath(toHashName(@todosPath), "bundles", @filePath)
+      expectedPath = appData.projectsPath(savedState.toHashName(@todosPath), "bundles", @filePath)
       expect(@plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
 
     it "returns a promise resolved with the plugin's outputPath", ->
@@ -76,6 +77,19 @@ describe "lib/plugins/preprocessor", ->
       sinon.stub(plugins, "execute").returns(->)
       browserifyFn = ->
       browserify = sinon.stub().returns(browserifyFn)
+      ## mock default options
+      browserify.defaultOptions = {
+        browserifyOptions: {
+          extensions: [],
+          transform: [
+            [],
+            ['babelify', {
+              presets: [],
+              extensions: [],
+            }]
+          ]
+        }
+      }
       mockery.registerMock("@cypress/browserify-preprocessor", browserify)
       preprocessor.getFile(@filePath, @config)
       expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn)
@@ -125,11 +139,12 @@ describe "lib/plugins/preprocessor", ->
       }())
       """)
 
-    it "replaces new lines with {newline} placeholder", ->
-      expect(preprocessor.clientSideError("with\nnew\nlines")).to.include('error: "with{newline}new{newline}lines"')
 
-    it "removes command line syntax highlighting characters", ->
-      expect(preprocessor.clientSideError("[30mfoo[100mbar[7mbaz")).to.include('error: "foobarbaz"')
+    it "does not replace new lines with {newline} placeholder", ->
+      expect(preprocessor.clientSideError("with\nnew\nlines")).to.include('error: "with\\nnew\\nlines"')
+
+    it "does not remove command line syntax highlighting characters", ->
+      expect(preprocessor.clientSideError("[30mfoo[100mbar[7mbaz")).to.include('error: "[30mfoo[100mbar[7mbaz"')
 
   context "#errorMessage", ->
     it "handles error strings", ->
@@ -159,3 +174,33 @@ describe "lib/plugins/preprocessor", ->
 
     it "removes stack lines", ->
       expect(preprocessor.errorMessage("foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)")).to.equal("foo\n baz")
+
+  context "#setDefaultPreprocessor", ->
+    it "finds TypeScript in the project root", ->
+      mockPlugin = {}
+      sinon.stub(plugins, "register")
+      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin)
+
+      preprocessor.setDefaultPreprocessor(@config)
+
+      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin)
+      # in this mock project, the TypeScript should be found
+      # from the monorepo
+      monorepoRoot = path.join(__dirname, "../../../../..")
+      typescript = resolve.sync("typescript", {
+        basedir: monorepoRoot
+      })
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript })
+
+    it "does not have typescript if not found", ->
+      mockPlugin = {}
+      sinon.stub(plugins, "register")
+      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin)
+      sinon.stub(resolve, "sync")
+        .withArgs("typescript", { basedir: @todosPath })
+        .throws(new Error('TypeScript not found'))
+
+      preprocessor.setDefaultPreprocessor(@config)
+
+      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin)
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript: null })

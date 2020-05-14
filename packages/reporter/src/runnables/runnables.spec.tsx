@@ -128,7 +128,7 @@ describe('<Runnables />', () => {
 
   context('<RunnablesList />', () => {
     it('renders a runnable for each runnable in model', () => {
-      const component = shallow(<RunnablesList runnables={[{ id: 1 }, { id: 2 }]} />)
+      const component = shallow(<RunnablesList runnables={[{ id: 1 } as TestModel, { id: 2 } as TestModel]} />)
 
       expect(component.find('Runnable').length).to.equal(2)
     })

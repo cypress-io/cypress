@@ -74,6 +74,20 @@ describe "lib/browsers/chrome", ->
         # we load the browser with blank page first
         expect(utils.launch).to.be.calledWith("chrome", "about:blank", args)
 
+    it "sets default window size in headless mode", ->
+      chrome._writeExtension.restore()
+
+      pathToTheme = extension.getPathToTheme()
+
+      chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--headless"
+          "--window-size=1280,720"
+        ])
+
     it "does not load extension in headless mode", ->
       chrome._writeExtension.restore()
 
@@ -89,6 +103,31 @@ describe "lib/browsers/chrome", ->
           "--remote-debugging-address=127.0.0.1"
           "--user-data-dir=/profile/dir"
           "--disk-cache-dir=/profile/dir/CypressCache"
+        ])
+
+    it "uses a custom profilePath if supplied", ->
+      chrome._writeExtension.restore()
+      utils.getProfileDir.restore()
+
+      profilePath = '/home/foo/snap/chromium/current'
+      fullPath = "#{profilePath}/Cypress/chromium-stable/interactive"
+
+      @readJson.withArgs("#{fullPath}/Default/Preferences").rejects({ code: 'ENOENT' })
+      @readJson.withArgs("#{fullPath}/Default/Secure Preferences").rejects({ code: 'ENOENT' })
+      @readJson.withArgs("#{fullPath}/Local State").rejects({ code: 'ENOENT' })
+
+      chrome.open({
+        isHeadless: true,
+        isHeaded: false,
+        profilePath,
+        name: 'chromium',
+        channel: 'stable'
+      }, "http://", {}, @automation)
+      .then =>
+        args = utils.launch.firstCall.args[2]
+
+        expect(args).to.include.members([
+          "--user-data-dir=#{fullPath}"
         ])
 
     it "DEPRECATED: normalizes --load-extension if provided in plugin", ->

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
-import rp from 'request-promise'
+import rp from '@cypress/request-promise'
 import * as url from 'url'
 import { agent, connect } from '@packages/network'
 

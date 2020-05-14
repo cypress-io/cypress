@@ -45,7 +45,7 @@ const v = require(`${root}lib/util/validation`)
 const system = require(`${root}lib/util/system`)
 const appData = require(`${root}lib/util/app_data`)
 const electronApp = require('../../lib/util/electron-app')
-const { formStatePath } = require(`${root}lib/util/saved_state`)
+const savedState = require(`${root}lib/saved_state`)
 
 const TYPICAL_BROWSERS = [
   {
@@ -640,7 +640,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      return config.get(this.idsPath)
+      config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
@@ -961,7 +961,7 @@ describe('lib/cypress', () => {
       beforeEach(function () {
         return appData.remove()
         .then(() => {
-          return formStatePath(this.todosPath)
+          return savedState.formStatePath(this.todosPath)
         }).then((statePathStart) => {
           this.statePath = appData.projectsPath(statePathStart)
         })
@@ -1165,7 +1165,7 @@ describe('lib/cypress', () => {
               browser: 'electron',
               foo: 'bar',
               onNewWindow: sinon.match.func,
-              onPaint: sinon.match.func,
+              onScreencastFrame: sinon.match.func,
             })
 
             this.expectExitWith(0)
@@ -1559,7 +1559,7 @@ describe('lib/cypress', () => {
         osVersion: 'v1',
       })
 
-      sinon.stub(browsers, 'ensureAndGetByNameOrPath').returns({
+      sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves({
         version: '59.1.2.3',
         displayName: 'Electron',
       })

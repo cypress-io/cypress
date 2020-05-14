@@ -9,11 +9,12 @@ import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { IncomingMessage } from 'http'
 import { NetStubbingState } from '@packages/net-stubbing/server'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import { Readable } from 'stream'
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import RequestMiddleware from './request-middleware'
 import ResponseMiddleware from './response-middleware'
+import { DeferredSourceMapCache } from '@packages/rewriter'
 
 const debug = debugModule('cypress:proxy:http')
 
@@ -36,6 +37,7 @@ type HttpMiddlewareCtx<T> = {
   res: CypressOutgoingResponse
 
   middleware: HttpMiddlewareStacks
+  deferSourceMapRewrite: (opts: { js: string, url: string }) => string
 } & T
 
 export type ServerCtx = Readonly<{
@@ -86,14 +88,14 @@ export function _runStage (type: HttpStages, ctx: any) {
     const middlewareName = _.keys(middlewares)[0]
 
     if (!middlewareName) {
-      return Promise.resolve()
+      return Bluebird.resolve()
     }
 
     const middleware = middlewares[middlewareName]
 
     ctx.middleware[type] = _.omit(middlewares, middlewareName)
 
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       let ended = false
 
       function copyChangedCtx () {
@@ -178,6 +180,7 @@ export function _runStage (type: HttpStages, ctx: any) {
 export class Http {
   buffers: HttpBuffers
   config: CyServer.Config
+  deferredSourceMapCache: DeferredSourceMapCache
   getFileServerToken: () => string
   getRemoteState: () => any
   middleware: HttpMiddlewareStacks
@@ -187,6 +190,7 @@ export class Http {
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
+    this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
     this.getFileServerToken = opts.getFileServerToken
@@ -205,7 +209,7 @@ export class Http {
     }
   }
 
-  handle (req, res) {
+  handle (req: Request, res: Response) {
     const ctx: HttpMiddlewareCtx<any> = {
       req,
       res,
@@ -218,6 +222,12 @@ export class Http {
       middleware: _.cloneDeep(this.middleware),
       netStubbingState: this.netStubbingState,
       socket: this.socket,
+      deferSourceMapRewrite: (opts) => {
+        this.deferredSourceMapCache.defer({
+          resHeaders: ctx.incomingRes.headers,
+          ...opts,
+        })
+      },
     }
 
     return _runStage(HttpStages.IncomingRequest, ctx)
@@ -228,6 +238,20 @@ export class Http {
 
       return debug('warning: Request was not fulfilled with a response.')
     })
+  }
+
+  async handleSourceMapRequest (req: Request, res: Response) {
+    try {
+      const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
+
+      if (!sm) {
+        throw new Error('no sourcemap found')
+      }
+
+      res.json(sm)
+    } catch (err) {
+      res.status(500).json({ err })
+    }
   }
 
   reset () {

@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-// tests in driver/test/cypress/integration/commands/assertions_spec.coffee
+// tests in driver/test/cypress/integration/commands/assertions_spec.js
 
 const _ = require('lodash')
 const $ = require('jquery')
@@ -9,6 +9,7 @@ const sinonChai = require('@cypress/sinon-chai')
 const $dom = require('../dom')
 const $utils = require('../cypress/utils')
 const $errUtils = require('../cypress/error_utils')
+const $stackUtils = require('../cypress/stack_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
 
@@ -38,27 +39,17 @@ let chaiUtils = null
 
 chai.use(sinonChai)
 
-const getType = function (val) {
-  const match = /\[object (.*)\]/.exec(Object.prototype.toString.call(val))
-
-  return match && match[1]
-}
-
 chai.use((chai, u) => {
   chaiUtils = u
 
   $chaiJquery(chai, chaiUtils, {
     onInvalid (method, obj) {
-      const err = $errUtils.cypressErr(
-        $errUtils.errMsgByPath(
-          'chai.invalid_jquery_obj', {
-            assertion: method,
-            subject: $utils.stringifyActual(obj),
-          },
-        ),
-      )
-
-      throw err
+      $errUtils.throwErrByPath('chai.invalid_jquery_obj', {
+        args: {
+          assertion: method,
+          subject: $utils.stringifyActual(obj),
+        },
+      })
     },
 
     onError (err, method, obj, negated) {
@@ -93,10 +84,20 @@ chai.use((chai, u) => {
 
   const { inspect, setFormatValueHook } = chaiInspect.create(chai)
 
-  // prevent tunneling into Window objects (can throw cross-origin errors in firefox)
+  // prevent tunneling into Window objects (can throw cross-origin errors)
   setFormatValueHook((ctx, val) => {
-    if (val && (getType(val) === 'Window')) {
-      return '[window]'
+    // https://github.com/cypress-io/cypress/issues/5270
+    // When name attribute exists in <iframe>,
+    // Firefox returns [object Window] but Chrome returns [object Object]
+    // So, we try throwing an error and check the error message.
+    try {
+      val && val.document
+      val && val.inspect
+    } catch (e) {
+      if (e.stack.indexOf('cross-origin') !== -1 || // chrome
+      e.message.indexOf('cross-origin') !== -1) { // firefox
+        return `[window]`
+      }
     }
   })
 
@@ -198,8 +199,8 @@ chai.use((chai, u) => {
     }
   }
 
-  const overrideChaiAsserts = function (assertFn) {
-    chai.Assertion.prototype.assert = createPatchedAssert(assertFn)
+  const overrideChaiAsserts = function (specWindow, state, assertFn) {
+    chai.Assertion.prototype.assert = createPatchedAssert(specWindow, state, assertFn)
 
     const _origGetmessage = function (obj, args) {
       const negate = chaiUtils.flag(obj, 'negate')
@@ -253,7 +254,7 @@ chai.use((chai, u) => {
           return _super.apply(this, arguments)
         }
 
-        const err = $errUtils.cypressErr($errUtils.errMsgByPath('chai.match_invalid_argument', { regExp }))
+        const err = $errUtils.cypressErrByPath('chai.match_invalid_argument', { args: { regExp } })
 
         err.retry = false
         throw err
@@ -340,11 +341,14 @@ chai.use((chai, u) => {
                 return `Not enough elements found. Found '${len1}', expected '${len2}'.`
               }
 
-              e1.displayMessage = getLongLengthMessage(obj.length, length)
+              const newMessage = getLongLengthMessage(obj.length, length)
+
+              $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
               throw e1
             }
 
-            const e2 = $errUtils.cypressErr($errUtils.errMsgByPath('chai.length_invalid_argument', { length }))
+            const e2 = $errUtils.cypressErrByPath('chai.length_invalid_argument', { args: { length } })
 
             e2.retry = false
             throw e2
@@ -397,10 +401,13 @@ chai.use((chai, u) => {
                 return `Expected ${node} not to exist in the DOM, but it was continuously found.`
               }
 
-              return `Expected to find element: '${obj.selector}', but never found it.`
+              return `Expected to find element: \`${obj.selector}\`, but never found it.`
             }
 
-            e1.displayMessage = getLongExistsMessage(obj)
+            const newMessage = getLongExistsMessage(obj)
+
+            $errUtils.modifyErrMsg(e1, newMessage, () => newMessage)
+
             throw e1
           }
         }
@@ -408,7 +415,29 @@ chai.use((chai, u) => {
     })
   }
 
-  const createPatchedAssert = (assertFn) => {
+  const captureUserInvocationStack = (specWindow, state, ssfi) => {
+    let userInvocationStack
+
+    // we need a user invocation stack with the top line being the point where
+    // the error occurred for the sake of the code frame
+    // in chrome, stack lines from another frame don't appear in the
+    // error. specWindow.Error works for our purposes because it
+    // doesn't include anything extra (chai.Assertion error doesn't work
+    // because it doesn't have lines from the spec iframe)
+    // in firefox, specWindow.Error has too many extra lines at the
+    // beginning, but chai.AssertionError helps us winnow those down
+    if ($stackUtils.hasCrossFrameStacks(specWindow)) {
+      userInvocationStack = (new chai.AssertionError('uis', {}, ssfi)).stack
+    } else {
+      userInvocationStack = (new specWindow.Error()).stack
+    }
+
+    userInvocationStack = $stackUtils.normalizedUserInvocationStack(userInvocationStack)
+
+    state('currentAssertionUserInvocationStack', userInvocationStack)
+  }
+
+  const createPatchedAssert = (specWindow, state, assertFn) => {
     return (function (...args) {
       let err
       const passed = chaiUtils.test(this, args)
@@ -430,31 +459,46 @@ chai.use((chai, u) => {
 
       assertFn(passed, message, value, actual, expected, err)
 
-      if (err) {
-        throw err
+      if (!err) return
+
+      // when assert() is used instead of expect(), we override the method itself
+      // below in `overrideAssert` and prefer the user invocation stack
+      // that we capture there
+      if (!state('assertUsed')) {
+        captureUserInvocationStack(specWindow, state, chaiUtils.flag(this, 'ssfi'))
       }
+
+      throw err
     })
   }
 
-  const overrideExpect = () => {
+  const overrideExpect = (specWindow, state) => {
     // only override assertions for this specific
     // expect function instance so we do not affect
     // the outside world
     return (val, message) => {
+      captureUserInvocationStack(specWindow, state, overrideExpect)
+
       // make the assertion
       return new chai.Assertion(val, message)
     }
   }
 
-  const overrideAssert = function () {
+  const overrideAssert = function (specWindow, state) {
     const fn = (express, errmsg) => {
+      state('assertUsed', true)
+      captureUserInvocationStack(specWindow, state, fn)
+
       return chai.assert(express, errmsg)
     }
 
     const fns = _.functions(chai.assert)
 
     _.each(fns, (name) => {
-      return fn[name] = function () {
+      fn[name] = function () {
+        state('assertUsed', true)
+        captureUserInvocationStack(specWindow, state, overrideAssert)
+
         return chai.assert[name].apply(this, arguments)
       }
     })
@@ -462,9 +506,9 @@ chai.use((chai, u) => {
     return fn
   }
 
-  const setSpecWindowGlobals = function (specWindow, assertFn) {
-    const expect = overrideExpect()
-    const assert = overrideAssert()
+  const setSpecWindowGlobals = function (specWindow, state) {
+    const expect = overrideExpect(specWindow, state)
+    const assert = overrideAssert(specWindow, state)
 
     specWindow.chai = chai
     specWindow.expect = expect
@@ -477,15 +521,14 @@ chai.use((chai, u) => {
     }
   }
 
-  const create = function (specWindow, assertFn) {
-    // restoreOverrides()
+  const create = function (specWindow, state, assertFn) {
     restoreAsserts()
 
     overrideChaiInspect()
     overrideChaiObjDisplay()
-    overrideChaiAsserts(assertFn)
+    overrideChaiAsserts(specWindow, state, assertFn)
 
-    return setSpecWindowGlobals(specWindow)
+    return setSpecWindowGlobals(specWindow, state)
   }
 
   module.exports = {
@@ -494,8 +537,6 @@ chai.use((chai, u) => {
     removeOrKeepSingleQuotesBetweenStars,
 
     setSpecWindowGlobals,
-
-    // overrideChai: overrideChai
 
     restoreAsserts,
 

@@ -3,9 +3,11 @@
 export namespace CyServer {
   export type getRemoteState = () => RemoteState
 
+  // TODO: pull this from main types
   export interface Config {
     blacklistHosts: string | string[]
     clientRoute: string
+    experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
     /**
      * URL to Cypress's runner.

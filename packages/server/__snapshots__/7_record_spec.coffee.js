@@ -74,10 +74,11 @@ Fix the error in your code and re-run your tests.
   0 passing
   1 failing
 
-  1) record fails "before each" hook for "fails 1":
+  1) record fails
+       "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
       [stack trace lines]
 
 
@@ -167,17 +168,17 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
-     Uncaught Error: instantly fails
+  1) An uncaught error was detected outside of a test:
+     Error: The following error originated from your test code, not from Cypress.
 
-This error originated from your test code, not from Cypress.
+  > instantly fails
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 
@@ -998,10 +999,11 @@ Fix the error in your code and re-run your tests.
   0 passing
   1 failing
 
-  1) record fails "before each" hook for "fails 1":
+  1) record fails
+       "before each" hook for "fails 1":
      Error: foo
 
-Because this error occurred during a 'before each' hook we are skipping the remaining tests in the current suite: 'record fails'
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`record fails\`
       [stack trace lines]
 
 
@@ -1051,17 +1053,17 @@ Because this error occurred during a 'before each' hook we are skipping the rema
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
-     Uncaught Error: instantly fails
+  1) An uncaught error was detected outside of a test:
+     Error: The following error originated from your test code, not from Cypress.
 
-This error originated from your test code, not from Cypress.
+  > instantly fails
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
 Cypress could not associate this error to any specific test.
 
 We dynamically generated a new test to display this failure.
-  
+      [stack trace lines]
 
 
 

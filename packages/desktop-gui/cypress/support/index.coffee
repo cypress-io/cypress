@@ -1,3 +1,6 @@
+require("@percy/cypress")
+require('cypress-react-unit-test/dist/hooks')
+
 BluebirdPromise = require("bluebird")
 
 beforeEach ->
@@ -14,7 +17,7 @@ beforeEach ->
   }
 
 Cypress.Commands.add "visitIndex", (options = {}) ->
-  cy.visit("/dist/index.html", options)
+  cy.visit('/', options)
 
 Cypress.Commands.add "shouldBeOnIntro", ->
   cy.get(".main-nav .logo")

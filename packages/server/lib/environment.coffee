@@ -19,12 +19,12 @@ Error.stackTraceLimit = Infinity
 pkg = require("@packages/root")
 
 ## instead of setting NODE_ENV we will
-## use our own separate CYPRESS_ENV so
+## use our own separate CYPRESS_INTERNAL_ENV so
 ## as not to conflict with CI providers
 
 ## use env from package first
 ## or development as default
-env = process.env["CYPRESS_ENV"] or= pkg.env ? "development"
+env = process.env["CYPRESS_INTERNAL_ENV"] or= pkg.env ? "development"
 
 config = {
   ## uses cancellation for automation timeouts

@@ -229,7 +229,7 @@ const Log = function (cy, state, config, obj) {
       .omit('error')
       .omitBy(_.isFunction)
       .extend({
-        err: $errUtils.serializeError(this.get('error')),
+        err: $errUtils.wrapErr(this.get('error')),
         consoleProps: this.invoke('consoleProps'),
         renderProps: this.invoke('renderProps'),
       })
@@ -359,13 +359,7 @@ const Log = function (cy, state, config, obj) {
     },
 
     getError (err) {
-      // dont log stack traces on cypress errors
-      // or assertion errors
-      if ($errUtils.CypressErrorRe.test(err.name)) {
-        return err.toString()
-      }
-
-      return err.stack
+      return err.stack || err.message
     },
 
     setElAttrs () {

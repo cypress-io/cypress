@@ -6,10 +6,11 @@
   "parser": "@typescript-eslint/parser",
   "settings": {
     "react": {
-      "version": "16.8"
+      "version": "16.12"
     }
   },
   "rules": {
+    "arrow-body-style": "off",
     "no-unused-vars": "off",
     "react/jsx-filename-extension": [
       "warn",

@@ -54,7 +54,7 @@ describe "lib/browsers/electron", ->
       sinon.stub(plugins, "has")
       sinon.stub(plugins, "execute")
 
-      savedState()
+      savedState.create()
       .then (state) =>
         la(check.fn(state.get), "state is missing .get to stub", state)
         sinon.stub(state, "get").resolves(@state)
@@ -97,7 +97,7 @@ describe "lib/browsers/electron", ->
       .then =>
         options = electron._render.firstCall.args[3]
 
-        expect(options).to.include.keys("onFocus", "onNewWindow", "onPaint", "onCrashed")
+        expect(options).to.include.keys("onFocus", "onNewWindow", "onCrashed")
 
     ## https://github.com/cypress-io/cypress/issues/1992
     it "it merges in user preferences without removing essential options", ->
@@ -112,7 +112,7 @@ describe "lib/browsers/electron", ->
       .then =>
         options = electron._render.firstCall.args[3]
 
-        expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onPaint", "onCrashed")
+        expect(options).to.include.keys("foo", "onFocus", "onNewWindow", "onCrashed")
 
     it "installs supplied extensions from before:browser:launch and warns on failure", ->
       plugins.has.returns(true)

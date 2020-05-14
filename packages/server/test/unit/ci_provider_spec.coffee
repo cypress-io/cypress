@@ -440,6 +440,7 @@ describe "lib/util/ci_provider", ->
       CI_PROJECT_URL: "ciProjectUrl"
       CI_REPOSITORY_URL: "ciRepositoryUrl"
       CI_ENVIRONMENT_URL: "ciEnvironmentUrl"
+      CI_DEFAULT_BRANCH: "ciDefaultBranch"
 
       CI_COMMIT_SHA: "ciCommitSha"
       CI_COMMIT_REF_NAME: "ciCommitRefName"
@@ -461,6 +462,7 @@ describe "lib/util/ci_provider", ->
       ciProjectUrl: "ciProjectUrl"
       ciRepositoryUrl: "ciRepositoryUrl"
       ciEnvironmentUrl: "ciEnvironmentUrl"
+      ciDefaultBranch: "ciDefaultBranch"
     })
     expectsCommitParams({
       sha: "ciCommitSha"
@@ -468,6 +470,8 @@ describe "lib/util/ci_provider", ->
       message: "ciCommitMessage"
       authorName: "gitlabUserName"
       authorEmail: "gitlabUserEmail"
+      remoteOrigin: "ciRepositoryUrl"
+      defaultBranch: "ciDefaultBranch"
     })
 
     resetEnv = mockedEnv({
@@ -748,6 +752,42 @@ describe "lib/util/ci_provider", ->
     expectsCiParams(null)
     expectsCommitParams(null)
 
+  it "netlify", ->
+    resetEnv = mockedEnv({
+      NETLIFY: "true"
+
+      BUILD_ID: "buildId"
+      CONTEXT: "deployContent"
+      # deploy env variables
+      URL: "url"
+      DEPLOY_URL: "individualDeployUrl"
+      DEPLOY_PRIME_URL: "primeDeployUrl"
+      DEPLOY_ID: "deployId"
+
+      COMMIT_REF: "commit"
+      BRANCH: "branch"
+      HEAD: "head"
+      CACHED_COMMIT_REF: "previousCommit"
+      PULL_REQUEST: "pullRequestTrueOrFalse"
+      REVIEW_ID: "pullRequestReviewId"
+      REPOSITORY_URL: "repositoryUrl"
+    }, {clear: true})
+
+    expectsName("netlify")
+    expectsCiParams({
+      buildId: "buildId"
+      context: "deployContent"
+      url: "url"
+      deployUrl: "individualDeployUrl"
+      deployPrimeUrl: "primeDeployUrl"
+      deployId: "deployId"
+    })
+    expectsCommitParams({
+      sha: "commit"
+      branch: "branch"
+      remoteOrigin: "repositoryUrl"
+    })
+
   it "azure", ->
     resetEnv = mockedEnv({
       # these two variables tell us it is Azure CI
@@ -816,6 +856,7 @@ describe "lib/util/ci_provider", ->
 
       TRAVIS_JOB_ID: "travisJobId"
       TRAVIS_BUILD_ID: "travisBuildId"
+      TRAVIS_BUILD_WEB_URL: "https://travis-ci.org/github/project/123"
       TRAVIS_REPO_SLUG: "travisRepoSlug"
       TRAVIS_JOB_NUMBER: "travisJobNumber"
       TRAVIS_EVENT_TYPE: "travisEventType"
@@ -834,6 +875,7 @@ describe "lib/util/ci_provider", ->
     expectsCiParams({
       travisJobId: "travisJobId"
       travisBuildId: "travisBuildId"
+      travisBuildWebUrl: "https://travis-ci.org/github/project/123"
       travisRepoSlug: "travisRepoSlug"
       travisJobNumber: "travisJobNumber"
       travisEventType: "travisEventType"

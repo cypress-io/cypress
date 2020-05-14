@@ -33,6 +33,8 @@ describe('lib/open_project', () => {
 
   context('#launch', () => {
     beforeEach(function () {
+      openProject.getProject().options = {}
+
       this.spec = {
         absolute: 'path/to/spec',
       }

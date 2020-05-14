@@ -168,9 +168,12 @@ const runSmokeTest = (binaryDir, options) => {
 function testBinary (version, binaryDir, options) {
   debug('running binary verification check', version)
 
-  logger.log(stripIndent`
-  It looks like this is your first time using Cypress: ${chalk.cyan(version)}
-  `)
+  // if running from 'cypress verify', don't print this message
+  if (!options.force) {
+    logger.log(stripIndent`
+    It looks like this is your first time using Cypress: ${chalk.cyan(version)}
+    `)
+  }
 
   logger.log()
 

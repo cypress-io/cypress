@@ -1,29 +1,42 @@
 _     = require("lodash")
 path  = require("path")
-Mocha = require("mocha")
+## mocha-* is used to allow us to have later versions of mocha specified in devDependencies
+## and prevents accidently upgrading this one
+## TODO: look into upgrading this to version in driver
+Mocha = require("mocha-7.0.1")
+mochaReporters = require("mocha-7.0.1/lib/reporters")
+mochaCreateStatsCollector = require("mocha-7.0.1/lib/stats-collector")
+
 debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
-
-mochaReporters = require("mocha/lib/reporters")
+{ overrideRequire } = require('./override_require')
 
 STATS = "suites tests passes pending failures start end duration".split(" ")
 
-if Mocha.Suite.prototype.titlePath
-  throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
+## override calls to `require('mocha*')` when to always resolve with a mocha we control
+## otherwise mocha will be resolved from project's node_modules and might not work with our code
+customReporterMochaPath = path.dirname(require.resolve('mocha-7.0.1'))
+overrideRequire((depPath, _load) ->
+  if depPath is 'mocha' or depPath.startsWith('mocha/')
+    return _load(depPath.replace('mocha', customReporterMochaPath))
+)
 
-Mocha.Suite.prototype.titlePath = ->
-  result = []
+# if Mocha.Suite.prototype.titlePath
+#   throw new Error('Mocha.Suite.prototype.titlePath already exists. Please remove the monkeypatch code.')
 
-  if @parent
-    result = result.concat(@parent.titlePath())
+# Mocha.Suite.prototype.titlePath = ->
+#   result = []
 
-  if !@root
-    result.push(@title);
+#   if @parent
+#     result = result.concat(@parent.titlePath())
 
-  return result
+#   if !@root
+#     result.push(@title)
 
-Mocha.Runnable.prototype.titlePath = ->
-  @parent.titlePath().concat([@title])
+#   return result
+
+# Mocha.Runnable.prototype.titlePath = ->
+#   @parent.titlePath().concat([@title])
 
 getParentTitle = (runnable, titles) ->
   if not titles
@@ -41,6 +54,7 @@ createSuite = (obj, parent) ->
   suite = new Mocha.Suite(obj.title, {})
   suite.parent = parent if parent
   suite.file = obj.file
+  suite.root = !!obj.root
   return suite
 
 createRunnable = (obj, parent) ->
@@ -138,7 +152,7 @@ class Reporter
     @projectRoot = projectRoot
     @reporterOptions = reporterOptions
 
-  setRunnables: (rootRunnable = {}) ->
+  setRunnables: (rootRunnable = {title: ''}) ->
     ## manage stats ourselves
     @stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     @runnables = {}
@@ -147,6 +161,8 @@ class Reporter
     @mocha = new Mocha({reporter: reporter})
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
+    mochaCreateStatsCollector(@runner)
+
     @reporter = new @mocha._reporter(@runner, {
       reporterOptions: @reporterOptions
     })

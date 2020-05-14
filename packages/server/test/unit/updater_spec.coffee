@@ -2,7 +2,7 @@ require("../spec_helper")
 
 nmi         = require("node-machine-id")
 cwd         = require("#{root}lib/cwd")
-request     = require("request")
+request     = require("@cypress/request")
 Updater     = require("#{root}lib/updater")
 pkg         = require("@packages/root")
 _           = require("lodash")
@@ -53,6 +53,7 @@ describe "lib/updater", ->
           }
         })
         done()
+      return
 
     it "sends x-machine-id", (done) ->
       nmi.machineId()
@@ -64,6 +65,7 @@ describe "lib/updater", ->
             }
           })
           done()
+      return
 
     it "sends x-machine-id as null on error", (done) ->
       sinon.stub(nmi, "machineId").rejects(new Error())
@@ -76,6 +78,8 @@ describe "lib/updater", ->
         })
 
         done()
+      
+      return
 
   context "#check", ->
     beforeEach ->

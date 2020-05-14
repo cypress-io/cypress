@@ -2,92 +2,134 @@ const _ = require('lodash')
 
 const $errorMessages = require('./error_messages')
 const $utils = require('./utils')
+const $stackUtils = require('./stack_utils')
 
-const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
-const CypressErrorRe = /(AssertionError|CypressError)/
-const twoOrMoreNewLinesRe = /\n{2,}/
+const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 
-const appendErrMsg = (err, message) => {
-  //# preserve stack
-  //# this is the critical part
-  //# because the browser has a cached
-  //# dynamic stack getter that will
-  //# not be evaluated later
-  const stack = err.stack || ''
+if (!Error.captureStackTrace) {
+  Error.captureStackTrace = (err, fn) => {
+    const stack = (new Error()).stack
 
-  //# preserve message
-  //# and toString
-  let msg = err.message
-  const str = err.toString()
+    err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
+  }
+}
 
-  //# append message
-  msg += `\n\n${message}`
+const wrapErr = (err) => {
+  if (!err) return
 
-  //# set message
-  err.message = msg
+  return $utils.reduceProps(err, ERROR_PROPS)
+}
 
-  //# reset stack by replacing the original first line
-  //# with the new one
-  err.stack = stack.replace(str, err.toString())
+const isAssertionErr = (err = {}) => {
+  return err.name === 'AssertionError'
+}
 
-  module.exports.normalizeErrorStack(err)
+const isChaiValidationErr = (err = {}) => {
+  return _.startsWith(err.message, 'Invalid Chai property')
+}
+
+const isCypressErr = (err = {}) => {
+  return err.name === 'CypressError'
+}
+
+const mergeErrProps = (origErr, ...newProps) => {
+  return _.extend(origErr, ...newProps)
+}
+
+const stackWithReplacedProps = (err, props) => {
+  const {
+    message: originalMessage,
+    name: originalName,
+    stack: originalStack,
+  } = err
+
+  const {
+    message: newMessage,
+    name: newName,
+  } = props
+
+  // if stack doesn't already exist, leave it as is
+  if (!originalStack) return originalStack
+
+  let stack
+
+  if (newMessage) {
+    stack = originalStack.replace(originalMessage, newMessage)
+  }
+
+  if (newName) {
+    stack = originalStack.replace(originalName, newName)
+  }
+
+  if (originalMessage) {
+    return stack
+  }
+
+  // if message is undefined or an empty string, the error (in Chrome at least)
+  // is 'Error\n\n<stack>' and it results in wrongly prepending the
+  // new message, looking like '<newMsg>Error\n\n<stack>'
+  const message = newMessage || err.message
+  const name = newName || err.name
+
+  return originalStack.replace(originalName, `${name}: ${message}`)
+}
+
+const modifyErrMsg = (err, newErrMsg, cb) => {
+  err.stack = $stackUtils.normalizedStack(err)
+
+  const newMessage = cb(err.message, newErrMsg)
+  const newStack = stackWithReplacedProps(err, { message: newMessage })
+
+  err.message = newMessage
+  err.stack = newStack
 
   return err
 }
 
-const normalizeErrorStack = (e) => {
-  //# normalize error message + stack for firefox
-  const errString = e.toString()
-  const errStack = e.stack || ''
+const appendErrMsg = (err, errMsg) => {
+  return modifyErrMsg(err, errMsg, (msg1, msg2) => {
+    // we don't want to just throw in extra
+    // new lines if there isn't even a msg
+    if (!msg1) return msg2
 
-  if (!errStack.slice(0, errStack.indexOf('\n')).includes(errString.slice(0, errString.indexOf('\n')))) {
-    e.stack = `${errString}\n${errStack}`
-  }
+    if (!msg2) return msg1
 
-  return e
+    return `${msg1}\n\n${msg2}`
+  })
 }
 
-const cloneErr = (obj) => {
+const makeErrFromObj = (obj) => {
   const err2 = new Error(obj.message)
 
   err2.name = obj.name
   err2.stack = obj.stack
 
-  for (let prop of Object.keys(obj || {})) {
-    const val = obj[prop]
-
+  _.each(obj, (val, prop) => {
     if (!err2[prop]) {
       err2[prop] = val
     }
-  }
+  })
 
   return err2
 }
 
-const throwErr = (err, options) => {
-  if (options == null) {
-    options = {}
-  }
-
+const throwErr = (err, options = {}) => {
   if (_.isString(err)) {
-    err = cypressErr(err)
-
-    if (options.noStackTrace) {
-      err.stack = ''
-    }
+    err = cypressErr({ message: err })
   }
 
-  let { onFail } = options
-  const { errProps } = options
+  let { onFail, errProps } = options
 
-  //# assume onFail is a command if
+  // assume onFail is a command if
   //# onFail is present and isnt a function
   if (onFail && !_.isFunction(onFail)) {
     const command = onFail
 
     //# redefine onFail and automatically
     //# hook this into our command
-    onFail = (err) => command.error(err)
+    onFail = (err) => {
+      return command.error(err)
+    }
   }
 
   if (onFail) {
@@ -101,124 +143,199 @@ const throwErr = (err, options) => {
   throw err
 }
 
-const throwErrByPath = (errPath, options) => {
-  let err
+const throwErrByPath = (errPath, options = {}) => {
+  const err = errByPath(errPath, options.args)
 
-  if (options == null) {
-    options = {}
+  // gets rid of internal stack lines that just build the error
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(err, throwErrByPath)
   }
 
-  err = (() => {
-    try {
-      return errMsgByPath(errPath, options.args)
-    } catch (e) {
-      return internalErr(e)
-    }
-  })()
-
-  throwErr(err, options)
+  return throwErr(err, options)
 }
 
-const warnByPath = (errPath, options) => {
-  if (options == null) {
-    options = {}
+const warnByPath = (errPath, options = {}) => {
+  const errObj = errByPath(errPath, options.args)
+  let err = errObj.message
+
+  if (errObj.docsUrl) {
+    err += `\n\n${errObj.docsUrl}`
   }
 
-  const err = errMsgByPath(errPath, options.args)
+  $utils.warning(err)
+}
 
-  return $utils.warning(err)
+class InternalCypressError extends Error {
+  constructor (message) {
+    super(message)
+
+    this.name = 'InternalCypressError'
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InternalCypressError)
+    }
+  }
+}
+
+class CypressError extends Error {
+  constructor (message) {
+    super(message)
+
+    this.name = 'CypressError'
+
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, CypressError)
+    }
+  }
 }
 
 const internalErr = (err) => {
-  err = new Error(err)
-  err.name = 'InternalError'
+  const newErr = new InternalCypressError(err.message)
 
-  return err
+  return mergeErrProps(newErr, err)
 }
 
 const cypressErr = (err) => {
-  err = new Error(err)
-  err.name = 'CypressError'
+  const newErr = new CypressError(err.message)
+
+  return mergeErrProps(newErr, err)
+}
+
+const cypressErrByPath = (errPath, options = {}) => {
+  const errObj = errByPath(errPath, options.args)
+
+  return cypressErr(errObj)
+}
+
+const replaceErrMsgTokens = (errMessage, args) => {
+  if (!errMessage) return errMessage
+
+  const replace = (str, argValue, argKey) => {
+    return str.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
+  }
+
+  const getMsg = function (args = {}) {
+    return _.reduce(args, (message, argValue, argKey) => {
+      if (_.isArray(message)) {
+        return _.map(message, (str) => replace(str, argValue, argKey))
+      }
+
+      return replace(message, argValue, argKey)
+    }, errMessage)
+  }
+
+  // replace more than 2 newlines with exactly 2 newlines
+  return $utils.normalizeNewLines(getMsg(args), 2)
+}
+
+const errByPath = (msgPath, args) => {
+  let msgValue = _.get($errorMessages, msgPath)
+
+  if (!msgValue) {
+    return internalErr({ message: `Error message path '${msgPath}' does not exist` })
+  }
+
+  let msgObj = msgValue
+
+  if (_.isFunction(msgValue)) {
+    msgObj = msgValue(args)
+  }
+
+  if (_.isString(msgObj)) {
+    msgObj = {
+      message: msgObj,
+    }
+  }
+
+  return cypressErr({
+    message: replaceErrMsgTokens(msgObj.message, args),
+    docsUrl: msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined,
+  })
+}
+
+const createUncaughtException = (type, err) => {
+  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  let uncaughtErr = errByPath(errPath, {
+    errMsg: err.message,
+  })
+
+  modifyErrMsg(err, uncaughtErr.message, () => uncaughtErr.message)
+
+  err.docsUrl = _.compact([uncaughtErr.docsUrl, err.docsUrl])
 
   return err
 }
 
-const getObjValueByPath = (obj, keyPath) => {
-  if (!_.isObject(obj)) {
-    throw new Error('The first parameter to utils.getObjValueByPath() must be an object')
+// stacks from command failures and assertion failures have the right message
+// but the stack points to cypress internals. here we replace the internal
+// cypress stack with the invocation stack, which points to the user's code
+const stackAndCodeFrameIndex = (err, userInvocationStack) => {
+  if (!userInvocationStack) return { stack: err.stack }
+
+  if (isCypressErr(err) || isChaiValidationErr(err)) {
+    return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
   }
 
-  if (!_.isString(keyPath)) {
-    throw new Error('The second parameter to utils.getObjValueByPath() must be a string')
-  }
-
-  const keys = keyPath.split('.')
-  let val = obj
-
-  for (let key of keys) {
-    val = val[key]
-    if (!val) {
-      break
-    }
-  }
-
-  return val
+  return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
 }
 
-const errMsgByPath = (errPath, args) => {
-  let errMessage
+const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
+  let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
 
-  if (!(errMessage = getObjValueByPath($errorMessages, errPath))) {
-    throw new Error(`Error message path '${errPath}' does not exist`)
-  }
+  stack = $stackUtils.stackWithContentAppended(err, stack)
+  stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
 
-  const getMsg = function () {
-    if (_.isFunction(errMessage)) {
-      return errMessage(args)
-    }
-
-    return _.reduce(args, (message, argValue, argKey) => message.replace(new RegExp(`\{\{${argKey}\}\}`, 'g'), argValue)
-      , errMessage)
-  }
-
-  //# normalize two or more new lines
-  //# into only exactly two new lines
-  return _
-  .chain(getMsg())
-  .split(twoOrMoreNewLinesRe)
-  .compact()
-  .join('\n\n')
-  .value()
+  return { stack, index }
 }
 
-const serializeError = (err) => {
-  if (!err) return null
+const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
+  const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
+  const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
-  return _.reduce(ERROR_PROPS, (memo, prop) => {
-    if (_.has(err, prop) || err[prop]) {
-      memo[prop] = err[prop]
-    }
+  err.stack = stack
+  err.sourceMappedStack = sourceMapped
+  err.parsedStack = parsed
+  err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
-    return memo
-  }, {})
+  return err
 }
 
-const wrapErr = (err) => {
-  return $utils.reduceProps(err, ERROR_PROPS)
+// all errors flow through this function before they're finally thrown
+// or used to reject promises
+const processErr = (errObj = {}, config) => {
+  let docsUrl = errObj.docsUrl
+
+  if (config('isInteractive') || !docsUrl) {
+    return errObj
+  }
+
+  // backup, and then delete the docsUrl property in runMode
+  // so that it does not add the 'Learn More' link to the UI
+  // for screenshots or videos
+  delete errObj.docsUrl
+
+  docsUrl = _(docsUrl).castArray().compact().join('\n\n')
+
+  // append the docs url when not interactive so it appears in the stdout
+  return appendErrMsg(errObj, docsUrl)
 }
 
 module.exports = {
-  CypressErrorRe,
   appendErrMsg,
-  normalizeErrorStack,
-  cloneErr,
+  createUncaughtException,
+  cypressErr,
+  cypressErrByPath,
+  enhanceStack,
+  errByPath,
+  isAssertionErr,
+  isChaiValidationErr,
+  isCypressErr,
+  makeErrFromObj,
+  mergeErrProps,
+  modifyErrMsg,
+  processErr,
   throwErr,
   throwErrByPath,
   warnByPath,
-  internalErr,
-  cypressErr,
-  errMsgByPath,
-  serializeError,
   wrapErr,
-  getObjValueByPath,
 }

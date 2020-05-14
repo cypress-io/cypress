@@ -40,7 +40,9 @@ class SelectorPlayground extends Component {
       })}>
         <div className='selector'>
           <Tooltip
-            title='Click an element to see a suggested selector'>
+            title='Click an element to see a suggested selector'
+            className='cy-tooltip'
+          >
             <button
               className={`highlight-toggle ${model.isEnabled ? 'active' : ''}`}
               onClick={this._toggleEnablingSelectorPlayground}>
@@ -67,7 +69,7 @@ class SelectorPlayground extends Component {
             /><span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
-            <Tooltip title={model.infoHelp || ''}>
+            <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
               <span className='info num-elements'>
                 {model.isValid ?
                   model.numElements :
@@ -76,7 +78,7 @@ class SelectorPlayground extends Component {
               </span>
             </Tooltip>
           </div>
-          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`}>
+          <Tooltip title={this.copyText || ''} updateCue={`${selectorText}${this.copyText}`} className='cy-tooltip'>
             <button
               ref={(node) => this._copyButton = node}
               className='copy-to-clipboard'
@@ -87,7 +89,7 @@ class SelectorPlayground extends Component {
               <i className='far fa-copy' />
             </button>
           </Tooltip>
-          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`}>
+          <Tooltip title={this.printText || ''} updateCue={`${selectorText}${this.printText}`} className='cy-tooltip'>
             <button
               ref={(node) => this._printButton = node}
               className='print-to-console'

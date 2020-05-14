@@ -14,8 +14,8 @@ describe "lib/util/tty", ->
     beforeEach ->
       ## need to delete both the initial module and the
       ## "base.js" module with problematic tty.getWindowSize call
-      delete require.cache[require.resolve("mocha/lib/reporters/base")]
-      delete require.cache[require.resolve("mocha/lib/reporters")]
+      delete require.cache[require.resolve("mocha-7.0.1/lib/reporters/base")]
+      delete require.cache[require.resolve("mocha-7.0.1/lib/reporters")]
 
     it "polyfills stdout and stderr getWindowSize", ->
       sinon.stub(tty, "isatty").returns(true)
@@ -28,8 +28,8 @@ describe "lib/util/tty", ->
 
       ## forces mocha reporters base to use tty.getWindowSize()
       ## check the terminal width - should be the ttyUtil hardcoded
-      require("mocha/lib/reporters")
-      base = require("mocha/lib/reporters/base")
+      require("mocha-7.0.1/lib/reporters")
+      base = require("mocha-7.0.1/lib/reporters/base")
 
       expect(process.stdout.getWindowSize()).to.deep.eq([10, 20])
       expect(process.stderr.getWindowSize()).to.deep.eq([10, 20])

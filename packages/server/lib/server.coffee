@@ -15,6 +15,7 @@ debug        = require("debug")("cypress:server:server")
 { agent, blacklist, concatStream, cors, uri } = require("@packages/network")
 { NetworkProxy } = require("@packages/proxy")
 { netStubbingState } = require("@packages/net-stubbing/server")
+{ createInitialWorkers } = require("@packages/rewriter")
 origin       = require("./util/origin")
 ensureUrl    = require("./util/ensure-url")
 appData      = require("./util/app_data")
@@ -156,8 +157,9 @@ class Server
     e.portInUse = true
     e
 
-  open: (config = {}, project, onWarning) ->
+  open: (config = {}, project, onError, onWarning) ->
     debug("server open")
+
     la(_.isPlainObject(config), "expected plain config object", config)
 
     Promise.try =>
@@ -176,9 +178,19 @@ class Server
 
       @createNetworkProxy(config, getRemoteState)
 
+      if config.experimentalSourceRewriting
+        createInitialWorkers()
+
       @createHosts(config.hosts)
 
-      @createRoutes(app, config, @_request, getRemoteState, project, @_networkProxy)
+      @createRoutes({
+        app
+        config
+        getRemoteState
+        networkProxy: @_networkProxy
+        onError
+        project
+      })
 
       @createServer(app, config, project, @_request, onWarning)
 
@@ -742,6 +754,9 @@ class Server
     options.onResolveUrl = @_onResolveUrl.bind(@)
     options.onRequest    = @_onRequest.bind(@)
     options.netStubbingState = @_netStubbingState
+
+    options.onResetServerState = =>
+      @_networkProxy.reset()
 
     @_socket.startListening(@_server, automation, config, options)
     @_normalizeReqUrl(@_server)

@@ -1,8 +1,8 @@
 require("../spec_helper")
 
 _             = require("lodash")
-r             = require("request")
-rp            = require("request-promise")
+r             = require("@cypress/request")
+rp            = require("@cypress/request-promise")
 compression   = require("compression")
 dns           = require("dns")
 express       = require("express")
@@ -13,7 +13,7 @@ zlib          = require("zlib")
 str           = require("underscore.string")
 browserify    = require("browserify")
 babelify      = require("babelify")
-coffeeify       = require("coffeeify")
+coffeeify     = require("coffeeify")
 streamToPromise = require("stream-to-promise")
 evilDns       = require("evil-dns")
 Promise       = require("bluebird")
@@ -27,21 +27,39 @@ Project       = require("#{root}lib/project")
 Watchers      = require("#{root}lib/watchers")
 errors        = require("#{root}lib/errors")
 files         = require("#{root}lib/controllers/files")
+pluginsModule = require("#{root}lib/plugins")
 preprocessor  = require("#{root}lib/plugins/preprocessor")
+resolve       = require("#{root}lib/plugins/resolve")
 fs            = require("#{root}lib/util/fs")
 glob          = require("#{root}lib/util/glob")
 CacheBuster   = require("#{root}lib/util/cache_buster")
 Fixtures      = require("#{root}test/support/helpers/fixtures")
+simple_tsify  = require("#{root}test/support/helpers/simple_tsify")
 
 zlib = Promise.promisifyAll(zlib)
 
 ## force supertest-session to use promises provided in supertest
 session = proxyquire("supertest-session", {supertest: supertest})
 
+absolutePathRegex = /"\/[^{}]*?\.projects/g
+sourceMapRegex = /\n\/\/# sourceMappingURL=.*$/im
+
+replaceAbsolutePaths = (content) ->
+  content.replace(absolutePathRegex, "\"/<path-to-project>")
+
+removeSourceMap = (content) ->
+  content.replace(sourceMapRegex, ";")
+
 removeWhitespace = (c) ->
   c = str.clean(c)
   c = str.lines(c).join(" ")
   c
+
+cleanResponseBody = (body) ->
+  replaceAbsolutePaths(removeWhitespace(body))
+
+trimString = (s) -> _.trim(s)
+nonEmpty = (s) -> !_.isEmpty(s)
 
 sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
@@ -66,6 +84,16 @@ browserifyFile = (filePath) ->
     .bundle()
   )
 
+browserifyFileTs = (filePath) ->
+  streamToPromise(
+    browserify(filePath)
+    .transform(coffeeify)
+    .transform(simple_tsify, {
+      typescript: require('typescript'),
+    })
+    .bundle()
+  )
+
 describe "Routes", ->
   require("mocha-banner").register()
 
@@ -74,6 +102,7 @@ describe "Routes", ->
 
     sinon.stub(CacheBuster, "get").returns("-123")
     sinon.stub(Server.prototype, "reset")
+    sinon.stub(pluginsModule, "has").returns(false)
 
     nock.enableNetConnect()
 
@@ -356,7 +385,7 @@ describe "Routes", ->
 
               body = res.body
 
-              expect(body.integration).to.have.length(3)
+              expect(body.integration).to.have.length(4)
 
               ## remove the absolute path key
               body.integration = _.map body.integration, (obj) ->
@@ -364,6 +393,10 @@ describe "Routes", ->
 
               expect(res.body).to.deep.eq({
                 integration: [
+                  {
+                    "name": "sub/a&b%c.js"
+                    "relative": "tests/sub/a&b%c.js"
+                  }
                   {
                     name: "sub/sub_test.coffee"
                     relative: "tests/sub/sub_test.coffee"
@@ -470,9 +503,55 @@ describe "Routes", ->
             })
 
   context "GET /__cypress/tests", ->
-    describe "ids", ->
+    describe "ids with typescript", ->
       beforeEach ->
         Fixtures.scaffold("ids")
+
+        @setup({
+          projectRoot: Fixtures.projectPath("ids")
+        })
+
+      checkTranspilation = (body, file) ->
+        b = removeSourceMap(body).replace(/\n/g, '')
+        f = file.toString().replace(/\n/g, '')
+
+        expect(b).to.equal f
+
+      it "processes foo.coffee spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
+          .then (file) ->
+            checkTranspilation(res.body, file)
+
+      it "processes dom.jsx spec", ->
+        @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+
+          browserifyFileTs(Fixtures.path("projects/ids/cypress/integration/baz.js"))
+          .then (file) ->
+            checkTranspilation(res.body, file)
+            expect(res.body).to.include("React.createElement(")
+
+      it "serves error javascript file when the file is missing", ->
+        @rp("http://localhost:2020/__cypress/tests?p=does/not/exist.coffee")
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.body).to.include('Cypress.action("spec:script:error", {')
+          expect(res.body).to.include("Cannot find module")
+
+    describe "ids without typescript", ->
+      beforeEach ->
+        Fixtures.scaffold("ids")
+
+        ## remove cached options
+        delete require.cache[require.resolve("@cypress/browserify-preprocessor")]
+        sinon.stub(resolve, 'typescript').callsFake(->
+          return null
+        )
 
         @setup({
           projectRoot: Fixtures.projectPath("ids")
@@ -482,19 +561,21 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/foo.coffee"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
       it "processes dom.jsx spec", ->
         @rp("http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
           browserifyFile(Fixtures.path("projects/ids/cypress/integration/baz.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
             expect(res.body).to.include("React.createElement(")
 
       it "serves error javascript file when the file is missing", ->
@@ -535,19 +616,21 @@ describe "Routes", ->
         @rp("http://localhost:2020/__cypress/tests?p=my-tests/test1.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
-          browserifyFile(Fixtures.path("projects/no-server/my-tests/test1.js"))
+          browserifyFileTs(Fixtures.path("projects/no-server/my-tests/test1.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
       it "processes helpers/includes.js javascripts", ->
         @rp("http://localhost:2020/__cypress/tests?p=helpers/includes.js")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
+          expect(res.body).to.match(sourceMapRegex)
 
-          browserifyFile(Fixtures.path("projects/no-server/helpers/includes.js"))
+          browserifyFileTs(Fixtures.path("projects/no-server/helpers/includes.js"))
           .then (file) ->
-            expect(removeSourceMapContents(res.body)).to.equal(file.toString())
+            expect(removeSourceMap(res.body)).to.equal(file.toString())
 
   context "ALL /__cypress/xhrs/*", ->
     beforeEach ->
@@ -688,23 +771,6 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.deep.eq({test: "We’ll"})
-
-      context "deferred", ->
-        it "closes connection if no stub is received before a reset", ->
-          p = @rp({
-            url: "http://localhost:2020/__cypress/xhrs/users/1"
-            json: true
-            headers: {
-              "x-cypress-id": "foo1"
-              "x-cypress-responsedeferred": true
-            }
-          })
-
-          setTimeout =>
-            @server._xhrServer.reset()
-          , 100
-
-          expect(p).to.be.rejectedWith('Error: socket hang up')
 
       context "fixture", ->
         beforeEach ->
@@ -850,23 +916,23 @@ describe "Routes", ->
         })
 
       it "renders iframe with variables passed in", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/integration/test2.coffee")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "can send back all tests", ->
-        contents = removeWhitespace Fixtures.get("server/expected_todos_all_tests_iframe.html")
+        contents = removeWhitespace(Fixtures.get("server/expected_todos_all_tests_iframe.html"))
 
         @rp("http://localhost:2020/__cypress/iframes/__all")
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "no-server", ->
@@ -887,7 +953,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "no-server with supportFile: false", ->
@@ -907,7 +973,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "e2e", ->
@@ -927,7 +993,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
     describe "ids", ->
@@ -943,7 +1009,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "can send back all tests", ->
@@ -953,7 +1019,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
   context "GET *", ->
@@ -1035,7 +1101,7 @@ describe "Routes", ->
         .get("/gzip")
         .matchHeader("accept-encoding", "gzip")
         .replyWithFile(200, Fixtures.path("server/gzip.html.gz"), {
-          "Content-Type": "application/javascript"
+          "Content-Type": "text/html"
           "Content-Encoding": "gzip"
         })
 
@@ -1066,6 +1132,7 @@ describe "Routes", ->
             js += chunk
             res.write(chunk)
 
+          ## note - this is unintentionally invalid JS, just try executing it anywhere
           write("function ")
           _.times 100, =>
             write("😡😈".repeat(10))
@@ -1564,14 +1631,14 @@ describe "Routes", ->
             "__cypress.initial=true; Domain=localhost; Path=/"
           ]
 
-      it "ignores invalid cookies", ->
+      it "passes invalid cookies", ->
         nock(@server._remoteOrigin)
         .get("/invalid")
         .reply 200, "OK", {
           "set-cookie": [
             "foo=bar; Path=/"
-             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900" ## this is okay
-             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900" ## should ignore this
+             "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM\n    XtQOGalF: VtR; path=/; Max-Age=900"
            ]
         }
 
@@ -1581,6 +1648,7 @@ describe "Routes", ->
           expect(res.headers["set-cookie"]).to.deep.eq [
             "foo=bar; Path=/"
              "___utmvmXluIZsM=fidJKOsDSdm; path=/; Max-Age=900"
+             "___utmvbXluIZsM=bZM    XtQOGalF: VtR; path=/; Max-Age=900"
           ]
 
       it "forwards other headers from incoming responses", ->
@@ -1650,6 +1718,26 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
           expect(res.headers).not.to.have.property("content-security-policy")
+
+      it "omits document-domain from Feature-Policy header", ->
+        nock(@server._remoteOrigin)
+        .get("/bar")
+        .reply 200, "OK", {
+          "Content-Type": "text/html"
+          "Feature-Policy": "camera *; document-domain 'none'; autoplay 'self'"
+        }
+
+        @rp({
+          url: "http://localhost:8080/bar"
+          headers: {
+            "Cookie": "__cypress.initial=false"
+          }
+        })
+        .then (res) ->
+          expect(res.statusCode).to.eq(200)
+          expect(res.headers['feature-policy']).to.include("camera *")
+          expect(res.headers['feature-policy']).to.include("autoplay 'self'")
+          expect(res.headers['feature-policy']).not.to.include("document-domain 'none'")
 
       it "does not modify host origin header", ->
         @setup("http://foobar.com")
@@ -1996,7 +2084,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "injects even when head tag is missing", ->
@@ -2017,7 +2105,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
           expect(body).to.eq contents
 
       it "injects when head is capitalized", ->
@@ -2254,7 +2342,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents
 
       it "injects into https://www.google.com", ->
@@ -2315,7 +2403,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "continues to inject on the same https superdomain but different subdomain", ->
@@ -2334,7 +2422,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq contents.replace("localhost", "foobar.com")
 
       it "injects document.domain on https requests to same superdomain but different subdomain", ->
@@ -2354,7 +2442,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
             expect(body).to.eq "<html><head> <script type='text/javascript'> document.domain = 'foobar.com'; </script></head><body>https server</body></html>"
 
       it "injects document.domain on other http requests", ->
@@ -2374,7 +2462,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2395,7 +2483,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head> <script type='text/javascript'> document.domain = 'google.com'; </script></head></html>")
 
@@ -2473,7 +2561,7 @@ describe "Routes", ->
         .then (res) ->
           expect(res.statusCode).to.eq(200)
 
-          body = removeWhitespace(res.body)
+          body = cleanResponseBody(res.body)
 
           expect(body).to.eq("<html><head></head></html>")
 
@@ -2498,7 +2586,7 @@ describe "Routes", ->
           .then (res) ->
             expect(res.statusCode).to.eq(200)
 
-            body = removeWhitespace(res.body)
+            body = cleanResponseBody(res.body)
 
             expect(body).to.eq("<html><head></head></html>")
 
@@ -3116,6 +3204,7 @@ describe "Routes", ->
             ## abort when we get the
             ## response headers
             .on "response", abort
+        return
 
     context "event source / server sent events / SSE", ->
       onRequest = null

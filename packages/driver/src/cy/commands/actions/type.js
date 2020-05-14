@@ -14,12 +14,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
+    const userOptions = options
     let updateTable
 
-    options = _.clone(options)
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    _.defaults(options, {
+    options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -349,9 +349,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
     const handleFocused = function () {
       // if it's the body, don't need to worry about focus
-      const isBody = options.$el.is('body')
+      // (unless it can be modified i.e we're in designMode or contenteditable)
+      const isBody = options.$el.is('body') && !$elements.isContentEditable(options.$el[0])
 
       if (isBody) {
+        debug('typing into body')
+
         return type()
       }
 
@@ -454,7 +457,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   }
 
   function clear (subject, options = {}) {
-    _.defaults(options, {
+    const userOptions = options
+
+    options = _.defaults({}, userOptions, {
       log: true,
       force: false,
     })
