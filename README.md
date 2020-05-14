@@ -46,6 +46,7 @@ module.exports = (on) => {
 
 - [React app](examples/react-app) shows how to point Cypress at Webpack configuration from `react-scripts` dependency
 - [use-babelrc](examples/use-babelrc) shows to to use your project's `.babelrc` with Webpack
+- [use-ts-loader](examples/use-ts-loader) shows how to transpile TypeScript specs following [Webpack TypeScript guide](https://webpack.js.org/guides/typescript/)
 
 ## Options
 
