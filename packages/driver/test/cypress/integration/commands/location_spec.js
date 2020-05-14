@@ -1,499 +1,513 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const {
-  _
-} = Cypress;
-const {
-  $
-} = Cypress;
+const { _ } = Cypress
 
-describe("src/cy/commands/location", function() {
-  beforeEach(() => cy.visit("/fixtures/generic.html"));
+describe('src/cy/commands/location', () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/generic.html')
+  })
 
-  context("#url", function() {
-    it("returns the location href", () => cy.url().then(url => expect(url).to.eq("http://localhost:3500/fixtures/generic.html")));
+  context('#url', () => {
+    it('returns the location href', () => {
+      cy.url().then((url) => {
+        expect(url).to.eq('http://localhost:3500/fixtures/generic.html')
+      })
+    })
 
-    it("eventually resolves", function() {
+    it('eventually resolves', () => {
       _.delay(() => {
-        const win = cy.state("window");
-        return win.location.href = "/foo/bar/baz.html";
-      }
-      , 100);
+        const win = cy.state('window')
 
-      return cy.url().should("match", /baz/).and("eq", "http://localhost:3500/foo/bar/baz.html");
-    });
+        win.location.href = '/foo/bar/baz.html'
+      }, 100)
 
-    it("catches thrown errors", function() {
-      cy.stub(Cypress.utils, "locToString")
+      cy.url().should('match', /baz/).and('eq', 'http://localhost:3500/foo/bar/baz.html')
+    })
+
+    it('catches thrown errors', () => {
+      cy.stub(Cypress.utils, 'locToString')
       .onFirstCall().throws(new Error)
-      .onSecondCall().returns("http://localhost:3500/baz.html");
+      .onSecondCall().returns('http://localhost:3500/baz.html')
 
-      return cy.url().should("include", "/baz.html");
-    });
+      cy.url().should('include', '/baz.html')
+    })
 
-    describe("assertion verification", function() {
-      beforeEach(function() {
-        cy.on("log:added", (attrs, log) => {
-          if (log.get("name") === "assert") {
-            return this.lastLog = log;
+    describe('assertion verification', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'assert') {
+            this.lastLog = log
           }
-        });
-
-        return null;
-      });
-
-      return it("eventually passes the assertion", function() {
-        cy.on("command:retry", _.after(2, _.once(() => {
-          const win = cy.state("window");
-          return win.location.href = "/foo/bar/baz.html";
         })
-        )
-        );
 
-        return cy.url().should("match", /baz/).then(function() {
-          const {
-            lastLog
-          } = this;
+        return null
+      })
 
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("passed");
-          return expect(lastLog.get("ended")).to.be.true;
-        });
-      });
-    });
+      it('eventually passes the assertion', () => {
+        cy.on('command:retry', _.after(2, _.once(() => {
+          const win = cy.state('window')
 
-    describe("errors", function() {
-      beforeEach(function() {
-        Cypress.config("defaultCommandTimeout", 100);
+          win.location.href = '/foo/bar/baz.html'
+        })))
 
-        this.logs = [];
+        cy.url().should('match', /baz/).then(function () {
+          const { lastLog } = this
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
+      })
+    })
 
-        return null;
-      });
+    describe('errors', () => {
+      beforeEach(function () {
+        Cypress.config('defaultCommandTimeout', 100)
 
-      it("eventually fails the assertion", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+        this.logs = []
 
-          expect(err.message).to.include(lastLog.get("error").message);
-          expect(err.message).not.to.include("undefined");
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError);
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-          return done();
-        });
+        return null
+      })
 
-        return cy.url().should("eq", "not-this");
-      });
+      it('eventually fails the assertion', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-      return it("does not log an additional log on failure", function(done) {
-        cy.on("fail", () => {
-          expect(this.logs.length).to.eq(2);
-          return done();
-        });
+          expect(err.message).to.include(lastLog.get('error').message)
+          expect(err.message).not.to.include('undefined')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-        return cy.url().should("eq", "not-this");
-      });
-    });
+          done()
+        })
 
-    return describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
+        cy.url().should('eq', 'not-this')
+      })
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+      it('does not log an additional log on failure', function (done) {
+        cy.on('fail', () => {
+          expect(this.logs.length).to.eq(2)
 
-        return null;
-      });
+          done()
+        })
 
-      it("ends immediately", () => cy.url().then(function() {
-        const {
-          lastLog
-        } = this;
+        cy.url().should('eq', 'not-this')
+      })
+    })
 
-        expect(lastLog.get("ended")).to.be.true;
-        return expect(lastLog.get("state")).to.eq("passed");
-      }));
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
 
-      it("snapshots immediately", () => cy.url().then(function() {
-        const {
-          lastLog
-        } = this;
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-        expect(lastLog.get("snapshots").length).to.eq(1);
-        return expect(lastLog.get("snapshots")[0]).to.be.an("object");
-      }));
+        return null
+      })
 
-      it("logs obj", () => cy.url().then(function() {
-        const obj = {
-          name: "url",
-          message: ""
-        };
+      it('ends immediately', () => {
+        cy.url().then(function () {
+          const { lastLog } = this
 
-        const {
-          lastLog
-        } = this;
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
 
-        return _.each(obj, (value, key) => {
-          return expect(lastLog.get(key)).to.deep.eq(value);
-        });
-      }));
+      it('snapshots immediately', () => {
+        cy.url().then(function () {
+          const { lastLog } = this
 
-      it("does not emit when {log: false}", () => cy.url({log: false}).then(function() {
-        return expect(this.log).to.be.undefined;
-      }));
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
 
-      return it("#consoleProps", () => cy.url().then(function() {
-        const consoleProps = this.lastLog.invoke("consoleProps");
-
-        return expect(consoleProps).to.deep.eq({
-          Command: "url",
-          Yielded: "http://localhost:3500/fixtures/generic.html"
-        });}));
-  });
-});
-
-  context("#hash", function() {
-    it("returns the location hash", () => cy.hash().then(hash => expect(hash).to.eq("")));
-
-    it("eventually resolves", function() {
-      _.delay(function() {
-        const win = cy.state("window");
-        return win.location.hash = "users/1";
-      }
-      , 100);
-
-      return cy.hash().should("match", /users/).and("eq", "#users/1");
-    });
-
-    describe("assertion verification", function() {
-      beforeEach(function() {
-        cy.on("log:added", (attrs, log) => {
-          if (log.get("name") === "assert") {
-            return this.lastLog = log;
+      it('logs obj', () => {
+        cy.url().then(function () {
+          const obj = {
+            name: 'url',
+            message: '',
           }
-        });
 
-        return null;
-      });
+          const { lastLog } = this
 
-      return it("eventually passes the assertion", function() {
-        cy.on("command:retry", _.after(2, () => {
-          const win = cy.state("window");
-          return win.location.hash = "users/1";
+          _.each(obj, (value, key) => {
+            expect(lastLog.get(key)).to.deep.eq(value)
+          })
         })
-        );
+      })
 
-        return cy.hash().should("match", /users/).then(function() {
-          const {
-            lastLog
-          } = this;
+      it('does not emit when {log: false}', () => {
+        cy.url({ log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
 
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("passed");
-          return expect(lastLog.get("ended")).to.be.true;
-        });
-      });
-    });
+      it('#consoleProps', () => {
+        cy.url().then(function () {
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-    describe("errors", function() {
-      beforeEach(function() {
-        Cypress.config("defaultCommandTimeout", 100);
+          expect(consoleProps).to.deep.eq({
+            Command: 'url',
+            Yielded: 'http://localhost:3500/fixtures/generic.html',
+          })
+        })
+      })
+    })
+  })
 
-        this.logs = [];
+  context('#hash', () => {
+    it('returns the location hash', () => {
+      cy.hash().then((hash) => {
+        expect(hash).to.eq('')
+      })
+    })
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+    it('eventually resolves', () => {
+      _.delay(() => {
+        const win = cy.state('window')
 
-        return null;
-      });
+        win.location.hash = 'users/1'
+      }, 100)
 
-      it("eventually fails the assertion", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+      cy.hash().should('match', /users/).and('eq', '#users/1')
+    })
 
-          expect(err.message).to.include(lastLog.get("error").message);
-          expect(err.message).not.to.include("undefined");
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError);
-
-          return done();
-        });
-
-        return cy.hash().should("eq", "not-this");
-      });
-
-      return it("does not log an additional log on failure", function(done) {
-        cy.on("fail", () => {
-          expect(this.logs.length).to.eq(2);
-          return done();
-        });
-
-        return cy.hash().should("eq", "not-this");
-      });
-    });
-
-    return describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
-
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
-
-        return null;
-      });
-
-      it("ends immediately", () => cy.hash().then(function() {
-        const {
-          lastLog
-        } = this;
-
-        expect(lastLog.get("ended")).to.be.true;
-        return expect(lastLog.get("state")).to.eq("passed");
-      }));
-
-      it("snapshots immediately", () => cy.hash().then(function() {
-        const {
-          lastLog
-        } = this;
-
-        expect(lastLog.get("snapshots").length).to.eq(1);
-        return expect(lastLog.get("snapshots")[0]).to.be.an("object");
-      }));
-
-      it("logs obj", () => cy.hash().then(function() {
-        const obj = {
-          name: "hash",
-          message: ""
-        };
-
-        const {
-          lastLog
-        } = this;
-
-        return _.each(obj, (value, key) => {
-          return expect(lastLog.get(key)).to.deep.eq(value);
-        });
-      }));
-
-      it("does not emit when {log: false}", () => cy.hash({log: false}).then(function() {
-        return expect(this.log).to.be.undefined;
-      }));
-
-      return it("#consoleProps", () => cy.hash().then(function() {
-        const consoleProps = this.lastLog.invoke("consoleProps");
-
-        return expect(consoleProps).to.deep.eq({
-          Command: "hash",
-          Yielded: ""
-        });}));
-  });
-});
-
-  return context("#location", function() {
-    it("returns the location object", () => cy.location().then(loc => expect(loc).to.have.keys(["auth", "authObj", "hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"])));
-
-    it("returns a specific key from location object", () => cy.location("href").then(href => expect(href).to.eq("http://localhost:3500/fixtures/generic.html")));
-
-    it("eventually resolves", function() {
-      _.delay(function() {
-        const win = cy.state("window");
-        return win.location.pathname = "users/1";
-      }
-      , 100);
-
-      return cy.location().should("have.property", "pathname").and("match", /users/);
-    });
-
-    describe("assertion verification", function() {
-      beforeEach(function() {
-        cy.on("log:added", (attrs, log) => {
-          if (log.get("name") === "assert") {
-            return this.lastLog = log;
+    describe('assertion verification', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'assert') {
+            this.lastLog = log
           }
-        });
-
-        return null;
-      });
-
-      return it("eventually passes the assertion", function() {
-        cy.on("command:retry", _.after(2, _.once(() => {
-          const win = cy.state("window");
-          return win.location.pathname = "users/1";
         })
-        )
-        );
 
-        return cy.location("pathname").should("match", /users/).then(function() {
-          const {
-            lastLog
-          } = this;
+        return null
+      })
 
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("passed");
-          return expect(lastLog.get("ended")).to.be.true;
-        });
-      });
-    });
+      it('eventually passes the assertion', () => {
+        cy.on('command:retry', _.after(2, () => {
+          const win = cy.state('window')
 
-    describe("errors", function() {
-      beforeEach(function() {
-        Cypress.config("defaultCommandTimeout", 100);
+          win.location.hash = 'users/1'
+        }))
 
-        this.logs = [];
+        cy.hash().should('match', /users/).then(function () {
+          const { lastLog } = this
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
+      })
+    })
 
-        return null;
-      });
+    describe('errors', () => {
+      beforeEach(function () {
+        Cypress.config('defaultCommandTimeout', 100)
 
-      it("throws when passed a non-existent key", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+        this.logs = []
 
-          expect(err.message).to.include(lastLog.get("error").message);
-          expect(err.message).to.include("Location object does not have key: `ladida`");
-          expect(err.docsUrl).to.include("https://on.cypress.io/location");
-          expect(lastLog.get("name")).to.eq("location");
-          expect(lastLog.get("state")).to.eq("failed");
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-          return done();
-        });
+        return null
+      })
 
-        return cy.location('ladida');
-      });
+      it('eventually fails the assertion', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-      it("eventually fails the assertion", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+          expect(err.message).to.include(lastLog.get('error').message)
+          expect(err.message).not.to.include('undefined')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
 
-          expect(err.message).to.include(lastLog.get("error").message);
-          expect(err.message).not.to.include("undefined");
-          expect(lastLog.get("name")).to.eq("assert");
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(lastLog.get("error")).to.be.an.instanceof(chai.AssertionError);
+          done()
+        })
 
-          return done();
-        });
+        cy.hash().should('eq', 'not-this')
+      })
 
-        return cy.location("pathname").should("eq", "not-this");
-      });
+      it('does not log an additional log on failure', function (done) {
+        cy.on('fail', () => {
+          expect(this.logs.length).to.eq(2)
 
-      return it("does not log an additional log on failure", function(done) {
-        const logs = [];
+          done()
+        })
 
-        cy.on("log:added", (attrs, log) => logs.push(log));
+        cy.hash().should('eq', 'not-this')
+      })
+    })
 
-        cy.on("fail", () => {
-          expect(this.logs.length).to.eq(2);
-          return done();
-        });
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
 
-        return cy.location("pathname").should("eq", "not-this");
-      });
-    });
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-    return describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
+        return null
+      })
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+      it('ends immediately', () => {
+        cy.hash().then(function () {
+          const { lastLog } = this
 
-        return null;
-      });
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
 
-      it("ends immediately", () => cy.location("href").then(function() {
-        const {
-          lastLog
-        } = this;
+      it('snapshots immediately', () => {
+        cy.hash().then(function () {
+          const { lastLog } = this
 
-        expect(lastLog.get("ended")).to.be.true;
-        return expect(lastLog.get("state")).to.eq("passed");
-      }));
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
 
-      it("snapshots immediately", () => cy.location("href").then(function() {
-        const {
-          lastLog
-        } = this;
+      it('logs obj', () => {
+        cy.hash().then(function () {
+          const obj = {
+            name: 'hash',
+            message: '',
+          }
 
-        expect(lastLog.get("snapshots").length).to.eq(1);
-        return expect(lastLog.get("snapshots")[0]).to.be.an("object");
-      }));
+          const { lastLog } = this
 
-      it("does not emit when {log: false} as options", () => cy.location("href", {log: false}).then(function() {
-        return expect(this.log).to.be.undefined;
-      }));
+          _.each(obj, (value, key) => {
+            expect(lastLog.get(key)).to.deep.eq(value)
+          })
+        })
+      })
 
-      it("does not emit when {log: false} as key", () => cy.location({log: false}).then(function() {
-        return expect(this.log).to.be.undefined;
-      }));
+      it('does not emit when {log: false}', () => {
+        cy.hash({ log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
 
-      it("logs obj without a message", () => cy.location().then(function() {
-        const obj = {
-          name: "location",
-          message: ""
-        };
+      it('#consoleProps', () => {
+        cy.hash().then(function () {
+          const consoleProps = this.lastLog.invoke('consoleProps')
 
-        const {
-          lastLog
-        } = this;
+          expect(consoleProps).to.deep.eq({
+            Command: 'hash',
+            Yielded: '',
+          })
+        })
+      })
+    })
+  })
 
-        return _.each(obj, (value, key) => {
-          return expect(lastLog.get(key)).to.deep.eq(value);
-        });
-      }));
+  context('#location', () => {
+    it('returns the location object', () => {
+      cy.location().then((loc) => {
+        expect(loc).to.have.keys(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+      })
+    })
 
-      it("logs obj with a message", () => cy.location("origin").then(function() {
-        const obj = {
-          name: "location",
-          message: "origin"
-        };
+    it('returns a specific key from location object', () => {
+      cy.location('href').then((href) => {
+        expect(href).to.eq('http://localhost:3500/fixtures/generic.html')
+      })
+    })
 
-        const {
-          lastLog
-        } = this;
+    it('eventually resolves', () => {
+      _.delay(() => {
+        const win = cy.state('window')
 
-        return _.each(obj, (value, key) => {
-          return expect(lastLog.get(key)).to.deep.eq(value);
-        });
-      }));
+        win.location.pathname = 'users/1'
+      }, 100)
 
-      return it("#consoleProps", () => cy.location().then(function() {
-        const consoleProps = this.lastLog.invoke("consoleProps");
+      cy.location().should('have.property', 'pathname').and('match', /users/)
+    })
 
-        expect(_.keys(consoleProps)).to.deep.eq(["Command", "Yielded"]);
-        expect(consoleProps.Command).to.eq("location");
-        return expect(_.keys(consoleProps.Yielded)).to.deep.eq(["auth", "authObj", "hash", "href", "host", "hostname", "origin", "pathname", "port", "protocol", "search", "originPolicy", "superDomain", "toString"]);}));
-  });
-});
-});
+    describe('assertion verification', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'assert') {
+            this.lastLog = log
+          }
+        })
+
+        return null
+      })
+
+      it('eventually passes the assertion', () => {
+        cy.on('command:retry', _.after(2, _.once(() => {
+          const win = cy.state('window')
+
+          win.location.pathname = 'users/1'
+        })))
+
+        cy.location('pathname').should('match', /users/).then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('passed')
+          expect(lastLog.get('ended')).to.be.true
+        })
+      })
+    })
+
+    describe('errors', () => {
+      beforeEach(function () {
+        Cypress.config('defaultCommandTimeout', 100)
+
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
+
+        return null
+      })
+
+      it('throws when passed a non-existent key', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.include(lastLog.get('error').message)
+          expect(err.message).to.include('Location object does not have key: `ladida`')
+          expect(err.docsUrl).to.include('https://on.cypress.io/location')
+          expect(lastLog.get('name')).to.eq('location')
+          expect(lastLog.get('state')).to.eq('failed')
+
+          done()
+        })
+
+        cy.location('ladida')
+      })
+
+      it('eventually fails the assertion', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
+
+          expect(err.message).to.include(lastLog.get('error').message)
+          expect(err.message).not.to.include('undefined')
+          expect(lastLog.get('name')).to.eq('assert')
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(lastLog.get('error')).to.be.an.instanceof(chai.AssertionError)
+
+          done()
+        })
+
+        cy.location('pathname').should('eq', 'not-this')
+      })
+
+      it('does not log an additional log on failure', function (done) {
+        const logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          logs.push(log)
+        })
+
+        cy.on('fail', () => {
+          expect(this.logs.length).to.eq(2)
+
+          done()
+        })
+
+        cy.location('pathname').should('eq', 'not-this')
+      })
+    })
+
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
+
+        return null
+      })
+
+      it('ends immediately', () => {
+        cy.location('href').then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('state')).to.eq('passed')
+        })
+      })
+
+      it('snapshots immediately', () => {
+        cy.location('href').then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('does not emit when {log: false} as options', () => {
+        cy.location('href', { log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
+
+      it('does not emit when {log: false} as key', () => {
+        cy.location({ log: false }).then(function () {
+          expect(this.log).to.be.undefined
+        })
+      })
+
+      it('logs obj without a message', () => {
+        cy.location().then(function () {
+          const obj = {
+            name: 'location',
+            message: '',
+          }
+
+          const { lastLog } = this
+
+          _.each(obj, (value, key) => {
+            expect(lastLog.get(key)).to.deep.eq(value)
+          })
+        })
+      })
+
+      it('logs obj with a message', () => {
+        cy.location('origin').then(function () {
+          const obj = {
+            name: 'location',
+            message: 'origin',
+          }
+
+          const { lastLog } = this
+
+          _.each(obj, (value, key) => {
+            expect(lastLog.get(key)).to.deep.eq(value)
+          })
+        })
+      })
+
+      it('#consoleProps', () => {
+        cy.location().then(function () {
+          const consoleProps = this.lastLog.invoke('consoleProps')
+
+          expect(_.keys(consoleProps)).to.deep.eq(['Command', 'Yielded'])
+          expect(consoleProps.Command).to.eq('location')
+          expect(_.keys(consoleProps.Yielded)).to.deep.eq(['auth', 'authObj', 'hash', 'href', 'host', 'hostname', 'origin', 'pathname', 'port', 'protocol', 'search', 'originPolicy', 'superDomain', 'toString'])
+        })
+      })
+    })
+  })
+})

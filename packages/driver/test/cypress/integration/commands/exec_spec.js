@@ -1,375 +1,384 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const {
-  _
-} = Cypress;
-const {
-  Promise
-} = Cypress;
+const { _, Promise } = Cypress
 
-describe("src/cy/commands/exec", function() {
-  const okResponse = { code: 0 };
+describe('src/cy/commands/exec', () => {
+  const okResponse = { code: 0 }
 
-  return context("#exec", function() {
-    beforeEach(function() {
-      Cypress.config("execTimeout", 2500);
+  context('#exec', () => {
+    beforeEach(() => {
+      Cypress.config('execTimeout', 2500)
 
-      //# call through normally on everything
-      return cy.stub(Cypress, "backend").callThrough();
-    });
+      // call through normally on everything
+      cy.stub(Cypress, 'backend').callThrough()
+    })
 
-    it("triggers 'exec' with the right options", function() {
-      Cypress.backend.resolves(okResponse);
+    it('triggers \'exec\' with the right options', () => {
+      Cypress.backend.resolves(okResponse)
 
-      return cy.exec("ls").then(() => expect(Cypress.backend).to.be.calledWith("exec", {
-        cmd: "ls",
-        timeout: 2500,
-        env: {}
-      }));
-    });
+      cy.exec('ls').then(() => {
+        expect(Cypress.backend).to.be.calledWith('exec', {
+          cmd: 'ls',
+          timeout: 2500,
+          env: {},
+        })
+      })
+    })
 
-    it("passes through environment variables", function() {
-      Cypress.backend.resolves(okResponse);
+    it('passes through environment variables', () => {
+      Cypress.backend.resolves(okResponse)
 
-      return cy.exec("ls", { env: { FOO: "foo" } }).then(() => expect(Cypress.backend).to.be.calledWith("exec", {
-        cmd: "ls",
-        timeout: 2500,
-        env: {
-          FOO: "foo"
-        }
-      }));
-    });
+      cy.exec('ls', { env: { FOO: 'foo' } }).then(() => {
+        expect(Cypress.backend).to.be.calledWith('exec', {
+          cmd: 'ls',
+          timeout: 2500,
+          env: {
+            FOO: 'foo',
+          },
+        })
+      })
+    })
 
-    it("really works", () => // output is trimmed
-    cy.exec("echo foo", { timeout: 20000 }).its("stdout").should("eq", "foo"));
+    it('really works', () => {
+      // output is trimmed
+      cy.exec('echo foo', { timeout: 20000 }).its('stdout').should('eq', 'foo')
+    })
 
-    describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-        return null;
-      });
+        return null
+      })
 
-      it("can turn off logging", function() {
-        Cypress.backend.resolves(okResponse);
+      it('can turn off logging', () => {
+        Cypress.backend.resolves(okResponse)
 
-        return cy.exec('ls', { log: false }).then(function() {
-          const logs = _.filter(this.logs, log => log.get("name") === "exec");
+        cy.exec('ls', { log: false }).then(function () {
+          const logs = _.filter(this.logs, (log) => {
+            return log.get('name') === 'exec'
+          })
 
-          return expect(logs.length).to.eq(0);
-        });
-      });
+          expect(logs.length).to.eq(0)
+        })
+      })
 
-      return it("logs immediately before resolving", function() {
-        Cypress.backend.resolves(okResponse);
+      it('logs immediately before resolving', function () {
+        Cypress.backend.resolves(okResponse)
 
-        cy.on("log:added", (attrs, log) => {
-          if (attrs.name === "exec") {
-            expect(log.get("state")).to.eq("pending");
-            return expect(log.get("message")).to.eq("ls");
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'exec') {
+            expect(log.get('state')).to.eq('pending')
+            expect(log.get('message')).to.eq('ls')
           }
-        });
+        })
 
-        return cy.exec("ls").then(() => {
-          if (!this.lastLog) { throw new Error("failed to log before resolving"); }
-        });
-      });
-    });
-
-    describe("timeout", function() {
-      it("defaults timeout to Cypress.config(execTimeout)", function() {
-        Cypress.backend.resolves(okResponse);
-
-        const timeout = cy.spy(Promise.prototype, "timeout");
-
-        return cy.exec("ls").then(() => expect(timeout).to.be.calledWith(2500));
-      });
-
-      it("can override timeout", function() {
-        Cypress.backend.resolves(okResponse);
-
-        const timeout = cy.spy(Promise.prototype, "timeout");
-
-        return cy.exec("li", { timeout: 1000 }).then(() => expect(timeout).to.be.calledWith(1000));
-      });
-
-      return it("clears the current timeout and restores after success", function() {
-        Cypress.backend.resolves(okResponse);
-
-        cy.timeout(100);
-
-        const clearTimeout = cy.spy(cy, "clearTimeout");
-
-        cy.on("exec", () => {
-          return expect(clearTimeout).to.be.calledOnce;
-        });
-
-        return cy.exec("ls").then(() => expect(cy.timeout()).to.eq(100));
-      });
-    });
-
-    return describe("errors", function() {
-      beforeEach(function() {
-        Cypress.config("defaultCommandTimeout", 50);
-
-        this.logs = [];
-
-        cy.on("log:added", (attrs, log) => {
-          if (attrs.name === "exec") {
-            this.lastLog = log;
-            return this.logs.push(log);
+        cy.exec('ls').then(() => {
+          if (!this.lastLog) {
+            throw new Error('failed to log before resolving')
           }
-        });
+        })
+      })
+    })
 
-        return null;
-      });
+    describe('timeout', () => {
+      it('defaults timeout to Cypress.config(execTimeout)', () => {
+        Cypress.backend.resolves(okResponse)
 
-      it("throws when cmd is absent", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+        const timeout = cy.spy(Promise.prototype, 'timeout')
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(err.message).to.eq("`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: ''.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+        cy.exec('ls').then(() => {
+          expect(timeout).to.be.calledWith(2500)
+        })
+      })
 
-        return cy.exec();
-      });
+      it('can override timeout', () => {
+        Cypress.backend.resolves(okResponse)
 
-      it("throws when cmd isn't a string", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+        const timeout = cy.spy(Promise.prototype, 'timeout')
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(err.message).to.eq("`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: '3'.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+        cy.exec('li', { timeout: 1000 }).then(() => {
+          expect(timeout).to.be.calledWith(1000)
+        })
+      })
 
-        return cy.exec(3);
-      });
+      it('clears the current timeout and restores after success', () => {
+        Cypress.backend.resolves(okResponse)
 
-      it("throws when cmd is an empty string", function(done) {
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+        cy.timeout(100)
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(err.message).to.eq("`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: ''.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+        const clearTimeout = cy.spy(cy, 'clearTimeout')
 
-        return cy.exec('');
-      });
+        cy.on('exec', () => {
+          expect(clearTimeout).to.be.calledOnce
+        })
 
-      it("throws when the execution errors", function(done) {
-        Cypress.backend.rejects(new Error("exec failed"));
+        cy.exec('ls').then(() => {
+          expect(cy.timeout()).to.eq(100)
+        })
+      })
+    })
 
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+    describe('errors', () => {
+      beforeEach(function () {
+        Cypress.config('defaultCommandTimeout', 50)
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
+        this.logs = []
 
-          expect(err.message).to.eq("`cy.exec('ls')` failed with the following error:\n\n> \"Error: exec failed\"");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'exec') {
+            this.lastLog = log
+            this.logs.push(log)
+          }
+        })
 
-        return cy.exec("ls");
-      });
+        return null
+      })
 
-      it("throws after timing out", function(done) {
-        Cypress.backend.resolves(Promise.delay(250));
+      it('throws when cmd is absent', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'\'.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
-          expect(err.message).to.eq("`cy.exec('ls')` timed out after waiting `50ms`.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+          done()
+        })
 
-        return cy.exec("ls", { timeout: 50 });
-      });
+        cy.exec()
+      })
 
-      it("logs once on error", function(done) {
-        Cypress.backend.rejects(new Error("exec failed"));
+      it('throws when cmd isn\'t a string', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-        cy.on("fail", err => {
-          const {
-            lastLog
-          } = this;
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'3\'.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
 
-          expect(this.logs.length).to.eq(1);
-          expect(lastLog.get("error")).to.eq(err);
-          expect(lastLog.get("state")).to.eq("failed");
-          return done();
-        });
+          done()
+        })
 
-        return cy.exec("ls");
-      });
+        cy.exec(3)
+      })
 
-      it("can timeout from the backend's response", function(done) {
-        const err = new Error("timeout");
-        err.timedOut = true;
+      it('throws when cmd is an empty string', function (done) {
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-        Cypress.backend.rejects(err);
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.exec()` must be passed a non-empty string as its 1st argument. You passed: \'\'.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
 
-        cy.on("fail", function(err) {
-          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting `100ms`.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+          done()
+        })
 
-        return cy.exec("sleep 2", {
-          timeout: 100
-        });
-      });
+        cy.exec('')
+      })
 
-      it("can really time out", function(done) {
-        cy.on("fail", function(err) {
-          expect(err.message).to.include("`cy.exec('sleep 2')` timed out after waiting `100ms`.");
-          expect(err.docsUrl).to.eq("https://on.cypress.io/exec");
-          return done();
-        });
+      it('throws when the execution errors', function (done) {
+        Cypress.backend.rejects(new Error('exec failed'))
 
-        return cy.exec("sleep 2", {
-          timeout: 100
-        });
-      });
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-      return describe("when error code is non-zero", function() {
-        it("throws error that includes useful information and exit code", function(done) {
-          Cypress.backend.resolves({ code: 1 });
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
 
-          cy.on("fail", function(err) {
-            expect(err.message).to.contain("`cy.exec('ls')` failed because the command exited with a non-zero code.\n\nPass `{failOnNonZeroExit: false}` to ignore exit code failures.");
-            expect(err.message).to.contain("Code: 1");
-            expect(err.docsUrl).to.contain("https://on.cypress.io/exec");
-            return done();
-          });
+          expect(err.message).to.eq('`cy.exec(\'ls\')` failed with the following error:\n\n> "Error: exec failed"')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
 
-          return cy.exec("ls");
-        });
+          done()
+        })
 
-        it("throws error that includes stderr if it exists and is non-empty", function(done) {
-          Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "" });
+        cy.exec('ls')
+      })
 
-          cy.on("fail", function(err) {
-            expect(err.message).to.contain("Stderr:\nerror output");
-            expect(err.message).not.to.contain("Stdout");
-            return done();
-          });
+      it('throws after timing out', function (done) {
+        Cypress.backend.resolves(Promise.delay(250))
 
-          return cy.exec("ls");
-        });
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-        it("throws error that includes stdout if it exists and is non-empty", function(done) {
-          Cypress.backend.resolves({ code: 1, stderr: "", stdout: "regular output" });
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
+          expect(err.message).to.eq('`cy.exec(\'ls\')` timed out after waiting `50ms`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
 
-          cy.on("fail", function(err) {
-            expect(err.message).to.contain("\nStdout:\nregular output");
-            expect(err.message).not.to.contain("Stderr");
-            return done();
-          });
+          done()
+        })
 
-          return cy.exec("ls");
-        });
+        cy.exec('ls', { timeout: 50 })
+      })
 
-        it("throws error that includes stdout and stderr if they exists and are non-empty", function(done) {
-          Cypress.backend.resolves({ code: 1, stderr: "error output", stdout: "regular output" });
+      it('logs once on error', function (done) {
+        Cypress.backend.rejects(new Error('exec failed'))
 
-          cy.on("fail", function(err) {
-            expect(err.message).to.contain("\nStdout:\nregular output\nStderr:\nerror output");
-            return done();
-          });
+        cy.on('fail', (err) => {
+          const { lastLog } = this
 
-          return cy.exec("ls");
-        });
+          expect(this.logs.length).to.eq(1)
+          expect(lastLog.get('error')).to.eq(err)
+          expect(lastLog.get('state')).to.eq('failed')
 
-        it("truncates the stdout and stderr in the error message", function(done) {
+          done()
+        })
+
+        cy.exec('ls')
+      })
+
+      it('can timeout from the backend\'s response', (done) => {
+        const err = new Error('timeout')
+
+        err.timedOut = true
+
+        Cypress.backend.rejects(err)
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.exec(\'sleep 2\')` timed out after waiting `100ms`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
+
+          done()
+        })
+
+        cy.exec('sleep 2', {
+          timeout: 100,
+        })
+      })
+
+      it('can really time out', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.exec(\'sleep 2\')` timed out after waiting `100ms`.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/exec')
+
+          done()
+        })
+
+        cy.exec('sleep 2', {
+          timeout: 100,
+        })
+      })
+
+      describe('when error code is non-zero', () => {
+        it('throws error that includes useful information and exit code', (done) => {
+          Cypress.backend.resolves({ code: 1 })
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`cy.exec(\'ls\')` failed because the command exited with a non-zero code.\n\nPass `{failOnNonZeroExit: false}` to ignore exit code failures.')
+            expect(err.message).to.contain('Code: 1')
+            expect(err.docsUrl).to.contain('https://on.cypress.io/exec')
+
+            done()
+          })
+
+          cy.exec('ls')
+        })
+
+        it('throws error that includes stderr if it exists and is non-empty', (done) => {
+          Cypress.backend.resolves({ code: 1, stderr: 'error output', stdout: '' })
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('Stderr:\nerror output')
+            expect(err.message).not.to.contain('Stdout')
+
+            done()
+          })
+
+          cy.exec('ls')
+        })
+
+        it('throws error that includes stdout if it exists and is non-empty', (done) => {
+          Cypress.backend.resolves({ code: 1, stderr: '', stdout: 'regular output' })
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('\nStdout:\nregular output')
+            expect(err.message).not.to.contain('Stderr')
+
+            done()
+          })
+
+          cy.exec('ls')
+        })
+
+        it('throws error that includes stdout and stderr if they exists and are non-empty', (done) => {
+          Cypress.backend.resolves({ code: 1, stderr: 'error output', stdout: 'regular output' })
+
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('\nStdout:\nregular output\nStderr:\nerror output')
+
+            done()
+          })
+
+          cy.exec('ls')
+        })
+
+        it('truncates the stdout and stderr in the error message', (done) => {
           Cypress.backend.resolves({
             code: 1,
             stderr: `${_.range(200).join()}stderr should be truncated`,
-            stdout: `${_.range(200).join()}stdout should be truncated`
-          });
+            stdout: `${_.range(200).join()}stdout should be truncated`,
+          })
 
-          cy.on("fail", function(err) {
-            expect(err.message).not.to.contain("stderr should be truncated");
-            expect(err.message).not.to.contain("stdout should be truncated");
-            expect(err.message).to.contain("...");
-            return done();
-          });
+          cy.on('fail', (err) => {
+            expect(err.message).not.to.contain('stderr should be truncated')
+            expect(err.message).not.to.contain('stdout should be truncated')
+            expect(err.message).to.contain('...')
 
-          return cy.exec("ls");
-        });
+            done()
+          })
 
-        it("can really fail", function(done) {
-          cy.on("fail", err => {
-            const {
-              lastLog
-            } = this;
+          cy.exec('ls')
+        })
 
-            const { Yielded } = lastLog.invoke("consoleProps");
+        it('can really fail', function (done) {
+          cy.on('fail', () => {
+            const { lastLog } = this
+
+            const { Yielded } = lastLog.invoke('consoleProps')
 
             // output is trimmed
             expect(Yielded).to.deep.eq({
-              stdout: "foo",
-              stderr: "",
-              code: 1
-            });
+              stdout: 'foo',
+              stderr: '',
+              code: 1,
+            })
 
-            return done();
-          });
+            done()
+          })
 
-          return cy.exec("echo foo && exit 1");
-        });
+          cy.exec('echo foo && exit 1')
+        })
 
-        return describe("and failOnNonZeroExit is false", function() {
-          it("does not error", function() {
-            const response = { code: 1, stderr: "error output", stdout: "regular output" };
-            Cypress.backend.resolves(response);
+        describe('and failOnNonZeroExit is false', () => {
+          it('does not error', () => {
+            const response = { code: 1, stderr: 'error output', stdout: 'regular output' }
 
-            return cy
-            .exec("ls", { failOnNonZeroExit: false })
-            .should("deep.eq", response);
-          });
+            Cypress.backend.resolves(response)
 
-          return it("does not really fail", () => cy.exec("echo foo && exit 1", {
-            failOnNonZeroExit: false
-          }));
-        });
-      });
-    });
-  });
-});
+            cy
+            .exec('ls', { failOnNonZeroExit: false })
+            .should('deep.eq', response)
+          })
+
+          it('does not really fail', () => {
+            cy.exec('echo foo && exit 1', {
+              failOnNonZeroExit: false,
+            })
+          })
+        })
+      })
+    })
+  })
+})
