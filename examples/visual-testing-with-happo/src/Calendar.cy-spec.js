@@ -5,6 +5,9 @@ import Calendar from './Calendar'
 import CalendarHeatmap from 'react-calendar-heatmap'
 import 'react-calendar-heatmap/dist/styles.css'
 
+// parse the date consistently
+const toDate = yyyyMmDd => Cypress.moment(yyyyMmDd, 'YYYY-MM-DD').utc()
+
 describe('Calendar heatmap', () => {
   // Skipping the test because the tooltip does not get cleaned correctly
   // when the next test starts, see issue
@@ -77,8 +80,8 @@ describe('Calendar heatmap', () => {
   })
 
   it('Cypress ❤️ 🦛', () => {
-    const startDate = '2019-11-01'
-    const endDate = '2020-05-01'
+    const startDate = toDate('2019-10-26')
+    const endDate = toDate('2020-05-02')
 
     const classForValue = value => {
       if (!value || !value.count) {
@@ -93,6 +96,12 @@ describe('Calendar heatmap', () => {
     }
 
     cy.fixture('cypress-work').then(values => {
+      values = values.map(v => {
+        return {
+          date: toDate(v.date),
+          count: v.count,
+        }
+      })
       mount(
         <>
           <center>
@@ -117,6 +126,7 @@ describe('Calendar heatmap', () => {
       )
     })
     cy.contains('Cypress ❤️ 🦛').should('be.visible')
+    // now that UI has refreshed, take a snapshot
     cy.get('.react-calendar-heatmap').happoScreenshot({
       component: 'CalendarHeatmap',
       variant: 'heart',
