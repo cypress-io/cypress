@@ -228,7 +228,10 @@ export default {
       getDelayMsForRetry,
     })
 
-    const driver = new Marionette.Drivers.Promises({ port, tries: 1 })
+    const driver = new Marionette.Drivers.Promises({
+      port,
+      tries: 1, // marionette-client has its own retry logic which we want to avoid
+    })
 
     const sendMarionette = (data) => {
       return driver.send(new Command(data))
