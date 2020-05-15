@@ -1034,6 +1034,15 @@ jobs:
           command: $(npm bin)/cypress info
 
   test-types-cypress-and-jest:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-cypress-and-jest
     <<: *defaults
     steps:
       - attach_workspace:
@@ -1041,20 +1050,24 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir /root/test-cypress-and-jest
+      - run: mkdir << parameters.wd >>
       - run: node --version
       - run: npm --version
       - run:
-          name: Create new NPM package
-          working_directory: /root/test-cypress-and-jest
+          name: Create new NPM package ⚗️
+          working_directory: << parameters.wd >>
           command: npm init -y
       - run:
-          name: Test types clash
-          working_directory: /root/test-cypress-and-jest
+          name: Install dependencies 📦
+          working_directory: << parameters.wd >>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
             npm install /root/cypress/cypress.tgz typescript jest @types/jest
+      - run:
+          name: Test types clash ⚔️
+          working_directory: << parameters.wd >>
+          command: |
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
 
