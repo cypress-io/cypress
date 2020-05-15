@@ -4,6 +4,10 @@
 
 **Jump to:** [Comparison](#comparison), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems)
 
+## Survey
+
+Hi there! We are trying to collect feedback from Cypress users who need component testing. Answer a few questions [here](https://forms.gle/qiX2ScqPNEMgwvfA9) about component testing to help us 🙏
+
 ## TLDR
 
 - What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your React components with zero effort. Here is a typical component testing, notice there is not external URL shown, since it is mounting the component directly.
