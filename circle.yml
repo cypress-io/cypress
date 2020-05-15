@@ -19,6 +19,9 @@ workflows:
                 name: Linting code 🧹
                 command: npm run lint
             - run:
+                name: Check markdown links ⚓️
+                command: npm run check:links
+            - run:
                 name: Build folder 🏗
                 command: npm run build
 
