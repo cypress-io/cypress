@@ -135,7 +135,22 @@ Found an error while validating the \`browsers\` list. Expected \`displayName\` 
 exports['e2e plugins can filter browsers from config 1'] = `
 Can't run because you've entered an invalid browser name.
 
-Browser: 'chrome' was not found on your system.
+Browser: 'chrome' was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+- Canary
+- Chrome
+- Chromium
+- Edge
+- Edge Beta
+- Edge Canary
+- Edge Dev
+- Electron
+- Firefox (Beta support)
+- Firefox Developer Edition (Beta support)
+- Firefox Nightly (Beta support)
+
+You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
 
 Available browsers found are: electron
 
@@ -381,11 +396,12 @@ The following error was thrown by a plugin. We stopped running your tests becaus
   │ Spec Ran:     app_spec.coffee                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+Warning: We failed processing this video.
 
-  (Video)
+This error will not alter the exit code.
 
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+TimeoutError: operation timed out
+      [stack trace lines]
 
 
 ====================================================================================================

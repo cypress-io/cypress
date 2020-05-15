@@ -763,7 +763,22 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
 Can't run because you've entered an invalid browser name.
 
-Browser: 'browserDoesNotExist' was not found on your system.
+Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
+
+Cypress supports the following browsers:
+- Canary
+- Chrome
+- Chromium
+- Edge
+- Edge Beta
+- Edge Canary
+- Edge Dev
+- Electron
+- Firefox (Beta support)
+- Firefox Developer Edition (Beta support)
+- Firefox Nightly (Beta support)
+
+You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
 
 Available browsers found are: browser1, browser2, browser3
 
