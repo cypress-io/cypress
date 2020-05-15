@@ -8,6 +8,7 @@ import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
+import * as launcherDebug from '@packages/launcher/lib/log'
 import { Browser } from './types'
 const errors = require('../errors')
 
@@ -283,7 +284,7 @@ const defaultPreferences = {
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
 
-  'marionette.log.level': process.env.DEBUG ? 'Debug' : undefined,
+  'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
 }
 
 export async function open (browser: Browser, url, options: any = {}) {
