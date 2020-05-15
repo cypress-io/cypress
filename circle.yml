@@ -1041,8 +1041,7 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: cd /root
-      - run: mkdir test-cypress-and-jest
+      - run: mkdir /root/test-cypress-and-jest
       - run: node --version
       - run: npm --version
       - run:
