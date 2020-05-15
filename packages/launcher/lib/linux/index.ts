@@ -67,7 +67,7 @@ export function getVersionString (path: string) {
   log('finding version string using command "%s --version"', path)
 
   return Bluebird.resolve(utils.getOutput(path, ['--version']))
-  .timeout(5000, `Timed out getting version for ${path}`)
+  .timeout(30000, `Timed out after 30 seconds getting browser version for ${path}`)
   .then(prop('stdout'))
   .then(trim)
   .then(tap(partial(log, ['stdout: "%s"'])))

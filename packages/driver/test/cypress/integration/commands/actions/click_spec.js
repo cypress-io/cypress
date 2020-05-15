@@ -960,84 +960,6 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('pointer-events:none', () => {
-      beforeEach(function () {
-        cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
-        this.ptrNone = cy.$$('<div id="ptrNone" style="position:absolute;width:400px;height:400px;background-color:salmon;pointer-events:none;opacity:0.4;text-align:right">#ptrNone</div>').appendTo(cy.$$('#dom'))
-        cy.$$('<div id="ptrNoneChild" style="position:absolute;top:50px;left:50px;width:200px;height:200px;background-color:red">#ptrNone > div</div>').appendTo(this.ptrNone)
-
-        this.logs = []
-        cy.on('log:added', (attrs, log) => {
-          this.lastLog = log
-
-          this.logs.push(log)
-        })
-      })
-
-      it('element behind pointer-events:none should still get click', () => {
-        cy.get('#ptr').click() // should pass with flying colors
-      })
-
-      it('should be able to force on pointer-events:none with force:true', () => {
-        cy.get('#ptrNone').click({ timeout: 300, force: true })
-      })
-
-      it('should error with message about pointer-events', function () {
-        const onError = cy.stub().callsFake((err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.contain('has CSS `pointer-events: none`')
-          expect(err.message).to.not.contain('inherited from')
-          const consoleProps = lastLog.invoke('consoleProps')
-
-          expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Error',
-          ])
-
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
-        })
-
-        cy.once('fail', onError)
-
-        cy.get('#ptrNone').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
-      })
-
-      it('should error with message about pointer-events and include inheritance', function () {
-        const onError = cy.stub().callsFake((err) => {
-          const { lastLog } = this
-
-          expect(err.message).to.contain('has CSS `pointer-events: none`, inherited from this element:')
-          expect(err.message).to.contain('<div id="ptrNone"')
-          const consoleProps = lastLog.invoke('consoleProps')
-
-          expect(_.keys(consoleProps)).deep.eq([
-            'Command',
-            'Tried to Click',
-            'But it has CSS',
-            'Inherited From',
-            'Error',
-          ])
-
-          expect(consoleProps['But it has CSS']).to.eq('pointer-events: none')
-
-          expect(consoleProps['Inherited From']).to.eq(this.ptrNone.get(0))
-        })
-
-        cy.once('fail', onError)
-
-        cy.get('#ptrNoneChild').click({ timeout: 300 })
-        .then(() => {
-          expect(onError).calledOnce
-        })
-      })
-    })
-
     describe('actionability', () => {
       it('can click on inline elements that wrap lines', () => {
         cy.get('#overflow-link').find('.wrapped').click()
@@ -1750,6 +1672,28 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('#button-covered-in-span').click(75, 78, { force: true })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7319
+      it('can specify x and/or y to be 0', () => {
+        const $btn = $('<button id="click-button">button</button>')
+        .prependTo(cy.$$('body'))
+
+        cy.on('log:changed', (log, attr) => {
+          if (log.name === 'click' && attr._emittedAttrs.coords) {
+            const args = attr._emittedAttrs.message.split(', ').map((i) => parseInt(i))
+            const coords = attr._emittedAttrs.coords
+            const position = Cypress.dom.getElementPositioning($btn).fromAutWindow
+
+            expect(coords.x).to.equal(coords.left).to.equal(position.left + args[0])
+            expect(coords.y).to.equal(coords.top).to.equal(position.top + args[1])
+          }
+        })
+
+        cy.get('#click-button').click(2, 2)
+        cy.get('#click-button').click(0, 0)
+        cy.get('#click-button').click(0, 2)
+        cy.get('#click-button').click(2, 0)
       })
     })
 
