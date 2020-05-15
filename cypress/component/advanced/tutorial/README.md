@@ -4,7 +4,11 @@ Just following the tutorial and writing Cypress component tests.
 
 ## Tic-tac-toe
 
+<!-- markdown-link-check-disable -->
+
 The example code taken from [https://codepen.io/gaearon/pen/LyyXgK](https://codepen.io/gaearon/pen/LyyXgK)
+
+<!-- markdown-link-check-enable -->
 
 <!-- prettier-ignore-start -->
 Test | Description
