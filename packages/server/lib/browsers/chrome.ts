@@ -10,7 +10,7 @@ import appData from '../util/app_data'
 import fs from '../util/fs'
 import { CdpAutomation } from './cdp_automation'
 import * as CriClient from './cri-client'
-import protocol from './protocol'
+import * as protocol from './protocol'
 import utils from './utils'
 import { Browser } from './types'
 
