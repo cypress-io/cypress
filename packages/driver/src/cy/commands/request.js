@@ -27,6 +27,7 @@ const REQUEST_DEFAULTS = {
   timeout: null,
   followRedirect: true,
   failOnStatusCode: true,
+  encodeBodyToBase64: false,
   retryOnNetworkFailure: true,
   retryOnStatusCodeFailure: false,
 }
