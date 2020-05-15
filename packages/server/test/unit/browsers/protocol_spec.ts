@@ -43,24 +43,44 @@ describe('lib/browsers/protocol', () => {
   })
 
   context('.getWsTargetFor', () => {
+    const expectedCdpFailedError = stripIndents`
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was ${chalk.yellow('12345')}.
+
+      Error details:
+    `
+
     it('rejects if CDP connection fails', () => {
       const innerErr = new Error('cdp connection failure')
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
       const p = protocol.getWsTargetFor(12345)
 
-      const expectedError = stripIndents`
-        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+      return expect(p).to.eventually.be.rejected
+      .and.property('message').include(expectedCdpFailedError)
+      .and.include(innerErr.message)
+    })
 
-        This usually indicates there was a problem opening the Chrome browser.
+    it('rejects if CRI.List fails', () => {
+      const innerErr = new Error('cdp connection failure')
 
-        The CDP port requested was ${chalk.yellow('12345')}.
+      sinon.stub(Bluebird, 'delay').resolves()
 
-        Error details:
-      `
+      sinon.stub(CRI, 'List')
+      .withArgs({ host, port: 12345, getDelayMsForRetry: sinon.match.func })
+      .rejects(innerErr)
 
-      expect(p).to.eventually.be.rejected
-      .and.property('message').include(expectedError)
+      const end = sinon.stub()
+
+      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
+
+      const p = protocol.getWsTargetFor(12345)
+
+      return expect(p).to.eventually.be.rejected
+      .and.property('message').include(expectedCdpFailedError)
       .and.include(innerErr.message)
     })
 
