@@ -96,9 +96,6 @@ export const getWsTargetFor = (port) => {
   }
 
   return _connectAsync(connectOpts)
-  .catch((err) => {
-    errors.throw('CDP_COULD_NOT_CONNECT', port, err)
-  })
   .then(() => {
     const retry = () => {
       debug('attempting to find CRI target... %o', { retryIndex })
@@ -121,7 +118,8 @@ export const getWsTargetFor = (port) => {
 
     return retry()
   })
-  .tapCatch((err) => {
+  .catch((err) => {
     debug('failed to connect to CDP %o', { connectOpts, err })
+    errors.throw('CDP_COULD_NOT_CONNECT', port, err)
   })
 }

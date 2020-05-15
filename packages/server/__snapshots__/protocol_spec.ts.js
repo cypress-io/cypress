@@ -1,4 +1,4 @@
-exports['lib/browsers/protocol ._getDelayMsForRetry retries as expected for up to 20 seconds 1'] = [
+exports['lib/browsers/protocol ._getDelayMsForRetry retries as expected for up to 50 seconds 1'] = [
   100,
   100,
   100,
