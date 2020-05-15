@@ -944,6 +944,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.
       """
+    when "FOLDER_NOT_WRITABLE"
+      """
+      Folder #{arg1} is not writable.
+
+      Writing to this directory is required by Cypress in order to store screenshots and videos.
+
+      Enable write permissions to this directory to ensure screenshots and videos are stored.
+
+      If you don't require screenshots or videos to be stored you can safely ignore this warning.
+      """
 
 get = (type, arg1, arg2, arg3) ->
   msg = getMsgByType(type, arg1, arg2, arg3)
