@@ -23,6 +23,22 @@ const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
 }
 
+const getDelayMsForRetry = (i) => {
+  if (i < 10) {
+    return 100
+  }
+
+  if (i < 18) {
+    return 500
+  }
+
+  if (i < 33) {
+    return 1000
+  }
+
+  return
+}
+
 const getPrimaryTab = Bluebird.method((browser) => {
   const setPrimaryTab = () => {
     return browser.listTabs()
@@ -154,21 +170,7 @@ export default {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
-      getDelayMsForRetry: (i) => {
-        if (i < 10) {
-          return 100
-        }
-
-        if (i < 18) {
-          return 500
-        }
-
-        if (i < 33) {
-          return 1000
-        }
-
-        return
-      },
+      getDelayMsForRetry,
     })
 
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
@@ -220,7 +222,13 @@ export default {
   },
 
   async setupMarionette (extensions, url, port) {
-    const driver = new Marionette.Drivers.Promises({ port })
+    await protocol._connectAsync({
+      host: '127.0.0.1',
+      port,
+      getDelayMsForRetry,
+    })
+
+    const driver = new Marionette.Drivers.Promises({ port, tries: 1 })
 
     const sendMarionette = (data) => {
       return driver.send(new Command(data))

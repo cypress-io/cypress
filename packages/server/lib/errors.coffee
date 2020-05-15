@@ -894,6 +894,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg2.stack}
       """
+    when "FIREFOX_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to Firefox.
+
+      This usually indicates there was a problem opening the Firefox browser.
+
+      Error details:
+
+      #{arg1.stack}
+      """
     when "CDP_COULD_NOT_RECONNECT"
       """
       There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
