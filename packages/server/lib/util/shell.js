@@ -1,7 +1,9 @@
+const _ = require('lodash')
 const Promise = require('bluebird')
 const execa = require('execa')
 const R = require('ramda')
 const os = require('os')
+const commandExistsModule = require('command-exists')
 const log = require('../log')
 
 const isWindows = () => {
@@ -94,6 +96,14 @@ const getShell = function (shell) {
   return findBash()
 }
 
+const commandExists = (command) => {
+  return Promise.resolve(commandExistsModule(command))
+  .return(true)
+  // commandExists rejects with no error if command does not exist
+  // otherwise, it's a legitimate error
+  .catchReturn(_.isNil, false)
+}
+
 // for testing
 const reset = () => {
   return sourcedProfiles = []
@@ -106,4 +116,5 @@ module.exports = {
   getProfilePath,
   sourceShellCommand,
   startedNormally,
+  commandExists,
 }

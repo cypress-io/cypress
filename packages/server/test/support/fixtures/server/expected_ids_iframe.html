@@ -13,11 +13,8 @@
         if (!Cypress) {
           throw new Error("Tests cannot run without a reference to Cypress!");
         }
-        return Cypress.onSpecWindow(window);
+        return Cypress.onSpecWindow(window, [{"absolute":"/<path-to-project>/ids/cypress/support/index.js","relative":"cypress/support/index.js","relativeUrl":"/__cypress/tests?p=cypress/support/index.js"},{"absolute":"/<path-to-project>/ids/cypress/integration/foo.coffee","relative":"cypress/integration/foo.coffee","relativeUrl":"/__cypress/tests?p=cypress/integration/foo.coffee"}]);
       })(window.opener || window.parent);
     </script>
-
-      <script type="text/javascript" src="/__cypress/tests?p=cypress/support/index.js-123"></script>
-      <script type="text/javascript" src="/__cypress/tests?p=cypress/integration/foo.coffee-123"></script>
   </body>
 </html>

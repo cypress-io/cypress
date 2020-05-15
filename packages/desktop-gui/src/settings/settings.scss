@@ -245,6 +245,20 @@
   }
 }
 
+.editor-picker {
+  margin: 0;
+  padding: 0;
+
+  li {
+    list-style: none;
+  }
+
+  label {
+    margin: 0;
+    font-weight: normal;
+  }
+}
+
 .experiment-intro {
   padding-bottom: 15px;
   margin-bottom: 0px;
@@ -272,6 +286,7 @@
       margin-left: auto;
     }
   }
+  
   .experiment-header {
     display: flex;
     align-items: center;

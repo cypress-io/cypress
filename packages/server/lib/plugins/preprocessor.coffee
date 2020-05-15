@@ -6,8 +6,7 @@ Promise = require("bluebird")
 appData = require("../util/app_data")
 cwd = require("../cwd")
 plugins = require("../plugins")
-savedState = require("../saved_state")
-resolve = require('./resolve')
+resolve = require("./resolve")
 
 errorMessage = (err = {}) ->
   (err.stack ? err.annotated ? err.message ? err.toString())
@@ -30,22 +29,24 @@ clientSideError = (err) ->
   }())
   """
 
-getOutputPath = (config, filePath) ->
-  appData.projectsPath(savedState.toHashName(config.projectRoot), "bundles", filePath)
-
 baseEmitter = new EE()
 fileObjects = {}
 fileProcessors = {}
 
+createBrowserifyPreprocessor = (options) ->
+  debug("creating browserify preprocessor with options %o", options)
+  browserify = require("@cypress/browserify-preprocessor")
+  browserify(options)
+
 setDefaultPreprocessor = (config) ->
   debug("set default preprocessor")
 
-  browserify = require("@cypress/browserify-preprocessor")
   tsPath = resolve.typescript(config)
 
-  plugins.register("file:preprocessor", browserify({
+  options = {
     typescript: tsPath
-  }))
+  }
+  plugins.register("file:preprocessor", API.createBrowserifyPreprocessor(options))
 
 plugins.registerHandler (ipc) ->
   ipc.on "preprocessor:rerun", (filePath) ->
@@ -56,14 +57,20 @@ plugins.registerHandler (ipc) ->
     debug("base emitter plugin close event")
     ipc.send("preprocessor:close", filePath)
 
-module.exports = {
+# for simpler stubbing from unit tests
+API = {
   errorMessage
 
   clientSideError
 
+  setDefaultPreprocessor
+
+  createBrowserifyPreprocessor
+
   emitter: baseEmitter
 
   getFile: (filePath, config) ->
+    debug("getting file #{filePath}")
     filePath = path.resolve(config.projectRoot, filePath)
 
     debug("getFile #{filePath}")
@@ -73,8 +80,8 @@ module.exports = {
       ## in a text terminal aka cypress run
       ## TODO: rename this to config.isRunMode
       ## vs config.isInterativeMode
-      shouldWatch = not config.isTextTerminal || !!process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH
-      
+      shouldWatch = not config.isTextTerminal or Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+
       baseFilePath = filePath
       .replace(config.projectRoot, "")
       .replace(config.integrationFolder, "")
@@ -82,7 +89,7 @@ module.exports = {
       fileObject = fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
-        outputPath: getOutputPath(config, baseFilePath)
+        outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath)
       })
 
       fileObject.on "rerun", ->
@@ -128,3 +135,5 @@ module.exports = {
     baseEmitter.emit("close")
     baseEmitter.removeAllListeners()
 }
+
+module.exports = API

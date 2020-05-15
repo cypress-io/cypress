@@ -230,58 +230,30 @@ describe('lib/modes/run', () => {
     })
 
     it('calls video process with name, cname and videoCompression', () => {
-      const endVideoCapture = () => {
-        return Promise.resolve()
-      }
-
-      return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, true)
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, true)
       .then(() => {
         expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
       })
     })
 
     it('does not call video process when videoCompression is false', () => {
-      const endVideoCapture = () => {
-        return Promise.resolve()
-      }
-
-      return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', false, true)
+      return runMode.postProcessRecording('foo', 'foo-compress', false, true)
       .then(() => {
         expect(videoCapture.process).not.to.be.called
       })
     })
 
     it('calls video process if we have been told to upload videos', () => {
-      const endVideoCapture = () => {
-        return Promise.resolve()
-      }
-
-      return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, true)
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, true)
       .then(() => {
         expect(videoCapture.process).to.be.calledWith('foo', 'foo-compress', 32)
       })
     })
 
     it('does not call video process if there are no failing tests and we have set not to upload video on passing', () => {
-      const endVideoCapture = () => {
-        return Promise.resolve()
-      }
-
-      return runMode.postProcessRecording(endVideoCapture, 'foo', 'foo-compress', 32, false)
+      return runMode.postProcessRecording('foo', 'foo-compress', 32, false)
       .then(() => {
         expect(videoCapture.process).not.to.be.called
-      })
-    })
-
-    it('logs a warning on failure and resolves', () => {
-      sinon.stub(errors, 'warning')
-      const end = sinon.stub().rejects()
-
-      return runMode.postProcessRecording(end)
-      .then(() => {
-        expect(end).to.be.calledOnce
-
-        expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
       })
     })
   })
@@ -380,12 +352,13 @@ describe('lib/modes/run', () => {
     beforeEach(function () {
       sinon.stub(this.projectInstance, 'getConfig').resolves({})
       sinon.spy(runMode, 'getVideoRecordingDelay')
+      sinon.spy(errors, 'warning')
     })
 
     it('end event resolves with obj, displays stats, displays screenshots, sets video timestamps', function () {
       const startedVideoCapture = new Date
       const screenshots = [{}, {}, {}]
-      const endVideoCapture = () => {}
+      const endVideoCapture = sinon.stub().resolves()
       const results = {
         tests: [4, 5, 6],
         stats: {
@@ -428,7 +401,7 @@ describe('lib/modes/run', () => {
         // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
-        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, 'foo.mp4', 'foo-compressed.mp4', 32, true)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(results)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
@@ -462,7 +435,7 @@ describe('lib/modes/run', () => {
       const startedVideoCapture = new Date
       const wallClock = new Date()
       const screenshots = [{}, {}, {}]
-      const endVideoCapture = () => {}
+      const endVideoCapture = sinon.stub().resolves()
 
       sinon.stub(runMode, 'postProcessRecording').resolves()
       sinon.spy(runMode, 'displayResults')
@@ -491,7 +464,7 @@ describe('lib/modes/run', () => {
         // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
-        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, 'foo.mp4', 'foo-compressed.mp4', 32, true)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(obj)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
@@ -522,6 +495,59 @@ describe('lib/modes/run', () => {
       })
     })
 
+    it('logs warning and resolves on failed video end', async function () {
+      process.nextTick(() => {
+        return this.projectInstance.emit('end', {
+          stats: {
+            failures: 0,
+          },
+        })
+      })
+
+      sinon.spy(videoCapture, 'process')
+      const endVideoCapture = sinon.stub().rejects()
+
+      await runMode.waitForTestsToFinishRunning({
+        project: this.projectInstance,
+        videoName: 'foo.mp4',
+        compressedVideoName: 'foo-compressed.mp4',
+        videoCompression: 32,
+        videoUploadOnPasses: true,
+        gui: false,
+        endVideoCapture,
+      })
+
+      expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
+
+      expect(videoCapture.process).not.to.be.called
+    })
+
+    it('logs warning and resolves on failed video compression', async function () {
+      process.nextTick(() => {
+        return this.projectInstance.emit('end', {
+          stats: {
+            failures: 0,
+          },
+        })
+      })
+
+      const endVideoCapture = sinon.stub().resolves()
+
+      sinon.stub(videoCapture, 'process').rejects()
+
+      await runMode.waitForTestsToFinishRunning({
+        project: this.projectInstance,
+        videoName: 'foo.mp4',
+        compressedVideoName: 'foo-compressed.mp4',
+        videoCompression: 32,
+        videoUploadOnPasses: true,
+        gui: false,
+        endVideoCapture,
+      })
+
+      expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
+    })
+
     it('should not upload video when videoUploadOnPasses is false and no failures', function () {
       process.nextTick(() => {
         return this.projectInstance.emit('end', {
@@ -545,7 +571,7 @@ describe('lib/modes/run', () => {
         endVideoCapture,
       })
       .then((obj) => {
-        expect(runMode.postProcessRecording).to.be.calledWith(endVideoCapture, 'foo.mp4', 'foo-compressed.mp4', 32, false)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, false)
 
         expect(videoCapture.process).not.to.be.called
       })

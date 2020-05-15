@@ -42,6 +42,7 @@ const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|js
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
 const availableBrowsersRe = /(Available browsers found are: )(.+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
+const whiteSpaceBetweenNewlines = /\n\s+\n/
 
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
@@ -49,21 +50,14 @@ const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin fr
 // 'at' will be present in chrome stack trace lines
 const replaceStackTraceLines = (str) => {
   return str.replace(stackTraceLinesRe, (match, ...parts) => {
-    let pre = parts[0]
     const isFirefoxStack = parts[1] === '@'
     let post = parts[4]
 
     if (isFirefoxStack) {
-      if (pre === '\n') {
-        pre = '\n    '
-      } else {
-        pre += pre.slice(1).repeat(2)
-      }
-
-      post = post.slice(-1)
+      post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
-    return `${pre}[stack trace lines]${post}`
+    return `\n      [stack trace lines]${post}`
   })
 }
 
@@ -112,6 +106,22 @@ const replaceUploadingResults = function (orig, ...rest) {
   const ret = match[0] + results + match[3]
 
   return ret
+}
+
+/**
+ * Takes normalized runner STDOUT, finds the "Run Finished" line
+ * and returns everything AFTER that, which usually is just the
+ * test summary table.
+ * @param {string} stdout from the test run, probably normalized
+*/
+const leaveRunFinishedTable = (stdout) => {
+  const index = stdout.indexOf('  (Run Finished)')
+
+  if (index === -1) {
+    throw new Error('Cannot find Run Finished line')
+  }
+
+  return stdout.slice(index)
 }
 
 const normalizeStdout = function (str, options = {}) {
@@ -366,6 +376,8 @@ const e2e = {
 
   normalizeStdout,
 
+  leaveRunFinishedTable,
+
   it: localItFn,
 
   snapshot (...args) {
@@ -428,6 +440,7 @@ const e2e = {
   options (ctx, options = {}) {
     _.defaults(options, {
       browser: 'electron',
+      headed: process.env.HEADED || false,
       project: e2ePath,
       timeout: 120000,
       originalTitle: null,
@@ -460,6 +473,7 @@ const e2e = {
           return spec
         }
 
+        // TODO would not work for component tests
         return path.join(options.project, 'cypress', 'integration', spec)
       })
 
@@ -569,8 +583,26 @@ const e2e = {
     })
   },
 
+  /**
+   * Executes a given project and optionally sanitizes and checks output.
+   * @example
+    ```
+      e2e.setup()
+      project = Fixtures.projectPath("component-tests")
+      e2e.exec(this, {
+        project,
+        config: {
+          video: false
+        }
+      })
+      .then (result) ->
+        console.log(e2e.normalizeStdout(result.stdout))
+    ```
+   */
   exec (ctx, options = {}) {
+    debug('e2e exec options %o', options)
     options = this.options(ctx, options)
+    debug('processed options %o', options)
     let args = this.args(options)
 
     const specifiedBrowser = process.env.BROWSER

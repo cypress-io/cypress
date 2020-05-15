@@ -1,4 +1,5 @@
 const { $, Promise } = Cypress
+const lodash = require('lodash')
 
 describe('driver/src/cypress/index', () => {
   let CypressInstance
@@ -34,6 +35,17 @@ describe('driver/src/cypress/index', () => {
       cy.get(':foo').then(($el) => {
         expect($el.get(0)).to.eq($foo.get(0))
       })
+    })
+  })
+
+  context('_', () => {
+    it('exposes lodash methods', () => {
+      expect(Object.getOwnPropertyNames(Cypress._)).to.include.members(Object.getOwnPropertyNames(lodash))
+    })
+
+    it('has same lodash capitalize method', () => {
+      // https://github.com/cypress-io/cypress/issues/7222
+      expect(Cypress._.capitalize('FOO BAR')).to.eq(lodash.capitalize('FOO BAR'))
     })
   })
 
@@ -119,6 +131,63 @@ describe('driver/src/cypress/index', () => {
       }
 
       expect(fn).to.not.throw()
+    })
+  })
+
+  context('deprecated custom command methods', () => {
+    it('throws when using Cypress.addParentCommand', () => {
+      const addParentCommand = () => Cypress.addParentCommand()
+
+      expect(addParentCommand).to.throw().and.satisfy((err) => {
+        expect(err.message).to.include('Cypress.addParentCommand(...) has been removed and replaced')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
+
+        return true
+      })
+    })
+
+    it('throws when using Cypress.addChildCommand', () => {
+      const addChildCommand = () => Cypress.addChildCommand()
+
+      expect(addChildCommand).to.throw().and.satisfy((err) => {
+        expect(err.message).to.include('Cypress.addChildCommand(...) has been removed and replaced')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
+
+        return true
+      })
+    })
+
+    it('throws when using Cypress.addDualCommand', () => {
+      const addDualCommand = () => Cypress.addDualCommand()
+
+      expect(addDualCommand).to.throw().and.satisfy((err) => {
+        expect(err.message).to.include('Cypress.addDualCommand(...) has been removed and replaced')
+        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
+
+        return true
+      })
+    })
+  })
+
+  context('private command methods', () => {
+    it('throws when using Cypress.addAssertionCommand', () => {
+      const addAssertionCommand = () => Cypress.addAssertionCommand()
+
+      expect(addAssertionCommand).to.throw().and.satisfy((err) => {
+        expect(err.message).to.include('You cannot use the undocumented private command interface: `addAssertionCommand`')
+
+        return true
+      })
+    })
+
+    it('throws when using Cypress.addUtilityCommand', () => {
+      const addUtilityCommand = () => Cypress.addUtilityCommand()
+
+      expect(addUtilityCommand).to.throw().and.satisfy((err) => {
+        expect(err.message).to.include('You cannot use the undocumented private command interface: `addUtilityCommand`')
+
+        return true
+      })
     })
   })
 })

@@ -66,7 +66,7 @@ https://on.cypress.io/returning-value-and-commands-in-custom-command
 Original mocha error:
 
 Error: Resolution method is overspecified. Specify a callback *or* return a Promise; not both.
-    [stack trace lines]
+      [stack trace lines]
 
 
 

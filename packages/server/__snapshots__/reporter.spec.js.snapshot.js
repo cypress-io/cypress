@@ -83,12 +83,12 @@ exports['fail in [afterEach] - runner emit'] = [
   ],
   [
     "hook",
-    "{Object 57}"
+    "{Object 60}"
   ],
   [
     "fail",
-    "{Object 57}",
-    "{Object 6}"
+    "{Object 60}",
+    "{Object 9}"
   ],
   [
     "test end",
@@ -218,7 +218,7 @@ exports['fail in [beforeEach] - runner emit'] = [
   [
     "fail",
     "{Object 57}",
-    "{Object 6}"
+    "{Object 9}"
   ],
   [
     "test end",

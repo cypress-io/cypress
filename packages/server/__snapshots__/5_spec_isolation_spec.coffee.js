@@ -68,7 +68,7 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n    [stack trace lines]",
+          "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
           "timings": {
             "lifecycle": 100,
@@ -111,7 +111,7 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n    [stack trace lines]",
+          "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
           "timings": {
             "lifecycle": 100,
@@ -181,7 +181,7 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n    [stack trace lines]",
+          "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
           "timings": {
             "lifecycle": 100,
@@ -240,7 +240,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -277,7 +278,7 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        return cy.wrap(true, {\n            timeout: 100\n        }).should(\"be.false\");\n    }",
-          "stack": "AssertionError: Timed out retrying: expected true to be false\n    [stack trace lines]",
+          "stack": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
           "error": "Timed out retrying: expected true to be false",
           "timings": {
             "lifecycle": 100,
@@ -299,7 +300,7 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        throw new Error(\"fails2\");\n    }",
-          "stack": "Error: fails2\n    [stack trace lines]",
+          "stack": "Error: fails2\n      [stack trace lines]",
           "error": "fails2",
           "timings": {
             "lifecycle": 100,
@@ -341,7 +342,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -532,7 +534,8 @@ exports['e2e spec isolation fails'] = {
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee"
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     },
@@ -1048,9 +1051,10 @@ exports['failing with retries enabled'] = {
         }
       ],
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee"
+        "name": "simple_passing_spec.coffee",
+        "relative": "cypress/integration/simple_passing_spec.coffee",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
+        "specType": "integration"
       },
       "shouldUploadVideo": true
     }

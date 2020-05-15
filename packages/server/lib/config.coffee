@@ -50,6 +50,9 @@ folders = toWords """
   videosFolder
 """
 
+# for experimentalComponentTesting
+folders.push("componentFolder")
+
 # Public configuration properties, like "cypress.json" fields
 configKeys = toWords """
   animationDistanceThreshold      fileServerFolder
@@ -80,6 +83,9 @@ configKeys = toWords """
   retries
 """
 
+# experimentalComponentTesting
+configKeys.push("componentFolder")
+
 # Deprecated and retired public configuration properties
 breakingConfigKeys = toWords """
   videoRecording
@@ -95,7 +101,7 @@ systemConfigKeys = toWords """
 # Know experimental flags / values
 # each should start with "experimental" and be camel cased
 # example: experimentalComponentTesting
-experimentalConfigKeys = ['experimentalGetCookiesSameSite']
+experimentalConfigKeys = ['experimentalGetCookiesSameSite', "experimentalComponentTesting"]
 
 CONFIG_DEFAULTS = {
   port:                          null
@@ -154,7 +160,11 @@ CONFIG_DEFAULTS = {
   javascripts:                   []
 
   ## experimental keys (should all start with "experimental" prefix)
-  # example for component testing with subkeys
+  experimentalComponentTesting:  false
+
+  ## setting related to component testing experiments
+  componentFolder:               "cypress/component"
+  # TODO: example for component testing with subkeys
   # experimentalComponentTesting: { componentFolder: 'cypress/component' }
   experimentalGetCookiesSameSite: false
 }
@@ -197,6 +207,10 @@ validationRules = {
   waitForAnimations: v.isBoolean
   watchForFileChanges: v.isBoolean
   firefoxGcInterval: v.isValidFirefoxGcInterval
+  # experimental flag validation here
+  experimentalComponentTesting: v.isBoolean
+  # validation for component testing experiment
+  componentFolder: v.isStringOrFalse
   # experimental flag validation below
   experimentalGetCookiesSameSite: v.isBoolean
 }
@@ -607,6 +621,7 @@ module.exports = {
   setParentTestsPaths: (obj) ->
     ## projectRoot:              "/path/to/project"
     ## integrationFolder:        "/path/to/project/cypress/integration"
+    ## componentFolder:          "/path/to/project/cypress/components"
     ## parentTestsFolder:        "/path/to/project/cypress"
     ## parentTestsFolderDisplay: "project/cypress"
 

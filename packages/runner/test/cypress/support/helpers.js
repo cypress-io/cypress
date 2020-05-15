@@ -24,6 +24,8 @@ const eventCleanseMap = {
   afterFnDuration: match.number,
   wallClockDuration: match.number,
   stack: match.string,
+  sourceMappedStack: match.string,
+  parsedStack: match.array,
   message: '[error message]',
 }
 
@@ -91,9 +93,9 @@ function createCypress () {
   }
 
   const visit = (mochaTests, opts = {}) => {
-    _.defaults(opts, {
+    _.defaultsDeep(opts, {
       state: {},
-      config: {},
+      config: { video: false },
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -185,7 +187,6 @@ function createCypress () {
           cy.spy(cy.state('window').console, 'log').as('console_log')
           cy.spy(cy.state('window').console, 'error').as('console_error')
 
-          console.log(onInitializedListeners)
           onInitializedListeners.forEach((fn) => fn(autCypress))
           onInitializedListeners = []
 
@@ -205,10 +206,15 @@ function createCypress () {
           cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
-            autCypress.onSpecWindow(specWindow)
+            autCypress.onSpecWindow(specWindow, [
+              {
+                absolute: 'cypress/fixtures/empty_spec.js',
+                relative: 'cypress/fixtures/empty_spec.js',
+                relativeUrl: '/__cypress/tests?p=cypress/fixtures/empty_spec.js',
+              },
+            ])
 
             generateMochaTestsForWin(specWindow, mochaTests)
-
             specWindow.before = () => {}
             specWindow.beforeEach = () => {}
             specWindow.afterEach = () => {}

@@ -11,8 +11,6 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 
-import TestError from '../errors/test-error'
-
 import Attempts from '../attempts/attempts'
 
 interface Props {
@@ -82,7 +80,6 @@ class Test extends Component<Props> {
           </div>
         </div>
         {this._contents()}
-        <TestError model={model} />
       </div>
     )
   }

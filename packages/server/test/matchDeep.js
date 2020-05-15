@@ -47,6 +47,8 @@ const registerInMocha = () => {
         }
       }
 
+      e.message = `Snapshot failed to match\n${e.message}`
+
       throw e
     }
   }
@@ -147,6 +149,10 @@ const getFake = (matcherType) => {
 
   if (matcherType === 'string') {
     return 'foobar'
+  }
+
+  if (matcherType === 'array') {
+    return []
   }
 }
 

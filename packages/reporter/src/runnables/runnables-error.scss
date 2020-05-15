@@ -178,6 +178,56 @@
 
     .err-stack-line {
       white-space: pre;
+
+      // ensure empty lines still take up vertical space
+      &:empty:before {
+        content: ' ';
+      }
     }
+  }
+
+  .test-err-code-frame {
+    background-color: #fff;
+    border: 1px solid #ffe4e7;
+    margin: 10px;
+
+    .runnable-err-file-path {
+      display: block;
+      padding: 3px 10px 0;
+      line-height: 24px;
+      font-size: 13px;
+      position: relative;
+      top: 5px;
+    }
+
+    pre {
+      background-color: #fff;
+      border: 0;
+      padding-left: 10px;
+    }
+  }
+}
+
+.editor-picker-modal {
+  max-width: 40em;
+
+  .editor-picker {
+    margin-bottom: 1em;
+  }
+
+  .controls {
+    > span:first-child {
+      order: 1;
+    }
+
+    button.is-disabled,
+    button.is-disabled:hover,
+    button.is-disabled:focus {
+      background: $pass !important;
+      cursor: default !important;
+      opacity: 0.5;
+    }
+
+    padding: 1em 1em 1em;
   }
 }

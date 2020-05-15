@@ -2,7 +2,7 @@ import _ from 'lodash'
 import React from 'react'
 import { observer } from 'mobx-react'
 import ipc from '../lib/ipc'
-import { getExperiments } from '@packages/server/lib/experiments'
+import experiments from '@packages/server/lib/experiments'
 import MarkdownRenderer from '../lib/markdown-renderer'
 
 const openHelp = (e) => {
@@ -11,10 +11,10 @@ const openHelp = (e) => {
 }
 
 const Experiments = observer(({ project }) => {
-  const experiments = getExperiments(project)
+  const knownExperiments = experiments.getExperiments(project)
 
   return (
-    <div>
+    <div data-cy='experiments'>
       <a href='#' className='learn-more' data-cy='experiments' onClick={openHelp}>
         <i className='fas fa-info-circle'></i> Learn more
       </a>
@@ -25,7 +25,7 @@ const Experiments = observer(({ project }) => {
       </div>
       <ul className='experiments-list'>
         {
-          _.map(experiments, (experiment, i) => (
+          _.map(knownExperiments, (experiment, i) => (
             <li className='experiment' key={i}>
               <div className='experiment-header'>
                 <h5>

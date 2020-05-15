@@ -110,6 +110,10 @@ const create = function (Cypress, cy) {
       // them up with existing ones
       cmd.set('assertionIndex', 0)
 
+      if (cy.state('current') != null) {
+        cy.state('current').set('currentAssertionCommand', cmd)
+      }
+
       return cmd.get('fn').originalFn.apply(
         cy.state('ctx'),
         [subject].concat(cmd.get('args')),
@@ -200,6 +204,8 @@ const create = function (Cypress, cy) {
       } catch (e2) {
         err = e2
       }
+
+      err.isDefaultAssertionErr = isDefaultAssertionErr
 
       options.error = err
 
