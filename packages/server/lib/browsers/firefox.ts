@@ -282,6 +282,8 @@ const defaultPreferences = {
   // allow getUserMedia APIs on insecure domains
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
+
+  'marionette.log.level': process.env.DEBUG ? 'Debug' : undefined,
 }
 
 export async function open (browser: Browser, url, options: any = {}) {
