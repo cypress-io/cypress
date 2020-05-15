@@ -766,21 +766,19 @@ Can't run because you've entered an invalid browser name.
 Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
 
 Cypress supports the following browsers:
-- Canary
-- Chrome
-- Chromium
-- Edge
-- Edge Beta
-- Edge Canary
-- Edge Dev
-- Electron
-- Firefox (Beta support)
-- Firefox Developer Edition (Beta support)
-- Firefox Nightly (Beta support)
+- chrome
+- chromium
+- edge
+- electron
+- firefox (Cypress support in beta)
 
 You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
 
-Available browsers found are: browser1, browser2, browser3
+Available browsers found are:
+- chrome
+- firefox
+- edge
+- electron
 
 `
 

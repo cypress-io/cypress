@@ -109,21 +109,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       Browser: '#{arg1}' was not found on your system or is not supported by Cypress.
 
       Cypress supports the following browsers:
-      - Canary
-      - Chrome
-      - Chromium
-      - Edge
-      - Edge Beta
-      - Edge Canary
-      - Edge Dev
-      - Electron
-      - Firefox (Beta support)
-      - Firefox Developer Edition (Beta support)
-      - Firefox Nightly (Beta support)
+      - chrome
+      - chromium
+      - edge
+      - electron
+      - firefox (Cypress support in beta)
 
       You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
 
-      Available browsers found are: #{arg2}
+      Available browsers found are:
+      #{arg2}
       """
 
       if arg1 is 'canary'
