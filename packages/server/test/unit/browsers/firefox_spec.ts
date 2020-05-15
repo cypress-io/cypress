@@ -326,6 +326,7 @@ describe('lib/browsers/firefox', () => {
 
   context('firefox-util', () => {
     context('#setupMarionette', () => {
+      // @see https://github.com/cypress-io/cypress/issues/7159
       it('attaches geckodriver after testing connection', async () => {
         await firefoxUtil.setupMarionette([], '', port)
 
