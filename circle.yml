@@ -50,6 +50,18 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          name: Example Tailwind
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/tailwind
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Example Webpack options
           executor: cypress/base-12
           requires:
@@ -127,6 +139,7 @@ workflows:
             - Test
             - Example React Scripts
             - Example Component Folder
+            - Example Tailwind
             - Example Webpack options
             - Visual with Percy
             - Visual with Happo

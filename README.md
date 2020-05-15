@@ -156,6 +156,7 @@ Folder Name | Description
 --- | ---
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
+[tailwind](examples/tailwind) | Testing styles built using [Tailwind CSS](https://tailwindcss.com/)
 [visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](https://on.cypress.io/visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](https://on.cypress.io/visual-testing) for components using 3rd party service [Happo](https://happo.io/)
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
