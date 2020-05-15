@@ -15,7 +15,8 @@
     "pretest": "npm run lint && npm run transpile",
     "lint": "standard --verbose --fix *.js src cypress/integration",
     "semantic-release": "semantic-release",
-    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'"
+    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
+    "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet"
   },
   "husky": {
     "hooks": {
@@ -78,6 +79,7 @@
     "husky": "3.1.0",
     "lint-staged": "9.5.0",
     "lodash": "4.17.15",
+    "markdown-link-check": "3.8.1",
     "prettier": "1.19.1",
     "pretty": "2.0.0",
     "prop-types": "15.7.2",
