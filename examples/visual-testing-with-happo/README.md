@@ -1,4 +1,8 @@
+<!-- markdown-link-check-disable -->
+
 # example: visual-testing-with-happo [Happo Dashboard](https://happo.io/a/340/dashboard)
+
+<!-- markdown-link-check-enable -->
 
 > Visual component testing using [Happo.io](https://docs.happo.io/docs/cypress)
 
