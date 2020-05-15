@@ -364,9 +364,10 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
-          command: yarn lerna exec  --scope cypress "yarn dtslint"
+          command: ls -la chai
+          working_directory: cli/types
       - run:
-          command: yarn type-check --ignore-progress
+          command: yarn lerna exec  --scope cypress "yarn dtslint"
       - store-npm-logs
 
   build-system-unit-tests:
@@ -1032,6 +1033,47 @@ jobs:
           working_directory: test-binary
           command: $(npm bin)/cypress info
 
+  test-types-cypress-and-jest:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-cypress-and-jest
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir << parameters.wd >>
+      - run: node --version
+      - run: npm --version
+      - run:
+          name: Create new NPM package ⚗️
+          working_directory: << parameters.wd >>
+          command: npm init -y
+      - run:
+          name: Install dependencies 📦
+          working_directory: << parameters.wd >>
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          # let's install Cypress, Jest and any other package that might conflict
+          # https://github.com/cypress-io/cypress/issues/6690
+          command: |
+            npm install /root/cypress/cypress.tgz \
+              typescript jest @types/jest enzyme @types/enzyme
+      - run:
+          name: Test types clash ⚔️
+          working_directory: << parameters.wd >>
+          command: |
+            echo "console.log('hello world')" > hello.ts
+            npx tsc hello.ts --noEmit
+
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
     <<: *defaults
@@ -1351,6 +1393,10 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
+        requires:
+          - build-binary
+          - build-npm-package
+    - test-types-cypress-and-jest:
         requires:
           - build-binary
           - build-npm-package

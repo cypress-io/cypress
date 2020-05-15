@@ -7,15 +7,17 @@
 // TypeScript Version: 3.0
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="lodash" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
-/// <reference types="mocha" />
-/// <reference types="jquery" />
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="bluebird" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
 // jQuery includes dependency "sizzle" that provides types
 // so we include it too in "node_modules/sizzle".
@@ -29,6 +31,7 @@
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 type Bluebird<R> = import("bluebird")<R>
 
+// type helpers
 type Nullable<T> = T | null
 
 interface EventEmitter extends EventEmitter2 {
