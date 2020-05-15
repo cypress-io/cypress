@@ -6,7 +6,7 @@
 
 ## Survey
 
-Hi there! We are trying to collect feedback from Cypress users who need component testing. Answer a few questions [here](https://forms.gle/qiX2ScqPNEMgwvfA9) about component testing to help us 🙏
+Hi there! We are trying to collect feedback from Cypress users who need component testing. Answer a few questions [in this survey](https://forms.gle/qiX2ScqPNEMgwvfA9) about component testing to help us 🙏
 
 ## TLDR
 
