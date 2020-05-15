@@ -2,7 +2,7 @@
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Commoon problems](#common-problems)
+**Jump to:** [Comparison](#comparison), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems)
 
 ## TLDR
 
@@ -194,7 +194,21 @@ To find more examples, see GitHub topic [cypress-react-unit-test-example](https:
 
 ## Options
 
-You can pass additional styles, css files and external stylesheets to load, see [docs/styles.md](./docs/styles.md) for full list.
+In most cases, the component already imports its own styles, thus it looks "right" during the test. If you need another CSS, the simplest way is to import it from the spec file:
+
+```js
+// src/Footer.spec.js
+import './styles/main.css'
+import Footer from './Footer'
+it('looks right', () => {
+  // styles are applied
+  mount(<Footer />)
+})
+```
+
+### Extra styles
+
+You can pass additional styles, css files and external stylesheets to load, see [docs/styles.md](./docs/styles.md) for the full list of options.
 
 ```js
 const todo = {
