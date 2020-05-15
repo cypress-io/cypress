@@ -101,7 +101,7 @@ Spec | Description
 [counter-set-state](cypress/component/basic/counter-set-state) | Counter component that uses `this.state`
 [counter-use-hooks](cypress/component/basic/counter-use-hooks) | Counter component that uses `useState` hook
 [emotion-spec.js](cypress/component/basic/emotion-spec.js) | Confirms the component is using `@emotion/core` and styles are set
-[error-boundary-spec.js](cypress/component/basic/error-boundar-spec.js) | Checks if an error boundary component works
+[error-boundary-spec.js](cypress/component/basic/error-boundary-spec.js) | Checks if an error boundary component works
 [pure-component-spec.js](cypress/component/basic/pure-component.spec.js) | Tests stateless component
 [stateless-spec.js](cypress/component/basic/stateless-spec.js) | Passes Cypress stub to the component, confirms the component calls it on click
 [window-spec.js](cypress/component/basic/window-spec.js) | In the component test, the spec `window` and the application's `window` where the component is running should be the same object
@@ -128,7 +128,7 @@ Spec | Description
 --- | ---
 [app-action-example](cypress/component/advanced/app-action-example) | App actions against components
 [context](cypress/component/advanced/context) | Confirms components that use React context feature work
-[custom-command](cypress/component/custom-command) | Wraps `mount` in a custom command for convenience
+[custom-command](cypress/component/advanced/custom-command) | Wraps `mount` in a custom command for convenience
 [forward-ref](cypress/component/advanced/forward-ref) | Tests a component that uses a forward ref feature
 [hooks](cypress/component/advanced/hooks) | Tests several components that use React Hooks like `useState`, `useCallback`
 [lazy-loaded](cypress/component/advanced/lazy-loaded) | Confirms components that use `React.lazy` and dynamic imports work
@@ -136,7 +136,7 @@ Spec | Description
 [mock-fetch](cypress/component/advanced/mock-fetch) | Test stubs `window.fetch` used by component in `useEffect` hook
 [mocking-component](cypress/component/advanced/mocking-component) | Replaced a child component with dummy component during test
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub a named ES6 import using `plugin-transform-modules-commonjs` with `loose: true` when transpiled
-[react-router-v6](cypress/component/advanced/react-router-v6) | Example testing a [React Router v6](https://github.com/ReactTraining/react-router/blob/dev/docs/guides/getting-started.md)
+[react-router-v6](cypress/component/advanced/react-router-v6) | Example testing a [React Router v6](https://github.com/ReactTraining/react-router)
 [renderless](cypress/component/advanced/renderless) | Testing a component that does not need to render itself into the DOM
 [set-timeout-example](cypress/component/advanced/set-timeout-example) | Control the clock with `cy.tick` and test loading components that use `setTimeout`
 [testing-lib-example](cypress/component/advanced/testing-lib-example) | A spec adopted from [@testing-library/react](https://testing-library.com/docs/react-testing-library/example-intro) that uses [@testing-library/cypress](https://testing-library.com/docs/cypress-testing-library/intro)
