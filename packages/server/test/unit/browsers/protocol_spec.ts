@@ -7,7 +7,7 @@ import { connect } from '@packages/network'
 import CRI from 'chrome-remote-interface'
 import { expect } from 'chai'
 import humanInterval from 'human-interval'
-import protocol from '../../../lib/browsers/protocol'
+import * as protocol from '../../../lib/browsers/protocol'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
@@ -30,12 +30,12 @@ describe('lib/browsers/protocol', () => {
         i++
       }
 
-      expect(_.sum(delays)).to.eq(humanInterval('20 seconds'))
+      expect(_.sum(delays)).to.eq(humanInterval('50 seconds'))
 
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/32)`)
+        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)
@@ -50,7 +50,7 @@ describe('lib/browsers/protocol', () => {
       const p = protocol.getWsTargetFor(12345)
 
       const expectedError = stripIndents`
-        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
         This usually indicates there was a problem opening the Chrome browser.
 
@@ -160,7 +160,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/32)`)
+        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
       })
     })
   })

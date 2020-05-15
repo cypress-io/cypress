@@ -32,7 +32,7 @@ const getDelayMsForRetry = (i) => {
     return 500
   }
 
-  if (i < 33) {
+  if (i < 63) {
     return 1000
   }
 
