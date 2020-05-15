@@ -2350,7 +2350,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('attr', () => {
       beforeEach(function () {
-        this.$div = $('<div foo=\'bar\'>foo</div>')
+        this.$div = $('<div foo=\'bar\' fizz=\'buzz\'>foo</div>')
         this.$div.attr = function () {
           throw new Error('attr called')
         }
@@ -2445,6 +2445,18 @@ describe('src/cy/commands/assertions', () => {
         })
 
         expect({}).to.have.attr('foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('can accept an object as a parameter', function () {
+        expect(this.$div).to.have.attr({ foo: 'bar' })
+        expect(this.$div).to.have.attr({ fizz: 'buzz' })
+        expect(this.$div).to.have.attr({ foo: 'bar', fizz: 'buzz' })
+
+        expect(this.$div).not.to.have.attr({ foo: 'buzz' })
+        expect(this.$div).not.to.have.attr({ fizz: 'bar' })
+        expect(this.$div).not.to.have.attr({ foo: 'buzz', fizz: 'bar' })
+        expect(this.$div).not.to.have.attr({ bar: 'foo' })
       })
     })
 
@@ -2549,6 +2561,18 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.prop('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('can accept an object as a parameter', function () {
+        expect(this.$input).to.have.prop({ checked: true })
+        expect(this.$input).to.have.prop({ type: 'checkbox' })
+        expect(this.$input).to.have.prop({ checked: true, type: 'checkbox' })
+
+        expect(this.$input).not.to.have.prop({ checked: false })
+        expect(this.$input).not.to.have.prop({ type: 'text' })
+        expect(this.$input).not.to.have.prop({ checked: false, type: 'text' })
+        expect(this.$input).not.to.have.prop({ foo: 'bar' })
+      })
     })
 
     context('css', () => {
@@ -2624,18 +2648,12 @@ describe('src/cy/commands/assertions', () => {
       it('can accept an object as a parameter', function () {
         expect(this.$div).to.have.css({ display: 'none' })
         expect(this.$div).to.have.css({ position: 'absolute' })
-
-        try {
-          expect(this.$div).to.have.css({ display: 'block' })
-        } catch (error) {} // eslint-disable-line no-empty
+        expect(this.$div).to.have.css({ display: 'none', position: 'absolute' })
 
         expect(this.$div).not.to.have.css({ display: 'inline' })
         expect(this.$div).not.to.have.css({ position: 'fixed' })
+        expect(this.$div).not.to.have.css({ display: 'inline', position: 'fixed' })
         expect(this.$div).not.to.have.css({ foo: 'bar' })
-
-        try {
-          expect(this.$div).not.to.have.css({ display: 'none' })
-        } catch (error) {} // eslint-disable-line no-empty
       })
     })
   })
