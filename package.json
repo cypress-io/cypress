@@ -62,6 +62,7 @@
     "@types/node": "9.6.49",
     "@types/react": "16.9.16",
     "@types/react-dom": "16.9.4",
+    "autoprefixer": "9.7.6",
     "axios": "0.18.1",
     "babel-loader": "8.0.6",
     "babel-plugin-module-resolver": "4.0.0",
@@ -94,6 +95,7 @@
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",
+    "tailwindcss": "1.4.6",
     "typescript": "3.8.3",
     "webpack": "4.33.0",
     "webpack-cli": "3.3.9"

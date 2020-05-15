@@ -1,0 +1,15 @@
+{
+  "name": "example-tailwind",
+  "description": "Component testing with Tailwind CSS",
+  "private": true,
+  "scripts": {
+    "test": "../../node_modules/.bin/cypress run",
+    "cy:open": "../../node_modules/.bin/cypress open",
+    "build:css": "../../node_modules/.bin/tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
+    "pretest": "npm run build:css",
+    "precy:open": "npm run build:css"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}
