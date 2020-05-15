@@ -1,74 +1,88 @@
-describe "src/cy/commands/popups", ->
-  context "alert", ->
-    beforeEach ->
-      cy.visit("/fixtures/generic.html")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("src/cy/commands/popups", function() {
+  context("alert", function() {
+    beforeEach(function() {
+      cy.visit("/fixtures/generic.html");
 
-      @logs = []
+      this.logs = [];
 
-      cy.on "log:added", (attrs, log) =>
-        if attrs.name is "alert"
-          @logs.push(log)
+      cy.on("log:added", (attrs, log) => {
+        if (attrs.name === "alert") {
+          return this.logs.push(log);
+        }
+      });
 
-      return null
+      return null;
+    });
 
-    it "logs the alert", ->
-      cy.window().then (win) ->
-        win.alert("fooooo")
-      .then ->
-        expect(@logs.length).to.eq(1)
-        expect(@logs[0].get("name")).to.eq("alert")
-        expect(@logs[0].get("message")).to.eq("fooooo")
+    return it("logs the alert", () => cy.window().then(win => win.alert("fooooo")).then(function() {
+      expect(this.logs.length).to.eq(1);
+      expect(this.logs[0].get("name")).to.eq("alert");
+      expect(this.logs[0].get("message")).to.eq("fooooo");
 
-        consoleProps = @logs[0].invoke("consoleProps")
+      const consoleProps = this.logs[0].invoke("consoleProps");
 
-        expect(consoleProps).to.deep.eq({
-          Event: "alert"
-          Alerted: "fooooo"
-        })
+      return expect(consoleProps).to.deep.eq({
+        Event: "alert",
+        Alerted: "fooooo"
+      });
+    }));
+  });
 
-  context "confirm", ->
-    beforeEach ->
-      cy.visit("/fixtures/generic.html")
+  return context("confirm", function() {
+    beforeEach(function() {
+      cy.visit("/fixtures/generic.html");
 
-      @logs = []
+      this.logs = [];
 
-      cy.on "log:added", (attrs, log) =>
-        if attrs.name is "confirm"
-          @logs.push(log)
+      cy.on("log:added", (attrs, log) => {
+        if (attrs.name === "confirm") {
+          return this.logs.push(log);
+        }
+      });
 
-      return null
+      return null;
+    });
 
-    it "logs the confirm", ->
-      cy.window().then (win) ->
-        win.confirm("Delete hard drive?")
-      .then ->
-        expect(@logs.length).to.eq(1)
-        expect(@logs[0].get("name")).to.eq("confirm")
-        expect(@logs[0].get("message")).to.eq("Delete hard drive?")
+    it("logs the confirm", () => cy.window().then(win => win.confirm("Delete hard drive?")).then(function() {
+      expect(this.logs.length).to.eq(1);
+      expect(this.logs[0].get("name")).to.eq("confirm");
+      expect(this.logs[0].get("message")).to.eq("Delete hard drive?");
 
-        consoleProps = @logs[0].invoke("consoleProps")
+      const consoleProps = this.logs[0].invoke("consoleProps");
 
-        expect(consoleProps).to.deep.eq({
-          Event: "confirm"
-          Prompted: "Delete hard drive?"
-          Confirmed: true
-        })
+      return expect(consoleProps).to.deep.eq({
+        Event: "confirm",
+        Prompted: "Delete hard drive?",
+        Confirmed: true
+      });
+    }));
 
-    it "can turn on and off confirmation", ->
-      cy.on "window:confirm", (str) ->
-        switch str
-          when "foo" then false
-          when "bar" then true
-          when "baz" then undefined
+    return it("can turn on and off confirmation", function() {
+      cy.on("window:confirm", function(str) {
+        switch (str) {
+          case "foo": return false;
+          case "bar": return true;
+          case "baz": return undefined;
+        }
+      });
 
-      cy.window().then (win) ->
-        confirmedFoo = win.confirm("foo")
-        expect(confirmedFoo).to.be.false
+      return cy.window().then(function(win) {
+        const confirmedFoo = win.confirm("foo");
+        expect(confirmedFoo).to.be.false;
 
-        confirmedBar = win.confirm("bar")
-        expect(confirmedBar).to.be.true
+        const confirmedBar = win.confirm("bar");
+        expect(confirmedBar).to.be.true;
 
-        ## undefined is not strictly false
-        ## so the confirmation should be true
-        confirmedBaz = win.confirm("baz")
-        expect(confirmedBaz).to.be.true
+        //# undefined is not strictly false
+        //# so the confirmation should be true
+        const confirmedBaz = win.confirm("baz");
+        return expect(confirmedBaz).to.be.true;
+      });
+    });
+  });
+});
