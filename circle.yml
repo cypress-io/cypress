@@ -1041,16 +1041,16 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir test-cypress-and-jest
+      - run: mkdir /root/test-cypress-and-jest
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package
-          working_directory: test-cypress-and-jest
+          working_directory: /root/test-cypress-and-jest
           command: npm init -y
       - run:
           name: Test types clash
-          working_directory: test-cypress-and-jest
+          working_directory: /root/test-cypress-and-jest
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
