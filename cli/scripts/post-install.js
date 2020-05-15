@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// @ts-check
+/* eslint-disable no-console */
+
 const { includeTypes } = require('./utils')
 const shell = require('shelljs')
 const { join } = require('path')
@@ -27,38 +30,41 @@ const typesJqueryDistFolder = join('types', 'jquery', 'dist')
 
 shell.rm('-rf', typesJqueryDistFolder)
 
-// fix paths to Chai, jQuery and other types to be relative
-shell.sed(
-  '-i',
-  '<reference types="chai" />',
-  '<reference path="../chai/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts'),
-)
+/**
+ * Replaces "reference types=<name>" comment with "reference path=..." line.
+ * @param {string} typeName - like "chai" or "jquery"
+ * @param {string} relativeTypesFilePath - relative path to .d.ts file like "../chai/index.d.ts"
+ * @param {string} filename - the source file to change
+ */
+function makeReferenceTypesCommentRelative (typeName, relativeTypesFilePath, filename) {
+  console.log('in file %s changing reference for types %s to relative path %s',
+    filename, typeName, relativeTypesFilePath)
 
-shell.sed(
-  '-i',
-  '<reference types="jquery" />',
-  '<reference path="../jquery/index.d.ts" />',
-  join('types', 'chai-jquery', 'index.d.ts'),
-)
+  const referenceTypes = `<reference types="${typeName}" />`
+  const relativeTypes = `<reference path="${relativeTypesFilePath}" />`
+
+  shell.sed(
+    '-i',
+    referenceTypes,
+    relativeTypes,
+    filename,
+  )
+}
+
+// fix paths to Chai, jQuery and other types to be relative
+makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts',
+  join('types', 'chai-jquery', 'index.d.ts'))
+
+makeReferenceTypesCommentRelative('jquery', '../jquery/index.d.ts',
+  join('types', 'chai-jquery', 'index.d.ts'))
 
 const sinonChaiFilename = join('types', 'sinon-chai', 'index.d.ts')
 
-shell.sed(
-  '-i',
-  '<reference types="chai" />',
-  '<reference path="../chai/index.d.ts" />',
-  sinonChaiFilename,
-)
+makeReferenceTypesCommentRelative('chai', '../chai/index.d.ts', sinonChaiFilename)
 
 // also use relative import via path for sinon-chai
 // there is reference comment line we need to fix to be relative
-shell.sed(
-  '-i',
-  '<reference types="sinon" />',
-  '<reference path="../sinon/index.d.ts" />',
-  sinonChaiFilename,
-)
+makeReferenceTypesCommentRelative('sinon', '../sinon/index.d.ts', sinonChaiFilename)
 
 // and an import sinon line to be changed to relative path
 shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
