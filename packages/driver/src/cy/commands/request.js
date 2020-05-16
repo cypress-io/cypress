@@ -25,9 +25,9 @@ const REQUEST_DEFAULTS = {
   form: null,
   gzip: true,
   timeout: null,
+  bufferEncoding: null,
   followRedirect: true,
   failOnStatusCode: true,
-  encodeBodyToBase64: false,
   retryOnNetworkFailure: true,
   retryOnStatusCodeFailure: false,
 }
