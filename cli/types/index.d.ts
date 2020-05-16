@@ -7,15 +7,17 @@
 // TypeScript Version: 3.0
 // Updated by the Cypress team: https://www.cypress.io/about/
 
-/// <reference types="blob-util" />
-/// <reference types="lodash" />
-/// <reference types="sinon" />
-/// <reference types="sinon-chai" />
-/// <reference types="mocha" />
-/// <reference types="jquery" />
-/// <reference types="chai" />
-/// <reference types="chai-jquery" />
-/// <reference types="bluebird" />
+/// <reference path="./cy-blob-util.d.ts" />
+/// <reference path="./cy-bluebird.d.ts" />
+/// <reference path="./cy-moment.d.ts" />
+/// <reference path="./cy-minimatch.d.ts" />
+/// <reference path="./cy-chai.d.ts" />
+/// <reference path="./lodash/index.d.ts" />
+/// <reference path="./sinon/index.d.ts" />
+/// <reference path="./sinon-chai/index.d.ts" />
+/// <reference path="./mocha/index.d.ts" />
+/// <reference path="./jquery/index.d.ts" />
+/// <reference path="./chai-jquery/index.d.ts" />
 
 // jQuery includes dependency "sizzle" that provides types
 // so we include it too in "node_modules/sizzle".
@@ -29,6 +31,7 @@
 type EventEmitter2 = import("eventemitter2").EventEmitter2
 type Bluebird<R> = import("bluebird")<R>
 
+// type helpers
 type Nullable<T> = T | null
 
 interface EventEmitter extends EventEmitter2 {
@@ -57,7 +60,7 @@ declare namespace Cypress {
   type RequestBody = string | object
   type ViewportOrientation = "portrait" | "landscape"
   type PrevSubject = "optional" | "element" | "document" | "window"
-  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | Partial<ConfigOptions> | Promise<Partial<ConfigOptions>>
+  type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
     prevSubject: boolean | PrevSubject | PrevSubject[]
@@ -294,7 +297,7 @@ declare namespace Cypress {
     // {defaultCommandTimeout: 10000, pageLoadTimeout: 30000, ...}
     ```
      */
-    config(): ConfigOptions
+    config(): ResolvedConfigOptions
     /**
      * Returns one configuration value.
      * @see https://on.cypress.io/config
@@ -304,7 +307,7 @@ declare namespace Cypress {
     // 60000
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K): ConfigOptions[K]
+    config<K extends keyof ConfigOptions>(key: K): ResolvedConfigOptions[K]
     /**
      * Sets one configuration value.
      * @see https://on.cypress.io/config
@@ -313,7 +316,7 @@ declare namespace Cypress {
     Cypress.config('viewportWidth', 800)
     ```
      */
-    config<K extends keyof ConfigOptions>(key: K, value: ConfigOptions[K]): void
+    config<K extends keyof ConfigOptions>(key: K, value: ResolvedConfigOptions[K]): void
     /**
      * Sets multiple configuration values at once.
      * @see https://on.cypress.io/config
@@ -325,7 +328,7 @@ declare namespace Cypress {
     })
     ```
      */
-    config(Object: Partial<ConfigOptions>): void
+    config(Object: ConfigOptions): void
 
     // no real way to type without generics
     /**
@@ -478,11 +481,11 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an object is a window object.
        */
-      isWindow(obj: any): boolean
+      isWindow(obj: any): obj is Window
       /**
        * Returns a boolean indicating whether an object is a jQuery object.
        */
-      isJquery(obj: any): boolean
+      isJquery(obj: any): obj is JQuery
       isInputType(element: JQuery | HTMLElement, type: string | string[]): boolean
       stringify(element: JQuery | HTMLElement, form: string): string
       getElements(element: JQuery): JQuery | HTMLElement[]
@@ -2287,7 +2290,7 @@ declare namespace Cypress {
     multiple: boolean
   }
 
-  interface ConfigOptions {
+  interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
      * @default null
@@ -2456,9 +2459,20 @@ declare namespace Cypress {
      * @default false
      */
     experimentalGetCookiesSameSite: boolean
+    /**
+     * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
+     * algorithm.
+     * @default false
+     */
+    experimentalSourceRewriting: boolean
   }
 
-  interface PluginConfigOptions extends ConfigOptions {
+  /**
+   * All configuration items are optional.
+   */
+  type ConfigOptions = Partial<ResolvedConfigOptions>
+
+  interface PluginConfigOptions extends ResolvedConfigOptions {
     /**
     * Absolute path to the config file (default: <projectRoot>/cypress.json) or false
     */

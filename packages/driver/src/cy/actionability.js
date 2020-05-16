@@ -239,7 +239,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
 
 const getCoordinatesForEl = function (cy, $el, options) {
   // determine if this element is animating
-  if (options.x && options.y) {
+  if (_.isFinite(options.x) && _.isFinite(options.y)) {
     return $dom.getElementCoordinatesByPositionRelativeToXY($el, options.x, options.y)
   }
 

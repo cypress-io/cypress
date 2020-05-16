@@ -20,6 +20,7 @@ ensureUrl   = require("../util/ensure-url")
 chromePolicyCheck = require("../util/chrome_policy_check")
 browsers    = require("../browsers")
 konfig      = require("../konfig")
+editors     = require("../util/editors")
 
 nullifyUnserializableValues = (obj) =>
   ## nullify values that cannot be cloned
@@ -264,6 +265,16 @@ handleEvent = (options, bus, event, id, type, arg) ->
 
     when "get:record:keys"
       openProject.getRecordKeys()
+      .then(send)
+      .catch(sendErr)
+
+    when "get:user:editor"
+      editors.getUserEditor(true)
+      .then(send)
+      .catch(sendErr)
+
+    when "set:user:editor"
+      editors.setUserEditor(arg)
       .then(send)
       .catch(sendErr)
 

@@ -6,7 +6,6 @@ import clean from 'underscore.string/clean'
 import count from 'underscore.string/count'
 import isBlank from 'underscore.string/isBlank'
 import toBoolean from 'underscore.string/toBoolean'
-import capitalize from 'underscore.string/capitalize'
 
 const inflection = underscoreInflection(_)
 
@@ -16,7 +15,6 @@ _.mixin({
   count,
   isBlank,
   toBoolean,
-  capitalize, // its mo' better the lodash version
   ordinalize: inflection.ordinalize,
 })
 
@@ -26,7 +24,6 @@ declare module 'lodash' {
     count(...args): LoDashExplicitWrapper<TValue>
     isBlank(...args): LoDashExplicitWrapper<TValue>
     toBoolean(...args): LoDashExplicitWrapper<TValue>
-    capitalize(...args): LoDashExplicitWrapper<TValue>
     ordinalize(...args): LoDashExplicitWrapper<TValue>
   }
 
@@ -35,7 +32,6 @@ declare module 'lodash' {
     count(...args): LoDashExplicitWrapper<TValue>
     isBlank(...args): LoDashExplicitWrapper<TValue>
     toBoolean(...args): LoDashExplicitWrapper<TValue>
-    capitalize(...args): LoDashExplicitWrapper<TValue>
     ordinalize(...args): LoDashExplicitWrapper<TValue>
   }
 }

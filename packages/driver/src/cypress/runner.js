@@ -8,6 +8,7 @@ const Pending = require('mocha/lib/pending')
 const $Log = require('./log')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const $stackUtils = require('./stack_utils')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -731,7 +732,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     let hookName
     const isHook = runnable.type === 'hook'
 
-    $errUtils.normalizeErrorStack(err)
+    err.stack = $stackUtils.normalizedStack(err)
 
     if (isHook) {
       const parentTitle = runnable.parent.title
@@ -742,10 +743,10 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       // we're skipping the remaining tests in this suite
       err = $errUtils.appendErrMsg(
         err,
-        $errUtils.errMsgByPath('uncaught.error_in_hook', {
+        $errUtils.errByPath('uncaught.error_in_hook', {
           parentTitle,
           hookName,
-        }),
+        }).message,
       )
     }
 
@@ -786,34 +787,29 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
   _runner.suite = mocha.getRootSuite()
 
-  specWindow.onerror = function () {
-    let err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
-
+  const onScriptError = (err) => {
     // err will not be returned if cy can associate this
     // uncaught exception to an existing runnable
     if (!err) {
       return true
     }
 
-    const todoMsg = function () {
+    const todoMsg = () => {
       if (!Cypress.config('isTextTerminal')) {
         return 'Check your console for the stack trace or click this message to see where it originated from.'
       }
     }
 
-    const append = () => {
-      return _.chain([
-        'Cypress could not associate this error to any specific test.',
-        'We dynamically generated a new test to display this failure.',
-        todoMsg(),
-      ])
-      .compact()
-      .join('\n\n')
-      .value()
-    }
+    const appendMsg = _.chain([
+      'Cypress could not associate this error to any specific test.',
+      'We dynamically generated a new test to display this failure.',
+      todoMsg(),
+    ])
+    .compact()
+    .join('\n\n')
+    .value()
 
-    // else  do the same thing as mocha here
-    err = $errUtils.appendErrMsg(err, append())
+    err = $errUtils.appendErrMsg(err, appendMsg)
 
     const throwErr = function () {
       throw err
@@ -826,6 +822,12 @@ const create = function (specWindow, mocha, Cypress, cy) {
     // return undefined so the browser does its default
     // uncaught exception behavior (logging to console)
     return undefined
+  }
+
+  specWindow.onerror = function () {
+    const err = cy.onSpecWindowUncaughtException.apply(cy, arguments)
+
+    return onScriptError(err)
   }
 
   // hold onto the _runnables for faster lookup later
@@ -892,6 +894,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
   return {
+    onScriptError,
+
     normalizeAll (tests) {
       // if we have an uncaught error then slice out
       // all of the tests and suites and just generate

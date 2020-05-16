@@ -22,12 +22,24 @@
             bar.baz()
           })
         })
+
+        $("button.sync-error").click(function () {
+          qux.bar()
+        })
+
+        $("button.async-error").click(function () {
+          setTimeout(function () {
+            qax.bar()
+          })
+        })
       })
     </script>
   </head>
   <body>
     <button type="button" class="ref">reference err</button>
     <button type="button" class="xhr">xhr err</button>
+    <button type="button" class="sync-error">sync err</button>
+    <button type="button" class="async-error">async err</button>
     <div id="results"></div>
   </body>
 </html>

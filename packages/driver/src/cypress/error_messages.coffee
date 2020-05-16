@@ -1,4 +1,5 @@
 _ = require("lodash")
+capitalize = require('underscore.string/capitalize')
 
 divider = (num, char) ->
   Array(num).join(char)
@@ -27,7 +28,7 @@ formatProp = (memo, field) ->
   {key, value} = field
 
   if value?
-    memo.push(_.capitalize(key) + ": " + format(value))
+    memo.push(capitalize(key) + ": " + format(value))
   memo
 
 cmd = (command, args = "") ->
@@ -214,8 +215,9 @@ module.exports = {
     backend_error: (obj) -> {
       message: """
       #{cmd('{{cmd}}')} had an unexpected error {{action}} {{browserDisplayName}}.
-      {{errMessage}}
-      {{errStack}}
+
+      > {{error}}
+
       """
       docsUrl: "https://on.cypress.io/#{_.toLower(obj.cmd)}"
     }
@@ -493,7 +495,7 @@ module.exports = {
         If you want to assert on the property's value, then switch to use #{cmd('its')} and add an assertion such as:
 
         `cy.wrap({ foo: 'bar' }).its('foo').should('eq', 'bar')`
-        """
+      """
       docsUrl: "https://on.cypress.io/invoke"
     }
     subject_null_or_undefined: {
@@ -503,7 +505,7 @@ module.exports = {
         If you expect your subject to be `{{value}}`, then add an assertion such as:
 
         `cy.wrap({{value}}).should('be.{{value}}')`
-        """
+      """
       docsUrl: "https://on.cypress.io/invoke"
     }
     null_or_undefined_prop_value: {
@@ -515,7 +517,7 @@ module.exports = {
         If you expect the property `{{prop}}` to be `{{value}}`, then switch to use #{cmd('its')} and add an assertion such as:
 
         `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
-        """
+      """
       docsUrl: "https://on.cypress.io/invoke"
     }
 
@@ -527,7 +529,7 @@ module.exports = {
         If you expect your subject to be `{{value}}`, then add an assertion such as:
 
         `cy.wrap({{value}}).should('be.{{value}}')`
-        """
+      """
       docsUrl: "https://on.cypress.io/its"
     }
     null_or_undefined_prop_value: {
@@ -539,7 +541,7 @@ module.exports = {
         If you expect the property `{{prop}}` to be `{{value}}`, then add an assertion such as:
 
         `cy.wrap({ foo: {{value}} }).its('foo').should('be.{{value}}')`
-        """
+      """
       docsUrl: "https://on.cypress.io/its"
     }
 
@@ -553,7 +555,7 @@ module.exports = {
         If you do not expect the property `{{prop}}` to exist, then add an assertion such as:
 
         `cy.wrap({ foo: 'bar' }).its('quux').should('not.exist')`
-        """
+      """
       docsUrl: "https://on.cypress.io/{{cmd}}"
     }
     previous_prop_null_or_undefined: {
@@ -630,7 +632,7 @@ module.exports = {
         To rewrite this custom command you'd likely write:
 
         `Cypress.Commands.add(#{obj.signature})`
-        """
+      """
       docsUrl: "https://on.cypress.io/custom-command-interface-changed"
     }
     returned_value_and_commands_from_custom_command: (obj) -> {
@@ -839,6 +841,18 @@ module.exports = {
   ng:
     no_global: "Angular global (`window.angular`) was not found in your window. You cannot use #{cmd('ng')} methods without angular."
 
+  proxy:
+    js_rewriting_failed: """
+    An error occurred in the Cypress proxy layer while rewriting your source code. This is a bug in Cypress. Open an issue if you see this message.
+
+    JS URL: {{url}}
+
+    Original error:
+
+    {{errMessage}}
+    {{errStack}}
+    """
+
   reload:
     invalid_arguments: {
       message: "#{cmd('reload')} can only accept a boolean or `options` as its arguments."
@@ -922,10 +936,6 @@ module.exports = {
           - you forgot to run / boot your web server
           - your web server isn't accessible
           - you have weird network configuration settings on your computer
-
-        The stack trace for this error is:
-
-        #{obj.stack}
         """
       docsUrl: "https://on.cypress.io/request"
     }
@@ -1141,6 +1151,10 @@ module.exports = {
       message: "#{cmd('select')} failed because this `<option>` you are trying to select is currently disabled:\n\n`{{node}}`"
       docsUrl: "https://on.cypress.io/select"
     }
+    optgroup_disabled: {
+      message: "#{cmd('select')} failed because this `<option>` you are trying to select is within an `<optgroup>` that is currently disabled:\n\n`{{node}}`"
+      docsUrl: "https://on.cypress.io/select"
+    }
 
   selector_playground:
     defaults_invalid_arg: {
@@ -1170,14 +1184,6 @@ module.exports = {
     unavailable: "The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message."
 
   setCookie:
-    backend_error: {
-      message: """
-        #{cmd('setCookie')} had an unexpected error setting the requested cookie in {{browserDisplayName}}.
-
-        {{errStack}}
-      """
-      docsUrl: "https://on.cypress.io/setcookie"
-    }
     invalid_arguments: {
       message: "#{cmd('setCookie')} must be passed two string arguments for `name` and `value`."
       docsUrl: "https://on.cypress.io/setcookie"
@@ -1428,19 +1434,20 @@ module.exports = {
     }
 
   uncaught:
-    cross_origin_script: """
-      Script error.
+    cross_origin_script: {
+      message: """
+        Script error.
 
-      Cypress detected that an uncaught error was thrown from a cross origin script.
+        Cypress detected that an uncaught error was thrown from a cross origin script.
 
-      We cannot provide you the stack trace, line number, or file where this error occurred.
+        We cannot provide you the stack trace, line number, or file where this error occurred.
 
-      Check your Developer Tools Console for the actual error - it should be printed there.
+        Check your Developer Tools Console for the actual error - it should be printed there.
 
-      It's possible to enable debugging these scripts by adding the `crossorigin` attribute and setting a CORS header.
-
-      https://on.cypress.io/cross-origin-script-error
-    """
+        It's possible to enable debugging these scripts by adding the `crossorigin` attribute and setting a CORS header.
+      """
+      docsUrl: "https://on.cypress.io/cross-origin-script-error"
+    }
     error_in_hook: (obj) ->
       msg = "Because this error occurred during a `#{obj.hookName}` hook we are skipping "
 
@@ -1450,15 +1457,15 @@ module.exports = {
         msg += "all of the remaining tests."
 
       msg
-
     error: (obj) ->
-      {msg, source, lineno} = obj
+      {message, source, lineno} = obj
 
-      msg + if source and lineno then " (#{source}:#{lineno})" else ""
-
+      message + if source and lineno then " (#{source}:#{lineno})" else ""
     fromApp: {
       message: """
-        This error originated from your application code, not from Cypress.
+        The following error originated from your application code, not from Cypress.
+
+          > {{errMsg}}
 
         When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -1468,7 +1475,9 @@ module.exports = {
     }
     fromSpec:
       message: """
-        This error originated from your test code, not from Cypress.
+        The following error originated from your test code, not from Cypress.
+
+          > {{errMsg}}
 
         When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
       """
@@ -1574,10 +1583,6 @@ module.exports = {
         - you forgot to run / boot your web server
         - your web server isn't accessible
         - you have weird network configuration settings on your computer
-
-      The stack trace for this error is:
-
-      {{stack}}
     """
     loading_file_failed: (obj) ->
       """
@@ -1630,15 +1635,14 @@ module.exports = {
         #{cmd('request')} will automatically get and set cookies and enable you to parse responses.
       """
 
-    specify_file_by_relative_path: """
-      #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
+    specify_file_by_relative_path: {
+      message: """
+        #{cmd('visit')} failed because the 'file://...' protocol is not supported by Cypress.
 
-      To visit a local file, you can pass in the relative path to the file from the `projectRoot` (Note: if the configuration value `baseUrl` is set, the supplied path will be resolved from the `baseUrl` instead of `projectRoot`)
-
-      https://docs.cypress.io/api/commands/visit.html
-
-      https://docs.cypress.io/api/cypress-api/config.html
+        To visit a local file, you can pass in the relative path to the file from the `projectRoot` (Note: if the configuration value `baseUrl` is set, the supplied path will be resolved from the `baseUrl` instead of `projectRoot`)
       """
+      docsUrl: ["https://docs.cypress.io/api/commands/visit.html", "/https://docs.cypress.io/api/cypress-api/config.html"]
+    }
 
   wait:
     alias_invalid: {

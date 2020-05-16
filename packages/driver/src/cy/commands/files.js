@@ -2,7 +2,6 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $errUtils = require('../../cypress/error_utils')
-const $errMessages = require('../../cypress/error_messages')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({
@@ -62,11 +61,11 @@ module.exports = (Commands, Cypress, cy) => {
                 return
               }
 
-              const { message, docsUrl } = (contents != null)
-                // file exists but it shouldn't
-                ? $errUtils.errObjByPath($errMessages, 'files.existent', { file, filePath })
-                // file doesn't exist but it should
-                : $errUtils.errObjByPath($errMessages, 'files.nonexistent', { file, filePath })
+              // file exists but it shouldn't - or - file doesn't exist but it should
+              const errPath = contents ? 'files.existent' : 'files.nonexistent'
+              const { message, docsUrl } = $errUtils.cypressErrByPath(errPath, {
+                args: { file, filePath },
+              })
 
               err.message = message
               err.docsUrl = docsUrl

@@ -310,7 +310,7 @@ exports['deprecated before:browser:launch args / displays errors thrown and abor
   Running:  app_spec.js                                                                     (1 of 2)
 Error thrown from plugins handler
 Error: Error thrown from plugins handler
-    [stack trace lines]
+      [stack trace lines]
 `
 
 exports['deprecated before:browser:launch args / displays promises rejected and aborts the run'] = `
@@ -332,5 +332,5 @@ exports['deprecated before:browser:launch args / displays promises rejected and 
   Running:  app_spec.js                                                                     (1 of 2)
 Promise rejected from plugins handler
 Error: Promise rejected from plugins handler
-    [stack trace lines]
+      [stack trace lines]
 `

@@ -1,8 +1,10 @@
-import commonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
+import getCommonConfig, { HtmlWebpackPlugin } from '@packages/web-config/webpack.config.base'
 import path from 'path'
+import webpack from 'webpack'
 
-const config: typeof commonConfig = {
-  ...commonConfig,
+// @ts-ignore
+const config: webpack.Configuration = {
+  ...getCommonConfig(),
   entry: {
     app: [require.resolve('@babel/polyfill'), path.resolve(__dirname, 'src/main')],
   },
@@ -26,7 +28,10 @@ config.plugins = [
 config.resolve = {
   ...config.resolve,
   alias: {
+    'bluebird': require.resolve('bluebird'),
     'lodash$': require.resolve('lodash'),
+    'mobx': require.resolve('mobx'),
+    'mobx-react': require.resolve('mobx-react'),
     'react': require.resolve('react'),
     'react-dom': require.resolve('react-dom'),
   },
