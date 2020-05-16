@@ -121,7 +121,7 @@ module.exports = (Commands, Cypress, cy) => {
         contents = JSON.stringify(contents, null, 2)
       }
 
-      return Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'decodeContentFromBase64']))
+      return Cypress.backend('write:file', fileName, contents, _.pick(options, ['encoding', 'flag', 'bufferEncoding']))
       .then(({ contents, filePath }) => {
         consoleProps['File Path'] = filePath
         consoleProps['Contents'] = contents

@@ -26,8 +26,8 @@ module.exports = {
       encoding: options.encoding or "utf8"
       flag: options.flag or "w"
     }
-    if (!!options.decodeContentFromBase64)
-      contents = Buffer.from(contents, 'base64')
+    if (!!options.bufferEncoding && Buffer.isEncoding(options.bufferEncoding))
+      contents = Buffer.from(contents, options.bufferEncoding)
     fs.outputFile(filePath, contents, writeOptions)
     .then ->
       {
