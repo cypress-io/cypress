@@ -21,7 +21,6 @@ const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file final currentRetry retries'.split(' ')
-// const ERROR_PROPS = 'message type name stack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
 // ## initial payload
@@ -1102,211 +1101,209 @@ const create = function (specWindow, mocha, Cypress, cy) {
     return fail()
   }
 
-  mocha.onCypress(Cypress)
+  return {
+    onRunnableRun (run, runnable, args) {
+      // extract out the next(fn) which mocha uses to
+      // move to the next runnable - this will be our async seam
+      const _next = args[0]
 
-  mocha.onRunnableRun(function (run, runnable, args) {
-    // extract out the next(fn) which mocha uses to
-    // move to the next runnable - this will be our async seam
-    const _next = args[0]
+      const test = getTestFromRunnable(runnable)
 
-    const test = getTestFromRunnable(runnable)
-
-    // if there's no test, this is likely a rouge before/after hook
-    // that should not have run, so skip this runnable
-    if (!test) {
-      return _next()
-    }
-
-    // first time seeing a retried test
-    // that hasn't already replaced our test
-    if (test._currentRetry > 0 && _testsById[test.id] !== test) {
-      replacePreviousAttemptWith(test)
-    }
-
-    // closure for calculating the actual
-    // runtime of a runnables fn exection duration
-    // and also the run of the runnable:after:run:async event
-    let lifecycleStart
-    let wallClockStartedAt = null
-    let wallClockEnd = null
-    let fnDurationStart = null
-    let fnDurationEnd = null
-    let afterFnDurationStart = null
-    let afterFnDurationEnd = null
-
-    // when this is a hook, capture the real start
-    // date so we can calculate our test's duration
-    // including all of its hooks
-    wallClockStartedAt = new Date()
-
-    if (!test.wallClockStartedAt) {
-      // if we don't have lifecycle timings yet
-      lifecycleStart = wallClockStartedAt
-    }
-
-    if (test.wallClockStartedAt == null) {
-      test.wallClockStartedAt = wallClockStartedAt
-    }
-
-    // if we haven't yet fired this event for this test
-    // that means that we need to reset the previous state
-    // of cy - since we now have a new 'test' and all of the
-    // associated _runnables will share this state
-    if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
-      fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
-    }
-
-    const isHook = runnable.type === 'hook'
-    const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
-
-    if (isAfterAllHook) {
-      if (test.state !== 'failed') {
-        delete test.err
-        test.state = 'passed'
-      }
-    }
-
-    if (
-      isHook &&
-        test.trueFn &&
-        !isAfterAllHook
-    ) {
-      return _next.call(this)
-    }
-
-    // if this isnt a hook, then the name is 'test'
-    const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
-
-    const next = function (err) {
-      // now set the duration of the after runnable run async event
-      afterFnDurationEnd = (wallClockEnd = new Date())
-
-      switch (runnable.type) {
-        case 'hook':
-          // reset runnable duration to include lifecycle
-          // and afterFn timings purely for the mocha runner.
-          // this is what it 'feels' like to the user
-          runnable.duration = wallClockEnd - wallClockStartedAt
-
-          setTestTimingsForHook(test, hookName, {
-            hookId: runnable.hookId,
-            fnDuration: fnDurationEnd - fnDurationStart,
-            afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
-          })
-
-          break
-
-        case 'test':
-          // if we are currently on a test then
-          // recalculate its duration to be based
-          // against that (purely for the mocha reporter)
-          test.duration = wallClockEnd - test.wallClockStartedAt
-
-          // but still preserve its actual function
-          // body duration for timings
-          setTestTimings(test, 'test', {
-            fnDuration: fnDurationEnd - fnDurationStart,
-            afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
-          })
-
-          break
-
-        default:
-          break
+      // if there's no test, this is likely a rouge before/after hook
+      // that should not have run, so skip this runnable
+      if (!test) {
+        return _next()
       }
 
-      return _next.call(runnable, err)
-    }
+      // first time seeing a retried test
+      // that hasn't already replaced our test
+      if (test._currentRetry > 0 && _testsById[test.id] !== test) {
+        replacePreviousAttemptWith(test)
+      }
 
-    const onNext = function (err) {
-      // when done with the function set that to end
-      fnDurationEnd = new Date()
+      // closure for calculating the actual
+      // runtime of a runnables fn exection duration
+      // and also the run of the runnable:after:run:async event
+      let lifecycleStart
+      let wallClockStartedAt = null
+      let wallClockEnd = null
+      let fnDurationStart = null
+      let fnDurationEnd = null
+      let afterFnDurationStart = null
+      let afterFnDurationEnd = null
 
-      // and also set the afterFnDuration to this same date
-      afterFnDurationStart = fnDurationEnd
+      // when this is a hook, capture the real start
+      // date so we can calculate our test's duration
+      // including all of its hooks
+      wallClockStartedAt = new Date()
 
-      // attach error right now
-      // if we have one
-      if (err) {
-        if (err instanceof Pending) {
-          err.isPending = true
+      if (!test.wallClockStartedAt) {
+        // if we don't have lifecycle timings yet
+        lifecycleStart = wallClockStartedAt
+      }
+
+      if (test.wallClockStartedAt == null) {
+        test.wallClockStartedAt = wallClockStartedAt
+      }
+
+      // if we haven't yet fired this event for this test
+      // that means that we need to reset the previous state
+      // of cy - since we now have a new 'test' and all of the
+      // associated _runnables will share this state
+      if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+      }
+
+      const isHook = runnable.type === 'hook'
+      const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
+
+      if (isAfterAllHook) {
+        if (test.state !== 'failed') {
+          delete test.err
+          test.state = 'passed'
+        }
+      }
+
+      if (
+        isHook &&
+          test.trueFn &&
+          !isAfterAllHook
+      ) {
+        return _next.call(this)
+      }
+
+      // if this isnt a hook, then the name is 'test'
+      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+      const next = function (err) {
+        // now set the duration of the after runnable run async event
+        afterFnDurationEnd = (wallClockEnd = new Date())
+
+        switch (runnable.type) {
+          case 'hook':
+            // reset runnable duration to include lifecycle
+            // and afterFn timings purely for the mocha runner.
+            // this is what it 'feels' like to the user
+            runnable.duration = wallClockEnd - wallClockStartedAt
+
+            setTestTimingsForHook(test, hookName, {
+              hookId: runnable.hookId,
+              fnDuration: fnDurationEnd - fnDurationStart,
+              afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+            })
+
+            break
+
+          case 'test':
+            // if we are currently on a test then
+            // recalculate its duration to be based
+            // against that (purely for the mocha reporter)
+            test.duration = wallClockEnd - test.wallClockStartedAt
+
+            // but still preserve its actual function
+            // body duration for timings
+            setTestTimings(test, 'test', {
+              fnDuration: fnDurationEnd - fnDurationStart,
+              afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
+            })
+
+            break
+
+          default:
+            break
         }
 
-        runnable.err = $errUtils.wrapErr(err)
+        return _next.call(runnable, err)
       }
 
-      err = maybeHandleRetry(runnable, err)
+      const onNext = function (err) {
+        // when done with the function set that to end
+        fnDurationEnd = new Date()
 
-      return runnableAfterRunAsync(runnable, Cypress)
-      .then(() => {
-        // once we complete callback with the
-        // original err
-        next(err)
+        // and also set the afterFnDuration to this same date
+        afterFnDurationStart = fnDurationEnd
 
-        // return null here to signal to bluebird
-        // that we did not forget to return a promise
-        // because mocha internally does not return
-        // the test.run(fn)
-        return null
-      }).catch((err) => {
-        next(err)
+        // attach error right now
+        // if we have one
+        if (err) {
+          if (err instanceof Pending) {
+            err.isPending = true
+          }
 
-        // return null here to signal to bluebird
-        // that we did not forget to return a promise
-        // because mocha internally does not return
-        // the test.run(fn)
-        return null
+          runnable.err = $errUtils.wrapErr(err)
+        }
+
+        err = maybeHandleRetry(runnable, err)
+
+        return runnableAfterRunAsync(runnable, Cypress)
+        .then(() => {
+          // once we complete callback with the
+          // original err
+          next(err)
+
+          // return null here to signal to bluebird
+          // that we did not forget to return a promise
+          // because mocha internally does not return
+          // the test.run(fn)
+          return null
+        }).catch((err) => {
+          next(err)
+
+          // return null here to signal to bluebird
+          // that we did not forget to return a promise
+          // because mocha internally does not return
+          // the test.run(fn)
+          return null
+        })
+      }
+
+      // our runnable is about to run, so let cy know. this enables
+      // us to always have a correct runnable set even when we are
+      // running lifecycle events
+      // and also get back a function result handler that we use as
+      // an async seam
+      cy.setRunnable(runnable, hookName)
+
+      // TODO: handle promise timeouts here!
+      // whenever any runnable is about to run
+      // we figure out what test its associated to
+      // if its a hook, and then we fire the
+      // test:before:run:async action if its not
+      // been fired before for this test
+      return testBeforeRunAsync(test, Cypress)
+      .catch((err) => {
+        // TODO: if our async tasks fail
+        // then allow us to cause the test
+        // to fail here by blowing up its fn
+        // callback
+        const { fn } = runnable
+
+        const restore = () => {
+          return runnable.fn = fn
+        }
+
+        runnable.fn = function () {
+          restore()
+
+          throw err
+        }
+      }).finally(() => {
+        if (lifecycleStart) {
+          // capture how long the lifecycle took as part
+          // of the overall wallClockDuration of our test
+          setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
+        }
+
+        // capture the moment we're about to invoke
+        // the runnable's callback function
+        fnDurationStart = new Date()
+
+        // call the original method with our
+        // custom onNext function
+        return run.call(runnable, onNext)
       })
-    }
+    },
 
-    // our runnable is about to run, so let cy know. this enables
-    // us to always have a correct runnable set even when we are
-    // running lifecycle events
-    // and also get back a function result handler that we use as
-    // an async seam
-    cy.setRunnable(runnable, hookName)
-
-    // TODO: handle promise timeouts here!
-    // whenever any runnable is about to run
-    // we figure out what test its associated to
-    // if its a hook, and then we fire the
-    // test:before:run:async action if its not
-    // been fired before for this test
-    return testBeforeRunAsync(test, Cypress)
-    .catch((err) => {
-      // TODO: if our async tasks fail
-      // then allow us to cause the test
-      // to fail here by blowing up its fn
-      // callback
-      const { fn } = runnable
-
-      const restore = () => {
-        return runnable.fn = fn
-      }
-
-      runnable.fn = function () {
-        restore()
-
-        throw err
-      }
-    }).finally(() => {
-      if (lifecycleStart) {
-        // capture how long the lifecycle took as part
-        // of the overall wallClockDuration of our test
-        setTestTimings(test, 'lifecycle', new Date() - lifecycleStart)
-      }
-
-      // capture the moment we're about to invoke
-      // the runnable's callback function
-      fnDurationStart = new Date()
-
-      // call the original method with our
-      // custom onNext function
-      return run.call(runnable, onNext)
-    })
-  })
-
-  return {
     grep (re) {
       if (arguments.length) {
         return _runner._grep = re

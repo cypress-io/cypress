@@ -379,8 +379,8 @@ class $Cypress {
         break
       }
 
-      // case 'mocha:runnable:run':
-      //   return this.runner.onRunnableRun(...args)
+      case 'mocha:runnable:run':
+        return this.runner.onRunnableRun(...args)
 
       case 'runner:test:before:run':
         // get back to a clean slate

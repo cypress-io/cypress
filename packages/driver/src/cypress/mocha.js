@@ -1,3 +1,5 @@
+/* eslint-disable prefer-rest-params */
+
 const _ = require('lodash')
 const $errUtils = require('./error_utils')
 
@@ -8,16 +10,15 @@ const mocha = require('mocha')
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
 const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
-const SUITE_RUNNABLE_PROPS = ['_beforeAll', '_beforeEach', '_afterEach', '_afterAll', 'tests']
-
-const testClone = Test.prototype.clone
-const suiteAddTest = Suite.prototype.addTest
 const runnerRun = Runner.prototype.run
 const runnerFail = Runner.prototype.fail
+const runnerRunTests = Runner.prototype.runTests
 const runnableRun = Runnable.prototype.run
 const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
 const testRetries = Test.prototype.retries
+const testClone = Test.prototype.clone
+const suiteAddTest = Suite.prototype.addTest
 const suiteRetries = Suite.prototype.retries
 const hookRetries = Hook.prototype.retries
 
@@ -118,6 +119,21 @@ const restoreSuiteRetries = () => {
   Suite.prototype.retries = suiteRetries
 }
 
+function restoreTestClone () {
+  Test.prototype.clone = testClone
+}
+
+function restoreRunnerRunTests () {
+  Runner.prototype.runTests = runnerRunTests
+}
+
+function restoreSuiteAddTest () {
+  Mocha.Suite.prototype.addTest = suiteAddTest
+}
+const restoreHookRetries = () => {
+  Hook.prototype.retries = hookRetries
+}
+
 const patchSuiteRetries = () => {
   Suite.prototype.retries = function (...args) {
     if (args[0] != null && args[0] > -1) {
@@ -128,9 +144,6 @@ const patchSuiteRetries = () => {
 
     return suiteRetries.apply(this, args)
   }
-}
-const restoreHookRetries = () => {
-  Hook.prototype.retries = hookRetries
 }
 
 const patchHookRetries = () => {
@@ -178,24 +191,13 @@ const patchRunnableRun = (Cypress) => {
   }
 }
 
-const overrideRunnableRun = (runnable, onRunnableRun) => {
-  runnable.run = function (...args) {
-    // call the original onRunnableRun function
-    // with the original runnable.run function,
-    // the runnable itself, and the args
-
-    return onRunnableRun(runnableRun, runnable, args)
-  }
-
-  // this happens when a test retries
-  runnable.clone = function (...args) {
+function patchTestClone () {
+  Test.prototype.clone = function () {
     if (this.trueFn) {
       this.fn = this.trueFn
     }
 
-    const ret = testClone.apply(this, args)
-
-    overrideRunnableRun(ret, onRunnableRun)
+    const ret = testClone.apply(this, arguments)
 
     ret.id = this.id
 
@@ -203,49 +205,23 @@ const overrideRunnableRun = (runnable, onRunnableRun) => {
   }
 }
 
-const overrideRunnerRunSuite = (runner, onRunnableRun) => {
-  // backup the original
-  const { runSuite } = runner
-
-  // override each of the runnables own .run() method
-  // and pass in the original so that the outside world
-  // can control how these runnables run
-  runner.runSuite = function (suite, fn) {
-    // use a regular for loop for perf
-    for (let i = 0; i < SUITE_RUNNABLE_PROPS.length; i++) {
-      let prop = SUITE_RUNNABLE_PROPS[i]
-
-      // find all the runnables for this particular prop
-      let runnables = suite[prop]
-
-      for (let j = 0; j < runnables.length; j++) {
-        overrideRunnableRun(runnables[j], onRunnableRun)
-      }
-    }
-
-    return runSuite.call(runner, suite, fn)
-  }
-}
-
-const overrideRunnerRunTests = (runner) => {
-  const _runTests = runner.runTests
-
-  runner.runTests = function (...args) {
-    const suite = args[0]
+function patchRunnerRunTests () {
+  Runner.prototype.runTests = function () {
+    const suite = arguments[0]
 
     const _slice = suite.tests.slice
 
-    suite.tests.slice = function (...args) {
+    suite.tests.slice = function () {
       this.slice = _slice
 
-      const ret = _slice.apply(this, args)
+      const ret = _slice.apply(this, arguments)
 
       suite.testsQueue = ret
 
       return ret
     }
 
-    const ret = _runTests.apply(this, args)
+    const ret = runnerRunTests.apply(this, arguments)
 
     return ret
   }
@@ -257,6 +233,34 @@ const patchRunnableClearTimeout = () => {
     runnableClearTimeout.apply(this, args)
 
     this.timer = null
+  }
+}
+
+function patchSuiteAddTest (Cypress) {
+  Mocha.Suite.prototype.addTest = function (...args) {
+    const test = args[0]
+
+    const ret = suiteAddTest.apply(this, args)
+
+    let retries = Cypress.getTestRetries()
+
+    if (retries == null) {
+      retries = -1
+    }
+
+    test._retries = retries
+
+    test.retries = function (...args) {
+      if (args[0] !== undefined && args[0] > -1) {
+        const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
+
+        throw err
+      }
+
+      return testRetries.apply(this, args)
+    }
+
+    return ret
   }
 }
 
@@ -298,6 +302,9 @@ const restore = () => {
   restoreRunnableResetTimeout()
   restoreSuiteRetries()
   restoreHookRetries()
+  restoreRunnerRunTests()
+  restoreTestClone()
+  restoreSuiteAddTest()
 }
 
 const override = (Cypress) => {
@@ -307,6 +314,9 @@ const override = (Cypress) => {
   patchRunnableResetTimeout()
   patchSuiteRetries()
   patchHookRetries()
+  patchRunnerRunTests()
+  patchTestClone()
+  patchSuiteAddTest(Cypress)
 }
 
 const create = (specWindow, Cypress, reporter) => {
@@ -321,44 +331,10 @@ const create = (specWindow, Cypress, reporter) => {
 
   const _runner = getRunner(_mocha)
 
-  overrideRunnerRunTests(_runner)
-
   _mocha.suite.file = Cypress.spec.relative
 
   return {
     _mocha,
-
-    onRunnableRun (onRunnableRun) {
-      return overrideRunnerRunSuite(_runner, onRunnableRun)
-    },
-
-    onCypress (Cypress) {
-      Mocha.Suite.prototype.addTest = function (...args) {
-        const test = args[0]
-
-        const ret = suiteAddTest.apply(this, args)
-
-        let retries = Cypress.getTestRetries()
-
-        if (retries == null) {
-          retries = -1
-        }
-
-        test._retries = retries
-
-        test.retries = function (...args) {
-          if (args[0] !== undefined && args[0] > -1) {
-            const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
-
-            throw err
-          }
-
-          return testRetries.apply(this, args)
-        }
-
-        return ret
-      }
-    },
 
     createRootTest (title, fn) {
       const r = new Test(title, fn)
@@ -374,9 +350,6 @@ const create = (specWindow, Cypress, reporter) => {
 
     getRootSuite () {
       return _mocha.suite
-    },
-    options (runner) {
-      return runner.options(_mocha.options)
     },
   }
 }
