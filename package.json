@@ -72,7 +72,7 @@
     "css-loader": "2.1.1",
     "cypress": "4.5.0",
     "cypress-plugin-snapshots": "1.4.3",
-    "cypress-react-selector": "0.1.2",
+    "cypress-react-selector": "0.1.4",
     "date-fns": "2.13.0",
     "happo-cypress": "0.2.0",
     "happo.io": "5.4.0",
