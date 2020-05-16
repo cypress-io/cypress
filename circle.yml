@@ -77,6 +77,22 @@ workflows:
           command: npm test
           store_artifacts: true
 
+      - cypress/run:
+          name: Visual Sudoku
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-sudoku
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - store_artifacts:
+                path: examples/visual-sudoku/cypress/snapshots
+
       # skipping due to https://github.com/bahmutov/cypress-react-unit-test/issues/216
       # - cypress/run:
       #     name: Visual with Percy
@@ -145,6 +161,7 @@ workflows:
             - Example Component Folder
             - Example Tailwind
             - Example Webpack options
+            - Visual Sudoku
             # - Visual with Percy
             - Visual with Happo
           install-command: echo 'Already installed'
