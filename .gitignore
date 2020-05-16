@@ -3,6 +3,7 @@ node_modules/
 dist
 **/cypress/videos
 **/cypress/screenshots
+**/cypress/snapshots/**/__diff_output__
 package-lock.json
 .nyc_output
 coverage
