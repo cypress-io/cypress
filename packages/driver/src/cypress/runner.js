@@ -805,19 +805,19 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // return Cypress.action('runner:test:end', wrap(test))
   })
 
-  /**
-   * Mocha retry event is only fired in Mocha version 6+
-   * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
-   */
-  _runner.on('retry', (test, err) => {
-    test.err = $errUtils.wrapErr(err)
-    Cypress.action('runner:retry', wrap(test), test.err)
-  })
-
   // Ignore the 'pass' event since we emit our own
   // _runner.on('pass', (test) => {
   //   return Cypress.action('runner:pass', wrap(test))
   // })
+
+  /**
+     * Mocha retry event is only fired in Mocha version 6+
+     * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
+     */
+  _runner.on('retry', (test, err) => {
+    test.err = $errUtils.wrapErr(err)
+    Cypress.action('runner:retry', wrap(test), test.err)
+  })
 
   // if a test is pending mocha will only
   // emit the pending event instead of the test
@@ -1049,6 +1049,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     replaceRunnable(test, test.id)
   }
+
   const maybeHandleRetry = (runnable, err) => {
     const r = runnable
     const isHook = r.type === 'hook'
@@ -1303,6 +1304,8 @@ const create = function (specWindow, mocha, Cypress, cy) {
         return run.call(runnable, onNext)
       })
     },
+
+    onScriptError,
 
     grep (re) {
       if (arguments.length) {

@@ -89,7 +89,11 @@ module.exports = {
 
     return _.reduce(props, (memo, prop) => {
       if (_.has(obj, prop) || obj[prop] !== undefined) {
-        memo[prop] = obj[prop]
+        if (typeof obj[prop] === 'function') {
+          memo[prop] = obj[prop]()
+        } else {
+          memo[prop] = obj[prop]
+        }
       }
 
       return memo
@@ -295,6 +299,10 @@ module.exports = {
     const deltaY = point1.y - point2.y
 
     return Math.sqrt((deltaX * deltaX) + (deltaY * deltaY))
+  },
+
+  getTestFromRunnable (r) {
+    return r.ctx.currentTest || r
   },
 
   memoize (func, cacheInstance = new Map()) {
