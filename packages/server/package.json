@@ -71,7 +71,7 @@
     "image-size": "0.7.4",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
-    "jimp": "0.9.3",
+    "jimp": "0.12.0",
     "jsonlint": "1.6.3",
     "konfig": "0.2.1",
     "launch-editor": "2.2.1",
