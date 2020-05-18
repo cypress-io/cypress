@@ -220,6 +220,11 @@ commands:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run types --if-present
+      - run:
+          name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run build --if-present
       - run:
@@ -367,7 +372,19 @@ jobs:
           command: ls -la chai
           working_directory: cli/types
       - run:
-          command: yarn lerna exec  --scope cypress "yarn dtslint"
+          name: "Lint types 🧹"
+          command: yarn lerna exec --scope cypress "yarn dtslint"
+      - run:
+          name: "TypeScript check 🧩"
+          command: echo Skipping for now
+          # TODO split cli/index.d.ts into separate TS files
+          # to be able to reference them from individual projects
+          # like this was doing it https://github.com/cypress-io/cypress/pull/7194/files
+          # packages/desktop-gui/index.d.ts
+          # packages/driver/index.d.ts
+          # packages/reporter/index.d.ts
+          # packages/runner/index.d.ts
+          # command: yarn type-check --ignore-progress
       - store-npm-logs
 
   build-system-unit-tests:
@@ -1400,6 +1417,10 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
           - build-npm-package
+    - test-binary-against-kitchensink:
+        requires:
+          - build-binary
+          - build-npm-package
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         filters:
@@ -1437,8 +1458,6 @@ linux-workflow: &linux-workflow
           - build-binary
 
     - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink:
         <<: *testBinaryFirefox
     - test-binary-against-kitchensink-firefox:
         <<: *testBinaryFirefox
