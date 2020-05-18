@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
-import Fetch from './fetch'
+import Fetch from './Fetch'
 
 it('loads and displays greeting', () => {
   cy.server()
