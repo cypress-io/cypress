@@ -6,7 +6,13 @@
 import outsideError from '../../../todos/throws-error'
 import { setup, fail, verify, verifyInternalError } from '../support/util'
 
-setup({ verifyStackLineIsSpecFile: false })
+setup({
+  idePath: {
+    relative: 'cypress/support/commands.js',
+    absolute: /\/[^\/]+\/cypress\/support\/commands\.js/,
+  },
+  verifyStackLineIsSpecFile: false,
+})
 
 context('assertion failures', function () {
   describe('with expect().<foo>', function () {

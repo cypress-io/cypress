@@ -2,6 +2,7 @@ const { _ } = Cypress
 
 let count = 1
 let shouldVerifyStackLineIsSpecFile = true
+let openInIdePath = Cypress.spec
 
 // ensure title is unique since it's necessary for querying the UI
 // in the verification step
@@ -11,8 +12,9 @@ const getTitle = (ctx) => {
   return `${parentTitle} ${ctx.title}`.trim()
 }
 
-export const setup = ({ verifyStackLineIsSpecFile }) => {
+export const setup = ({ verifyStackLineIsSpecFile, idePath }) => {
   shouldVerifyStackLineIsSpecFile = verifyStackLineIsSpecFile
+  if (idePath) openInIdePath = idePath
 }
 
 // NOTE: use { defaultCommandTimeout: 0 } once per-test configuration is
@@ -60,6 +62,18 @@ export const verify = (ctx, options) => {
     regex = shouldVerifyStackLineIsSpecFile ?
       new RegExp(`${Cypress.spec.relative}:${line}:${column}`) :
       new RegExp(`cypress\/support\/commands\.js:${line}:${column}`)
+  }
+
+  // const openInIdePath = getOpenInIdePath()
+
+  const testOpenInIde = (runnerWs) => {
+    if (_.isRegExp(openInIdePath.absolute)) {
+      expect(runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.match(openInIdePath.absolute)
+    } else {
+      expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
+        file: openInIdePath.absolute,
+      })
+    }
   }
 
   it(`✓ VERIFY`, function () {
@@ -135,11 +149,9 @@ export const verify = (ctx, options) => {
       }
 
       if (verifyOpenInIde) {
-        cy.contains('.runnable-err-stack-trace .runnable-err-file-path', Cypress.spec.relative).click()
+        cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative).click()
         .should(() => {
-          expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
-            file: Cypress.spec.absolute,
-          })
+          testOpenInIde(runnerWs)
         })
       }
 
@@ -156,12 +168,10 @@ export const verify = (ctx, options) => {
       cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || 'fail(this,()=>')
 
       if (verifyOpenInIde) {
-        cy.contains('.test-err-code-frame .runnable-err-file-path', Cypress.spec.relative).click()
+        cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative).click()
         .should(() => {
           expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
-          expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
-            file: Cypress.spec.absolute,
-          })
+          testOpenInIde(runnerWs)
         })
       }
     })
