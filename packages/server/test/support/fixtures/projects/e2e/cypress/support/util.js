@@ -64,8 +64,6 @@ export const verify = (ctx, options) => {
       new RegExp(`cypress\/support\/commands\.js:${line}:${column}`)
   }
 
-  // const openInIdePath = getOpenInIdePath()
-
   const testOpenInIde = (runnerWs) => {
     if (_.isRegExp(openInIdePath.absolute)) {
       expect(runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.match(openInIdePath.absolute)
@@ -86,7 +84,17 @@ export const verify = (ctx, options) => {
 
     const runnerWs = window.top.runnerWs
 
-    cy.stub(window.top.runnerWs, 'emit').callThrough().withArgs('open:file')
+    cy.stub(window.top.runnerWs, 'emit').callThrough().withArgs('get:user:editor')
+    .yields({
+      preferredOpener: {
+        id: 'foo-editor',
+        name: 'Foo',
+        openerId: 'foo-editor',
+        isOther: false,
+      },
+    })
+
+    window.top.runnerWs.emit.callThrough().withArgs('open:file')
 
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
@@ -104,7 +112,7 @@ export const verify = (ctx, options) => {
         // .should('not.include.text', msg)
       })
 
-      cy.contains('View stack trace').click({ force: true })
+      cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
@@ -150,7 +158,7 @@ export const verify = (ctx, options) => {
 
       if (verifyOpenInIde) {
         cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative)
-        .click({ force: true })
+        .click()
         .should(() => {
           testOpenInIde(runnerWs)
         })
@@ -170,7 +178,7 @@ export const verify = (ctx, options) => {
 
       if (verifyOpenInIde) {
         cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
-        .click({ force: true })
+        .click()
         .should(() => {
           expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
           testOpenInIde(runnerWs)
