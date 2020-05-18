@@ -190,7 +190,7 @@ declare namespace Cypress {
      * @example
      *    Cypress.Blob.method()
      */
-    Blob: typeof import('blob-util')
+    Blob: BlobUtil.BlobUtilStatic
     /**
      * Cypress automatically includes minimatch and exposes it as Cypress.minimatch.
      *
