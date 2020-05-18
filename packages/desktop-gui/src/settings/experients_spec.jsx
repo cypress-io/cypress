@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import React from 'react'
 import Experiments from './experiments'
 import Collapse, { Panel } from 'rc-collapse'

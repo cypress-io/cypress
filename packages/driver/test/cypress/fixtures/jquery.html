@@ -16,5 +16,8 @@
     <div>
       Nested Find
     </div>
+    <!-- cy.visit() fails when element with id="jquery" exists
+    // https://github.com/cypress-io/cypress/issues/6193 -->
+    <p id="jquery">jQuery</p>
   </body>
 </html>
