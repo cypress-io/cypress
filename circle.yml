@@ -376,15 +376,7 @@ jobs:
           command: yarn lerna exec --scope cypress "yarn dtslint"
       - run:
           name: "TypeScript check 🧩"
-          command: echo Skipping for now
-          # TODO split cli/index.d.ts into separate TS files
-          # to be able to reference them from individual projects
-          # like this was doing it https://github.com/cypress-io/cypress/pull/7194/files
-          # packages/desktop-gui/index.d.ts
-          # packages/driver/index.d.ts
-          # packages/reporter/index.d.ts
-          # packages/runner/index.d.ts
-          # command: yarn type-check --ignore-progress
+          command: yarn type-check --ignore-progress
       - store-npm-logs
 
   build-system-unit-tests:
