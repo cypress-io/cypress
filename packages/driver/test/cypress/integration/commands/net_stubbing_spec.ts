@@ -2,24 +2,12 @@ declare interface Window {
   $: any
 }
 
-declare namespace Cypress {
-  interface Cypress {
-    state: Function
-  }
-
-  interface cy {
-    queue: any
-    noop: <T>(v: T) => Cypress.Chainable<T>
-    state: Function
-  }
-}
-
 // @ts-ignore
 const { $, _ } = Cypress
 
-const { sinon, state } = Cypress
-
 describe('src/cy/commands/net_stubbing', function () {
+  const { sinon, state } = Cypress
+
   context('#route', function () {
     context('creating', function () {
       beforeEach(function () {

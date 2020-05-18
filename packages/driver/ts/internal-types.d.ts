@@ -11,7 +11,10 @@ declare namespace Cypress {
      * If `as` is chained to the current command, return the alias name used.
      */
     getNextAlias: () => string | undefined
+    noop: <T>(v: T) => Cypress.Chainable<T>
+    queue: any
     retry: (fn: () => any, opts: any) => any
+    state: State
   }
 
   interface Cypress {
@@ -19,11 +22,8 @@ declare namespace Cypress {
     routes: {
       [routeHandlerId: string]: any
     }
-    sinon: sinon.SinonStatic
+    sinon: sinon.SinonApi
     utils: CypressUtils
-        /**
-     * Access and set Cypress's internal state.
-     */
     state: State
   }
 
@@ -57,5 +57,8 @@ declare namespace Cypress {
   interface State {
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
+    (k: 'document', v?: Document): Document
+    (k: 'window', v?: Window): Window
+    (k: string, v?: any): any
   }
 }
