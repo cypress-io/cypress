@@ -68,6 +68,7 @@ context('exceptions', function () {
       message: 'An outside error',
       regex: /todos\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
+      verifyOpenInIde: false,
     })
   })
 })
@@ -713,6 +714,7 @@ context('uncaught errors', () => {
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
+      verifyOpenInIde: false,
     })
   })
 
@@ -728,6 +730,7 @@ context('uncaught errors', () => {
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
+      verifyOpenInIde: false,
     })
   })
 

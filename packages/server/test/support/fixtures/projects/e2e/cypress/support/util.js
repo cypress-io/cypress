@@ -39,7 +39,16 @@ export const fail = (ctx, test) => {
 }
 
 export const verify = (ctx, options) => {
-  const { hasCodeFrame = true, verifyDocsContent, verifyDocsLearnMore, column, codeFrameText, message, stack } = options
+  const {
+    hasCodeFrame = true,
+    verifyOpenInIde = true,
+    verifyDocsContent,
+    verifyDocsLearnMore,
+    column,
+    codeFrameText,
+    message,
+    stack,
+  } = options
   let { regex, line } = options
 
   // if no specific line, just accept any number
@@ -61,6 +70,10 @@ export const verify = (ctx, options) => {
     // find the previous test in the suite
     const prevTest = ctx.tests[currTestIndex - 1]
 
+    const runnerWs = window.top.runnerWs
+
+    cy.stub(window.top.runnerWs, 'emit').callThrough().withArgs('open:file')
+
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(ctx)}`)
@@ -76,6 +89,8 @@ export const verify = (ctx, options) => {
         // .invoke('text')
         // .should('not.include.text', msg)
       })
+
+      cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
@@ -119,6 +134,15 @@ export const verify = (ctx, options) => {
         .should('not.exist')
       }
 
+      if (verifyOpenInIde) {
+        cy.contains('.runnable-err-stack-trace .runnable-err-file-path', Cypress.spec.relative).click()
+        .should(() => {
+          expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
+            file: Cypress.spec.absolute,
+          })
+        })
+      }
+
       if (!hasCodeFrame) return
 
       cy
@@ -130,6 +154,16 @@ export const verify = (ctx, options) => {
       // for some it's cut off due to the test code being more lines,
       // so we prefer the `codeFrameText`
       cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || 'fail(this,()=>')
+
+      if (verifyOpenInIde) {
+        cy.contains('.test-err-code-frame .runnable-err-file-path', Cypress.spec.relative).click()
+        .should(() => {
+          expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
+          expect(runnerWs.emit).to.be.calledWithMatch('open:file', {
+            file: Cypress.spec.absolute,
+          })
+        })
+      }
     })
   })
 }
