@@ -309,6 +309,8 @@ yarn dev --run-project /project/folder --record --key <key>
 
 #### Adding new Dependencies
 
+⚠️ There is a [bug in yarn](https://github.com/yarnpkg/yarn/issues/7734) that may cause issues adding a new dependency to a workspace. You can avoid this by downgrading yarn to 1.19.1 (temporarily downgrade using `npx yarn@1.19.1 workspace @packages/server add my-new-dep1`).
+
 ```shell
 # add a new dep to the root of the repo
 $ yarn add -W my-new-dep1
