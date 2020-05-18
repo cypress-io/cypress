@@ -1,6 +1,12 @@
 version: 2.1
 orbs:
   cypress: cypress-io/cypress@1.21.0
+
+executors:
+  base-12-16-2:
+    docker:
+      - image: 'cypress/base:12.16.2'
+
 workflows:
   build:
     jobs:
@@ -93,21 +99,20 @@ workflows:
             - store_artifacts:
                 path: examples/visual-sudoku/cypress/snapshots
 
-      # skipping due to https://github.com/bahmutov/cypress-react-unit-test/issues/216
-      # - cypress/run:
-      #     name: Visual with Percy
-      #     executor: cypress/base-12
-      #     requires:
-      #       - Install
-      #     # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-      #     install-command: npm install
-      #     verify-command: echo 'Already verified'
-      #     no-workspace: true
-      #     working_directory: examples/visual-testing-with-percy
-      #     # run Percy agent and then run Cypress component tests
-      #     # https://docs.percy.io/docs/cypress
-      #     command: npx percy exec -- npm test
-      #     store_artifacts: true
+      - cypress/run:
+          name: Visual with Percy
+          executor: base-12-16-2
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-percy
+          # run Percy agent and then run Cypress component tests
+          # https://docs.percy.io/docs/cypress
+          command: npx percy exec -- npm test
+          store_artifacts: true
 
       - cypress/run:
           name: Visual with Happo
@@ -162,7 +167,7 @@ workflows:
             - Example Tailwind
             - Example Webpack options
             - Visual Sudoku
-            # - Visual with Percy
+            - Visual with Percy
             - Visual with Happo
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
