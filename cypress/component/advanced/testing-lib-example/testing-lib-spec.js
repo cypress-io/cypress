@@ -1,6 +1,6 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
-import Fetch from './fetch'
+import Fetch from './Fetch'
 
 // https://testing-library.com/docs/cypress-testing-library/intro
 import '@testing-library/cypress/add-commands'
@@ -12,11 +12,11 @@ it('loads and displays greeting (testing-lib)', () => {
   const url = '/greeting'
   mount(<Fetch url={url} />)
 
-  cy.queryByText('Load Greeting')
+  cy.findByText('Load Greeting')
     .wait(1000)
     .click()
-  cy.queryByRole('heading').should('have.text', 'Hello there')
-  cy.queryByRole('button').should('be.disabled')
+  cy.findByRole('heading').should('have.text', 'Hello there')
+  cy.findByRole('button').should('be.disabled')
   cy.get('@greet')
     .its('url')
     .should('match', /\/greeting$/)
