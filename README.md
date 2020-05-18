@@ -22,12 +22,19 @@
 
 ## Install
 
-Requires [Node](https://nodejs.org/en/) version 8 or above. Only supporting webpack-based projects. Installation via Vue CLI recommended. Manual webpack configuration is possible and documented [here]().
+<p align="left">
+  <img src="./docs/commands.gif" width="300px" alt="Terminal typing vue add cypress-experimental"/>
+</p>
+
+* Requires Cypress v4.5.0 or later
+* Requires [Node](https://nodejs.org/en/) version 8 or above
+* Only supporting webpack-based projects
+* Installation via Vue CLI recommended
 
 ### Vue CLI Installation
 > Vue CLI v3+
 
-*Recommended*: One step install to existing projects with Vue CLI
+*Recommended*: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental)
 
 ```sh
 vue add cypress-experimental
