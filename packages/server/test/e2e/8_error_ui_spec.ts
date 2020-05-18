@@ -60,7 +60,7 @@ describe('e2e error ui', function () {
   })
 
   WEBPACK_PREPROCESSOR_PROJECTS.forEach((project) => {
-    e2e.it.only(`handles sourcemaps in webpack for project: ${project}`, {
+    e2e.it(`handles sourcemaps in webpack for project: ${project}`, {
       project: Fixtures.projectPath(project),
       spec: 'failing_spec.*',
       expectedExitCode: 1,
