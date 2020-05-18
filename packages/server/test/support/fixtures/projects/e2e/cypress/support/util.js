@@ -149,7 +149,8 @@ export const verify = (ctx, options) => {
       }
 
       if (verifyOpenInIde) {
-        cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative).click()
+        cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative)
+        .click({ force: true })
         .should(() => {
           testOpenInIde(runnerWs)
         })
@@ -168,7 +169,8 @@ export const verify = (ctx, options) => {
       cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText || 'fail(this,()=>')
 
       if (verifyOpenInIde) {
-        cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative).click()
+        cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
+        .click({ force: true })
         .should(() => {
           expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
           testOpenInIde(runnerWs)
