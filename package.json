@@ -14,12 +14,12 @@
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
-    "pretest": "npm run lint && npm run build",
-    "test": "npm run test-unit && npm run test-e2e",
+    "pretest": "yarn lint && yarn build",
+    "test": "yarn test-unit && yarn test-e2e",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-e2e": "mocha test/e2e/*.spec.js",
     "test-unit": "mocha test/unit/*.spec.js",
-    "test-watch": "chokidar '*.js' 'test/unit/*.js' -c 'npm run test-unit'",
+    "test-watch": "yarn test-unit & chokidar '*.js' 'test/unit/*.js' -c 'yarn test-unit'",
     "types": "tsc --noEmit"
   },
   "husky": {
@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "bluebird": "3.7.1",
-    "debug": "4.1.1"
+    "debug": "4.1.1",
+    "lodash": "4.17.15"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",

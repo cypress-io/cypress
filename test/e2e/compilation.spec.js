@@ -43,7 +43,12 @@ describe('webpack preprocessor - e2e', () => {
   })
 
   it('correctly preprocesses the file', () => {
-    return preprocessor()(file).then(() => {
+    const options = preprocessor.defaultOptions
+
+    // our snapshot is minified
+    options.webpackOptions.mode = 'production'
+
+    return preprocessor(options)(file).then(() => {
       snapshot(fs.readFileSync(outputPath).toString())
     })
   })

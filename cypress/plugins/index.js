@@ -12,14 +12,11 @@
 // This function is called when a project is opened or re-opened (e.g. due to
 // the project's config changing)
 
-const webpack = require('../../')
-
-// const webpackOptions = require('@packages/runner/webpack.config.ts').default
+const webpackPreprocessor = require('../../')
 
 /**
  * @type {Cypress.PluginConfig}
  */
 module.exports = (on) => {
-  // on('file:preprocessor', webpack({ webpackOptions }))
-  on('file:preprocessor', webpack({ }))
+  on('file:preprocessor', webpackPreprocessor())
 }
