@@ -20,6 +20,7 @@ const preprocessor = require('../../dist/index')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
+    webpack.reset()
     sinon.restore()
 
     this.watchApi = {
