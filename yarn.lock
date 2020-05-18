@@ -1651,13 +1651,14 @@
     "@babel/preset-env" "^7.0.0"
     babel-loader "^8.0.2"
 
-"@cypress/webpack-preprocessor@5.2.0":
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.2.0.tgz#3a17b478f6e2d600e536e6dda9c2e349d25a297e"
-  integrity sha512-uvo0FfKL+rIXrBGS6qPIaJRD8euK+t6YoZvrTuLPnStprzlgeGfSCnCDUEMJZqFk9LwBd1NtOop+J7qNuv74ng==
+"@cypress/webpack-preprocessor@5.4.0":
+  version "5.4.0"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.0.tgz#c13135d9533ff2a000dc87ee2f043961ed7bc398"
+  integrity sha512-ZI+OsY0QRvtCRiIH9zpuYWPKN29426RteBkNR+8hDHnmvk11XBenSXnDU9bdMRMcaMpMpej2RWLF7NkuvmEYPQ==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
+    lodash "4.17.15"
 
 "@cypress/what-is-circular@1.0.1":
   version "1.0.1"
