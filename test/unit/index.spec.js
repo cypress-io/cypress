@@ -16,7 +16,8 @@ mockery.enable({
 
 mockery.registerMock('webpack', webpack)
 
-const preprocessor = require('../../dist/index')
+const preprocessor = require('../../index')
+const { getSourceMapOverride } = require('../../lib/typescript-overrides')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
@@ -155,6 +156,8 @@ describe('webpack preprocessor', function () {
             expect(webpack).to.be.calledWithMatch({
               devtool: 'inline-source-map',
             })
+
+            expect(getSourceMapOverride()).to.be.true
           })
         })
 
@@ -165,6 +168,8 @@ describe('webpack preprocessor', function () {
             expect(webpack).to.be.calledWithMatch({
               devtool: false,
             })
+
+            expect(getSourceMapOverride()).to.be.false
           })
         })
 
@@ -175,6 +180,8 @@ describe('webpack preprocessor', function () {
             expect(webpack).to.be.calledWithMatch({
               devtool: 'inline-source-map',
             })
+
+            expect(getSourceMapOverride()).to.be.true
           })
         })
       })

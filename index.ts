@@ -1,3 +1,5 @@
+import { overrideSourceMaps } from './lib/typescript-overrides'
+
 import * as Promise from 'bluebird'
 import * as events from 'events'
 import * as _ from 'lodash'
@@ -95,7 +97,7 @@ interface WebpackPreprocessor extends WebpackPreprocessorFn {
  */
 // @ts-ignore
 const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): FilePreprocessor => {
-  debug('user options:', options)
+  debug('user options: %o', options)
 
   // we return function that accepts the arguments provided by
   // the event 'file:preprocessor'
@@ -151,11 +153,21 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       },
     })
     .tap((opts) => {
-      if (opts.devtool !== false) {
-        debug('setting devtool to inline-source-map')
+      if (opts.devtool === false) {
+        // disable any overrides if
+        // we've explictly turned off sourcemaps
+        overrideSourceMaps(false)
 
-        opts.devtool = 'inline-source-map'
+        return
       }
+
+      debug('setting devtool to inline-source-map')
+
+      opts.devtool = 'inline-source-map'
+
+      // override typescript to always generate
+      // proper source maps
+      overrideSourceMaps(true)
     })
     .value() as any
 
