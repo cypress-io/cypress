@@ -37,3 +37,7 @@ npm run docker:run -- --env updateSnapshots=true
 ```
 
 See [cypress-image-snapshot docs](https://github.com/palmerhq/cypress-image-snapshot#updating-snapshots).
+
+## Full example
+
+For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository.

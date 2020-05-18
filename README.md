@@ -161,7 +161,7 @@ Folder Name | Description
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
 [tailwind](examples/tailwind) | Testing styles built using [Tailwind CSS](https://tailwindcss.com/)
-[visual-sudoku](examples/visual-sudoku) | [Visual testing](#visual-testing) for components using open source plugin [cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot)
+[visual-sudoku](examples/visual-sudoku) | [Visual testing](#visual-testing) for components using open source plugin [cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot). For larger example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku).
 [visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](#visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](#visual-testing) for components using 3rd party service [Happo](https://happo.io/)
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
@@ -258,7 +258,9 @@ If you are using [plugins/cra-v3](plugins/cra-v3) it instruments the code on the
 
 ## Visual testing
 
-You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo has several example projects, see [visual-sudoku](examples/visual-sudoku), [visual-testing-with-percy](examples/visual-testing-with-percy), and [visual-testing-with-happo](examples/visual-testing-with-happo)
+You can use any Cypress [Visual Testing plugin](https://on.cypress.io/plugins#visual-testing) to perform [visual testing](https://on.cypress.io/visual-testing) from the component tests. This repo has several example projects, see [visual-sudoku](examples/visual-sudoku), [visual-testing-with-percy](examples/visual-testing-with-percy), and [visual-testing-with-happo](examples/visual-testing-with-happo).
+
+For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository.
 
 ## Common problems
 
