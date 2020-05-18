@@ -17,7 +17,6 @@ mockery.enable({
 mockery.registerMock('webpack', webpack)
 
 const preprocessor = require('../../dist/index')
-const stubbableRequire = require('../../dist/stubbable-require')
 
 describe('webpack preprocessor', function () {
   beforeEach(function () {
@@ -107,7 +106,9 @@ describe('webpack preprocessor', function () {
 
       it('specifies the entry file', function () {
         return this.run().then(() => {
-          expect(webpack.lastCall.args[0].entry).to.eql([this.file.filePath])
+          expect(webpack).to.be.calledWithMatch({
+            entry: [this.file.filePath],
+          })
         })
       })
 
@@ -115,19 +116,23 @@ describe('webpack preprocessor', function () {
         return this.run({
           additionalEntries: ['entry-1.js', 'entry-2.js'],
         }).then(() => {
-          expect(webpack.lastCall.args[0].entry).to.eql([
-            this.file.filePath,
-            'entry-1.js',
-            'entry-2.js',
-          ])
+          expect(webpack).to.be.calledWithMatch({
+            entry: [
+              this.file.filePath,
+              'entry-1.js',
+              'entry-2.js',
+            ],
+          })
         })
       })
 
       it('specifies output path and filename', function () {
         return this.run().then(() => {
-          expect(webpack.lastCall.args[0].output).to.eql({
-            path: 'output',
-            filename: 'output.js',
+          expect(webpack).to.be.calledWithMatch({
+            output: {
+              path: 'output',
+              filename: 'output.js',
+            },
           })
         })
       })
@@ -143,17 +148,53 @@ describe('webpack preprocessor', function () {
         })
       })
 
-      it('enables inline source maps', function () {
-        return this.run().then(() => {
-          expect(webpack.lastCall.args[0].devtool).to.equal('inline-source-map')
+      describe('devtool', function () {
+        it('enables inline source maps', function () {
+          return this.run().then(() => {
+            expect(webpack).to.be.calledWithMatch({
+              devtool: 'inline-source-map',
+            })
+          })
+        })
+
+        it('does not enable inline source maps when devtool is false', function () {
+          const options = { webpackOptions: { devtool: false } }
+
+          return this.run(options).then(() => {
+            expect(webpack).to.be.calledWithMatch({
+              devtool: false,
+            })
+          })
+        })
+
+        it('always sets devtool even when mode is "production"', function () {
+          const options = { webpackOptions: { mode: 'production' } }
+
+          return this.run(options).then(() => {
+            expect(webpack).to.be.calledWithMatch({
+              devtool: 'inline-source-map',
+            })
+          })
         })
       })
 
-      it('does not enable inline source maps when devtool is false', function () {
-        const options = { webpackOptions: { devtool: false } }
+      describe('mode', function () {
+        it('sets mode to development by default', function () {
+          return this.run().then(() => {
+            expect(webpack).to.be.calledWithMatch({
+              mode: 'development',
+            })
+          })
+        })
 
-        return this.run(options).then(() => {
-          expect(webpack.lastCall.args[0].devtool).to.be.false
+        it('follows user mode if present', function () {
+          const options = { webpackOptions: { mode: 'production' } }
+
+          return this.run(options).then(() => {
+            expect(webpack).to.be.calledWithMatch({
+              mode: 'production',
+            })
+          })
         })
       })
 
@@ -178,7 +219,7 @@ describe('webpack preprocessor', function () {
         const options = { watchOptions: { poll: true } }
 
         return this.run(options).then(() => {
-          expect(this.compilerApi.watch.lastCall.args[0]).to.eql({
+          expect(this.compilerApi.watch).to.be.calledWith({
             poll: true,
           })
         })
@@ -252,26 +293,9 @@ describe('webpack preprocessor', function () {
         const options = { webpackOptions: { module: { rules: [] } } }
 
         return this.run(options).then(() => {
-          expect(webpack.lastCall.args[0].module).to.equal(options.webpackOptions.module)
-        })
-      })
-
-      it('requires babel dependencies when default options are used', function () {
-        sinon.spy(stubbableRequire, 'resolve')
-
-        return this.run().then(() => {
-          expect(stubbableRequire.resolve).to.be.calledWith('babel-loader')
-          expect(stubbableRequire.resolve).to.be.calledWith('@babel/preset-env')
-        })
-      })
-
-      it('does not requires babel dependencies when user options are non-default', function () {
-        sinon.spy(stubbableRequire, 'resolve')
-        const options = { webpackOptions: { module: { rules: [] } } }
-
-        return this.run(options).then(() => {
-          expect(stubbableRequire.resolve).not.to.be.calledWith('babel-loader')
-          expect(stubbableRequire.resolve).not.to.be.calledWith('@babel/preset-env')
+          expect(webpack).to.be.calledWithMatch({
+            module: options.webpackOptions.module,
+          })
         })
       })
     })

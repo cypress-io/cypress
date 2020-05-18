@@ -75,6 +75,7 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
 
 ```javascript
 {
+  mode: 'development',
   module: {
     rules: [
       {
@@ -92,7 +93,9 @@ Object of webpack options. Just `require` in the options from your `webpack.conf
 }
 ```
 
-Source maps are always enabled unless explicitly disabled by specifying `devtool: false`.
+Source maps are **always enabled** unless explicitly disabled by specifying `devtool: false`.
+
+Webpack [mode](https://webpack.js.org/configuration/mode/) is set to `development` if not present. You can set `mode` to "development", "production" or "none".
 
 ### use babelrc
 
@@ -171,6 +174,18 @@ DEBUG=cypress:webpack:stats
 ## Contributing
 
 Use the [version of Node that matches Cypress](https://github.com/cypress-io/cypress/blob/develop/.node-version).
+
+Build the typescript files:
+
+```shell
+yarn build
+```
+
+Watch the typescript files and rebuild on file change:
+
+```shell
+yarn build --watch
+```
 
 Run all tests once:
 
