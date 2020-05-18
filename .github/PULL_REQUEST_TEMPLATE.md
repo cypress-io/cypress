@@ -1,7 +1,7 @@
 <!-- 
 Thanks for contributing!
 Read our contribution guidelines here: 
-https://github.com/cypress-io/cypress/blob/develop/.github/CONTRIBUTING.md 
+https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md 
 -->
 
 <!-- Example: "Closes #1234" -->
