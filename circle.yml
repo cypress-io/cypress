@@ -1405,6 +1405,10 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
           - build-npm-package
+    - test-binary-against-kitchensink:
+        requires:
+          - build-binary
+          - build-npm-package
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         filters:
@@ -1442,8 +1446,6 @@ linux-workflow: &linux-workflow
           - build-binary
 
     - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink:
         <<: *testBinaryFirefox
     - test-binary-against-kitchensink-firefox:
         <<: *testBinaryFirefox
