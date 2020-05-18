@@ -104,7 +104,7 @@ export const verify = (ctx, options) => {
         // .should('not.include.text', msg)
       })
 
-      cy.contains('View stack trace').click()
+      cy.contains('View stack trace').click({ force: true })
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
