@@ -22,8 +22,8 @@
 
 ## Install
 
-<p align="left">
-  <img src="./docs/commands.gif" width="300px" alt="Terminal typing vue add cypress-experimental"/>
+<p align="center">
+  <img src="./docs/commands.gif" width="400px" alt="Terminal typing vue add cypress-experimental"/>
 </p>
 
 * Requires Cypress v4.5.0 or later
