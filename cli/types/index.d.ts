@@ -536,10 +536,67 @@ declare namespace Cypress {
     off: Actions
   }
 
+  // NOTE: declared separately so that experimentalNetworkMocking users can override it
+  // @see https://github.com/cypress-io/cypress/pull/4176
+  interface CyRoute {
+    /**
+     * Use `cy.route()` to manage the behavior of network requests.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
+     */
+    route(url: string | RegExp, response?: string | object): Chainable<null>
+    /**
+     * Spy or stub request with specific method and url.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    // spy on POST /todos requests
+     *    cy.route('POST', '/todos').as('add-todo')
+     */
+    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
+    /**
+     * Set a route by returning an object literal from a callback function.
+     * Functions that return a Promise will automatically be awaited.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route(() => {
+     *      // your logic here
+     *      // return an appropriate routing object here
+     *      return {
+     *        method: 'POST',
+     *        url: '/comments',
+     *        response: this.commentsFixture
+     *      }
+     *    })
+     */
+    route(fn: () => RouteOptions): Chainable<null>
+    /**
+     * Spy or stub a given route.
+     *
+     * @see https://on.cypress.io/route
+     * @example
+     *    cy.server()
+     *    cy.route({
+     *      method: 'DELETE',
+     *      url: '/users',
+     *      status: 412,
+     *      delay: 1000
+     *      // and other options, see documentation
+     *    })
+     */
+    route(options: Partial<RouteOptions>): Chainable<null>
+  }
+
   /**
    * Chainable interface for non-array Subjects
    */
-  interface Chainable<Subject = any> {
+  interface Chainable<Subject = any> extends CyRoute {
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      *
@@ -1468,59 +1525,6 @@ declare namespace Cypress {
      * @see https://on.cypress.io/root
      */
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
-
-    /**
-     * Use `cy.route()` to manage the behavior of network requests.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
-     */
-    route(url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * Spy or stub request with specific method and url.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    // spy on POST /todos requests
-     *    cy.route('POST', '/todos').as('add-todo')
-     */
-    route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
-    /**
-     * Set a route by returning an object literal from a callback function.
-     * Functions that return a Promise will automatically be awaited.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route(() => {
-     *      // your logic here
-     *      // return an appropriate routing object here
-     *      return {
-     *        method: 'POST',
-     *        url: '/comments',
-     *        response: this.commentsFixture
-     *      }
-     *    })
-     */
-    route(fn: () => RouteOptions): Chainable<null>
-    /**
-     * Spy or stub a given route.
-     *
-     * @see https://on.cypress.io/route
-     * @example
-     *    cy.server()
-     *    cy.route({
-     *      method: 'DELETE',
-     *      url: '/users',
-     *      status: 412,
-     *      delay: 1000
-     *      // and other options, see documentation
-     *    })
-     */
-    route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
      * Take a screenshot of the application under test and the Cypress Command Log.

@@ -1,6 +1,10 @@
-declare interface Window {
-  $: any
+declare global {
+  interface Window {
+    $: any
+  }
 }
+
+import 'cypress/types/cy-net-stubbing'
 
 // @ts-ignore
 const { $, _ } = Cypress
@@ -1586,6 +1590,7 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         describe('#onResponse', function () {
+          // NOTE: not ported from XHR-based stubbing - XHR-specific
           it('calls onResponse callback with cy context + proxy xhr', function (done) {
             cy.server().route({
               url: /foo/,
@@ -1594,6 +1599,7 @@ describe('src/cy/commands/net_stubbing', function () {
               },
               onResponse (xhr) {
                 expect(this).to.eq(cy)
+                // @ts-ignore
                 expect(xhr.responseBody).to.deep.eq({
                   foo: 'bar',
                 })
@@ -1633,13 +1639,15 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         describe('request parsing', function () {
-          it('adds parses requestBody into JSON', function (done) {
+          // NOTE: not ported from XHR-based stubbing - XHR-specific
+          it.skip('adds parses requestBody into JSON', function (done) {
             cy.server().route({
               method: 'POST',
               url: /foo/,
               response: {},
               onRequest (xhr) {
                 expect(this).to.eq(cy)
+                // @ts-ignore
                 expect(xhr.requestBody).to.deep.eq({
                   foo: 'bar',
                 })
@@ -2697,6 +2705,7 @@ describe('src/cy/commands/net_stubbing', function () {
             })
 
             cy.route({
+              // @ts-ignore: should fail
               url: {},
             })
           })
@@ -2777,6 +2786,7 @@ describe('src/cy/commands/net_stubbing', function () {
                 done()
               })
 
+              // @ts-ignore: types are incorrectly inferred when val is invalid
               cy.route(/foo/, val)
             })
           })

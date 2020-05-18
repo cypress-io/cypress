@@ -7,7 +7,7 @@ export namespace CyHttpMessages {
   interface BaseMessage {
     // as much stuff from `incomingmessage` as makes sense to serialize and send
     body?: any
-    headers?: { [key: string]: string }
+    headers: { [key: string]: string }
     url: string
     method?: string
     httpVersion?: string
@@ -164,7 +164,7 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
   webSocket?: boolean
 }
 
-export type RouteHandlerController = HttpRequestInterceptor | WebSocketController
+export type RouteHandlerController = HttpRequestInterceptor
 
 export type RouteHandler = string | StaticResponse | RouteHandlerController
 
@@ -195,14 +195,11 @@ export interface StaticResponse {
  */
 export type StringMatcher = GlobPattern | RegExp
 
-export type WebSocketController = never
-// export interface WebSocketController {
-//   onConnect?: (req: CyHttpMessages.IncomingRequest, socket: CyWebSocket) => void
-//   onIncomingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-//   onOutgoingFrame?: (socket: CyWebSocket, message: CyWebSocketFrame) => void
-//   onDisconnect?: (socket: CyWebSocket) => void
-
-//   transport: 'socket.io' // socket.io client over websockets
-//               | 'socket.io-longpolling' // socket.io client via longpolling
-//               | 'websockets' // vanilla websockets server
-// }
+declare global {
+  namespace Cypress {
+    interface CyRoute {
+      route(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route(method: HttpMethod, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+    }
+  }
+}
