@@ -233,6 +233,11 @@
       "type": "boolean",
       "default": false,
       "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
+    },
+    "experimentalNetworkMocking": {
+      "type": "boolean",
+      "default": false,
+      "description": "A new version of the `cy.route` API that works on the HTTP layer, instead of stubbing out XMLHttpRequests."
     }
   }
 }

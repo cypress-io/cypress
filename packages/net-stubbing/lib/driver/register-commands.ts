@@ -12,7 +12,6 @@ import {
   RouteMatcher,
   StaticResponse,
   HttpRequestInterceptor,
-  WebSocketController,
   STRING_MATCHER_FIELDS,
   DICT_STRING_MATCHER_FIELDS,
   SERIALIZABLE_REQ_PROPS,
@@ -42,9 +41,9 @@ function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
           }
 
           return ''
-        })
-      )
-    )
+        }),
+      ),
+    ),
   )
 
   const ret: AnnotatedRouteMatcherOptions = {}
@@ -73,10 +72,6 @@ function _getUniqueId () {
 
 function _isHttpRequestInterceptor (obj): obj is HttpRequestInterceptor {
   return typeof obj === 'function'
-}
-
-function _isWebSocketController (obj, options): obj is WebSocketController {
-  return typeof obj === 'object' && options.webSocket === true
 }
 
 function _isRegExp (obj): obj is RegExp {
@@ -253,8 +248,6 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     switch (true) {
       case _isHttpRequestInterceptor(handler):
         break
-      case _isWebSocketController(handler, matcher):
-        break
       case _.isUndefined(handler):
         // TODO: handle this, for when users just want to alias/wait on route
         break
@@ -309,7 +302,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function server (): void {
-    Cypress.utils.warnByPath('warn_server_deprecated', null)
+    Cypress.utils.warnByPath('warn_server_deprecated')
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
@@ -564,8 +557,17 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
   })
 
-  Commands.addAll({
-    route,
-    server,
-  })
+  const _experimentalOverride = (experimentalFn) => {
+    return (originalFn, ...args) => {
+      if (Cypress.config('experimentalNetworkMocking')) {
+        return experimentalFn(...args)
+      }
+
+      return originalFn(...args)
+    }
+  }
+
+  // TODO: once new net stubbing is official, this can use Commands.addAll
+  Commands.overwrite('route', _experimentalOverride(route))
+  Commands.overwrite('server', _experimentalOverride(server))
 }

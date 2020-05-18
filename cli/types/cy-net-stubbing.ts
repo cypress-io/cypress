@@ -1,3 +1,4 @@
+// TODO: probably good to remove
 export type CompatXHRHandler = (xhr: XMLHttpRequest /** ? */) => void
 
 /**
@@ -113,8 +114,8 @@ export interface Route {
 export type RouteMatcher = StringMatcher | RouteMatcherOptions
 
 export interface RouteMatcherCompatOptions {
-  onRequest?: CompatXHRHandler
-  onResponse?: CompatXHRHandler
+  // onRequest?: CompatXHRHandler
+  // onResponse?: CompatXHRHandler
   response?: string | object
 }
 

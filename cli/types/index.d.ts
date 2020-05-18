@@ -81,6 +81,10 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
+    /**
+     * Internal network stubbing message.
+     */
+    (task: 'net', eventName: string, ...args: any[]): Promise<void>
   }
 
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
@@ -2469,6 +2473,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * A new version of the `cy.route` API that works on the HTTP layer, instead of stubbing out XMLHttpRequests.
+     * @default false
+     */
+    experimentalNetworkMocking: boolean
   }
 
   /**

@@ -3,7 +3,6 @@ const _ = require('lodash')
 const $errUtils = require('./error_utils')
 
 const builtInCommands = [
-  require('@packages/net-stubbing/driver').registerCommands,
   require('../cy/commands/actions/check'),
   require('../cy/commands/actions/click'),
   require('../cy/commands/actions/focus'),
@@ -38,6 +37,7 @@ const builtInCommands = [
   require('../cy/commands/waiting'),
   require('../cy/commands/window'),
   require('../cy/commands/xhr'),
+  require('@packages/net-stubbing/driver').registerCommands,
 ]
 
 const getTypeByPrevSubject = (prevSubject) => {
