@@ -222,7 +222,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/stubs-spies-and-clocks
      * @see https://example.cypress.io/commands/spies-stubs-clocks
      */
-    sinon: sinon.SinonApi
+    sinon: sinon.SinonStatic
 
     /**
      * Cypress version string. i.e. "1.1.2"
