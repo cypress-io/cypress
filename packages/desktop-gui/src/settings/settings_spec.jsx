@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 // prevents "regeneratorRuntime is not defined" error
 import 'regenerator-runtime/runtime'
 import React from 'react'

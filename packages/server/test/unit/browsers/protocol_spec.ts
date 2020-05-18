@@ -7,7 +7,7 @@ import { connect } from '@packages/network'
 import CRI from 'chrome-remote-interface'
 import { expect } from 'chai'
 import humanInterval from 'human-interval'
-import protocol from '../../../lib/browsers/protocol'
+import * as protocol from '../../../lib/browsers/protocol'
 import sinon from 'sinon'
 import snapshot from 'snap-shot-it'
 import stripAnsi from 'strip-ansi'
@@ -18,7 +18,7 @@ describe('lib/browsers/protocol', () => {
   const host = '127.0.0.1'
 
   context('._getDelayMsForRetry', () => {
-    it('retries as expected for up to 20 seconds', () => {
+    it('retries as expected for up to 50 seconds', () => {
       const log = sinon.spy(console, 'log')
 
       let delays = []
@@ -30,12 +30,12 @@ describe('lib/browsers/protocol', () => {
         i++
       }
 
-      expect(_.sum(delays)).to.eq(humanInterval('20 seconds'))
+      expect(_.sum(delays)).to.eq(humanInterval('50 seconds'))
 
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/32)`)
+        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
       })
 
       snapshot(delays)
@@ -43,24 +43,44 @@ describe('lib/browsers/protocol', () => {
   })
 
   context('.getWsTargetFor', () => {
+    const expectedCdpFailedError = stripIndents`
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
+
+      This usually indicates there was a problem opening the Chrome browser.
+
+      The CDP port requested was ${chalk.yellow('12345')}.
+
+      Error details:
+    `
+
     it('rejects if CDP connection fails', () => {
       const innerErr = new Error('cdp connection failure')
 
       sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, innerErr)
       const p = protocol.getWsTargetFor(12345)
 
-      const expectedError = stripIndents`
-        Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+      return expect(p).to.eventually.be.rejected
+      .and.property('message').include(expectedCdpFailedError)
+      .and.include(innerErr.message)
+    })
 
-        This usually indicates there was a problem opening the Chrome browser.
+    it('rejects if CRI.List fails', () => {
+      const innerErr = new Error('cdp connection failure')
 
-        The CDP port requested was ${chalk.yellow('12345')}.
+      sinon.stub(Bluebird, 'delay').resolves()
 
-        Error details:
-      `
+      sinon.stub(CRI, 'List')
+      .withArgs({ host, port: 12345, getDelayMsForRetry: sinon.match.func })
+      .rejects(innerErr)
 
-      expect(p).to.eventually.be.rejected
-      .and.property('message').include(expectedError)
+      const end = sinon.stub()
+
+      sinon.stub(connect, 'createRetryingSocket').callsArgWith(1, null, { end })
+
+      const p = protocol.getWsTargetFor(12345)
+
+      return expect(p).to.eventually.be.rejected
+      .and.property('message').include(expectedCdpFailedError)
       .and.include(innerErr.message)
     })
 
@@ -160,7 +180,7 @@ describe('lib/browsers/protocol', () => {
       log.getCalls().forEach((log, i) => {
         const line = stripAnsi(log.args[0])
 
-        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/32)`)
+        expect(line).to.include(`Failed to connect to Chrome, retrying in 1 second (attempt ${i + 18}/62)`)
       })
     })
   })
