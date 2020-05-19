@@ -779,10 +779,16 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
       it can relative redirect in a settimeout
         ✓ with location.href
         ✓ with window.location.href
+        ✓ with document.location.href
+        ✓ with window.document.location.href
+        ✓ with location.href = #hash
         ✓ with location.replace()
         ✓ with location.assign()
         ✓ with location = ...
         ✓ with window.location = ...
+        ✓ with document.location = ...
+        ✓ with window.document.location = ...
+        ✓ with document.location = #hash
         ✓ with location.search
         ✓ with location.pathname
     can load some well-known sites in a timely manner
@@ -793,15 +799,15 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
       - http://github.com
 
 
-  12 passing
+  18 passing
   6 pending
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        18                                                                               │
-  │ Passing:      12                                                                               │
+  │ Tests:        24                                                                               │
+  │ Passing:      18                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      6                                                                                │
   │ Skipped:      0                                                                                │
@@ -825,9 +831,9 @@ exports['e2e visit / low response timeout / passes with experimentalSourceRewrit
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  source_rewriting_spec.js                 XX:XX       18       12        -        6        - │
+  │ ✔  source_rewriting_spec.js                 XX:XX       24       18        -        6        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       18       12        -        6        -  
+    ✔  All specs passed!                        XX:XX       24       18        -        6        -  
 
 
 `

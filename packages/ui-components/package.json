@@ -20,7 +20,6 @@
     "@babel/preset-env": "7.9.0",
     "@babel/preset-react": "7.9.4",
     "@cypress/eslint-plugin-dev": "5.0.0",
-    "@cypress/webpack-preprocessor": "4.1.5",
     "@fortawesome/fontawesome-free": "5.12.1",
     "@reach/visually-hidden": "0.6.2",
     "babel-loader": "8.1.0",
