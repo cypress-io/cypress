@@ -14,8 +14,17 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
 
   const getTargetValue = () => {
     const targetValue = accessedObject[accessedProp]
+    const accessingDocument = dom.isDocument(accessedObject)
+    const hasLocation = dom.isWindow(accessedObject) || accessingDocument
 
-    if (dom.isWindow(accessedObject) && accessedProp === 'location') {
+    if (hasLocation && accessedProp === 'location') {
+      if (accessingDocument) {
+        // `document.location` is the same reference as `window.location`.
+        // use `window.location` so that the location Proxy can be cached in the same
+        // place on `window` regardless of if it is accessed via `document` or `window`
+        accessedObject = currentWindow
+      }
+
       const targetLocation = resolveLocationReference(accessedObject)
 
       if (isValPassed) {

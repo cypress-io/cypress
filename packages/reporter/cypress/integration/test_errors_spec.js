@@ -150,6 +150,7 @@ describe('test errors', function () {
         message: 'Message line below blank line',
         whitespace: '  ',
       }, {
+        originalFile: 'my/app.js',
         relativeFile: 'my/app.js',
         absoluteFile: '/me/dev/my/app.js',
         function: 'foo.bar',
@@ -157,6 +158,7 @@ describe('test errors', function () {
         column: 7,
         whitespace: '  ',
       }, {
+        originalFile: 'cypress/integration/foo_spec.js',
         relativeFile: 'cypress/integration/foo_spec.js',
         absoluteFile: '/me/dev/cypress/integration/foo_spec.js',
         function: 'baz.qux',
@@ -167,6 +169,7 @@ describe('test errors', function () {
         message: 'At previous event:',
         whitespace: '  ',
       }, {
+        originalFile: 'my/app.js',
         relativeFile: 'my/app.js',
         absoluteFile: '/me/dev/my/app.js',
         function: 'bar.baz',
@@ -174,6 +177,7 @@ describe('test errors', function () {
         column: 11,
         whitespace: '    ',
       }, {
+        originalFile: 'cypress://../driver/src/cypress/runner.js',
         relativeFile: 'cypress://../driver/src/cypress/runner.js',
         absoluteFile: 'cypress://../driver/src/cypress/runner.js',
         function: 'callFn',
@@ -181,6 +185,7 @@ describe('test errors', function () {
         column: 12,
         whitespace: '    ',
       }, {
+        originalFile: 'http://localhost:12345/__cypress/runner/cypress_runner.js',
         relativeFile: 'http://localhost:12345/__cypress/runner/cypress_runner.js',
         absoluteFile: 'http://localhost:12345/__cypress/runner/cypress_runner.js',
         function: 'throwErr',
@@ -191,6 +196,7 @@ describe('test errors', function () {
         message: 'From Node.js Internals:',
         whitespace: '  ',
       }, {
+        originalFile: 'events.js',
         relativeFile: 'events.js',
         absoluteFile: 'events.js',
         function: 'emit',
@@ -198,6 +204,7 @@ describe('test errors', function () {
         column: 14,
         whitespace: '    ',
       }, {
+        originalFile: 'some/node/internals.js',
         relativeFile: 'some/node/internals.js',
         absoluteFile: '/user/path/to/node/some/node/internals.js',
         function: 'writeFile',
@@ -207,6 +214,7 @@ describe('test errors', function () {
       }],
       docsUrl: 'https://on.cypress.io/type',
       codeFrame: {
+        originalFile: 'my/app.js',
         relativeFile: 'my/app.js',
         absoluteFile: '/me/dev/my/app.js',
         line: 2,

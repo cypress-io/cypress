@@ -147,6 +147,8 @@ commands:
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
       - store-npm-logs
 
   store-npm-logs:

@@ -134,6 +134,7 @@ describe('driver/src/cypress/stack_utils', () => {
         {
           function: 'foo.bar',
           fileUrl: 'http://localhost:1234/source_map_spec.js',
+          originalFile: 'some_other_file.ts',
           relativeFile: 'some_other_file.ts',
           absoluteFile: '/dev/app/some_other_file.ts',
           line: 2,
@@ -143,6 +144,7 @@ describe('driver/src/cypress/stack_utils', () => {
         {
           function: 'Context.<anonymous>',
           fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
+          originalFile: 'cypress/integration/features/source_map_spec.coffee',
           relativeFile: 'cypress/integration/features/source_map_spec.coffee',
           absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
           line: 4,
@@ -182,6 +184,54 @@ Error: spec iframe stack
     at foo.bar (some_other_file.ts:2:2)
     at Context.<anonymous> (cypress/integration/features/source_map_spec.coffee:4:4)\
 `)
+    })
+
+    it('strips webpack protocol from relativeFile and maintains it in originalFile', () => {
+      $sourceMapUtils.getSourcePosition.returns({
+        file: 'cypress:///some_other_file.ts',
+        line: 2,
+        column: 1,
+      })
+
+      $sourceMapUtils.getSourcePosition.onCall(1).returns({
+        file: 'webpack:///cypress/integration/features/source_map_spec.coffee',
+        line: 4,
+        column: 3,
+      })
+
+      const sourceStack = $stackUtils.getSourceStack(generatedStack, projectRoot)
+
+      expect(sourceStack.sourceMapped).to.equal(`Error: spec iframe stack
+    at foo.bar (cypress:///some_other_file.ts:2:2)
+    at Context.<anonymous> (webpack:///cypress/integration/features/source_map_spec.coffee:4:4)\
+`)
+
+      expect(sourceStack.parsed).to.eql([
+        {
+          message: 'Error: spec iframe stack',
+          whitespace: '',
+        },
+        {
+          function: 'foo.bar',
+          fileUrl: 'http://localhost:1234/source_map_spec.js',
+          originalFile: 'cypress:///some_other_file.ts',
+          relativeFile: 'some_other_file.ts',
+          absoluteFile: '/dev/app/some_other_file.ts',
+          line: 2,
+          column: 2,
+          whitespace: '    ',
+        },
+        {
+          function: 'Context.<anonymous>',
+          fileUrl: 'http://localhost:1234/tests?p=cypress/integration/features/source_map_spec.js',
+          originalFile: 'webpack:///cypress/integration/features/source_map_spec.coffee',
+          relativeFile: 'cypress/integration/features/source_map_spec.coffee',
+          absoluteFile: '/dev/app/cypress/integration/features/source_map_spec.coffee',
+          line: 4,
+          column: 4,
+          whitespace: '    ',
+        },
+      ])
     })
 
     it('returns empty object if there\'s no stack', () => {
