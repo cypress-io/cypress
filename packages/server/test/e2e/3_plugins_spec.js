@@ -138,7 +138,7 @@ describe('e2e plugins', function () {
   })
 
   it('fails when invalid event is registered', function () {
-    e2e.exec(this, {
+    return e2e.exec(this, {
       spec: 'app_spec.js',
       project: pluginValidationError,
       sanitizeScreenshotDimensions: true,
@@ -148,7 +148,7 @@ describe('e2e plugins', function () {
   })
 
   it('fails when there is no function exported', function () {
-    e2e.exec(this, {
+    return e2e.exec(this, {
       spec: 'app_spec.js',
       project: pluginEmpty,
       sanitizeScreenshotDimensions: true,
