@@ -1,13 +1,13 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
-import Fetch from './Fetch'
+import Fetcher from './fetcher'
 
 it('loads and displays greeting', () => {
   cy.server()
   cy.route('/greeting', { greeting: 'Hello there' }).as('greet')
 
   const url = '/greeting'
-  mount(<Fetch url={url} />)
+  mount(<Fetcher url={url} />)
 
   cy.contains('Load Greeting').click()
   cy.get('[role=heading]').should('have.text', 'Hello there')
