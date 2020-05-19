@@ -553,16 +553,12 @@ describe('src/cy/commands/agents', () => {
 
           it('does not include stack with calls when assertion fails', function (done) {
             cy.on('fail', () => {
-              const messages = [
+              expect(this.lastLog.get('message')).to.include([
                 '    foo("str", 5, true) => "return value"',
                 '    foo(null, undefined, [1, 2, 3]) => "return value"',
                 '    foo({g: 1}, Array[5], Object{6}) => "return value"',
                 '    foo(1, 2, 3, 4, 5) => "return value"',
-              ]
-
-              messages.forEach((msg) => {
-                expect(this.lastLog.get('message')).to.include(msg)
-              })
+              ].join('\n'))
 
               done()
             })
