@@ -1,4 +1,5 @@
 const wp = require('@cypress/webpack-preprocessor')
+const path = require('path')
 
 const webpackOptions = {
   resolve: {
@@ -10,6 +11,9 @@ const webpackOptions = {
         test: /\.tsx?$/,
         exclude: /node_modules/,
         loader: 'awesome-typescript-loader',
+        options: {
+          configFileName: path.join(__dirname, '..', 'tsconfig.json'),
+        },
       },
     ],
   },

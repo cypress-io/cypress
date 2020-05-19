@@ -6,5 +6,6 @@
     "sourceMap": false,
     "inlineSourceMap": true,
     "inlineSources": false,
+    "types": ["cypress"]
   }
 }
