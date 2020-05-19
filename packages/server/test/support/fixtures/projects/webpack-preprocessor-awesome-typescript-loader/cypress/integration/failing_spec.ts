@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 /**
  * This tests various failure scenarios where an error and code frame is displayed
  * It does this by having a test fail and then a subsequent test run that
@@ -30,7 +28,7 @@ context('validation errors', function () {
   })
 
   verify(this, {
-    line: 29, // this only has 1 test, so we can be specific
+    line: 27, // this only has 1 test, so we can be specific
     column: 8,
     message: 'can only accept a string preset or',
     stack: ['throwErrBadArgs', 'From Your Spec Code:'],
