@@ -49,7 +49,7 @@ describe('src/cypress/resolvers', function () {
 
         cy.stub(Cypress.dom, 'isDocument').withArgs(document).returns(true)
 
-        expect(actual).to.eq(Cypress.resolveLocationReference(document))
+        expect(actual).to.eq(Cypress.resolveLocationReference(contentWindow))
       })
     })
 
