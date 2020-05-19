@@ -27,6 +27,24 @@ describe('source rewriting spec', function () {
         cy.location('pathname').should('eq', '/static/index.html')
       })
 
+      it('with document.location.href', function () {
+        cy.visit('/static/settimeout_redirect_document_href.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with window.document.location.href', function () {
+        cy.visit('/static/settimeout_redirect_window_document_href.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with location.href = #hash', function () {
+        cy.visit('/static/settimeout_redirect_href_hash.html')
+        cy.location().should('include', {
+          pathname: '/static/settimeout_redirect_href_hash.html',
+          hash: '#foo',
+        })
+      })
+
       it('with location.replace()', function () {
         cy.visit('/static/settimeout_redirect_replace.html')
         cy.location('pathname').should('eq', '/static/index.html')
@@ -45,6 +63,24 @@ describe('source rewriting spec', function () {
       it('with window.location = ...', function () {
         cy.visit('/static/settimeout_redirect_set_window_location.html')
         cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with document.location = ...', function () {
+        cy.visit('/static/settimeout_redirect_set_document_location.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with window.document.location = ...', function () {
+        cy.visit('/static/settimeout_redirect_set_window_document_location.html')
+        cy.location('pathname').should('eq', '/static/index.html')
+      })
+
+      it('with document.location = #hash', function () {
+        cy.visit('/static/settimeout_redirect_set_document_location_hash.html')
+        cy.location().should('include', {
+          pathname: '/static/settimeout_redirect_set_document_location_hash.html',
+          hash: '#foo',
+        })
       })
 
       it('with location.search', function () {
