@@ -100,6 +100,19 @@ workflows:
                 path: examples/visual-sudoku/cypress/snapshots
 
       - cypress/run:
+          name: Visual with Applitools
+          executor: base-12-16-2
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-applitools
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Visual with Percy
           executor: base-12-16-2
           requires:
@@ -169,6 +182,7 @@ workflows:
             - Visual Sudoku
             - Visual with Percy
             - Visual with Happo
+            - Visual with Applitools
           install-command: echo 'Already installed'
           verify-command: echo 'Already verified'
           no-workspace: true
