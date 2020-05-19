@@ -131,7 +131,6 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.34.2",
     "@cypress/sinon-chai": "1.1.0",
-    "@cypress/webpack-preprocessor": "5.4.0",
     "@packages/coffee": "*",
     "@packages/desktop-gui": "*",
     "@packages/electron": "*",

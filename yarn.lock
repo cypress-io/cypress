@@ -1639,10 +1639,10 @@
     "@babel/preset-env" "^7.0.0"
     babel-loader "^8.0.2"
 
-"@cypress/webpack-preprocessor@5.4.0":
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.0.tgz#c13135d9533ff2a000dc87ee2f043961ed7bc398"
-  integrity sha512-ZI+OsY0QRvtCRiIH9zpuYWPKN29426RteBkNR+8hDHnmvk11XBenSXnDU9bdMRMcaMpMpej2RWLF7NkuvmEYPQ==
+"@cypress/webpack-preprocessor@5.4.1":
+  version "5.4.1"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.1.tgz#eb58f6cd02932a95653c1a674cfd769da2409806"
+  integrity sha512-1E2BdVVXQ4wDQ7f3mXCvS9xmfTVwEoT3oqKhjAr1iNlTJpBq10Z0VNBZd3VZ3nmCTFwTuUvs735QGnRE1gQ1BA==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
