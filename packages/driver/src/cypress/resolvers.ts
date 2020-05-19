@@ -15,7 +15,7 @@ export function resolveWindowReference (this: typeof $Cypress, currentWindow: Wi
   const getTargetValue = () => {
     const targetValue = accessedObject[accessedProp]
     const accessingDocument = dom.isDocument(accessedObject)
-    const hasLocation = dom.isWindow(accessedObject) || accessedObject
+    const hasLocation = dom.isWindow(accessedObject) || accessingDocument
 
     if (hasLocation && accessedProp === 'location') {
       if (accessingDocument) {
