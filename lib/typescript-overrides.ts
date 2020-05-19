@@ -1,21 +1,29 @@
 const debug = require('debug')('cypress:webpack')
+const _ = require('lodash')
+
+import { CompilerOptions, CreateProgramOptions } from 'typescript'
 
 let sourceMapOverride: null | boolean = null
+
+export const getProgramOptions = (rootNamesOrOptions: CreateProgramOptions, options: CompilerOptions): CompilerOptions => {
+  return _.isArray(rootNamesOrOptions) ? options : rootNamesOrOptions.options
+}
 
 export const tryRequireTypescript = () => {
   try {
     // reset each time this is called
     sourceMapOverride = null
 
-    const typescript = require('typescript')
+    const typescript = require('typescript') as typeof import('typescript')
 
     debug('typescript found, overriding typescript.createProgram()')
 
     const { createProgram } = typescript
 
-    typescript.createProgram = (...args: [any]) => {
-      const [programOptions] = args
-      const { options } = programOptions
+    typescript.createProgram = (...args: any[]) => {
+      const [rootNamesOrOptions, _options] = args
+
+      const options = getProgramOptions(rootNamesOrOptions, _options)
 
       debug('typescript unmodified createProgram options %o', options)
 
@@ -31,6 +39,7 @@ export const tryRequireTypescript = () => {
         debug('typescript modified createProgram options %o', options)
       }
 
+      // @ts-ignore
       return createProgram.apply(typescript, args)
     }
 

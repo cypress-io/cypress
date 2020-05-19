@@ -117,5 +117,26 @@ describe('./lib/typescript-overrides', () => {
         },
       })
     })
+
+    it('sets options when given an array', () => {
+      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
+        typescript,
+      })
+
+      typescriptOverrides.overrideSourceMaps(true)
+
+      expect(typescriptOverrides.getSourceMapOverride()).to.be.true
+
+      typescript.createProgram([], {
+        sourceMap: false,
+        inlineSources: true,
+        inlineSourceMap: true,
+      })
+
+      expect(createProgram).to.be.calledOn(typescript)
+      expect(createProgram).to.be.calledWith([], {
+        sourceMap: true,
+      })
+    })
   })
 })
