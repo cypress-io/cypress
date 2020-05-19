@@ -2,7 +2,7 @@
 
 You can install and bring [Testing library/Cypress](https://testing-library.com/docs/react-testing-library/example-intro) to be used in these React component tests. The following example was copied from [react-testing-library/example-intro](https://testing-library.com/docs/react-testing-library/example-intro).
 
-- [Fetch.js](./Fetch.js) is the component we are testing
+- [Fetch.js](Fetch.js) is the component we are testing
 - [testing-lib-spec.js](testing-lib-spec.js) is component test implemented using `Testing library/Cypress`
 
 ```js
