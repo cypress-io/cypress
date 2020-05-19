@@ -583,7 +583,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       }
       ```
 
-      Learn more: https://on.cypress.io/writing-a-plugin
+      Learn more: https://on.cypress.io/plugins-api
 
       We loaded the `pluginsFile` from: `#{arg1}`
 
