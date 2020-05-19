@@ -7,7 +7,7 @@
     "build-prod": "tsc --project .",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",
-    "test-unit": "mocha test/unit --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --compilers ts:@packages/ts/register,coffee:@packages/coffee/register --timeout 10000 --recursive --require test/pretest.ts",
+    "test-unit": "mocha test/unit --timeout 10000 --recursive -r @packages/ts/register -r @packages/coffee/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "watch": "tsc -w --project ."
   },
   "dependencies": {},
