@@ -469,3 +469,22 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
 
 `
+
+exports['e2e plugins projectRoot and configFile passes projectRoot and default configFile to plugins function 2'] = `
+The \`pluginsFile\` must export a function with the following signature:
+
+\`\`\`
+module.exports = function (on, config) {
+  // configure plugins here
+}
+\`\`\`
+
+Learn more: https://on.cypress.io/plugins-api
+
+We loaded the \`pluginsFile\` from: \`/foo/bar/.projects/plugin-empty/cypress/plugins/index.js\`
+
+It exported:
+
+ {}
+
+`
