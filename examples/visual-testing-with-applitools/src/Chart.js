@@ -28,7 +28,7 @@ export class CustomTheme extends React.Component {
           x={425}
           y={55}
           style={styles.labelTwo}
-          text={'Dinosaur exports\n $bn'}
+          text={'Dinosaur 🦕🦖 exports\n $bn'}
         />
 
         <g transform={'translate(0, 40)'}>
