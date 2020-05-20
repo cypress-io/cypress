@@ -410,20 +410,18 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
         if (t) {
           const siblings = getAllSiblingTests(t.parent, getTestById)
 
-          // 1. if we have another afterAll hook left to run, obviously this isn't the last hook
-          // 2. if we're the very last test in the entire allTests
+          // 1. if we're the very last test in the entire allTests
           //    we wait until the root suite fires
-          // 3. else we wait until the very last possible moment by waiting
+          // 2. else we wait until the very last possible moment by waiting
           //    until the root suite is the parent of the current suite
           //    since that will bubble up IF we're the last nested suite
-          // 4. else if we arent the last nested suite we fire if we're
+          // 3. else if we arent the last nested suite we fire if we're
           //    the last test that will run
 
           if (
-            // !this.suite.parent._afterAll.length &&
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
               (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
-              (!isLastSuite(this.suite, allTests) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings))
+              (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
           }
