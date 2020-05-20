@@ -1,5 +1,15 @@
-<script type="text/javascript">
-chrome.devtools.inspectedWindow.onResourceAdded.addListener(() => {
-  chrome.devtools.inspectedWindow.eval('window.theExtensionLoaded = true')
-})
+<script>
+  function addProperty () {
+    chrome.devtools.inspectedWindow.onResourceAdded.addListener(() => {
+      chrome.devtools.inspectedWindow.eval('window.theExtensionLoaded = true')
+    })
+  }
+
+  // sometimes chrome.devtools is undefined, most likely bug in chromium :|
+  // this was causing flake in our e2e tests 
+  if (chrome.devtools) {
+    addProperty()
+  } else {
+    setTimeout(addProperty, 1000)
+  }
 </script>

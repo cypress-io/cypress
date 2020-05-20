@@ -838,7 +838,7 @@ describe('src/cy/commands/assertions', () => {
             expected: false,
             actual: true,
             Message: 'expected true to be false',
-            Error: log.get('error').toString(),
+            Error: log.get('error').stack,
           })
 
           done()
@@ -1316,6 +1316,14 @@ describe('src/cy/commands/assertions', () => {
         expect(this.logs.length).to.eq(8)
       })
 
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#data-number').then(($el) => {
+          expect($el).to.have.data('number', 222)
+          expect($el).not.to.have.data('number', '222')
+        })
+      })
+
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
@@ -1355,6 +1363,14 @@ describe('src/cy/commands/assertions', () => {
         expect(l3.get('message')).to.eq(
           'expected **<div.foo.bar>** not to have class **baz**',
         )
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('.999').then(($el) => {
+          expect($el).to.have.class(999)
+          expect($el).to.have.class('999')
+        })
       })
 
       it('throws when obj is not DOM', function (done) {
@@ -1426,6 +1442,14 @@ describe('src/cy/commands/assertions', () => {
         expect(l2.get('message')).to.eq(
           'expected **<div#foo>** not to have id **bar**',
         )
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#456').then(($el) => {
+          expect($el).to.have.id(456)
+          expect($el).to.have.id('456')
+        })
       })
 
       it('throws when obj is not DOM', function (done) {
@@ -1581,6 +1605,13 @@ describe('src/cy/commands/assertions', () => {
         }
       })
 
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#number').then(($el) => {
+          expect($el).to.have.text(123)
+        })
+      })
+
       it('partial match', function () {
         expect(this.$div).to.have.text('foo')
         expect(this.$div).to.contain.text('o')
@@ -1661,6 +1692,14 @@ describe('src/cy/commands/assertions', () => {
             'expected **<input>** to contain value **bar**, but the value was **foo**',
           )
         }
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#value-number').then(($el) => {
+          expect($el).to.have.value(123)
+          expect($el).to.have.value('123')
+        })
       })
 
       it('throws when obj is not DOM', function (done) {
@@ -2431,6 +2470,14 @@ describe('src/cy/commands/assertions', () => {
         )
       })
 
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#attr-number').then(($el) => {
+          expect($el).to.have.attr('num', 777)
+          expect($el).to.have.attr('num', '777')
+        })
+      })
+
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
@@ -2532,6 +2579,19 @@ describe('src/cy/commands/assertions', () => {
         expect(l10.get('message')).to.eq(
           `expected **<a>** not to have property **href** with the value **${href}**, but the value was **${href}**`,
         )
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7314
+      it('supports a number argument', () => {
+        cy.get('#prop-number').then(($el) => {
+          $el.prop('foo', 444)
+          $el.prop('bar', '333')
+
+          expect($el).to.have.prop('foo', 444)
+          expect($el).not.to.have.prop('foo', '444')
+          expect($el).not.to.have.prop('bar', 333)
+          expect($el).to.have.prop('bar', '333')
+        })
       })
 
       it('throws when obj is not DOM', function (done) {

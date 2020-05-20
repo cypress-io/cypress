@@ -11,11 +11,7 @@ debug = require("debug")("cypress:server:reporter")
 Promise = require("bluebird")
 { overrideRequire } = require('./override_require')
 
-
-mochaErrMsgExtractionRe = /^([^:]+): expected/
-
 STATS = "suites tests passes pending failures start end duration".split(" ")
-
 
 ## override calls to `require('mocha*')` when to always resolve with a mocha we control
 ## otherwise mocha will be resolved from project's node_modules and might not work with our code
@@ -116,24 +112,6 @@ mergeErr = (runnable, runnables, stats) ->
   ## event for reporters
   test = _.extend({}, test, { title: runnable.title })
 
-  ## mocha tries to extract the error name using a regular expression
-  ## but when the error message includes a colon (:) like
-  ## "Timed out retrying: expected...", it thinks the error name is
-  ## "Timed out retrying" and replaces the entire message with only that
-  ##
-  ## Here's the code we're patching in the mocha version currently being used (7.0.1):
-  ## https://github.com/mochajs/mocha/blob/2a8594424c73ffeca41ef1668446372160528b4a/lib/reporters/base.js#L208
-  if test.err and test.err.message
-    message = new String(test.err.message)
-    originalMatch = message.match
-    message.match = (re) ->
-      if _.isEqual(re, mochaErrMsgExtractionRe)
-        return null
-
-      originalMatch.apply(@, arguments)
-
-    test.err.message = message
-
   [test, test.err]
 
 setDate = (obj, runnables, stats) ->
@@ -184,7 +162,7 @@ class Reporter
     @mocha.suite = rootRunnable
     @runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(@runner)
-    
+
     @reporter = new @mocha._reporter(@runner, {
       reporterOptions: @reporterOptions
     })

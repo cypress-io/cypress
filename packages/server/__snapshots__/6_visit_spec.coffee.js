@@ -118,13 +118,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: connect ECONNREFUSED 127.0.0.1:16795
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: connect ECONNREFUSED 127.0.0.1:16795
+      [stack trace lines]
+    
 
 
 
@@ -581,13 +580,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
   2) response timeouts result in an error
        handles no response errors when not initially visiting:
@@ -606,13 +604,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
   3) response timeouts result in an error
        fails after reducing the responseTimeout option:
@@ -631,13 +628,12 @@ Common situations why this would fail:
   - you forgot to run / boot your web server
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
-
-The stack trace for this error is:
-
-Error: ESOCKETTIMEDOUT
-    [stack trace lines]
-
+      [stack trace lines]
   
+  From Node.js Internals:
+    Error: ESOCKETTIMEDOUT
+      [stack trace lines]
+    
 
 
 
@@ -749,6 +745,95 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ ✔  issue_2196_spec.coffee                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e visit / low response timeout / passes with experimentalSourceRewriting'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (source_rewriting_spec.js)                                               │
+  │ Searched:     cypress/integration/source_rewriting_spec.js                                     │
+  │ Experiments:  experimentalSourceRewriting=true                                                 │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  source_rewriting_spec.js                                                        (1 of 1)
+
+
+  source rewriting spec
+    ✓ obstructive code is replaced
+    issue 3975
+      ✓ can relative redirect in a xhr onload
+      ✓ can relative redirect in a onclick handler
+      ✓ can relative redirect in a settimeout with a base tag
+      - Login demo
+      it can relative redirect in a settimeout
+        ✓ with location.href
+        ✓ with window.location.href
+        ✓ with document.location.href
+        ✓ with window.document.location.href
+        ✓ with location.href = #hash
+        ✓ with location.replace()
+        ✓ with location.assign()
+        ✓ with location = ...
+        ✓ with window.location = ...
+        ✓ with document.location = ...
+        ✓ with window.document.location = ...
+        ✓ with document.location = #hash
+        ✓ with location.search
+        ✓ with location.pathname
+    can load some well-known sites in a timely manner
+      - http://google.com
+      - http://facebook.com
+      - http://cypress.io
+      - http://docs.cypress.io
+      - http://github.com
+
+
+  18 passing
+  6 pending
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        24                                                                               │
+  │ Passing:      18                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      6                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     source_rewriting_spec.js                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/source_rewriting_spec.js.mp4        (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  source_rewriting_spec.js                 XX:XX       24       18        -        6        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX       24       18        -        6        -  
 
 
 `

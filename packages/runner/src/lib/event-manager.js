@@ -16,6 +16,8 @@ const ws = client.connect({
   parser: circularParser,
 })
 
+window.runnerWs = ws
+
 ws.on('connect', () => {
   ws.emit('runner:connected')
 })
@@ -96,6 +98,14 @@ const eventManager = {
 
     reporterBus.on('focus:tests', this.focusTests)
 
+    reporterBus.on('get:user:editor', (cb) => {
+      ws.emit('get:user:editor', cb)
+    })
+
+    reporterBus.on('set:user:editor', (editor) => {
+      ws.emit('set:user:editor', editor)
+    })
+
     reporterBus.on('runner:restart', rerun)
 
     function sendEventIfSnapshotProps (logId, event) {
@@ -146,6 +156,10 @@ const eventManager = {
       ws.emit('external:open', url)
     })
 
+    reporterBus.on('open:file', (url) => {
+      ws.emit('open:file', url)
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)
@@ -177,7 +191,7 @@ const eventManager = {
     }
   },
 
-  setup (config, specPath) {
+  setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -185,7 +199,7 @@ const eventManager = {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', specPath)
+    ws.emit('watch:test:file', config.spec)
   },
 
   isBrowser (browserName) {
@@ -197,40 +211,44 @@ const eventManager = {
   initialize ($autIframe, config) {
     performance.mark('initialize-start')
 
-    Cypress.initialize($autIframe)
+    return Cypress.initialize({
+      $autIframe,
+      onSpecReady: () => {
+        // get the current runnable in case we reran mid-test due to a visit
+        // to a new domain
+        ws.emit('get:existing:run:state', (state = {}) => {
+          const runnables = Cypress.normalizeAll(state.tests)
+          const run = () => {
+            performance.mark('initialize-end')
+            performance.measure('initialize', 'initialize-start', 'initialize-end')
 
-    // get the current runnable in case we reran mid-test due to a visit
-    // to a new domain
-    ws.emit('get:existing:run:state', (state = {}) => {
-      const runnables = Cypress.normalizeAll(state.tests)
-      const run = () => {
-        performance.mark('initialize-end')
-        performance.measure('initialize', 'initialize-start', 'initialize-end')
-        this._runDriver(state)
-      }
+            this._runDriver(state)
+          }
 
-      reporterBus.emit('runnables:ready', runnables)
+          reporterBus.emit('runnables:ready', runnables)
 
-      if (state.numLogs) {
-        Cypress.setNumLogs(state.numLogs)
-      }
+          if (state.numLogs) {
+            Cypress.setNumLogs(state.numLogs)
+          }
 
-      if (state.startTime) {
-        Cypress.setStartTime(state.startTime)
-      }
+          if (state.startTime) {
+            Cypress.setStartTime(state.startTime)
+          }
 
-      if (state.currentId) {
-        // if we have a currentId it means
-        // we need to tell the Cypress to skip
-        // ahead to that test
-        Cypress.resumeAtTest(state.currentId, state.emissions)
-      }
+          if (state.currentId) {
+            // if we have a currentId it means
+            // we need to tell the Cypress to skip
+            // ahead to that test
+            Cypress.resumeAtTest(state.currentId, state.emissions)
+          }
 
-      if (config.isTextTerminal && !state.currentId) {
-        ws.emit('set:runnables', runnables, run)
-      } else {
-        run()
-      }
+          if (config.isTextTerminal && !state.currentId) {
+            ws.emit('set:runnables', runnables, run)
+          } else {
+            run()
+          }
+        })
+      },
     })
   },
 

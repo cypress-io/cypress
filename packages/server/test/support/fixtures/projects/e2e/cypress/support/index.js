@@ -1,3 +1,5 @@
+import './commands'
+
 before(function () {
   if (Cypress.browser.family === 'chromium' && Cypress.browser.name !== 'electron') {
     return Cypress.automation('remote:debugger:protocol', {

@@ -70,8 +70,9 @@ if (isWindows()) {
   commandAndArguments.command = 'xvfb-maybe'
   // this should always match cli/lib/exec/xvfb.js
   commandAndArguments.args = [
-    '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x24\\""',
+    `-as`,
+    `"-screen 0 1280x1024x24"`,
+    `--`,
     'node',
   ]
 }
@@ -146,6 +147,10 @@ if (env.VERBOSE === '1') {
 
 if (options.browser) {
   env.BROWSER = options.browser
+}
+
+if (options.headed) {
+  env.HEADED = true
 }
 
 if (options.exit === false) {

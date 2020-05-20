@@ -50,7 +50,7 @@ executors:
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/base:12.0.0
+      - image: cypress/browsers:node12.13.0-chrome80-ff74
         user: node
     environment:
       PLATFORM: linux
@@ -102,10 +102,26 @@ commands:
       - run:
           command: yarn wait-on http://localhost:3500
       - run:
+          environment:
+            CYPRESS_KONFIG_ENV: production
           command: |
-            CYPRESS_KONFIG_ENV=production \
-            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            echo Current working directory is $PWD
+            echo Total containers $CIRCLE_NODE_TOTAL
+
+            if [[ -v PACKAGES_RECORD_KEY ]]; then
+              # internal PR
+              CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+              yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+            else
+              # external PR
+              TESTFILES=$(circleci tests glob "test/cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              echo "Test files for this machine are $TESTFILES"
+
+              if [[ -z "$TESTFILES" ]]; then
+                echo "Empty list of test files"
+              fi
+              yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
+            fi
           working_directory: packages/driver
       - verify-mocha-results
       - store_test_results:
@@ -122,7 +138,7 @@ commands:
         type: string
       chunk:
         description: e2e test chunk number
-        type: integer
+        type: string
     steps:
       - attach_workspace:
           at: ~/
@@ -131,6 +147,8 @@ commands:
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
       - store-npm-logs
 
   store-npm-logs:
@@ -204,6 +222,11 @@ commands:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Types check 🧩 (maybe)
+          working_directory: /tmp/<<parameters.repo>>
+          command: npm run types --if-present
+      - run:
+          name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run build --if-present
       - run:
@@ -330,7 +353,7 @@ jobs:
       # run unit tests from each individual package
       - run: yarn test
       - verify-mocha-results:
-          expectedResultCount: 6
+          expectedResultCount: 8
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
@@ -348,8 +371,13 @@ jobs:
           command: ls -la types
           working_directory: cli
       - run:
-          command: yarn lerna exec  --scope cypress "yarn dtslint"
+          command: ls -la chai
+          working_directory: cli/types
       - run:
+          name: "Lint types 🧹"
+          command: yarn lerna exec --scope cypress "yarn dtslint"
+      - run:
+          name: "TypeScript check 🧩"
           command: yarn type-check --ignore-progress
       - store-npm-logs
 
@@ -410,168 +438,174 @@ jobs:
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 1
+          chunk: "1"
 
   "server-e2e-tests-chrome-2":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 2
+          chunk: "2"
 
   "server-e2e-tests-chrome-3":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 3
+          chunk: "3"
 
   "server-e2e-tests-chrome-4":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 4
+          chunk: "4"
 
   "server-e2e-tests-chrome-5":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 5
+          chunk: "5"
 
   "server-e2e-tests-chrome-6":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 6
+          chunk: "6"
 
   "server-e2e-tests-chrome-7":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 7
+          chunk: "7"
 
   "server-e2e-tests-chrome-8":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: 8
+          chunk: "8"
 
   "server-e2e-tests-electron-1":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 1
+          chunk: "1"
 
   "server-e2e-tests-electron-2":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 2
+          chunk: "2"
 
   "server-e2e-tests-electron-3":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 3
+          chunk: "3"
 
   "server-e2e-tests-electron-4":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 4
+          chunk: "4"
 
   "server-e2e-tests-electron-5":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 5
+          chunk: "5"
 
   "server-e2e-tests-electron-6":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 6
+          chunk: "6"
 
   "server-e2e-tests-electron-7":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 7
+          chunk: "7"
 
   "server-e2e-tests-electron-8":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: 8
+          chunk: "8"
+
+  "server-e2e-tests-non-root":
+    <<: *defaults
+    steps:
+      - run-e2e-tests:
+          chunk: non_root
 
   "server-e2e-tests-firefox-1":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 1
+          chunk: "1"
 
   "server-e2e-tests-firefox-2":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 2
+          chunk: "2"
 
   "server-e2e-tests-firefox-3":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 3
+          chunk: "3"
 
   "server-e2e-tests-firefox-4":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 4
+          chunk: "4"
 
   "server-e2e-tests-firefox-5":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 5
+          chunk: "5"
 
   "server-e2e-tests-firefox-6":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 6
+          chunk: "6"
 
   "server-e2e-tests-firefox-7":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 7
+          chunk: "7"
 
   "server-e2e-tests-firefox-8":
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
-          chunk: 8
+          chunk: "8"
 
   "driver-integration-tests-chrome":
     <<: *defaults
@@ -1010,6 +1044,47 @@ jobs:
           working_directory: test-binary
           command: $(npm bin)/cypress info
 
+  test-types-cypress-and-jest:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-cypress-and-jest
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir << parameters.wd >>
+      - run: node --version
+      - run: npm --version
+      - run:
+          name: Create new NPM package ⚗️
+          working_directory: << parameters.wd >>
+          command: npm init -y
+      - run:
+          name: Install dependencies 📦
+          working_directory: << parameters.wd >>
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          # let's install Cypress, Jest and any other package that might conflict
+          # https://github.com/cypress-io/cypress/issues/6690
+          command: |
+            npm install /root/cypress/cypress.tgz \
+              typescript jest @types/jest enzyme @types/enzyme
+      - run:
+          name: Test types clash ⚔️
+          working_directory: << parameters.wd >>
+          command: |
+            echo "console.log('hello world')" > hello.ts
+            npx tsc hello.ts --noEmit
+
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
     <<: *defaults
@@ -1232,6 +1307,10 @@ linux-workflow: &linux-workflow
     - server-e2e-tests-electron-8:
         requires:
           - build
+    - server-e2e-tests-non-root:
+        executor: non-root-docker-user
+        requires:
+          - build
     - server-e2e-tests-firefox-1:
         requires:
           - build
@@ -1328,6 +1407,14 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
           - build-npm-package
+    - test-types-cypress-and-jest:
+        requires:
+          - build-binary
+          - build-npm-package
+    - test-binary-against-kitchensink:
+        requires:
+          - build-binary
+          - build-npm-package
     - post-pre-release-install-comment:
         context: test-runner:commit-status-checks
         filters:
@@ -1365,8 +1452,6 @@ linux-workflow: &linux-workflow
           - build-binary
 
     - test-binary-against-recipes-firefox:
-        <<: *testBinaryFirefox
-    - test-binary-against-kitchensink:
         <<: *testBinaryFirefox
     - test-binary-against-kitchensink-firefox:
         <<: *testBinaryFirefox
