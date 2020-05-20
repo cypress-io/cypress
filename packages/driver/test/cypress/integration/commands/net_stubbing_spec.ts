@@ -12,6 +12,14 @@ const { $, _ } = Cypress
 describe('src/cy/commands/net_stubbing', function () {
   const { sinon, state } = Cypress
 
+  beforeEach(function () {
+    Cypress.config('experimentalNetworkMocking', true)
+  })
+
+  afterEach(function () {
+    Cypress.config('experimentalNetworkMocking', false)
+  })
+
   context('#route', function () {
     context('creating', function () {
       beforeEach(function () {
