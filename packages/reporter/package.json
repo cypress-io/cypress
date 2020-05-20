@@ -27,7 +27,7 @@
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",
     "css-element-queries": "1.2.3",
-    "cypress-multi-reporters": "1.2.4",
+    "cypress-multi-reporters": "1.4.0",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "jsdom": "14.1.0",
