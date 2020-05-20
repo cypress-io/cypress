@@ -60,30 +60,30 @@ module.exports = (Commands, Cypress, cy, state) => {
       })
     }
 
-    // const checkForXhr = function (alias, type, index, num, options) {
-    //   options.type = type
+    const checkForXhr = function (alias, type, index, num, options) {
+      options.type = type
 
-    //   // append .type to the alias
-    //   const xhr = cy.getIndexedXhrByAlias(`${alias}.${type}`, index)
+      // append .type to the alias
+      const xhr = cy.getIndexedXhrByAlias(`${alias}.${type}`, index)
 
-    //   // return our xhr object
-    //   if (xhr) {
-    //     return Promise.resolve(xhr)
-    //   }
+      // return our xhr object
+      if (xhr) {
+        return Promise.resolve(xhr)
+      }
 
-    //   options.error = $errUtils.errByPath('wait.timed_out', {
-    //     timeout: options.timeout,
-    //     alias,
-    //     num,
-    //     type,
-    //   }).message
+      options.error = $errUtils.errByPath('wait.timed_out', {
+        timeout: options.timeout,
+        alias,
+        num,
+        type,
+      }).message
 
-    //   const args = [alias, type, index, num, options]
+      const args = [alias, type, index, num, options]
 
-    //   return cy.retry(() => {
-    //     return checkForXhr.apply(window, args)
-    //   }, options)
-    // }
+      return cy.retry(() => {
+        return checkForXhr.apply(window, args)
+      }, options)
+    }
 
     const waitForXhr = function (str, options) {
       let str2
@@ -114,7 +114,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       str = _.compact([alias, str2]).join('.')
 
-      // const type = cy.getXhrTypeByAlias(str)
+      const type = cy.getXhrTypeByAlias(str)
 
       const [index, num] = getNumRequests(state, alias)
 
@@ -143,36 +143,38 @@ module.exports = (Commands, Cypress, cy, state) => {
         })
       }
 
-      // TODO: account for `type` in aliases?
+      if (Cypress.config('experimentalNetworkMocking')) {
+        return waitForRoute(alias, cy, state, str2, options)
+      }
+
       // create shallow copy of each options object
       // but slice out the error since we may set
       // the error related to a previous xhr
-      // const { timeout } = options
-      // const requestTimeout = options.requestTimeout || timeout
-      // const responseTimeout = options.responseTimeout || timeout
+      const { timeout } = options
+      const requestTimeout = options.requestTimeout || timeout
+      const responseTimeout = options.responseTimeout || timeout
 
-      // const waitForRequest = () => {
-      //   options = _.omit(options, '_runnableTimeout')
-      //   options.timeout = requestTimeout || Cypress.config('requestTimeout')
+      const waitForRequest = () => {
+        options = _.omit(options, '_runnableTimeout')
+        options.timeout = requestTimeout || Cypress.config('requestTimeout')
 
-      //   return checkForXhr(alias, 'request', index, num, options)
-      // }
+        return checkForXhr(alias, 'request', index, num, options)
+      }
 
-      // const waitForResponse = () => {
-      //   options = _.omit(options, '_runnableTimeout')
-      //   options.timeout = responseTimeout || Cypress.config('responseTimeout')
+      const waitForResponse = () => {
+        options = _.omit(options, '_runnableTimeout')
+        options.timeout = responseTimeout || Cypress.config('responseTimeout')
 
-      //   return checkForXhr(alias, 'response', index, num, options)
-      // }
+        return checkForXhr(alias, 'response', index, num, options)
+      }
 
-      // // if we were only waiting for the request
-      // // then resolve immediately do not wait for response
-      // if (type === 'request') {
-      //   return waitForRequest()
-      // }
+      // if we were only waiting for the request
+      // then resolve immediately do not wait for response
+      if (type === 'request') {
+        return waitForRequest()
+      }
 
-      // return waitForRequest().then(waitForResponse)
-      return waitForRoute(alias, cy, state, str2, options)
+      return waitForRequest().then(waitForResponse)
     }
 
     return Promise
