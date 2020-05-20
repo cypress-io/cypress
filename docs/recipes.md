@@ -29,8 +29,6 @@ See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/t
 
 **Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
 
-**⚠️ Note:** when using `react-scripts` you must place component specs in the `src` folder too, otherwise they won't be transpiled correctly.
-
 ## Your webpack config
 
 If you have your own webpack config, you can use included plugins file to load it. You can pass the webpack config file name (with respect to the root folder where `cypress.json` file sits) via plugins file or via an `env` variable in `cypress.json`
