@@ -1,9 +1,10 @@
 const { _ } = Cypress
+const sinon = require('sinon')
 const helpers = require('../support/helpers')
-
 const snapshots = require('../support/eventSnapshots').EventSnapshots
 
-const sinon = require('sinon')
+const { cleanseRunStateMap, shouldHaveTestResults, getRunState } = helpers
+const { visit, snapshotEvents, onInitialized, getAutCypress } = helpers.createCypress()
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
@@ -12,8 +13,6 @@ const simpleSingleTest = {
 const threeTestsWithHooks = {
   suites: { 'suite 1': { hooks: ['before', 'beforeEach', 'afterEach', 'after'], tests: ['test 1', 'test 2', 'test 3'] } },
 }
-
-const { visit, snapshotEvents, onInitialized, getAutCypress } = helpers.createCypress()
 
 describe('src/cypress/runner', () => {
   describe('isolated test runner', () => {
@@ -542,43 +541,3 @@ describe('src/cypress/runner', () => {
     })
   })
 })
-
-const getRunState = (Cypress) => {
-  const currentRunnable = Cypress.cy.state('runnable')
-  const currentId = currentRunnable && currentRunnable.id
-
-  const s = {
-    currentId,
-    tests: Cypress.getTestsState(),
-    startTime: Cypress.getStartTime(),
-    emissions: Cypress.getEmissions(),
-  }
-
-  s.passed = Cypress.countByTestState(s.tests, 'passed')
-  s.failed = Cypress.countByTestState(s.tests, 'failed')
-  s.pending = Cypress.countByTestState(s.tests, 'pending')
-  s.numLogs = Cypress.Log.countLogsByTests(s.tests)
-
-  return _.cloneDeep(s)
-}
-
-const cleanseRunStateMap = {
-  wallClockStartedAt: new Date(0),
-  wallClockDuration: 1,
-  fnDuration: 1,
-  afterFnDuration: 1,
-  lifecycle: 1,
-  duration: 1,
-  startTime: new Date(0),
-  'err.stack': '[err stack]',
-}
-
-const shouldHaveTestResults = (expPassed, expFailed) => {
-  return ({ failed }) => {
-    expect(failed, 'resolve with failure count').eq(failed)
-    expPassed = expPassed || '--'
-    expFailed = expFailed || '--'
-    cy.get('header .passed .num').should('have.text', `${expPassed}`)
-    cy.get('header .failed .num').should('have.text', `${expFailed}`)
-  }
-}

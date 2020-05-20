@@ -35,7 +35,7 @@ const registerInMocha = () => {
     try {
       matchDeep.call(ctx, m, exp, { message: 'to match snapshot', chai, setGlobalSnapshot: _.noop, sinon })
     } catch (e) {
-      if (_.has(e, 'act')) {
+      if (_.has(e, 'act') && !e.failedMatcher) {
         if (process.env['SNAPSHOT_UPDATE']) {
           saveSnapshot({
             file,

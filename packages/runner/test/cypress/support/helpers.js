@@ -24,9 +24,9 @@ const eventCleanseMap = {
   afterFnDuration: match.number,
   wallClockDuration: match.number,
   stack: match.string,
+  message: '[error message]',
   sourceMappedStack: match.string,
   parsedStack: match.array,
-  message: '[error message]',
 }
 
 const mochaEventCleanseMap = {
@@ -271,6 +271,7 @@ function createCypress () {
     snapshotEvents,
     onInitialized,
     getAutCypress,
+
   }
 }
 
@@ -407,7 +408,59 @@ const evalFn = (win, fn) => {
   }
 }
 
+const cleanseRunStateMap = {
+  wallClockStartedAt: new Date(0),
+  wallClockDuration: 1,
+  fnDuration: 1,
+  afterFnDuration: 1,
+  lifecycle: 1,
+  duration: 1,
+  startTime: new Date(0),
+  'err.stack': '[err stack]',
+  sourceMappedStack: match.string,
+  parsedStack: match.array,
+}
+
+const shouldHaveTestResults = (expPassed, expFailed) => {
+  return ({ failed }) => {
+    expect(failed, 'resolve with failure count').eq(failed)
+    expPassed = expPassed || '--'
+    expFailed = expFailed || '--'
+    cy.get('header .passed .num').should('have.text', `${expPassed}`)
+    cy.get('header .failed .num').should('have.text', `${expFailed}`)
+  }
+}
+
+const containText = (text) => {
+  return (($el) => {
+    expect($el[0]).property('innerText').contain(text)
+  })
+}
+
+const getRunState = (Cypress) => {
+  const currentRunnable = Cypress.cy.state('runnable')
+  const currentId = currentRunnable && currentRunnable.id
+
+  const s = {
+    currentId,
+    tests: Cypress.getTestsState(),
+    startTime: Cypress.getStartTime(),
+    emissions: Cypress.getEmissions(),
+  }
+
+  s.passed = Cypress.countByTestState(s.tests, 'passed')
+  s.failed = Cypress.countByTestState(s.tests, 'failed')
+  s.pending = Cypress.countByTestState(s.tests, 'pending')
+  s.numLogs = Cypress.Log.countLogsByTests(s.tests)
+
+  return _.cloneDeep(s)
+}
+
 module.exports = {
   generateMochaTestsForWin,
   createCypress,
+  containText,
+  cleanseRunStateMap,
+  shouldHaveTestResults,
+  getRunState,
 }
