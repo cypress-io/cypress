@@ -805,7 +805,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName, getTestById)
+      return hookFailed(runnable, runnable.err, hookName)
     }
   })
 }
