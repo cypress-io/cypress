@@ -297,6 +297,14 @@ Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unit-tes
 
 See [docs/development.md](./docs/development.md)
 
+## Debugging
+
+You can see verbose logs from this plugin by running with environment variable
+
+```
+DEBUG=cypress-react-unit-test
+```
+
 ## Migration guide
 
 ### From v3 to v4
