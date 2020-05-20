@@ -1,6 +1,4 @@
-_ = Cypress._
-$ = Cypress.$
-Promise = Cypress.Promise
+{ _, $, Promise } = Cypress
 
 describe "src/cy/commands/xhr", ->
   before ->
@@ -1491,7 +1489,7 @@ describe "src/cy/commands/xhr", ->
 
     describe "errors", ->
       beforeEach ->
-        Cypress.config("defaultCommandTimeout", 50)
+        Cypress.config("defaultCommandTimeout", 100)
 
         @logs = []
 

@@ -17,6 +17,10 @@ export class NetworkProxy {
     this.http.handle(req, res)
   }
 
+  handleSourceMapRequest (req, res) {
+    this.http.handleSourceMapRequest(req, res)
+  }
+
   setHttpBuffer (buffer) {
     this.http.setBuffer(buffer)
   }

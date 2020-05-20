@@ -8,6 +8,7 @@ const $utils = require('./utils')
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
+const customProtocolRegex = /^[^:\/]+:\/+/
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
 
 // returns tuple of [message, stack]
@@ -131,6 +132,7 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   return {
     line,
     column,
+    originalFile: relativeFile,
     relativeFile,
     absoluteFile,
     frame,
@@ -152,9 +154,9 @@ const getCodeFrame = (err, stackIndex) => {
 
   if (!stackLine) return
 
-  const { fileUrl, relativeFile } = stackLine
+  const { fileUrl, originalFile } = stackLine
 
-  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(fileUrl, relativeFile), stackLine)
+  return getCodeFrameFromSource($sourceMapUtils.getSourceContents(fileUrl, originalFile), stackLine)
 }
 
 const getWhitespace = (line) => {
@@ -206,6 +208,10 @@ const parseLine = (line) => {
   }
 }
 
+const stripCustomProtocol = (filePath) => {
+  return filePath.replace(customProtocolRegex, '')
+}
+
 const getSourceDetailsForLine = (projectRoot, line) => {
   const whitespace = getWhitespace(line)
   const generatedDetails = parseLine(line)
@@ -219,12 +225,15 @@ const getSourceDetailsForLine = (projectRoot, line) => {
   }
 
   const sourceDetails = getSourceDetails(generatedDetails)
+  const originalFile = sourceDetails.file
+  const relativeFile = stripCustomProtocol(originalFile)
 
   return {
     function: sourceDetails.function,
     fileUrl: generatedDetails.file,
-    relativeFile: sourceDetails.file,
-    absoluteFile: path.join(projectRoot, sourceDetails.file),
+    originalFile,
+    relativeFile,
+    absoluteFile: path.join(projectRoot, relativeFile),
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,
@@ -238,9 +247,9 @@ const reconstructStack = (parsedStack) => {
       return `${parsedLine.whitespace}${parsedLine.message}`
     }
 
-    const { whitespace, relativeFile, function: fn, line, column } = parsedLine
+    const { whitespace, originalFile, function: fn, line, column } = parsedLine
 
-    return `${whitespace}at ${fn} (${relativeFile || '<unknown>'}:${line}:${column})`
+    return `${whitespace}at ${fn} (${originalFile || '<unknown>'}:${line}:${column})`
   }).join('\n')
 }
 

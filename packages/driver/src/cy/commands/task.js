@@ -90,7 +90,13 @@ module.exports = (Commands, Cypress, cy) => {
 
         $errUtils.throwErrByPath('task.failed', {
           onFail: options._log,
-          args: { task, error: err?.stack || err?.message || err },
+          args: { task, error: err?.message || err },
+          errProps: {
+            appendToStack: {
+              title: 'From Node.js Internals',
+              content: err?.stack || err,
+            },
+          },
         })
       })
     },

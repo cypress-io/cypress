@@ -16,6 +16,7 @@ describe "e2e domain", ->
   e2e.it "passes", {
     spec: "domain*"
     snapshot: true
+    video: false
     config: {
       hosts
     }

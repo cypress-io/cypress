@@ -438,6 +438,8 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
+    const noExit = process.env.NO_EXIT
+
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
@@ -447,7 +449,7 @@ const e2e = {
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
-      noExit: process.env.NO_EXIT,
+      noExit,
     })
 
     if (options.noExit) {
@@ -460,6 +462,10 @@ const e2e = {
       Please pass the --no-exit flag to the test command instead
       e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
       `)
+    }
+
+    if (noExit && options.timeout < 3000000) {
+      options.timeout = 3000000
     }
 
     ctx.timeout(options.timeout)

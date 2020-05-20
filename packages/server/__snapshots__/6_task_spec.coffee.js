@@ -103,7 +103,11 @@ https://on.cypress.io/api/task
   2) includes stack trace in error:
      CypressError: \`cy.task('errors')\` failed with the following error:
 
-> Error: Error thrown in task handler
+> Error thrown in task handler
+      [stack trace lines]
+  
+  From Node.js Internals:
+    Error: Error thrown in task handler
       [stack trace lines]
 
 

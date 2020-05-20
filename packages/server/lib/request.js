@@ -741,12 +741,6 @@ module.exports = function (options = {}) {
         return this.create(options, true)
         .then(this.normalizeResponse.bind(this, push))
         .then((resp) => {
-          // TODO: move duration somewhere...?
-          // does node store this somewhere?
-          // we could probably calculate this ourselves
-          // by using the date headers
-          let loc
-
           resp.duration = Date.now() - ms
           resp.allRequestResponses = requestResponses
 
@@ -754,10 +748,10 @@ module.exports = function (options = {}) {
             resp.redirects = redirects
           }
 
-          if ((options.followRedirect === false) && (loc = resp.headers.location)) {
+          if ((options.followRedirect === false) && resp.headers.location) {
             // resolve the new location head against
             // the current url
-            resp.redirectedToUrl = url.resolve(options.url, loc)
+            resp.redirectedToUrl = url.resolve(options.url, resp.headers.location)
           }
 
           return this.setCookiesOnBrowser(resp, currentUrl, automationFn)

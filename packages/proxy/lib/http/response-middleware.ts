@@ -74,6 +74,10 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
   )
 }
 
+function isHtml (res: IncomingMessage) {
+  return !resContentTypeIsJavaScript(res)
+}
+
 function resIsGzipped (res: IncomingMessage) {
   return (res.headers['content-encoding'] || '').includes('gzip')
 }
@@ -364,10 +368,18 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   debug('injecting into HTML')
 
-  this.incomingResStream.pipe(concatStream((body) => {
+  this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved)
+    const injectedBody = await rewriter.html(decodedBody, {
+      domainName: this.getRemoteState().domainName,
+      wantsInjection: this.res.wantsInjection,
+      wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+      isHtml: isHtml(this.incomingRes),
+      useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      url: this.req.proxiedUrl,
+      deferSourceMapRewrite: this.deferSourceMapRewrite,
+    })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
     const pt = new PassThrough
@@ -388,7 +400,13 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
   debug('removing JS framebusting code')
 
   this.incomingResStream.setEncoding('utf8')
-  this.incomingResStream = this.incomingResStream.pipe(rewriter.security()).on('error', this.onError)
+  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
+    isHtml: isHtml(this.incomingRes),
+    useAstSourceRewriting: this.config.experimentalSourceRewriting,
+    url: this.req.proxiedUrl,
+    deferSourceMapRewrite: this.deferSourceMapRewrite,
+  })).on('error', this.onError)
+
   this.next()
 }
 
