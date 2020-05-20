@@ -102,7 +102,7 @@ module.exports = {
       .then((win) => {
         Events.start(_.extend({}, options, {
           onFocusTests () {
-            return win.focus()
+            return app.focus()
           },
           os: os.platform(),
         }), bus)
