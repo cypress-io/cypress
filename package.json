@@ -118,7 +118,7 @@
   },
   "dependencies": {
     "@cypress/code-coverage": "3.7.4",
-    "@cypress/webpack-preprocessor": "5.2.1",
+    "@cypress/webpack-preprocessor": "5.4.1",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
     "find-webpack": "1.8.0",
