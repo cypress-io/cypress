@@ -103,10 +103,10 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
     if (frame.staticResponse) {
       if (frame.throttleKbps) {
-        return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse, throttleify(frame.staticResponse.body))
+        return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!, throttleify(frame.staticResponse.body))
       }
 
-      return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse)
+      return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!)
     }
 
     // merge the changed response attributes with our response and continue
@@ -123,7 +123,7 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
         // pt.on('pipe', () => pt.end())
         pt.end()
 
-        pt.thisIsTheBody = true
+        // pt.thisIsTheBody = true
         newResStream = pt
       }
 

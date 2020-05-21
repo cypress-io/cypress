@@ -198,9 +198,9 @@ export type StringMatcher = GlobPattern | RegExp
 
 declare global {
   namespace Cypress {
-    interface Chainable {
+    interface Chainable<Subject = any> {
       route(url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      route(method: HttpMethod, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
     }
   }
 }

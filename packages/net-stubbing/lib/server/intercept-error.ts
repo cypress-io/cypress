@@ -24,6 +24,7 @@ export const InterceptError: ErrorMiddleware = function () {
     routeHandlerId: backendRequest.route.handlerId!,
     requestId: backendRequest.requestId,
     res: {
+      headers: {},
       url: this.req.proxiedUrl,
       error: this.error,
     },
