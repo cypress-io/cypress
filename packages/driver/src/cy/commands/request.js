@@ -170,6 +170,18 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         })
       }
 
+      if (options.encoding) {
+        if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
+          $errUtils.throwErrByPath('request.encoding_invalid', {
+            args: {
+              encoding: options.encoding,
+            },
+          })
+        } else {
+          options.encoding = options.encoding.toLowerCase()
+        }
+      }
+
       // if a user has `x-www-form-urlencoded` content-type set
       // with an object body, they meant to add 'form: true'
       // so we are nice and do it for them :)
