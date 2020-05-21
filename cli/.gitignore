@@ -1,0 +1,14 @@
+types/blob-util
+types/bluebird
+types/chai
+types/chai-jquery
+types/jquery
+types/lodash
+types/mocha
+types/minimatch
+types/sinon
+types/sinon-chai
+# copied from net-stubbing package on build
+types/net-stubbing.ts
+# ignore CLI output build folder
+build

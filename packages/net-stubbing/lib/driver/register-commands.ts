@@ -20,7 +20,7 @@ import {
   AnnotatedStringMatcher,
   NetEventFrames,
 } from '../types'
-import '@packages/driver'
+import '@packages/driver/index.d.ts'
 
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.

@@ -16,7 +16,7 @@ export const SERIALIZABLE_REQ_PROPS = [
 export const SERIALIZABLE_RES_PROPS = _.concat(
   SERIALIZABLE_REQ_PROPS,
   'statusCode',
-  'statusMessage'
+  'statusMessage',
 )
 
 export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
