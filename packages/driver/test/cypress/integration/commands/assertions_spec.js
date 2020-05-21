@@ -2350,12 +2350,12 @@ describe('src/cy/commands/assertions', () => {
 
     context('attr', () => {
       beforeEach(function () {
-        this.$div = $('<div foo=\'bar\' fizz=\'buzz\'>foo</div>')
+        this.$div = $('<div foo="bar" fizz="buzz">foo</div>')
         this.$div.attr = function () {
           throw new Error('attr called')
         }
 
-        this.$a = $('<a href=\'https://google.com\'>google</a>')
+        this.$a = $('<a href="https://google.com">google</a>')
         this.$a.attr = function () {
           throw new Error('attr called')
         }
@@ -2462,13 +2462,13 @@ describe('src/cy/commands/assertions', () => {
 
     context('prop', () => {
       beforeEach(function () {
-        this.$input = $('<input type=\'checkbox\' />')
+        this.$input = $('<input type="checkbox" />')
         this.$input.prop('checked', true)
         this.$input.prop = function () {
           throw new Error('prop called')
         }
 
-        this.$a = $('<a href=\'/foo\'>google</a>')
+        this.$a = $('<a href="/foo">google</a>')
         this.$a.prop = function () {
           throw new Error('prop called')
         }
@@ -2577,7 +2577,7 @@ describe('src/cy/commands/assertions', () => {
 
     context('css', () => {
       beforeEach(function () {
-        this.$div = $('<div style=\'display: none; position: absolute;\'>div</div>')
+        this.$div = $('<div style="display: none; position: absolute;">div</div>')
         this.$div.css = function () {
           throw new Error('css called')
         }
