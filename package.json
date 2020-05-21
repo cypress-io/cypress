@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "4.5.0",
+  "version": "4.6.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -85,6 +85,7 @@
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
+    "@cypress/webpack-preprocessor": "5.4.1",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@percy/cypress": "2.3.0",
     "@types/bluebird": "3.5.29",

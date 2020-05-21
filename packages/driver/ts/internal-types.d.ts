@@ -19,6 +19,9 @@ declare namespace Cypress {
 
   interface Cypress {
     backend: (eventName: string, ...args: any[]) => Promise<any>
+    // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
+    resolveWindowReference: any
+    resolveLocationReference: any
     routes: {
       [routeHandlerId: string]: any
     }
@@ -28,7 +31,7 @@ declare namespace Cypress {
   }
 
   interface CypressUtils {
-    throwErrByPath: (path: string, obj: { args: object }) => void
+    throwErrByPath: (path: string, obj?: { args: object }) => void
     warnByPath: (path: string, obj?: { args: object }) => void
     warning: (message: string) => void
   }

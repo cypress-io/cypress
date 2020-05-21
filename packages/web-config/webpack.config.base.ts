@@ -1,14 +1,15 @@
-import execa from 'execa'
-import webpack from 'webpack'
+import chalk from 'chalk'
 import CleanWebpackPlugin from 'clean-webpack-plugin'
-// @ts-ignore
-import sassGlobImporter = require('node-sass-globbing')
+import execa from 'execa'
+import path from 'path'
+import webpack from 'webpack'
 // @ts-ignore
 import LiveReloadPlugin from 'webpack-livereload-plugin'
+
+// @ts-ignore
+import sassGlobImporter = require('node-sass-globbing')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
-import path from 'path'
-import chalk from 'chalk'
 
 // Ensures node-sass/vendor has built node-sass binary.
 execa.sync('rebuild-node-sass', { cwd: path.join(require.resolve('node-sass'), '../../../', '.bin'), stdio: 'inherit' })
@@ -23,6 +24,14 @@ const watchModeEnabled = args.includes('--watch') || args.includes('-w')
 if (liveReloadEnabled && watchModeEnabled) console.log(chalk.gray(`\nLive Reloading is enabled. use ${chalk.bold('--no-livereload')} to disable`))
 
 process.env.NODE_ENV = env
+
+// @ts-ignore
+const evalDevToolPlugin = new webpack.EvalDevToolModulePlugin({
+  moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
+  fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
+})
+
+evalDevToolPlugin.evalDevToolPlugin = true
 
 const getCommonConfig = () => {
   const commonConfig: webpack.Configuration = {
@@ -191,18 +200,12 @@ const getCommonConfig = () => {
       //   fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]'
       // })] :
 
-      ...(env === 'production' ?
-        [
-          new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') }),
-        ] :
-        [
-          // @ts-ignore
-          new webpack.EvalDevToolModulePlugin({
-            moduleFilenameTemplate: 'cypress://[namespace]/[resource-path]',
-            fallbackModuleFilenameTemplate: 'cypress://[namespace]/[resourcePath]?[hash]',
-          }),
-        ]
-      ),
+      ...[
+        (env === 'production'
+          ? new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify('production') })
+          : evalDevToolPlugin
+        ),
+      ],
       ...(liveReloadEnabled ? [new LiveReloadPlugin({ appendScriptTag: 'true', port: 0, hostname: 'localhost', protocol: 'http' })] : []),
     ],
 
