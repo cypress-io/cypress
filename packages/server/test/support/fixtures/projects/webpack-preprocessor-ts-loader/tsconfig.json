@@ -1,0 +1,10 @@
+{
+  // act as if we're attempting to disable source maps
+  // and enable inline source maps. these properties
+  // should be overriden by our typescript monkey patching
+  "compilerOptions": {
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "inlineSources": false,
+  }
+}

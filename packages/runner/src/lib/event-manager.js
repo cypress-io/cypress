@@ -16,6 +16,8 @@ const ws = client.connect({
   parser: circularParser,
 })
 
+window.runnerWs = ws
+
 ws.on('connect', () => {
   ws.emit('runner:connected')
 })

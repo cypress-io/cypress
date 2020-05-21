@@ -41,7 +41,7 @@ expectDurationWithin = (obj, duration, low, high, reset) ->
   message = duration
 
   ## ensure the duration is within range
-  expect(d).to.be.within(low, high, message)
+  expect(d, duration).to.be.within(low, high)
 
   ## once valid, mutate and set static range
   _.set(obj, duration, reset)

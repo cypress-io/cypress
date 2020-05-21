@@ -645,17 +645,18 @@ const trashAssets = Promise.method((config = {}) => {
 const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
+  const onError = _.once((err) => {
+    // catch video recording failures and log them out
+    // but don't let this affect the run at all
+    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+  })
+
   return fs
   .ensureDirAsync(outputDir)
+  .catch(onError)
   .then(() => {
     return videoCapture
-    .start(videoName, _.extend({}, options, {
-      onError (err) {
-        // catch video recording failures and log them out
-        // but don't let this affect the run at all
-        return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
-      },
-    }))
+    .start(videoName, _.extend({}, options, { onError }))
   })
 }
 
