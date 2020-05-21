@@ -29,14 +29,20 @@ describe('e2e plugins', function () {
     })
   })
 
+  // this tests verifies stdout manually instead of via snapshot because
+  // there's a degree of randomness as to whether the error occurs before or
+  // after the run output starts. the important thing is that the run is
+  // failed and the right error is displayed
   e2e.it('fails when there is an async error at the root', {
     browser: 'chrome',
     spec: 'app_spec.js',
     project: pluginsRootAsyncError,
-    snapshot: true,
     expectedExitCode: 1,
-    config: {
-      video: false,
+    onRun (exec) {
+      return exec().then(({ stdout }) => {
+        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file')
+        expect(stdout).to.include('Error: Root async error from plugins file')
+      })
     },
   })
 
