@@ -2504,7 +2504,7 @@ declare namespace Cypress {
     onBeforeScreenshot: ($el: JQuery) => void
     onAfterScreenshot: ($el: JQuery, props: {
       path: string,
-      size: 12,
+      size: number,
       dimensions: {
         width: number,
         height: number
