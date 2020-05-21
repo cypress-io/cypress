@@ -5,7 +5,7 @@
   "scripts": {
     "build-prod": "tsc --project . || true",
     "clean-deps": "rm -rf node_modules",
-    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+    "test": "echo 'See net_stubbing_spec in driver and server'"
   },
   "dependencies": {
     "concat-stream": "^2.0.0",
