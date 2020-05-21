@@ -172,7 +172,7 @@ class Server
       ## TODO: might not be needed anymore
       @_request = Request({timeout: config.responseTimeout})
       @_nodeProxy = httpProxy.createProxyServer()
-      @_socket = Socket(config)
+      @_socket = new Socket(config)
 
       getRemoteState = => @_getRemoteState()
 
