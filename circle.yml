@@ -1125,6 +1125,12 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
 
+  test-binary-against-awesome-typescript-loader:
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-test-awesome-typescript-loader
+
   "test-binary-against-kitchensink-firefox":
     <<: *defaults
     steps:
@@ -1412,6 +1418,10 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-kitchensink:
+        requires:
+          - build-binary
+          - build-npm-package
+    - test-binary-against-awesome-typescript-loader:
         requires:
           - build-binary
           - build-npm-package
