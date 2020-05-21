@@ -7,7 +7,7 @@
     "automerge": false
   },
   "schedule": [
-    "every night"
+    "before 2am"
   ],
   "updateNotScheduled": false,
   "timezone": "America/New_York",
