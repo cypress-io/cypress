@@ -19,6 +19,7 @@ describe "src/cy/commands/request", ->
             failOnStatusCode: true
             retryOnNetworkFailure: true
             retryOnStatusCodeFailure: false
+            encoding: 'utf8'
             gzip: true
             followRedirect: true
             timeout: RESPONSE_TIMEOUT
@@ -197,11 +198,20 @@ describe "src/cy/commands/request", ->
               url: "http://xn--localhost-ob26h:1234/%F0%9F%98%80"
             })
 
-      context "encoding normalization", ->
+      context "encoding", ->
         it "lowercases encoding", ->
           cy.request({
             url: "http://localhost:8080/",
             encoding: "UtF8"
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8080/"
+              encoding: "utf8"
+            })
+
+        it "defaults encoding to `utf8`", ->
+          cy.request({
+            url: "http://localhost:8080/",
           }).then ->
             @expectOptionsToBe({
               url: "http://localhost:8080/"

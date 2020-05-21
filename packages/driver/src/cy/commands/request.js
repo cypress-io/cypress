@@ -23,7 +23,7 @@ const REQUEST_DEFAULTS = {
   headers: null,
   json: null,
   form: null,
-  encoding: null,
+  encoding: 'utf8',
   gzip: true,
   timeout: null,
   followRedirect: true,
