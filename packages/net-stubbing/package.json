@@ -17,7 +17,9 @@
     "bin-up": "1.2.0"
   },
   "files": [
-    "driver",
-    "middleware"
+    "lib",
+    "server.js",
+    "driver.js",
+    "index.js"
   ]
 }
