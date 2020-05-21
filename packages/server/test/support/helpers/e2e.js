@@ -452,6 +452,10 @@ const e2e = {
       noExit,
     })
 
+    if (options.noExit) {
+      options.timeout = 3000000
+    }
+
     if (options.exit != null) {
       throw new Error(`
       passing { exit: false } to e2e options is no longer supported
