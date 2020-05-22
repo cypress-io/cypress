@@ -95,6 +95,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: getSelector(),
+          displayName: traversal.replace(/([A-Z])/, ' $1'),
           options: userOptions,
           consoleProps () {
             return consoleProps

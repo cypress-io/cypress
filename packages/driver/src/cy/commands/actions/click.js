@@ -36,7 +36,7 @@ const formatMouseEvents = (events) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   const { mouse } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions, displayName }) => {
     let position
     let x
 
@@ -81,6 +81,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         options._log = Cypress.log({
           message,
+          displayName,
           options: userOptions,
           $el,
         })
@@ -212,6 +213,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         userOptions: options,
         positionOrX,
+        displayName: 'click',
         onReady (fromElViewport, forceEl) {
           const clickEvents = mouse.click(fromElViewport, forceEl)
 
@@ -243,6 +245,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         // TODO: 4.0 make this false by default
         defaultOptions: { multiple: true },
         positionOrX,
+        displayName: 'double click',
         onReady (fromElViewport, forceEl) {
           const { clickEvents1, clickEvents2, dblclick } = mouse.dblclick(fromElViewport, forceEl)
 
@@ -277,6 +280,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         userOptions: options,
         positionOrX,
+        displayName: 'right click',
         onReady (fromElViewport, forceEl) {
           const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)
 

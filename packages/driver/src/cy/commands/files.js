@@ -23,6 +23,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: file,
+          displayName: 'read file',
           options: userOptions,
           consoleProps () {
             return consoleProps
@@ -98,6 +99,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: fileName,
+          displayName: 'write file',
           options: userOptions,
           consoleProps () {
             return consoleProps

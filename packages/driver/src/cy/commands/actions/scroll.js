@@ -84,6 +84,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (options.log) {
         const log = {
           $el: options.$el,
+          displayName: 'scroll into view',
           options: userOptions,
           consoleProps () {
             const obj = {
@@ -293,6 +294,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         const log = {
           message: messageArgs.join(', '),
+          displayName: 'scroll to',
           options: userOptions,
           consoleProps () {
             // merge into consoleProps without mutating it
