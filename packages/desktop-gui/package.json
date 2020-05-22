@@ -25,7 +25,7 @@
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
     "cross-env": "6.0.3",
-    "cypress-multi-reporters": "1.2.4",
+    "cypress-multi-reporters": "1.4.0",
     "cypress-react-unit-test": "3.0.0-cypress-mount-mode.19",
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "gravatar": "1.8.0",
