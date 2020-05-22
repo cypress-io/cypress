@@ -1,10 +1,11 @@
-require('../spec_helper')
+import {
+  _doesRouteMatch,
+  _getMatchableForRequest,
+} from '../../lib/server/intercept-request'
+import { expect } from 'chai'
+import { CypressIncomingRequest } from '@packages/proxy'
 
-import * as netStubbing from '../../lib/net_stubbing'
-
-type FakeProxyIncomingMessage = netStubbing.ProxyIncomingMessage
-
-describe('lib/net_stubbing', function () {
+describe('intercept-request', function () {
   context('._getMatchableForRequest', function () {
     it('converts a fully-fledged req into a matchable shape', function () {
       const req = {
@@ -15,9 +16,9 @@ describe('lib/net_stubbing', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as unknown as FakeProxyIncomingMessage
+      } as unknown as CypressIncomingRequest
 
-      const matchable = netStubbing._getMatchableForRequest(req)
+      const matchable = _getMatchableForRequest(req)
 
       expect(matchable).to.deep.eq({
         auth: {
@@ -47,9 +48,9 @@ describe('lib/net_stubbing', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as unknown as FakeProxyIncomingMessage
+      } as unknown as CypressIncomingRequest
 
-      const matched = netStubbing._doesRouteMatch({}, req)
+      const matched = _doesRouteMatch({}, req)
 
       expect(matched).to.be.true
     })
@@ -61,9 +62,9 @@ describe('lib/net_stubbing', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as unknown as FakeProxyIncomingMessage
+      } as unknown as CypressIncomingRequest
 
-      const matched = netStubbing._doesRouteMatch({
+      const matched = _doesRouteMatch({
         auth: {
           username: /^Fo[aob]$/i,
           password: /.*/,
@@ -80,9 +81,9 @@ describe('lib/net_stubbing', function () {
         },
         method: 'GET',
         proxiedUrl: 'https://google.com/asdf?1234=a',
-      } as unknown as FakeProxyIncomingMessage
+      } as unknown as CypressIncomingRequest
 
-      const matched = netStubbing._doesRouteMatch({
+      const matched = _doesRouteMatch({
         auth: {
           username: /^Fo[aob]$/i,
           password: /.*/,
