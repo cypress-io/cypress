@@ -76,7 +76,8 @@ describe('issue #678', () => {
         timeout: 3000,
       })
 
-      // Ignore cy.each(), cy.end() because they don't have options.
+      // Ignore cy.each() because it only has an option, timeout.
+      // Ignore cy.end() because it doesn't have options.
 
       cy.get('input').eq(0, {
         timeout: 1111,
@@ -236,7 +237,8 @@ describe('issue #678', () => {
         timeout: 2223,
       })
 
-      // Ignore cy.spread(), cy.spy(), cy.stub() because they don't log to reporter.
+      // Ignore cy.spread() because it only has an option, timeout
+      // cy.spy(), cy.stub() because they don't log to reporter.
 
       cy.get('form').submit({
         timeout: 2000,
