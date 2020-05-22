@@ -420,7 +420,7 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
 
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
+              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
