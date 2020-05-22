@@ -25,6 +25,7 @@ export default class Iframes extends Component {
         className={cs('iframes-container', { 'has-error': !!scriptError })}
         style={{
           top: headerHeight,
+          left: this.props.state.absoluteReporterWidth,
         }}
       >
         <div
