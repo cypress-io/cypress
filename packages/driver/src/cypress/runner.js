@@ -21,53 +21,8 @@ const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
 const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
-// ## initial payload
-// {
-//   suites: [
-//     {id: "r1"}, {id: "r4", suiteId: "r1"}
-//   ]
-//   tests: [
-//     {id: "r2", title: "foo", suiteId: "r1"}
-//   ]
-// }
 
-// ## normalized
-// {
-//   {
-//     root: true
-//     suites: []
-//     tests: []
-//   }
-// }
-
-// ## resetting state (get back from server)
-// {
-//   scrollTop: 100
-//   tests: {
-//     r2: {id: "r2", title: "foo", suiteId: "r1", state: "passed", err: "", routes: [
-//         {}, {}
-//       ]
-//       agents: [
-//       ]
-//       commands: [
-//         {}, {}, {}
-//       ]
-//     }}
-//
-//     r3: {id: "r3", title: "bar", suiteId: "r1", state: "failed", logs: {
-//       routes: [
-//         {}, {}
-//       ]
-//       spies: [
-//       ]
-//       commands: [
-//         {}, {}, {}
-//       ]
-//     }}
-//   ]
-// }
-
-const fire = function (event, runnable, Cypress) {
+const fire = (event, runnable, Cypress) => {
   debug('fire: %o', { event })
   if (runnable._fired == null) {
     runnable._fired = {}
@@ -95,7 +50,7 @@ const testBeforeRunAsync = (test, Cypress) => {
   })
 }
 
-const runnableAfterRunAsync = function (runnable, Cypress) {
+const runnableAfterRunAsync = (runnable, Cypress) => {
   runnable.clearTimeout()
 
   return Promise.try(() => {
@@ -105,7 +60,7 @@ const runnableAfterRunAsync = function (runnable, Cypress) {
   })
 }
 
-const testAfterRun = function (test, Cypress) {
+const testAfterRun = (test, Cypress) => {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
     setWallClockDuration(test)
@@ -129,14 +84,14 @@ const testAfterRun = function (test, Cypress) {
     // reset the fn to be empty function
     // for GC to be aggressive and prevent
     // closures from hold references
-    test.fn = function () {}
+    test.fn = () => {}
 
     // prevent loop comprehension
     return null
   }
 }
 
-const setTestTimingsForHook = function (test, hookName, obj) {
+const setTestTimingsForHook = (test, hookName, obj) => {
   if (test.timings == null) {
     test.timings = {}
   }
@@ -148,7 +103,7 @@ const setTestTimingsForHook = function (test, hookName, obj) {
   return test.timings[hookName].push(obj)
 }
 
-const setTestTimings = function (test, name, obj) {
+const setTestTimings = (test, name, obj) => {
   if (test.timings == null) {
     test.timings = {}
   }
@@ -176,7 +131,7 @@ const wrapAll = (runnable) => {
   )
 }
 
-const getHookName = function (hook) {
+const getHookName = (hook) => {
   // find the name of the hook by parsing its
   // title and pulling out whats between the quotes
   const name = hook.title.match(betweenQuotesRe)
@@ -184,7 +139,7 @@ const getHookName = function (hook) {
   return name && name[1]
 }
 
-const forceGc = function (obj) {
+const forceGc = (obj) => {
   // aggressively forces GC by purging
   // references to ctx, and removes callback
   // functions for closures
@@ -193,11 +148,11 @@ const forceGc = function (obj) {
   }
 
   if (obj.fn) {
-    obj.fn = function () {}
+    obj.fn = () => {}
   }
 }
 
-const eachHookInSuite = function (suite, fn) {
+const eachHookInSuite = (suite, fn) => {
   for (let type of HOOKS) {
     for (let hook of suite[`_${type}`]) {
       fn(hook)
@@ -210,7 +165,7 @@ const eachHookInSuite = function (suite, fn) {
 
 // iterates over a suite's tests (including nested suites)
 // and will return as soon as the callback is true
-const findTestInSuite = function (suite, fn = _.identity) {
+const findTestInSuite = (suite, fn = _.identity) => {
   for (const test of suite.tests) {
     if (fn(test)) {
       return test
@@ -227,7 +182,7 @@ const findTestInSuite = function (suite, fn = _.identity) {
 }
 
 // same as findTestInSuite but iterates backwards
-const findLastTestInSuite = function (suite, fn = _.identity) {
+const findLastTestInSuite = (suite, fn = _.identity) => {
   for (let i = suite.suites.length - 1; i >= 0; i--) {
     const test = findLastTestInSuite(suite.suites[i], fn)
 
@@ -245,7 +200,7 @@ const findLastTestInSuite = function (suite, fn = _.identity) {
   }
 }
 
-const getAllSiblingTests = function (suite, getTestById) {
+const getAllSiblingTests = (suite, getTestById) => {
   const tests = []
 
   suite.eachTest((test) => {
@@ -269,7 +224,7 @@ function isNotAlreadyRunTest (test) {
   return !(Cypress._RESUMED_AT_TEST && getOrderFromId(test.id) < getOrderFromId(Cypress._RESUMED_AT_TEST))
 }
 
-const getTestFromHook = function (hook) {
+const getTestFromHook = (hook) => {
   // if theres already a currentTest use that
 
   const test = hook.ctx.currentTest
@@ -279,7 +234,7 @@ const getTestFromHook = function (hook) {
   }
 }
 
-const getTestFromHookOrFindTest = function (hook) {
+const getTestFromHookOrFindTest = (hook) => {
   const test = getTestFromHook(hook)
 
   if (test) {
@@ -311,7 +266,7 @@ function getTestFromRunnable (runnable) {
 // we have to see if this is the last suite amongst
 // its siblings.  but first we have to filter out
 // suites which dont have a filtered test in them
-const isLastSuite = function (suite, tests) {
+const isLastSuite = (suite, tests) => {
   if (suite.root) {
     return false
   }
@@ -355,7 +310,7 @@ const isRootSuite = (suite) => {
   return suite && suite.root
 }
 
-const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, setTest, getTests) {
+const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, getTests) => {
   // bail if our _runner doesnt have a hook.
   // useful in tests
   if (!_runner.hook) {
@@ -367,10 +322,10 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
   // the hooks surrounding a test runnable
   const _runnerHook = _runner.hook
 
-  _runner.hook = function (name, fn) {
+  _runner.hook = (name, fn) => {
     const allTests = getTests()
 
-    const changeFnToRunAfterHooks = function () {
+    const changeFnToRunAfterHooks = () => {
       const originalFn = fn
 
       const test = getTest()
@@ -599,7 +554,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = function (hook, err, hookName) {
+const hookFailed = (hook, err, hookName) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
@@ -618,7 +573,7 @@ const hookFailed = function (hook, err, hookName) {
   }
 }
 
-const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) {
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -810,7 +765,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
   })
 }
 
-const create = function (specWindow, mocha, Cypress, cy) {
+const create = (specWindow, mocha, Cypress, cy) => {
   let _id = 0
   let _hookId = 0
   let _uncaughtFn = null
@@ -843,7 +798,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
 
     err = $errUtils.appendErrMsg(err, appendMsg)
 
-    const throwErr = function () {
+    const throwErr = () => {
       throw err
     }
 
@@ -914,7 +869,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
     return _test = t
   }
 
-  const getTestById = function (id) {
+  const getTestById = (id) => {
     // perf short circuit
     if (!id) {
       return
@@ -1023,7 +978,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 
-      const next = function (err) {
+      const next = (err) => {
         // now set the duration of the after runnable run async event
         afterFnDurationEnd = (wallClockEnd = new Date())
 
@@ -1064,7 +1019,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
         return _next(err)
       }
 
-      const onNext = function (err) {
+      const onNext = (err) => {
         // when done with the function set that to end
         fnDurationEnd = new Date()
 
@@ -1128,7 +1083,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
           return runnable.fn = fn
         }
 
-        runnable.fn = function () {
+        runnable.fn = () => {
           restore()
 
           throw err
@@ -1279,7 +1234,7 @@ const create = function (specWindow, mocha, Cypress, cy) {
     },
 
     cleanupQueue (numTestsKeptInMemory) {
-      const cleanup = function (queue) {
+      const cleanup = (queue) => {
         if (queue.length > numTestsKeptInMemory) {
           const test = queue.shift()
 
