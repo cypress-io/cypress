@@ -262,6 +262,7 @@ describe('issue #678', () => {
 
       cy.get('#a').type('hi?', {
         delay: 10,
+        force: true,
       })
 
       cy.get('#checkbox').uncheck('good', {
