@@ -1,16 +1,17 @@
-let _ = require('lodash')
+const _ = require('lodash')
+// if we're in Cypress, we'll need to swap this with Cypress.sinon later
+let sinon = require('sinon')
 const Debug = require('debug')
 const chalk = require('chalk')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
-let sinon = require('sinon')
+const { printVar, stringifyShort, isObject, addPluginButton, fmt, typeColors } = require('./utils')
 
 const debug = Debug('plugin:snapshot')
 
-// window.localStorage.debug = 'spec* plugin:snapshot'
-// Debug.enable('plugin:snapshot')
-
-// prints nice assertion error in command log with modified error message
+/**
+ * prints nice assertion error in command log with modified error message
+ */
 function throwErr (e, message, exp, ctx) {
   try {
     ctx.assert(false, message, 'sdf', exp, e.act, true)
@@ -20,26 +21,61 @@ function throwErr (e, message, exp, ctx) {
   }
 }
 
+function getMatchDeepMessage ({ act, exp }) {
+  return `Expected **${chai.util.objDisplay(act)}** to deep match: **${chai.util.objDisplay(exp)}**`
+}
+
+function saveSnapshot (ctx, exactSpecName, file, exp, act) {
+  ctx.assert(true, `snapshot updated: **${exactSpecName}**`, 'dsf', exp, act)
+
+  return cy.task('saveSnapshot', {
+    file,
+    what: act,
+    exactSpecName,
+  }, { log: false })
+}
+
 const registerInCypress = () => {
-  _ = Cypress._
+  // need to use correct sinon version for matcher.isMatcher to work
   sinon = Cypress.sinon
   const $ = Cypress.$
 
-  chai = window.chai
-
   let snapshotIndex = {}
 
-  const matchDeepCypress = function (...args) {
+  chai = window.chai
+  chai.Assertion.addMethod('matchDeep', matchDeepCypress)
+  chai.Assertion.addMethod('matchSnapshot', matchSnapshotCypress)
+
+  after(() => {
+    snapshotIndex = {}
+  })
+
+  before(() => {
+    addPluginButton($, 'toggle-snapshot-update', '', function () {
+      const prev = Cypress.env('SNAPSHOT_UPDATE')
+
+      Cypress.env('SNAPSHOT_UPDATE', !prev)
+      const btnIcon = this.children().first()
+
+      return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
+      .css({ 'font-size': '10px', 'line-height': '0.9' })
+      .html(btnIcon.html().replace(/\n/g, '<br/>'))
+    })
+  })
+
+  function matchDeepCypress (...args) {
     const exp = args[1] || args[0]
     const ctx = this
 
     try {
       const res = matchDeep.apply(this, [args[0], args[1], { Cypress, expectedOnly: true }])
 
-      ctx.assert(true, `Expected **${chai.util.objDisplay(res.act)}** to deep match: **${chai.util.objDisplay(exp)}**`)
+      const message = getMatchDeepMessage(res.act, exp)
+
+      ctx.assert(true, message)
       Cypress.log({
         name: 'assert',
-        message: `Expected **${chai.util.objDisplay(res.act)}** to deep match: **${chai.util.objDisplay(exp)}**`,
+        message,
         state: 'passed',
         consoleProps: () => {
           return {
@@ -50,17 +86,17 @@ const registerInCypress = () => {
     } catch (e) {
       throwErr(
         e,
-        `Expected **${chai.util.objDisplay(e.act)}** to deep match: **${chai.util.objDisplay(args[1] || args[0])}**`,
+        getMatchDeepMessage(e.act, args[1] || args[0]),
         exp,
         ctx,
       )
     }
   }
 
-  const matchSnapshotCypress = function (m, snapshotName) {
+  function matchSnapshotCypress (m, snapshotName) {
     const ctx = this
-    const testName = Cypress.mocha.getRunner().test.fullTitle()
     const file = Cypress.spec.name
+    const testName = Cypress.mocha.getRunner().test.fullTitle()
 
     return cy.then(() => {
       snapshotIndex[testName] = (snapshotIndex[testName] || 1)
@@ -77,14 +113,12 @@ const registerInCypress = () => {
 
           ctx.assert(true, `snapshot matched: **${exactSpecName}**`, res.act)
         } catch (e) {
-          if (Cypress.env('SNAPSHOT_UPDATE') && !e.failedMatcher && e.act) {
-            ctx.assert(true, `snapshot updated: **${exactSpecName}**`, 'dsf', exp, e.act)
+          if (!e.known) {
+            throw e
+          }
 
-            return cy.task('saveSnapshot', {
-              file,
-              what: e.act,
-              exactSpecName,
-            }, { log: false })
+          if (Cypress.env('SNAPSHOT_UPDATE') && !e.failedMatcher && e.act) {
+            return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
           }
 
           throwErr(e, `**snapshot failed to match**: ${exactSpecName}`, exp, ctx)
@@ -92,56 +126,7 @@ const registerInCypress = () => {
       })
     })
   }
-
-  chai.Assertion.addMethod('matchDeep', matchDeepCypress)
-  chai.Assertion.addMethod('matchSnapshot', matchSnapshotCypress)
-
-  after(() => {
-    snapshotIndex = {}
-  })
-
-  before(() => {
-    const btn = addButton('toggle-snapshot-update', '', () => {
-      const prev = Cypress.env('SNAPSHOT_UPDATE')
-
-      Cypress.env('SNAPSHOT_UPDATE', !prev)
-      updateText()
-    })
-    const btnIcon = btn.children().first()
-    const updateText = () => {
-      return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
-      .css({ 'font-size': '10px', 'line-height': '0.9' })
-      .html(btnIcon.html().replace(/\n/g, '<br/>'))
-    }
-
-    updateText()
-  })
-
-  const addButton = (name, faClass, fn) => {
-    $(`#${name}`, window.top.document).remove()
-
-    const btn = $(`<span id="${name}"><button><i class="fa ${faClass}"></i></button></span>`, window.top.document)
-    const container = $(
-      '.toggle-auto-scrolling.auto-scrolling-enabled',
-      window.top.document,
-    ).closest('.controls')
-
-    container.prepend(btn)
-
-    btn.on('click', fn)
-
-    return btn
-  }
 }
-
-// // unfortunate, but sinon uses isPrototype of, which will not work for
-// // two different sinon versions
-// match.isMatcher = (obj) => {
-//   return _.isFunction(_.get(obj, 'test')) &&
-//   _.isString(_.get(obj, 'message')) &&
-//   _.isFunction(_.get(obj, 'and')) &&
-//   _.isFunction(_.get(obj, 'or'))
-// }
 
 const matcherStringToObj = (mes) => {
   const res = mes.replace(/typeOf\("(\w+)"\)/, '$1')
@@ -167,8 +152,6 @@ const matchDeep = function (matchers, exp, optsArg) {
     m = {}
   }
 
-  // debug(optsArg)
-
   const opts = _.defaults(optsArg, {
     message: 'to match',
     Cypress: false,
@@ -186,8 +169,6 @@ const matchDeep = function (matchers, exp, optsArg) {
 
   const act = this._obj
 
-  debug('matchDeep:actual:', act)
-
   m = _.map(m, (val, key) => {
     return [key.split('.'), val]
   })
@@ -195,7 +176,7 @@ const matchDeep = function (matchers, exp, optsArg) {
   const diffStr = withMatchers(m, match, opts.expectedOnly)(exp, act)
 
   if (diffStr.changed) {
-    let e = _.extend(new Error(), { act: diffStr.act, failedMatcher: diffStr.opts.failedMatcher })
+    let e = _.extend(new Error(), { known: true, act: diffStr.act, failedMatcher: diffStr.opts.failedMatcher })
 
     e.message = isAnsi ? `\n${diffStr.text}` : stripAnsi(diffStr.text)
 
@@ -213,94 +194,6 @@ const matchDeep = function (matchers, exp, optsArg) {
   return diffStr
 }
 
-let typeColors = {
-  modified: chalk.yellow,
-  added: chalk.green,
-  removed: chalk.red,
-  normal: chalk.gray,
-  failed: chalk.redBright,
-}
-
-let options = {
-  indent: 2,
-  indentChar: ' ',
-  newLineChar: '\n',
-  wrap: function wrap (type, text) {
-    if (this.Cypress) {
-      text = `**${text}**`
-    }
-
-    return typeColors[type](text)
-  },
-}
-
-let indent = ''
-
-for (let i = 0; i < options.indent; i++) {
-  indent += options.indentChar
-}
-
-function isObject (obj) {
-  return typeof obj === 'object' && obj && getType(obj) !== 'RegExp'
-  // return typeof obj === 'object' && obj && !Array.isArray(obj)
-}
-
-function printVar (variable) {
-  switch (getType(variable)) {
-    case 'Null':
-      return variable
-    case 'Undefined':
-      return variable
-    case 'Boolean':
-      return variable
-    case 'Number':
-      return variable
-    case 'Function':
-      return `[Function${variable.name ? ` ${variable.name}` : ''}]`
-
-      // return variable.toString().replace(/\{.+\}/, '{}')
-
-    case 'Array':
-    case 'Object':
-
-      if (variable.toJSON) {
-        return variable.toJSON()
-      }
-
-      return stringifyShort(variable)
-
-    case 'String':
-      return `${variable}`
-
-    default: return `${variable}`
-  }
-}
-
-function indentSubItem (text) {
-  return text.split(options.newLineChar).map(function onMap (line, index) {
-    if (index === 0) {
-      return line
-    }
-
-    return indent + line
-  }).join(options.newLineChar)
-}
-
-function getType (obj) {
-  return Object.prototype.toString.call(obj).split('[object ').join('').slice(0, -1)
-}
-function keyChanged (key, text) {
-  return `${indent + key}: ${indentSubItem(text)}${options.newLineChar}`
-}
-
-function keyRemoved (key, variable) {
-  return options.wrap('removed', `- ${key}: ${printVar(variable)}`) + options.newLineChar
-}
-
-function keyAdded (key, variable) {
-  return options.wrap('added', `+ ${key}: ${printVar(variable)}`) + options.newLineChar
-}
-
 function parseMatcher (obj, match) {
   if (match.isMatcher(obj)) {
     return obj
@@ -312,8 +205,6 @@ function parseMatcher (obj, match) {
     const parsed = /match\.(.*)/.exec(parseObj)
 
     if (parsed) {
-      // debug('parsed matcher from string:', parsed[1])
-
       return match[parsed[1]]
     }
 
@@ -348,35 +239,28 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
 
       const matched = _path.join('.').endsWith(rep[0].join('.'))
 
-      // (_.last(_path) === _.last(val[0]))
-      //    && _.isEqual(_.intersection(_path, val[0]), val[0])
-
       if (matched) {
         return rep[1]
       }
     }
 
-    return no_replacement
+    return NO_REPLACEMENT
   }
 
   const testValue = (matcher, value) => {
-    // if (match.isMatcher(value)) {
-    //   if (value.toString() === matcher.toString()) {
-    //     return true
-    //   }
-    // }
-
     if (matcher.test(value)) {
       return true
     }
 
-    // addErr(new Error(`replace matcher failed: ${genError(newPath, matcher.toString(), value)}`))
-
     return false
   }
 
-  const no_replacement = {}
+  const NO_REPLACEMENT = {}
 
+  /**
+   * diffing function that produces human-readable diff output.
+   * unfortunately it is also unreadable code in itself.
+   */
   const diff = (exp, act, path = ['^'], optsArg) => {
     const opts = _.defaults({}, optsArg, {
       expectedOnly,
@@ -386,7 +270,6 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       throw new Error(`exceeded max depth on ${path.slice(0, 4)} ... ${path.slice(-4)}`)
     }
 
-    // console.log(act)
     let text = ''
     let changed = false
     let itemDiff
@@ -395,9 +278,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
 
     let replacement = getReplacementFor(path, matchers)
 
-    // console.log(path)
-
-    if (replacement !== no_replacement) {
+    if (replacement !== NO_REPLACEMENT) {
       if (match.isMatcher(replacement)) {
         if (testValue(replacement, act)) {
           act = matcherStringToObj(replacement.message).toJSON()
@@ -430,7 +311,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
         }
 
         return {
-          text: options.wrap('failed', `${chalk.green(printVar(act))} ⛔  ${matcherStringToObj(exp.message).toJSON()}`),
+          text: fmt.wrap('failed', `${chalk.green(printVar(act))} ⛔  ${matcherStringToObj(exp.message).toJSON()}`),
           changed: true,
           act,
         }
@@ -461,11 +342,11 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
           _.defaults(opts, itemDiff.opts)
           act[key] = itemDiff.act
           if (itemDiff.changed) {
-            subOutput += keyChanged(key, itemDiff.text)
+            subOutput += fmt.keyChanged(key, itemDiff.text)
             changed = true
           }
         } else {
-          subOutput += keyRemoved(key, exp[key])
+          subOutput += fmt.keyRemoved(key, exp[key])
           changed = true
         }
 
@@ -489,7 +370,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
           if (opts.failedMatcher) {
             subOutput += addDiff.text
           } else {
-            subOutput += keyAdded(key, act[key])
+            subOutput += fmt.keyAdded(key, act[key])
           }
 
           changed = true
@@ -497,21 +378,12 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       }
 
       if (changed) {
-        let renderBracket = false
-
-        if (_.isArray(act) && _.isArray(exp)) {
-          renderBracket = true
-        }
-
-        const _O = renderBracket ? '[' : '{'
-        const _C = renderBracket ? ']' : '}'
-
-        text = options.wrap('normal', `${_O}${options.newLineChar}${subOutput}${_C}`)
+        text = fmt.wrapObjectLike(exp, act, subOutput)
       }
     } else if (match.isMatcher(exp)) {
       debug('is matcher')
       if (!testValue(exp, act)) {
-        text = options.wrap('failed', `${chalk.green(printVar(act))} ⛔  ${matcherStringToObj(exp.message).toJSON()}`)
+        text = fmt.wrap('failed', `${chalk.green(printVar(act))} ⛔  ${matcherStringToObj(exp.message).toJSON()}`)
         changed = true
       }
     } else if (isObject(act)) {
@@ -524,7 +396,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       return _.extend({},
         addDiff, {
           changed: true,
-          text: options.wrap('removed', `${printVar(exp)}\n${options.wrap('added', addDiff.text)}`),
+          text: fmt.wrap('removed', `${printVar(exp)}\n${fmt.wrap('added', addDiff.text)}`),
         })
     } else {
       debug('neither is obj')
@@ -532,7 +404,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
       act = printVar(act)
 
       if (exp !== act) {
-        text = options.wrap('modified', `${exp} ${typeColors['normal']('⮕')} ${act}`)
+        text = fmt.wrap('modified', `${exp} ${typeColors['normal']('⮕')} ${act}`)
         changed = true
       }
     }
@@ -546,24 +418,6 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
   }
 
   return diff
-}
-
-const stringifyShort = (obj) => {
-  const constructorName = _.get(obj, 'constructor.name')
-
-  if (constructorName && !_.includes(['Object', 'Array'], constructorName)) {
-    return `{${constructorName}}`
-  }
-
-  if (_.isArray(obj)) {
-    return `[Array ${obj.length}]`
-  }
-
-  if (_.isObject(obj)) {
-    return `{Object ${Object.keys(obj).length}}`
-  }
-
-  return obj
 }
 
 module.exports = {
