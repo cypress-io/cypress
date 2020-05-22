@@ -194,6 +194,7 @@ Repo | Description
 [bahmutov/integration-tests](https://github.com/bahmutov/integration-tests) | Example based on blog post [React Integration Testing: Greater Coverage, Fewer Tests](https://css-tricks.com/react-integration-testing-greater-coverage-fewer-tests/)
 [mobx-react-typescript-boilerplate](https://github.com/bahmutov/mobx-react-typescript-boilerplate) | Fork of the official Mobx example, shows clock control
 [bahmutov/test-react-hook-form](https://github.com/bahmutov/test-react-hook-form) | Testing forms created using [react-hook-form](https://github.com/react-hook-form/react-hook-form)
+[bahmutov/react-with-rollup](https://github.com/bahmutov/react-with-rollup) | Testing a React application bundled with Rollup by using [@bahmutov/cy-rollup](https://github.com/bahmutov/cy-rollup) preprocessor
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
