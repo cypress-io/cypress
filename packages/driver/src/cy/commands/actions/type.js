@@ -83,7 +83,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       options._log = Cypress.log({
-        message: [chars, deltaOptions],
+        message: chars,
         options: userOptions,
         $el: options.$el,
         consoleProps () {

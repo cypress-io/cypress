@@ -291,10 +291,6 @@ module.exports = (Commands, Cypress, cy, state) => {
           messageArgs.push(y)
         }
 
-        if (deltaOptions) {
-          messageArgs.push(deltaOptions)
-        }
-
         const log = {
           message: messageArgs.join(', '),
           options: userOptions,
