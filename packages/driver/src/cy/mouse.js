@@ -370,7 +370,7 @@ const create = (state, keyboard, focused, Cypress) => {
      * @returns {HTMLElement}
      */
     getElAtCoords ({ x, y, doc }) {
-      const el = doc.elementFromPoint(x, y)
+      const el = $dom.elementFromPoint(doc, x, y)
 
       return el
     },

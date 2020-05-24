@@ -559,27 +559,43 @@ const isAncestor = ($el, $maybeAncestor) => {
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
-  const el1Ancestors = [el1].concat(getAllParents(el1))
-  let curEl = el2
+  const el1Ancestors = getAllParents(el1)
+  const el2Ancestors = getAllParents(el2)
 
-  while (curEl) {
-    if (el1Ancestors.indexOf(curEl) !== -1) {
-      return curEl
-    }
+  let a
+  let b
 
-    curEl = curEl.parentNode
+  if (el1Ancestors.length > el2Ancestors.length) {
+    a = el1Ancestors
+    b = el2Ancestors
+  } else {
+    a = el2Ancestors
+    b = el1Ancestors
   }
 
-  return curEl
+  for (const ancestor of a) {
+    if (b.includes(ancestor)) {
+      return ancestor
+    }
+  }
+
+  return el2;
 }
 
 const getAllParents = (el) => {
-  let curEl = el.parentNode
-  const allParents: any[] = []
+  const allParents: Node[] = [];
+  let node = el;
 
-  while (curEl) {
-    allParents.push(curEl)
-    curEl = curEl.parentNode
+  while (node) {
+    let parent = node.parentNode;
+    if (parent instanceof ShadowRoot) {
+      parent = parent.host;
+    }
+
+    if (parent) {
+      allParents.push(parent);
+    }
+    node = parent;
   }
 
   return allParents
@@ -823,7 +839,7 @@ const findParent = (el, fn) => {
       }
     }
 
-    if (!parent) {
+    if (!parent || parent === document) {
       return null;
     }
 
@@ -881,24 +897,27 @@ const getFirstParentWithTagName = ($el, tagName) => {
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    if (fixedOrStickyRe.test(cy.$$(node).css('position'))) {
-      return node;
+    let wrapped = cy.$$(node);
+    if (fixedOrStickyRe.test(wrapped.css('position'))) {
+      return wrapped;
     }
   });
 }
 
 const getFirstStickyPositionParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    if (cy.$$(node).css('position') === 'sticky') {
-      return node;
+    let wrapped = cy.$$(node);
+    if (wrapped.css('position') === 'sticky') {
+      return wrapped;
     }
   });
 }
 
 const getFirstScrollableParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    if (isScrollable(cy.$$(node))) {
-      return node;
+    let wrapped = cy.$$(node);
+    if (isScrollable(wrapped)) {
+      return wrapped;
     }
   });
 }
@@ -1090,7 +1109,19 @@ const stringify = (el, form = 'long') => {
   })
 }
 
+const elementFromPoint = (doc, x, y) => {
+  let immediate = doc.elementFromPoint(x, y)
+  let node = immediate;
+
+  while (node.shadowRoot) {
+    node = node.shadowRoot.elementFromPoint(x, y)
+  }
+
+  return node ?? immediate;
+};
+
 export {
+  elementFromPoint,
   isElement,
   isUndefinedOrHTMLBodyDoc,
   isSelector,
