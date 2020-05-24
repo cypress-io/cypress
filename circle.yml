@@ -32,6 +32,18 @@ workflows:
                 command: npm run build
 
       - cypress/run:
+          name: Example Babel
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/using-babel
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Example React Scripts
           requires:
             - Install
@@ -175,6 +187,7 @@ workflows:
           requires:
             - Install
             - Test
+            - Example Babel
             - Example React Scripts
             - Example Component Folder
             - Example Tailwind

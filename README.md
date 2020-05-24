@@ -164,6 +164,7 @@ Folder Name | Description
 [visual-sudoku](examples/visual-sudoku) | [Visual testing](#visual-testing) for components using open source plugin [cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot). For larger example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku).
 [visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](#visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](#visual-testing) for components using 3rd party service [Happo](https://happo.io/)
+[using-babel](examples/using-babel) | Bundling specs and loaded source files using project's existing `.babelrc` file
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
 <!-- prettier-ignore-end -->
 
