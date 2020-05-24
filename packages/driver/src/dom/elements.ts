@@ -1129,7 +1129,7 @@ const elementFromPoint = (doc, x, y) => {
 const findAllShadowRoots = (root: Node): Node[] => {
   const nodes: Node[] = []
   let roots: Node[] = [root]
-  let currentRoot: Element
+  let currentRoot: Node
 
   while ((currentRoot = roots.pop())) {
     const childRoots = findShadowRoots(currentRoot)
@@ -1144,10 +1144,10 @@ const findAllShadowRoots = (root: Node): Node[] => {
 }
 
 const findShadowRoots = (root: Node): Node[] => {
-  const doc = root.getRootNode({ composed: true })
+  const doc = root.getRootNode({ composed: true }) as Document
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
     acceptNode (node) {
-      if (node.shadowRoot) {
+      if ((node as Element).shadowRoot) {
         return NodeFilter.FILTER_ACCEPT
       }
 
@@ -1155,11 +1155,11 @@ const findShadowRoots = (root: Node): Node[] => {
     },
   })
 
-  const nodes: Element[] = []
+  const nodes: Node[] = []
   let currentNode
 
-  if (root.shadowRoot) {
-    nodes.push(root.shadowRoot)
+  if ((root as Element).shadowRoot) {
+    nodes.push((root as Element).shadowRoot)
   }
 
   while ((currentNode = walker.nextNode())) {

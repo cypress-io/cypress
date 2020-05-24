@@ -4,7 +4,7 @@ const docNode = window.Node.DOCUMENT_NODE
 const docFragmentNode = window.Node.DOCUMENT_FRAGMENT_NODE
 
 //TODO: make this not allow jquery
-const isDocument = (obj: HTMLElement | DocumentOrShadowRoot): obj is Document => {
+const isDocument = (obj: Node): obj is Document => {
   try {
     if ($jquery.isJquery(obj)) {
       obj = obj[0]
