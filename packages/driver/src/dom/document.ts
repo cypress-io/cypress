@@ -10,7 +10,7 @@ const isDocument = (obj: HTMLElement | DocumentOrShadowRoot): obj is Document =>
       obj = obj[0]
     }
 
-    return obj?.nodeType === docNode || obj?.nodeType === docFragmentNode;
+    return obj?.nodeType === docNode || obj?.nodeType === docFragmentNode
   } catch (error) {
     return false
   }

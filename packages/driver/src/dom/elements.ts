@@ -579,23 +579,25 @@ const getFirstCommonAncestor = (el1, el2) => {
     }
   }
 
-  return el2;
+  return el2
 }
 
 const getAllParents = (el) => {
-  const allParents: Node[] = [];
-  let node = el;
+  const allParents: Node[] = []
+  let node = el
 
   while (node) {
-    let parent = node.parentNode;
+    let parent = node.parentNode
+
     if (parent?.toString() === '[object ShadowRoot]') {
-      parent = parent.host;
+      parent = parent.host
     }
 
     if (parent) {
-      allParents.push(parent);
+      allParents.push(parent)
     }
-    node = parent;
+
+    node = parent
   }
 
   return allParents
@@ -636,7 +638,7 @@ const isAttached = function ($el) {
     return true
   }
 
-  return ($jquery.isJquery($el) ? $el[0] : $el).isConnected;
+  return ($jquery.isJquery($el) ? $el[0] : $el).isConnected
 }
 
 /**
@@ -820,39 +822,40 @@ const isDescendent = ($el1, $el2) => {
 
   return findParent($el2.get(0), (node) => {
     if (node === $el1.get(0)) {
-      return node;
+      return node
     }
-  }) !== $el2.get(0);
+  }) !== $el2.get(0)
 }
 
 const findParent = (el, fn) => {
-  let node = el;
-  let parent;
+  let node = el
+  let parent
 
   do {
-    parent = node.parentElement;
+    parent = node.parentElement
 
     if (!parent) {
       const shadow = node.getRootNode()
+
       if (shadow?.toString() === '[object ShadowRoot]') {
-        parent = shadow.host;
+        parent = shadow.host
       }
     }
 
     if (!parent || parent === document) {
-      return null;
+      return null
     }
 
-    const returnValue = fn(parent, node);
+    const returnValue = fn(parent, node)
 
     if (returnValue) {
-      return returnValue;
+      return returnValue
     }
 
-    node = parent;
-  } while (parent);
+    node = parent
+  } while (parent)
 
-  return null;
+  return null
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -890,36 +893,39 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 const getFirstParentWithTagName = ($el, tagName) => {
   return findParent($el.get(0), (node) => {
     if (getTagName(node) === tagName) {
-      return node;
+      return node
     }
-  });
+  })
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    let wrapped = cy.$$(node);
+    let wrapped = $(node)
+
     if (fixedOrStickyRe.test(wrapped.css('position'))) {
-      return wrapped;
+      return wrapped
     }
-  });
+  })
 }
 
 const getFirstStickyPositionParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    let wrapped = cy.$$(node);
+    let wrapped = $(node)
+
     if (wrapped.css('position') === 'sticky') {
-      return wrapped;
+      return wrapped
     }
-  });
+  })
 }
 
 const getFirstScrollableParent = ($el) => {
   return findParent($el.get(0), (node) => {
-    let wrapped = cy.$$(node);
+    let wrapped = $(node)
+
     if (isScrollable(wrapped)) {
-      return wrapped;
+      return wrapped
     }
-  });
+  })
 }
 
 const getElements = ($el) => {
@@ -1111,54 +1117,56 @@ const stringify = (el, form = 'long') => {
 
 const elementFromPoint = (doc, x, y) => {
   let immediate = doc.elementFromPoint(x, y)
-  let node = immediate;
+  let node = immediate
 
   while (node.shadowRoot) {
     node = node.shadowRoot.elementFromPoint(x, y)
   }
 
-  return node ?? immediate;
-};
+  return node ?? immediate
+}
 
 const findAllShadowRoots = (root: Node): Node[] => {
-  const nodes: Node[] = [];
-  let roots: Node[] = [root];
-  let currentRoot: Element;
+  const nodes: Node[] = []
+  let roots: Node[] = [root]
+  let currentRoot: Element
 
   while ((currentRoot = roots.pop())) {
-    const childRoots = findElementsWithShadowRoots(currentRoot);
+    const childRoots = findShadowRoots(currentRoot)
+
     if (childRoots.length > 0) {
-      roots.push(...childRoots);
-      nodes.push(...childRoots);
+      roots.push(...childRoots)
+      nodes.push(...childRoots)
     }
   }
 
-  return nodes;
-};
+  return nodes
+}
 
 const findShadowRoots = (root: Node): Node[] => {
-  const doc = root.getRootNode({composed: true});
+  const doc = root.getRootNode({ composed: true })
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
-    acceptNode(node) {
+    acceptNode (node) {
       if (node.shadowRoot) {
-        return NodeFilter.FILTER_ACCEPT;
+        return NodeFilter.FILTER_ACCEPT
       }
-      return NodeFilter.FILTER_SKIP;
-    }
-  });
 
-  const nodes: Element[] = [];
-  let currentNode;
+      return NodeFilter.FILTER_SKIP
+    },
+  })
+
+  const nodes: Element[] = []
+  let currentNode
 
   if (root.shadowRoot) {
-    nodes.push(root.shadowRoot);
+    nodes.push(root.shadowRoot)
   }
 
   while ((currentNode = walker.nextNode())) {
-    nodes.push(currentNode.shadowRoot);
+    nodes.push(currentNode.shadowRoot)
   }
 
-  return nodes;
+  return nodes
 }
 
 export {
@@ -1205,7 +1213,7 @@ export {
   tryCallNativeMethod,
   findParent,
   findAllShadowRoots,
-  findAllShadowRoots,
+  findShadowRoots,
   getElements,
   getFirstFocusableEl,
   getActiveElByDocument,

@@ -522,12 +522,12 @@ module.exports = (Commands, Cypress, cy) => {
   })
 
   Commands.addAll({ prevSubject: 'element' }, {
-    shadow(subject, options) {
-      options = {log: true, ...options}
+    shadow (subject, options) {
+      options = { log: true, ...options }
 
       if (options.log) {
         options._log = Cypress.log({
-          $el: subject
+          $el: subject,
         })
       }
 

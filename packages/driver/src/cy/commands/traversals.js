@@ -1,7 +1,7 @@
 const _ = require('lodash')
 
 const $dom = require('../../dom')
-const $jquery = require('../../dom/jquery.js');
+const $jquery = require('../../dom/jquery.js')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
@@ -57,12 +57,14 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          const wrapped = $jquery.isJquery(subject) ? subject : cy.$$(subject);
+          const wrapped = $jquery.isJquery(subject) ? subject : cy.$$(subject)
+
           if (!options.ignoreShadowBoundaries) {
-            $el = wrapped[traversal].call(wrapped, arg1, arg2);
+            $el = wrapped[traversal].call(wrapped, arg1, arg2)
           } else {
-            const elementsWithShadow = wrapped.add($dom.findAllShadowRoots(wrapped[0]));
-            $el = elementsWithShadow[traversal].call(elementsWithShadow, arg1, arg2);
+            const elementsWithShadow = wrapped.add($dom.findAllShadowRoots(wrapped[0]))
+
+            $el = elementsWithShadow[traversal].call(elementsWithShadow, arg1, arg2)
           }
 
           // normalize the selector since jQuery won't have it
