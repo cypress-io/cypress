@@ -895,6 +895,8 @@ const getFirstParentWithTagName = ($el, tagName) => {
     if (getTagName(node) === tagName) {
       return node
     }
+
+    return null
   })
 }
 
@@ -905,6 +907,8 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
     if (fixedOrStickyRe.test(wrapped.css('position'))) {
       return wrapped
     }
+
+    return null
   })
 }
 
@@ -915,6 +919,8 @@ const getFirstStickyPositionParent = ($el) => {
     if (wrapped.css('position') === 'sticky') {
       return wrapped
     }
+
+    return null
   })
 }
 
@@ -925,6 +931,8 @@ const getFirstScrollableParent = ($el) => {
     if (isScrollable(wrapped)) {
       return wrapped
     }
+
+    return null;
   })
 }
 
@@ -1129,7 +1137,7 @@ const elementFromPoint = (doc, x, y) => {
 const findAllShadowRoots = (root: Node): Node[] => {
   const nodes: Node[] = []
   let roots: Node[] = [root]
-  let currentRoot: Node
+  let currentRoot: Node|undefined;
 
   while ((currentRoot = roots.pop())) {
     const childRoots = findShadowRoots(currentRoot)
@@ -1158,8 +1166,10 @@ const findShadowRoots = (root: Node): Node[] => {
   const nodes: Node[] = []
   let currentNode
 
-  if ((root as Element).shadowRoot) {
-    nodes.push((root as Element).shadowRoot)
+  const rootAsElement = root as Element;
+
+  if (rootAsElement.shadowRoot) {
+    nodes.push(rootAsElement.shadowRoot)
   }
 
   while ((currentNode = walker.nextNode())) {
