@@ -559,8 +559,8 @@ const isAncestor = ($el, $maybeAncestor) => {
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
-  const el1Ancestors = getAllParents(el1)
-  const el2Ancestors = getAllParents(el2)
+  const el1Ancestors = [el1].concat(getAllParents(el1))
+  const el2Ancestors = [el2].concat(getAllParents(el2))
 
   let a
   let b
