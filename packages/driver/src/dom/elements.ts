@@ -620,38 +620,7 @@ const isAttached = function ($el) {
     return true
   }
 
-  // if this is a document we can simply check
-  // whether or not it has a defaultView (window).
-  // documents which are part of stale pages
-  // will have this property null'd out
-  if ($document.isDocument($el)) {
-    return $document.hasActiveWindow($el)
-  }
-
-  // normalize into an array
-  const els = [].concat($jquery.unwrap($el))
-
-  // we could be passed an empty array here
-  // which in that case it is not attached
-  if (els.length === 0) {
-    return false
-  }
-
-  // get the document from the first element
-  const doc = $document.getDocumentFromElement(els[0])
-
-  // TODO: i guess its possible each element
-  // is technically bound to a different document
-  // but c'mon
-  const isIn = (el) => {
-    return $.contains(doc as any, el)
-  }
-
-  // make sure the document is currently
-  // active (it has a window) and
-  // make sure every single element
-  // is attached to this document
-  return $document.hasActiveWindow(doc) && _.every(els, isIn)
+  return ($jquery.isJquery($el) ? $el[0] : $el).isConnected;
 }
 
 /**
@@ -833,27 +802,34 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
-  return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
+  return findParent($el2.get(0), (node) => {
+    if (node === $el1.get(0)) {
+      return node;
+    }
+  }) !== $el2.get(0);
 }
 
 const findParent = (el, fn) => {
-  const recurse = (curEl, prevEl) => {
-    if (!curEl) {
-      return null
+  let node = el;
+  let parent;
+
+  do {
+    parent = node.parentElement || node.getRootNode();
+
+    if (!parent || parent === node) {
+      return null;
     }
 
-    const retEl = fn(curEl, prevEl)
+    const returnValue = fn(parent, node);
 
-    if (retEl) {
-      return retEl
+    if (returnValue) {
+      return returnValue;
     }
 
-    const nextEl = curEl.parentElement
+    node = parent;
+  } while (parent);
 
-    return recurse(nextEl, curEl)
-  }
-
-  return recurse(el.parentElement, el) || el
+  return el;
 }
 
 // in order to simulate actual user behavior we need to do the following:

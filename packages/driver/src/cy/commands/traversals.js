@@ -1,12 +1,13 @@
 const _ = require('lodash')
 
 const $dom = require('../../dom')
+const $jquery = require('../../dom/jquery.js');
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
 module.exports = (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
-    Commands.add(traversal, { prevSubject: 'element' }, (subject, arg1, arg2, options) => {
+    Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
       if (_.isObject(arg1) && !_.isFunction(arg1)) {
         options = arg1
       }
@@ -56,7 +57,12 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          $el = subject[traversal].call(subject, arg1, arg2)
+          if ($jquery.isJquery(subject)) {
+            $el = subject[traversal].call(subject, arg1, arg2);
+          } else {
+            const wrapped = cy.$$(subject);
+            $el = wrapped[traversal].call(wrapped, arg1, arg2);
+          }
 
           // normalize the selector since jQuery won't have it
           // or completely borks it

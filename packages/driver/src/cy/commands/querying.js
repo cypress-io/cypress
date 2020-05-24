@@ -522,6 +522,30 @@ module.exports = (Commands, Cypress, cy) => {
   })
 
   Commands.addAll({ prevSubject: 'element' }, {
+    shadow(subject, options) {
+      options = {log: true, ...options}
+
+      if (options.log) {
+        options._log = Cypress.log({
+          $el: subject
+        })
+      }
+
+      const getShadow = () => {
+        let $shadowRoot = subject[0].shadowRoot
+
+        if ($shadowRoot === undefined) {
+          throw new Error('Element does not have a shadow root attached.')
+        }
+
+        return cy.verifyUpcomingAssertions($shadowRoot, options, {
+          onRetry: getShadow,
+        })
+      }
+
+      return getShadow()
+    },
+
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
