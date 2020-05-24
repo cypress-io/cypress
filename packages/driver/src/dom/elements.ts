@@ -1120,6 +1120,47 @@ const elementFromPoint = (doc, x, y) => {
   return node ?? immediate;
 };
 
+const findAllShadowRoots = (root: Node): Node[] => {
+  const nodes: Node[] = [];
+  let roots: Node[] = [root];
+  let currentRoot: Element;
+
+  while ((currentRoot = roots.pop())) {
+    const childRoots = findElementsWithShadowRoots(currentRoot);
+    if (childRoots.length > 0) {
+      roots.push(...childRoots);
+      nodes.push(...childRoots);
+    }
+  }
+
+  return nodes;
+};
+
+const findShadowRoots = (root: Node): Node[] => {
+  const doc = root.getRootNode({composed: true});
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
+    acceptNode(node) {
+      if (node.shadowRoot) {
+        return NodeFilter.FILTER_ACCEPT;
+      }
+      return NodeFilter.FILTER_SKIP;
+    }
+  });
+
+  const nodes: Element[] = [];
+  let currentNode;
+
+  if (root.shadowRoot) {
+    nodes.push(root.shadowRoot);
+  }
+
+  while ((currentNode = walker.nextNode())) {
+    nodes.push(currentNode.shadowRoot);
+  }
+
+  return nodes;
+}
+
 export {
   elementFromPoint,
   isElement,
@@ -1163,6 +1204,8 @@ export {
   callNativeMethod,
   tryCallNativeMethod,
   findParent,
+  findAllShadowRoots,
+  findAllShadowRoots,
   getElements,
   getFirstFocusableEl,
   getActiveElByDocument,

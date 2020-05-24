@@ -57,11 +57,12 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          if ($jquery.isJquery(subject)) {
-            $el = subject[traversal].call(subject, arg1, arg2);
-          } else {
-            const wrapped = cy.$$(subject);
+          const wrapped = $jquery.isJquery(subject) ? subject : cy.$$(subject);
+          if (!options.ignoreShadowBoundaries) {
             $el = wrapped[traversal].call(wrapped, arg1, arg2);
+          } else {
+            const elementsWithShadow = wrapped.add($dom.findAllShadowRoots(wrapped[0]));
+            $el = elementsWithShadow[traversal].call(elementsWithShadow, arg1, arg2);
           }
 
           // normalize the selector since jQuery won't have it
