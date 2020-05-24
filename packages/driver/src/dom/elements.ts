@@ -588,7 +588,7 @@ const getAllParents = (el) => {
 
   while (node) {
     let parent = node.parentNode;
-    if (parent instanceof ShadowRoot) {
+    if (parent?.toString() === '[object ShadowRoot]') {
       parent = parent.host;
     }
 
@@ -834,7 +834,7 @@ const findParent = (el, fn) => {
 
     if (!parent) {
       const shadow = node.getRootNode()
-      if (shadow instanceof ShadowRoot) {
+      if (shadow?.toString() === '[object ShadowRoot]') {
         parent = shadow.host;
       }
     }
