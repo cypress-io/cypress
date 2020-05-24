@@ -932,7 +932,7 @@ const getFirstScrollableParent = ($el) => {
       return wrapped
     }
 
-    return null;
+    return null
   })
 }
 
@@ -1137,7 +1137,7 @@ const elementFromPoint = (doc, x, y) => {
 const findAllShadowRoots = (root: Node): Node[] => {
   const nodes: Node[] = []
   let roots: Node[] = [root]
-  let currentRoot: Node|undefined;
+  let currentRoot: Node|undefined
 
   while ((currentRoot = roots.pop())) {
     const childRoots = findShadowRoots(currentRoot)
@@ -1166,7 +1166,7 @@ const findShadowRoots = (root: Node): Node[] => {
   const nodes: Node[] = []
   let currentNode
 
-  const rootAsElement = root as Element;
+  const rootAsElement = root as Element
 
   if (rootAsElement.shadowRoot) {
     nodes.push(rootAsElement.shadowRoot)
