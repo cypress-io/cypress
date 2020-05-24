@@ -814,9 +814,16 @@ const findParent = (el, fn) => {
   let parent;
 
   do {
-    parent = node.parentElement || node.getRootNode();
+    parent = node.parentElement;
 
-    if (!parent || parent === node) {
+    if (!parent) {
+      const shadow = node.getRootNode()
+      if (shadow instanceof ShadowRoot) {
+        parent = shadow.host;
+      }
+    }
+
+    if (!parent) {
       return null;
     }
 
@@ -829,7 +836,7 @@ const findParent = (el, fn) => {
     node = parent;
   } while (parent);
 
-  return el;
+  return null;
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -865,77 +872,35 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
-  // return null if undefined or we're at body/html/document
-  // cuz that means nothing has fixed position
-  if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
-    return null
-  }
-
-  // if we are the matching element return ourselves
-  if (getTagName($el[0]) === tagName) {
-    return $el
-  }
-
-  // else recursively continue to walk up the parent node chain
-  return getFirstParentWithTagName($el.parent(), tagName)
+  return findParent($el.get(0), (node) => {
+    if (getTagName(node) === tagName) {
+      return node;
+    }
+  });
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're undefined or at not a normal DOM el
-  // cuz that means nothing has fixed position
-  if (isUndefinedOrHTMLBodyDoc($el)) {
-    return null
-  }
-
-  // if we have fixed position return ourselves
-  if (fixedOrStickyRe.test($el.css('position'))) {
-    return $el
-  }
-
-  // else recursively continue to walk up the parent node chain
-  return getFirstFixedOrStickyPositionParent($el.parent())
+  return findParent($el.get(0), (node) => {
+    if (fixedOrStickyRe.test(cy.$$(node).css('position'))) {
+      return node;
+    }
+  });
 }
 
 const getFirstStickyPositionParent = ($el) => {
-  // return null if we're undefined or at body/html/document
-  // cuz that means nothing has sticky position
-  if (isUndefinedOrHTMLBodyDoc($el)) {
-    return null
-  }
-
-  // if we have sticky position return ourselves
-  if ($el.css('position') === 'sticky') {
-    return $el
-  }
-
-  // else recursively continue to walk up the parent node chain
-  return getFirstStickyPositionParent($el.parent())
+  return findParent($el.get(0), (node) => {
+    if (cy.$$(node).css('position') === 'sticky') {
+      return node;
+    }
+  });
 }
 
 const getFirstScrollableParent = ($el) => {
-  // this may be null or not even defined in IE
-  // scrollingElement = doc.scrollingElement
-
-  const search = ($el) => {
-    const $parent = $el.parent()
-
-    // parent is undefined or
-    // instead of fussing with scrollingElement
-    // we'll simply return null here and let our
-    // caller deal with situations where they're
-    // needing to scroll the window or scrollableElement
-    if (isUndefinedOrHTMLBodyDoc($parent)) {
-      return null
+  return findParent($el.get(0), (node) => {
+    if (isScrollable(cy.$$(node))) {
+      return node;
     }
-
-    if (isScrollable($parent)) {
-      return $parent
-    }
-
-    return search($parent)
-  }
-
-  return search($el)
+  });
 }
 
 const getElements = ($el) => {
