@@ -277,7 +277,13 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          $el = cy.$$(selector, options.withinSubject)
+          if (!options.ignoreShadowBoundaries || options.withinSubject) {
+            $el = cy.$$(selector, options.withinSubject)
+          } else {
+            const elementsWithShadow = $dom.findAllShadowRoots(cy.state('document'))
+
+            $el = cy.$$(selector, elementsWithShadow)
+          }
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
           // but our error messages use this property to actually show the missing element
