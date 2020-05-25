@@ -1,236 +1,273 @@
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const $ = Cypress.$.bind(Cypress);
-const {
-  _
-} = Cypress;
+const $ = Cypress.$.bind(Cypress)
+const { _ } = Cypress
 
-const $dom = require("../../../../src/dom");
+const $dom = require('../../../../src/dom')
 
-describe("src/cy/commands/misc", function() {
-  before(() => cy
-    .visit("/fixtures/jquery.html")
-    .then(function(win) {
-      return this.body = win.document.body.outerHTML;
-  }));
+describe('src/cy/commands/misc', () => {
+  before(() => {
+    cy
+    .visit('/fixtures/jquery.html')
+    .then(function (win) {
+      this.body = win.document.body.outerHTML
+    })
+  })
 
-  beforeEach(function() {
-    const doc = cy.state("document");
+  beforeEach(function () {
+    const doc = cy.state('document')
 
-    return $(doc.body).empty().html(this.body);
-  });
+    $(doc.body).empty().html(this.body)
+  })
 
-  context("#end", () => it("nulls out the subject", () => cy.noop({}).end().then(subject => expect(subject).to.be.null)));
+  context('#end', () => {
+    it('nulls out the subject', () => {
+      cy.noop({}).end().then((subject) => {
+        expect(subject).to.be.null
+      })
+    })
+  })
 
-  context("#log", function() {
-    it("nulls out the subject", () => cy.wrap({}).log("foo").then(subject => expect(subject).to.be.null));
+  context('#log', () => {
+    it('nulls out the subject', () => {
+      cy.wrap({}).log('foo').then((subject) => {
+        expect(subject).to.be.null
+      })
+    })
 
-    return describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-        return null;
-      });
+        return null
+      })
 
-      it("logs immediately", function(done) {
-        cy.on("log:added", (attrs, log) => {
-          cy.removeAllListeners("log:added");
+      it('logs immediately', function (done) {
+        cy.on('log:added', (attrs, log) => {
+          cy.removeAllListeners('log:added')
 
-          expect(log.get("message")).to.eq("foo, {foo: bar}");
-          expect(log.get("name")).to.eq("log");
-          expect(log.get("end")).to.be.true;
-          return done();
-        });
+          expect(log.get('message')).to.eq('foo, {foo: bar}')
+          expect(log.get('name')).to.eq('log')
+          expect(log.get('end')).to.be.true
 
-        return cy.log("foo", {foo: "bar"}).then(() => {
-          const {
-            lastLog
-          } = this;
+          done()
+        })
 
-          expect(lastLog.get("ended")).to.be.true;
-          expect(lastLog.get("snapshots").length).to.eq(1);
-          return expect(lastLog.get("snapshots")[0]).to.be.an("object");
-        });
-      });
+        cy.log('foo', { foo: 'bar' }).then(() => {
+          const { lastLog } = this
 
-      return it("consoleProps", () => cy.log("foobarbaz", [{}]).then(function() {
-        return expect(this.lastLog.invoke("consoleProps")).to.deep.eq({
-          Command: "log",
-          args: [{}],
-          message: "foobarbaz"
-        });
-      }));
-    });
-  });
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('snapshots').length).to.eq(1)
 
-  return context("#wrap", function() {
-    beforeEach(function() {
-      this.remoteWindow = cy.state("window");
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
 
-      return delete this.remoteWindow.$.fn.foo;
-    });
+      it('consoleProps', () => {
+        return cy.log('foobarbaz', [{}]).then(function () {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            Command: 'log',
+            args: [{}],
+            message: 'foobarbaz',
+          })
+        })
+      })
+    })
+  })
 
-    it("sets the subject to the first argument", () => cy.wrap({}).then(subject => expect(subject).to.deep.eq({})));
+  context('#wrap', () => {
+    beforeEach(function () {
+      this.remoteWindow = cy.state('window')
 
-    //# https://github.com/cypress-io/cypress/issues/3241
-    it("cy.wrap(undefined) should retry", function() {
-      const stub = cy.stub();
+      delete this.remoteWindow.$.fn.foo
+    })
 
-      cy.wrap().should(function() {
-        stub();
-        return expect(stub).to.be.calledTwice;
-      });
+    it('sets the subject to the first argument', () => {
+      cy.wrap({}).then((subject) => {
+        expect(subject).to.deep.eq({})
+      })
+    })
 
-      return cy.wrap(undefined).should(function() {
-        stub();
-        return expect(stub.callCount).to.eq(4);
-      });
-    });
+    // https://github.com/cypress-io/cypress/issues/3241
+    it('cy.wrap(undefined) should retry', () => {
+      const stub = cy.stub()
 
-    it("can wrap jquery objects and continue to chain", function() {
-      this.remoteWindow.$.fn.foo = "foo";
+      cy.wrap().should(() => {
+        stub()
+
+        expect(stub).to.be.calledTwice
+      })
+
+      cy.wrap(undefined).should(() => {
+        stub()
+
+        expect(stub.callCount).to.eq(4)
+      })
+    })
+
+    it('can wrap jquery objects and continue to chain', function () {
+      this.remoteWindow.$.fn.foo = 'foo'
 
       const append = () => {
-        return setTimeout(() => {
-          return $("<li class='appended'>appended</li>").appendTo(cy.$$("#list"));
-        }
-        , 50);
-      };
+        setTimeout(() => {
+          $('<li class=\'appended\'>appended</li>').appendTo(cy.$$('#list'))
+        }, 50)
+      }
 
-      cy.on("command:retry", _.after(2, _.once(append)));
+      cy.on('command:retry', _.after(2, _.once(append)))
 
-      return cy.get("#list").then($ul => cy
+      cy.get('#list').then(($ul) => {
+        cy
         // ensure that assertions are based on the real subject
         // and not the cy subject - therefore foo should be defined
-        .wrap($ul).should("have.property", "foo")
+        .wrap($ul).should('have.property', 'foo')
 
         // then re-wrap $ul and ensure that the subject passed
         // downstream is the cypress instance
         .wrap($ul)
-        .find("li.appended")
-        .then($li => //# must use explicit non cy.should
-      //# else this test will always pass
-      expect($li.length).to.eq(1)));
-    });
+        .find('li.appended')
+        .then(($li) => {
+          // must use explicit non cy.should
+          // else this test will always pass
+          expect($li.length).to.eq(1)
+        })
+      })
+    })
 
-    //# TODO: fix this test in 4.0 when we refactor validating subjects
-    it.skip("throws a good error when wrapping mixed types: element + string", () => cy.get("button").then(function($btn) {
-      const btn = $btn.get(0);
+    // TODO: fix this test in 4.0 when we refactor validating subjects
+    it.skip('throws a good error when wrapping mixed types: element + string', () => {
+      cy.get('button').then(($btn) => {
+        const btn = $btn.get(0)
 
-      return cy.wrap([btn, "asdf"]).click();
-    }));
+        cy.wrap([btn, 'asdf']).click()
+      })
+    })
 
-    it("can wrap an array of DOM elements and pass command validation", () => cy.get("button").then(function($btn) {
-      const btn = $btn.get(0);
+    it('can wrap an array of DOM elements and pass command validation', () => {
+      cy.get('button').then(($btn) => {
+        const btn = $btn.get(0)
 
-      cy.wrap([btn]).click().then($btn => expect($dom.isJquery($btn)).to.be.true);
+        cy.wrap([btn]).click().then(($btn) => {
+          expect($dom.isJquery($btn)).to.be.true
+        })
 
-      return cy.wrap([btn, btn]).click({ multiple: true }).then($btns => expect($dom.isJquery($btns)).to.be.true);
-    }));
+        cy.wrap([btn, btn]).click({ multiple: true }).then(($btns) => {
+          expect($dom.isJquery($btns)).to.be.true
+        })
+      })
+    })
 
-    it("can wrap an array of window without it being altered", () => cy.window().then(win => cy.wrap([win]).then(function(arr) {
-      expect(arr).to.be.an('array');
-      return expect(Array.isArray(arr)).to.be.true;
-    })));
+    it('can wrap an array of window without it being altered', () => {
+      cy.window().then((win) => {
+        cy.wrap([win]).then((arr) => {
+          expect(arr).to.be.an('array')
+          expect(Array.isArray(arr)).to.be.true
+        })
+      })
+    })
 
-    it("can wrap an array of document without it being altered", () => cy.document().then(doc => cy.wrap([doc]).then(function(arr) {
-      expect(arr).to.be.an('array');
-      expect(Array.isArray(arr)).to.be.true;
-      return expect(arr[0]).to.eq(doc);
-    })));
+    it('can wrap an array of document without it being altered', () => {
+      cy.document().then((doc) => {
+        cy.wrap([doc]).then((arr) => {
+          expect(arr).to.be.an('array')
+          expect(Array.isArray(arr)).to.be.true
+          expect(arr[0]).to.eq(doc)
+        })
+      })
+    })
 
-    //# https://github.com/cypress-io/cypress/issues/2927
-    it("can properly handle objects with 'jquery' functions as properties", () => //# the root issue here has to do with the fact that window.jquery points
-    //# to the jquery constructor, but not an actual jquery instance and
-    //# we need to account for that...
-    cy.window().then(function(win) {
-      win.jquery = function() {};
+    // https://github.com/cypress-io/cypress/issues/2927
+    it('can properly handle objects with \'jquery\' functions as properties', () => {
+      // the root issue here has to do with the fact that window.jquery points
+      // to the jquery constructor, but not an actual jquery instance and
+      // we need to account for that...
+      cy.window().then((win) => {
+        win.jquery = function () {}
 
-      return win;
-    }));
+        return win
+      })
+    })
 
-    describe("errors", function() {
-      it("throws when wrapping an array of windows", function(done) {
-        cy.on("fail", err => {
-          expect(err.message).to.include("`cy.scrollTo()` failed because it requires a DOM element.");
-          expect(err.message).to.include("[<window>]");
-          expect(err.message).to.include("All 2 subject validations failed on this subject.");
-          return done();
-        });
+    describe('errors', () => {
+      it('throws when wrapping an array of windows', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element.')
+          expect(err.message).to.include('[<window>]')
+          expect(err.message).to.include('All 2 subject validations failed on this subject.')
 
-        return cy.window().then(win => cy.wrap([win]).scrollTo("bottom"));
-      });
+          done()
+        })
 
-      return it("throws when wrapping an array of documents", function(done) {
-        cy.on("fail", err => {
-          expect(err.message).to.include("`cy.screenshot()` failed because it requires a DOM element.");
-          expect(err.message).to.include("[<document>]");
-          expect(err.message).to.include("All 3 subject validations failed on this subject.");
-          return done();
-        });
+        cy.window().then((win) => {
+          cy.wrap([win]).scrollTo('bottom')
+        })
+      })
 
-        return cy.document().then(doc => cy.wrap([doc]).screenshot());
-      });
-    });
+      it('throws when wrapping an array of documents', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.screenshot()` failed because it requires a DOM element.')
+          expect(err.message).to.include('[<document>]')
+          expect(err.message).to.include('All 3 subject validations failed on this subject.')
 
-    return describe(".log", function() {
-      beforeEach(function() {
-        this.logs = [];
+          done()
+        })
 
-        cy.on("log:added", (attrs, log) => {
-          this.lastLog = log;
-          return this.logs.push(log);
-        });
+        cy.document().then((doc) => {
+          cy.wrap([doc]).screenshot()
+        })
+      })
+    })
 
-        return null;
-      });
+    describe('.log', () => {
+      beforeEach(function () {
+        this.logs = []
 
-      it("logs immediately", function(done) {
-        cy.on("log:added", (attrs, log) => {
-          cy.removeAllListeners("log:added");
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+          this.logs.push(log)
+        })
 
-          expect(log.get("message")).to.eq("{}");
-          expect(log.get("name")).to.eq("wrap");
-          expect(log.get("end")).not.to.be.ok;
-          return done();
-        });
+        return null
+      })
 
-        return cy.wrap({}).then(() => {
-          const {
-            lastLog
-          } = this;
+      it('logs immediately', function (done) {
+        cy.on('log:added', (attrs, log) => {
+          cy.removeAllListeners('log:added')
 
-          expect(lastLog.get("ended")).to.be.true;
-          expect(lastLog.get("snapshots").length).to.eq(1);
-          return expect(lastLog.get("snapshots")[0]).to.be.an("object");
-        });
-      });
+          expect(log.get('message')).to.eq('{}')
+          expect(log.get('name')).to.eq('wrap')
+          expect(log.get('end')).not.to.be.ok
 
-      return it("stringifies DOM elements and sets $el", function() {
-        const body = $("body");
+          done()
+        })
 
-        return cy.wrap(body).then(function($el) {
-          const {
-            lastLog
-          } = this;
+        cy.wrap({}).then(() => {
+          const { lastLog } = this
 
-          //# internally we store the real remote jquery
-          //# instance instead of the cypress one
-          expect(lastLog.get("$el")).not.to.eq($el);
+          expect(lastLog.get('ended')).to.be.true
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
 
-          //# but make sure they are the same DOM object
-          expect(lastLog.get("$el").get(0)).to.eq($el.get(0));
-          return expect(lastLog.get("message")).to.eq("<body>");
-        });
-      });
-    });
-  });
-});
+      it('stringifies DOM elements and sets $el', () => {
+        const body = $('body')
+
+        cy.wrap(body).then(function ($el) {
+          const { lastLog } = this
+
+          // internally we store the real remote jquery
+          // instance instead of the cypress one
+          expect(lastLog.get('$el')).not.to.eq($el)
+
+          // but make sure they are the same DOM object
+          expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+          expect(lastLog.get('message')).to.eq('<body>')
+        })
+      })
+    })
+  })
+})
