@@ -96,7 +96,7 @@
     "react-router-dom": "6.0.0-alpha.1",
     "react-scripts": "3.4.1",
     "react-tooltip": "4.2.6",
-    "semantic-release": "17.0.7",
+    "semantic-release": "17.0.8",
     "standard": "14.3.3",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
