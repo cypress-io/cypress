@@ -284,6 +284,7 @@ module.exports = (Commands, Cypress, cy) => {
 
             $el = cy.$$(selector, elementsWithShadow)
           }
+
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
           // but our error messages use this property to actually show the missing element
