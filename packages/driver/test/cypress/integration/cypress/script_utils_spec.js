@@ -17,7 +17,8 @@ describe('src/cypress/script_utils', () => {
       }
 
       cy.stub($networkUtils, 'fetch').resolves('the script contents')
-      cy.stub($sourceMapUtils, 'extractSourceMap').resolves()
+      cy.stub($sourceMapUtils, 'extractSourceMap').returns()
+      cy.stub($sourceMapUtils, 'initializeSourceMapConsumer').resolves()
     })
 
     it('fetches each script', () => {
