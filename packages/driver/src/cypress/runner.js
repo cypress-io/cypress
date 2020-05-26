@@ -216,12 +216,8 @@ const getAllSiblingTests = (suite, getTestById) => {
   return tests
 }
 
-function getOrderFromId (id) {
+function getTestIndexFromId (id) {
   return +id.slice(1)
-}
-
-function isNotAlreadyRunTest (test) {
-  return !(Cypress._RESUMED_AT_TEST && getOrderFromId(test.id) < getOrderFromId(Cypress._RESUMED_AT_TEST))
 }
 
 const getTestFromHook = (hook) => {
@@ -231,35 +227,6 @@ const getTestFromHook = (hook) => {
 
   if (test) {
     return test
-  }
-}
-
-const getTestFromHookOrFindTest = (hook) => {
-  const test = getTestFromHook(hook)
-
-  if (test) {
-    return test
-  }
-
-  const suite = hook.parent
-
-  if (hook.hookName === 'after all') {
-    return findLastTestInSuite(suite, isNotAlreadyRunTest)
-  }
-
-  if (hook.hookName === 'before all') {
-    return findTestInSuite(suite, isNotAlreadyRunTest)
-  }
-}
-
-function getTestFromRunnable (runnable) {
-  switch (runnable.type) {
-    case 'hook':
-      return getTestFromHook(runnable)
-
-    case 'test':
-      return runnable
-    default: null
   }
 }
 
@@ -372,7 +339,6 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           //    since that will bubble up IF we're the last nested suite
           // 3. else if we arent the last nested suite we fire if we're
           //    the last test that will run
-
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
               (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
@@ -554,11 +520,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = (hook, err, hookName) => {
+const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
-  const test = getTestFromHookOrFindTest(hook)
+  const test = getTest() || getTestFromHookOrFindTest(hook)
 
   test.err = err
   test.state = 'failed'
@@ -573,7 +539,18 @@ const hookFailed = (hook, err, hookName) => {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId) => {
+function getTestFromRunnable (runnable) {
+  switch (runnable.type) {
+    case 'hook':
+      return getTestFromHook(runnable)
+
+    case 'test':
+      return runnable
+    default: null
+  }
+}
+
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -631,7 +608,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTestFromHookOrFindTest(hook)
+    const test = getTest() || getTestFromHookOrFindTest(hook)
 
     if (!test) {
       // we couldn't find a test to run with this hook
@@ -760,7 +737,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName)
+      return hookFailed(runnable, runnable.err, hookName, getTest, getTestFromHookOrFindTest)
     }
   })
 }
@@ -769,10 +746,33 @@ const create = (specWindow, mocha, Cypress, cy) => {
   let _id = 0
   let _hookId = 0
   let _uncaughtFn = null
+  let _resumedAtTestIndex
 
   const _runner = mocha.getRunner()
 
   _runner.suite = mocha.getRootSuite()
+
+  function isNotAlreadyRunTest (test) {
+    return !(Cypress._RESUMED_AT_TEST && getTestIndexFromId(test.id) < getTestIndexFromId(Cypress._RESUMED_AT_TEST))
+  }
+
+  const getTestFromHookOrFindTest = (hook) => {
+    const test = getTestFromHook(hook)
+
+    if (test) {
+      return test
+    }
+
+    const suite = hook.parent
+
+    if (hook.hookName === 'after all') {
+      return findLastTestInSuite(suite, isNotAlreadyRunTest)
+    }
+
+    if (hook.hookName === 'before all') {
+      return findTestInSuite(suite, isNotAlreadyRunTest)
+    }
+  }
 
   const onScriptError = (err) => {
     // err will not be returned if cy can associate this
@@ -913,7 +913,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
         _startTime = moment().toJSON()
       }
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)
 
       return _runner.run((failures) => {
         // if we happen to make it all the way through
@@ -1218,12 +1218,12 @@ const create = (specWindow, mocha, Cypress, cy) => {
     },
 
     resumeAtTest (id, emissions = {}) {
-      Cypress._RESUMED_AT_TEST = id
+      _resumedAtTestIndex = getTestIndexFromId(id)
 
       _emissions = emissions
 
       for (let test of _tests) {
-        if (test.id !== id) {
+        if (getTestIndexFromId(test.id) !== _resumedAtTestIndex) {
           test._ALREADY_RAN = true
           test.pending = true
         } else {
@@ -1318,11 +1318,5 @@ const create = (specWindow, mocha, Cypress, cy) => {
 }
 
 module.exports = {
-  overrideRunnerHook,
-
-  normalize,
-
-  normalizeAll,
-
   create,
 }
