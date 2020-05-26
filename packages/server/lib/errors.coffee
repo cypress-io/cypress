@@ -115,9 +115,9 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       - electron
       - firefox (Cypress support in beta)
 
-      You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
+      You can also use a custom browser: https://on.cypress.io/customize-browsers
 
-      Available browsers found are:
+      Available browsers found on your system are:
       #{arg2}
       """
 
