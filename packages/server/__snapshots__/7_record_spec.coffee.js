@@ -772,14 +772,12 @@ Cypress supports the following browsers:
 - electron
 - firefox (Cypress support in beta)
 
-You can also use a custom browser: https://on.cypress.io/launching-browsers#Customize-available-browsers
+You can also use a custom browser: https://on.cypress.io/customize-browsers
 
-Available browsers found are:
-- chrome
-- firefox
-- edge
-- electron
-
+Available browsers found on your system are:
+- browser1
+- browser2
+- browser3
 `
 
 exports['e2e record misconfiguration errors and exits when no specs found 1'] = `
