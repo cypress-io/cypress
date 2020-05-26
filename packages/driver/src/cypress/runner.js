@@ -289,7 +289,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
   // the hooks surrounding a test runnable
   const _runnerHook = _runner.hook
 
-  _runner.hook = (name, fn) => {
+  _runner.hook = function (name, fn) {
     const allTests = getTests()
 
     const changeFnToRunAfterHooks = () => {
