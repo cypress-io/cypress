@@ -575,7 +575,15 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       return msg
     when "PLUGINS_DIDNT_EXPORT_FUNCTION"
       msg = """
-      The `pluginsFile` must export a function.
+      The `pluginsFile` must export a function with the following signature:
+
+      ```
+      module.exports = function (on, config) {
+        // configure plugins here
+      }
+      ```
+
+      Learn more: https://on.cypress.io/plugins-api
 
       We loaded the `pluginsFile` from: `#{arg1}`
 

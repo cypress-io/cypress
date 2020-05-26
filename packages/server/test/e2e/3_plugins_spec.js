@@ -16,6 +16,7 @@ const pluginReturnsBadConfig = Fixtures.projectPath('plugin-returns-bad-config')
 const pluginReturnsEmptyBrowsersList = Fixtures.projectPath('plugin-returns-empty-browsers-list')
 const pluginReturnsInvalidBrowser = Fixtures.projectPath('plugin-returns-invalid-browser')
 const pluginValidationError = Fixtures.projectPath('plugin-validation-error')
+const pluginEmpty = Fixtures.projectPath('plugin-empty')
 
 describe('e2e plugins', function () {
   e2e.setup()
@@ -29,14 +30,20 @@ describe('e2e plugins', function () {
     })
   })
 
+  // this tests verifies stdout manually instead of via snapshot because
+  // there's a degree of randomness as to whether the error occurs before or
+  // after the run output starts. the important thing is that the run is
+  // failed and the right error is displayed
   e2e.it('fails when there is an async error at the root', {
     browser: 'chrome',
     spec: 'app_spec.js',
     project: pluginsRootAsyncError,
-    snapshot: true,
     expectedExitCode: 1,
-    config: {
-      video: false,
+    onRun (exec) {
+      return exec().then(({ stdout }) => {
+        expect(stdout).to.include('The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file')
+        expect(stdout).to.include('Error: Root async error from plugins file')
+      })
     },
   })
 
@@ -137,9 +144,19 @@ describe('e2e plugins', function () {
   })
 
   it('fails when invalid event is registered', function () {
-    e2e.exec(this, {
+    return e2e.exec(this, {
       spec: 'app_spec.js',
       project: pluginValidationError,
+      sanitizeScreenshotDimensions: true,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
+
+  it('fails when there is no function exported', function () {
+    return e2e.exec(this, {
+      spec: 'app_spec.js',
+      project: pluginEmpty,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
