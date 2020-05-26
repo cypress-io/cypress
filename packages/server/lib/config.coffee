@@ -533,7 +533,7 @@ module.exports = {
     Promise
     .try ->
       ## resolve full path with extension
-      obj.supportFile = require.resolve(sf)
+      obj.supportFile = utils.resolveModule(sf)
       debug("resolved support file %s", obj.supportFile)
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)

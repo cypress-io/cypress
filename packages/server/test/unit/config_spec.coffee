@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 R        = require("ramda")
+debug    = require("debug")("test")
 config   = require("#{root}lib/config")
 errors   = require("#{root}lib/errors")
 configUtil = require("#{root}lib/util/config")
@@ -1348,6 +1349,29 @@ describe "lib/config", ->
       config.setSupportFileAndFolder(obj)
       .catch (err) ->
         expect(err.message).to.include("The support file is missing or invalid.")
+
+    it "sets the supportFile to index.ts if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+      supportFolder = "#{projectRoot}/cypress/support"
+      supportFilename = "#{supportFolder}/index.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(supportFolder).throws(e)
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support"
+      })
+
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        debug("result is", result)
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          supportFolder: supportFolder
+          supportFile: supportFilename
+        })
 
   context ".setPluginsFile", ->
     it "does nothing if pluginsFile is falsey", ->
