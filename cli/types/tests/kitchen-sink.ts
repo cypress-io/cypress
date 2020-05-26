@@ -135,3 +135,10 @@ cy.clearLocalStorage()
 cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })
 cy.clearLocalStorage({ log: false })
+
+namespace BlobTests {
+  Cypress.Blob.imgSrcToDataURL('/some/path', undefined, 'anonymous')
+    .then((dateUrl) => {
+      dateUrl // $ExpectType string
+  })
+}

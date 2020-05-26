@@ -23,6 +23,7 @@ const REQUEST_DEFAULTS = {
   headers: null,
   json: null,
   form: null,
+  encoding: 'utf8',
   gzip: true,
   timeout: null,
   followRedirect: true,
@@ -167,6 +168,18 @@ module.exports = (Commands, Cypress, cy, state, config) => {
             configFile: Cypress.config('configFile'),
           },
         })
+      }
+
+      if (options.encoding) {
+        if (!_.isString(options.encoding) || !Buffer.isEncoding(options.encoding)) {
+          $errUtils.throwErrByPath('request.encoding_invalid', {
+            args: {
+              encoding: options.encoding,
+            },
+          })
+        } else {
+          options.encoding = options.encoding.toLowerCase()
+        }
       }
 
       // if a user has `x-www-form-urlencoded` content-type set

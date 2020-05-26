@@ -17,12 +17,12 @@ describe('e2e cdp', function () {
     restoreEnv()
   })
 
-  e2e.it('fails when remote debugging port cannot be connected to', {
+  // NOTE: this test takes almost a minute and is largely redundant with protocol_spec
+  e2e.it.skip('fails when remote debugging port cannot be connected to', {
     project: Fixtures.projectPath('remote-debugging-port-removed'),
     spec: 'spec.ts',
     browser: 'chrome',
     expectedExitCode: 1,
-    snapshot: true,
   })
 
   // https://github.com/cypress-io/cypress/issues/5685

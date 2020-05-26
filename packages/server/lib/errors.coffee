@@ -575,7 +575,15 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       return msg
     when "PLUGINS_DIDNT_EXPORT_FUNCTION"
       msg = """
-      The `pluginsFile` must export a function.
+      The `pluginsFile` must export a function with the following signature:
+
+      ```
+      module.exports = function (on, config) {
+        // configure plugins here
+      }
+      ```
+
+      Learn more: https://on.cypress.io/plugins-api
 
       We loaded the `pluginsFile` from: `#{arg1}`
 
@@ -884,7 +892,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "CDP_COULD_NOT_CONNECT"
       """
-      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 20 seconds.
+      Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
       This usually indicates there was a problem opening the Chrome browser.
 
@@ -894,6 +902,16 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
 
       #{arg2.stack}
       """
+    when "FIREFOX_COULD_NOT_CONNECT"
+      """
+      Cypress failed to make a connection to Firefox.
+
+      This usually indicates there was a problem opening the Firefox browser.
+
+      Error details:
+
+      #{arg1.stack}
+      """
     when "CDP_COULD_NOT_RECONNECT"
       """
       There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
@@ -902,7 +920,7 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       """
     when "CDP_RETRYING_CONNECTION"
       """
-      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/32)
+      Failed to connect to Chrome, retrying in 1 second (attempt #{chalk.yellow(arg1)}/62)
       """
     when "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS"
       """
