@@ -402,7 +402,26 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
 `
 
-exports['e2e plugins projectRoot and configFile passes projectRoot and default configFile to plugins function 1'] = `
+exports['e2e plugins fails when there is no function exported 1'] = `
+The \`pluginsFile\` must export a function with the following signature:
+
+\`\`\`
+module.exports = function (on, config) {
+  // configure plugins here
+}
+\`\`\`
+
+Learn more: https://on.cypress.io/plugins-api
+
+We loaded the \`pluginsFile\` from: \`/foo/bar/.projects/plugin-empty/cypress/plugins/index.js\`
+
+It exported:
+
+ {}
+
+`
+
+exports['e2e plugins fails when invalid event is registered 1'] = `
 The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js\`).
 
  Error: You must pass a valid event name when registering a plugin.
