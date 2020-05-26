@@ -31,7 +31,11 @@ const isJquery = (obj) => {
   // does it have the jquery property and does this
   // instance have a constructor with a jquery property
   // on its prototype?
-  return hasJqueryProperty && !!_.get(obj, 'constructor.prototype.jquery')
+  // an HTML element with id="jquery" will show up
+  // as the jquery property of the window constructor
+  // for actual jquery, it should be the version number
+  // so we ensure that it is a string (rather than HTML element)
+  return hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
 }
 
 // doing a little jiggle wiggle here

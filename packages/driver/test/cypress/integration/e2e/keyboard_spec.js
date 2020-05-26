@@ -7,7 +7,7 @@ describe('keyboard', () => {
     it('fires keyboard and click events with modifier', () => {
       cy
       .window().then((win) => {
-        win.$('input').one('keyup', (e) => {
+        win.$('#input').one('keyup', (e) => {
           expect(e.ctrlKey).to.be.true
 
           expect(e.which).to.equal(83)
@@ -17,7 +17,7 @@ describe('keyboard', () => {
           expect(e.ctrlKey).to.be.true
         })
 
-        cy.get('input').type('{ctrl}s', { release: false })
+        cy.get('#input').type('{ctrl}s', { release: false })
 
         cy.get('button').click()
       })
@@ -26,11 +26,11 @@ describe('keyboard', () => {
     it('releases modifiers between tests', () => {
       cy
       .window().then((win) => {
-        win.$('input').one('keyup', (e) => {
+        win.$('#input').one('keyup', (e) => {
           expect(e.ctrlKey).to.be.false
         })
 
-        cy.get('input').type('s')
+        cy.get('#input').type('s')
       })
     })
 
@@ -48,28 +48,28 @@ describe('keyboard', () => {
       characters.forEach(([char, asciiCode, keyCode]) => {
         it(`for ${char}`, () => {
           cy.window().then((win) => {
-            win.$('input').one('keydown', (e) => {
+            win.$('#input').one('keydown', (e) => {
               expect(e.charCode).to.equal(0)
               expect(e.which).to.equal(keyCode)
 
               expect(e.keyCode).to.equal(keyCode)
             })
 
-            win.$('input').one('keypress', (e) => {
+            win.$('#input').one('keypress', (e) => {
               expect(e.charCode).to.equal(asciiCode)
               expect(e.which).to.equal(asciiCode)
 
               expect(e.keyCode).to.equal(asciiCode)
             })
 
-            win.$('input').one('keyup', (e) => {
+            win.$('#input').one('keyup', (e) => {
               expect(e.charCode).to.equal(0)
               expect(e.which).to.equal(keyCode)
 
               expect(e.keyCode).to.equal(keyCode)
             })
 
-            cy.get('input').type(char)
+            cy.get('#input').type(char)
           })
         })
       })

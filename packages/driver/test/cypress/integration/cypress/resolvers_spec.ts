@@ -24,7 +24,6 @@ describe('src/cypress/resolvers', function () {
       // @ts-ignore
       cy.spy(unboundFn, 'bind')
 
-      // @ts-ignore
       const actual = Cypress.resolveWindowReference({}, unboundFnWindow, 'parent')
 
       expect(actual).to.be.instanceOf(Function)
@@ -32,16 +31,26 @@ describe('src/cypress/resolvers', function () {
       expect(unboundFn.bind).to.be.calledWith(unboundFnWindow)
     })
 
-    it('returns proxied location object if prop is location', function () {
-      const contentWindow = Cypress.state('$autIframe')!.prop('contentWindow')
-      // @ts-ignore
-      const actual = Cypress.resolveWindowReference(contentWindow, contentWindow, 'location')
+    context('returns proxied location object', function () {
+      it('if prop is location and obj is a Window', function () {
+        const contentWindow = Cypress.state('$autIframe')!.prop('contentWindow')
+        const actual = Cypress.resolveWindowReference(contentWindow, contentWindow, 'location')
 
-      cy.stub(Cypress.dom, 'isWindow').withArgs(contentWindow).returns(true)
-      cy.stub(Cypress.dom, 'isJquery').withArgs(contentWindow).returns(false)
+        cy.stub(Cypress.dom, 'isWindow').withArgs(contentWindow).returns(true)
+        cy.stub(Cypress.dom, 'isJquery').withArgs(contentWindow).returns(false)
 
-      // @ts-ignore
-      expect(actual).to.eq(Cypress.resolveLocationReference(contentWindow))
+        expect(actual).to.eq(Cypress.resolveLocationReference(contentWindow))
+      })
+
+      it('if prop is location and obj is a Document', function () {
+        const contentWindow = Cypress.state('$autIframe')!.prop('contentWindow')
+        const { document } = contentWindow
+        const actual = Cypress.resolveWindowReference(contentWindow, document, 'location')
+
+        cy.stub(Cypress.dom, 'isDocument').withArgs(document).returns(true)
+
+        expect(actual).to.eq(Cypress.resolveLocationReference(contentWindow))
+      })
     })
 
     context('window reference selection', function () {
@@ -131,7 +140,6 @@ describe('src/cypress/resolvers', function () {
             isJquery.withArgs(frame).returns(false)
           })
 
-          // @ts-ignore
           const actual = Cypress.resolveWindowReference(currentWindow, accessedObject, accessedProp)
 
           expect(actual).to.eq(expected)
@@ -151,7 +159,6 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('.href setter sets location.href with resolved URL', () => {
-      // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       loc.href = 'foo'
@@ -160,7 +167,6 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('.assign() calls location.assign with resolved URL', () => {
-      // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       loc.assign('foo')
@@ -169,7 +175,6 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('.replace() calls location.replace with resolved URL', () => {
-      // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       loc.replace('foo')
@@ -178,7 +183,6 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('calls through to unintercepted functions', () => {
-      // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       loc.someFn('foo')
@@ -187,7 +191,6 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('calls through to unintercepted setters + getters', () => {
-      // @ts-ignore
       const loc = Cypress.resolveLocationReference(fakeWindow)
 
       expect(loc.someProp).to.eq('foo')
@@ -199,9 +202,7 @@ describe('src/cypress/resolvers', function () {
     })
 
     it('returns the same object between calls', () => {
-      // @ts-ignore
       const loc1 = Cypress.resolveLocationReference(fakeWindow)
-      // @ts-ignore
       const loc2 = Cypress.resolveLocationReference(fakeWindow)
 
       expect(loc1).to.eq(loc2)
