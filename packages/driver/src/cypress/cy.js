@@ -5,7 +5,6 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
-const $selection = require('../dom/selection')
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
 const $Chai = require('../cy/chai')
@@ -26,6 +25,7 @@ const $Timers = require('../cy/timers')
 const $Timeouts = require('../cy/timeouts')
 const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
+const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
@@ -103,8 +103,12 @@ const setTopOnError = function (cy) {
   })
 }
 
+// NOTE: this makes the cy object an instance
+// TODO: refactor the 'create' method below into this class
+class $Cy {}
+
 const create = function (specWindow, Cypress, Cookies, state, config, log) {
-  let cy = {}
+  let cy = new $Cy()
   let stopped = false
   const commandFns = {}
 
