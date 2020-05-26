@@ -658,41 +658,9 @@ module.exports = {
           configFile = obj.configFile || CONFIG_DEFAULTS.configFile
           return errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
 
+        debug("setting plugins file to %o", {result})
         obj.pluginsFile = result
         return obj
-
-      # if !isLoadingDefaultPluginsFile
-      #   debug("plugins file is not default")
-      #   ## they have it explicitly set, so it should be there
-      #   return fs.pathExists(pluginsFile)
-      #   .then (found) ->
-      #     if found
-      #       debug("plugins file exists, assuming it will load")
-      #       obj.pluginsFile = pluginsFile
-      #       return obj
-      #     else
-      #       return errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
-
-      # debug("checking if pluginsFile exists", { pluginsFile, dirName: path.dirname(pluginsFile) })
-      # fs.pathExists(pluginsFile)
-      # .then (found) ->
-      #   if found
-      #     debug("is there index.ts in the plugins folder %s?", pluginsFile)
-      #     tsPluginsFilename = path.join(pluginsFile, "index.ts")
-      #     return fs.pathExists(tsPluginsFilename)
-      #     .then (foundTsFile) ->
-      #       if foundTsFile
-      #         debug("found index TS plugins file %o", { tsPluginsFilename })
-      #         obj.pluginsFile = tsPluginsFilename
-      #       else
-      #         debug("plugins folder exists, set pluginsFile to false")
-      #         ## if the directory exists, set it to false so it's ignored
-      #         obj.pluginsFile = false
-      #   else
-      #     debug("plugins folder does not exist, set to default index.js")
-      #     ## otherwise, set it up to be scaffolded later
-      #     obj.pluginsFile = path.join(pluginsFile, "index.js")
-      #   return obj
 
     .return(obj)
 

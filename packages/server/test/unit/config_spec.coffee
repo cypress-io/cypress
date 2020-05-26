@@ -11,7 +11,7 @@ findSystemNode = require("#{root}lib/util/find_system_node")
 scaffold = require("#{root}lib/scaffold")
 settings = require("#{root}lib/util/settings")
 
-describe.only "lib/config", ->
+describe "lib/config", ->
   beforeEach ->
     @env = process.env
 
