@@ -633,7 +633,7 @@ module.exports = {
             return fs.pathExists(tsPluginsFilename)
             .then (foundTsFile) ->
               if foundTsFile
-                debug("found index TS plugins file %s", tsPluginsFilename)
+                debug("found index TS plugins file %o", { tsPluginsFilename })
                 obj.pluginsFile = tsPluginsFilename
               else
                 debug("plugins folder exists, set pluginsFile to false")
