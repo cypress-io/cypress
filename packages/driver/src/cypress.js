@@ -86,6 +86,7 @@ class $Cypress {
     this.mocha = null
     this.runner = null
     this.Commands = null
+    this._RESUMED_AT_TEST = null
     this.$autIframe = null
     this.onSpecReady = null
 
