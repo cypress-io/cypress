@@ -266,7 +266,7 @@ const isLastSuite = (suite, tests) => {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests) => {
-  return !test.parent._afterAll.length || isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all' || test.hookName === 'after all'))
 }
 
 const isLastTest = (test, tests) => {
@@ -339,9 +339,9 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
           //    since that will bubble up IF we're the last nested suite
           // 3. else if we arent the last nested suite we fire if we're
           //    the last test that will run
+
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
