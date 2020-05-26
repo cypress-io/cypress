@@ -525,6 +525,10 @@ module.exports = {
     .try ->
       ## resolve full path with extension
       obj.supportFile = require.resolve(sf)
+      debug("resolved support file %s", obj.supportFile)
+      e = new Error('nope')
+      e.code = "MODULE_NOT_FOUND"
+      throw e
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
         debug("require.resolve switched support folder from %s to %s", sf, obj.supportFile)
@@ -539,25 +543,39 @@ module.exports = {
             errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
-      debug("support file %s does not exist", sf)
-      ## supportFile doesn't exist on disk
-      if sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
-        debug("support file is default, check if #{path.dirname(sf)} exists")
-        return fs.pathExists(sf)
-        .then (found) ->
-          if found
-            debug("support folder exists, set supportFile to false")
-            ## if the directory exists, set it to false so it's ignored
-            obj.supportFile = false
-          else
-            debug("support folder does not exist, set to default index.js")
-            ## otherwise, set it up to be scaffolded later
-            obj.supportFile = path.join(sf, "index.js")
-          return obj
-      else
+      debug("support JS module %s does not load", sf)
+
+      loadingDefaltSupportFile = sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
+      if !loadingDefaltSupportFile
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
+        return errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
+
+      ## supportFile doesn't exist on disk?
+      debug("support file is default, check if #{path.dirname(sf)} exists")
+      # at this point suport file is probably just support folder
+      #  like "<project root>/cypress/support"
+      return fs.pathExists(sf)
+      .then (found) ->
+        if found
+          debug("support folder exists")
+
+          debug("is there index.ts in the support folder %s?", sf)
+          tsSupportFilename = path.join(sf, "index.ts")
+          return fs.pathExists(tsSupportFilename)
+          .then (foundTsFile) ->
+            if foundTsFile
+              debug("found index TS support file %s", tsSupportFilename)
+              obj.supportFile = tsSupportFilename
+            else
+              ## if the directory exists, set it to false so it's ignored
+              debug("setting support file to false")
+              obj.supportFile = false
+        else
+          debug("support folder does not exist, set to default index.js")
+          ## otherwise, set it up to be scaffolded later
+          obj.supportFile = path.join(sf, "index.js")
+        return obj
     )
     .then ->
       if obj.supportFile
