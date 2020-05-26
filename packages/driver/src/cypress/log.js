@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible options'.split(' ')
+const DISPLAY_PROPS = 'id actual alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state subject testId type url visible options'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
