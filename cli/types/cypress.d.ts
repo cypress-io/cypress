@@ -2458,6 +2458,7 @@ declare namespace Cypress {
   interface RequestOptions extends Loggable, Timeoutable, Failable {
     auth: object
     body: RequestBody
+    encoding: Encodings
     followRedirect: boolean
     form: boolean
     gzip: boolean
