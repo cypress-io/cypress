@@ -623,8 +623,7 @@ module.exports = {
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins module does not exist %o", { pluginsFile })
       if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
-        debug("plugins file %s is default, check if folder %s exists",
-          pluginsFile, path.dirname(pluginsFile))
+        debug("checking if pluginsFile exists", { pluginsFile, dirName: path.dirname(pluginsFile) })
 
         fs.pathExists(pluginsFile)
         .then (found) ->
