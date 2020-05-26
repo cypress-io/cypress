@@ -25,6 +25,7 @@ const getSnapshot = (snapshotName) => {
 
 let stdoutStub
 
+// TODO: refactor into utility, remove module.exports
 function createReporter ({ setRunnables, mocha }) {
   stdoutStub = stdout.capture()
 
