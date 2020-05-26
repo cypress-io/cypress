@@ -1,3 +1,4 @@
+/* global Cypress */
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
@@ -155,6 +156,9 @@ const Message = observer(({ model }: MessageProps) => (
             }),
           }}
           data={model.options}
+          // 10 below is an arbitrary big number
+          // @ts-ignore
+          expandLevel={Cypress.config('isInteractive') ? 0 : 10}
         />
       </span>
       : null
