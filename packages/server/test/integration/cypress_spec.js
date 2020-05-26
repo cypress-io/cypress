@@ -812,7 +812,7 @@ describe('lib/cypress', () => {
         const found3 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
+              'Available browsers found on your system are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
             )
           })
         })
