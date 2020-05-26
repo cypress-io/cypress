@@ -1373,6 +1373,42 @@ describe "lib/config", ->
           pluginsFile: "#{projectRoot}/cypress/plugins/index.js"
         })
 
+    it "sets the pluginsFile to index.ts if it exists", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: "#{projectRoot}/cypress/plugins"
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: "#{projectRoot}/cypress/plugins/index.ts"
+        })
+
+    it "sets the pluginsFile to index.ts if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+      pluginsFolder = "#{projectRoot}/cypress/plugins"
+      pluginsFilename = "#{pluginsFolder}/index.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(pluginsFolder).throws(e)
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: pluginsFolder
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: pluginsFilename
+        })
+
     it "set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default", ->
       projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/empty-folders")
 

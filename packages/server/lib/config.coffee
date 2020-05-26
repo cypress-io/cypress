@@ -254,7 +254,16 @@ hideSpecialVals = (val, key) ->
 
   return val
 
+# an object with a few utility methods
+# for easy stubbing from unit tests
+utils = {
+  resolveModule: (name) ->
+    require.resolve(name)
+}
+
 module.exports = {
+  utils,
+
   getConfigKeys: -> configKeys.concat(experimentalConfigKeys)
 
   isValidCypressInternalEnvValue: (value) ->
@@ -609,10 +618,10 @@ module.exports = {
     Promise
     .try ->
       ## resolve full path with extension
-      obj.pluginsFile = require.resolve(pluginsFile)
+      obj.pluginsFile = utils.resolveModule(pluginsFile)
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      debug("plugins file does not exist")
+      debug("plugins module %s does not exist", pluginsFile)
       if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
         debug("plugins file %s is default, check if folder %s exists",
           pluginsFile, path.dirname(pluginsFile))
