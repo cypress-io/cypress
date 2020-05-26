@@ -1,0 +1,12 @@
+{
+  "fixturesFolder": false,
+  "testFiles": "**/*spec.*",
+  "viewportWidth": 500,
+  "viewportHeight": 500,
+  "experimentalComponentTesting": true,
+  "componentFolder": "src",
+  "nodeVersion": "system",
+  "env": {
+    "coverage": false
+  }
+}

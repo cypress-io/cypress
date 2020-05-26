@@ -96,6 +96,21 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          name: Example Sass
+          requires:
+            - Install
+          # we need the same OS version as in install job
+          # because we will use native Sass dependency
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/sass-and-ts
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Visual Sudoku
           executor: cypress/base-12
           requires:
@@ -187,6 +202,7 @@ workflows:
           requires:
             - Install
             - Test
+            - Example Sass
             - Example Babel
             - Example React Scripts
             - Example Component Folder
