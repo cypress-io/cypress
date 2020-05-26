@@ -614,13 +614,23 @@ module.exports = {
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins file does not exist")
       if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
-        debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
+        debug("plugins file %s is default, check if folder %s exists",
+          pluginsFile, path.dirname(pluginsFile))
+
         fs.pathExists(pluginsFile)
         .then (found) ->
           if found
-            debug("plugins folder exists, set pluginsFile to false")
-            ## if the directory exists, set it to false so it's ignored
-            obj.pluginsFile = false
+            debug("is there index.ts in the plugins folder %s?", pluginsFile)
+            tsPluginsFilename = path.join(pluginsFile, "index.ts")
+            return fs.pathExists(tsPluginsFilename)
+            .then (foundTsFile) ->
+              if foundTsFile
+                debug("found index TS plugins file %s", tsPluginsFilename)
+                obj.pluginsFile = tsPluginsFilename
+              else
+                debug("plugins folder exists, set pluginsFile to false")
+                ## if the directory exists, set it to false so it's ignored
+                obj.pluginsFile = false
           else
             debug("plugins folder does not exist, set to default index.js")
             ## otherwise, set it up to be scaffolded later
