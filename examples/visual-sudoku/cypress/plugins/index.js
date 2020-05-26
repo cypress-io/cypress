@@ -1,3 +1,5 @@
+// load file preprocessor that comes with this plugin
+// https://github.com/bahmutov/cypress-react-unit-test#install
 const preprocessor = require('../../../../plugins/react-scripts')
 const { addMatchImageSnapshotPlugin } = require('cypress-image-snapshot/plugin')
 

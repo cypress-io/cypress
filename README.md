@@ -161,6 +161,7 @@ Folder Name | Description
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
 [tailwind](examples/tailwind) | Testing styles built using [Tailwind CSS](https://tailwindcss.com/)
+[sass-and-ts](examples/sass-and-ts) | Example with Webpack, Sass and TypeScript
 [visual-sudoku](examples/visual-sudoku) | [Visual testing](#visual-testing) for components using open source plugin [cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot). For larger example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku).
 [visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](#visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](#visual-testing) for components using 3rd party service [Happo](https://happo.io/)
@@ -277,6 +278,8 @@ When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.
   "nodeVersion": "system"
 }
 ```
+
+Find full example in [sass-and-ts](examples/sass-and-ts) folder.
 
 </details>
 

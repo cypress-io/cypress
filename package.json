@@ -83,6 +83,7 @@
     "lint-staged": "9.5.0",
     "lodash": "4.17.15",
     "markdown-link-check": "3.8.1",
+    "node-sass": "4.14.1",
     "prettier": "1.19.1",
     "pretty": "2.0.0",
     "prop-types": "15.7.2",
