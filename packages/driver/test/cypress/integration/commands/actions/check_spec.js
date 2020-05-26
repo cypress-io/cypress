@@ -53,7 +53,7 @@ describe('src/cy/commands/actions/check', () => {
     })
 
     it('changes the subject when matching values even if noop', () => {
-      const checked = $('<input type=\'checkbox\' name=\'colors\' value=\'blue\' checked>')
+      const checked = $(`<input type='checkbox' name='colors' value='blue' checked>`)
 
       $('[name=colors]').parent().append(checked)
 

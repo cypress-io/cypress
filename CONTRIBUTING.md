@@ -28,13 +28,14 @@ Thanks for taking the time to contribute! :smile:
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
+  - [Adding links within code](#Adding-links-within-code)
   - [Tests](#tests)
   - [Packages](#packages)
 - [Committing Code](#committing-code)
- - [Branches](#branches)
- - [Pull Requests](#pull-requests)
- - [Testing](#testing)
- - [Dependencies](#dependencies)
+  - [Branches](#branches)
+  - [Pull Requests](#pull-requests)
+  - [Testing](#testing)
+  - [Dependencies](#dependencies)
 - [Deployment](#deployment)
 
 ## CI status
@@ -309,6 +310,8 @@ yarn dev --run-project /project/folder --record --key <key>
 
 #### Adding new Dependencies
 
+⚠️ There is a [bug in yarn](https://github.com/yarnpkg/yarn/issues/7734) that may cause issues adding a new dependency to a workspace. You can avoid this by downgrading yarn to 1.19.1 (temporarily downgrade using `npx yarn@1.19.1 workspace @packages/server add my-new-dep1`).
+
 ```shell
 # add a new dep to the root of the repo
 $ yarn add -W my-new-dep1
@@ -413,6 +416,16 @@ When committing files, we run a Git pre-commit hook to lint the staged JS files.
 If this command fails, you may need to run `yarn lint-changed-fix` and commit those changes.
 
 We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
+
+### Adding links within code
+
+When adding links to outside resources within the Cypress Test Runner (including links to Cypress's own documentation), we utilize our [`cypress-on`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) service for all links.
+
+This is to ensure that links do not go dead in older versions of Cypress when the location of the link has changed. To add a new link:
+
+- Make up a new slug for the linked resource like `https://on.cypress.io/my-special-link`.
+- Open a PR adding the new slug in [links.yml](https://github.com/cypress-io/cypress-services/blob/develop/packages/on/data/links.yml) with the href of the resource it should redirect to. *Note: this requires access to the internal [cypress-services](https://github.com/cypress-io/cypress-services) repo which is only granted to employees. If you're an outside contributor and need a link reroute added, please comment in the relevant PR asking for assistance.*
+- Wait for the PR to be reviewed and **deployed** from [cypress-services](https://github.com/cypress-io/cypress-services). This is required before your changes can be merged into the `cypress` project.
 
 ### Tests
 
