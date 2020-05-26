@@ -539,10 +539,10 @@ const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => 
   }
 }
 
-function getTestFromRunnable (runnable) {
+function getTestFromRunnable (runnable, getTest) {
   switch (runnable.type) {
     case 'hook':
-      return getTestFromHook(runnable)
+      return getTest() || getTestFromHook(runnable)
 
     case 'test':
       return runnable
@@ -746,14 +746,14 @@ const create = (specWindow, mocha, Cypress, cy) => {
   let _id = 0
   let _hookId = 0
   let _uncaughtFn = null
-  let _resumedAtTestIndex
+  let _resumedAtTestIndex = null
 
   const _runner = mocha.getRunner()
 
   _runner.suite = mocha.getRootSuite()
 
   function isNotAlreadyRunTest (test) {
-    return !(Cypress._RESUMED_AT_TEST && getTestIndexFromId(test.id) < getTestIndexFromId(Cypress._RESUMED_AT_TEST))
+    return _resumedAtTestIndex == null || getTestIndexFromId(test.id) >= _resumedAtTestIndex
   }
 
   const getTestFromHookOrFindTest = (hook) => {
@@ -934,7 +934,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // move to the next runnable - this will be our async seam
       const _next = args[0]
 
-      const test = getTestFromRunnable(runnable)
+      const test = getTestFromRunnable(runnable, getTest)
 
       // if there's no test, this is likely a rouge before/after hook
       // that should not have run, so skip this runnable
@@ -1231,6 +1231,10 @@ const create = (specWindow, mocha, Cypress, cy) => {
           return
         }
       }
+    },
+
+    getResumedAtTestIndex () {
+      return _resumedAtTestIndex
     },
 
     cleanupQueue (numTestsKeptInMemory) {

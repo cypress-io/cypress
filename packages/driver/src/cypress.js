@@ -237,7 +237,7 @@ class $Cypress {
         // mocha runner has begun running the tests
         this.emit('run:start')
 
-        if (this.runner.getResumedAtTest() !== null) {
+        if (this.runner.getResumedAtTestIndex() !== null) {
           return
         }
 
