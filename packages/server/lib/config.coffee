@@ -552,10 +552,17 @@ module.exports = {
       debug("support JS module %s does not load", sf)
 
       loadingDefaultSupportFile = sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
-      if !loadingDefaltSupportFile
+      if !loadingDefaultSupportFile
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
-        return errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
+        return fs.pathExists(sf)
+        .then (found) ->
+          if found
+            debug("support file exists, assuming it will load")
+            obj.supportFile = sf
+            return obj
+          else
+            return errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
 
       ## supportFile doesn't exist on disk?
       debug("support file is default, check if #{path.dirname(sf)} exists")
@@ -622,32 +629,42 @@ module.exports = {
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
       debug("plugins module does not exist %o", { pluginsFile })
-      if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
-        debug("checking if pluginsFile exists", { pluginsFile, dirName: path.dirname(pluginsFile) })
 
-        fs.pathExists(pluginsFile)
-        .then (found) ->
-          if found
-            debug("is there index.ts in the plugins folder %s?", pluginsFile)
-            tsPluginsFilename = path.join(pluginsFile, "index.ts")
-            return fs.pathExists(tsPluginsFilename)
-            .then (foundTsFile) ->
-              if foundTsFile
-                debug("found index TS plugins file %o", { tsPluginsFilename })
-                obj.pluginsFile = tsPluginsFilename
-              else
-                debug("plugins folder exists, set pluginsFile to false")
-                ## if the directory exists, set it to false so it's ignored
-                obj.pluginsFile = false
-          else
-            debug("plugins folder does not exist, set to default index.js")
-            ## otherwise, set it up to be scaffolded later
-            obj.pluginsFile = path.join(pluginsFile, "index.js")
-          return obj
-      else
+      isLoadingDefaultPluginsFile = pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
+
+      if !isLoadingDefaultPluginsFile
         debug("plugins file is not default")
         ## they have it explicitly set, so it should be there
-        errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+        return fs.pathExists(pluginsFile)
+        .then (found) ->
+          if found
+            debug("plugins file exists, assuming it will load")
+            obj.pluginsFile = pluginsFile
+            return obj
+          else
+            return errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+
+      debug("checking if pluginsFile exists", { pluginsFile, dirName: path.dirname(pluginsFile) })
+      fs.pathExists(pluginsFile)
+      .then (found) ->
+        if found
+          debug("is there index.ts in the plugins folder %s?", pluginsFile)
+          tsPluginsFilename = path.join(pluginsFile, "index.ts")
+          return fs.pathExists(tsPluginsFilename)
+          .then (foundTsFile) ->
+            if foundTsFile
+              debug("found index TS plugins file %o", { tsPluginsFilename })
+              obj.pluginsFile = tsPluginsFilename
+            else
+              debug("plugins folder exists, set pluginsFile to false")
+              ## if the directory exists, set it to false so it's ignored
+              obj.pluginsFile = false
+        else
+          debug("plugins folder does not exist, set to default index.js")
+          ## otherwise, set it up to be scaffolded later
+          obj.pluginsFile = path.join(pluginsFile, "index.js")
+        return obj
+
     .return(obj)
 
   setParentTestsPaths: (obj) ->

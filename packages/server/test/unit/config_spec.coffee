@@ -1373,6 +1373,29 @@ describe "lib/config", ->
           supportFile: supportFilename
         })
 
+    it "uses custom TS supportFile if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj-custom-names")
+      supportFolder = "#{projectRoot}/cypress"
+      supportFilename = "#{supportFolder}/support.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(supportFilename).throws(e)
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support.ts"
+      })
+
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        debug("result is", result)
+        expect(result).to.eql({
+          projectRoot
+          supportFolder
+          supportFile: supportFilename
+        })
+
   context ".setPluginsFile", ->
     it "does nothing if pluginsFile is falsey", ->
       obj = {
@@ -1459,6 +1482,27 @@ describe "lib/config", ->
       config.setPluginsFile(obj)
       .catch (err) ->
         expect(err.message).to.include("The plugins file is missing or invalid.")
+
+    it "uses custom TS pluginsFile if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj-custom-names")
+      pluginsFolder = "#{projectRoot}/cypress"
+      pluginsFile = "#{pluginsFolder}/plugins.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(pluginsFile).throws(e)
+
+      obj = {
+        projectRoot
+        pluginsFile
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot
+          pluginsFile
+        })
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->
