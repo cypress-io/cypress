@@ -128,4 +128,34 @@ describe('controls', function () {
       })
     })
   })
+
+  describe('big object', () => {
+    it('shows correct message', () => {
+      cy.get('.command-name-assert .command-message-summarized-text').each(($el) => {
+        cy.wrap($el).should('contain', '[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...more]')
+      })
+    })
+
+    it('toggles inspector', () => {
+      cy.get('.command-name-assert .command-message-summarized-text').each(($el) => {
+        cy.wrap($el).click()
+        cy.get('.command-detail-viewer').should('be.visible')
+
+        cy.wrap($el).click()
+        cy.get('.command-detail-viewer').should('not.be.visible')
+      })
+    })
+
+    it('load more button works properly', () => {
+      cy.get('.command-name-assert .command-message-summarized-text').each(($el) => {
+        cy.wrap($el).click()
+
+        cy.get('.load-more').should('be.visible')
+        cy.get('.load-more').click()
+        cy.get('.load-more').should('not.be.visible')
+
+        cy.wrap($el).click()
+      })
+    })
+  })
 })
