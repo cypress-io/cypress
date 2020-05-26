@@ -621,7 +621,7 @@ module.exports = {
       obj.pluginsFile = utils.resolveModule(pluginsFile)
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      debug("plugins module %s does not exist", pluginsFile)
+      debug("plugins module does not exist %o", { pluginsFile })
       if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
         debug("plugins file %s is default, check if folder %s exists",
           pluginsFile, path.dirname(pluginsFile))
