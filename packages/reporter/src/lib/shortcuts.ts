@@ -18,7 +18,7 @@ class Shortcuts {
     if (dom.isTextLike(event.target)) return
 
     switch (event.key) {
-      case 'r': appState.isPaused ? events.emit('resume') : events.emit('restart')
+      case 'r': events.emit('restart')
         break
       case 's': !appState.isPaused && events.emit('stop')
         break

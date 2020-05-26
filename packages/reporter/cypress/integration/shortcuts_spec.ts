@@ -49,16 +49,11 @@ describe('controls', function () {
       })
     })
 
-    it('resumes tests when paused', () => {
-      runner.on.withArgs('paused').callArgWith(1, 'next command')
-
-      cy.get('body').type('r').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('runner:restart')
-        expect(runner.emit).to.have.been.calledWith('runner:resume')
-      })
-    })
-
     it('does not stop tests when paused', () => {
+      cy.get('body').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+      })
+
       runner.on.withArgs('paused').callArgWith(1, 'next command')
 
       cy.get('body').type('s').then(() => {
@@ -66,13 +61,12 @@ describe('controls', function () {
       })
     })
 
-    it('restarts tests', () => {
+    it('resumes tests', () => {
       cy.get('body').then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })
 
       cy.get('body').type('r').then(() => {
-        expect(runner.emit).not.to.have.been.calledWith('runner:resume')
         expect(runner.emit).to.have.been.calledWith('runner:restart')
       })
     })
@@ -111,10 +105,6 @@ describe('controls', function () {
       cy.window().then((win) => win.state.isRunning = true)
       cy.get('button.stop').trigger('mouseover')
       cy.get('.cy-tooltip').should('have.text', 'Stop Running S')
-
-      cy.window().then(() => runner.on.withArgs('paused').callArgWith(1, 'next command'))
-      cy.get('button.play').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'Resume R')
     })
   })
 })

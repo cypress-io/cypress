@@ -142,14 +142,9 @@ describe('<Controls />', () => {
     })
 
     it('renders tooltip around play button', () => {
-      const title = shallow(<Controls events={eventsStub()} appState={appState} />)
-      .find('.play')
-      .parent()
-      .prop('title')
+      const component = shallow(<Controls events={eventsStub()} appState={appState} />)
 
-      const component = shallow(title)
-
-      expect(component.text()).to.contain('Resume ')
+      expect(component.find('.play').parent()).to.have.prop('title', 'Resume')
     })
 
     it('emits resume event when play button is clicked', () => {
