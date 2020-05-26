@@ -526,9 +526,6 @@ module.exports = {
       ## resolve full path with extension
       obj.supportFile = require.resolve(sf)
       debug("resolved support file %s", obj.supportFile)
-      e = new Error('nope')
-      e.code = "MODULE_NOT_FOUND"
-      throw e
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
         debug("require.resolve switched support folder from %s to %s", sf, obj.supportFile)
