@@ -551,7 +551,7 @@ module.exports = {
     .catch({code: "MODULE_NOT_FOUND"}, ->
       debug("support JS module %s does not load", sf)
 
-      loadingDefaltSupportFile = sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
+      loadingDefaultSupportFile = sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
       if !loadingDefaltSupportFile
         debug("support file is not default")
         ## they have it explicitly set, so it should be there
