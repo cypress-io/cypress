@@ -208,38 +208,19 @@ const eachHookInSuite = function (suite, fn) {
   return null
 }
 
-// iterates over a suite's tests (including nested suites)
-// and will return as soon as the callback is true
-const findTestInSuite = function (suite, fn = _.identity) {
-  for (const test of suite.tests) {
+const onFirstTest = function (suite, fn) {
+  let test
+
+  for (test of suite.tests) {
     if (fn(test)) {
       return test
     }
   }
 
   for (suite of suite.suites) {
-    const test = findTestInSuite(suite, fn)
+    test = onFirstTest(suite, fn)
 
     if (test) {
-      return test
-    }
-  }
-}
-
-// same as findTestInSuite but iterates backwards
-const findLastTestInSuite = function (suite, fn = _.identity) {
-  for (let i = suite.suites.length - 1; i >= 0; i--) {
-    const test = findLastTestInSuite(suite.suites[i], fn)
-
-    if (test) {
-      return test
-    }
-  }
-
-  for (let i = suite.tests.length - 1; i >= 0; i--) {
-    const test = suite.tests[i]
-
-    if (fn(test)) {
       return test
     }
   }
@@ -261,51 +242,46 @@ const getAllSiblingTests = function (suite, getTestById) {
   return tests
 }
 
-function getOrderFromId (id) {
-  return +id.slice(1)
-}
-
-function isNotAlreadyRunTest (test) {
-  return !(Cypress._RESUMED_AT_TEST && getOrderFromId(test.id) < getOrderFromId(Cypress._RESUMED_AT_TEST))
-}
-
-const getTestFromHook = function (hook) {
+const getTestFromHook = function (hook, suite, getTestById) {
   // if theres already a currentTest use that
+  let found; let test
 
-  const test = hook.ctx.currentTest
-
-  if (test) {
-    return test
-  }
-}
-
-const getTestFromHookOrFindTest = function (hook) {
-  const test = getTestFromHook(hook)
+  test = hook != null ? hook.ctx.currentTest : undefined
 
   if (test) {
     return test
   }
 
-  const suite = hook.parent
+  // if we have a hook id then attempt
+  // to find the test by its id
+  if (hook != null ? hook.id : undefined) {
+    found = onFirstTest(suite, (test) => {
+      return hook.id === test.id
+    })
 
-  if (hook.hookName === 'after all') {
-    return findLastTestInSuite(suite, isNotAlreadyRunTest)
+    if (found) {
+      return found
+    }
   }
 
-  if (hook.hookName === 'before all') {
-    return findTestInSuite(suite, isNotAlreadyRunTest)
-  }
-}
+  // returns us the very first test
+  // which is in our filtered tests array
+  // based on walking down the current suite
+  // iterating through each test until it matches
+  found = onFirstTest(suite, (test) => {
+    return getTestById(test.id)
+  })
 
-function getTestFromRunnable (runnable) {
-  switch (runnable.type) {
-    case 'hook':
-      return getTestFromHook(runnable)
-
-    case 'test':
-      return runnable
-    default: null
+  if (found) {
+    return found
   }
+
+  // have one last final fallback where
+  // we just return true on the very first
+  // test (used in testing)
+  return onFirstTest(suite, (test) => {
+    return true
+  })
 }
 
 // we have to see if this is the last suite amongst
@@ -344,7 +320,7 @@ const isLastSuite = function (suite, tests) {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests) => {
-  return !test.parent._afterAll.length || isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
+  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
 const isLastTest = (test, tests) => {
@@ -417,10 +393,9 @@ const overrideRunnerHook = function (Cypress, _runner, getTestById, getTest, set
           //    since that will bubble up IF we're the last nested suite
           // 3. else if we arent the last nested suite we fire if we're
           //    the last test that will run
-
           if (
             (isRootSuite(this.suite) && isLastTest(t, allTests)) ||
-              (isRootSuite(this.suite.parent) && !this.suite.parent._afterAll.length && lastTestThatWillRunInSuite(t, siblings)) ||
+              (isRootSuite(this.suite.parent) && lastTestThatWillRunInSuite(t, siblings)) ||
               (!isLastSuite(this.suite, allTests) && lastTestThatWillRunInSuite(t, siblings))
           ) {
             changeFnToRunAfterHooks()
@@ -464,7 +439,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   let hasTests = false
 
   // only loop until we find the first test
-  findTestInSuite(suite, (test) => {
+  onFirstTest(suite, (test) => {
     return hasTests = true
   })
 
@@ -599,11 +574,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = function (hook, err, hookName) {
-  // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
-  // event, so this hook might not have currentTest set correctly
-  // in which case we need to lookup the test
-  const test = getTestFromHookOrFindTest(hook)
+const hookFailed = function (hook, err, hookName, getTestById, getTest) {
+  // finds the test by returning the first test from
+  // the parent or looping through the suites until
+  // it finds the first test
+  const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
 
   test.err = err
   test.state = 'failed'
@@ -664,11 +639,11 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       hook.hookName = getHookName(hook)
     }
 
-    // mocha incorrectly sets currentTest on before/after all's.
+    // mocha incorrectly sets currentTest on before all's.
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run
     // and not our current
-    if ((hook.hookName === 'before all' || hook.hookName === 'after all') && hook.ctx.currentTest) {
+    if ((hook.hookName === 'before all') && hook.ctx.currentTest) {
       delete hook.ctx.currentTest
     }
 
@@ -676,14 +651,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTestFromHookOrFindTest(hook)
-
-    if (!test) {
-      // we couldn't find a test to run with this hook
-      // probably because the entire suite has already completed
-      // so return early and tell onRunnableRun to skip the test
-      return
-    }
+    const test = getTest() || getTestFromHook(hook, hook.parent, getTestById)
 
     hook.id = test.id
     hook.ctx.currentTest = test
@@ -805,7 +773,7 @@ const _runnerListeners = function (_runner, Cypress, _emissions, getTestById, ge
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName)
+      return hookFailed(runnable, runnable.err, hookName, getTestById, getTest)
     }
   })
 }
@@ -975,22 +943,32 @@ const create = function (specWindow, mocha, Cypress, cy) {
     },
 
     onRunnableRun (runnableRun, runnable, args) {
-      // extract out the next(fn) which mocha uses to
-      // move to the next runnable - this will be our async seam
-      const _next = args[0]
+      let lifecycleStart; let test
 
-      const test = getTestFromRunnable(runnable)
+      if (!runnable.id) {
+        if (!_stopped) {
+          throw new Error('runnable must have an id', runnable.id)
+        }
 
-      // if there's no test, this is likely a rouge before/after hook
-      // that should not have run, so skip this runnable
-      if (!test) {
-        return _next()
+        return
+      }
+
+      switch (runnable.type) {
+        case 'hook':
+          test = getTest() || getTestFromHook(runnable, runnable.parent, getTestById)
+          break
+
+        case 'test':
+          test = runnable
+          break
+
+        default:
+          break
       }
 
       // closure for calculating the actual
       // runtime of a runnables fn exection duration
       // and also the run of the runnable:after:run:async event
-      let lifecycleStart
       let wallClockStartedAt = null
       let wallClockEnd = null
       let fnDurationStart = null
@@ -1022,6 +1000,10 @@ const create = function (specWindow, mocha, Cypress, cy) {
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
+
+      // extract out the next(fn) which mocha uses to
+      // move to the next runnable - this will be our async seam
+      const _next = args[0]
 
       const next = function (err) {
         // now set the duration of the after runnable run async event
