@@ -1119,7 +1119,7 @@ jobs:
       - run:
           name: Scaffold full TypeScript project 🏗
           working_directory: << parameters.wd >>
-          command: npx @bahmutov/cly init --typescript
+          command: npx @bahmutov/cly@1 init --typescript
       - run:
           name: Run project tests 🗳
           working_directory: << parameters.wd >>
