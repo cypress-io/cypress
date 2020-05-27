@@ -155,7 +155,7 @@ const defaults = function (state, config, obj) {
     let args = current != null ? current.get('args') : undefined
 
     if (args) {
-      const last = args[args.length - 1]
+      const last = _.last(args)
 
       if (_.isObject(last)) {
         args = args.slice(0, args.length - 1)
