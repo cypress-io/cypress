@@ -6,6 +6,7 @@ declare namespace Cypress {
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
     resolveWindowReference: any
     resolveLocationReference: any
+    state: Cypress.state
   }
 
   // Cypress.state is also accessible on cy.state
