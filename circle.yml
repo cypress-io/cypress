@@ -1085,6 +1085,46 @@ jobs:
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
 
+  test-full-typescript-project:
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      wd:
+        description: Working directory, should be OUTSIDE cypress monorepo folder
+        type: string
+        default: /root/test-full-typescript
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      # make sure we have cypress.zip received
+      - run: ls -l
+      - run: ls -l cypress.zip cypress.tgz
+      - run: mkdir << parameters.wd >>
+      - run: node --version
+      - run: npm --version
+      - run:
+          name: Create new NPM package ⚗️
+          working_directory: << parameters.wd >>
+          command: npm init -y
+      - run:
+          name: Install dependencies 📦
+          working_directory: << parameters.wd >>
+          environment:
+            CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
+          command: |
+            npm install /root/cypress/cypress.tgz typescript
+      - run:
+          name: Scaffold full TypeScript project 🏗
+          working_directory: << parameters.wd >>
+          command: npx @bahmutov/cly@1 init --typescript
+      - run:
+          name: Run project tests 🗳
+          working_directory: << parameters.wd >>
+          command: npx cypress run
+
   # install NPM + binary zip and run against staging API
   "test-binary-against-staging":
     <<: *defaults
@@ -1414,6 +1454,10 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-types-cypress-and-jest:
+        requires:
+          - build-binary
+          - build-npm-package
+    - test-full-typescript-project:
         requires:
           - build-binary
           - build-npm-package
