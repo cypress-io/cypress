@@ -119,7 +119,7 @@ module.exports = (Commands, Cypress, cy) => {
           if (options.ignoreShadowBoundaries && shadowTraversal) {
             $el = shadowTraversal(cy, wrapped, arg1, arg2)
           } else {
-            $el = wrapped[traversal].call(cy, wrapped, arg1, arg2)
+            $el = wrapped[traversal].call(wrapped, arg1, arg2)
           }
 
           // normalize the selector since jQuery won't have it
