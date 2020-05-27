@@ -826,11 +826,11 @@ describe('src/cy/commands/navigation', () => {
       beforeEach(() => {
         Cypress.emit('test:before:run', { id: 888 })
 
-        cy.stub(Cypress, 'getEmissions').returns([])
-        cy.stub(Cypress, 'getTestsState').returns([])
-        cy.stub(Cypress, 'getStartTime').returns('12345')
+        cy.stub(Cypress.runner, 'getEmissions').returns([])
+        cy.stub(Cypress.runner, 'getTestsState').returns([])
+        cy.stub(Cypress.runner, 'getStartTime').returns('12345')
         cy.stub(Cypress.Log, 'countLogsByTests').withArgs([]).returns(1)
-        cy.stub(Cypress, 'countByTestState')
+        cy.stub(Cypress.runner, 'countByTestState')
         .withArgs([], 'passed').returns(2)
         .withArgs([], 'failed').returns(3)
         .withArgs([], 'pending').returns(4)
@@ -952,7 +952,7 @@ describe('src/cy/commands/navigation', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        cy.stub(Cypress, 'getEmissions').returns([])
+        cy.stub(Cypress.runner, 'getEmissions').returns([])
 
         this.logs = []
 
