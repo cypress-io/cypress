@@ -54,6 +54,13 @@ workflows:
           working_directory: examples/react-scripts
           command: npm test
           store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/react-scripts
 
       - cypress/run:
           # react-scripts example with component tests not in "src" folder
@@ -69,6 +76,13 @@ workflows:
           working_directory: examples/react-scripts-folder
           command: npm test
           store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/react-scripts-folder
 
       - cypress/run:
           name: Example Tailwind
@@ -79,8 +93,17 @@ workflows:
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/tailwind
-          command: npm test
+          command: |
+            DEBUG=cypress-react-unit-test,find-webpack npm test
           store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  ls -la
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/tailwind
 
       - cypress/run:
           name: Example Webpack options
@@ -94,6 +117,13 @@ workflows:
           working_directory: examples/webpack-options
           command: npm test
           store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/webpack-options
 
       - cypress/run:
           name: Example Sass

@@ -6,6 +6,6 @@
   "experimentalComponentTesting": true,
   "componentFolder": "src",
   "env": {
-    "coverage": false
+    "coverage": true
   }
 }

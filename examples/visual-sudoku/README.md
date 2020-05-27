@@ -4,6 +4,8 @@ This React Sudoku app was cloned from [raravi/sudoku](https://github.com/raravi/
 
 Visual testing uses open source [palmerhq/cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot) plugin.
 
+Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+
 Example failing test [src/App.cy-spec.js](src/App.cy-spec.js)
 
 ![failing test](images/test.png)
