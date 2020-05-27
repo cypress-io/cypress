@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "test": "../../node_modules/.bin/cypress run",
-    "cy:open": "../../node_modules/.bin/cypress open"
+    "cy:open": "../../node_modules/.bin/cypress open",
+    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js",
+    "only-covered": "../../node_modules/.bin/only-covered src/App.js"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."

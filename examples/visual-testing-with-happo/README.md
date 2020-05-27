@@ -6,6 +6,8 @@
 
 > Visual component testing using [Happo.io](https://docs.happo.io/docs/cypress)
 
+Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+
 Example PR with code a change where we forgot to update the styles with additional classes: [#210](https://github.com/bahmutov/cypress-react-unit-test/pull/210)
 
 Notice that CircleCI passes the test, because functionally it worked, but the Happo CI check shows a failure:

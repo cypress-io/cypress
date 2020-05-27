@@ -6,6 +6,8 @@ Shows how to use Applitools to visually check React charts made with [Victory](h
 
 See [src/Chart.spec.js](src/Chart.spec.js)
 
+Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+
 The `cy.eyes*` commands are ignored during local interactive run. On CI, the `cy.eyes*` send the snapshots to Applitools servers to be analyzed and compared against the baseline images.
 
 ![Test result](images/result.png)

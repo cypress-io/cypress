@@ -7,7 +7,9 @@
     "cy:open": "../../node_modules/.bin/cypress open",
     "build:css": "../../node_modules/.bin/tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
     "pretest": "npm run build:css",
-    "precy:open": "npm run build:css"
+    "precy:open": "npm run build:css",
+    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js",
+    "only-covered": "../../node_modules/.bin/only-covered src/App.js"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."
