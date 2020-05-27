@@ -5,6 +5,28 @@ const $jquery = require('../../dom/jquery.js')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
+const shadowTraversals = {
+  find: (cy, el, arg1, arg2) => {
+    const elementsWithShadow = el.add($dom.findAllShadowRoots(el[0]))
+
+    return elementsWithShadow.find(arg1, arg2)
+  },
+  closest: (cy, el, arg1) => {
+    let found
+    let root = el
+
+    do {
+      found = root.closest(arg1)
+
+      if (!found) {
+        root = found.getRootNode()
+      }
+    } while (!found && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE)
+
+    return found ? cy.$$(found) : null
+  },
+}
+
 module.exports = (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
     Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
@@ -58,13 +80,12 @@ module.exports = (Commands, Cypress, cy) => {
 
         try {
           const wrapped = $jquery.isJquery(subject) ? subject : cy.$$(subject)
+          const shadowTraversal = shadowTraversals[traversal]
 
-          if (!options.ignoreShadowBoundaries) {
-            $el = wrapped[traversal].call(wrapped, arg1, arg2)
+          if (options.ignoreShadowBoundaries && shadowTraversal) {
+            $el = shadowTraversal(cy, wrapped, arg1, arg2)
           } else {
-            const elementsWithShadow = wrapped.add($dom.findAllShadowRoots(wrapped[0]))
-
-            $el = elementsWithShadow[traversal].call(elementsWithShadow, arg1, arg2)
+            $el = wrapped[traversal].call(cy, wrapped, arg1, arg2)
           }
 
           // normalize the selector since jQuery won't have it
