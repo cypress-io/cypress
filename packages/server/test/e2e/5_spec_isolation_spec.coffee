@@ -39,7 +39,7 @@ expectDurationWithin = (obj, duration, low, high, reset) ->
   return if not _.isNumber(d)
 
   ## ensure the duration is within range
-  expect(d).to.be.within(low, high)
+  expect(d, duration).to.be.within(low, high)
 
   ## once valid, mutate and set static range
   _.set(obj, duration, reset)
@@ -89,7 +89,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "stats.wallClockDuration",
       wallClocks,
-      wallClocks + 150, ## add 150ms to account for padding
+      wallClocks + 200, ## add 200ms to account for padding
       1234
     )
 
@@ -97,7 +97,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
       run,
       "reporterStats.duration",
       wallClocks,
-      wallClocks + 150, ## add 150ms to account for padding
+      wallClocks + 200, ## add 200ms to account for padding
       1234
     )
 
@@ -126,7 +126,7 @@ expectRunsToHaveCorrectStats = (runs = []) ->
         test,
         "wallClockDuration",
         timings,
-        timings + 50, ## add 50ms to account for padding
+        timings + 80, ## add 80ms to account for padding
         1234
       )
 

@@ -1,0 +1,6 @@
+{
+  "pluginsFile": false,
+  "supportFile": false,
+  "experimentalComponentTesting": true,
+  "componentFolder": "cypress/component-tests"
+}

@@ -1,13 +1,25 @@
+// should fail since before hooks are rerun on domain change
+
+const urls = [
+  'http://localhost:3434',
+  'http://localhost:4545',
+  'http://localhost:5656',
+]
+
+describe('initial domain change', () => {
+  it('test', () => {
+    cy.visit(urls[0])
+  })
+})
+
 describe('suite', () => {
   before(() => {
-    // will cause infinite top navigation
-    cy.visit('http://localhost:3434')
+    cy.visit(urls[1])
   })
 
-  it('test', () => {
-  })
+  it('test', () => {})
 
   it('causes domain navigation', () => {
-    cy.visit('http://localhost:4545')
+    cy.visit(urls[2])
   })
 })

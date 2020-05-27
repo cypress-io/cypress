@@ -5,6 +5,5 @@ describe "No Running Test", ->
   it "bar", ->
 
   context "nested suite", ->
-    cy
-      .viewport("iphone-6")
-      .get("h1")
+    cy.viewport("iphone-6")
+    cy.get("h1")

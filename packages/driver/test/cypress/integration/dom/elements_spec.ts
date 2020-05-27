@@ -1,9 +1,3 @@
-declare namespace Cypress {
-  interface cy {
-    state(key: 'window'): Window
-  }
-}
-
 describe('src/dom/elements', () => {
   const $ = Cypress.$.bind(Cypress)
 

@@ -14,10 +14,15 @@ namespace CypressMomentTests {
 }
 
 namespace CypressSinonTests {
-  Cypress.sinon // $ExpectType SinonApi
+  Cypress.sinon // $ExpectType SinonStatic
+
   const stub = cy.stub()
   stub(2, 'foo')
   expect(stub).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
+
+  const stub2 = Cypress.sinon.stub()
+  stub2(2, 'foo')
+  expect(stub2).to.have.been.calledWith(Cypress.sinon.match.number, Cypress.sinon.match('foo'))
 }
 
 namespace CypressJqueryTests {

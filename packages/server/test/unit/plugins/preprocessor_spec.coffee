@@ -1,5 +1,6 @@
 require("../../spec_helper")
 
+resolve = require('resolve')
 EE = require("events")
 Fixtures = require("../../support/helpers/fixtures")
 path = require("path")
@@ -173,3 +174,33 @@ describe "lib/plugins/preprocessor", ->
 
     it "removes stack lines", ->
       expect(preprocessor.errorMessage("foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)")).to.equal("foo\n baz")
+
+  context "#setDefaultPreprocessor", ->
+    it "finds TypeScript in the project root", ->
+      mockPlugin = {}
+      sinon.stub(plugins, "register")
+      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin)
+
+      preprocessor.setDefaultPreprocessor(@config)
+
+      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin)
+      # in this mock project, the TypeScript should be found
+      # from the monorepo
+      monorepoRoot = path.join(__dirname, "../../../../..")
+      typescript = resolve.sync("typescript", {
+        basedir: monorepoRoot
+      })
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript })
+
+    it "does not have typescript if not found", ->
+      mockPlugin = {}
+      sinon.stub(plugins, "register")
+      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin)
+      sinon.stub(resolve, "sync")
+        .withArgs("typescript", { basedir: @todosPath })
+        .throws(new Error('TypeScript not found'))
+
+      preprocessor.setDefaultPreprocessor(@config)
+
+      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin)
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript: null })

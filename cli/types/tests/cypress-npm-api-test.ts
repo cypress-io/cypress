@@ -29,3 +29,12 @@ cypress.open({
 cypress.run({
   configFile: "abc123"
 })
+
+// provide only some config options
+const runConfig: Cypress.ConfigOptions = {
+  baseUrl: 'http://localhost:8080',
+  env: {
+    login: false
+  },
+}
+cypress.run({ config: runConfig })

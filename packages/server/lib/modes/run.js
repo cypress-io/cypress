@@ -645,17 +645,18 @@ const trashAssets = Promise.method((config = {}) => {
 const createVideoRecording = function (videoName, options = {}) {
   const outputDir = path.dirname(videoName)
 
+  const onError = _.once((err) => {
+    // catch video recording failures and log them out
+    // but don't let this affect the run at all
+    return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
+  })
+
   return fs
   .ensureDirAsync(outputDir)
+  .catch(onError)
   .then(() => {
     return videoCapture
-    .start(videoName, _.extend({}, options, {
-      onError (err) {
-        // catch video recording failures and log them out
-        // but don't let this affect the run at all
-        return errors.warning('VIDEO_RECORDING_FAILED', err.stack)
-      },
-    }))
+    .start(videoName, _.extend({}, options, { onError }))
   })
 }
 
@@ -700,6 +701,12 @@ const maybeStartVideoRecording = Promise.method(function (options = {}) {
     }
   })
 })
+
+const warnVideoRecordingFailed = (err) => {
+  // log that post processing was attempted
+  // but failed and dont let this change the run exit code
+  errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
+}
 
 module.exports = {
   collectTestResults,
@@ -806,101 +813,91 @@ module.exports = {
     console.log('')
   },
 
-  postProcessRecording (end, name, cname, videoCompression, shouldUploadVideo) {
+  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
     // then begin processing the file
-    return end()
-    .then(() => {
-      // dont process anything if videoCompress is off
-      // or we've been told not to upload the video
-      if (videoCompression === false || shouldUploadVideo === false) {
-        return
+    // dont process anything if videoCompress is off
+    // or we've been told not to upload the video
+    if (videoCompression === false || shouldUploadVideo === false) {
+      return
+    }
+
+    console.log('')
+
+    terminal.header('Video', {
+      color: ['cyan'],
+    })
+
+    console.log('')
+
+    const table = terminal.table({
+      colWidths: [3, 21, 76],
+      colAligns: ['left', 'left', 'left'],
+      type: 'noBorder',
+      style: {
+        'padding-right': 0,
+      },
+      chars: {
+        'left': ' ',
+        'right': '',
+      },
+    })
+
+    table.push([
+      gray('-'),
+      gray('Started processing:'),
+      chalk.cyan(`Compressing to ${videoCompression} CRF`),
+    ])
+
+    console.log(table.toString())
+
+    const started = Date.now()
+    let progress = Date.now()
+    const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+
+    const onProgress = function (float) {
+      if (float === 1) {
+        const finished = Date.now() - started
+        const dur = `(${humanTime.long(finished)})`
+
+        const table = terminal.table({
+          colWidths: [3, 21, 61, 15],
+          colAligns: ['left', 'left', 'left', 'right'],
+          type: 'noBorder',
+          style: {
+            'padding-right': 0,
+          },
+          chars: {
+            'left': ' ',
+            'right': '',
+          },
+        })
+
+        table.push([
+          gray('-'),
+          gray('Finished processing:'),
+          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+          gray(dur),
+        ])
+
+        console.log(table.toString())
+
+        console.log('')
       }
 
-      console.log('')
+      if (Date.now() - progress > throttle) {
+        // bump up the progress so we dont
+        // continuously get notifications
+        progress += throttle
+        const percentage = `${Math.ceil(float * 100)}%`
 
-      terminal.header('Video', {
-        color: ['cyan'],
-      })
-
-      console.log('')
-
-      const table = terminal.table({
-        colWidths: [3, 21, 76],
-        colAligns: ['left', 'left', 'left'],
-        type: 'noBorder',
-        style: {
-          'padding-right': 0,
-        },
-        chars: {
-          'left': ' ',
-          'right': '',
-        },
-      })
-
-      table.push([
-        gray('-'),
-        gray('Started processing:'),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`),
-      ])
-
-      console.log(table.toString())
-
-      const started = Date.now()
-      let progress = Date.now()
-      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
-
-      const onProgress = function (float) {
-        if (float === 1) {
-          const finished = Date.now() - started
-          const dur = `(${humanTime.long(finished)})`
-
-          const table = terminal.table({
-            colWidths: [3, 21, 61, 15],
-            colAligns: ['left', 'left', 'left', 'right'],
-            type: 'noBorder',
-            style: {
-              'padding-right': 0,
-            },
-            chars: {
-              'left': ' ',
-              'right': '',
-            },
-          })
-
-          table.push([
-            gray('-'),
-            gray('Finished processing:'),
-            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-            gray(dur),
-          ])
-
-          console.log(table.toString())
-
-          console.log('')
-        }
-
-        if (Date.now() - progress > throttle) {
-          // bump up the progress so we dont
-          // continuously get notifications
-          progress += throttle
-          const percentage = `${Math.ceil(float * 100)}%`
-
-          console.log('    Compression progress: ', chalk.cyan(percentage))
-        }
+        console.log('    Compression progress: ', chalk.cyan(percentage))
       }
+    }
 
-      // bar.tickTotal(float)
-
-      return videoCapture.process(name, cname, videoCompression, onProgress)
-    })
-    .catch((err) => {
-      // log that post processing was attempted
-      // but failed and dont let this change the run exit code
-      errors.warning('VIDEO_POST_PROCESSING_FAILED', err.stack)
-    })
+    return videoCapture.process(name, cname, videoCompression, onProgress)
   },
 
   launchBrowser (options = {}) {
@@ -995,7 +992,7 @@ module.exports = {
 
   waitForBrowserToConnect (options = {}) {
     const { project, socketId, timeout, onError } = options
-
+    const browserTimeout = process.env.CYPRESS_INTERNAL_BROWSER_CONNECT_TIMEOUT || timeout || 60000
     let attempts = 0
 
     const wait = () => {
@@ -1011,7 +1008,7 @@ module.exports = {
           debug('browser launched')
         }),
       )
-      .timeout(timeout || 60000)
+      .timeout(browserTimeout)
       .catch(Promise.TimeoutError, (err) => {
         attempts += 1
 
@@ -1074,7 +1071,7 @@ module.exports = {
 
     return this.listenForProjectEnd(project, exit)
     .delay(delay)
-    .then((obj) => {
+    .then(async (obj) => {
       _.defaults(obj, {
         error: null,
         hooks: null,
@@ -1120,27 +1117,31 @@ module.exports = {
 
       obj.shouldUploadVideo = suv
 
-      debug('attempting to close the browser')
+      let videoCaptureFailed = false
+
+      if (endVideoCapture) {
+        await endVideoCapture()
+        .tapCatch(() => videoCaptureFailed = true)
+        .catch(warnVideoRecordingFailed)
+      }
 
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
-      return openProject
-      .closeBrowser()
-      .then(() => {
-        if (endVideoCapture) {
-          return this.postProcessRecording(
-            endVideoCapture,
-            videoName,
-            compressedVideoName,
-            videoCompression,
-            suv,
-          ).then(finish)
-          // TODO: add a catch here
-        }
+      debug('attempting to close the browser')
+      await openProject.closeBrowser()
 
-        return finish()
-      })
+      if (endVideoCapture && !videoCaptureFailed) {
+        await this.postProcessRecording(
+          videoName,
+          compressedVideoName,
+          videoCompression,
+          suv,
+        )
+        .catch(warnVideoRecordingFailed)
+      }
+
+      return finish()
     })
   },
 
@@ -1329,7 +1330,7 @@ module.exports = {
 
     // this needs to be a closure over `this.exitEarly` and not a reference
     // because `this.exitEarly` gets overwritten in `this.listenForProjectEnd`
-    options.onError = (err) => {
+    const onError = options.onError = (err) => {
       this.exitEarly(err)
     }
 
@@ -1394,6 +1395,7 @@ module.exports = {
               specPattern,
               socketId,
               parallel,
+              onError,
               browser,
               project,
               runUrl,

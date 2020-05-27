@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 import sinon, { SinonStub, SinonSpy } from 'sinon'
 import { EventEmitter } from 'events'
 
@@ -46,6 +44,18 @@ describe('controls', function () {
 
       cy.get('body').type('s').then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:stop')
+      })
+    })
+
+    it('does not stop tests when paused', () => {
+      cy.get('body').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+      })
+
+      runner.on.withArgs('paused').callArgWith(1, 'next command')
+
+      cy.get('body').type('s').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
     })
 

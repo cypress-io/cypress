@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
+const pluralize = require('pluralize')
 const Project = require('./project')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
@@ -30,6 +31,8 @@ const moduleFactory = () => {
   return {
     specsWatcher: null,
 
+    componentSpecsWatcher: null,
+
     reset: tryToCall('reset'),
 
     getConfig: tryToCall('getConfig'),
@@ -49,15 +52,18 @@ const moduleFactory = () => {
     },
 
     launch (browser, spec, options = {}) {
-      debug('resetting project state, preparing to launch browser')
+      debug('resetting project state, preparing to launch browser %s for spec %o options %o',
+        browser.name, spec, options)
 
       la(_.isPlainObject(browser), 'expected browser object:', browser)
 
       // reset to reset server and socket state because
       // of potential domain changes, request buffers, etc
       return this.reset()
-      .then(() => openProject.getSpecUrl(spec.absolute))
+      .then(() => openProject.getSpecUrl(spec.absolute, spec.specType))
       .then((url) => {
+        debug('open project url %s', url)
+
         return openProject.getConfig()
         .then((cfg) => {
           options.browsers = cfg.browsers
@@ -168,21 +174,39 @@ const moduleFactory = () => {
       250, { leading: true })
 
       const createSpecsWatcher = (cfg) => {
-        if (this.specsWatcher) {
-          return
+        // TODO I keep repeating this to get the resolved value
+        // probably better to have a single function that does this
+        const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+
+        debug('createSpecWatch component testing enabled', experimentalComponentTestingEnabled)
+
+        if (!this.specsWatcher) {
+          debug('watching integration test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
+
+          this.specsWatcher = chokidar.watch(cfg.testFiles, {
+            cwd: cfg.integrationFolder,
+            ignored: cfg.ignoreTestFiles,
+            ignoreInitial: true,
+          })
+
+          this.specsWatcher.on('add', checkForSpecUpdates)
+
+          this.specsWatcher.on('unlink', checkForSpecUpdates)
         }
 
-        debug('watch test files: %s in %s', cfg.testFiles, cfg.integrationFolder)
+        if (experimentalComponentTestingEnabled && !this.componentSpecsWatcher) {
+          debug('watching component test files: %s in %s', cfg.testFiles, cfg.componentFolder)
 
-        this.specsWatcher = chokidar.watch(cfg.testFiles, {
-          cwd: cfg.integrationFolder,
-          ignored: cfg.ignoreTestFiles,
-          ignoreInitial: true,
-        })
+          this.componentSpecsWatcher = chokidar.watch(cfg.testFiles, {
+            cwd: cfg.componentFolder,
+            ignored: cfg.ignoreTestFiles,
+            ignoreInitial: true,
+          })
 
-        this.specsWatcher.on('add', checkForSpecUpdates)
+          this.componentSpecsWatcher.on('add', checkForSpecUpdates)
 
-        return this.specsWatcher.on('unlink', checkForSpecUpdates)
+          this.componentSpecsWatcher.on('unlink', checkForSpecUpdates)
+        }
       }
 
       const get = () => {
@@ -191,13 +215,37 @@ const moduleFactory = () => {
           createSpecsWatcher(cfg)
 
           return specsUtil.find(cfg)
-        })
-        // TODO: put back 'integration' property
-        // on the specs
-        .then((specs = []) => {
-          return {
-            integration: specs,
-          }
+          .then((specs = []) => {
+            // TODO merge logic with "run.js"
+            if (debug.enabled) {
+              const names = _.map(specs, 'name')
+
+              debug(
+                'found %s using spec pattern \'%s\': %o',
+                pluralize('spec', names.length, true),
+                cfg.testFiles,
+                names,
+              )
+            }
+
+            const experimentalComponentTestingEnabled = _.get(cfg, 'resolved.experimentalComponentTesting.value', false)
+
+            if (experimentalComponentTestingEnabled) {
+              // separate specs into integration and component lists
+              // note: _.remove modifies the array in place and returns removed elements
+              const component = _.remove(specs, { specType: 'component' })
+
+              return {
+                integration: specs,
+                component,
+              }
+            }
+
+            // assumes all specs are integration specs
+            return {
+              integration: specs,
+            }
+          })
         })
       }
 
@@ -211,6 +259,11 @@ const moduleFactory = () => {
       if (this.specsWatcher) {
         this.specsWatcher.close()
         this.specsWatcher = null
+      }
+
+      if (this.componentSpecsWatcher) {
+        this.componentSpecsWatcher.close()
+        this.componentSpecsWatcher = null
       }
     },
 

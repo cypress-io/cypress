@@ -39,19 +39,22 @@ exports['e2e caught and uncaught hooks errors failing1 1'] = `
   5 passing
   3 failing
 
-  1) s1a "before each" hook for "t2a":
+  1) s1a
+       "before each" hook for "t2a":
      AssertionError: Timed out retrying: Expected to find element: \`.does-not-exist\`, but never found it.
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`s1a\`
       [stack trace lines]
 
-  2) s3a "before all" hook for "t8a":
+  2) s3a
+       "before all" hook for "t8a":
      Error: s3a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`s3a\`
       [stack trace lines]
 
-  3) s4a "before all" hook for "t10a":
+  3) s4a
+       "before all" hook for "t10a":
      Error: s4a before hook failed
 
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`s4a\`
@@ -139,10 +142,11 @@ exports['e2e caught and uncaught hooks errors failing2 1'] = `
   4 passing
   1 failing
 
-  1) s1b "before each" hook for "t2b":
-     Uncaught ReferenceError: foo is not defined
+  1) s1b
+       "before each" hook for "t2b":
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -223,10 +227,10 @@ exports['e2e caught and uncaught hooks errors failing3 1'] = `
   0 passing
   1 failing
 
-  1)  "before each" hook for "t1c":
-     Uncaught ReferenceError: foo is not defined
+  1) "before each" hook for "t1c":
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
@@ -313,10 +317,12 @@ exports['e2e caught and uncaught hooks errors failing4 1'] = `
   2 passing
   1 failing
 
-  1) uncaught hook error should continue to fire all mocha events s1 "before each" hook for "does not run":
-     Uncaught ReferenceError: foo is not defined
+  1) uncaught hook error should continue to fire all mocha events
+       s1
+         "before each" hook for "does not run":
+     ReferenceError: The following error originated from your application code, not from Cypress.
 
-This error originated from your application code, not from Cypress.
+  > foo is not defined
 
 When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 

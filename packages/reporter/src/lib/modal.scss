@@ -1,0 +1,78 @@
+[data-reach-dialog-overlay] {
+  display: flex;
+  z-index: 1;
+}
+
+[data-reach-dialog-content] {
+  align-items: center;
+  background: #f8f8f8;
+  border-radius: 10px;
+  font-family: $open-sans;
+  font-size: 0.9em;
+  justify-content: center;
+  margin: auto;
+  min-width: 30em;
+  padding: 2em 0 0;
+  position: relative;
+
+  h1 {
+    font-size: 1.5em;
+    padding-bottom: 0.5em;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0.6em 1em;
+    line-height: 1em;
+  }
+
+  p {
+    line-height: 1.5;
+    margin-bottom: 1em;
+    color: #444;
+  }
+
+  .content {
+    padding: 0 1.2em 0.6em;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.6em;
+
+    button {
+      border-radius: 3px;
+    }
+
+    .submit {
+      background: $pass;
+      color: #fff;
+      margin-left: 0.6em;
+      order: 1;
+
+      &:hover,
+      &:focus {
+        background: darken($pass, 10%);
+      }
+    }
+
+    .cancel {
+      background: #e3e3e3;
+
+      &:hover,
+      &:focus {
+        background: darken(#e3e3e3, 10%);
+      }
+    }
+  }
+
+  .close-button {
+    position: absolute;
+    right: 0.1em;
+    top: 0.5em;
+  }
+}

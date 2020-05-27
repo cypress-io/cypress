@@ -30,13 +30,10 @@ const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
+const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
+const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
-
-const proxies = {
-  runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
-  cy: 'detachDom getStyles'.split(' '),
-}
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -89,7 +86,8 @@ class $Cypress {
     this.mocha = null
     this.runner = null
     this.Commands = null
-    this._RESUMED_AT_TEST = null
+    this.$autIframe = null
+    this.onSpecReady = null
 
     this.events = $Events.extend(this)
 
@@ -169,8 +167,9 @@ class $Cypress {
     return this.action('cypress:config', config)
   }
 
-  initialize ($autIframe) {
-    return this.cy.initialize($autIframe)
+  initialize ({ $autIframe, onSpecReady }) {
+    this.$autIframe = $autIframe
+    this.onSpecReady = onSpecReady
   }
 
   run (fn) {
@@ -186,7 +185,7 @@ class $Cypress {
   // specs or support files have been downloaded
   // or parsed. we have not received any custom commands
   // at this point
-  onSpecWindow (specWindow) {
+  onSpecWindow (specWindow, scripts) {
     const logFn = (...args) => {
       return this.log.apply(this, args)
     }
@@ -206,7 +205,17 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
-    return null
+    $scriptUtils.runScripts(specWindow, scripts)
+    .catch((err) => {
+      err = $errUtils.createUncaughtException('spec', err)
+
+      this.runner.onScriptError(err)
+    })
+    .then(() => {
+      this.cy.initialize(this.$autIframe)
+
+      this.onSpecReady()
+    })
   }
 
   action (eventName, ...args) {
@@ -228,7 +237,7 @@ class $Cypress {
         // mocha runner has begun running the tests
         this.emit('run:start')
 
-        if (this._RESUMED_AT_TEST) {
+        if (this.runner.getResumedAtTestIndex() !== null) {
           return
         }
 
@@ -597,6 +606,8 @@ $Cypress.prototype.Location = $Location
 $Cypress.prototype.Log = $Log
 $Cypress.prototype.LocalStorage = $LocalStorage
 $Cypress.prototype.Mocha = $Mocha
+$Cypress.prototype.resolveWindowReference = resolvers.resolveWindowReference
+$Cypress.prototype.resolveLocationReference = resolvers.resolveLocationReference
 $Cypress.prototype.Mouse = $Mouse
 $Cypress.prototype.Runner = $Runner
 $Cypress.prototype.Server = $Server
@@ -610,18 +621,6 @@ $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
 $Cypress.prototype.lolex = lolex
-
-// proxy all of the methods in proxies
-// to their corresponding objects
-_.each(proxies, (methods, key) => {
-  return _.each(methods, (method) => {
-    return $Cypress.prototype[method] = function (...args) {
-      const prop = this[key]
-
-      return prop && prop[method].apply(prop, args)
-    }
-  })
-})
 
 // attaching these so they are accessible
 // via the runner + integration spec helper

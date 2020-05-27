@@ -4,7 +4,7 @@ Fixtures = require("../support/helpers/fixtures")
 e2ePath = Fixtures.projectPath("e2e")
 
 describe "e2e browserify, babel, es2015", ->
-  e2e.setup({npmInstall: true})
+  e2e.setup()
 
   it "passes", ->
     e2e.exec(@, {

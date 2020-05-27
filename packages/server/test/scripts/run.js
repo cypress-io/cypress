@@ -24,7 +24,7 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [options['glob-in-dir']]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
@@ -70,8 +70,9 @@ if (isWindows()) {
   commandAndArguments.command = 'xvfb-maybe'
   // this should always match cli/lib/exec/xvfb.js
   commandAndArguments.args = [
-    '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x24\\""',
+    `-as`,
+    `"-screen 0 1280x1024x24"`,
+    `--`,
     'node',
   ]
 }
@@ -110,11 +111,14 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '-r @packages/ts/register',
+  '-r @packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  // restore mocha 2.x behavior to force end process after spec run
+  '--exit',
 )
 
 const env = _.clone(process.env)
@@ -145,8 +149,12 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-if (options.exit != null) {
-  env.EXIT = options.exit
+if (options.headed) {
+  env.HEADED = true
+}
+
+if (options.exit === false) {
+  env.NO_EXIT = '1'
 }
 
 const cmd = `${commandAndArguments.command} ${

@@ -1,7 +1,23 @@
 const path = require('path')
 const fs = require('./fs')
+const debug = require('debug')('cypress:server:path_helpers')
+const _ = require('lodash')
 
+// When we load the spec iframe, we set its url to start with the type of the spec file
+// thus all integration tests are at "/integration/..."
+// and all component tests are at "/component/..."
+// After the spec type the url is the relative path to the spec from
+// the parent folder _of that spec type_.
+// Example:
+//    root/
+//      cypress/
+//        e2e/
+//          spec.js
+// Cypress config:
+//   integrationFolder: cypress/e2e
+// Serving spec.js at url: /integration/spec.js
 const isIntegrationTestRe = /^integration/
+const isComponentTestRe = /^component/
 
 // require.resolve walks the symlinks, which can really change
 // the results. For example
@@ -41,6 +57,10 @@ const getRelativePathToSpec = (spec) => {
     case !isIntegrationTestRe.test(spec):
       // strip off the integration part
       return path.relative('integration', spec)
+
+    case !isComponentTestRe.test(spec):
+      return path.relative('component', spec)
+
     default:
       return spec
   }
@@ -54,29 +74,45 @@ module.exports = {
   getRelativePathToSpec,
 
   getAbsolutePathToSpec (spec, config) {
-    switch (false) {
-      // if our file is an integration test
-      // then figure out the absolute path
-      // to it
-      case !isIntegrationTestRe.test(spec):
-        spec = getRelativePathToSpec(spec)
+    debug('get absolute path to spec %o', { spec })
 
-        // now simply join this with our integrationFolder
-        // which makes it an absolute path
-        return path.join(config.integrationFolder, spec)
+    const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
 
-        // // commented out until we implement unit testing
-        // when isUnitTestRe.test(spec)
+    // if our file is an integration test
+    // then figure out the absolute path
+    // to it
+    if (isIntegrationTestRe.test(spec)) {
+      spec = getRelativePathToSpec(spec)
 
-        // // strip off the unit part
-        // spec = path.relative("unit", spec)
+      // now simply join this with our integrationFolder
+      // which makes it an absolute path
+      const resolved = path.join(config.integrationFolder, spec)
 
-        // // now simply resolve this with our unitFolder
-        // // which makes it an absolute path
-        // path.join(config.unitFolder, spec)
+      debug('resolved path %s', resolved)
 
-      default:
-        return spec
+      return resolved
     }
+
+    if (experimentalComponentTestingEnabled && isComponentTestRe.test(spec)) {
+      spec = getRelativePathToSpec(spec)
+
+      const resolved = path.join(config.componentFolder, spec)
+
+      debug('resolved component spec path %o', { spec, componentFolder: config.componentFolder, resolved })
+
+      return resolved
+    }
+
+    // when isUnitTestRe.test(spec)
+
+    // // strip off the unit part
+    // spec = path.relative("unit", spec)
+
+    // // now simply resolve this with our unitFolder
+    // // which makes it an absolute path
+    // path.join(config.unitFolder, spec)
+    debug('returning default path %s', spec)
+
+    return spec
   },
 }

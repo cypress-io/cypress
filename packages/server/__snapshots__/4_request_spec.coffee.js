@@ -97,7 +97,8 @@ exports['e2e requests fails when network immediately fails 1'] = `
   0 passing
   1 failing
 
-  1) when network connection cannot be established fails:
+  1) when network connection cannot be established
+       fails:
      CypressError: \`cy.request()\` failed trying to load:
 
 http://localhost:16795/
@@ -123,14 +124,13 @@ Common situations why this would fail:
   - your web server isn't accessible
   - you have weird network configuration settings on your computer
 
-The stack trace for this error is:
-
-RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
-    [stack trace lines]
-
-
 https://on.cypress.io/request
+      [stack trace lines]
   
+  From Node.js Internals:
+    RequestError: Error: connect ECONNREFUSED 127.0.0.1:16795
+      [stack trace lines]
+    
 
 
 
@@ -204,7 +204,8 @@ exports['e2e requests fails on status code 1'] = `
   0 passing
   1 failing
 
-  1) when status code isnt 2xx or 3xx fails:
+  1) when status code isnt 2xx or 3xx
+       fails:
      CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/statusCode?code=503
@@ -321,7 +322,8 @@ exports['e2e requests prints long http props on fail 1'] = `
   0 passing
   1 failing
 
-  1) when status code isnt 2xx or 3xx fails:
+  1) when status code isnt 2xx or 3xx
+       fails:
      CypressError: \`cy.request()\` failed on:
 
 http://localhost:2294/myreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallyreallylong

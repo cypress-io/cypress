@@ -3,6 +3,7 @@ require("../spec_helper")
 _        = require("lodash")
 path     = require("path")
 R        = require("ramda")
+debug    = require("debug")("test")
 config   = require("#{root}lib/config")
 errors   = require("#{root}lib/errors")
 configUtil = require("#{root}lib/util/config")
@@ -798,6 +799,7 @@ describe "lib/config", ->
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
             experimentalGetCookiesSameSite: { value: false, from: "default" },
+            experimentalSourceRewriting: { value: false, from: "default" },
             taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
@@ -822,6 +824,8 @@ describe "lib/config", ->
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" },
             nodeVersion:                { value: "default", from: "default" },
+            experimentalComponentTesting: { value: false, from: "default" },
+            componentFolder:              { value: "cypress/component", from: "default" },
           })
 
       it "sets config, envFile and env", ->
@@ -868,6 +872,7 @@ describe "lib/config", ->
             responseTimeout:            { value: 30000, from: "default" },
             execTimeout:                { value: 60000, from: "default" },
             experimentalGetCookiesSameSite: { value: false, from: "default" },
+            experimentalSourceRewriting: { value: false, from: "default" },
             taskTimeout:                { value: 60000, from: "default" },
             numTestsKeptInMemory:       { value: 50, from: "default" },
             waitForAnimations:          { value: true, from: "default" },
@@ -892,6 +897,8 @@ describe "lib/config", ->
             screenshotsFolder:          { value: "cypress/screenshots", from: "default" },
             testFiles:                  { value: "**/*.*", from: "default" },
             nodeVersion:                { value: "default", from: "default" },
+            experimentalComponentTesting: { value: false, from: "default" },
+            componentFolder:              { value: "cypress/component", from: "default" },
             env: {
               foo: {
                 value: "foo"
@@ -1343,6 +1350,52 @@ describe "lib/config", ->
       .catch (err) ->
         expect(err.message).to.include("The support file is missing or invalid.")
 
+    it "sets the supportFile to index.ts if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+      supportFolder = "#{projectRoot}/cypress/support"
+      supportFilename = "#{supportFolder}/index.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(supportFolder).throws(e)
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support"
+      })
+
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        debug("result is", result)
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          supportFolder: supportFolder
+          supportFile: supportFilename
+        })
+
+    it "uses custom TS supportFile if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj-custom-names")
+      supportFolder = "#{projectRoot}/cypress"
+      supportFilename = "#{supportFolder}/support.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(supportFilename).throws(e)
+
+      obj = config.setAbsolutePaths({
+        projectRoot: projectRoot
+        supportFile: "cypress/support.ts"
+      })
+
+      config.setSupportFileAndFolder(obj)
+      .then (result) ->
+        debug("result is", result)
+        expect(result).to.eql({
+          projectRoot
+          supportFolder
+          supportFile: supportFilename
+        })
+
   context ".setPluginsFile", ->
     it "does nothing if pluginsFile is falsey", ->
       obj = {
@@ -1365,6 +1418,42 @@ describe "lib/config", ->
         expect(result).to.eql({
           projectRoot: projectRoot
           pluginsFile: "#{projectRoot}/cypress/plugins/index.js"
+        })
+
+    it "sets the pluginsFile to index.ts if it exists", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: "#{projectRoot}/cypress/plugins"
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: "#{projectRoot}/cypress/plugins/index.ts"
+        })
+
+    it "sets the pluginsFile to index.ts if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj")
+      pluginsFolder = "#{projectRoot}/cypress/plugins"
+      pluginsFilename = "#{pluginsFolder}/index.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(pluginsFolder).throws(e)
+
+      obj = {
+        projectRoot: projectRoot
+        pluginsFile: pluginsFolder
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot: projectRoot
+          pluginsFile: pluginsFilename
         })
 
     it "set the pluginsFile to false if it does not exist, plugins folder exists, and pluginsFile is the default", ->
@@ -1393,6 +1482,27 @@ describe "lib/config", ->
       config.setPluginsFile(obj)
       .catch (err) ->
         expect(err.message).to.include("The plugins file is missing or invalid.")
+
+    it "uses custom TS pluginsFile if it exists (without ts require hook)", ->
+      projectRoot = path.join(process.cwd(), "test/support/fixtures/projects/ts-proj-custom-names")
+      pluginsFolder = "#{projectRoot}/cypress"
+      pluginsFile = "#{pluginsFolder}/plugins.ts"
+
+      e = new Error("Cannot resolve TS file by default")
+      e.code = "MODULE_NOT_FOUND"
+      sinon.stub(config.utils, "resolveModule").withArgs(pluginsFile).throws(e)
+
+      obj = {
+        projectRoot
+        pluginsFile
+      }
+
+      config.setPluginsFile(obj)
+      .then (result) ->
+        expect(result).to.eql({
+          projectRoot
+          pluginsFile
+        })
 
   context ".setParentTestsPaths", ->
     it "sets parentTestsFolder and parentTestsFolderDisplay", ->

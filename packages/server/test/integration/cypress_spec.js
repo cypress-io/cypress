@@ -640,7 +640,7 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      return config.get(this.idsPath)
+      config.get(this.idsPath)
       .then((cfg) => {
         this.cfg = cfg
 
