@@ -334,10 +334,7 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
 
           // 1. if we're the very last test in the entire allTests
           //    we wait until the root suite fires
-          // 2. else we wait until the very last possible moment by waiting
-          //    until the root suite is the parent of the current suite
-          //    since that will bubble up IF we're the last nested suite
-          // 3. else if we arent the last nested suite we fire if we're
+          // 2. else if we arent the last nested suite we fire if we're
           //    the last test that will run
 
           if (
@@ -539,10 +536,10 @@ const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => 
   }
 }
 
-function getTestFromRunnable (runnable, getTest) {
+function getTestFromRunnable (runnable) {
   switch (runnable.type) {
     case 'hook':
-      return getTest() || getTestFromHook(runnable)
+      return getTestFromHook(runnable)
 
     case 'test':
       return runnable
@@ -934,7 +931,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // move to the next runnable - this will be our async seam
       const _next = args[0]
 
-      const test = getTestFromRunnable(runnable, getTest)
+      const test = getTest() || getTestFromRunnable(runnable)
 
       // if there's no test, this is likely a rouge before/after hook
       // that should not have run, so skip this runnable
