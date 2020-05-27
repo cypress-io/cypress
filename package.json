@@ -70,6 +70,7 @@
     "babel-loader": "8.0.6",
     "babel-plugin-module-resolver": "4.0.0",
     "bootstrap": "4.4.1",
+    "check-code-coverage": "1.9.2",
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
     "cypress": "4.6.0",
@@ -124,7 +125,7 @@
     "@cypress/webpack-preprocessor": "5.4.1",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
-    "find-webpack": "1.8.0",
+    "find-webpack": "1.9.0",
     "mime-types": "2.1.26"
   },
   "release": {

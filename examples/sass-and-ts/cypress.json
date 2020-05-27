@@ -7,6 +7,6 @@
   "componentFolder": "src",
   "nodeVersion": "system",
   "env": {
-    "coverage": false
+    "coverage": true
   }
 }
