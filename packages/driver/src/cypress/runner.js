@@ -266,7 +266,7 @@ const isLastSuite = (suite, tests) => {
 // if we failed from a hook and that hook was 'before'
 // since then mocha skips the remaining tests in the suite
 const lastTestThatWillRunInSuite = (test, tests) => {
-  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all' || test.hookName === 'after all'))
+  return isLastTest(test, tests) || (test.failedFromHookId && (test.hookName === 'before all'))
 }
 
 const isLastTest = (test, tests) => {
@@ -597,6 +597,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run
     // and not our current
+    // https://github.com/cypress-io/cypress/issues/1987
     if ((hook.hookName === 'before all' || hook.hookName === 'after all') && hook.ctx.currentTest) {
       delete hook.ctx.currentTest
     }
