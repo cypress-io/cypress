@@ -115,9 +115,14 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
         - Test the new version of Cypress against the Cypress dashboard repo.
 7. Deploy the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
-    - Merge any release-specific documentation changes.
-    - There will usually already be a PR for the changelog. Double-check it includes items from each closed issue in the release (check the release report in ZenHub for a list of the issues).
-    - Merging into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
+    - If there is not already a release-specific PR open, create one. You can use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
+        ```
+        cd packages/issues-in-release
+        yarn do:changelog --release <release label>
+        ```
+    - Ensure the changelog is up-to-date and has the correct date.
+    - Merge any release-specific documentation changes into the main release PR.
+    - Merging this PR into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@X.Y.Z
