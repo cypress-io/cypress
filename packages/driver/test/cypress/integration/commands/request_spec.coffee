@@ -19,6 +19,7 @@ describe "src/cy/commands/request", ->
             failOnStatusCode: true
             retryOnNetworkFailure: true
             retryOnStatusCodeFailure: false
+            encoding: 'utf8'
             gzip: true
             followRedirect: true
             timeout: RESPONSE_TIMEOUT
@@ -195,6 +196,26 @@ describe "src/cy/commands/request", ->
           cy.request({ url: encodeURI('http://localhost😀:1234/😀') }).then ->
             @expectOptionsToBe({
               url: "http://xn--localhost-ob26h:1234/%F0%9F%98%80"
+            })
+
+      context "encoding", ->
+        it "lowercases encoding", ->
+          cy.request({
+            url: "http://localhost:8080/",
+            encoding: "UtF8"
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8080/"
+              encoding: "utf8"
+            })
+
+        it "defaults encoding to `utf8`", ->
+          cy.request({
+            url: "http://localhost:8080/",
+          }).then ->
+            @expectOptionsToBe({
+              url: "http://localhost:8080/"
+              encoding: "utf8"
             })
 
       context "gzip", ->
@@ -737,6 +758,22 @@ describe "src/cy/commands/request", ->
         cy.request({
           url: "http://localhost:1234/foo"
           gzip: {}
+        })
+
+      it "throws when encoding is not valid", (done) ->
+        cy.on "fail", (err) =>
+          lastLog = @lastLog
+
+          expect(@logs.length).to.eq(1)
+          expect(lastLog.get("error")).to.eq(err)
+          expect(lastLog.get("state")).to.eq("failed")
+          expect(err.message).to.eq("`cy.request()` was called with invalid encoding: `binaryX`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node's Buffer encoding.")
+          expect(err.docsUrl).to.eq("https://on.cypress.io/request")
+          done()
+
+        cy.request({
+          url: "http://localhost:1234/foo"
+          encoding: 'binaryX'
         })
 
       it "throws when form isnt a boolean", (done) ->

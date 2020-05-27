@@ -1,6 +1,7 @@
 // @ts-ignore
 import dom from '@packages/driver/src/dom'
 import events from './events'
+import appState from './app-state'
 
 class Shortcuts {
   start () {
@@ -19,7 +20,7 @@ class Shortcuts {
     switch (event.key) {
       case 'r': events.emit('restart')
         break
-      case 's': events.emit('stop')
+      case 's': !appState.isPaused && events.emit('stop')
         break
       case 'f': events.emit('focus:tests')
         break

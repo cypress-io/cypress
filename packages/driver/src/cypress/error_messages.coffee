@@ -884,6 +884,10 @@ module.exports = {
       message: "#{cmd('request')} must be passed an object literal for the `auth` option."
       docsUrl: "https://on.cypress.io/request"
     }
+    encoding_invalid: {
+      message: "#{cmd('request')} was called with invalid encoding: `{{encoding}}`. Encoding can be: `utf8`, `utf16le`, `latin1`, `base64`, `hex`, `ascii`, `binary`, `latin1`, `ucs2`, `utf16le`, or any other encoding supported by Node's Buffer encoding."
+      docsUrl: "https://on.cypress.io/request"
+    }
     gzip_invalid: {
       message: "#{cmd('request')} requires the `gzip` option to be a boolean."
       docsUrl: "https://on.cypress.io/request"
