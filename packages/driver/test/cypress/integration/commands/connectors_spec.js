@@ -335,7 +335,7 @@ describe('src/cy/commands/connectors', () => {
         beforeEach(function () {
           delete this.remoteWindow.$.fn.foo
 
-          Cypress.config('defaultCommandTimeout', 100)
+          Cypress.config('defaultCommandTimeout', 200)
 
           this.logs = []
 
