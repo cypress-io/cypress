@@ -109,6 +109,13 @@ workflows:
           working_directory: examples/sass-and-ts
           command: npm test
           store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/sass-and-ts
 
       - cypress/run:
           name: Visual Sudoku

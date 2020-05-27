@@ -38,7 +38,7 @@ module.exports = (on, config) => {
   }
 
   findWebpack.cleanForCypress(opts, webpackOptions)
-  debug('claned webpack options: %o', webpackOptions)
+  debug('cleaned webpack options: %o', webpackOptions)
 
   addImageRedirect(webpackOptions)
 
