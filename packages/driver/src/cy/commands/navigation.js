@@ -917,14 +917,14 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           // state for like scrollTop
           let s = {
             currentId: id,
-            tests: Cypress.getTestsState(),
-            startTime: Cypress.getStartTime(),
-            emissions: Cypress.getEmissions(),
+            tests: Cypress.runner.getTestsState(),
+            startTime: Cypress.runner.getStartTime(),
+            emissions: Cypress.runner.getEmissions(),
           }
 
-          s.passed = Cypress.countByTestState(s.tests, 'passed')
-          s.failed = Cypress.countByTestState(s.tests, 'failed')
-          s.pending = Cypress.countByTestState(s.tests, 'pending')
+          s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
+          s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
+          s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
           s.numLogs = $Log.countLogsByTests(s.tests)
 
           return Cypress.action('cy:collect:run:state')

@@ -6,14 +6,17 @@ declare namespace Cypress {
     // TODO: how to pull these from resolvers.ts? can't import in a d.ts file...
     resolveWindowReference: any
     resolveLocationReference: any
-
-    /**
-     * Access and set Cypress's internal state.
-     */
-    state: State
+    state: Cypress.state
   }
 
-  interface State {
-    (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
+  // Cypress.state is also accessible on cy.state
+  interface cy {
+    state: Cypress.State
+  }
+
+  // Extend Cypress.state properties here
+  interface ResolvedConfigOptions {
+    $autIframe: JQuery<HTMLIFrameElement>
+    document: Document
   }
 }
