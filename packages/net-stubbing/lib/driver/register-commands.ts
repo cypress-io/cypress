@@ -21,6 +21,7 @@ import {
   NetEventFrames,
 } from '../types'
 import '@packages/driver/index.d.ts'
+import $errUtils from '@packages/driver/src/cypress/error_utils'
 
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
@@ -133,9 +134,6 @@ function _validateStaticResponse (staticResponse: StaticResponse): void {
 }
 
 export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State /* config */) {
-  const { utils } = Cypress
-  // TODO: figure out what to do for XHR compatibility
-
   function _emit (eventName: string, ...args: any[]) {
     // all messages from driver to server are wrapped in backend:request
     return Cypress.backend('net', eventName, ...args)
@@ -258,7 +256,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         try {
           _validateStaticResponse(<StaticResponse>handler)
         } catch (err) {
-          utils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
+          $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
 
           return Promise.resolve()
         }
@@ -266,7 +264,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         frame.staticResponse = <StaticResponse>handler
         break
       default:
-        utils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
+        $errUtils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
 
         return Promise.resolve()
     }
@@ -302,7 +300,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   }
 
   function server (): void {
-    Cypress.utils.warnByPath('warn_server_deprecated')
+    $errUtils.warnByPath('warn_server_deprecated')
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
@@ -366,11 +364,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
         if (nextCalled) {
-          return utils.warnByPath('net_stubbing.warn_reply_called_after_next', { args: { route: route.options, req } })
+          return $errUtils.warnByPath('net_stubbing.warn_reply_called_after_next', { args: { route: route.options, req } })
         }
 
         if (replyCalled) {
-          return utils.warnByPath('net_stubbing.warn_multiple_reply_calls', { args: { route: route.options, req } })
+          return $errUtils.warnByPath('net_stubbing.warn_multiple_reply_calls', { args: { route: route.options, req } })
         }
 
         replyCalled = true
@@ -430,11 +428,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     // next() can be called to pass this to the next route
     const next = () => {
       if (replyCalled) {
-        return utils.warnByPath('net_stubbing.warn_next_called_after_reply', { args: { route: route.options, req } })
+        return $errUtils.warnByPath('net_stubbing.warn_next_called_after_reply', { args: { route: route.options, req } })
       }
 
       if (nextCalled) {
-        return utils.warnByPath('net_stubbing.warn_multiple_next_calls', { args: { route: route.options, req } })
+        return $errUtils.warnByPath('net_stubbing.warn_multiple_next_calls', { args: { route: route.options, req } })
       }
 
       nextCalled = true
@@ -476,7 +474,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       ...res,
       send (staticResponse?, maybeBody?, maybeHeaders?) {
         if (sendCalled) {
-          return utils.warnByPath('net_stubbing.warn_multiple_send_calls', { args: { res } })
+          return $errUtils.warnByPath('net_stubbing.warn_multiple_send_calls', { args: { res } })
         }
 
         sendCalled = true
