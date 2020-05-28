@@ -4,7 +4,7 @@ declare global {
   }
 }
 
-import 'cypress/types/cy-net-stubbing'
+import 'cypress/types/net-stubbing'
 
 // @ts-ignore
 const { $, _ } = Cypress
