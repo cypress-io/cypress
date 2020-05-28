@@ -18,7 +18,11 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
       relativeFile: relativeSpecPath,
     }
 
-    return <FileOpener className="runnable-header" fileDetails={fileDetails} />
+    return (
+      <div className="runnable-header">
+        <FileOpener fileDetails={fileDetails} />
+      </div>
+    )
   }
 }
 

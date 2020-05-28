@@ -27,6 +27,7 @@ describe('controls', function () {
       win.render({
         runner,
         specPath: '/foo/bar',
+        relativeSpecPath: '/foo/bar',
       })
     })
 
@@ -84,7 +85,7 @@ describe('controls', function () {
       .then(($body) => {
         // this realistically happens with the selector playground, but
         // need to add an input since this environment is isolated
-        $body.append('<input id="temp-input" />')
+        $body.append('<input id="temp-input" style="margin-top: 40px;" />')
       })
       .get('#temp-input').type('r')
       .then(() => {

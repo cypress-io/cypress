@@ -247,13 +247,12 @@
     display: block;
     font-size: 13px;
     line-height: 24px;
-    margin-bottom: 5px;
     padding: 5px 10px;
     position: absolute;
     width: 100%;
     z-index: 1;
 
-    &:before {
+    a:before {
       @extend .#{$fa-css-prefix};
       @extend .#{$fa-css-prefix}-file;
       color: #bdbdbd;
