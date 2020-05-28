@@ -192,12 +192,18 @@
     margin: 10px;
 
     .runnable-err-file-path {
+      &:before {
+        @extend .#{$fa-css-prefix};
+        @extend .#{$fa-css-prefix}-file;
+        color: #bdbdbd;
+        margin-right: 5px;
+      }
+
+      background: #f6f6f6;
       display: block;
-      padding: 3px 10px 0;
-      line-height: 24px;
       font-size: 13px;
-      position: relative;
-      top: 5px;
+      line-height: 24px;
+      padding: 3px 10px;
     }
 
     pre {
