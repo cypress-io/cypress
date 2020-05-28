@@ -52,7 +52,7 @@
     "@babel/plugin-transform-modules-commonjs": "7.7.5",
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
-    "@babel/preset-typescript": "7.9.0",
+    "@babel/preset-typescript": "7.10.1",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
     "@emotion/core": "10.0.22",
