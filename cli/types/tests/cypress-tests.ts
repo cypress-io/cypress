@@ -40,6 +40,8 @@ namespace CypressConfigTests {
   Cypress.config('baseUrl', '.') // $ExpectType void
   Cypress.config('baseUrl', null) // $ExpectType void
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
+
+  Cypress.config('taskTimeout') // $ExpectType number
 }
 
 namespace CypressEnvTests {

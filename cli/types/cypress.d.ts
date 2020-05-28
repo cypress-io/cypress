@@ -2302,6 +2302,11 @@ declare namespace Cypress {
      */
     responseTimeout: number
     /**
+     * Time, in milliseconds, to wait for a task to finish executing during a cy.task() command
+     * @default 60000
+     */
+    taskTimeout: number
+    /**
      * Path to folder where application files will attempt to be served from
      * @default root project folder
      */
