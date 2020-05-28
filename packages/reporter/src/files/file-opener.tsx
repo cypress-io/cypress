@@ -78,7 +78,7 @@ const FileOpener = observer(({ fileDetails, className }: Props) => {
 
   return (
     <a className={className} onClick={attemptOpenFile} href='#'>
-      {originalFile}:{line}:{column}
+      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
       <EditorPickerModal
         chosenEditor={state.chosenEditor}
         editors={state.editors}

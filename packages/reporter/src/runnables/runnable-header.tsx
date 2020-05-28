@@ -12,8 +12,8 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     const { specPath, relativeSpecPath } = this.props
     const fileDetails = {
       absoluteFile: specPath,
-      column: 1,
-      line: 1,
+      column: 0,
+      line: 0,
       originalFile: relativeSpecPath,
       relativeFile: relativeSpecPath,
     }
