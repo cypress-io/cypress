@@ -254,7 +254,57 @@ hideSpecialVals = (val, key) ->
 
   return val
 
+# an object with a few utility methods
+# for easy stubbing from unit tests
+utils = {
+  resolveModule: (name) ->
+    require.resolve(name)
+
+  # tries to find support or plugins file
+  # returns:
+  #   false - if the file should not be set
+  #   string - found filename
+  #   null - if there is an error finding the file
+  discoverModuleFile: (options) ->
+    debug("discover module file %o", options)
+    { filename, projectRoot, isDefault } = options
+
+    if !isDefault
+      ## they have it explicitly set, so it should be there
+      return fs.pathExists(filename)
+      .then (found) ->
+        if found
+          debug("file exists, assuming it will load")
+          return filename
+
+        debug("could not find %o", { filename })
+        return null
+
+    ## support or plugins file doesn't exist on disk?
+    debug("support file is default, check if #{path.dirname(filename)} exists")
+    return fs.pathExists(filename)
+    .then (found) ->
+      if found
+        debug("is there index.ts in the support or plugins folder %s?", filename)
+        tsFilename = path.join(filename, "index.ts")
+        return fs.pathExists(tsFilename)
+        .then (foundTsFile) ->
+          if foundTsFile
+            debug("found index TS file %s", tsFilename)
+            return tsFilename
+
+          ## if the directory exists, set it to false so it's ignored
+          debug("setting support or plugins file to false")
+          return false
+
+      debug("folder does not exist, set to default index.js")
+      ## otherwise, set it up to be scaffolded later
+      return path.join(filename, "index.js")
+}
+
 module.exports = {
+  utils,
+
   getConfigKeys: -> configKeys.concat(experimentalConfigKeys)
 
   isValidCypressInternalEnvValue: (value) ->
@@ -524,7 +574,8 @@ module.exports = {
     Promise
     .try ->
       ## resolve full path with extension
-      obj.supportFile = require.resolve(sf)
+      obj.supportFile = utils.resolveModule(sf)
+      debug("resolved support file %s", obj.supportFile)
     .then ->
       if pathHelpers.checkIfResolveChangedRootFolder(obj.supportFile, sf)
         debug("require.resolve switched support folder from %s to %s", sf, obj.supportFile)
@@ -539,25 +590,22 @@ module.exports = {
             errors.throw("SUPPORT_FILE_NOT_FOUND", obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
           debug("switching to found file %s", obj.supportFile)
     .catch({code: "MODULE_NOT_FOUND"}, ->
-      debug("support file %s does not exist", sf)
-      ## supportFile doesn't exist on disk
-      if sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
-        debug("support file is default, check if #{path.dirname(sf)} exists")
-        return fs.pathExists(sf)
-        .then (found) ->
-          if found
-            debug("support folder exists, set supportFile to false")
-            ## if the directory exists, set it to false so it's ignored
-            obj.supportFile = false
-          else
-            debug("support folder does not exist, set to default index.js")
-            ## otherwise, set it up to be scaffolded later
-            obj.supportFile = path.join(sf, "index.js")
-          return obj
-      else
-        debug("support file is not default")
-        ## they have it explicitly set, so it should be there
-        errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), obj.configFile || CONFIG_DEFAULTS.configFile)
+      debug("support JS module %s does not load", sf)
+
+      loadingDefaultSupportFile = sf is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
+      return utils.discoverModuleFile({
+        filename: sf
+        isDefault: loadingDefaultSupportFile
+        projectRoot: obj.projectRoot
+      })
+      .then (result) ->
+        if result == null
+          configFile = obj.configFile || CONFIG_DEFAULTS.configFile
+          return errors.throw("SUPPORT_FILE_NOT_FOUND", path.resolve(obj.projectRoot, sf), configFile)
+
+        debug("setting support file to %o", {result})
+        obj.supportFile = result
+        return obj
     )
     .then ->
       if obj.supportFile
@@ -594,27 +642,26 @@ module.exports = {
     Promise
     .try ->
       ## resolve full path with extension
-      obj.pluginsFile = require.resolve(pluginsFile)
+      obj.pluginsFile = utils.resolveModule(pluginsFile)
       debug("set pluginsFile to #{obj.pluginsFile}")
     .catch {code: "MODULE_NOT_FOUND"}, ->
-      debug("plugins file does not exist")
-      if pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
-        debug("plugins file is default, check if #{path.dirname(pluginsFile)} exists")
-        fs.pathExists(pluginsFile)
-        .then (found) ->
-          if found
-            debug("plugins folder exists, set pluginsFile to false")
-            ## if the directory exists, set it to false so it's ignored
-            obj.pluginsFile = false
-          else
-            debug("plugins folder does not exist, set to default index.js")
-            ## otherwise, set it up to be scaffolded later
-            obj.pluginsFile = path.join(pluginsFile, "index.js")
-          return obj
-      else
-        debug("plugins file is not default")
-        ## they have it explicitly set, so it should be there
-        errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+      debug("plugins module does not exist %o", { pluginsFile })
+
+      isLoadingDefaultPluginsFile = pluginsFile is path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
+      return utils.discoverModuleFile({
+        filename: pluginsFile
+        isDefault: isLoadingDefaultPluginsFile
+        projectRoot: obj.projectRoot
+      })
+      .then (result) ->
+        if result == null
+          configFile = obj.configFile || CONFIG_DEFAULTS.configFile
+          return errors.throw("PLUGINS_FILE_ERROR", path.resolve(obj.projectRoot, pluginsFile))
+
+        debug("setting plugins file to %o", {result})
+        obj.pluginsFile = result
+        return obj
+
     .return(obj)
 
   setParentTestsPaths: (obj) ->
