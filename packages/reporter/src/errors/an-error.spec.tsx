@@ -3,6 +3,7 @@ import { shallow } from 'enzyme'
 
 import AnError, { Error } from './an-error'
 
+// can we change this to cypress react component tests?
 describe('<AnError />', () => {
   let error: Error
 

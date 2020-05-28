@@ -28,6 +28,7 @@
     "classnames": "2.2.6",
     "css-element-queries": "1.2.3",
     "cypress-multi-reporters": "1.4.0",
+    "cypress-react-unit-test": "4.3.1",
     "enzyme": "3.11.0",
     "enzyme-adapter-react-16": "1.15.2",
     "jsdom": "14.1.0",
