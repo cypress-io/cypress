@@ -25,7 +25,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
     {_.map(urlArray, (url) => (
       <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
         Learn more
-        <i className='fas fa-external-link-alt'></i>
+        <i className='fas fa-external-link-alt' />
       </a>
     ))}
   </>)
@@ -60,18 +60,18 @@ const TestError = observer((props: TestErrorProps) => {
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle'></i>
+            <i className='fas fa-exclamation-circle' />
             {err.name}
           </div>
 
           <Tooltip title='Print error to console' className='cy-tooltip'>
             <button className='runnable-err-print' onClick={onPrint}>
-              <i className='fas fa-terminal'></i>
+              <i className='fas fa-terminal' />
             </button>
           </Tooltip>
         </div>
         <div className='runnable-err-message'>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
+          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />
         </div>
 
