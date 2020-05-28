@@ -1,4 +1,3 @@
-/// <reference path="../../../../../../cli/types/index.d.ts" />
 /* eslint-disable @cypress/dev/skip-comment,mocha/no-exclusive-tests */
 describe('per-test config', () => {
   const testState = {
