@@ -1,19 +1,18 @@
+const _ = require('lodash')
 const { SourceMapConsumer } = require('source-map')
 const Promise = require('bluebird')
 
-const baseSourceMapRegex = '\\s*[@#]\\s*sourceMappingURL\\s*=\\s*([^\\s]*)(?![\\S\\s]*sourceMappingURL)'
-const regexCommentStyle1 = new RegExp(`/\\*${baseSourceMapRegex}\\s*\\*/`) // matches /* ... */ comments
-const regexCommentStyle2 = new RegExp(`//${baseSourceMapRegex}($|\n|\r\n?)`) // matches // .... comments
+const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
 let sourceMapConsumers = {}
 
-const initialize = (file, sourceMapBase64) => {
+const initializeSourceMapConsumer = (file, sourceMap) => {
+  if (!sourceMap) return Promise.resolve(null)
+
   SourceMapConsumer.initialize({
     'lib/mappings.wasm': require('source-map/lib/mappings.wasm'),
   })
-
-  const sourceMap = base64toJs(sourceMapBase64)
 
   return Promise.resolve(new SourceMapConsumer(sourceMap)).then((consumer) => {
     sourceMapConsumers[file.fullyQualifiedUrl] = consumer
@@ -23,18 +22,19 @@ const initialize = (file, sourceMapBase64) => {
 }
 
 const extractSourceMap = (file, fileContents) => {
-  const sourceMapMatch = fileContents.match(regexCommentStyle1) || fileContents.match(regexCommentStyle2)
+  let sourceMapMatch = fileContents.match(sourceMapExtractionRegex)
 
-  if (!sourceMapMatch) return Promise.resolve(null)
+  if (!sourceMapMatch) return null
 
-  const url = sourceMapMatch[1]
+  const url = _.last(sourceMapMatch)
   const dataUrlMatch = url.match(regexDataUrl)
 
-  if (!dataUrlMatch) return Promise.resolve(null)
+  if (!dataUrlMatch) return null
 
   const sourceMapBase64 = dataUrlMatch[1]
+  const sourceMap = base64toJs(sourceMapBase64)
 
-  return initialize(file, sourceMapBase64)
+  return sourceMap
 }
 
 const getSourceContents = (filePath, sourceFile) => {
@@ -80,4 +80,5 @@ module.exports = {
   extractSourceMap,
   getSourceContents,
   getSourcePosition,
+  initializeSourceMapConsumer,
 }

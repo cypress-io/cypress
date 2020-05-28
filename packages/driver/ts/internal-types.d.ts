@@ -63,5 +63,12 @@ declare namespace Cypress {
     (k: 'document', v?: Document): Document
     (k: 'window', v?: Window): Window
     (k: string, v?: any): any
+    state: Cypress.state
+  }
+
+  // Extend Cypress.state properties here
+  interface ResolvedConfigOptions {
+    $autIframe: JQuery<HTMLIFrameElement>
+    document: Document
   }
 }

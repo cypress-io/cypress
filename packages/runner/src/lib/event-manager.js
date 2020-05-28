@@ -82,7 +82,7 @@ const eventManager = {
     })
 
     const logCommand = (logId) => {
-      const consoleProps = Cypress.getConsolePropsForLogById(logId)
+      const consoleProps = Cypress.runner.getConsolePropsForLogById(logId)
 
       logger.logFormatted(consoleProps)
     }
@@ -119,7 +119,7 @@ const eventManager = {
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
 
-      const snapshotProps = Cypress.getSnapshotPropsForLogById(logId)
+      const snapshotProps = Cypress.runner.getSnapshotPropsForLogById(logId)
 
       if (snapshotProps) {
         localBus.emit(event, snapshotProps)
@@ -225,7 +225,7 @@ const eventManager = {
         // get the current runnable in case we reran mid-test due to a visit
         // to a new domain
         ws.emit('get:existing:run:state', (state = {}) => {
-          const runnables = Cypress.normalizeAll(state.tests)
+          const runnables = Cypress.runner.normalizeAll(state.tests)
           const run = () => {
             performance.mark('initialize-end')
             performance.measure('initialize', 'initialize-start', 'initialize-end')
@@ -236,18 +236,18 @@ const eventManager = {
           reporterBus.emit('runnables:ready', runnables)
 
           if (state.numLogs) {
-            Cypress.setNumLogs(state.numLogs)
+            Cypress.runner.setNumLogs(state.numLogs)
           }
 
           if (state.startTime) {
-            Cypress.setStartTime(state.startTime)
+            Cypress.runner.setStartTime(state.startTime)
           }
 
           if (state.currentId) {
             // if we have a currentId it means
             // we need to tell the Cypress to skip
             // ahead to that test
-            Cypress.resumeAtTest(state.currentId, state.emissions)
+            Cypress.runner.resumeAtTest(state.currentId, state.emissions)
           }
 
           if (config.isTextTerminal && !state.currentId) {
@@ -278,13 +278,13 @@ const eventManager = {
     })
 
     Cypress.on('log:added', (log) => {
-      const displayProps = Cypress.getDisplayPropsForLog(log)
+      const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
-      const displayProps = Cypress.getDisplayPropsForLog(log)
+      const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -348,7 +348,7 @@ const eventManager = {
 
     reporterBus.emit('reporter:start', {
       firefoxGcInterval: Cypress.getFirefoxGcInterval(),
-      startTime: Cypress.getStartTime(),
+      startTime: Cypress.runner.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,
       numPending: state.pending,

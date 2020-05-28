@@ -402,7 +402,26 @@ The following error was thrown by a plugin. We stopped running your tests becaus
 
 `
 
-exports['e2e plugins projectRoot and configFile passes projectRoot and default configFile to plugins function 1'] = `
+exports['e2e plugins fails when there is no function exported 1'] = `
+The \`pluginsFile\` must export a function with the following signature:
+
+\`\`\`
+module.exports = function (on, config) {
+  // configure plugins here
+}
+\`\`\`
+
+Learn more: https://on.cypress.io/plugins-api
+
+We loaded the \`pluginsFile\` from: \`/foo/bar/.projects/plugin-empty/cypress/plugins/index.js\`
+
+It exported:
+
+ {}
+
+`
+
+exports['e2e plugins fails when invalid event is registered 1'] = `
 The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-validation-error/cypress/plugins/index.js\`).
 
  Error: You must pass a valid event name when registering a plugin.
@@ -416,56 +435,4 @@ The following are valid events:
 - after:screenshot
 
       [stack trace lines]
-`
-
-exports['e2e plugins / fails when there is an async error at the root'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.js)                                                              │
-  │ Searched:   cypress/integration/app_spec.js                                                    │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  app_spec.js                                                                     (1 of 1)
-
-The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`/foo/bar/.projects/plugins-root-async-error/cypress/plugins/index.js\`)
-
- Error: Root async error from plugins file
-      [stack trace lines]
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        0                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      1                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        false                                                                            │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.js                                                                      │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
-
-
 `
