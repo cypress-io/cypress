@@ -86,7 +86,6 @@ class $Cypress {
     this.mocha = null
     this.runner = null
     this.Commands = null
-    this._RESUMED_AT_TEST = null
     this.$autIframe = null
     this.onSpecReady = null
 
@@ -238,7 +237,7 @@ class $Cypress {
         // mocha runner has begun running the tests
         this.emit('run:start')
 
-        if (this._RESUMED_AT_TEST) {
+        if (this.runner.getResumedAtTestIndex() !== null) {
           return
         }
 
