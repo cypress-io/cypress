@@ -368,7 +368,7 @@ class Socket {
 
         debug('backend:request %o', { eventName, args })
 
-        const backendRequest = function () {
+        const backendRequest = () => {
           switch (eventName) {
             case 'preserve:run:state':
               existingState = args[0]

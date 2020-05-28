@@ -237,7 +237,7 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
     const prevRoute = _.find(state.routes, { handlerId: frame.routeHandlerId })
 
     if (!prevRoute) {
-      // route no longer registered, it's fine
+      // TODO: should lacking a prevRoute throw an error?
       return backendRequest.continueRequest()
     }
 

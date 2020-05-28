@@ -9,6 +9,7 @@ import {
 import { getAllStringMatcherFields } from './util'
 import { onRequestContinue } from './intercept-request'
 import { onResponseContinue } from './intercept-response'
+import CyServer from '@packages/server'
 
 const debug = debugModule('cypress:net-stubbing:server:driver-events')
 
@@ -60,7 +61,7 @@ function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   return ret
 }
 
-export function onNetEvent (state: NetStubbingState, socket: any, eventName: string, ...args: any[]) {
+export function onNetEvent (state: NetStubbingState, socket: CyServer.Socket, eventName: string, ...args: any[]) {
   debug('received driver event %o', { eventName, args })
 
   switch (eventName) {
