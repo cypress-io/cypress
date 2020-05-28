@@ -4380,7 +4380,7 @@ describe('mouse state', () => {
       })
       .then(($iframe) => {
         // cypress does not wrap this as a DOM element (does not wrap in jquery)
-        return cy.wrap($iframe.first().contents().find('body'))
+        cy.wrap($iframe.first().contents().find('body'))
       })
       .within(() => {
         cy.get('a#hashchange')

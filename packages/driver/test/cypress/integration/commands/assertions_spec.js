@@ -123,7 +123,7 @@ describe('src/cy/commands/assertions', () => {
         }
         , 100)
 
-        return cy.wrap(obj)
+        cy.wrap(obj)
       }).should('deep.eq', { foo: 'baz' })
     })
 

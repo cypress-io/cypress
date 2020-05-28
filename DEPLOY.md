@@ -114,7 +114,15 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         node scripts/test-other-projects.js --npm cypress@X.Y.Z --binary X.Y.Z
         ```
         - Test the new version of Cypress against the Cypress dashboard repo.
-7. Update and publish the changelog and any release-specific documentation changes in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
+7. Deploy the release-specific documentation and changelog in [cypress-documentation](https://github.com/cypress-io/cypress-documentation).
+    - If there is not already a release-specific PR open, create one. You can use [`release-automations`](https://github.com/cypress-io/release-automations)'s `issues-in-release` tool to generate a starting point for the changelog, based off of ZenHub:
+        ```
+        cd packages/issues-in-release
+        yarn do:changelog --release <release label>
+        ```
+    - Ensure the changelog is up-to-date and has the correct date.
+    - Merge any release-specific documentation changes into the main release PR.
+    - Merging this PR into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
 8. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@X.Y.Z
@@ -130,8 +138,20 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - Close the current release in ZenHub.
     - Create a new patch release (and a new minor release, if this is a minor release) in ZenHub, and schedule them both to be completed 2 weeks from the current date.
     - Move all issues that are still open from the current release to the appropriate future release.
-13. Bump `version` in [`package.json`](package.json) and commit it to `develop` using a commit message like `release X.Y.Z [skip ci]`
-14. Tag this commit with `vX.Y.Z` and push that tag up.
+13. Bump `version` in [`package.json`](package.json), commit it to `develop`, and tag it with version:
+    ```shell
+    # commit and tag at the same time
+    git commit -a vX.Y.Z -m "release X.Y.Z [skip ci]"
+
+    # OR if you don't tag it with the commit, you can tag it after
+    git commit -m "release X.Y.Z [skip ci]"
+    git log --pretty=oneline # copy sha of the previous commit
+    git tag -a vX.Y.Z <sha>
+    ```
+14. Push the tag up:
+    ```shell
+    git push origin vX.Y.Z
+    ```
 15. Merge `develop` into `master` and push that branch up.
 16. Inside of [cypress-io/release-automations][release-automations]:
     - Publish GitHub release to [cypress-io/cypress/releases](https://github.com/cypress-io/cypress/releases) using package `set-releases`:
@@ -144,17 +164,17 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
         ```
 17. Publish a new docker image in [`cypress-docker-images`](https://github.com/cypress-io/cypress-docker-images) under `included` for the new cypress version.
 18. Decide on the next version that we will work on. For example, if we have just released `3.7.0` we probably will work on `3.7.1` next. Set it on [CI machines](#set-next-version-on-cis).
-19. Try updating as many example projects to the new version. You probably want to update by using Renovate dependency issue like [`cypress-example-todomvc` "Update Dependencies (Renovate Bot)](https://github.com/cypress-io/cypress-example-todomvc/issues/99). Try updating at least the following projects:
-    - https://github.com/cypress-io/cypress-example-todomvc
-    - https://github.com/cypress-io/cypress-example-todomvc-redux
-    - https://github.com/cypress-io/cypress-example-realworld
-    - https://github.com/cypress-io/cypress-example-recipes
-    - https://github.com/cypress-io/cypress-example-docker-compose
-    - https://github.com/cypress-io/cypress-example-api-testing
-    - https://github.com/cypress-io/angular-pizza-creator
-    - https://github.com/cypress-io/cypress-fiddle
-    - https://github.com/cypress-io/cypress-example-piechopper
-    - https://github.com/cypress-io/cypress-documentation
+19. Update example projects to the new version. For most projects, you can go to the Renovate dependency issue and check the box next to `Update dependency cypress to X.Y.Z`. It will automatically create a PR. Once it passes, you can merge it. Try updating at least the following projects:
+    - [cypress-example-todomvc](https://github.com/cypress-io/cypress-example-todomvc/issues/99)
+    - [cypress-example-todomvc-redux](https://github.com/cypress-io/cypress-example-todomvc-redux/issues/1)
+    - [cypress-example-realworld](https://github.com/cypress-io/cypress-example-realworld/issues/2)
+    - [cypress-example-recipes](https://github.com/cypress-io/cypress-example-recipes/issues/225)
+    - [cypress-example-api-testing](https://github.com/cypress-io/cypress-example-api-testing/issues/15)
+    - [angular-pizza-creator](https://github.com/cypress-io/angular-pizza-creator/issues/5)
+    - [cypress-fiddle](https://github.com/cypress-io/cypress-fiddle/issues/5)
+    - [cypress-example-piechopper](https://github.com/cypress-io/cypress-example-piechopper/issues/75)
+    - [cypress-documentation](https://github.com/cypress-io/cypress-documentation/issues/1313)
+    - [cypress-example-docker-compose](https://github.com/cypress-io/cypress-example-docker-compose) - Doesn't have a Renovate issue, but will auto-create and auto-merge non-major Cypress updates as long as the tests pass.
 20. Check if any test or example repositories have a branch for testing the features or fixes from the newly published version `x.y.z`. The branch should also be named `x.y.z`. Check all `cypress-test-*` and `cypress-example-*` repositories, and if there is a branch named `x.y.z`, merge it into `master`.
 
     **Test Repos**
