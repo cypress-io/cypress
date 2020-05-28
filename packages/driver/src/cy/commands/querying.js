@@ -539,13 +539,13 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getShadow = () => {
-        let $shadowRoot = subject[0].shadowRoot
+        let wrapped = $dom.isJquery(subject) ? subject : cy.$$(subject)
+        let shadowRoots = wrapped
+        .toArray()
+        .map((node) => node.shadowRoot)
+        .filter((node) => node !== undefined)
 
-        if ($shadowRoot === undefined) {
-          throw new Error('Element does not have a shadow root attached.')
-        }
-
-        return cy.verifyUpcomingAssertions($shadowRoot, options, {
+        return cy.verifyUpcomingAssertions(cy.$$(shadowRoots), options, {
           onRetry: getShadow,
         })
       }
