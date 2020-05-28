@@ -634,9 +634,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       let userOptions = options
-<!--
-Explain the change(s) for every user to read in our changelog.
--->
+
       if (_.isObject(url) && _.isEqual(userOptions, {})) {
         // options specified as only argument
         userOptions = url
