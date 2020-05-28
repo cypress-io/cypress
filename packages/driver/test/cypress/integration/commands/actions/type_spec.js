@@ -2851,8 +2851,9 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('logs delay arguments', () => {
-      Cypress.config('isInteractive', true)
+    it('logs delay arguments', {
+      isInteractive: true,
+    }, () => {
       cy.get(':text:first').type('foo', { delay: 20 }).then(function () {
         const { lastLog } = this
 

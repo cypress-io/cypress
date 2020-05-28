@@ -1964,9 +1964,8 @@ describe('src/cy/commands/navigation', {
         return null
       })
 
-      it('can time out', {
-        pageLoadTimeout: 50,
-      }, function (done) {
+      // we use an empty TestOptions obj to force resetting Cypress.config after test
+      it('can time out', {}, function (done) {
         let thenCalled = false
 
         cy.on('fail', (err) => {
@@ -1992,6 +1991,8 @@ describe('src/cy/commands/navigation', {
         cy
         .visit('/fixtures/jquery.html')
         .window().then((win) => {
+          Cypress.config('pageLoadTimeout', 50)
+
           const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
           .appendTo(win.document.body)
 

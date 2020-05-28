@@ -18,10 +18,10 @@ describe('src/cy/commands/angular', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 100)
-
           this.angular = cy.state('window').angular
         })
 
@@ -119,10 +119,10 @@ describe('src/cy/commands/angular', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 100)
-
           this.angular = cy.state('window').angular
         })
 
@@ -267,10 +267,10 @@ describe('src/cy/commands/angular', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 100)
-
           this.angular = cy.state('window').angular
         })
 

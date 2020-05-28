@@ -75,9 +75,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -249,9 +249,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -507,9 +507,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -755,9 +755,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -1024,9 +1024,9 @@ describe('src/cy/commands/cookies', () => {
         .resolves({})
       })
 
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
