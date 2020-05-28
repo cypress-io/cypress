@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
+import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
@@ -44,6 +45,7 @@ interface RunnablesProps {
   error?: Error
   runnablesStore: RunnablesStore
   specPath: string
+  relativeSpecPath: string
   scroller: Scroller
   appState?: AppState
 }
@@ -51,10 +53,11 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, specPath, relativeSpecPath } = this.props
 
     return (
       <div ref='container' className='container'>
+        <RunnableHeader specPath={specPath} relativeSpecPath={relativeSpecPath} />
         {content(runnablesStore, specPath, error)}
       </div>
     )

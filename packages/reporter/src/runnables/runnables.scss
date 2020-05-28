@@ -12,6 +12,7 @@
   .wrap {
     box-shadow: 0 1px 2px #aaa;
     margin-bottom: 40px;
+    margin-top: 35px;
     padding-left: 0;
     width: 100%;
   }
@@ -237,6 +238,26 @@
     .collapsible-indicator,
     .collapsible-more {
       display: none;
+    }
+  }
+
+  .runnable-header {
+    background: #f2f2f2;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+    display: block;
+    font-size: 13px;
+    line-height: 24px;
+    margin-bottom: 5px;
+    padding: 5px 10px;
+    position: absolute;
+    width: 100%;
+    z-index: 1;
+
+    &:before {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-file;
+      color: #bdbdbd;
+      margin-right: 5px;
     }
   }
 }

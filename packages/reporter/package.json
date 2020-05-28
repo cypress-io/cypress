@@ -18,6 +18,7 @@
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/driver": "*",
+    "@packages/runner": "*",
     "@packages/socket": "*",
     "@packages/web-config": "*",
     "@reach/dialog": "0.6.1",

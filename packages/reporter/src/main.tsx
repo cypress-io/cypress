@@ -28,7 +28,8 @@ export interface ReporterProps {
   statsStore: StatsStore
   events: Events
   error?: Error
-  specPath: string
+  specPath: string,
+  relativeSpecPath: string
 }
 
 @observer
@@ -46,6 +47,7 @@ class Reporter extends Component<ReporterProps> {
       on: PropTypes.func.isRequired,
     }).isRequired,
     specPath: PropTypes.string.isRequired,
+    // relativeSpecPath: PropTypes.string.isRequired,
   }
 
   static defaultProps = {
@@ -68,6 +70,7 @@ class Reporter extends Component<ReporterProps> {
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
           specPath={this.props.specPath}
+          relativeSpecPath={this.props.relativeSpecPath}
         />
         <ForcedGcWarning
           appState={appState}
