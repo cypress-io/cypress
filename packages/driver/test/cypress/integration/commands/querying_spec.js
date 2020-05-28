@@ -7,6 +7,34 @@ describe('src/cy/commands/querying', () => {
     cy.visit('/fixtures/dom.html')
   })
 
+  context('#shadow', () => {
+    it('returns an empty set if no shadow roots exist', () => {
+      const $nonShadowElement = cy.$$('#non-shadow-element')
+
+      $nonShadowElement.shadow().then(($roots) => {
+        expect($roots.length).to.eq(0)
+      })
+    })
+
+    it('returns the shadow root of an individual element', () => {
+      const $shadowElement = cy.$$('#shadow-element')
+
+      $shadowElement.shadow().then(($roots) => {
+        expect($roots.length).to.eq(1)
+      })
+    })
+
+    it('returns a set of shadow roots for a set of elements', () => {
+      const $shadowElements = cy.$$('#shadow-element, #shadow-element-2')
+
+      $shadowElements.shadow().then(($roots) => {
+        expect($roots.length).to.eq(2)
+        expect($roots.get(0)).to.eq($shadowElements.get(0).shadowRoot)
+        expect($roots.get(1)).to.eq($shadowElements.get(1).shadowRoot)
+      })
+    })
+  })
+
   context('#focused', () => {
     it('returns the activeElement', () => {
       const $button = cy.$$('#button')
