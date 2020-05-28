@@ -638,7 +638,19 @@ const isAttached = function ($el) {
     return true
   }
 
-  return ($jquery.isJquery($el) ? $el[0] : $el).isConnected
+  const nodes: Node[] = []
+
+  if ($jquery.isJquery($el)) {
+    nodes.push(...$el.toArray())
+  } else if ($el) {
+    nodes.push($el)
+  }
+
+  if (nodes.length === 0) {
+    return false
+  }
+
+  return nodes.every((node) => node.isConnected)
 }
 
 /**
@@ -1127,7 +1139,7 @@ const elementFromPoint = (doc, x, y) => {
   let immediate = doc.elementFromPoint(x, y)
   let node = immediate
 
-  while (node.shadowRoot) {
+  while (node?.shadowRoot) {
     node = node.shadowRoot.elementFromPoint(x, y)
   }
 
