@@ -61,7 +61,10 @@ describe('src/cy/commands/local_storage', () => {
       })
     })
 
-    describe('.log', () => {
+    describe('.log', {
+      isInteractive: true,
+      numTestsKeptInMemory: 1,
+    }, () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
           this.lastLog = log

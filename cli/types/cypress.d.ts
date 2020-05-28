@@ -75,6 +75,8 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
+
   interface ViewportPosition extends WindowPosition {
     right: number
     bottom: number
@@ -327,12 +329,15 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Returns true if currently running the supplied browser name or matcher object.
+     * Returns true if currently running the supplied browser name or matcher object. Also accepts an array of matchers.
      * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
      * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
+     * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
+     * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
      * @param matcher browser name or matcher object to check.
      */
-    isBrowser(name: BrowserName | Partial<Browser>): boolean
+    isBrowser(name: IsBrowserMatcher): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -2410,6 +2415,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+  }
+
+  interface TestOptions extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
+    // retries?: number
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
   /**
@@ -4790,4 +4800,66 @@ declare namespace Cypress {
   ```
    */
   interface cy extends Chainable<undefined> {}
+}
+
+declare namespace Mocha {
+  interface TestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
+  }
+  interface ExclusiveTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
+  }
+  interface PendingTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestOptions, fn?: AsyncFunc): Test
+  }
+
+  interface SuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites.
+     */
+    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite
+  }
+
+  interface ExclusiveSuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites. Indicates this suite should be executed exclusively.
+     */
+    (title: string, config: Cypress.TestOptions, fn: (this: Suite) => void): Suite
+  }
+
+  interface PendingSuiteFunction {
+    (title: string,  config: Cypress.TestOptions, fn: (this: Suite) => void): Suite | void
+  }
 }

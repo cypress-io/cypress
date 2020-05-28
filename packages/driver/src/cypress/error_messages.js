@@ -154,7 +154,7 @@ module.exports = {
   },
 
   browser: {
-    invalid_arg: '`Cypress.{{method}}()` must be passed the name of a browser or an object to filter with. You passed: `{{obj}}`',
+    invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
 
   chai: {

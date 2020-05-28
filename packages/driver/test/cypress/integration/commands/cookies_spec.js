@@ -113,10 +113,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -171,7 +171,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('.log', () => {
+    describe('.log', {
+      isInteractive: true,
+      numTestsKeptInMemory: 1,
+    }, () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookies') {
@@ -284,10 +287,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -542,10 +545,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -790,10 +793,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1058,10 +1061,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

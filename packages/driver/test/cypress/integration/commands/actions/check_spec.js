@@ -1,7 +1,10 @@
 const $ = Cypress.$.bind(Cypress)
 const { _, Promise } = Cypress
 
-describe('src/cy/commands/actions/check', () => {
+describe('src/cy/commands/actions/check', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   before(() => {
     cy
     .visit('/fixtures/dom.html')
@@ -275,10 +278,10 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -842,10 +845,10 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

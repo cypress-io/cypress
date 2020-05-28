@@ -1,7 +1,10 @@
 const $ = Cypress.$.bind(Cypress)
 const { _, Promise } = Cypress
 
-describe('src/cy/commands/connectors', () => {
+describe('src/cy/commands/connectors', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   describe('with jquery', () => {
     before(() => {
       cy
@@ -43,11 +46,9 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', () => {
-        beforeEach(() => {
-          Cypress.config('defaultCommandTimeout', 50)
-        })
-
+      describe('errors', {
+        defaultCommandTimeout: 50,
+      }, () => {
         it('throws when subject isn\'t array-like', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.eq('`cy.spread()` requires the existing subject be array-like.')
@@ -225,10 +226,10 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 50)
-
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
@@ -331,11 +332,11 @@ describe('src/cy/commands/connectors', () => {
         this.remoteWindow = cy.state('window')
       })
 
-      describe('assertion verification', () => {
+      describe('assertion verification', {
+        defaultCommandTimeout: 200,
+      }, () => {
         beforeEach(function () {
           delete this.remoteWindow.$.fn.foo
-
-          Cypress.config('defaultCommandTimeout', 200)
 
           this.logs = []
 
@@ -600,11 +601,9 @@ describe('src/cy/commands/connectors', () => {
           })
         })
 
-        describe('errors', () => {
-          beforeEach(() => {
-            return Cypress.config('defaultCommandTimeout', 50)
-          })
-
+        describe('errors', {
+          defaultCommandTimeout: 100,
+        }, () => {
           it('bubbles up automatically', function (done) {
             cy.on('fail', (err) => {
               expect(err.message).to.include('fn.err failed.')
@@ -689,10 +688,10 @@ describe('src/cy/commands/connectors', () => {
           cy.noop([_.noop, fn]).invoke({}, 1).should('be.true')
         })
 
-        describe('errors', () => {
+        describe('errors', {
+          defaultCommandTimeout: 100,
+        }, () => {
           beforeEach(function () {
-            Cypress.config('defaultCommandTimeout', 50)
-
             cy.on('log:added', (attrs, log) => {
               this.lastLog = log
             })
@@ -959,10 +958,10 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 50)
-
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
@@ -1495,10 +1494,10 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 50)
-
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
@@ -1937,10 +1936,10 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
-      describe('errors', () => {
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         beforeEach(function () {
-          Cypress.config('defaultCommandTimeout', 50)
-
           this.logs = []
 
           cy.on('log:added', (attrs, log) => {
@@ -1955,7 +1954,7 @@ describe('src/cy/commands/connectors', () => {
           cy.on('fail', (err) => {
             // get + each
             expect(this.logs.length).to.eq(2)
-            expect(err.message).to.include('`cy.each()` timed out after waiting `50ms`.\n\nYour callback function returned a promise which never resolved.')
+            expect(err.message).to.include('`cy.each()` timed out after waiting `100ms`.\n\nYour callback function returned a promise which never resolved.')
             expect(err.docsUrl).to.include('https://on.cypress.io/each')
 
             done()

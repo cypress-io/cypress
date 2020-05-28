@@ -4,7 +4,10 @@ const { _, Promise } = Cypress
 
 const Cookie = require('js-cookie')
 
-describe('src/cy/commands/navigation', () => {
+describe('src/cy/commands/navigation', {
+  isInteractive: true,
+  numTestsKeptInMemory: 1,
+}, () => {
   context('#reload', () => {
     before(() => {
       cy
@@ -85,10 +88,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy.reload().then(() => {
         expect(timeout).to.be.calledWith(4567, 'reload')
@@ -123,10 +126,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -299,10 +302,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy
       .visit('/fixtures/jquery.html')
@@ -369,10 +372,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -542,10 +545,10 @@ describe('src/cy/commands/navigation', () => {
 
   context('#visit', () => {
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy.visit('/fixtures/jquery.html').then(() => {
         expect(timeout).to.be.calledWith(4567)
@@ -689,9 +692,9 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('does not support file:// protocol', (done) => {
-      Cypress.config('baseUrl', '')
-
+    it('does not support file:// protocol', {
+      baseUrl: '',
+    }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.visit()` failed because the \'file://...\' protocol is not supported by Cypress.')
 
@@ -1196,10 +1199,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1961,7 +1964,9 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('can time out', function (done) {
+      it('can time out', {
+        pageLoadTimeout: 50,
+      }, function (done) {
         let thenCalled = false
 
         cy.on('fail', (err) => {
@@ -1987,8 +1992,6 @@ describe('src/cy/commands/navigation', () => {
         cy
         .visit('/fixtures/jquery.html')
         .window().then((win) => {
-          Cypress.config('pageLoadTimeout', 50)
-
           const $a = win.$('<a href=\'/timeout?ms=500\'>jquery</a>')
           .appendTo(win.document.body)
 
