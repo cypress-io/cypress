@@ -909,6 +909,10 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
+  if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
+    return null
+  }
+
   return findParent($el.get(0), (node) => {
     if (getTagName(node) === tagName) {
       return node
@@ -919,6 +923,10 @@ const getFirstParentWithTagName = ($el, tagName) => {
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
+    return null
+  }
+
   return findParent($el.get(0), (node) => {
     let wrapped = $(node)
 
@@ -931,6 +939,10 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
 }
 
 const getFirstStickyPositionParent = ($el) => {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
+    return null
+  }
+
   return findParent($el.get(0), (node) => {
     let wrapped = $(node)
 
@@ -943,6 +955,10 @@ const getFirstStickyPositionParent = ($el) => {
 }
 
 const getFirstScrollableParent = ($el) => {
+  if (isUndefinedOrHTMLBodyDoc($el)) {
+    return null
+  }
+
   return findParent($el.get(0), (node) => {
     let wrapped = $(node)
 
