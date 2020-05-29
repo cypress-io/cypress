@@ -164,6 +164,7 @@ We have several subfolders in [examples](examples) folder that have complete pro
 <!-- prettier-ignore-start -->
 Folder Name | Description
 --- | ---
+[a11y](examples/a11y) | Testing components' accessibility using [cypress-axe](https://github.com/avanslaars/cypress-axe)
 [react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
 [tailwind](examples/tailwind) | Testing styles built using [Tailwind CSS](https://tailwindcss.com/)
