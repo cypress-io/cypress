@@ -792,7 +792,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system.',
+              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
             )
           })
         })
@@ -802,12 +802,22 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, chrome:canary, electron',
+              'Cypress supports the following browsers:',
             )
           })
         })
 
-        expect(found2, 'browser names should be listed').to.be.ok
+        expect(found2, 'supported browsers should be listed').to.be.ok
+
+        const found3 = _.find(argsSet, (args) => {
+          return _.find(args, (arg) => {
+            return arg.message && arg.message.includes(
+              'Available browsers found on your system are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
+            )
+          })
+        })
+
+        expect(found3, 'browser names should be listed').to.be.ok
       })
     })
 
