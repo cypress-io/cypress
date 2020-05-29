@@ -8,6 +8,10 @@ describe('App', () => {
     mount(<App />)
 
     cy.log('**parts that do not change**')
+    // make sure the text has loaded and rendered
+    cy.contains('New Game').should('be.visible')
+    cy.contains('footer', 'Github').should('be.visible')
+
     cy.get('header').matchImageSnapshot('header')
     cy.get('.status__numbers').matchImageSnapshot('numbers')
     cy.get('.status__actions').matchImageSnapshot('actions')
