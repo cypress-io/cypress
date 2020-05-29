@@ -32,7 +32,7 @@ const createProps = () => ({
   state: new State(),
   util: {
     absoluteSpecPath: sinon.stub().returns('/path/to/int/some-spec.js'),
-    specPath: sinon.stub().returns('/int/some-spec.js'),
+    relativeSpecPath: sinon.stub().returns('/int/some-spec.js'),
   },
 })
 
