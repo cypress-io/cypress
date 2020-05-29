@@ -106,9 +106,19 @@ getMsgByType = (type, arg1 = {}, arg2, arg3) ->
       str = """
       Can't run because you've entered an invalid browser name.
 
-      Browser: '#{arg1}' was not found on your system.
+      Browser: '#{arg1}' was not found on your system or is not supported by Cypress.
 
-      Available browsers found are: #{arg2}
+      Cypress supports the following browsers:
+      - chrome
+      - chromium
+      - edge
+      - electron
+      - firefox (Cypress support in beta)
+
+      You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+      Available browsers found on your system are:
+      #{arg2}
       """
 
       if arg1 is 'canary'
