@@ -59,6 +59,7 @@
     "react-16.0.0": "npm:react@16.0.0",
     "react-dom-15.6.1": "npm:react-dom@15.6.1",
     "react-dom-16.0.0": "npm:react-dom@16.0.0",
+    "regenerator-runtime": "0.13.5",
     "setimmediate": "1.0.5",
     "sinon": "8.1.1",
     "source-map": "0.7.3",
