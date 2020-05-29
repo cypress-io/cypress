@@ -22,10 +22,10 @@ exports['per-test-config / fails when passing invalid config value browser'] = `
   0 passing
   1 failing
 
-  1)  An uncaught error was detected outside of a test:
-     Uncaught CypressError: Test config value \`{ browser }\` must be passed the name of a browser, an object to filter with, or an array of either. You passed: \`true\`
+  1) An uncaught error was detected outside of a test:
+     CypressError: The following error originated from your test code, not from Cypress.
 
-This error originated from your test code, not from Cypress.
+  > Test config value \`{ browser }\` must be passed a string, object, or an array. You passed: \`true\`
 
 When Cypress detects uncaught errors originating from your test code it will automatically fail the current test.
 
