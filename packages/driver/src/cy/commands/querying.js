@@ -543,7 +543,7 @@ module.exports = (Commands, Cypress, cy) => {
         let shadowRoots = wrapped
         .toArray()
         .map((node) => node.shadowRoot)
-        .filter((node) => node !== undefined)
+        .filter((node) => node !== undefined && node !== null)
 
         return cy.verifyUpcomingAssertions(cy.$$(shadowRoots), options, {
           onRetry: getShadow,
