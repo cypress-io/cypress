@@ -16,5 +16,3 @@
 // custom commands provided by this package, built from TypeScript code in "lib"
 // using "npm run transpile"
 import 'cypress-react-unit-test/hooks'
-// import '@percy/cypress'
-// import 'cypress-plugin-snapshots/commands'

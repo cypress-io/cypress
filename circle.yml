@@ -160,6 +160,19 @@ workflows:
                 working_directory: examples/sass-and-ts
 
       - cypress/run:
+          name: Example Snapshots
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/snapshots
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Visual Sudoku
           executor: cypress/base-12
           requires:
@@ -256,6 +269,7 @@ workflows:
             - Example Component Folder
             - Example React Scripts
             - Example Sass
+            - Example Snapshots
             - Example Tailwind
             - Example Webpack options
             - Visual Sudoku

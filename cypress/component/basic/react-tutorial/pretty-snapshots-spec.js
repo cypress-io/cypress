@@ -11,8 +11,4 @@ it('says hello world', () => {
     .invoke('html')
     .then(pretty)
     .should('equal', '<h1>Hello, world!</h1>')
-
-  // too bad - cypress-plugin-snapshots throws
-  // ReferenceError: regeneratorRuntime is not defined
-  // .toMatchSnapshot()
 })
