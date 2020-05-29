@@ -1,7 +1,6 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const babelConfig = require('../../babel.config.js')
-// const { initPlugin } = require('cypress-plugin-snapshots/plugin')
 
 // should we just reuse root webpack config?
 const webpackOptions = {
@@ -42,7 +41,5 @@ const options = {
 
 module.exports = (on, config) => {
   on('file:preprocessor', webpackPreprocessor(options))
-
-  // initPlugin(on, config)
   return config
 }
