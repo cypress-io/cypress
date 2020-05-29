@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import FileOpener from '../files/file-opener'
+import FileOpener from '../opener/file-opener'
 
 interface RunnableHeaderProps {
   specPath: string,

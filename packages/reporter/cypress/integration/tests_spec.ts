@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import { itHandlesFileOpening } from '../support/utils'
 
 describe('controls', function () {
   beforeEach(function () {
@@ -10,7 +11,7 @@ describe('controls', function () {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
-        relativeSpecPath: '/foo/bar',
+        relativeSpecPath: '/foo/bar.spec.js',
       })
     })
 
@@ -102,6 +103,18 @@ describe('controls', function () {
         .should('have.class', 'is-open')
         .find('.collapsible-content')
         .should('be.visible')
+      })
+    })
+
+    describe('header', function () {
+      it('displays', function () {
+        cy.get('.runnable-header').find('a').should('have.text', '/foo/bar.spec.js')
+      })
+
+      itHandlesFileOpening('.runnable-header', {
+        file: '/foo/bar',
+        line: 0,
+        column: 0,
       })
     })
   })
