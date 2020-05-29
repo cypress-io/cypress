@@ -13,7 +13,7 @@ But usually you want to point Cypress at your application's current Webpack conf
 
 ## React Scripts
 
-If you are using Create-React-App v3 or `react-scripts`, and want to reuse the built in webpack before ejecting, this module ships with Cypress preprocessor in [plugins](plugins) folder.
+If you are using Create-React-App v3 or `react-scripts`, and want to reuse the built in webpack (even after ejecting), this module ships with Cypress preprocessor in [plugins](plugins) folder.
 
 ```js
 // cypress/plugins/index.js

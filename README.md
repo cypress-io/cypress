@@ -62,7 +62,7 @@ npm install --save-dev cypress cypress-react-unit-test
 require('cypress-react-unit-test/support')
 ```
 
-2. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` do:
+2. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` (even after ejecting) do:
 
 ```js
 // cypress/plugins/index.js
