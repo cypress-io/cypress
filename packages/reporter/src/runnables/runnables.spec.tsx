@@ -43,6 +43,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] as TestModel[] })}
         scroller={scrollerStub()}
         specPath=''
+        relativeSpecPath=''
       />,
     )
 
@@ -55,6 +56,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scrollerStub()}
         specPath='/path/to/foo_spec.js'
+        relativeSpecPath='/path/to/spec.js'
       />,
     )
 
@@ -73,6 +75,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub({ isReady: false })}
         scroller={scrollerStub()}
         specPath=''
+        relativeSpecPath=''
       />,
     )
 
@@ -86,6 +89,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
+        relativeSpecPath=''
       />,
     )
 
@@ -102,6 +106,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
+        relativeSpecPath=''
       />,
     )
 
@@ -119,6 +124,7 @@ describe('<Runnables />', () => {
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
         specPath=''
+        relativeSpecPath=''
       />,
     )
 
