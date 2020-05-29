@@ -79,6 +79,7 @@ const getCommonConfig = () => {
                 // "istanbul",
                 [require.resolve('@babel/plugin-proposal-decorators'), { legacy: true }],
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
+                require.resolve('babel-plugin-transform-async-to-promises'),
               ],
               presets: [
                 require.resolve('@babel/preset-env'),
