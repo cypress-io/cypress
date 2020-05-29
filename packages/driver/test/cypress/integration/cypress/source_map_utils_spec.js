@@ -7,12 +7,7 @@ import {
 } from '../../../../src/cypress/source_map_utils'
 
 const _ = Cypress._
-
-const encodeBase64Unicode = (str) => {
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
-    return String.fromCharCode(`0x${p1}`)
-  }))
-}
+const { encodeBase64Unicode } = Cypress.utils
 
 const testContent = `it(\'simple test\', () => {
     expect(true).to.be.true

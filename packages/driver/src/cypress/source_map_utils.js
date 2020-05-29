@@ -2,6 +2,8 @@ const _ = require('lodash')
 const { SourceMapConsumer } = require('source-map')
 const Promise = require('bluebird')
 
+const $utils = require('./utils')
+
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
@@ -66,15 +68,8 @@ const getSourcePosition = (filePath, position) => {
   }
 }
 
-// from https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
-const decodeBase64Unicode = (str) => {
-  return decodeURIComponent(atob(str).split('').map((char) => {
-    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
-  }).join(''))
-}
-
 const base64toJs = (base64) => {
-  const mapString = decodeBase64Unicode(base64)
+  const mapString = $utils.decodeBase64Unicode(base64)
 
   try {
     return JSON.parse(mapString)
