@@ -5,20 +5,6 @@ const $jquery = require('../../dom/jquery.js')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
-const getParent = (el) => {
-  if (el.parentElement) {
-    return el.parentElement
-  }
-
-  const root = el.getRootNode()
-
-  if (root && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
-    return root.host
-  }
-
-  return null
-}
-
 const shadowTraversals = {
   find: (cy, el, arg1, arg2) => {
     const roots = []
@@ -37,7 +23,7 @@ const shadowTraversals = {
       let current = el[i]
       let parent
 
-      while ((parent = getParent(current))) {
+      while ((parent = $dom.getParent(current))) {
         parents.push(parent)
         current = parent
       }

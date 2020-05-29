@@ -582,21 +582,27 @@ const getFirstCommonAncestor = (el1, el2) => {
   return el2
 }
 
+const getParent = (el) => {
+  if (el.parentElement) {
+    return el.parentElement
+  }
+
+  const root = el.getRootNode()
+
+  if (root && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
+    return root.host
+  }
+
+  return null
+}
+
 const getAllParents = (el) => {
   const allParents: Node[] = []
   let node = el
+  let parent
 
-  while (node) {
-    let parent = node.parentNode
-
-    if (parent?.toString() === '[object ShadowRoot]') {
-      parent = parent.host
-    }
-
-    if (parent) {
-      allParents.push(parent)
-    }
-
+  while ((parent = getParent(node))) {
+    allParents.push(parent)
     node = parent
   }
 
@@ -1246,4 +1252,5 @@ export {
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,
   getFirstScrollableParent,
+  getParent,
 }
