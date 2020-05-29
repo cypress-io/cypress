@@ -66,8 +66,15 @@ const getSourcePosition = (filePath, position) => {
   }
 }
 
+// from https://stackoverflow.com/questions/30106476/using-javascripts-atob-to-decode-base64-doesnt-properly-decode-utf-8-strings
+const decodeBase64Unicode = (str) => {
+  return decodeURIComponent(atob(str).split('').map((char) => {
+    return `%${(`00${char.charCodeAt(0).toString(16)}`).slice(-2)}`
+  }).join(''))
+}
+
 const base64toJs = (base64) => {
-  const mapString = atob(base64)
+  const mapString = decodeBase64Unicode(base64)
 
   try {
     return JSON.parse(mapString)

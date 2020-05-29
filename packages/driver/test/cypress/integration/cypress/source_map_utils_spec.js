@@ -8,10 +8,17 @@ import {
 
 const _ = Cypress._
 
+const encodeBase64Unicode = (str) => {
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+    return String.fromCharCode(`0x${p1}`)
+  }))
+}
+
 const testContent = `it(\'simple test\', () => {
     expect(true).to.be.true
     expect(true).to.be.false
     expect(false).to.be.false
+    expect('サイプリスは一番').to.be.true
 })
 `
 const sourceMap = {
@@ -31,7 +38,7 @@ const sourceMap = {
 }
 
 const fileContents = `${testContent}
-\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,${btoa(JSON.stringify(sourceMap))}
+\/\/# sourceMappingURL=data:application/json;charset=utf-8;base64,${encodeBase64Unicode(JSON.stringify(sourceMap))}
 `
 
 const createFile = (fileName) => {
@@ -80,6 +87,13 @@ describe('driver/src/cypress/source_map_utils', () => {
 
         expect(endTime - startTime, `extractSourceMap took longer than ${timeLimit}`).to.be.lt(timeLimit)
       })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7481
+    it('does not garble utf-8 characters', () => {
+      const sourceMap = extractSourceMap(file1, fileContents)
+
+      expect(sourceMap.sourcesContent[1]).to.include('サイプリスは一番')
     })
   })
 
