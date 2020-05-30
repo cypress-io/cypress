@@ -32,6 +32,8 @@ module.exports = (on, config) => {
   const opts = {
     reactScripts: true,
     coverage: !coverageIsDisabled,
+    // insert Babel plugin to mock named imports
+    looseModules: true,
   }
 
   findWebpack.cleanForCypress(opts, webpackOptions)

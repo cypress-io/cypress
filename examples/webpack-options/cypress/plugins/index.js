@@ -17,6 +17,15 @@ module.exports = (on, config) => {
     babelLoader.options.plugins = []
   }
   babelLoader.options.plugins.push(require.resolve('babel-plugin-istanbul'))
+
+  // in order to mock named imports, need to include a plugin
+  babelLoader.options.plugins.push([
+    require.resolve('@babel/plugin-transform-modules-commonjs'),
+    {
+      loose: true,
+    },
+  ])
+
   // add code coverage plugin
   require('@cypress/code-coverage/task')(on, config)
 
