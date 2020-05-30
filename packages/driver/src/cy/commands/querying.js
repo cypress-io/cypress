@@ -277,6 +277,9 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
+          // only support shadow traversal if we're not searching
+          // within a subject and have been explicitly told to ignore
+          // boundaries.
           if (!options.ignoreShadowBoundaries || options.withinSubject) {
             $el = cy.$$(selector, options.withinSubject)
           } else {
@@ -539,7 +542,9 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getShadow = () => {
+        // ensure the subject is a jquery element
         let wrapped = $dom.isJquery(subject) ? subject : cy.$$(subject)
+        // find all shadow roots of the subject(s), if any exist
         let shadowRoots = wrapped
         .toArray()
         .map((node) => node.shadowRoot)
