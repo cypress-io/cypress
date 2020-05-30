@@ -32,15 +32,23 @@ const shadowTraversals = {
     return cy.$$(parents)
   },
   closest: (cy, el, arg1) => {
-    let found = el.closest(arg1)
-    let root = el.getRootNode()
+    let nodes = []
 
-    while (!found && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
-      found = root.closest(arg1)
-      root = root.getRootNode()
+    for (let i = 0; i < el.length; i++) {
+      let found = el[i].closest(arg1)
+      let root = el[i].getRootNode()
+
+      while (!found && root && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
+        found = root.host.closest(arg1)
+        root = root.getRootNode()
+      }
+
+      if (found) {
+        nodes.push(found)
+      }
     }
 
-    return found ? cy.$$(found) : null
+    return cy.$$(nodes)
   },
 }
 

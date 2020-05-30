@@ -33,6 +33,18 @@ describe('src/cy/commands/querying', () => {
         expect($roots.get(1)).to.eq($shadowElements.get(1).shadowRoot)
       })
     })
+
+    it('retries until it can find a root', () => {
+      const $nonShadowElement = cy.$$('#non-shadow-element')
+
+      cy.on('command:retry', _.after(2, () => {
+        cy.$$('#non-shadow-element')[0].attachShadow({ mode: 'open' })
+      }))
+
+      cy.get($nonShadowElement).shadow().then(($roots) => {
+        expect($roots.length).to.equal(1)
+      })
+    })
   })
 
   context('#focused', () => {

@@ -8,6 +8,67 @@ describe('src/cy/commands/traversals', () => {
     cy.visit('/fixtures/dom.html')
   })
 
+  describe('ignoreShadowBoundaries', () => {
+    describe('closest', () => {
+      it('should retrieve the closest element beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+        cy
+          .get(el)
+          .closest('#parent-of-shadow-container-0', {ignoreShadowBoundaries: true})
+          .then(($parent) => {
+            expect($parent.length).to.eq(1)
+            expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+          })
+      })
+
+      it('should retrieve closest elements normally when no shadow roots', () => {
+        const el = cy.$$('#shadow-container-child')
+
+        cy
+          .get(el)
+          .closest('#parent-of-shadow-container-0', {ignoreShadowBoundaries: true})
+          .then(($parent) => {
+            expect($parent.length).to.eq(1)
+            expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+          })
+      })
+    })
+
+    describe('parents', () => {
+      it('should retrieve all parents, including those beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+        cy
+          .get(el)
+          .parents({ignoreShadowBoundaries: true})
+          .then(($parents) => {
+            expect($parents.length).to.eq(5)
+            expect($parents[0].id).to.eq('shadow-container-child')
+            expect($parents[1].id).to.eq('parent-of-shadow-container-1')
+            expect($parents[2].id).to.eq('parent-of-shadow-container-0')
+            expect($parents[3].nodeName).to.eq('BODY')
+            expect($parents[4].nodeName).to.eq('HTML')
+          })
+      })
+
+      it('should retrieve parents normally when no shadow roots exist', () => {
+        const el = cy.$$('#shadow-container-child')
+
+        cy
+          .get(el)
+          .parents({ignoreShadowBoundaries: true})
+          .then(($parents) => {
+            expect($parents.length).to.eq(4)
+            expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+            expect($parents[1].id).to.eq('parent-of-shadow-container-0')
+            expect($parents[2].nodeName).to.eq('BODY')
+            expect($parents[3].nodeName).to.eq('HTML')
+          })
+      })
+    })
+  })
+
   const fns = [
     { find: '*' },
     { filter: ':first' },
