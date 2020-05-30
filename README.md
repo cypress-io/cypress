@@ -174,6 +174,7 @@ Folder Name | Description
 [visual-testing-with-percy](examples/visual-testing-with-percy) | [Visual testing](#visual-testing) for components using 3rd party service [Percy.io](https://percy.io/)
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](#visual-testing) for components using 3rd party service [Happo](https://happo.io/)
 [using-babel](examples/using-babel) | Bundling specs and loaded source files using project's existing `.babelrc` file
+[webpack-file](examples/webpack-file) | Load existing `webpack.config.js` file
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
 <!-- prettier-ignore-end -->
 

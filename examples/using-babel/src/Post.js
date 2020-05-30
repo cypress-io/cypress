@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import Skeleton from 'react-loading-skeleton'
+import { getRandomNumber } from './calc'
 
 export default class Post extends Component {
   static propTypes = {
@@ -30,6 +31,7 @@ export default class Post extends Component {
       <div style={this.getStyle()}>
         <h1>{this.props.title || <Skeleton />}</h1>
         <p>{this.props.children || <Skeleton count={5} />}</p>
+        <p className="random">random id {getRandomNumber()}</p>
       </div>
     )
   }

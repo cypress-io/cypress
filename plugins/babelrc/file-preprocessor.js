@@ -3,6 +3,7 @@
 const debug = require('debug')('cypress-react-unit-test')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const { addImageRedirect } = require('../utils/add-image-redirect')
+const babelCore = require('@babel/core')
 
 // note: modifies the input object
 function enableBabelrc(webpackOptions) {
@@ -34,10 +35,23 @@ function enableBabelrc(webpackOptions) {
   // we allow Babel loader to load the presets and plugins
   // from the project's .babelrc file
   delete babelLoaderOptions.presets
+  delete babelLoaderOptions.plugins
+
+  debug('babel loader options %o', babelLoaderOptions)
 }
 
 module.exports = config => {
   debug('env object %o', config.env)
+
+  const nodeEnvironment = 'development'
+  if (!process.env.BABEL_ENV) {
+    debug('setting BABEL_ENV to %s', nodeEnvironment)
+    process.env.BABEL_ENV = nodeEnvironment
+  }
+  if (!process.env.NODE_ENV) {
+    debug('setting NODE_ENV to %s', nodeEnvironment)
+    process.env.NODE_ENV = nodeEnvironment
+  }
 
   const coverageIsDisabled =
     config && config.env && config.env.coverage === false

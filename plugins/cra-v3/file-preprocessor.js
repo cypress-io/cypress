@@ -38,6 +38,8 @@ module.exports = config => {
     reactScripts: true,
     addFolderToTranspile: config.componentFolder,
     coverage: !coverageIsDisabled,
+    // insert Babel plugin to mock named imports
+    looseModules: true,
   }
   const preprocessorOptions = getWebpackPreprocessorOptions(opts)
 

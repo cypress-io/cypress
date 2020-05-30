@@ -8,9 +8,20 @@
     "@emotion/babel-preset-css-prop"
   ],
   "env": {
+    // TODO switch this to "development" name
     "test": {
       "plugins": [
-        "babel-plugin-istanbul"
+        // during Cypress tests we want to instrument source code
+        // to get code coverage from tests
+        "babel-plugin-istanbul",
+        // we also want to export ES6 modules as objects
+        // to allow mocking named imports
+        [
+          "@babel/plugin-transform-modules-commonjs",
+          {
+            "loose": true
+          }
+        ]
       ]
     }
   }
