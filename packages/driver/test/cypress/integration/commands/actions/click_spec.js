@@ -2764,6 +2764,18 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
     })
+
+    it('composes events', (done) => {
+      const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+      cy.$$('#parent-of-shadow-container-0').on('click', () => {
+        done()
+      })
+
+      cy
+      .get(el)
+      .click()
+    })
   })
 
   context('#dblclick', () => {
@@ -3278,6 +3290,18 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
     })
+
+    it('composes events', (done) => {
+      const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+      cy.$$('#parent-of-shadow-container-0').on('dblclick', () => {
+        done()
+      })
+
+      cy
+      .get(el)
+      .dblclick()
+    })
   })
 
   context('#rightclick', () => {
@@ -3661,6 +3685,18 @@ describe('src/cy/commands/actions/click', () => {
           ])
         })
       })
+    })
+
+    it('composes events', (done) => {
+      const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+      cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
+        done()
+      })
+
+      cy
+      .get(el)
+      .rightclick()
     })
   })
 })

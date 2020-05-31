@@ -35,6 +35,19 @@ describe('src/cy/commands/traversals', () => {
           expect($element[0]).to.eq(el)
         })
       })
+
+      it('should allow traversal from a document', () => {
+        const parent = cy.$$('#shadow-container-child')[0].shadowRoot
+        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+
+        cy
+        .get(parent)
+        .find('p')
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
+        })
+      })
     })
 
     describe('closest', () => {
