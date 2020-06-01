@@ -656,7 +656,15 @@ const isAttached = function ($el) {
     return false
   }
 
-  return nodes.every((node) => node.isConnected)
+  return nodes.every((node) => {
+    const doc = $document.getDocumentFromElement(node)
+
+    if (!$document.hasActiveWindow(doc)) {
+      return false
+    }
+
+    return node.isConnected
+  })
 }
 
 /**

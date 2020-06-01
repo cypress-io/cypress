@@ -27,7 +27,7 @@ const hasActiveWindow = (doc) => {
   return !!doc.defaultView
 }
 
-const getDocumentFromElement = (el: HTMLElement): Document => {
+const getDocumentFromElement = (el: Node): Document => {
   if (isDocument(el)) {
     return el
   }
