@@ -123,11 +123,11 @@ const fmt = {
   },
 
   keyRemoved (key, variable) {
-    return fmtOpts.wrap('removed', `- ${key}: ${printVar(variable)}`) + fmtOpts.newLineChar
+    return fmt.wrap('removed', `- ${key}: ${printVar(variable)}`) + fmtOpts.newLineChar
   },
 
   keyAdded (key, variable) {
-    return fmtOpts.wrap('added', `+ ${key}: ${printVar(variable)}`) + fmtOpts.newLineChar
+    return fmt.wrap('added', `+ ${key}: ${printVar(variable)}`) + fmtOpts.newLineChar
   },
 }
 
