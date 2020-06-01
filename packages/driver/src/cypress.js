@@ -621,5 +621,6 @@ $Cypress.prototype.lolex = lolex
 // attaching these so they are accessible
 // via the runner + integration spec helper
 $Cypress.$ = $
+$Cypress.utils = $utils
 
 module.exports = $Cypress
