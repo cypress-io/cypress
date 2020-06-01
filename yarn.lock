@@ -23,7 +23,7 @@
   optionalDependencies:
     chokidar "^2.1.8"
 
-"@babel/code-frame@^7.0.0", "@babel/code-frame@^7.8.3":
+"@babel/code-frame@7.8.3", "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.8.3":
   version "7.8.3"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.8.3.tgz#33e25903d7481181534e12ec0a25f16b6fcf419e"
   integrity sha512-a9gxpmdXtZEInkCSHUJDLHZVBgb1QS0jhss4cPP93EW7s+uC5bikET2twEF3KV+7rDblJcmNvTR7VJejqd2C2g==
@@ -4122,7 +4122,7 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@^16.9.27":
+"@types/react@*", "@types/react@16.9.35":
   version "16.9.35"
   resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.35.tgz#a0830d172e8aadd9bd41709ba2281a3124bbd368"
   integrity sha512-q0n0SsWcGc8nDqH2GJfWQWUOmZSJhXV64CjVN5SvcNti3TdEaA3AH0D8DwNmMdzjMAC/78tB8nAZIlV8yTz+zQ==
@@ -24076,20 +24076,20 @@ through2-filter@^3.0.0:
     through2 "~2.0.0"
     xtend "~4.0.0"
 
+through2@2.0.5, through2@^2.0.0, through2@^2.0.1, through2@^2.0.2, through2@^2.0.3, through2@~2.0.0, through2@~2.0.3:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/through2/-/through2-2.0.5.tgz#01c1e39eb31d07cb7d03a96a70823260b23132cd"
+  integrity sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==
+  dependencies:
+    readable-stream "~2.3.6"
+    xtend "~4.0.1"
+
 through2@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/through2/-/through2-3.0.0.tgz#468b461df9cd9fcc170f22ebf6852e467e578ff2"
   integrity sha512-8B+sevlqP4OiCjonI1Zw03Sf8PuV1eRsYQgLad5eonILOdyeRsY27A/2Ze8IlvlMvq31OH+3fz/styI7Ya62yQ==
   dependencies:
     readable-stream "2 || 3"
-    xtend "~4.0.1"
-
-through2@^2.0.0, through2@^2.0.1, through2@^2.0.2, through2@^2.0.3, through2@~2.0.0, through2@~2.0.3:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/through2/-/through2-2.0.5.tgz#01c1e39eb31d07cb7d03a96a70823260b23132cd"
-  integrity sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==
-  dependencies:
-    readable-stream "~2.3.6"
     xtend "~4.0.1"
 
 through2@^3.0.0, through2@^3.0.1:
