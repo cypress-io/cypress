@@ -109,22 +109,7 @@
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    color: $err-text;
-    text-decoration: underline;
-
-    i {
-      position: relative;
-      top: 1px;
-      font-size: 10px;
-      margin-left: 5px;
-      display: inline;
-    }
-
-    &:hover,
-    &:focus {
-      cursor: pointer;
-      color: lighten($err-text, 10%);
-    }
+    font-family: $muli;
   }
 
   .runnable-err-message {

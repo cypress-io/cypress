@@ -47,11 +47,10 @@ class Collapsible extends Component<Props, State> {
           style={this.props.headerStyle}
           tabIndex={0}
         >
-          <i className='collapsible-indicator fa-fw fas'></i>
+          <i className='collapsible-indicator fa-fw fas' />
           <span className='collapsible-header-text'>
             {this.props.header}
           </span>
-          <i className='collapsible-more fas fa-ellipsis-h'></i>
         </div>
         <div className={cs('collapsible-content', this.props.contentClass)}>
           {this.props.children}
