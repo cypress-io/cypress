@@ -15,7 +15,7 @@ const onServer = function (app) {
   return app.get('/response', (req, res) => res.json({ ok: true }))
 }
 
-const VARIOUS_FAILURES_EXPECTED_FAILURES = 61
+const VARIOUS_FAILURES_EXPECTED_FAILURES = 63
 
 const verifyPassedAndFailedAreSame = (expectedFailures) => {
   return ({ stdout }) => {

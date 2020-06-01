@@ -835,6 +835,36 @@ context('event handlers', function () {
       message: 'bar is not a function',
     })
   })
+
+  describe('fail handler assertion failure', function () {
+    fail(this, () => {
+      cy.on('fail', () => {
+        expect('actual').to.equal('expected')
+      })
+
+      cy.get('#does-not-exist')
+    })
+
+    verify(this, {
+      column: 29,
+      message: `expected 'actual' to equal 'expected'`,
+    })
+  })
+
+  describe('fail handler exception', function () {
+    fail(this, () => {
+      cy.on('fail', () => {
+        ({}).bar()
+      })
+
+      cy.get('#does-not-exist')
+    })
+
+    verify(this, {
+      column: 14,
+      message: 'bar is not a function',
+    })
+  })
 })
 
 context('uncaught errors', () => {
