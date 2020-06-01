@@ -635,10 +635,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       let userOptions = options
 
-      if (userOptions.url && url) {
-        $utils.throwErrByPath('visit.no_duplicate_url', { args: { optionsUrl: userOptions.url, url } })
-      }
-
       if (_.isObject(url) && _.isEqual(userOptions, {})) {
         // options specified as only argument
         userOptions = url
