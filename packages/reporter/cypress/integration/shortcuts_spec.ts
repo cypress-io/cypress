@@ -85,7 +85,7 @@ describe('controls', function () {
       .then(($body) => {
         // this realistically happens with the selector playground, but
         // need to add an input since this environment is isolated
-        $body.append('<input id="temp-input" style="margin-top: 40px;" />')
+        $body.append('<input id="temp-input" />')
       })
       .get('#temp-input').type('r')
       .then(() => {
