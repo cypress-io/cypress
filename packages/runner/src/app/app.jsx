@@ -22,7 +22,7 @@ class App extends Component {
 
   render () {
     const specPath = this.props.util.absoluteSpecPath(this.props.config)
-    const relativeSpecPath = decodeURI(this.props.util.relativeSpecPath(this.props.config))
+    const relativeSpecPath = decodeURIComponent(this.props.util.relativeSpecPath(this.props.config))
 
     return (
       <div className={cs({
