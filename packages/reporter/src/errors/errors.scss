@@ -109,22 +109,7 @@
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    color: $err-text;
-    text-decoration: underline;
-
-    i {
-      position: relative;
-      top: 1px;
-      font-size: 10px;
-      margin-left: 5px;
-      display: inline;
-    }
-
-    &:hover,
-    &:focus {
-      cursor: pointer;
-      color: lighten($err-text, 10%);
-    }
+    font-family: $muli;
   }
 
   .runnable-err-message {
@@ -192,12 +177,19 @@
     margin: 10px;
 
     .runnable-err-file-path {
+      &:before {
+        @extend .#{$fa-css-prefix};
+        @extend .#{$fa-css-prefix}-file;
+        color: #bdbdbd;
+        margin-right: 5px;
+      }
+
+      background: #f6f6f6;
       display: block;
-      padding: 3px 10px 0;
-      line-height: 24px;
       font-size: 13px;
-      position: relative;
-      top: 5px;
+      line-height: 24px;
+      padding: 3px 10px;
+      word-break: break-all;
     }
 
     pre {

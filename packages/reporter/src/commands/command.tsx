@@ -104,7 +104,7 @@ interface MessageProps {
 
 const Message = observer(({ model }: MessageProps) => (
   <span>
-    <i className={`fas fa-circle ${model.renderProps.indicator}`}></i>
+    <i className={`fas fa-circle ${model.renderProps.indicator}`} />
     <span
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
@@ -167,14 +167,14 @@ class Command extends Component<Props> {
         >
           <div className='command-wrapper'>
             <span className='command-number'>
-              <i className='fas fa-spinner fa-spin'></i>
+              <i className='fas fa-spinner fa-spin' />
               <span>{model.number || ''}</span>
             </span>
             <span className='command-pin'>
-              <i className='fas fa-thumbtack'></i>
+              <i className='fas fa-thumbtack' />
             </span>
             <span className='command-expander' onClick={this._toggleOpen}>
-              <i className='fas'></i>
+              <i className='fas' />
             </span>
             <span className='command-method'>
               <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
@@ -184,7 +184,7 @@ class Command extends Component<Props> {
             </span>
             <span className='command-controls'>
               <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                <i className='command-invisible far fa-eye-slash'></i>
+                <i className='command-invisible far fa-eye-slash' />
               </Tooltip>
               <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
                 <span className='num-elements'>{model.numElements}</span>

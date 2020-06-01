@@ -35,11 +35,6 @@ const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
 
-const proxies = {
-  runner: 'getStartTime getTestsState getEmissions setNumLogs countByTestState getDisplayPropsForLog getConsolePropsForLogById getSnapshotPropsForLogById getErrorByTestId setStartTime resumeAtTest normalizeAll'.split(' '),
-  cy: 'detachDom getStyles'.split(' '),
-}
-
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
     $errUtils.throwErrByPath('miscellaneous.no_cy')
@@ -91,7 +86,6 @@ class $Cypress {
     this.mocha = null
     this.runner = null
     this.Commands = null
-    this._RESUMED_AT_TEST = null
     this.$autIframe = null
     this.onSpecReady = null
 
@@ -243,7 +237,7 @@ class $Cypress {
         // mocha runner has begun running the tests
         this.emit('run:start')
 
-        if (this._RESUMED_AT_TEST) {
+        if (this.runner.getResumedAtTestIndex() !== null) {
           return
         }
 
@@ -624,20 +618,9 @@ $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon
 $Cypress.prototype.lolex = lolex
 
-// proxy all of the methods in proxies
-// to their corresponding objects
-_.each(proxies, (methods, key) => {
-  return _.each(methods, (method) => {
-    return $Cypress.prototype[method] = function (...args) {
-      const prop = this[key]
-
-      return prop && prop[method].apply(prop, args)
-    }
-  })
-})
-
 // attaching these so they are accessible
 // via the runner + integration spec helper
 $Cypress.$ = $
+$Cypress.utils = $utils
 
 module.exports = $Cypress

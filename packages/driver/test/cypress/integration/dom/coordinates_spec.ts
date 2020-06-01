@@ -1,9 +1,3 @@
-declare namespace Cypress {
-  interface cy {
-    state(key: 'document'): Document
-  }
-}
-
 describe('src/dom/coordinates', () => {
   const $ = Cypress.$.bind(Cypress)
   let doc: Document

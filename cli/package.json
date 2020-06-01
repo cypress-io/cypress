@@ -23,6 +23,7 @@
     "@cypress/listr-verbose-renderer": "0.4.1",
     "@cypress/request": "2.88.5",
     "@cypress/xvfb": "1.2.4",
+    "@types/sinonjs__fake-timers": "6.0.1",
     "@types/sizzle": "2.3.2",
     "arch": "2.1.1",
     "bluebird": "3.7.2",

@@ -42,8 +42,8 @@ const ErrorStack = observer(({ err }: Props) => {
 
   let stopLinking = false
   const lines = _.map(stackLines, (stackLine, index) => {
-    const { relativeFile, function: fn, line, column } = stackLine
-    const key = `${relativeFile}${index}`
+    const { originalFile, function: fn, line, column } = stackLine
+    const key = `${originalFile}${index}`
 
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
 
@@ -57,8 +57,8 @@ const ErrorStack = observer(({ err }: Props) => {
       return makeLine(key, [whitespace, stackLine.message])
     }
 
-    if (cypressLineRegex.test(relativeFile || '') || stopLinking) {
-      return makeLine(key, [whitespace, `at ${fn} (${relativeFile}:${line}:${column})`])
+    if (cypressLineRegex.test(originalFile || '') || stopLinking) {
+      return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])
     }
 
     const link = (

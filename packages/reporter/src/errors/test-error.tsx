@@ -25,7 +25,6 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
     {_.map(urlArray, (url) => (
       <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
         Learn more
-        <i className='fas fa-external-link-alt'></i>
       </a>
     ))}
   </>)
