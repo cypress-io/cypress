@@ -923,7 +923,7 @@ const getFirstParentWithTagName = ($el, tagName) => {
 
   return findParent($el.get(0), (node) => {
     if (getTagName(node) === tagName) {
-      return node
+      return $jquery.wrap(node)
     }
 
     return null
@@ -940,7 +940,7 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
   }
 
   return findParent($el.get(0), (node) => {
-    let wrapped = $(node)
+    let wrapped = $jquery.wrap(node)
 
     if (fixedOrStickyRe.test(wrapped.css('position'))) {
       return wrapped
@@ -960,7 +960,7 @@ const getFirstStickyPositionParent = ($el) => {
   }
 
   return findParent($el.get(0), (node) => {
-    let wrapped = $(node)
+    let wrapped = $jquery.wrap(node)
 
     if (wrapped.css('position') === 'sticky') {
       return wrapped
@@ -976,7 +976,7 @@ const getFirstScrollableParent = ($el) => {
   }
 
   return findParent($el.get(0), (node) => {
-    let wrapped = $(node)
+    let wrapped = $jquery.wrap(node)
 
     if (isScrollable(wrapped)) {
       return wrapped
