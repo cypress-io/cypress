@@ -1,7 +1,7 @@
 <!-- 
 Thanks for contributing!
 Read our contribution guidelines here: 
-https://github.com/cypress-io/cypress/blob/develop/.github/CONTRIBUTING.md 
+https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md 
 -->
 
 <!-- Example: "Closes #1234" -->
@@ -40,5 +40,5 @@ Delete tasks if they are not applicable.
 - [ ] Have tests been added/updated?
 - [ ] Has the original issue been tagged with a release in ZenHub? <!-- (internal team only)-->
 - [ ] Has a PR for user-facing changes been opened in [`cypress-documentation`](https://github.com/cypress-io/cypress-documentation)? <!-- Link to PR here -->
-- [ ] Have API changes been updated in the [`type definitions`](cli/types/index.d.ts)?
+- [ ] Have API changes been updated in the [`type definitions`](cli/types/cypress.d.ts)?
 - [ ] Have new configuration options been added to the [`cypress.schema.json`](cli/schema/cypress.schema.json)?

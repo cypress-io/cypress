@@ -40,7 +40,7 @@ const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
 const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
-const availableBrowsersRe = /(Available browsers found are: )(.+)/g
+const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 
@@ -140,7 +140,7 @@ const normalizeStdout = function (str, options = {}) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
     // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
-    str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
+    str = str.replace(availableBrowsersRe, '$1\n- browser1\n- browser2\n- browser3')
   }
 
   str = str
@@ -442,7 +442,7 @@ const e2e = {
       browser: 'electron',
       headed: process.env.HEADED || false,
       project: e2ePath,
-      timeout: options.noExit ? 3000000 : 120000,
+      timeout: 120000,
       originalTitle: null,
       expectedExitCode: 0,
       sanitizeScreenshotDimensions: false,
@@ -456,6 +456,10 @@ const e2e = {
       Please pass the --no-exit flag to the test command instead
       e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
       `)
+    }
+
+    if (options.noExit && options.timeout < 3000000) {
+      options.timeout = 3000000
     }
 
     ctx.timeout(options.timeout)

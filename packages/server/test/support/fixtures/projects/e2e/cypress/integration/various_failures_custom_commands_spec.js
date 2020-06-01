@@ -6,7 +6,13 @@
 import outsideError from '../../../todos/throws-error'
 import { setup, fail, verify, verifyInternalError } from '../support/util'
 
-setup({ verifyStackLineIsSpecFile: false })
+setup({
+  idePath: {
+    relative: 'cypress/support/commands.js',
+    absolute: /\/[^\/]+\/cypress\/support\/commands\.js/,
+  },
+  verifyStackLineIsSpecFile: false,
+})
 
 context('assertion failures', function () {
   describe('with expect().<foo>', function () {
@@ -68,6 +74,7 @@ context('exceptions', function () {
       message: 'An outside error',
       regex: /todos\/throws\-error\.js:5:9/,
       codeFrameText: `thrownewError('An outside error')`,
+      verifyOpenInIde: false,
     })
   })
 })
@@ -698,6 +705,30 @@ context('event handlers', function () {
       message: 'bar is not a function',
     })
   })
+
+  describe('fail handler assertion failure', function () {
+    fail(this, () => {
+      cy.failFailHandlerAssertion()
+    })
+
+    verify(this, {
+      column: 25,
+      codeFrameText: 'failFailHandlerAssertion',
+      message: `expected 'actual' to equal 'expected'`,
+    })
+  })
+
+  describe('fail handler exception', function () {
+    fail(this, () => {
+      cy.failFailHandlerException()
+    })
+
+    verify(this, {
+      column: 10,
+      codeFrameText: 'failFailHandlerException',
+      message: 'bar is not a function',
+    })
+  })
 })
 
 context('uncaught errors', () => {
@@ -713,6 +744,7 @@ context('uncaught errors', () => {
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
+      verifyOpenInIde: false,
     })
   })
 
@@ -728,6 +760,7 @@ context('uncaught errors', () => {
       ],
       regex: /localhost\:\d+\/js_errors.html:\d+:\d+/,
       hasCodeFrame: false,
+      verifyOpenInIde: false,
     })
   })
 

@@ -965,6 +965,11 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#overflow-link').find('.wrapped').click()
       })
 
+      // https://github.com/cypress-io/cypress/issues/7343
+      it('can click on inline elements that wrap lines where the first rect has no width', () => {
+        cy.get('#overflow-link-width').click()
+      })
+
       // readonly should only limit typing, not clicking
       it('can click on readonly inputs', () => {
         cy.get('#readonly-attr').click()
@@ -4380,7 +4385,7 @@ describe('mouse state', () => {
       })
       .then(($iframe) => {
         // cypress does not wrap this as a DOM element (does not wrap in jquery)
-        return cy.wrap($iframe.first().contents().find('body'))
+        cy.wrap($iframe.first().contents().find('body'))
       })
       .within(() => {
         cy.get('a#hashchange')

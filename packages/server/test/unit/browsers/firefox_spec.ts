@@ -3,20 +3,17 @@ require('../../spec_helper')
 import { expect } from 'chai'
 import sinon from 'sinon'
 import 'chai-as-promised'
-
-const mockfs = require('mock-fs')
+import firefoxUtil from '../../../lib/browsers/firefox-util'
+import * as firefox from '../../../lib/browsers/firefox'
+import { EventEmitter } from 'events'
 import Marionette from 'marionette-client'
 import Foxdriver from '@benmalka/foxdriver'
+const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
-
 const utils = require('../../../lib/browsers/utils')
 const plugins = require('../../../lib/plugins')
 const protocol = require('../../../lib/browsers/protocol')
 const specUtil = require('../../specUtils')
-
-import firefoxUtil from '../../../lib/browsers/firefox-util'
-import * as firefox from '../../../lib/browsers/firefox'
-import { EventEmitter } from 'events'
 
 describe('lib/browsers/firefox', () => {
   const port = 3333
@@ -118,7 +115,7 @@ describe('lib/browsers/firefox', () => {
       sinon.spy(FirefoxProfile.prototype, 'updatePreferences')
 
       return sinon.spy(FirefoxProfile.prototype, 'path')
-    }) //.returns("/path/to/profile")
+    })
 
     it('executes before:browser:launch if registered', function () {
       plugins.has.returns(true)
@@ -313,10 +310,34 @@ describe('lib/browsers/firefox', () => {
         })
       })
     })
+
+    it('wraps errors when retrying socket fails', async function () {
+      const err = new Error
+
+      protocol._connectAsync.rejects()
+
+      await expect(firefox.open(this.browser, 'http://', this.options)).to.be.rejectedWith()
+      .then((wrapperErr) => {
+        expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
+        expect(wrapperErr.message).to.include(err.message)
+      })
+    })
   })
 
   context('firefox-util', () => {
     context('#setupMarionette', () => {
+      // @see https://github.com/cypress-io/cypress/issues/7159
+      it('attaches geckodriver after testing connection', async () => {
+        await firefoxUtil.setupMarionette([], '', port)
+
+        expect(marionetteDriver.connect).to.be.calledOnce
+        expect(protocol._connectAsync).to.be.calledWith({
+          host: '127.0.0.1',
+          port,
+          getDelayMsForRetry: sinon.match.func,
+        })
+      })
+
       it('rejects on errors on socket', async () => {
         marionetteSendCb = () => {
           marionetteDriver.tcp.socket.emit('error', new Error('foo error'))
