@@ -258,6 +258,7 @@
       @extend .#{$fa-css-prefix};
       @extend .#{$fa-css-prefix}-file;
       color: #bdbdbd;
+      display: inline;
       margin-right: 5px;
     }
   }
