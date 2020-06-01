@@ -838,11 +838,15 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
+  if ($el1.get(0) === $el2.get(0)) {
+    return true
+  }
+
   return findParent($el2.get(0), (node) => {
     if (node === $el1.get(0)) {
       return node
     }
-  }) !== $el2.get(0)
+  }) === $el1.get(0)
 }
 
 const findParent = (el, fn) => {
