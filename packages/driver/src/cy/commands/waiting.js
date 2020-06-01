@@ -60,23 +60,31 @@ module.exports = (Commands, Cypress, cy, state) => {
       })
     }
 
-    const checkForXhr = function (alias, type, index, num, options) {
+    const checkForXhr = async function (alias, type, index, num, options) {
+      options.error = $errUtils.errByPath('wait.timed_out', {
+        timeout: options.timeout,
+        alias,
+        num,
+        type,
+      })
+
       options.type = type
+
+      if (Cypress.config('experimentalNetworkMocking')) {
+        const req = waitForRoute(alias, state, type)
+
+        if (req) {
+          return req
+        }
+      }
 
       // append .type to the alias
       const xhr = cy.getIndexedXhrByAlias(`${alias}.${type}`, index)
 
       // return our xhr object
       if (xhr) {
-        return Promise.resolve(xhr)
+        return xhr
       }
-
-      options.error = $errUtils.errByPath('wait.timed_out', {
-        timeout: options.timeout,
-        alias,
-        num,
-        type,
-      }).message
 
       const args = [alias, type, index, num, options]
 
@@ -86,19 +94,19 @@ module.exports = (Commands, Cypress, cy, state) => {
     }
 
     const waitForXhr = function (str, options) {
-      let str2
+      let specifier
 
       // we always want to strip everything after the last '.'
       // since we support alias property 'request'
       if ((_.indexOf(str, '.') === -1) ||
       _.keys(cy.state('aliases')).includes(str.slice(1))) {
-        str2 = null
+        specifier = null
       } else {
         // potentially request, response or index
         const allParts = _.split(str, '.')
 
         str = _.join(_.dropRight(allParts, 1), '.')
-        str2 = _.last(allParts)
+        specifier = _.last(allParts)
       }
 
       const aliasObj = cy.getAlias(str, 'wait', log)
@@ -112,7 +120,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       // by its alias
       const { alias, command } = aliasObj
 
-      str = _.compact([alias, str2]).join('.')
+      str = _.compact([alias, specifier]).join('.')
 
       const type = cy.getXhrTypeByAlias(str)
 
@@ -141,10 +149,6 @@ module.exports = (Commands, Cypress, cy, state) => {
           onFail: options._log,
           args: { alias },
         })
-      }
-
-      if (Cypress.config('experimentalNetworkMocking')) {
-        return waitForRoute(alias, cy, state, str2, options)
       }
 
       // create shallow copy of each options object
