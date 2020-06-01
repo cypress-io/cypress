@@ -2,6 +2,8 @@ const _ = require('lodash')
 const { SourceMapConsumer } = require('source-map')
 const Promise = require('bluebird')
 
+const $utils = require('./utils')
+
 const sourceMapExtractionRegex = /\/\/\s*[@#]\s*sourceMappingURL\s*=\s*(data:[^\s]*)/g
 const regexDataUrl = /data:[^;\n]+(?:;charset=[^;\n]+)?;base64,([a-zA-Z0-9+/]+={0,2})/ // matches data urls
 
@@ -67,7 +69,7 @@ const getSourcePosition = (filePath, position) => {
 }
 
 const base64toJs = (base64) => {
-  const mapString = atob(base64)
+  const mapString = $utils.decodeBase64Unicode(base64)
 
   try {
     return JSON.parse(mapString)

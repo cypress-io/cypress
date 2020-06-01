@@ -1,17 +1,17 @@
 import { action, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
+import { utils as driverUtils } from '@packages/driver'
 
 import State from './lib/state'
 import Container from './app/container'
-import util from './lib/util'
 
 configure({ enforceActions: 'always' })
 
 const Runner = {
   start (el, base64Config) {
     action('started', () => {
-      const config = JSON.parse(util.b64DecodeUnicode(base64Config))
+      const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const state = new State((config.state || {}).reporterWidth)
 
