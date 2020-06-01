@@ -57,8 +57,12 @@ module.exports = (Commands, Cypress, cy) => {
       .timeout(options.timeout)
       .catch(Promise.TimeoutError, () => {
         $errUtils.throwErrByPath('wrap.timed_out', {
-          onFail: options._log,
           args: { timeout: options.timeout },
+        })
+      })
+      .catch((err) => {
+        $errUtils.throwErr(err, {
+          onFail: options._log,
         })
       })
       .then((subject) => {

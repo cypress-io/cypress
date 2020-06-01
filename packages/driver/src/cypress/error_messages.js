@@ -1805,7 +1805,7 @@ module.exports = {
       
       You called \`cy.wrap()\` with a promise that never resolved.
       
-      To set a custom timeout, use \`{ timeout: number }\`
+      To increase the timeout, use \`{ timeout: number }\`
       `,
       docsUrl: 'https://on.cypress.io/wrap',
     },

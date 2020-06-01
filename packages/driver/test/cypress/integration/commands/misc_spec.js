@@ -193,14 +193,30 @@ describe('src/cy/commands/misc', () => {
 
     it('can extend the default timeout', () => {
       Cypress.config('defaultCommandTimeout', 100)
-      cy.wrap(new Promise((resolve, reject) => {
+
+      const timeoutPromise = new Promise((resolve, reject) => {
         return setTimeout(() => {
           resolve(null)
         })
-      }, 200)), { timeout: 300 }
+      }, 200)
+
+      cy.wrap(timeoutPromise, { timeout: 300 })
     })
 
     describe('errors', () => {
+      beforeEach(function () {
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'wrap') {
+            this.lastLog = log
+            this.logs.push(log)
+          }
+        })
+
+        return null
+      })
+
       it('throws when wrapping an array of windows', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.scrollTo()` failed because it requires a DOM element.')
@@ -229,35 +245,59 @@ describe('src/cy/commands/misc', () => {
         })
       })
 
-      it('throws when exceeding default timeout', (done) => {
+      it('throws when exceeding default timeout', function (done) {
         Cypress.config('defaultCommandTimeout', 100)
-        cy.on('fail', (err) => {
-          expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
 
+        cy.on('fail', (err) => {
+          expect(this.logs.length).to.eq(1)
+          expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
+          expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
+          expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
+          expect(this.lastLog.get('error')).to.eq(err)
           done()
         })
 
-        cy.wrap(new Promise((resolve, reject) => {
+        const timeoutPromise = new Promise((resolve) => {
           setTimeout((() => {
             resolve(null)
           }), 200)
-        }))
+        })
+
+        cy.wrap(timeoutPromise)
       })
 
-      it('throws when exceeding custom timeout', (done) => {
+      it('throws when exceeding custom timeout', function (done) {
         cy.on('fail', (err) => {
+          expect(this.logs.length).to.eq(1)
           expect(err.message).to.include('`cy.wrap()` timed out waiting `100ms` to complete.')
-
+          expect(err.message).to.include('You called `cy.wrap()` with a promise that never resolved.')
+          expect(err.message).to.include('To increase the timeout, use `{ timeout: number }`')
+          expect(this.lastLog.get('error')).to.eq(err)
           done()
         })
 
-        cy.wrap(new Promise((resolve, reject) => {
+        const timeoutPromise = new Promise((resolve) => {
           setTimeout((() => {
             resolve(null)
           }), 200)
-        }), {
-          timeout: 100,
         })
+
+        cy.wrap(timeoutPromise, { timeout: 100 })
+      })
+
+      it('logs once when promise parameter is rejected', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).to.eq(1)
+          expect(err.message).to.include('custom error')
+          expect(this.lastLog.get('error')).to.eq(err)
+          done()
+        })
+
+        const rejectedPromise = new Promise((resolve, reject) => {
+          reject(new Error('custom error'))
+        })
+
+        cy.wrap(rejectedPromise)
       })
     })
 
