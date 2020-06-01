@@ -913,6 +913,10 @@ const getFirstParentWithTagName = ($el, tagName) => {
     return null
   }
 
+  if (getTagName($el.get(0)) === tagName) {
+    return $el
+  }
+
   return findParent($el.get(0), (node) => {
     if (getTagName(node) === tagName) {
       return node
@@ -925,6 +929,10 @@ const getFirstParentWithTagName = ($el, tagName) => {
 const getFirstFixedOrStickyPositionParent = ($el) => {
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
+  }
+
+  if (fixedOrStickyRe.test($el.css('position'))) {
+    return $el
   }
 
   return findParent($el.get(0), (node) => {
@@ -941,6 +949,10 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
 const getFirstStickyPositionParent = ($el) => {
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
+  }
+
+  if ($el.css('position') === 'sticky') {
+    return $el
   }
 
   return findParent($el.get(0), (node) => {
