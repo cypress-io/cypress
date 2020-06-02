@@ -9,6 +9,7 @@ const $Log = require('./log')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
+const testConfigOverrides = require('./testConfigOverrides')
 
 const mochaCtxKeysRe = /^(_runnable|test)$/
 const betweenQuotesRe = /\"(.+?)\"/
@@ -973,6 +974,9 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        //
+        testConfigOverrides(test, Cypress.config, Cypress.env)
+
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 

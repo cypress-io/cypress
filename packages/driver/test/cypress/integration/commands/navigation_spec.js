@@ -1950,7 +1950,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
+      let originalConfig
+
       beforeEach(function () {
+        originalConfig = _.clone(Cypress.config())
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1961,8 +1964,11 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      // we use an empty TestOptions obj to force resetting Cypress.config after test
-      it('can time out', {}, function (done) {
+      afterEach(() => {
+        Cypress.config(originalConfig)
+      })
+
+      it('can time out', function (done) {
         let thenCalled = false
 
         cy.on('fail', (err) => {
