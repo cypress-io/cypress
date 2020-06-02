@@ -10,7 +10,7 @@
     "start": "node test/support/server.js"
   },
   "devDependencies": {
-    "@babel/code-frame": "^7.0.0",
+    "@babel/code-frame": "7.8.3",
     "@cypress/bower-kendo-ui": "0.0.2",
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/underscore.inflection": "1.0.1",
@@ -61,7 +61,7 @@
     "react-dom-16.0.0": "npm:react-dom@16.0.0",
     "setimmediate": "1.0.5",
     "sinon": "8.1.1",
-    "source-map": "0.7.3",
+    "source-map": "0.8.0-beta.0",
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
