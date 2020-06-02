@@ -7,15 +7,6 @@
     display: block;
   }
 
-  .collapsible-more {
-    display: inline-block;
-    margin-left: 5px;
-  }
-
-  .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-more {
-    display: none;
-  }
-
   .collapsible-indicator {
     @extend .#{$fa-css-prefix}-caret-right;
     margin-right: 3px;

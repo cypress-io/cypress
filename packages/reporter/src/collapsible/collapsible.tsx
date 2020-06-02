@@ -56,7 +56,7 @@ class Collapsible extends Component<Props, State> {
               {this.props.header}
             </span>
           </div>
-          { this.props.headerExtras }
+          {this.props.headerExtras}
         </div>
         <div className={cs('collapsible-content', this.props.contentClass)}>
           {this.props.children}
