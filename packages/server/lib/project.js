@@ -582,6 +582,11 @@ class Project extends EE {
     push(scaffold.support(cfg.supportFolder, cfg))
 
     // if we're in headed mode add these other scaffolding tasks
+    debug('scaffold flags %o', {
+      isTextTerminal: cfg.isTextTerminal,
+      CYPRESS_INTERNAL_FORCE_SCAFFOLD: process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD,
+    })
+
     const scaffoldExamples = !cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD
 
     if (scaffoldExamples) {

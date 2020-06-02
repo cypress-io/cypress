@@ -473,7 +473,8 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
     describe('forced', () => {
       let resetEnv
 
-      beforeEach(() => {
+      beforeEach(function () {
+        this.obj.isTextTerminal = true
         resetEnv = mockedEnv({
           CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1',
         })
@@ -487,6 +488,31 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         return this.project.scaffold(this.obj).then(() => {
           expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
           expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
+          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
+        })
+      })
+    })
+
+    describe('not forced', () => {
+      let resetEnv
+
+      beforeEach(function () {
+        this.obj.isTextTerminal = true
+
+        resetEnv = mockedEnv({
+          CYPRESS_INTERNAL_FORCE_SCAFFOLD: undefined,
+        })
+      })
+
+      afterEach(() => {
+        resetEnv()
+      })
+
+      it('does not scaffold integration folder', function () {
+        return this.project.scaffold(this.obj).then(() => {
+          expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
+          expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
+          // still scaffolds support folder due to old logic
           expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
         })
       })
