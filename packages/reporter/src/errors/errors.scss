@@ -130,11 +130,16 @@
     }
   }
 
+  .runnable-err-stack-wrapper {
+    display: flex;
+  }
+
   .runnable-err-stack-expander {
     background: #ffeaec;
     cursor: pointer;
     outline: none;
     padding: 8px 5px;
+    width: 100%;
 
     &:hover,
     &:focus {
@@ -157,9 +162,7 @@
   }
 
   .runnable-err-stack-trace {
-    background: rgba(254, 224, 227, 0.45);
     font-family: $monospace;
-    margin-left: 15px;
     overflow: auto;
     padding: 10px;
 

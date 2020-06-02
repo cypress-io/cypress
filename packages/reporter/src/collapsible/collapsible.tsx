@@ -5,9 +5,11 @@ import { onEnterOrSpace } from '../lib/util'
 
 interface Props {
   isOpen?: boolean
+  headerWrapperClass?: string
   headerClass?: string
   headerStyle?: CSSProperties
   header?: ReactNode
+  headerExtras?: ReactNode
   contentClass?: string
 }
 
@@ -18,6 +20,7 @@ interface State {
 class Collapsible extends Component<Props, State> {
   static defaultProps = {
     isOpen: false,
+    headerWrapperClass: '',
     headerClass: '',
     headerStyle: {},
     contentClass: '',
@@ -38,19 +41,22 @@ class Collapsible extends Component<Props, State> {
   render () {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>
-        <div
-          aria-expanded={this.state.isOpen}
-          className={cs('collapsible-header', this.props.headerClass)}
-          onClick={this._onClick}
-          onKeyPress={onEnterOrSpace(this._onKeyPress)}
-          role='button'
-          style={this.props.headerStyle}
-          tabIndex={0}
-        >
-          <i className='collapsible-indicator fa-fw fas' />
-          <span className='collapsible-header-text'>
-            {this.props.header}
-          </span>
+        <div className={cs('collapsible-header-wrapper', this.props.headerWrapperClass)}>
+          <div
+            aria-expanded={this.state.isOpen}
+            className={cs('collapsible-header', this.props.headerClass)}
+            onClick={this._onClick}
+            onKeyPress={onEnterOrSpace(this._onKeyPress)}
+            role='button'
+            style={this.props.headerStyle}
+            tabIndex={0}
+          >
+            <i className='collapsible-indicator fa-fw fas' />
+            <span className='collapsible-header-text'>
+              {this.props.header}
+            </span>
+          </div>
+          { this.props.headerExtras }
         </div>
         <div className={cs('collapsible-content', this.props.contentClass)}>
           {this.props.children}

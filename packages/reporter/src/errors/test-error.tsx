@@ -75,13 +75,15 @@ const TestError = observer((props: TestErrorProps) => {
         </div>
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
         {err.stack &&
-        <Collapsible
-          header='View stack trace'
-          headerClass='runnable-err-stack-expander'
-          contentClass='runnable-err-stack-trace'
-        >
-          <ErrorStack err={err} />
-        </Collapsible>
+          <Collapsible
+            header='View stack trace'
+            headerClass='runnable-err-stack-expander'
+            headerWrapperClass='runnable-err-stack-wrapper'
+            headerExtras={<div>Print to console</div>}
+            contentClass='runnable-err-stack-trace'
+          >
+            <ErrorStack err={err} />
+          </Collapsible>
         }
       </div>
     </div>
