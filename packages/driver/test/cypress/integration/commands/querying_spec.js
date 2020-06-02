@@ -411,7 +411,7 @@ describe('src/cy/commands/querying', {
     })
 
     describe('errors', {
-      defaultCommandTimeout: 50,
+      defaultCommandTimeout: 100,
     }, () => {
       beforeEach(function () {
         this.logs = []
