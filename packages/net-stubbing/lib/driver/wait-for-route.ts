@@ -38,7 +38,7 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
   }
 
   // 3. Determine if it's ready based on the specifier
-  if (request.state >= RequestState.Intercepted) {
+  if (request.state >= RequestState.Received) {
     request.requestWaited = true
     if (specifier === 'request') {
       return request

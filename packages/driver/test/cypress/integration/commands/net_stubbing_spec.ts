@@ -863,12 +863,12 @@ describe('src/cy/commands/net_stubbing', function () {
           done()
         })
 
-        cy.route('/foo')
+        cy.route('/foo', _.noop)
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
         })
-        .wait('@foo.bar.3', { timeout: 100 })
+        .wait('@foo.bar', { timeout: 100 })
       })
 
       it('can wait on a single response using "alias.response"', function () {
@@ -914,33 +914,6 @@ describe('src/cy/commands/net_stubbing', function () {
         .wait('@foo.bar.request', { timeout: 100 })
       })
 
-      it('can wait on the 3rd request using "alias.request.3"', function () {
-        cy.route('/foo')
-        .as('foo.bar')
-        .then(() => {
-          _.times(3, () => {
-            $.get('/foo')
-          })
-        })
-        .wait('@foo.bar.3')
-      })
-
-      it('can timeout waiting on the 3rd request using "alias.request.3"', function (done) {
-        cy.on('fail', (err) => {
-          expect(err.message).to.contain('No response ever occurred.')
-          done()
-        })
-
-        cy.route('/foo')
-        .as('foo.bar')
-        .then(() => {
-          _.times(2, () => {
-            $.get('/foo')
-          })
-        })
-        .wait('@foo.bar.3', { timeout: 100 })
-      })
-
       it('can incrementally wait on responses', function () {
         cy.route('/foo')
         .as('foo.bar')
@@ -956,16 +929,17 @@ describe('src/cy/commands/net_stubbing', function () {
 
       it('can timeout incrementally waiting on responses', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('for the 2nd response to the route')
+          expect(err.message).to.contain('for the 1st response to the route')
           done()
         })
 
-        cy.route('/foo')
+        cy.route('/foo', _.noop)
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
+          $.get('/foo')
         })
-        .wait('@foo.bar')
+        .wait('@foo.bar', { timeout: 100 })
         .wait('@foo.bar', { timeout: 100 })
       })
 
@@ -1012,6 +986,36 @@ describe('src/cy/commands/net_stubbing', function () {
         .wait('@foo.bar.1')
         .wait('@foo.bar.1') // still only asserting on the 1st response
         .wait('@foo.bar.request') // now waiting for the next request
+      })
+
+      // NOTE: was undocumented in cy.route, may not continue to support
+      context.skip('indexed aliases', function () {
+        it('can wait on the 3rd request using "alias.3"', function () {
+          cy.route('/foo')
+          .as('foo.bar')
+          .then(() => {
+            _.times(3, () => {
+              $.get('/foo')
+            })
+          })
+          .wait('@foo.bar.3')
+        })
+
+        it('can timeout waiting on the 3rd request using "alias.3"', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('No response ever occurred.')
+            done()
+          })
+
+          cy.route('/foo')
+          .as('foo.bar')
+          .then(() => {
+            _.times(2, () => {
+              $.get('/foo')
+            })
+          })
+          .wait('@foo.bar.3', { timeout: 100 })
+        })
       })
 
       context('errors', function () {
