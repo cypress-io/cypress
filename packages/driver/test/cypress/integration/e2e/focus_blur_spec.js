@@ -669,7 +669,7 @@ describe('intercept blur methods correctly', () => {
     cy.wrap($svg).focus().should('have.focus')
   })
 
-  it('focus area', () => {
+  it('focus area', (done) => {
     cy.visit('http://localhost:3500/fixtures/active-elements.html').then(() => {
       cy.$$(`
       <map name="map">
@@ -677,14 +677,16 @@ describe('intercept blur methods correctly', () => {
       href="#"
       target="_blank" alt="area" />
       </map>
-      <img usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
+      <img id="test-image" usemap="#map" src="/__cypress/static/favicon.ico" alt="image" />
       `).appendTo(cy.$$('body'))
 
-      cy.get('area')
-      // NOTE: wait needed for firefox, otherwise element is not yet ready/loaded
-      .wait(100)
-      .focus()
-      .should('have.focus')
+      cy.$$('#test-image').on('load', () => {
+        cy.get('area')
+        .focus()
+        .should('have.focus')
+
+        done()
+      })
     })
   })
 
