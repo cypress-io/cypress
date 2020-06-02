@@ -705,6 +705,30 @@ context('event handlers', function () {
       message: 'bar is not a function',
     })
   })
+
+  describe('fail handler assertion failure', function () {
+    fail(this, () => {
+      cy.failFailHandlerAssertion()
+    })
+
+    verify(this, {
+      column: 25,
+      codeFrameText: 'failFailHandlerAssertion',
+      message: `expected 'actual' to equal 'expected'`,
+    })
+  })
+
+  describe('fail handler exception', function () {
+    fail(this, () => {
+      cy.failFailHandlerException()
+    })
+
+    verify(this, {
+      column: 10,
+      codeFrameText: 'failFailHandlerException',
+      message: 'bar is not a function',
+    })
+  })
 })
 
 context('uncaught errors', () => {
