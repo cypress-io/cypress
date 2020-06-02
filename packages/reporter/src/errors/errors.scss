@@ -131,23 +131,24 @@
   }
 
   .runnable-err-stack-expander {
+    background: #ffeaec;
     cursor: pointer;
     outline: none;
-    padding: 0 10px 2px 5px;
+    padding: 8px 5px;
 
     &:hover,
     &:focus {
-      color: lighten($err-text, 10%);
+      background: #fee0e3;
     }
 
     .collapsible-header-text {
-      text-decoration: underline;
+      color: #4f4f4f;
       font-size: 13px;
     }
 
     .collapsible-indicator {
       line-height: 18px;
-      color: #eb535e !important;
+      color: #bbbcbd !important;
     }
 
     .collapsible-more {
@@ -156,10 +157,11 @@
   }
 
   .runnable-err-stack-trace {
-    overflow: auto;
-    padding: 10px;
+    background: rgba(254, 224, 227, 0.45);
     font-family: $monospace;
     margin-left: 15px;
+    overflow: auto;
+    padding: 10px;
 
     .err-stack-line {
       white-space: pre;

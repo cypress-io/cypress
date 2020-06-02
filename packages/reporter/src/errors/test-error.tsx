@@ -73,17 +73,16 @@ const TestError = observer((props: TestErrorProps) => {
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
           <DocsUrl url={err.docsUrl} />
         </div>
-
-        {err.stack &&
-          <Collapsible
-            header='View stack trace'
-            headerClass='runnable-err-stack-expander'
-            contentClass='runnable-err-stack-trace'
-          >
-            <ErrorStack err={err} />
-          </Collapsible>
-        }
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
+        {err.stack &&
+        <Collapsible
+          header='View stack trace'
+          headerClass='runnable-err-stack-expander'
+          contentClass='runnable-err-stack-trace'
+        >
+          <ErrorStack err={err} />
+        </Collapsible>
+        }
       </div>
     </div>
   )
