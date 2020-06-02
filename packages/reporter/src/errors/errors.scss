@@ -91,21 +91,6 @@
     }
   }
 
-  .runnable-err-print {
-    background: none;
-    border: solid 2px $err-text;
-    border-radius: 3px;
-    color: $err-text;
-    font-size: 8px;
-    padding: 0.4em;
-
-    &:hover,
-    &:focus {
-      background: rgba(255, 255, 255, 0.6);
-      outline: none;
-    }
-  }
-
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
@@ -132,32 +117,57 @@
 
   .runnable-err-stack-wrapper {
     display: flex;
-  }
 
-  .runnable-err-stack-expander {
-    background: #ffeaec;
-    cursor: pointer;
-    outline: none;
-    padding: 8px 5px;
-    width: 100%;
+    .runnable-err-stack-expander {
+      background: #ffeaec;
+      cursor: pointer;
+      flex-grow: 1;
+      outline: none;
+      padding: 8px 5px;
 
-    &:hover,
-    &:focus {
-      background: #fee0e3;
+      &:hover,
+      &:focus {
+        background: #fee0e3;
+      }
+
+      .collapsible-header-text {
+        color: #4f4f4f;
+        font-size: 13px;
+      }
+
+      .collapsible-indicator {
+        line-height: 18px;
+        color: #bbbcbd !important;
+      }
+
+      .collapsible-more {
+        display: none;
+      }
     }
 
-    .collapsible-header-text {
+    .runnable-err-print {
+      background: #ffeaec;
       color: #4f4f4f;
+      cursor: pointer;
       font-size: 13px;
-    }
+      padding: 8px 10px;
 
-    .collapsible-indicator {
-      line-height: 18px;
-      color: #bbbcbd !important;
-    }
+      &:hover,
+      &:focus {
+        background: #fee0e3;
+      }
 
-    .collapsible-more {
-      display: none;
+      i {
+        border: solid 1px #4f4f4f;
+        border-radius: 4px;
+        font-size: 6px;
+        padding: 3px;
+        vertical-align: middle;
+      }
+
+      span {
+        vertical-align: middle;
+      }
     }
   }
 

@@ -62,12 +62,6 @@ const TestError = observer((props: TestErrorProps) => {
             <i className='fas fa-exclamation-circle'></i>
             {err.name}
           </div>
-
-          <Tooltip title='Print error to console' className='cy-tooltip'>
-            <button className='runnable-err-print' onClick={onPrint}>
-              <i className='fas fa-terminal'></i>
-            </button>
-          </Tooltip>
         </div>
         <div className='runnable-err-message'>
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
@@ -79,7 +73,11 @@ const TestError = observer((props: TestErrorProps) => {
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
             headerWrapperClass='runnable-err-stack-wrapper'
-            headerExtras={<div>Print to console</div>}
+            headerExtras={
+              <div className="runnable-err-print" onClick={onPrint}>
+                <i className="fas fa-terminal" /> <span>Print to console</span>
+              </div>
+            }
             contentClass='runnable-err-stack-trace'
           >
             <ErrorStack err={err} />

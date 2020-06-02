@@ -110,15 +110,6 @@
 
     &.suite.runnable-failed > div .runnable-wrapper {
       border-left: 5px solid $fail;
-
-      .collapsible-more {
-        border-radius: 3px;
-        background-color: $fail;
-        color: #FFF;
-        padding: 0 4px 0 3px;
-        font-size: 10px;
-        margin-left: 2px;
-      }
     }
 
     &.test.runnable-failed {
@@ -234,8 +225,7 @@
   }
 
   .test > .runnable-wrapper > .collapsible > .collapsible-header-wrapper > .collapsible-header {
-    .collapsible-indicator,
-    .collapsible-more {
+    .collapsible-indicator {
       display: none;
     }
   }
