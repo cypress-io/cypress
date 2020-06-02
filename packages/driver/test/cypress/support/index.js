@@ -15,16 +15,4 @@
 
 // Alternatively you can use CommonJS syntax:
 // require("./commands")
-
-// trick cypress run-mode into thinking it's in open-mode
-// this allows us to test properties of UI like snapshots, logs, etc.
-Cypress.config().numTestsKeptInMemory = 1
-const _isInteractive = Cypress.config().isInteractive
-
-beforeEach(() => {
-  Cypress.config().isInteractive = true
-})
-
-afterEach(() => {
-  Cypress.config().isInteractive = _isInteractive
-})
+require('./defaults')

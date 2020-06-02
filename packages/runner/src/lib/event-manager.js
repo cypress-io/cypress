@@ -38,72 +38,67 @@ const reporterBus = new EventEmitter()
  */
 let Cypress
 
-function mutateConfiguration (newConfig, Cypress) {
-  const { config, env } = Cypress
+function mutateConfiguration (testConfigOverride, Cypress) {
+  const { config } = Cypress
 
-  const backupConfig = _.clone(config())
+  const globalConfig = _.clone(config())
 
-  const backupEnv = _.clone(env())
+  //TODO: do same for env
 
-  const restoreConfigFn = function () {
-    Cypress.config.reset()
-    Cypress.config(backupConfig)
-    Cypress.env.reset()
-    Cypress.env(backupEnv)
-  }
+  // const backupEnv = _.clone(env())
 
   debug('load test config')
-  if (newConfig.env) {
-    env(newConfig.env)
-  }
+  // if (testConfigOverride.env) {
+  //   env(testConfigOverride.env)
+  // }
 
-  config(_.omit(newConfig, 'browser'))
+  delete testConfigOverride.browser
+  config(testConfigOverride)
+
+  const localTestConfig = config()
+  const localTestConfigBackup = _.clone(localTestConfig)
+
+  const restoreConfigFn = function () {
+    _.each(localTestConfig, (val, key) => {
+      if (localTestConfigBackup[key] !== val) {
+        globalConfig[key] = val
+      }
+    })
+
+    Cypress.config.reset()
+    Cypress.config(globalConfig)
+    // Cypress.env.reset()
+    // Cypress.env(backupEnv)
+  }
 
   return restoreConfigFn
 }
 
-function addSuiteConfigListeners () {
-  const backupSuiteCfgs = {}
+function getResolvedTestConfigOverride (test) {
+  let curParent = test.parent
 
-  Cypress.on('suite:start', (suite) => {
-    const suiteCfg = suite.cfg
+  const cfgs = [test.cfg]
 
-    if (!suiteCfg) return
-
-    backupSuiteCfgs[suite.id] = mutateConfiguration(suiteCfg, Cypress)
-  })
-
-  Cypress.on('suite:end', (suite) => {
-    const backupConfigFn = backupSuiteCfgs[suite.id]
-
-    if (backupConfigFn) {
-      backupConfigFn()
+  while (curParent) {
+    if (curParent.cfg) {
+      cfgs.push(curParent.cfg)
     }
-  })
+
+    curParent = curParent.parent
+  }
+
+  return _.reduceRight(cfgs, (acc, cfg) => _.extend(acc, cfg), {})
 }
 
 function addTestConfigListeners () {
   let restoreTestConfigFn = null
 
-  Cypress.on('test:before:run', (test) => {
-    const testConfig = test.cfg
+  Cypress.on('test:before:run', (attrs, test) => {
+    if (restoreTestConfigFn) restoreTestConfigFn()
 
-    debug('test:before:run')
+    const resolvedTestConfig = getResolvedTestConfigOverride(test)
 
-    if (!testConfig) return
-
-    restoreTestConfigFn = mutateConfiguration(testConfig, Cypress)
-  })
-
-  Cypress.on('test:after:run', (test) => {
-    const shouldRunRestoreTestConfig = !!restoreTestConfigFn
-
-    if (shouldRunRestoreTestConfig) {
-      restoreTestConfigFn()
-      restoreTestConfigFn = null
-
-      return
-    }
+    restoreTestConfigFn = mutateConfiguration(resolvedTestConfig, Cypress)
   })
 }
 const eventManager = {
@@ -402,7 +397,7 @@ const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    addSuiteConfigListeners()
+    // addSuiteConfigListeners()
     addTestConfigListeners()
   },
 

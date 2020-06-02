@@ -151,6 +151,8 @@ class $Cypress {
       longStackTraces: config.isInteractive,
     })
 
+    // TODO: env is unintentionally preserved between soft reruns unlike config.
+    // change this in the NEXT_BREAKING
     const { env } = config
 
     config = _.omit(config, 'env', 'remote', 'resolved', 'scaffoldedFiles', 'javascripts', 'state')

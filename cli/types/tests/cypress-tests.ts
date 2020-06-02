@@ -494,6 +494,8 @@ namespace CypressTestOptionsTests {
     baseUrl: 'www.example.com'
   }, () => {})
 
+  context('suite', {}, () => {})
+
   describe('suite', {
     browser: {family: 'firefox'},
     baseUrl: 'www.example.com'
@@ -503,4 +505,5 @@ namespace CypressTestOptionsTests {
   describe.only('suite', {}, () => {})
   describe.skip('suite', {}, () => {})
   xdescribe('suite', {}, () => {})
+
 }

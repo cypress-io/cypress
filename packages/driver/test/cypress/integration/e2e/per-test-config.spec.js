@@ -84,6 +84,21 @@ describe('per-test config', () => {
     expect(Cypress.browser.name).eq('firefox')
   })
 
+  describe('mutating via Cypress.config', () => {
+    it('1/2 Cypress.config() mutates local and global config', {
+      defaultCommandTimeout: 1234,
+    }, () => {
+      Cypress.config('responseTimeout', 1111)
+      expect(Cypress.config('responseTimeout')).eq(1111)
+      expect(Cypress.config('defaultCommandTimeout')).eq(1234)
+    })
+
+    it('2/2 has persisted gloabl config', () => {
+      expect(Cypress.config('responseTimeout')).eq(1111)
+      expect(Cypress.config('defaultCommandTimeout')).eq(4000)
+    })
+  })
+
   describe('in beforeEach', () => {
     it('set various config values', {
       defaultCommandTimeout: 200,
@@ -259,6 +274,22 @@ describe('per-test config', () => {
     expect(Cypress.config().defaultCommandTimeout).eq(100)
   })
 
+  describe('config changes after run', () => {
+    let defaultCommandTimeout
+
+    it('1/2', {
+      defaultCommandTimeout: 1234,
+    }, () => {
+      cy.on('test:after:run', () => {
+        defaultCommandTimeout = Cypress.config('defaultCommandTimeout')
+      })
+    })
+
+    it('2/2', () => {
+      expect(defaultCommandTimeout).eq(1234)
+    })
+  })
+
   describe('xit, xdescribe', () => {
     xit('should be skipped', {}, () => {})
     xspecify('should be skipped', {}, () => {})
@@ -284,17 +315,17 @@ describe('per-test config', () => {
   })
 })
 
-describe('per-test-config baseUrl', () => {
-  it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
-    cy.visit('/fixtures/generic.html')
-    cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
-  })
+// describe('per-test-config baseUrl', () => {
+//   it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
+//     cy.visit('/fixtures/generic.html')
+//     cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
+//   })
 
-  it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
-    cy.visit('/fixtures/generic.html')
-    cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
-  })
-})
+//   it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
+//     cy.visit('/fixtures/generic.html')
+//     cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+//   })
+// })
 
 function hasOnly (test) {
   let curSuite = test.parent
