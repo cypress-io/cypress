@@ -27,7 +27,6 @@ describe "aliases", ->
         win.render({
           runner: @runner
           specPath: "/foo/bar"
-          relativeSpecPath: "/foo/bar"
         })
 
       cy.get(".reporter").then =>

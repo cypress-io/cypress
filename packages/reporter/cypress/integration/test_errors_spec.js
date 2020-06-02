@@ -114,7 +114,6 @@ describe('test errors', function () {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
-        relativeSpecPath: '/foo/bar',
         config: {
           projectRoot: '/root',
         },

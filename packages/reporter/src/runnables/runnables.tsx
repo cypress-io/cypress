@@ -45,7 +45,6 @@ interface RunnablesProps {
   error?: Error
   runnablesStore: RunnablesStore
   specPath: string
-  relativeSpecPath: string
   scroller: Scroller
   appState?: AppState
 }
@@ -53,11 +52,11 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath, relativeSpecPath } = this.props
+    const { error, runnablesStore, specPath } = this.props
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader specPath={specPath} relativeSpecPath={relativeSpecPath} />
+        <RunnableHeader specPath={specPath} />
         {content(runnablesStore, specPath, error)}
       </div>
     )

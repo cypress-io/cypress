@@ -29,7 +29,6 @@ const getProps = (props?: Partial<ReporterPropsStub>) => {
     error,
     runner: { emit: () => {}, on: () => {} },
     specPath: 'the spec path',
-    relativeSpecPath: 'the relative spec path',
     appState: {
       setAutoScrolling: sinon.spy(),
     },
@@ -105,13 +104,12 @@ describe('<Reporter />', () => {
     expect(component.find(Header)).to.have.prop('statsStore', statsStore)
   })
 
-  it('renders the runnables with the error, runnables store, and spec paths', () => {
+  it('renders the runnables with the error, runnables store, and spec path', () => {
     const component = shallow(<Reporter {...getProps()} />)
 
     expect(component.find(Runnables)).to.have.prop('error', error)
     expect(component.find(Runnables)).to.have.prop('runnablesStore', runnablesStore)
     expect(component.find(Runnables)).to.have.prop('specPath', 'the spec path')
-    expect(component.find(Runnables)).to.have.prop('relativeSpecPath', 'the relative spec path')
   })
 
   it('renders the forced gc warning with the appState and events', () => {

@@ -15,10 +15,6 @@ export default {
     return ''
   },
 
-  relativeSpecPath (config) {
-    return path.relative(config.fileServerFolder, this.absoluteSpecPath(config))
-  },
-
   // TODO: handle both integration and components specs
   absoluteSpecPath (config) {
     if (config.spec.specType === 'component') {

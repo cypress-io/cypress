@@ -11,7 +11,6 @@ describe('controls', function () {
       win.render({
         runner: this.runner,
         specPath: '/foo/bar',
-        relativeSpecPath: '/foo/bar.spec.js',
       })
     })
 
@@ -108,7 +107,7 @@ describe('controls', function () {
 
     describe('header', function () {
       it('displays', function () {
-        cy.get('.runnable-header').find('a').should('have.text', '/foo/bar.spec.js')
+        cy.get('.runnable-header').find('a').should('have.text', 'cypress/integration/tests_spec.ts')
       })
 
       itHandlesFileOpening('.runnable-header', {

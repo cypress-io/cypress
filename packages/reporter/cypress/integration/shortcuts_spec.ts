@@ -27,7 +27,6 @@ describe('controls', function () {
       win.render({
         runner,
         specPath: '/foo/bar',
-        relativeSpecPath: '/foo/bar',
       })
     })
 
