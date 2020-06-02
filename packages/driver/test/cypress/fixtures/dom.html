@@ -2,19 +2,6 @@
 <html>
   <head>
     <title>DOM Fixture</title>
-    <script type="text/javascript">
-      if (window.customElements) {
-        window.customElements.define('cy-test-element', class extends HTMLElement {
-          constructor() {
-            super()
-            const root = this.attachShadow({mode: 'open'})
-            const para = document.createElement('p')
-            para.textContent = 'Foo'
-            root.appendChild(para);
-          }
-        })
-      }
-    </script>
   </head>
   <body>
     <div id="dom">
@@ -658,14 +645,6 @@
       <div>
         Cross domain iframe:<br>
         <iframe id="iframe-cross-domain" src="http://localhost:3501/fixtures/generic.html"></iframe>
-      </div>
-      <div id="non-shadow-element">Foo</div>
-      <cy-test-element id="shadow-element"></cy-test-element>
-      <cy-test-element id="shadow-element-2"></cy-test-element>
-      <div id="parent-of-shadow-container-0">
-        <div id="parent-of-shadow-container-1">
-          <cy-test-element id="shadow-container-child"></cy-test-element>
-        </div>
       </div>
     </div>
   </body>

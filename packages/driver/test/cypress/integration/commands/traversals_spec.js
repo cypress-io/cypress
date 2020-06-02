@@ -9,6 +9,10 @@ describe('src/cy/commands/traversals', () => {
   })
 
   describe('ignoreShadowBoundaries', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
     describe('find', () => {
       it('should retrieve a matching element beyond shadow boundaries', () => {
         const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
@@ -84,13 +88,12 @@ describe('src/cy/commands/traversals', () => {
         .get(el)
         .parents({ ignoreShadowBoundaries: true })
         .then(($parents) => {
-          expect($parents.length).to.eq(6)
+          expect($parents.length).to.eq(5)
           expect($parents[0].id).to.eq('shadow-container-child')
           expect($parents[1].id).to.eq('parent-of-shadow-container-1')
           expect($parents[2].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[3].id).to.eq('dom')
-          expect($parents[4].nodeName).to.eq('BODY')
-          expect($parents[5].nodeName).to.eq('HTML')
+          expect($parents[3].nodeName).to.eq('BODY')
+          expect($parents[4].nodeName).to.eq('HTML')
         })
       })
 
@@ -101,12 +104,11 @@ describe('src/cy/commands/traversals', () => {
         .get(el)
         .parents({ ignoreShadowBoundaries: true })
         .then(($parents) => {
-          expect($parents.length).to.eq(5)
+          expect($parents.length).to.eq(4)
           expect($parents[0].id).to.eq('parent-of-shadow-container-1')
           expect($parents[1].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[2].id).to.eq('dom')
-          expect($parents[3].nodeName).to.eq('BODY')
-          expect($parents[4].nodeName).to.eq('HTML')
+          expect($parents[2].nodeName).to.eq('BODY')
+          expect($parents[3].nodeName).to.eq('HTML')
         })
       })
     })

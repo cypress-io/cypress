@@ -8,6 +8,10 @@ describe('src/cy/commands/querying', () => {
   })
 
   context('#shadow', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
     it('returns an empty set if no shadow roots exist', () => {
       const $nonShadowElement = cy.$$('#non-shadow-element')
 
