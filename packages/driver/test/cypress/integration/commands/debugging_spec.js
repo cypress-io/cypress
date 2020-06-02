@@ -55,10 +55,7 @@ describe('src/cy/commands/debugging', () => {
     })
   })
 
-  context('#pause', {
-    isInteractive: true,
-    numTestsKeptInMemory: 1,
-  }, () => {
+  context('#pause', () => {
     beforeEach(function () {
       cy.on('log:added', (attrs, log) => {
         if (attrs.name === 'pause') {

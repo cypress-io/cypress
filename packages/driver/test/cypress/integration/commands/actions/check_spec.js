@@ -1,10 +1,7 @@
 const $ = Cypress.$.bind(Cypress)
 const { _, Promise } = Cypress
 
-describe('src/cy/commands/actions/check', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/actions/check', () => {
   before(() => {
     cy
     .visit('/fixtures/dom.html')

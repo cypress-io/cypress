@@ -20,10 +20,7 @@ const urls = {
   auth: 'http://cypress:password123@localhost:8080/foo',
 }
 
-describe('src/cypress/location', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cypress/location', () => {
   beforeEach(function () {
     this.setup = (remote) => {
       return new Location(urls[remote])

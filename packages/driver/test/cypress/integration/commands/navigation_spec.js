@@ -4,10 +4,7 @@ const { _, Promise } = Cypress
 
 const Cookie = require('js-cookie')
 
-describe('src/cy/commands/navigation', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
     before(() => {
       cy

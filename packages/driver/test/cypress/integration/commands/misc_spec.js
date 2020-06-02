@@ -26,10 +26,7 @@ describe('src/cy/commands/misc', () => {
     })
   })
 
-  context('#log', {
-    isInteractive: true,
-    numTestsKeptInMemory: 1,
-  }, () => {
+  context('#log', () => {
     it('nulls out the subject', () => {
       cy.wrap({}).log('foo').then((subject) => {
         expect(subject).to.be.null

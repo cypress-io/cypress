@@ -1,10 +1,7 @@
 const { clickCommandLog } = require('../../support/utils')
 
 // https://github.com/cypress-io/cypress/pull/5299/files
-describe('rect highlight', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('rect highlight', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })

@@ -18,10 +18,7 @@ beforeEach(() => {
   reqQueue = []
 })
 
-describe('src/cy/commands/waiting', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/waiting', () => {
   context('#wait', () => {
     describe('number argument', () => {
       it('passes delay onto Promise', () => {

@@ -1,7 +1,4 @@
-describe('src/cy/commands/popups', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/popups', () => {
   context('alert', () => {
     beforeEach(function () {
       cy.visit('/fixtures/generic.html')

@@ -171,10 +171,7 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('.log', {
-      isInteractive: true,
-      numTestsKeptInMemory: 1,
-    }, () => {
+    describe('.log', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookies') {
@@ -477,12 +474,11 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('can set cookies with sameSite', () => {
+    it('can set cookies with sameSite', {
+      experimentalGetCookiesSameSite: true,
+    }, () => {
       Cypress.automation.restore()
       Cypress.utils.addTwentyYears.restore()
-
-      Cypress.sinon.stub(Cypress, 'config').callThrough()
-      .withArgs('experimentalGetCookiesSameSite').returns(true)
 
       cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
       cy.getCookie('one').should('include', { sameSite: 'no_restriction' })

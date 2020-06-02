@@ -1,10 +1,7 @@
 const $ = Cypress.$.bind(Cypress)
 const { _, Promise } = Cypress
 
-describe('src/cy/commands/connectors', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/connectors', () => {
   describe('with jquery', () => {
     before(() => {
       cy

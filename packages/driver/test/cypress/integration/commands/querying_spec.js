@@ -2,10 +2,7 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 
-describe('src/cy/commands/querying', {
-  isInteractive: true,
-  numTestsKeptInMemory: 1,
-}, () => {
+describe('src/cy/commands/querying', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
   })
