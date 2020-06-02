@@ -9,7 +9,6 @@ import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
-const debug = require('debug')('cypress:runner:events')
 
 const ws = client.connect({
   path: '/__socket.io',
@@ -39,24 +38,23 @@ const reporterBus = new EventEmitter()
 let Cypress
 
 function mutateConfiguration (testConfigOverride, Cypress) {
-  const { config } = Cypress
+  const { config, env } = Cypress
 
   const globalConfig = _.clone(config())
-
-  //TODO: do same for env
-
-  // const backupEnv = _.clone(env())
-
-  debug('load test config')
-  // if (testConfigOverride.env) {
-  //   env(testConfigOverride.env)
-  // }
+  const globalEnv = _.clone(env())
 
   delete testConfigOverride.browser
   config(testConfigOverride)
 
   const localTestConfig = config()
   const localTestConfigBackup = _.clone(localTestConfig)
+
+  if (testConfigOverride.env) {
+    env(testConfigOverride.env)
+  }
+
+  const localTestEnv = env()
+  const localTestEnvBackup = _.clone(localTestEnv)
 
   const restoreConfigFn = function () {
     _.each(localTestConfig, (val, key) => {
@@ -65,10 +63,16 @@ function mutateConfiguration (testConfigOverride, Cypress) {
       }
     })
 
+    _.each(localTestEnv, (val, key) => {
+      if (localTestEnvBackup[key] !== val) {
+        globalEnv[key] = val
+      }
+    })
+
     Cypress.config.reset()
     Cypress.config(globalConfig)
-    // Cypress.env.reset()
-    // Cypress.env(backupEnv)
+    Cypress.env.reset()
+    Cypress.env(globalEnv)
   }
 
   return restoreConfigFn

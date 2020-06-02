@@ -84,18 +84,28 @@ describe('per-test config', () => {
     expect(Cypress.browser.name).eq('firefox')
   })
 
-  describe('mutating via Cypress.config', () => {
-    it('1/2 Cypress.config() mutates local and global config', {
+  describe('mutating global config via Cypress.config and Cypress.env', () => {
+    it('1/2 global config and env', {
       defaultCommandTimeout: 1234,
+      env: {
+        FOO: '0',
+      },
     }, () => {
       Cypress.config('responseTimeout', 1111)
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(1234)
+
+      Cypress.env('BAR', '1')
+      expect(Cypress.env('FOO')).eq('0')
+      expect(Cypress.env('BAR')).eq('1')
     })
 
-    it('2/2 has persisted gloabl config', () => {
+    it('2/2 global config and env', () => {
       expect(Cypress.config('responseTimeout')).eq(1111)
       expect(Cypress.config('defaultCommandTimeout')).eq(4000)
+
+      expect(Cypress.env('FOO')).eq(undefined)
+      expect(Cypress.env('BAR')).eq('1')
     })
   })
 
@@ -315,17 +325,17 @@ describe('per-test config', () => {
   })
 })
 
-// describe('per-test-config baseUrl', () => {
-//   it('visit example', { baseUrl: 'http://localhost:3501' }, () => {
-//     cy.visit('/fixtures/generic.html')
-//     cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
-//   })
+describe('per-test-config baseUrl @slow', () => {
+  it('visit 1', { baseUrl: 'http://localhost:3501' }, () => {
+    cy.visit('/fixtures/generic.html')
+    cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')
+  })
 
-//   it('visit docs', { baseUrl: 'http://localhost:3500' }, () => {
-//     cy.visit('/fixtures/generic.html')
-//     cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
-//   })
-// })
+  it('visit 2', { baseUrl: 'http://localhost:3500' }, () => {
+    cy.visit('/fixtures/generic.html')
+    cy.url().should('eq', 'http://localhost:3500/fixtures/generic.html')
+  })
+})
 
 function hasOnly (test) {
   let curSuite = test.parent
