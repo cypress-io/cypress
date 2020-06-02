@@ -96,10 +96,6 @@ export const verify = (ctx, options) => {
 
     window.top.runnerWs.emit.callThrough().withArgs('open:file')
 
-    // NOTE: we use { force: true } on the clicks because we're testing the
-    // reporter itself and we end up scrolling the element we want to click
-    // under the file name header, which triggers a visibility error
-
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(ctx)}`)
@@ -116,7 +112,7 @@ export const verify = (ctx, options) => {
         // .should('not.include.text', msg)
       })
 
-      cy.contains('View stack trace').click({ force: true })
+      cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace')
       .invoke('text')
@@ -162,7 +158,7 @@ export const verify = (ctx, options) => {
 
       if (verifyOpenInIde) {
         cy.contains('.runnable-err-stack-trace .runnable-err-file-path', openInIdePath.relative)
-        .click({ force: true })
+        .click()
         .should(() => {
           testOpenInIde(runnerWs)
         })
@@ -182,7 +178,7 @@ export const verify = (ctx, options) => {
 
       if (verifyOpenInIde) {
         cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
-        .click({ force: true })
+        .click()
         .should(() => {
           expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
           testOpenInIde(runnerWs)
