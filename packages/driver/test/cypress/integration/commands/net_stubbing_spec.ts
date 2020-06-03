@@ -2005,357 +2005,14 @@ describe('src/cy/commands/net_stubbing', function () {
       })
 
       context('#route', function () {
-        beforeEach(function () {
-          this.expectOptionsToBe = (opts) => {
-            let options
-
-            options = this.route.getCall(0).args[0]
-
-            return _.each(opts, function (value, key) {
-              expect(options[key]).to.deep.eq(opts[key], `failed on property: (${key})`)
-            })
-          }
-
-          cy.server().then(function () {
-            return this.route = cy.spy(cy.state('server'), 'route')
-          })
-        })
-
-        it('accepts url, response', function () {
-          cy.route('/foo', {}).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: '/foo',
-              response: {},
-            })
-          })
-        })
-
-        it('accepts regex url, response', function () {
-          cy.route(/foo/, {}).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: /foo/,
-              response: {},
-            })
-          })
-        })
-
-        it('does not mutate other routes when using shorthand', function () {
-          cy.route('POST', /foo/, {}).as('getFoo').route(/bar/, {}).as('getBar').then(function () {
-            expect(this.route.firstCall.args[0].method).to.eq('POST')
-
-            expect(this.route.secondCall.args[0].method).to.eq('GET')
-          })
-        })
-
-        it('accepts url, response, onRequest', function () {
-          let onRequest
-
-          onRequest = function () {}
-
-          cy.route({
-            url: '/foo',
-            response: {},
-            onRequest,
-          }).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: '/foo',
-              response: {},
-              onRequest,
-              onResponse: void 0,
-            })
-          })
-        })
-
-        it('accepts url, response, onRequest, onResponse', function () {
-          let onRequest; let onResponse
-
-          onRequest = function () {}
-          onResponse = function () {}
-
-          cy.route({
-            url: '/foo',
-            response: {},
-            onRequest,
-            onResponse,
-          }).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: '/foo',
-              response: {},
-              onRequest,
-              onResponse,
-            })
-          })
-        })
-
-        it('accepts method, url, response', function () {
-          cy.route('GET', '/foo', {}).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: '/foo',
-              response: {},
-            })
-          })
-        })
-
-        it('accepts method, url, response, onRequest', function () {
-          let onRequest
-
-          onRequest = function () {}
-
-          cy.route({
-            method: 'GET',
-            url: '/foo',
-            response: {},
-            onRequest,
-          }).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              url: '/foo',
-              status: 200,
-              response: {},
-              onRequest,
-              onResponse: void 0,
-            })
-          })
-        })
-
-        it('accepts method, url, response, onRequest, onResponse', function () {
-          let onRequest; let onResponse
-
-          onRequest = function () {}
-          onResponse = function () {}
-
-          cy.route({
-            method: 'GET',
-            url: '/foo',
-            response: {},
-            onRequest,
-            onResponse,
-          }).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              url: '/foo',
-              status: 200,
-              response: {},
-              onRequest,
-              onResponse,
-            })
-          })
-        })
-
-        it('uppercases method', function () {
-          cy.route('get', '/foo', {}).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: '/foo',
-              response: {},
-            })
-          })
-        })
-
-        it('accepts string or regex as the url', function () {
-          cy.route('get', /.*/, {}).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: /.*/,
-              response: {},
-            })
-          })
-        })
-
-        it('does not require response or method when not stubbing', function () {
-          cy.server().route(/users/).as('getUsers').then(function () {
-            return this.expectOptionsToBe({
-              status: 200,
-              method: 'GET',
-              url: /users/,
-            })
-          })
-        })
-
-        it('does not require response when not stubbing', function () {
-          cy.server().route('POST', /users/).as('createUsers').then(function () {
-            return this.expectOptionsToBe({
-              status: 200,
-              method: 'POST',
-              url: /users/,
-            })
-          })
-        })
-
-        it('accepts an object literal as options', function () {
-          let onRequest; let onResponse; let opts
-
-          onRequest = function () {}
-          onResponse = function () {}
-          opts = {
-            method: 'PUT',
-            url: '/foo',
-            status: 200,
-            response: {},
-            onRequest,
-            onResponse,
-          }
-
-          cy.route(opts).then(function () {
-            return this.expectOptionsToBe(opts)
-          })
-        })
-
-        it('can accept wildcard * as URL and converts to /.*/ regex', function () {
-          let opts
-
-          opts = {
-            url: '*',
-            response: {},
-          }
-
-          cy.route(opts).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: /.*/,
-              originalUrl: '*',
-              response: {},
-            })
-          })
-        })
-
-        // FIXME:
-        it.skip('can explicitly done() in onRequest function from options', function (done) {
-          cy.server().route({
-            method: 'POST',
-            url: '/users',
-            response: {},
-            onRequest () {
-              done()
-            },
-          }).then(function () {
-            cy.state('window').$.post('/users', 'name=brian')
-          })
-        })
-
-        it('can accept response as a function', function () {
-          let getUsers; let users
-
-          users = [{}, {}]
-          getUsers = function () {
-            return users
-          }
-
-          cy.route(/users/, getUsers).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: /users/,
-              response: users,
-            })
-          })
-        })
-
-        it('invokes response function with runnable.ctx', function () {
-          let ctx; let getUsers
-
-          ctx = this
-          getUsers = function () {
-            expect(this === ctx).to.be.true
-          }
-
-          cy.route(/users/, getUsers)
-        })
-
-        it('passes options as argument', function () {
-          let getUsers
-
-          getUsers = function (opts) {
-            expect(opts).to.be.an('object')
-
-            expect(opts.method).to.eq('GET')
-          }
-
-          cy.route(/users/, getUsers)
-        })
-
-        it('can accept response as a function which returns a promise', function () {
-          let getUsers; let users
-
-          users = [{}, {}]
-          getUsers = function () {
-            return new Promise(function (resolve) {
-              return setTimeout(function () {
-                resolve(users)
-              }, 10)
-            })
-          }
-
-          cy.route(/users/, getUsers).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 200,
-              url: /users/,
-              response: users,
-            })
-          })
-        })
-
-        it('can accept a function which returns options', function () {
-          let getRoute; let users
-
-          users = [{}, {}]
-          getRoute = function () {
-            return {
-              method: 'GET',
-              url: /users/,
-              status: 201,
-              response () {
-                return Promise.resolve(users)
-              },
-            }
-          }
-
-          cy.route(getRoute).then(function () {
-            return this.expectOptionsToBe({
-              method: 'GET',
-              status: 201,
-              url: /users/,
-              response: users,
-            })
-          })
-        })
-
-        it('invokes route function with runnable.ctx', function () {
-          let ctx; let getUsers
-
-          ctx = this
-          getUsers = function () {
-            expect(this === ctx).to.be.true
-
-            return {
-              url: /foo/,
-            }
-          }
-
-          cy.route(getUsers)
-        })
-
         it('can use regular strings as response', function () {
           cy.route('/foo', 'foo bar baz').as('getFoo').window().then(function (win) {
             win.$.get('/foo')
 
             return null
-          }).wait('@getFoo').then(function (xhr) {
-            expect(xhr.responseBody).to.eq('foo bar baz')
+          }).wait('@getFoo').then(function (res) {
+            // TODO: need to define user-accessible shape
+            // expect(xhr.responseBody).to.eq('foo bar baz')
           })
         })
 
@@ -2367,47 +2024,22 @@ describe('src/cy/commands/net_stubbing', function () {
             })
 
             return null
-          }).wait('@getFoo').then(function (xhr) {
-            expect(xhr.responseBody).to.eq('foo bar baz')
+          }).wait('@getFoo').then(function (res) {
+            // TODO: need to define user-accessible shape
+            // expect(xhr.responseBody).to.eq('foo bar baz')
           })
         })
 
         // https://github.com/cypress-io/cypress/issues/2372
         it('warns if a percent-encoded URL is used', function () {
-          cy.spy(Cypress.utils, 'warning')
-
           cy.route('GET', '/foo%25bar').then(function () {
             expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.route(), but cy.route() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
           })
         })
 
         it('does not warn if an invalid percent-encoded URL is used', function () {
-          cy.spy(Cypress.utils, 'warning')
-
           cy.route('GET', 'http://example.com/%E0%A4%A').then(function () {
             expect(Cypress.utils.warning).to.not.be.called
-          })
-        })
-
-        describe('deprecations', function () {
-          beforeEach(function () {
-            return this.warn = cy.spy(window.top.console, 'warn')
-          })
-
-          it('logs on {force404: false}', function () {
-            cy.server({
-              force404: false,
-            }).then(function () {
-              expect(this.warn).to.be.calledWith('Cypress Warning: Passing cy.server({force404: false}) is now the default behavior of cy.server(). You can safely remove this option.')
-            })
-          })
-
-          it('does not log on {force404: true}', function () {
-            cy.server({
-              force404: true,
-            }).then(function () {
-              expect(this.warn).not.to.be.called
-            })
           })
         })
 
@@ -2431,33 +2063,12 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return null
             }).wait('@getFoo').then(function (xhr) {
-              expect(xhr.responseBody).to.deep.eq({
-                foo: 'bar',
-              })
+              // TODO: need to decide body shape
+              // expect(xhr.responseBody).to.deep.eq({
+              //   foo: 'bar',
+              // })
 
-              expect(xhr.responseBody).to.deep.eq(this.foo)
-            })
-          })
-
-          it('can pass an alias when using a response function', function () {
-            let getFoo
-
-            getFoo = function () {
-              return Promise.resolve('@foo')
-            }
-
-            cy.noop({
-              foo: 'bar',
-            }).as('foo').route(/foo/, getFoo).as('getFoo').window().then(function (win) {
-              win.$.getJSON('foo')
-
-              return null
-            }).wait('@getFoo').then(function (xhr) {
-              expect(xhr.responseBody).to.deep.eq({
-                foo: 'bar',
-              })
-
-              expect(xhr.responseBody).to.deep.eq(this.foo)
+              // expect(xhr.responseBody).to.deep.eq(this.foo)
             })
           })
 
@@ -2470,18 +2081,18 @@ describe('src/cy/commands/net_stubbing', function () {
               let log
 
               log = cy.queue.logs({
-                name: 'xhr',
+                displayName: 'stubbed route',
               })[0]
 
-              expect(log.get('displayName')).to.eq('xhr')
               expect(log.get('alias')).to.eq('getFoo')
 
-              expect(xhr.responseBody).to.deep.eq({
-                some: 'json',
-                foo: {
-                  bar: 'baz',
-                },
-              })
+              // TODO: need to determine shape
+              // expect(xhr.responseBody).to.deep.eq({
+              //   some: 'json',
+              //   foo: {
+              //     bar: 'baz',
+              //   },
+              // })
             })
           })
         })

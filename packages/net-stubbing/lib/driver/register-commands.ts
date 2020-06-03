@@ -19,6 +19,7 @@ import {
   AnnotatedRouteMatcherOptions,
   AnnotatedStringMatcher,
   NetEventFrames,
+  StringMatcher,
 } from '../types'
 import '@packages/driver/index.d.ts'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
@@ -284,18 +285,31 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     return _emit('route:added', frame)
   }
 
-  function route (matcher: RouteMatcher, handler: RouteHandler) {
-    let options: RouteMatcherOptions
+  function route (matcher: RouteMatcher, handler: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+    function _getMatcherOptions (): RouteMatcherOptions {
+      if (_.isString(matcher) && (_isRegExp(handler) || typeof handler === 'string') && arg2) {
+        // method, url, handler
+        const url = handler as StringMatcher
 
-    if (matcher instanceof RegExp || typeof matcher === 'string') {
-      options = {
-        url: matcher,
+        handler = arg2
+
+        return {
+          method: matcher,
+          url,
+        }
       }
-    } else {
-      options = matcher
+
+      if (_isRegExp(matcher) || typeof matcher === 'string') {
+        // url, handler
+        return {
+          url: matcher,
+        }
+      }
+
+      return matcher
     }
 
-    return _addRoute(options, handler)
+    return _addRoute(_getMatcherOptions(), handler as RouteHandler)
     .then(() => null)
   }
 
