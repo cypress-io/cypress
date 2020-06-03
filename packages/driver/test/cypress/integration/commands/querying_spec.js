@@ -109,9 +109,7 @@ describe('src/cy/commands/querying', () => {
         })
       })
 
-      it('snapshots immediately', {
-
-      }, () => {
+      it('snapshots immediately', () => {
         cy.focused().then(function () {
           const { lastLog } = this
 
