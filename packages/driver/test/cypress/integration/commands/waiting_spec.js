@@ -1,12 +1,22 @@
 const { _, Promise } = Cypress
+let reqQueue = []
 
 const xhrGet = function (win, url) {
-  const xhr = new win.XMLHttpRequest
+  const xhr = new win.XMLHttpRequest()
 
   xhr.open('GET', url)
 
+  reqQueue.push(xhr)
+
   return xhr.send()
 }
+
+// keep track of outstanding requests and abort them so
+// they do not clog up the browser request queue
+beforeEach(() => {
+  _.each(reqQueue, (xhr) => xhr.abort())
+  reqQueue = []
+})
 
 describe('src/cy/commands/waiting', () => {
   context('#wait', () => {
@@ -69,7 +79,7 @@ describe('src/cy/commands/waiting', () => {
         .server()
         .route('GET', /.*/, response).as('fetch')
         .window().then((win) => {
-          win.$.get('/foo')
+          xhrGet(win, '/foo')
 
           return null
         })
@@ -82,7 +92,7 @@ describe('src/cy/commands/waiting', () => {
         cy.on('command:retry', _.once(() => {
           const win = cy.state('window')
 
-          win.$.get('/users')
+          xhrGet(win, '/users')
 
           return null
         }))
@@ -170,7 +180,7 @@ describe('src/cy/commands/waiting', () => {
         .server({ delay: 100 })
         .route('GET', '*', {}).as('fetch')
         .window().then((win) => {
-          win.$.get('/foo')
+          xhrGet(win, '/foo')
 
           return null
         })
@@ -189,7 +199,7 @@ describe('src/cy/commands/waiting', () => {
         .server({ delay: 100 })
         .route('GET', '*', {}).as('fetch')
         .window().then((win) => {
-          win.$.get('/foo')
+          xhrGet(win, '/foo')
 
           return null
         })
@@ -208,7 +218,7 @@ describe('src/cy/commands/waiting', () => {
             // trigger request to move onto response timeout verification
             const win = cy.state('window')
 
-            win.$.get('/foo')
+            xhrGet(win, '/foo')
           }
 
           if (retryCount === 2) {
@@ -233,7 +243,7 @@ describe('src/cy/commands/waiting', () => {
         .route(/bar/, {}).as('getBar')
         .window().then((win) => {
           win.$.post('/foo')
-          win.$.get('/bar')
+          xhrGet(win, '/bar')
 
           return null
         })
@@ -309,7 +319,7 @@ describe('src/cy/commands/waiting', () => {
           .server()
           .route(/foo/, {}).as('foo')
           .window().then((win) => {
-            win.$.get('/foo')
+            xhrGet(win, '/foo')
 
             return null
           })
@@ -328,7 +338,7 @@ describe('src/cy/commands/waiting', () => {
           .route(/foo/, {}).as('foo')
           .route(/bar/, {}).as('bar')
           .window().then((win) => {
-            win.$.get('/foo')
+            xhrGet(win, '/foo')
 
             return null
           })
@@ -348,7 +358,7 @@ describe('src/cy/commands/waiting', () => {
           .route(/foo/, {}).as('foo')
           .get('body').as('bar')
           .window().then((win) => {
-            win.$.get('/foo')
+            xhrGet(win, '/foo')
 
             return null
           })
@@ -390,7 +400,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('command:retry', _.once(() => {
             const win = cy.state('window')
 
-            win.$.get('/foo')
+            xhrGet(win, '/foo')
 
             return null
           }))
@@ -414,7 +424,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('command:retry', _.once(() => {
             const win = cy.state('window')
 
-            win.$.get('/bar')
+            xhrGet(win, '/bar')
 
             return null
           }))
@@ -508,7 +518,7 @@ describe('src/cy/commands/waiting', () => {
 
             const win = cy.state('window')
 
-            win.$.get('/users', { num: response })
+            return xhrGet(win, `/users?num=${response}`)
           })
 
           cy.server()
@@ -533,7 +543,7 @@ describe('src/cy/commands/waiting', () => {
             response += 1
             const win = cy.state('window')
 
-            win.$.get('/users', { num: response })
+            return xhrGet(win, `/users?num=${response}`)
           }))
 
           cy
@@ -560,7 +570,7 @@ describe('src/cy/commands/waiting', () => {
             request += 1
             const win = cy.state('window')
 
-            win.$.get('/users', { num: request })
+            return xhrGet(win, `/users?num=${request}`)
           }))
 
           cy
@@ -583,7 +593,7 @@ describe('src/cy/commands/waiting', () => {
           .server()
           .route('*').as('response')
           .window().then((win) => {
-            win.$.get('/timeout?ms=500')
+            xhrGet(win, '/timeout?ms=500')
 
             return null
           })
@@ -603,8 +613,8 @@ describe('src/cy/commands/waiting', () => {
           .server()
           .route('*').as('response')
           .window().then((win) => {
-            win.$.get('/timeout?ms=0')
-            win.$.get('/timeout?ms=5000')
+            xhrGet(win, '/timeout?ms=0')
+            xhrGet(win, '/timeout?ms=5000')
 
             return null
           })
@@ -625,8 +635,8 @@ describe('src/cy/commands/waiting', () => {
           .route('/timeout?ms=0').as('foo')
           .route('/timeout?ms=5000').as('bar')
           .window().then((win) => {
-            win.$.get('/timeout?ms=0')
-            win.$.get('/timeout?ms=5000')
+            xhrGet(win, '/timeout?ms=0')
+            xhrGet(win, '/timeout?ms=5000')
 
             return null
           })
@@ -639,7 +649,7 @@ describe('src/cy/commands/waiting', () => {
           cy.on('command:retry', _.once(() => {
             const win = cy.state('window')
 
-            win.$.get('/users')
+            xhrGet(win, '/users')
 
             return null
           }))
@@ -668,11 +678,11 @@ describe('src/cy/commands/waiting', () => {
             const win = cy.state('window')
 
             _.defer(() => {
-              win.$.get('/timeout?ms=2001')
+              xhrGet(win, '/timeout?ms=2001')
             })
 
             _.defer(() => {
-              win.$.get('/timeout?ms=2002')
+              xhrGet(win, '/timeout?ms=2002')
             })
           }))
 
@@ -713,9 +723,9 @@ describe('src/cy/commands/waiting', () => {
           .route('/timeout?ms=2').as('getTwo')
           .route('/timeout?ms=3000').as('getThree')
           .then(() => {
-            win.$.get('/timeout?ms=1')
-            win.$.get('/timeout?ms=2')
-            win.$.get('/timeout?ms=3000')
+            xhrGet(win, '/timeout?ms=1')
+            xhrGet(win, '/timeout?ms=2')
+            xhrGet(win, '/timeout?ms=3000')
 
             return null
           }).wait(['@getOne', '@getTwo', '@getThree'])
@@ -747,8 +757,8 @@ describe('src/cy/commands/waiting', () => {
         cy.route(/users/, resp1).as('getUsers')
         cy.route(/posts/, resp2).as('get.posts')
         cy.window().then((win) => {
-          win.$.get('/users')
-          win.$.get('/posts')
+          xhrGet(win, '/users')
+          xhrGet(win, '/posts')
 
           return null
         })
@@ -775,7 +785,7 @@ describe('src/cy/commands/waiting', () => {
           if (options._retries === 1) {
             response += 1
 
-            return win.$.get('/users', { num: response })
+            return xhrGet(win, `/users?num=${response}`)
           }
         })
 
@@ -809,7 +819,7 @@ describe('src/cy/commands/waiting', () => {
           if (options._retries === 1) {
             response += 1
 
-            win.$.get('/users', { num: response })
+            return xhrGet(win, `/users?num=${response}`)
           }
         })
 
