@@ -377,6 +377,22 @@ Cypress.Commands.add('failEventHandlerException', () => {
   cy.visit('http://localhost:1919')
 })
 
+Cypress.Commands.add('failFailHandlerAssertion', () => {
+  cy.on('fail', () => {
+    expect('actual').to.equal('expected')
+  })
+
+  cy.get('#does-not-exist')
+})
+
+Cypress.Commands.add('failFailHandlerException', () => {
+  cy.on('fail', () => {
+    ({}).bar()
+  })
+
+  cy.get('#does-not-exist')
+})
+
 Cypress.Commands.add('failSyncAppException', () => {
   cy.visit('/js_errors.html')
   cy.get('.sync-error').click()

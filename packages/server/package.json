@@ -189,7 +189,7 @@
     "stream-to-promise": "1.1.1",
     "supertest": "4.0.2",
     "supertest-session": "4.0.0",
-    "through2": "^2.0.0",
+    "through2": "2.0.5",
     "ts-loader": "7.0.4",
     "webpack": "4.43.0",
     "ws": "5.2.2",
