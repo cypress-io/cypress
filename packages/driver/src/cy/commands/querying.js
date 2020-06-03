@@ -280,10 +280,10 @@ module.exports = (Commands, Cypress, cy) => {
           // only support shadow traversal if we're not searching
           // within a subject and have been explicitly told to ignore
           // boundaries.
-          if (!options.ignoreShadowBoundaries || options.withinSubject) {
+          if (!options.ignoreShadowBoundaries) {
             $el = cy.$$(selector, options.withinSubject)
           } else {
-            const elementsWithShadow = $dom.findAllShadowRoots(cy.state('document'))
+            const elementsWithShadow = $dom.findAllShadowRoots(options.withinSubject || cy.state('document'))
 
             $el = cy.$$(selector, elementsWithShadow)
           }
