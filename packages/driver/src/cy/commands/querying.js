@@ -86,6 +86,10 @@ module.exports = (Commands, Cypress, cy) => {
         verify: true,
       })
 
+      if (!Cypress.config('experimentalShadowDomSupport')) {
+        options.ignoreShadowBoundaries = false
+      }
+
       let aliasObj
       const consoleProps = {}
       const start = (aliasType) => {

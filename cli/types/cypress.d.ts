@@ -2415,6 +2415,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Enables shadow DOM support, such that some traversals may specify the
+     * `ignoreShadowBoundaries` option to search beyond shadow boundaries.
+     */
+    experimentalShadowDomSupport: boolean
   }
 
   /**
