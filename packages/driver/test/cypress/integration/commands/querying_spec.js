@@ -2,6 +2,8 @@ const $ = Cypress.$.bind(Cypress)
 const { _ } = Cypress
 const { Promise } = Cypress
 
+const helpers = require('../../support/helpers')
+
 describe('src/cy/commands/querying', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -13,17 +15,16 @@ describe('src/cy/commands/querying', () => {
     })
 
     it('returns an empty set if no shadow roots exist', () => {
-      const $nonShadowElement = cy.$$('#non-shadow-element')
-
-      cy.get($nonShadowElement).shadow().should('not.exist').then(($root) => {
+      cy.get('#non-shadow-element').shadow()
+      .should('not.exist')
+      .then(($root) => {
         expect($root).to.be.null
       })
     })
 
     it('returns the shadow root of an individual element', () => {
-      const $shadowElement = cy.$$('#shadow-element')
-
-      cy.get($shadowElement).shadow().then(($roots) => {
+      cy.get('#shadow-element').shadow()
+      .then(($roots) => {
         expect($roots.length).to.eq(1)
       })
     })
@@ -31,7 +32,8 @@ describe('src/cy/commands/querying', () => {
     it('returns a set of shadow roots for a set of elements', () => {
       const $shadowElements = cy.$$('#shadow-element, #shadow-element-2')
 
-      cy.get($shadowElements).shadow().then(($roots) => {
+      cy.get('#shadow-element, #shadow-element-2').shadow()
+      .then(($roots) => {
         expect($roots.length).to.eq(2)
         expect($roots.get(0)).to.eq($shadowElements.get(0).shadowRoot)
         expect($roots.get(1)).to.eq($shadowElements.get(1).shadowRoot)
@@ -39,14 +41,77 @@ describe('src/cy/commands/querying', () => {
     })
 
     it('retries until it can find a root', () => {
-      const $nonShadowElement = cy.$$('#non-shadow-element')
-
       cy.on('command:retry', _.after(2, () => {
         cy.$$('#non-shadow-element')[0].attachShadow({ mode: 'open' })
       }))
 
-      cy.get($nonShadowElement).shadow().then(($roots) => {
+      cy.get('#non-shadow-element').shadow()
+      .then(($roots) => {
         expect($roots.length).to.equal(1)
+      })
+    })
+
+    describe('.log', () => {
+      beforeEach(function () {
+        cy.on('log:added', (attrs, log) => {
+          this.lastLog = log
+        })
+
+        return null
+      })
+
+      it('logs immediately before resolving', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (log.get('name') === 'shadow') {
+            expect(log.pick('state')).to.deep.eq({
+              state: 'pending',
+            })
+
+            done()
+          }
+        })
+
+        cy.get('#shadow-element').shadow()
+      })
+
+      it('snapshots after finding element', () => {
+        cy.get('#shadow-element').shadow()
+        .then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('snapshots').length).to.eq(1)
+          expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('has the $el', () => {
+        cy.get('#shadow-element').shadow()
+        .then(function ($el) {
+          const { lastLog } = this
+
+          expect(lastLog.get('$el').get(0)).to.eq($el.get(0))
+        })
+      })
+
+      it('#consoleProps', () => {
+        cy.get('#shadow-element').shadow()
+        .then(function ($el) {
+          expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
+            'Applied To': helpers.getFirstSubjectByName('get').get(0),
+            Yielded: Cypress.dom.getElements($el),
+            Elements: $el.length,
+            Command: 'shadow',
+          })
+        })
+      })
+
+      it('can be turned off', () => {
+        cy.get('#shadow-element').shadow({ log: false })
+        .then(function () {
+          const { lastLog } = this
+
+          expect(lastLog.get('name')).to.eq('get')
+        })
       })
     })
   })
@@ -637,7 +702,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     // NOTE: FLAKY in CI, need to investigate further
-    it.skip('retries finding elements until something is found', () => {
+    it('retries finding elements until something is found', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
       // wait until we're ALMOST about to time out before
