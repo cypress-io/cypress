@@ -2,7 +2,7 @@ fs         = require("fs")
 path       = require("path")
 express    = require("express")
 Fixtures   = require("../support/helpers/fixtures")
-e2e        = require("../support/helpers/e2e")
+e2e        = require("../support/helpers/e2e").default
 
 replacerRe = /(<h1>)\w+(<\/h1>)/
 

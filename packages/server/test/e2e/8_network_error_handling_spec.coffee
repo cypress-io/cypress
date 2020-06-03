@@ -13,7 +13,7 @@ DebugProxy = require("@cypress/debugging-proxy")
 mitmProxy = require("http-mitm-proxy")
 launcher = require("@packages/launcher")
 chrome   = require("../../lib/browsers/chrome")
-e2e      = require("../support/helpers/e2e")
+e2e      = require("../support/helpers/e2e").default
 random   = require("../../lib/util/random")
 Fixtures = require("../support/helpers/fixtures")
 

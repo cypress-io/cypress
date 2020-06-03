@@ -43,8 +43,6 @@ const jqueryProxyFn = function (...args) {
   return this.cy.$$.apply(this.cy, args)
 }
 
-_.extend(jqueryProxyFn, $)
-
 // provide the old interface and
 // throw a deprecation message
 $Log.command = () => {
@@ -90,6 +88,9 @@ class $Cypress {
     this.onSpecReady = null
 
     this.events = $Events.extend(this)
+    this.$ = jqueryProxyFn.bind(this)
+
+    _.extend(this.$, $)
 
     this.setConfig(config)
   }
@@ -583,8 +584,6 @@ class $Cypress {
     return new $Cypress(config)
   }
 }
-
-$Cypress.prototype.$ = jqueryProxyFn
 
 // attach to $Cypress to access
 // all of the constructors
