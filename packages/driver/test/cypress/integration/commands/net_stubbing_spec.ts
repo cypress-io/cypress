@@ -1049,7 +1049,7 @@ describe('src/cy/commands/net_stubbing', function () {
       // NOTE: some of these concepts are worth ensuring tests exist for
       context.skip('#startXhrServer', function () {
         it('continues to be a defined properties', function () {
-          cy.server().route({
+          cy.route({
             url: /foo/,
           }).as('getFoo').window().then(function (win) {
             let xhr
@@ -1069,7 +1069,7 @@ describe('src/cy/commands/net_stubbing', function () {
           onloaded = false
           onreadystatechanged = false
 
-          cy.server().route({
+          cy.route({
             url: /foo/,
           }).as('getFoo').window().then(function (win) {
             let handlers; let wrap; let xhr
@@ -1126,7 +1126,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           responseStatuses = 0
 
-          cy.server().route({
+          cy.route({
             url: /longtext.txt/,
           }).as('getLongText').task('create:long:file').window().then(function (win) {
             let xhr
@@ -1155,7 +1155,7 @@ describe('src/cy/commands/net_stubbing', function () {
           failed = false
           onloaded = false
 
-          cy.server().route({
+          cy.route({
             url: /foo/,
           }).as('getFoo').window().then(function (win) {
             let handlers; let open; let wrap
@@ -1200,7 +1200,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           onloaded = false
 
-          cy.server().route({
+          cy.route({
             url: /foo/,
           }).as('getFoo').window().then(function (win) {
             let xhr
@@ -1226,7 +1226,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           onloaded = false
 
-          cy.server().route({
+          cy.route({
             url: /foo/,
           }).as('getFoo').window().then(function (win) {
             let xhr
@@ -1251,7 +1251,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           onloaded = false
 
-          cy.server().route({
+          cy.route({
             url: /timeout/,
           }).as('getTimeout').window().then(function (win) {
             let xhr
@@ -1279,7 +1279,7 @@ describe('src/cy/commands/net_stubbing', function () {
           onloaded = false
           onreadystatechanged = false
 
-          cy.server().route({
+          cy.route({
             url: /timeout/,
           }).as('get.timeout').window().then(function (win) {
             let xhr
@@ -1306,7 +1306,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('url rewriting', function () {
           it('has a FQDN absolute-relative url', function () {
-            cy.server().route({
+            cy.route({
               url: /foo/,
             }).as('getFoo').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
@@ -1321,7 +1321,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('has a relative URL', function () {
-            cy.server().route(/foo/).as('getFoo').window().then(function (win) {
+            cy.route(/foo/).as('getFoo').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
               win.$.get('foo')
 
@@ -1334,7 +1334,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('resolves relative urls correctly when base tag is present', function () {
-            cy.server().route({
+            cy.route({
               url: /foo/,
             }).as('getFoo').window().then(function (win) {
               win.$('<base href=\'/\'>').appendTo(win.$('head'))
@@ -1350,7 +1350,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('resolves relative urls correctly when base tag is present on nested routes', function () {
-            cy.server().route({
+            cy.route({
               url: /foo/,
             }).as('getFoo').window().then(function (win) {
               win.$('<base href=\'/nested/route/path\'>').appendTo(win.$('head'))
@@ -1366,7 +1366,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('allows cross origin requests to go out as necessary', function () {
-            cy.server().route(/foo/).as('getFoo').window().then(function (win) {
+            cy.route(/foo/).as('getFoo').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
               win.$.get('http://localhost:3501/foo')
 
@@ -1379,7 +1379,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('rewrites FQDN url\'s for stubs', function () {
-            cy.server().route({
+            cy.route({
               url: /foo/,
               response: {},
             }).as('getFoo').window().then(function (win) {
@@ -1395,7 +1395,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('rewrites absolute url\'s for stubs', function () {
-            cy.server().route(/foo/, {}).as('getFoo').window().then(function (win) {
+            cy.route(/foo/, {}).as('getFoo').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
               win.$.get('/foo')
 
@@ -1408,9 +1408,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('rewrites 404\'s url\'s for stubs', function () {
-            cy.server({
-              force404: true,
-            }).window().then(function (win) {
+            cy.window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
 
               return new Promise(function (resolve) {
@@ -1435,7 +1433,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('rewrites urls with nested segments', function () {
-            cy.server().route({
+            cy.route({
               url: /phones/,
               response: {},
             }).as('getPhones').window().then(function (win) {
@@ -1473,7 +1471,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('can stub real CORS requests too', function () {
-            cy.server().route({
+            cy.route({
               url: /phones/,
               response: {},
             }).as('getPhones').window().then(function (win) {
@@ -1492,7 +1490,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('can stub CORS string routes', function () {
-            cy.server().route('http://localhost:3501/fixtures/app.json').as('getPhones').window().then(function (win) {
+            cy.route('http://localhost:3501/fixtures/app.json').as('getPhones').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
               win.$.get('http://localhost:3501/fixtures/app.json')
 
@@ -1510,7 +1508,7 @@ describe('src/cy/commands/net_stubbing', function () {
           it('sets display correctly when there is no remoteOrigin', function () {
             // this is an example of having cypress act as your webserver
             // when the remoteHost is <root>
-            cy.server().route({
+            cy.route({
               url: /foo/,
               response: {},
             }).as('getFoo').window().then(function (win) {
@@ -1529,7 +1527,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('decodes proxy urls', function () {
-            cy.server().route({
+            cy.route({
               url: /users/,
               response: {},
             }).as('getUsers').window().then(function (win) {
@@ -1549,7 +1547,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('decodes proxy urls #2', function () {
-            cy.server().route(/accounts/, {}).as('getAccounts').window().then(function (win) {
+            cy.route(/accounts/, {}).as('getAccounts').window().then(function (win) {
               this.open = cy.spy(cy.state('server').options, 'onOpen')
               win.$.get('/accounts?page=1&%24filter=(rowStatus+eq+1)&%24orderby=name+asc&includeOpenFoldersCount=true&includeStatusCount=true')
 
@@ -1569,7 +1567,7 @@ describe('src/cy/commands/net_stubbing', function () {
         describe('#onResponse', function () {
           // NOTE: not ported from XHR-based stubbing - XHR-specific
           it('calls onResponse callback with cy context + proxy xhr', function (done) {
-            cy.server().route({
+            cy.route({
               url: /foo/,
               response: {
                 foo: 'bar',
@@ -1593,7 +1591,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('#onAbort', function () {
           it('calls onAbort callback with cy context + proxy xhr', function (done) {
-            cy.server().route({
+            cy.route({
               url: /foo/,
               response: {},
               onAbort (xhr) {
@@ -1618,7 +1616,7 @@ describe('src/cy/commands/net_stubbing', function () {
         describe('request parsing', function () {
           // NOTE: not ported from XHR-based stubbing - XHR-specific
           it.skip('adds parses requestBody into JSON', function (done) {
-            cy.server().route({
+            cy.route({
               method: 'POST',
               url: /foo/,
               response: {},
@@ -1660,7 +1658,7 @@ describe('src/cy/commands/net_stubbing', function () {
               return null
             }
 
-            cy.server().route('POST', /foo/, {}).as('getFoo').window().then(function (win) {
+            cy.route('POST', /foo/, {}).as('getFoo').window().then(function (win) {
               return post(win, {
                 foo: 'bar1',
               })
@@ -1676,7 +1674,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('handles arraybuffer', function () {
-            cy.server().route('GET', /buffer/).as('getBuffer').window().then(function (win) {
+            cy.route('GET', /buffer/).as('getBuffer').window().then(function (win) {
               let xhr
 
               xhr = new win.XMLHttpRequest
@@ -1691,7 +1689,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('handles xml', function () {
-            cy.server().route('GET', /xml/).as('getXML').window().then(function (win) {
+            cy.route('GET', /xml/).as('getXML').window().then(function (win) {
               let xhr
 
               xhr = new win.XMLHttpRequest
@@ -1705,7 +1703,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('issue #84', function () {
           it('does not incorrectly match options', function () {
-            cy.server().route({
+            cy.route({
               method: 'GET',
               url: /answers/,
               status: 503,
@@ -1720,7 +1718,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('#issue #85', function () {
           it('correctly returns the right XHR alias', function () {
-            cy.server().route({
+            cy.route({
               method: 'POST',
               url: /foo/,
               response: {},
@@ -1757,7 +1755,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           context('requests', function () {
             it('immediately logs xhr obj', function () {
-              cy.server().route(/foo/, {}).as('getFoo').window().then(function (win) {
+              cy.route(/foo/, {}).as('getFoo').window().then(function (win) {
                 win.$.get('foo')
 
                 return null
@@ -1787,7 +1785,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               logs = null
 
-              cy.server().route({
+              cy.route({
                 url: /foo/,
                 response: {},
                 delay: 50,
@@ -1826,7 +1824,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               xhrs = null
 
-              cy.server().route({
+              cy.route({
                 url: /foo/,
                 response: {},
                 delay: 50,
@@ -1860,7 +1858,7 @@ describe('src/cy/commands/net_stubbing', function () {
             })
 
             it('can access requestHeaders', function () {
-              cy.server().route(/foo/, {}).as('getFoo').window().then(function (win) {
+              cy.route(/foo/, {}).as('getFoo').window().then(function (win) {
                 win.$.ajax({
                   method: 'GET',
                   url: '/foo',
@@ -1876,7 +1874,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           return context('responses', function () {
             beforeEach(function () {
-              cy.server().route(/foo/, {}).as('getFoo').window().then(function (win) {
+              cy.route(/foo/, {}).as('getFoo').window().then(function (win) {
                 win.$.get('foo_bar')
 
                 return null
@@ -2099,7 +2097,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('response fixtures', function () {
           it('works if the JSON file has an object', function () {
-            cy.server().route({
+            cy.route({
               method: 'POST',
               url: '/test-xhr',
               response: 'fixture:valid.json',
@@ -2109,7 +2107,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
 
           it('works if the JSON file has null content', function () {
-            cy.server().route({
+            cy.route({
               method: 'POST',
               url: '/test-xhr',
               response: 'fixture:null.json',
@@ -2380,7 +2378,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('when stubbed', function () {
           it('says Stubbed: Yes', function () {
-            cy.server().route(/foo/, {}).as('getFoo').window().then(function (win) {
+            cy.route(/foo/, {}).as('getFoo').window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.get('/foo').done(resolve)
               })
@@ -2392,9 +2390,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('zero configuration / zero routes', function () {
           beforeEach(function () {
-            cy.server({
-              force404: true,
-            }).window().then(function (win) {
+            cy.window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.ajax({
                   method: 'POST',
@@ -2444,7 +2440,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('whitelisting', function () {
           it('does not send back 404s on whitelisted routes', function () {
-            cy.server().window().then(function (win) {
+            cy.window().then(function (win) {
               return win.$.get('/fixtures/app.js')
             }).then(function (resp) {
               expect(resp).to.eq('{ \'bar\' }\n')
@@ -2452,31 +2448,9 @@ describe('src/cy/commands/net_stubbing', function () {
           })
         })
 
-        describe('route setup', function () {
-          beforeEach(function () {
-            cy.server({
-              force404: true,
-            }).route('/foo', {}).as('anyRequest').window().then(function (win) {
-              win.$.get('/bar')
-
-              return null
-            })
-          })
-
-          it('sends back 404 when request doesnt match route', function () {
-            cy.then(function () {
-              let consoleProps
-
-              consoleProps = this.lastLog.invoke('consoleProps')
-
-              expect(consoleProps.Note).to.eq('This request did not match any of your routes. It was automatically sent back \'404\'. Setting cy.server({force404: false}) will turn off this behavior.')
-            })
-          })
-        })
-
         describe('{force404: false}', function () {
           beforeEach(function () {
-            cy.server().window().then(function (win) {
+            cy.window().then(function (win) {
               return win.$.getJSON('/fixtures/app.json')
             })
           })
@@ -2559,7 +2533,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('in any case', function () {
           beforeEach(function () {
-            cy.server().route(/foo/, {}).window().then(function (win) {
+            cy.route(/foo/, {}).window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.get('/foo').done(resolve)
               })
@@ -2575,7 +2549,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('when response is successful', function () {
           beforeEach(function () {
-            cy.server().route(/foo/, {}).window().then(function (win) {
+            cy.route(/foo/, {}).window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.get('/foo').done(resolve)
               })
@@ -2591,7 +2565,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('when response is pending', function () {
           beforeEach(function () {
-            cy.server().route({
+            cy.route({
               url: '/foo',
               delay: 500,
               response: {},
@@ -2614,7 +2588,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('when response is outside 200 range', function () {
           beforeEach(function () {
-            cy.server().route({
+            cy.route({
               url: '/foo',
               status: 500,
               response: {},
@@ -2808,7 +2782,7 @@ describe('src/cy/commands/net_stubbing', function () {
           // this tests that the server + routes are automatically reapplied
           // after the 2nd visit - which is an example of the remote iframe
           // causing an onBeforeLoad event
-          cy.server().route(/foo/, {
+          cy.route(/foo/, {
             foo: 'bar',
           }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
             return new Promise(function (resolve) {
@@ -2837,7 +2811,7 @@ describe('src/cy/commands/net_stubbing', function () {
           // this tests that the server + routes are automatically reapplied
           // after the 2nd visit - which is an example of the remote iframe
           // causing an onBeforeLoad event
-          cy.server().route(/foo/, {
+          cy.route(/foo/, {
             foo: 'bar',
           }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
             let $a; let url
