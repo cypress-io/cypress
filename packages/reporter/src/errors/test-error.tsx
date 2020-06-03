@@ -75,7 +75,6 @@ const TestError = observer((props: TestErrorProps) => {
           <Collapsible
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
-            headerWrapperClass='runnable-err-stack-wrapper'
             headerExtras={
               <div
                 className="runnable-err-print"
