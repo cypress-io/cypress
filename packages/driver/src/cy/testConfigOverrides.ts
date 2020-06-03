@@ -17,6 +17,11 @@ function mutateConfiguration (testConfigOverride, config, env) {
   const localTestEnv = env()
   const localTestEnvBackup = _.clone(localTestEnv)
 
+  // we restore config back to what it was before the test ran
+  // UNLESS the user mutated config with Cypress.config, in which case
+  // we apply those changes to the global config
+  // TODO: (NEXT_BREAKING) always restore configuration
+  //   do not allow global mutations inside test
   const restoreConfigFn = function () {
     _.each(localTestConfig, (val, key) => {
       if (localTestConfigBackup[key] !== val) {

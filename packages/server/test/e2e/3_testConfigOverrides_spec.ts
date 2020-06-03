@@ -1,7 +1,8 @@
-import e2e, { expect } from '../support/helpers/e2e'
-import path from 'path'
 import fs from 'fs-extra'
-const Fixtures = require('../support/helpers/fixtures')
+import path from 'path'
+import e2e, { expect } from '../support/helpers/e2e'
+import Fixtures from '../support/helpers/fixtures.coffee'
+
 const e2ePath = Fixtures.projectPath('e2e')
 
 const outputPath = path.join(e2ePath, 'output.json')

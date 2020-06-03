@@ -2,7 +2,7 @@ const _ = require('lodash')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
 
-const _isBrowser = function (browser, matcher, errPrefix) {
+const _isBrowser = (browser, matcher, errPrefix) => {
   let isMatch
   let exclusive = false
 
@@ -35,7 +35,7 @@ const _isBrowser = function (browser, matcher, errPrefix) {
   }
 }
 
-const isBrowser = function (config, obj = '', errPrefix = '`Cypress.isBrowser()`') {
+const isBrowser = (config, obj = '', errPrefix = '`Cypress.isBrowser()`') => {
   return _
   .chain(obj)
   .concat([])
@@ -59,26 +59,6 @@ const isBrowser = function (config, obj = '', errPrefix = '`Cypress.isBrowser()`
     return Boolean(result) && result.isMatch
   })
   .value()
-
-  // ;[].concat(obj)
-  // .map((matcher) => _isBrowser(config.browser, matcher, errPrefix))
-  // .reduce((a, b) => {
-  //   if (!a) return b
-
-  //   if (a.exclusive && b.exclusive) {
-  //     return {
-  //       isMatch: a.isMatch && b.isMatch,
-  //       exclusive: true,
-  //     }
-  //   }
-
-  //   return {
-  //     isMatch: a.isMatch || b.isMatch,
-  //     exclusive: b.exclusive,
-  //   }
-  // }, null)
-
-  // return Boolean(result) && result.isMatch
 }
 
 module.exports = (config) => {
