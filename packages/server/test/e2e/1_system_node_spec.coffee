@@ -1,4 +1,4 @@
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 execa = require("execa")
 Fixtures = require("../support/helpers/fixtures")
 Promise = require("bluebird")
