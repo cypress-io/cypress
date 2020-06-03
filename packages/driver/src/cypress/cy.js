@@ -29,6 +29,7 @@ const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
+const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -147,6 +148,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
+  const testConfigOverrides = $TestConfigOverrides.create()
 
   const isCy = (val) => {
     return (val === cy) || $utils.isInstanceOf(val, $Chainer)
@@ -942,7 +944,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return doneEarly()
     },
 
-    reset () {
+    reset (attrs, test) {
       stopped = false
 
       const s = state()
@@ -961,6 +963,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       queue.reset()
       timers.reset()
+      testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
       return cy.removeAllListeners()
     },

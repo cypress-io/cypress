@@ -367,7 +367,7 @@ class $Cypress {
 
       case 'runner:test:before:run':
         // get back to a clean slate
-        this.cy.reset()
+        this.cy.reset(...args)
 
         return this.emit('test:before:run', ...args)
 
