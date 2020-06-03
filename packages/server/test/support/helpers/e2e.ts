@@ -746,7 +746,3 @@ export {
   e2e as default,
   expect,
 }
-
-// module.exports = e2e
-
-// _.extend(e2e, { expect })
