@@ -56,7 +56,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       if (options.log !== false) {
         logInstance = Cypress.log({
           name: 'mount',
-          message: [`ReactDOM.render(<${displayName} ... />)`],
+          message: [`<${displayName} ... />`],
         })
       }
     })
@@ -84,15 +84,22 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
         key,
       }
 
-      const CypressTestComponent = reactDomToUse.render(
-        React.createElement(React.Fragment, props, jsx),
-        el,
-      )
+      const reactComponent = React.createElement(React.Fragment, props, jsx)
+      const CypressTestComponent = reactDomToUse.render(reactComponent, el)
 
-      const logConsoleProps = {
-        props: jsx.props,
-      }
       if (logInstance) {
+        const logConsoleProps = {
+          props: jsx.props,
+          description: 'Mounts React component',
+          home: 'https://github.com/bahmutov/cypress-react-unit-test',
+        }
+        const componentElement = el.children[0]
+
+        if (componentElement) {
+          // @ts-ignore
+          logConsoleProps.yielded = reactDomToUse.findDOMNode(componentElement)
+        }
+
         logInstance.set('consoleProps', () => logConsoleProps)
 
         if (el.children.length) {

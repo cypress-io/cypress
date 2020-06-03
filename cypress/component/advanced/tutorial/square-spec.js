@@ -13,7 +13,10 @@ class Square extends React.Component {
 
   render() {
     return (
-      <button className="square" onClick={() => this.setState({ value: 'X' })}>
+      <button
+        className="square"
+        onClick={() => this.setState({ value: this.props.value })}
+      >
         {this.state.value}
       </button>
     )
@@ -21,9 +24,9 @@ class Square extends React.Component {
 }
 
 describe('Square', () => {
-  it('changes value on click', () => {
+  it.only('changes value on click', () => {
     const selector = 'button.square'
-    mount(<Square />)
+    mount(<Square value="X" />)
     // initially button is blank
     cy.get(selector).should('have.text', '')
     // but it changes text on click
