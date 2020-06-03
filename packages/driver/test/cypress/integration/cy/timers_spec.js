@@ -3,6 +3,7 @@ const startingIndex = Cypress.isBrowser('firefox') ? 1 : 0
 const timerNumber = (n) => n + startingIndex
 
 // NOTE: basically the same as a cy.wait(...) but uses setTimeout instead of Promise.delay
+// since firefox will sometimes have `Promise.delay(10)` fire faster than a `setTimeout(..., 1)`
 const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
 
 describe('driver/src/cy/timers', () => {
