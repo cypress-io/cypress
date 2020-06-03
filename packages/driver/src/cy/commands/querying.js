@@ -5,6 +5,32 @@ const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
+  if (Cypress.config('experimentalShadowDomSupport')) {
+    Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
+      options = { log: true, ...options }
+
+      if (options.log) {
+        options._log = Cypress.log({
+          $el: subject,
+        })
+      }
+
+      const getShadow = () => {
+        // find all shadow roots of the subject(s), if any exist
+        let shadowRoots = subject
+        .toArray()
+        .map((node) => node.shadowRoot)
+        .filter((node) => node !== undefined && node !== null)
+
+        return cy.verifyUpcomingAssertions(cy.$$(shadowRoots), options, {
+          onRetry: getShadow,
+        })
+      }
+
+      return getShadow()
+    })
+  }
+
   Commands.addAll({
     focused (options = {}) {
       const userOptions = options
@@ -536,30 +562,6 @@ module.exports = (Commands, Cypress, cy) => {
   })
 
   Commands.addAll({ prevSubject: 'element' }, {
-    shadow (subject, options) {
-      options = { log: true, ...options }
-
-      if (options.log) {
-        options._log = Cypress.log({
-          $el: subject,
-        })
-      }
-
-      const getShadow = () => {
-        // find all shadow roots of the subject(s), if any exist
-        let shadowRoots = subject
-        .toArray()
-        .map((node) => node.shadowRoot)
-        .filter((node) => node !== undefined && node !== null)
-
-        return cy.verifyUpcomingAssertions(cy.$$(shadowRoots), options, {
-          onRetry: getShadow,
-        })
-      }
-
-      return getShadow()
-    },
-
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
