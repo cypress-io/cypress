@@ -559,12 +559,15 @@ const isAncestor = ($el, $maybeAncestor) => {
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
+  // get all parents of each element
   const el1Ancestors = [el1].concat(getAllParents(el1))
   const el2Ancestors = [el2].concat(getAllParents(el2))
 
   let a
   let b
 
+  // choose the largest tree of parents to
+  // traverse up
   if (el1Ancestors.length > el2Ancestors.length) {
     a = el1Ancestors
     b = el2Ancestors
@@ -573,6 +576,9 @@ const getFirstCommonAncestor = (el1, el2) => {
     b = el1Ancestors
   }
 
+  // for each ancestor of the largest of the two
+  // parent arrays, check if the other parent array
+  // contains it.
   for (const ancestor of a) {
     if (b.includes(ancestor)) {
       return ancestor
@@ -583,13 +589,18 @@ const getFirstCommonAncestor = (el1, el2) => {
 }
 
 const getParent = (el) => {
+  // if the element has a direct parent element,
+  // simply return it.
   if (el.parentElement) {
     return el.parentElement
   }
 
   const root = el.getRootNode()
+  const win = $window.getWindowByElement(el)
 
-  if (root && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
+  // if the element is inside a shadow root,
+  // return the host of the root.
+  if (root && root instanceof win.ShadowRoot) {
     return root.host
   }
 
@@ -646,16 +657,21 @@ const isAttached = function ($el) {
 
   const nodes: Node[] = []
 
+  // push the set of elements to the nodes array
+  // whether they are wrapped or not
   if ($jquery.isJquery($el)) {
     nodes.push(...$el.toArray())
   } else if ($el) {
     nodes.push($el)
   }
 
+  // if there are no nodes, nothing is attached
   if (nodes.length === 0) {
     return false
   }
 
+  // check that every node has an active window
+  // and is connected to the dom
   return nodes.every((node) => {
     const doc = $document.getDocumentFromElement(node)
 
@@ -846,10 +862,13 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
+  // if they are equal, consider them a descendent
   if ($el1.get(0) === $el2.get(0)) {
     return true
   }
 
+  // walk up the tree until we find a parent which
+  // equals the descendent, if ever
   return findParent($el2.get(0), (node) => {
     if (node === $el1.get(0)) {
       return node
@@ -861,21 +880,7 @@ const findParent = (el, fn) => {
   let node = el
   let parent
 
-  do {
-    parent = node.parentElement
-
-    if (!parent) {
-      const shadow = node.getRootNode()
-
-      if (shadow?.toString() === '[object ShadowRoot]') {
-        parent = shadow.host
-      }
-    }
-
-    if (!parent || parent === document) {
-      return null
-    }
-
+  while ((parent = getParent(node))) {
     const returnValue = fn(parent, node)
 
     if (returnValue) {
@@ -883,7 +888,7 @@ const findParent = (el, fn) => {
     }
 
     node = parent
-  } while (parent)
+  }
 
   return null
 }
@@ -925,10 +930,14 @@ const getFirstParentWithTagName = ($el, tagName) => {
     return null
   }
 
+  // if this element is already the tag we want,
+  // return it
   if (getTagName($el.get(0)) === tagName) {
     return $el
   }
 
+  // walk up the tree until we find a parent with
+  // the tag we want
   return findParent($el.get(0), (node) => {
     if (getTagName(node) === tagName) {
       return $jquery.wrap(node)
@@ -947,6 +956,8 @@ const getFirstFixedOrStickyPositionParent = ($el) => {
     return $el
   }
 
+  // walk up the tree until we find an element
+  // with a fixed/sticky position
   return findParent($el.get(0), (node) => {
     let wrapped = $jquery.wrap(node)
 
@@ -967,6 +978,8 @@ const getFirstStickyPositionParent = ($el) => {
     return $el
   }
 
+  // walk up the tree until we find an element
+  // with a sticky position
   return findParent($el.get(0), (node) => {
     let wrapped = $jquery.wrap(node)
 
@@ -983,6 +996,8 @@ const getFirstScrollableParent = ($el) => {
     return null
   }
 
+  // walk up the tree until we find a scrollable
+  // parent
   return findParent($el.get(0), (node) => {
     let wrapped = $jquery.wrap(node)
 
@@ -1182,13 +1197,19 @@ const stringify = (el, form = 'long') => {
 }
 
 const elementFromPoint = (doc, x, y) => {
+  // first try the native elementFromPoint method
   let immediate = doc.elementFromPoint(x, y)
   let node = immediate
 
+  // if the node has a shadow root, we must behave like
+  // the browser and find the inner element of the shadow
+  // root at that same point.
   while (node?.shadowRoot) {
     node = node.shadowRoot.elementFromPoint(x, y)
   }
 
+  // if we never found an inner/deep element, use the
+  // initial one we found
   return node ?? immediate
 }
 
@@ -1197,6 +1218,9 @@ const findAllShadowRoots = (root: Node): Node[] => {
   let roots: Node[] = [root]
   let currentRoot: Node|undefined
 
+  // iterate through all shadow roots we find
+  // and try find shadow roots within them, until
+  // there are none left to find.
   while ((currentRoot = roots.pop())) {
     const childRoots = findShadowRoots(currentRoot)
 
@@ -1210,13 +1234,18 @@ const findAllShadowRoots = (root: Node): Node[] => {
 }
 
 const findShadowRoots = (root: Node): Node[] => {
+  // get the document for this node
   const doc = root.getRootNode({ composed: true }) as Document
+  // create a walker for efficiently traversing the
+  // dom of this node
   const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
     acceptNode (node) {
+      // we only care about nodes which have a shadow root
       if ((node as Element).shadowRoot) {
         return NodeFilter.FILTER_ACCEPT
       }
 
+      // we skip other nodes, but continue to traverse their children
       return NodeFilter.FILTER_SKIP
     },
   })
@@ -1230,6 +1259,8 @@ const findShadowRoots = (root: Node): Node[] => {
     nodes.push(rootAsElement.shadowRoot)
   }
 
+  // walk the tree for nodes with shadow roots and
+  // append the shadow roots to our array
   while ((currentNode = walker.nextNode())) {
     nodes.push(currentNode.shadowRoot)
   }

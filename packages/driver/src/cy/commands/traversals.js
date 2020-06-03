@@ -1,7 +1,6 @@
 const _ = require('lodash')
 
 const $dom = require('../../dom')
-const $jquery = require('../../dom/jquery.js')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
@@ -9,11 +8,17 @@ const shadowTraversals = {
   find: (cy, el, arg1, arg2) => {
     const roots = []
 
+    // for each of the selection, find all descendent
+    // elements who have a shadow root, and return those
+    // roots.
     for (let i = 0; i < el.length; i++) {
       roots.push(...$dom.findAllShadowRoots(el[i]))
     }
+
+    // add the roots to the existing selection
     const elementsWithShadow = el.add(roots)
 
+    // query the entire set of [selection + shadow roots]
     return elementsWithShadow.find(arg1, arg2)
   },
   parents: (cy, el, arg1) => {
@@ -37,8 +42,12 @@ const shadowTraversals = {
     for (let i = 0; i < el.length; i++) {
       let found = el[i].closest(arg1)
       let root = el[i].getRootNode()
+      const win = $dom.getWindowByElement(el[i])
 
-      while (!found && root && root.nodeType === window.Node.DOCUMENT_FRAGMENT_NODE) {
+      // if we didn't already get a result, traverse
+      // up the tree if we are in a shadow root and
+      // repeat.
+      while (!found && root instanceof win.ShadowRoot) {
         found = root.host.closest(arg1)
         root = root.getRootNode()
       }
@@ -104,13 +113,15 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          const wrapped = $jquery.isJquery(subject) ? subject : cy.$$(subject)
           const shadowTraversal = shadowTraversals[traversal]
 
+          // if we're told explicitly to ignore shadow boundaries,
+          // use the replacement traversal function if one exists
+          // so we can cross boundaries.
           if (options.ignoreShadowBoundaries && shadowTraversal) {
-            $el = shadowTraversal(cy, wrapped, arg1, arg2)
+            $el = shadowTraversal(cy, subject, arg1, arg2)
           } else {
-            $el = wrapped[traversal].call(wrapped, arg1, arg2)
+            $el = subject[traversal].call(subject, arg1, arg2)
           }
 
           // normalize the selector since jQuery won't have it

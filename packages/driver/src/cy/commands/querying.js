@@ -542,10 +542,8 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getShadow = () => {
-        // ensure the subject is a jquery element
-        let wrapped = $dom.isJquery(subject) ? subject : cy.$$(subject)
         // find all shadow roots of the subject(s), if any exist
-        let shadowRoots = wrapped
+        let shadowRoots = subject
         .toArray()
         .map((node) => node.shadowRoot)
         .filter((node) => node !== undefined && node !== null)
