@@ -505,5 +505,4 @@ namespace CypressTestConfigOverridesTests {
   describe.only('suite', {}, () => {})
   describe.skip('suite', {}, () => {})
   xdescribe('suite', {}, () => {})
-
 }
