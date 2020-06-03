@@ -2,14 +2,13 @@ import _ from 'lodash'
 import React, { MouseEvent } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
-// @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
 import ErrorCodeFrame from '../errors/error-code-frame'
 import ErrorStack from '../errors/error-stack'
 
 import events from '../lib/events'
+import { onEnterOrSpace } from '../lib/util'
 import TestModel from '../test/test-model'
 
 interface DocsUrlProps {
@@ -39,10 +38,14 @@ const TestError = observer((props: TestErrorProps) => {
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
-  const onPrint = (e: MouseEvent) => {
+  const onPrint = () => {
+    events.emit('show:error', props.model.id)
+  }
+
+  const _onPrintClick = (e: MouseEvent) => {
     e.stopPropagation()
 
-    events.emit('show:error', props.model.id)
+    onPrint()
   }
 
   const formattedMessage = (message?: string) => {
@@ -74,7 +77,13 @@ const TestError = observer((props: TestErrorProps) => {
             headerClass='runnable-err-stack-expander'
             headerWrapperClass='runnable-err-stack-wrapper'
             headerExtras={
-              <div className="runnable-err-print" onClick={onPrint}>
+              <div
+                className="runnable-err-print"
+                onClick={_onPrintClick}
+                onKeyPress={onEnterOrSpace(onPrint)}
+                role='button'
+                tabIndex={0}
+              >
                 <i className="fas fa-terminal" /> <span>Print to console</span>
               </div>
             }
