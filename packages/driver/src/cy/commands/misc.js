@@ -1,6 +1,8 @@
 const _ = require('lodash')
+const Promise = require('bluebird')
 
 const $dom = require('../../dom')
+const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy) => {
   Commands.addAll({ prevSubject: 'optional' }, {
@@ -33,7 +35,13 @@ module.exports = (Commands, Cypress, cy) => {
     wrap (arg, options = {}) {
       const userOptions = options
 
-      options = _.defaults({}, userOptions, { log: true })
+      options = _.defaults({}, userOptions, {
+        log: true,
+        timeout: Cypress.config('defaultCommandTimeout'),
+      })
+
+      // we'll handle the timeout ourselves
+      cy.clearTimeout()
 
       if (options.log !== false) {
         options._log = Cypress.log({
@@ -45,14 +53,28 @@ module.exports = (Commands, Cypress, cy) => {
         }
       }
 
-      const resolveWrap = () => {
-        return cy.verifyUpcomingAssertions(arg, options, {
-          onRetry: resolveWrap,
+      return Promise.resolve(arg)
+      .timeout(options.timeout)
+      .catch(Promise.TimeoutError, () => {
+        $errUtils.throwErrByPath('wrap.timed_out', {
+          args: { timeout: options.timeout },
         })
-        .return(arg)
-      }
+      })
+      .catch((err) => {
+        $errUtils.throwErr(err, {
+          onFail: options._log,
+        })
+      })
+      .then((subject) => {
+        const resolveWrap = () => {
+          return cy.verifyUpcomingAssertions(subject, options, {
+            onRetry: resolveWrap,
+          })
+          .return(subject)
+        }
 
-      return resolveWrap()
+        return resolveWrap()
+      })
     },
   })
 }

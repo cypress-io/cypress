@@ -329,7 +329,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('nestedIndex', state('index'))
 
       return command.get('args')
-    }).all()
+    })
 
     .then((args) => {
       // store this if we enqueue new commands
@@ -751,6 +751,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       throw err
     }
 
+    // this means the error came from a 'fail' handler, so don't send
+    // 'cy:fail' action again, just finish up
+    if (err.isCyFailErr) {
+      delete err.isCyFailErr
+
+      return finish(err)
+    }
+
     // if we have a "fail" handler
     // 1. catch any errors it throws and fail the test
     // 2. otherwise swallow any errors
@@ -766,9 +774,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
-      cyFailErr.stack = $stackUtils.normalizedStack(cyFailErr)
+      cyFailErr.isCyFailErr = true
 
-      return finish(cyFailErr)
+      return fail(cyFailErr)
     }
 
     // bail if we had callbacks attached
