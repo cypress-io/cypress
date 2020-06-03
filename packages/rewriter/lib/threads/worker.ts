@@ -17,6 +17,10 @@ parentPort!.postMessage(true)
 let _idCounter = 0
 
 parentPort!.on('message', (req: RewriteRequest) => {
+  if (req.shutdown) {
+    return process.exit()
+  }
+
   const startedAt = Date.now()
 
   function _deferSourceMapRewrite (deferredSourceMap) {

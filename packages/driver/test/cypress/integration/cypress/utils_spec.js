@@ -199,4 +199,22 @@ describe('driver/src/cypress/utils', () => {
       expect(twoLinesResult).to.equal('one new line\ntwo new lines\nthree new lines\nend')
     })
   })
+
+  context('.decodeBase64Unicode', () => {
+    it('decodes base64, with utf-8 handling', () => {
+      const base64 = '44K144Kk44OX44Oq44K544Gv5LiA55Wq'
+      const decoded = $utils.decodeBase64Unicode(base64)
+
+      expect(decoded).to.equal('サイプリスは一番')
+    })
+  })
+
+  context('.encodeBase64Unicode', () => {
+    it('encodes base64, with utf-8 handling', () => {
+      const str = 'サイプリスは一番'
+      const encoded = $utils.encodeBase64Unicode(str)
+
+      expect(encoded).to.equal('44K144Kk44OX44Oq44K544Gv5LiA55Wq')
+    })
+  })
 })

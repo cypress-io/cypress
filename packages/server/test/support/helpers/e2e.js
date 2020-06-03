@@ -40,7 +40,7 @@ const DEFAULT_BROWSERS = ['electron', 'chrome', 'firefox']
 
 const stackTraceLinesRe = /(\n?[^\S\n\r]*).*?(@|\bat\b).*\.(js|coffee|ts|html|jsx|tsx)(-\d+)?:\d+:\d+[\n\S\s]*?(\n\s*?\n|$)/g
 const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Chromium|Firefox)(\s\d+)(\s\(\w+\))?(\s+)/
-const availableBrowsersRe = /(Available browsers found are: )(.+)/g
+const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 
@@ -140,7 +140,7 @@ const normalizeStdout = function (str, options = {}) {
     // usually we are not interested in the browsers detected on this particular system
     // but some tests might filter / change the list of browsers
     // in that case the test should pass "normalizeStdoutAvailableBrowsers: false" as options
-    str = str.replace(availableBrowsersRe, '$1browser1, browser2, browser3')
+    str = str.replace(availableBrowsersRe, '$1\n- browser1\n- browser2\n- browser3')
   }
 
   str = str
