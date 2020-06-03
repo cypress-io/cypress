@@ -119,29 +119,36 @@
     display: flex;
 
     .runnable-err-stack-expander {
-      background: #ffeaec;
-      cursor: pointer;
       flex-grow: 1;
-      outline: none;
-      padding: 8px 5px;
 
-      &:hover,
       &:focus {
-        background: #fee0e3;
+        outline: none;
+
+        div {
+          background: #fee0e3;
+        }
       }
 
-      .collapsible-header-text {
-        color: #4f4f4f;
-        font-size: 13px;
-      }
+      div {
+        background: #ffeaec;
+        cursor: pointer;
+        outline: none;
+        padding: 8px 5px;
+        width: 100%;
 
-      .collapsible-indicator {
-        line-height: 18px;
-        color: #bbbcbd !important;
-      }
+        &:hover {
+          background: #fee0e3;
+        }
 
-      .collapsible-more {
-        display: none;
+        .collapsible-header-text {
+          color: #4f4f4f;
+          font-size: 13px;
+        }
+
+        .collapsible-indicator {
+          line-height: 18px;
+          color: #bbbcbd !important;
+        }
       }
     }
 
