@@ -90,6 +90,7 @@ class $Cypress {
     this.onSpecReady = null
 
     this.events = $Events.extend(this)
+    this.$ = jqueryProxyFn.bind(this)
 
     this.setConfig(config)
   }
@@ -589,8 +590,6 @@ class $Cypress {
     return new $Cypress(config)
   }
 }
-
-$Cypress.prototype.$ = jqueryProxyFn
 
 // attach to $Cypress to access
 // all of the constructors

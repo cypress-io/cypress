@@ -4372,7 +4372,6 @@ describe('mouse state', () => {
     })
   })
 
-  Cypress.config().isInteractive = false
   describe('user experience', () => {
     beforeEach(() => {
       cy.visit('/fixtures/dom.html')

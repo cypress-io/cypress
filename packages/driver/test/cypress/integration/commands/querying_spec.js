@@ -1,5 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
+const { _, $ } = Cypress
 const { Promise } = Cypress
 
 describe('src/cy/commands/querying', () => {
@@ -1304,7 +1303,9 @@ describe('src/cy/commands/querying', () => {
     //   cy.noop().then ->
     //     expect(cy.get("something")).to.be.a("function")
 
-    describe('errors', { defaultCommandTimeout: 50 }, () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
         this.logs = []
 

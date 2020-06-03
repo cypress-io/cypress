@@ -1,8 +1,8 @@
-const { stripIndent } = require('common-tags')
-const $ = Cypress.$.bind(Cypress)
-const { _, Promise } = Cypress
-
 const Cookie = require('js-cookie')
+const { stripIndent } = require('common-tags')
+const helpers = require('../../support/helpers')
+
+const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
@@ -71,6 +71,10 @@ describe('src/cy/commands/navigation', () => {
           expect(win).to.eq(cy.state('window'))
         })
       })
+    })
+
+    it('sdfsdfdsf', function () {
+      $('sd')
     })
 
     it('removes window:load listeners', () => {
@@ -1950,10 +1954,9 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
-      let originalConfig
+      helpers.registerCypressConfigBackupRestore()
 
       beforeEach(function () {
-        originalConfig = _.clone(Cypress.config())
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1962,10 +1965,6 @@ describe('src/cy/commands/navigation', () => {
         })
 
         return null
-      })
-
-      afterEach(() => {
-        Cypress.config(originalConfig)
       })
 
       it('can time out', function (done) {
