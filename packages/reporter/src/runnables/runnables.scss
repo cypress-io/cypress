@@ -82,12 +82,12 @@
       }
     }
 
-    &.suite.runnable-pending > div .runnable-wrapper,
+    &.suite.runnable-pending > div > .runnable-wrapper,
     &.test.runnable-pending > .runnable-wrapper {
       border-left: 5px solid lighten($pending, 25%);
     }
 
-    &.suite.runnable-passed > div .runnable-wrapper,
+    &.suite.runnable-passed > div > .runnable-wrapper,
     &.test.runnable-passed > .runnable-wrapper {
       border-left: 5px solid $pass;
     }
@@ -103,12 +103,12 @@
       }
     }
 
-    &.suite.runnable-skipped > div .runnable-wrapper,
+    &.suite.runnable-skipped > div > .runnable-wrapper,
     &.test.runnable-skipped > .runnable-wrapper {
       border-left: 5px solid #9a9aaa;
     }
 
-    &.suite.runnable-failed > div .runnable-wrapper {
+    &.suite.runnable-failed > div > .runnable-wrapper {
       border-left: 5px solid $fail;
     }
 
@@ -119,7 +119,7 @@
       }
     }
 
-    &.suite > div .runnable-wrapper {
+    &.suite > div > .runnable-wrapper {
       .runnable-title {
         color: #111;
         font-weight: 800;
@@ -127,11 +127,13 @@
       }
     }
 
-    &.suite > div .runnable-wrapper:focus {
-      outline: 0;
+    &.suite > div > .runnable-wrapper {
+      .collapsible-header:focus, .collapsible-header-inner:focus {
+        outline: 0;
 
-      .runnable-title {
-        outline: 1px dotted;
+        .runnable-title {
+          outline: 1px dotted;
+        }
       }
     }
 
@@ -162,6 +164,14 @@
     padding: 5px 15px 5px 5px;
     overflow: hidden;
     border-left: 5px solid transparent;
+  }
+
+  .collapsible > .runnable-wrapper {
+    padding: 0;
+
+    .collapsible-header {
+      padding: 5px 15px 5px 5px;
+    }
   }
 
   .runnable-title {

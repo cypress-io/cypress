@@ -5,7 +5,6 @@ import { onEnterOrSpace } from '../lib/util'
 
 interface Props {
   isOpen?: boolean
-  headerWrapperClass?: string
   headerClass?: string
   headerStyle?: CSSProperties
   header?: ReactNode
@@ -20,7 +19,6 @@ interface State {
 class Collapsible extends Component<Props, State> {
   static defaultProps = {
     isOpen: false,
-    headerWrapperClass: '',
     headerClass: '',
     headerStyle: {},
     contentClass: '',
@@ -41,17 +39,17 @@ class Collapsible extends Component<Props, State> {
   render () {
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>
-        <div className={cs('collapsible-header-wrapper', this.props.headerWrapperClass)}>
+        <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
           <div
             aria-expanded={this.state.isOpen}
-            className={cs('collapsible-header', this.props.headerClass)}
+            className='collapsible-header'
             onClick={this._onClick}
             onKeyPress={onEnterOrSpace(this._onKeyPress)}
             role='button'
             style={this.props.headerStyle}
             tabIndex={0}
           >
-            <div tabIndex={-1}>
+            <div className="collapsible-header-inner" tabIndex={-1}>
               <i className='collapsible-indicator fa-fw fas' />
               <span className='collapsible-header-text'>
                 {this.props.header}

@@ -115,14 +115,14 @@
     }
   }
 
-  .runnable-err-stack-wrapper {
+  .runnable-err-stack-expander {
     display: flex;
 
-    .runnable-err-stack-expander {
+    .collapsible-header {
       flex-grow: 1;
 
       &:focus {
-        outline: none;
+        outline: 0;
 
         div {
           background: #fee0e3;
