@@ -209,6 +209,7 @@ Repo | Description
 [bahmutov/react-with-rollup](https://github.com/bahmutov/react-with-rollup) | Testing a React application bundled with Rollup by using [@bahmutov/cy-rollup](https://github.com/bahmutov/cy-rollup) preprocessor
 [bahmutov/testing-react-example](https://github.com/bahmutov/testing-react-example) | Described in blog post [Test React Component with cypress-react-unit-test Example](https://dev.to/bahmutov/test-react-component-with-cypress-react-unit-test-example-4d99)
 [ejected-react-scripts-example](https://github.com/bahmutov/ejected-react-scripts-example) | Using component testing after ejecting `react-scripts`
+[tic-tac-toe](https://github.com/bahmutov/react-tic-tac-toe-example) | Component and unit tests for Tic-Tac-Toe, read [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)

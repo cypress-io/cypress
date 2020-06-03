@@ -18,3 +18,5 @@ Test | Description
 <!-- prettier-ignore-end -->
 
 ![Tic tac toe](images/tic-tac-toe.gif)
+
+For larger Tic-Tac-Toe example with mocking, read the blog post [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
