@@ -41,6 +41,22 @@ describe('intercept-request', function () {
   })
 
   context('._doesRouteMatch', function () {
+    it('matches on url as regexp', function () {
+      const req = {
+        headers: {
+          quuz: 'quux',
+        },
+        method: 'GET',
+        proxiedUrl: 'https://google.com/foo',
+      } as unknown as CypressIncomingRequest
+
+      const matched = _doesRouteMatch({
+        url: /foo/,
+      }, req)
+
+      expect(matched).to.be.true
+    })
+
     it('matches on a null matcher', function () {
       const req = {
         headers: {

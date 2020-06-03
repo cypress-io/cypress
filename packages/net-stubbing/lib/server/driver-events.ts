@@ -41,7 +41,7 @@ function _onRouteAdded (state: NetStubbingState, options: NetEventFrames.AddRout
   })
 }
 
-function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
+export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   const stringMatcherFields = getAllStringMatcherFields(options)
 
   const ret: RouteMatcherOptions = {}
@@ -49,9 +49,21 @@ function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptions) {
   stringMatcherFields.forEach((field) => {
     const obj = _.get(options, field)
 
-    if (obj) {
-      _.set(ret, field, obj.type === 'regex' ? new RegExp(obj.value) : obj.value)
+    if (!obj) {
+      return
     }
+
+    let { value, type } = obj
+
+    if (type === 'regex') {
+      const lastSlashI = value.lastIndexOf('/')
+      const flags = value.slice(lastSlashI + 1)
+      const pattern = value.slice(1, lastSlashI)
+
+      value = new RegExp(pattern, flags)
+    }
+
+    _.set(ret, field, value)
   })
 
   const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
