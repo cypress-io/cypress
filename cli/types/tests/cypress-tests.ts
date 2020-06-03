@@ -463,7 +463,7 @@ namespace CypressDomTests {
   Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
 }
 
-namespace CypressTestOptionsTests {
+namespace CypressTestConfigOverridesTests {
   // set config on a per-test basis
   it('test', {
     browser: {name: 'firefox'}
