@@ -1,4 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
+const { $ } = Cypress
 
 describe('driver/src/cy/snapshots', () => {
   context('invalid snapshot html', () => {

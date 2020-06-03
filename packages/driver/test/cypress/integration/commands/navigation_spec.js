@@ -1,8 +1,7 @@
-const { stripIndent } = require('common-tags')
-const $ = Cypress.$.bind(Cypress)
-const { _, Promise } = Cypress
-
 const Cookie = require('js-cookie')
+const { stripIndent } = require('common-tags')
+
+const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/navigation', () => {
   context('#reload', () => {
@@ -71,6 +70,10 @@ describe('src/cy/commands/navigation', () => {
           expect(win).to.eq(cy.state('window'))
         })
       })
+    })
+
+    it('sdfsdfdsf', function () {
+      $('sd')
     })
 
     it('removes window:load listeners', () => {

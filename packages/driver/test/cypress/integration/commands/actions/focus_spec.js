@@ -1,5 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
+const { _, $ } = Cypress
 
 const getActiveElement = () => {
   return cy.state('document').activeElement

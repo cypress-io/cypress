@@ -1,5 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _, Promise } = Cypress
+const { _, Promise, $ } = Cypress
 
 describe('src/cy/commands/actions/check', () => {
   before(() => {
