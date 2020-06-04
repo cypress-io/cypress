@@ -5,7 +5,7 @@ const Debug = require('debug')
 const chalk = require('chalk')
 const stripAnsi = require('strip-ansi')
 const { stripIndent } = require('common-tags')
-const { printVar, stringifyShort, isObject, addPluginButton, fmt, typeColors } = require('./utils')
+const { printVar, stringifyShort, isObject, addPluginButton, fmt, typeColors } = require('./snapshotUtils')
 
 const debug = Debug('plugin:snapshot')
 
@@ -194,21 +194,31 @@ const matchDeep = function (matchers, exp, optsArg) {
   return diffStr
 }
 
-function parseMatcher (obj, match) {
+const parseMatcherFromString = (matcher) => {
+  const regex = /match\.(.*)/
+
+  if (_.isString(matcher)) {
+    const parsed = regex.exec(matcher)
+
+    if (parsed) {
+      return parsed[1]
+    }
+  }
+}
+
+function parseMatcherFromObj (obj, match) {
   if (match.isMatcher(obj)) {
     return obj
   }
 
-  let parseObj = (_.isString(obj) && obj) || (obj && obj.toJSON && obj.toJSON())
+  const objStr = (_.isString(obj) && obj) || (obj && obj.toJSON && obj.toJSON())
 
-  if (parseObj) {
-    const parsed = /match\.(.*)/.exec(parseObj)
+  if (objStr) {
+    const parsed = parseMatcherFromString(objStr)
 
     if (parsed) {
-      return match[parsed[1]]
+      return match[parsed]
     }
-
-    return obj
   }
 
   return obj
@@ -298,7 +308,7 @@ const withMatchers = (matchers, match, expectedOnly = false) => {
         act = _.clone(act)
       }
 
-      exp = parseMatcher(exp, match)
+      exp = parseMatcherFromObj(exp, match)
       if (match.isMatcher(exp)) {
         if (testValue(exp, act)) {
           act = matcherStringToObj(exp.message).toJSON()
@@ -424,4 +434,5 @@ module.exports = {
   registerInCypress,
   matchDeep,
   stringifyShort,
+  parseMatcherFromString,
 }

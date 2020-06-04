@@ -99,12 +99,12 @@ exports['fail in [afterEach] runner emit'] = [
     "{Object 9}"
   ],
   [
-    "test:after:run",
-    "{Test}"
-  ],
-  [
     "suite end",
     "{Suite}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
   ],
   [
     "suite end",
@@ -226,12 +226,12 @@ exports['fail in [beforeEach] runner emit'] = [
     "{Object 9}"
   ],
   [
-    "test:after:run",
-    "{Test}"
-  ],
-  [
     "suite end",
     "{Suite}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
   ],
   [
     "suite end",
@@ -339,12 +339,12 @@ exports['simple_single_test runner emit'] = [
     "{Test}"
   ],
   [
-    "test:after:run",
-    "{Test}"
-  ],
-  [
     "suite end",
     "{Suite}"
+  ],
+  [
+    "test:after:run",
+    "{Test}"
   ],
   [
     "suite end",

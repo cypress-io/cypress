@@ -45,7 +45,7 @@ yarn lerna run build-prod --scope @packages/runner --stream
 yarn lerna run test --scope @packages/runner --stream
 ```
 
-### Cypress
+### Cypress Tests
 
 You'll need to start the server from the [`driver`](../driver) package in order to get Cypress running.
 

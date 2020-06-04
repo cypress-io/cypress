@@ -1,48 +1,49 @@
 // process.env.SNAPSHOT_UPDATE = 1
-require('../spec_helper.coffee')
-const Reporter = require('../../lib/reporter')
 const _ = require('lodash')
 const sinon = require('sinon')
 const Debug = require('debug')
-const debug = Debug('spec:retries')
+
+const Reporter = require('../../lib/reporter')
 const { spyOn, stdout } = require('../support/helpers/utils')
 const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep')
-
-registerInMocha()
-
-const { match } = sinon
 
 const events = require('../../../runner/test/__snapshots__/runner.spec.js.snapshot')
 const { EventSnapshots } = require('../../../runner/test/cypress/support/eventSnapshots')
 
-let currentReporter
-let currentStubs
+require('../spec_helper.coffee')
+registerInMocha()
 
-/** @param {typeof EventSnapshots.FAIL_IN_AFTER} snapshotName */
-const getSnapshot = (snapshotName) => {
-  return _.mapValues(snapshotName, (v) => parseSnapshot(events[v]))
+const debug = Debug('spec:retries')
+const { match } = sinon
+
+const runnerEmitCleanseMap = {
+  '^.*.1': stringifyShort,
+  parent: stringifyShort,
 }
 
-let stdoutStub
+// TODO: maybe refactor into utility, remove module.exports
+/** @param {typeof EventSnapshots.FAIL_IN_AFTER} snapshotName */
+function createReporter (snapshotName) {
+  const getSnapshot = (snapshotName) => {
+    return _.mapValues(snapshotName, (v) => parseSnapshot(events[v]))
+  }
 
-// TODO: refactor into utility, remove module.exports
-function createReporter ({ setRunnables, mocha }) {
-  stdoutStub = stdout.capture()
+  const { setRunnables, mocha } = getSnapshot(snapshotName)
+
+  const stdoutStub = stdout.capture()
 
   const reporter = Reporter()
 
-  currentReporter = reporter
+  const currentReporter = reporter
 
   const runnables = parseSnapshot(setRunnables)[0][1]
   const mochaEvents = parseSnapshot(mocha)
-
-  // const runnables = setRunnables[0][1]
 
   reporter.setRunnables(runnables)
 
   const stubs = {}
 
-  currentStubs = stubs
+  const currentStubs = stubs
 
   stubs.reporterEmit = spyOn(reporter, 'emit', debug.extend('reporter:emit'))
   stubs.runnerEmit = spyOn(reporter.runner, 'emit', debug.extend('runner:emit'))
@@ -52,15 +53,6 @@ function createReporter ({ setRunnables, mocha }) {
   })
 
   stdout.restore()
-
-  return { stubs, reporter }
-}
-
-module.exports = {
-  createReporter,
-}
-
-describe('reporter retries', () => {
   const snapshot = (name) => {
     if (!name) throw new Error('snapshot name cannot be empty')
 
@@ -77,29 +69,29 @@ describe('reporter retries', () => {
     .matchSnapshot({ '^': (v) => v.replace(/\(\d+ms\)/g, '') }, `${name} stdout`)
   }
 
+  return { stubs, reporter, snapshot }
+}
+
+describe('reporter retries', () => {
   afterEach(() => {
     stdout.restore()
   })
 
   it('simple single test', () => {
-    createReporter(getSnapshot(EventSnapshots.SIMPLE_SINGLE_TEST))
+    const { snapshot } = createReporter(EventSnapshots.SIMPLE_SINGLE_TEST)
+
     snapshot('simple_single_test')
   })
 
   it('fail [afterEach]', () => {
-    createReporter(getSnapshot(EventSnapshots.FAIL_IN_AFTEREACH))
+    const { snapshot } = createReporter(EventSnapshots.FAIL_IN_AFTEREACH)
 
     snapshot('fail in [afterEach]')
   })
 
   it('fail [beforeEach]', () => {
-    createReporter(getSnapshot(EventSnapshots.FAIL_IN_BEFOREEACH))
+    const { snapshot } = createReporter(EventSnapshots.FAIL_IN_BEFOREEACH)
 
     snapshot('fail in [beforeEach]')
   })
 })
-
-const runnerEmitCleanseMap = {
-  '^.*.1': stringifyShort,
-  parent: stringifyShort,
-}

@@ -203,7 +203,8 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "originalTitle": "\"after all\" hook"
     },
     {
       "message": "[error message]",
@@ -213,6 +214,17 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -245,17 +257,6 @@ exports['FAIL_IN_AFTER.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
@@ -446,7 +447,8 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "originalTitle": "\"after each\" hook"
     },
     {
       "message": "[error message]",
@@ -456,6 +458,17 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -488,17 +501,6 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
@@ -612,7 +614,8 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "originalTitle": "\"before all\" hook"
     },
     {
       "message": "[error message]",
@@ -622,6 +625,17 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -650,17 +664,6 @@ exports['FAIL_IN_BEFORE.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
@@ -786,7 +789,8 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
+      "file": null,
+      "originalTitle": "\"before each\" hook"
     },
     {
       "message": "[error message]",
@@ -796,6 +800,17 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -824,17 +839,6 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
@@ -1790,6 +1794,17 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
   ],
   [
     "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r3",
@@ -1808,17 +1823,6 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
           "afterFnDuration": "match.number"
         }
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
@@ -2518,6 +2522,17 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   ],
   [
     "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r5",
@@ -2557,17 +2572,6 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
       "file": null
     }
   ],
