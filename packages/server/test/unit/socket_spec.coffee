@@ -24,7 +24,7 @@ describe "lib/socket", ->
     Fixtures.scaffold()
 
     @todosPath = Fixtures.projectPath("todos")
-    @server    = Server(@todosPath)
+    @server    = new Server(@todosPath)
 
     config.get(@todosPath)
     .then (@cfg) =>

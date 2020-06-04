@@ -10,7 +10,7 @@ The error we received was:
 
 Cannot find module '/foo/bar/.projects/e2e/node_modules/module-does-not-exist'
 Require stack:
-- lib/reporter.coffee
+- lib/reporter.js
 - lib/project.js
 - lib/modes/run.js
 - lib/modes/index.js
