@@ -348,7 +348,7 @@ describe('Proxy Performance', function () {
           // turn off morgan
           config.morgan = false
 
-          cyServer = Server()
+          cyServer = new Server()
 
           return cyServer.open(config)
         }),

@@ -136,7 +136,7 @@ const formatBrowsersToOptions = (browsers) => {
 }
 
 const throwBrowserNotFound = function (browserName, browsers = []) {
-  const names = formatBrowsersToOptions(browsers).join(', ')
+  const names = `- ${formatBrowsersToOptions(browsers).join('\n- ')}`
 
   return errors.throw('BROWSER_NOT_FOUND_BY_NAME', browserName, names)
 }

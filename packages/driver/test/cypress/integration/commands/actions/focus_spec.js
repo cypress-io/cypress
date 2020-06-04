@@ -1,5 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
+const { _, $ } = Cypress
 
 const getActiveElement = () => {
   return cy.state('document').activeElement
@@ -298,10 +297,10 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -747,10 +746,10 @@ describe('src/cy/commands/actions/focus', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

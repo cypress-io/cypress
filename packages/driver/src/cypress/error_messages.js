@@ -154,7 +154,7 @@ module.exports = {
   },
 
   browser: {
-    invalid_arg: '`Cypress.{{method}}()` must be passed the name of a browser or an object to filter with. You passed: `{{obj}}`',
+    invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
 
   chai: {
@@ -661,7 +661,7 @@ module.exports = {
       message: stripIndent`\
         ${cmd('{{cmd}}')} timed out after waiting \`{{timeout}}ms\`.
 
-        Your callback function returned a promise which never resolved.
+        Your callback function returned a promise that never resolved.
 
         The callback function was:
 
@@ -1820,6 +1820,19 @@ module.exports = {
     invalid_argument: {
       message: `${cmd('within')} must be called with a function.`,
       docsUrl: 'https://on.cypress.io/within',
+    },
+  },
+
+  wrap: {
+    timed_out: {
+      message: stripIndent`
+      ${cmd('wrap')} timed out waiting \`{{timeout}}ms\` to complete.
+      
+      You called \`cy.wrap()\` with a promise that never resolved.
+      
+      To increase the timeout, use \`{ timeout: number }\`
+      `,
+      docsUrl: 'https://on.cypress.io/wrap',
     },
   },
 

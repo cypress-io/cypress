@@ -33,6 +33,9 @@ const socketToDriverEvents = 'net:event'.split(' ')
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+/**
+ * @type {Cypress.Cypress}
+ */
 let Cypress
 
 const eventManager = {

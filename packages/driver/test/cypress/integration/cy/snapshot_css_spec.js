@@ -1,4 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
+const { $ } = Cypress
 const $SnapshotsCss = require('../../../../src/cy/snapshots_css')
 
 const normalizeStyles = (styles) => {

@@ -1,5 +1,8 @@
+const { $ } = Cypress
+
+export {}
+
 describe('src/dom/coordinates', () => {
-  const $ = Cypress.$.bind(Cypress)
   let doc: Document
 
   before(() => {
