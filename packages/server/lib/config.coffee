@@ -82,6 +82,10 @@ configKeys = toWords """
   firefoxGcInterval
 """
 
+## NOTE: If you add a config value, make sure to update the following
+## - cli/types/index.d.ts (including whitelisted config options on TestOptions)
+## - cypress.schema.json
+
 # experimentalComponentTesting
 configKeys.push("componentFolder")
 

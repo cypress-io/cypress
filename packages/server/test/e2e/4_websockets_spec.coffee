@@ -1,6 +1,6 @@
 ws = require("ws")
 
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 
 onServer = (app) ->
   app.get "/foo", (req, res) ->

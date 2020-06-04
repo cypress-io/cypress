@@ -3,7 +3,7 @@ Promise  = require("bluebird")
 cp       = require("child_process")
 fs       = require("../../lib/util/fs")
 glob     = require("../../lib/util/glob")
-e2e      = require("../support/helpers/e2e")
+e2e      = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 
 e2ePath  = Fixtures.projectPath("e2e")

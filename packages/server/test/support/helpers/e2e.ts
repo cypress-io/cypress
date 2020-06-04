@@ -1,6 +1,7 @@
-require('../../spec_helper')
-require('mocha-banner').register()
+import helper from '../../spec_helper.coffee'
+const { expect, root } = helper as {expect: Chai.ExpectStatic, root: string}
 
+require('mocha-banner').register()
 const chalk = require('chalk').default
 const _ = require('lodash')
 let cp = require('child_process')
@@ -10,7 +11,7 @@ const human = require('human-interval')
 const morgan = require('morgan')
 const stream = require('stream')
 const express = require('express')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 const snapshot = require('snap-shot-it')
 const debug = require('debug')('cypress:support:e2e')
 const httpsProxy = require('@packages/https-proxy')
@@ -25,11 +26,11 @@ const settings = require(`${root}../lib/util/settings`)
 // mutates mocha test runner - needed for `test.titlePath`
 require(`${root}../lib/project`)
 
-cp = Promise.promisifyAll(cp)
+cp = Bluebird.promisifyAll(cp)
 
 const env = _.clone(process.env)
 
-Promise.config({
+Bluebird.config({
   longStackTraces: true,
 })
 
@@ -124,7 +125,7 @@ const leaveRunFinishedTable = (stdout) => {
   return stdout.slice(index)
 }
 
-const normalizeStdout = function (str, options = {}) {
+const normalizeStdout = function (str, options: any = {}) {
   const { normalizeStdoutAvailableBrowsers } = options
 
   // remove all of the dynamic parts of stdout
@@ -203,7 +204,7 @@ const startServer = function (obj) {
     app.use(express.static(e2ePath, opts))
   }
 
-  return new Promise((resolve) => {
+  return new Bluebird((resolve) => {
     return srv.listen(port, () => {
       // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
@@ -231,7 +232,7 @@ const copy = function () {
 
     // copy each of the screenshots and videos
     // to artifacts using each basename of the folders
-    return Promise.join(
+    return Bluebird.join(
       screenshots.copy(
         screenshotsFolder,
         path.join(ca, path.basename(screenshotsFolder)),
@@ -408,7 +409,7 @@ const e2e = {
       if (options.servers) {
         const optsServers = [].concat(options.servers)
 
-        const servers = await Promise.map(optsServers, startServer)
+        const servers = await Bluebird.map(optsServers, startServer)
 
         this.servers = servers
       } else {
@@ -432,7 +433,7 @@ const e2e = {
       const s = this.servers
 
       if (s) {
-        await Promise.map(s, stopServer)
+        await Bluebird.map(s, stopServer)
       }
     })
   },
@@ -636,7 +637,7 @@ const e2e = {
 
         if (matches) {
           // eslint-disable-next-line no-unused-vars
-          const [str, key, customBrowserPath, browserName, version, headless] = matches
+          const [, , customBrowserPath, browserName, version, headless] = matches
 
           const { browser } = options
 
@@ -671,7 +672,7 @@ const e2e = {
       }
     }
 
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       debug('spawning Cypress %o', { args })
       const sp = cp.spawn('node', args, {
         env: _.chain(process.env)
@@ -741,4 +742,7 @@ const e2e = {
   },
 }
 
-module.exports = e2e
+export {
+  e2e as default,
+  expect,
+}

@@ -408,11 +408,9 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
-    describe('errors', () => {
-      beforeEach(() => {
-        Cypress.config('defaultCommandTimeout', 50)
-      })
-
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       it('should not be true', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('expected false to be true')

@@ -1,6 +1,6 @@
 bodyParser   = require("body-parser")
 cookieParser = require("cookie-parser")
-e2e          = require("../support/helpers/e2e")
+e2e          = require("../support/helpers/e2e").default
 
 counts = null
 

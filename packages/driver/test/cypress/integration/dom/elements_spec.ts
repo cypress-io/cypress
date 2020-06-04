@@ -1,6 +1,8 @@
-describe('src/dom/elements', () => {
-  const $ = Cypress.$.bind(Cypress)
+const { $ } = Cypress
 
+export {}
+
+describe('src/dom/elements', () => {
   context('.isAttached', () => {
     beforeEach(() => {
       cy.visit('/fixtures/iframe-outer.html')

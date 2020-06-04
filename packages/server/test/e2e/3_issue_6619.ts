@@ -1,4 +1,4 @@
-const e2e = require('../support/helpers/e2e')
+import e2e from '../support/helpers/e2e'
 
 describe('e2e issue 6619', () => {
   e2e.setup()

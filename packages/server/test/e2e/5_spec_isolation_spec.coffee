@@ -3,7 +3,7 @@ path = require("path")
 moment = require("moment")
 snapshot = require("snap-shot-it")
 fs = require("../../lib/util/fs")
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 
 e2ePath = Fixtures.projectPath("e2e")
