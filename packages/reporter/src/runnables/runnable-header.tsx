@@ -20,7 +20,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
 
     return (
       <div className="runnable-header">
-        <FileOpener fileDetails={fileDetails} />
+        { relativeSpecPath === '__all' ? <span>All Specs</span> : <FileOpener fileDetails={fileDetails} /> }
       </div>
     )
   }
