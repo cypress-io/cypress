@@ -28,7 +28,7 @@ describe "lib/server", ->
     config.set({projectRoot: "/foo/bar/"})
     .then (cfg) =>
       @config = cfg
-      @server = Server()
+      @server = new Server()
 
       @oldFileServer = @server._fileServer
       @server._fileServer = @fileServer
@@ -191,9 +191,10 @@ describe "lib/server", ->
     it "sets _socket and calls _socket#startListening", ->
       @server.open(@config)
       .then =>
-        @server.startWebsockets(1, 2, 3)
+        arg2 = {}
+        @server.startWebsockets(1, 2, arg2)
 
-        expect(@startListening).to.be.calledWith(@server.getHttpServer(), 1, 2, 3)
+        expect(@startListening).to.be.calledWith(@server.getHttpServer(), 1, 2, arg2)
 
   context "#reset", ->
     beforeEach ->
@@ -310,7 +311,7 @@ describe "lib/server", ->
 
   context "#_onDomainSet", ->
     beforeEach ->
-      @server = Server()
+      @server = new Server()
 
     it "sets port to 443 when omitted and https:", ->
       ret = @server._onDomainSet("https://staging.google.com/foo/bar")

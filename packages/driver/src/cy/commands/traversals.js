@@ -1,25 +1,15 @@
 const _ = require('lodash')
+const { querySelectorAllDeep } = require('query-selector-shadow-dom')
 
 const $dom = require('../../dom')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
 const shadowTraversals = {
-  find: (cy, el, arg1, arg2) => {
-    const roots = []
+  find: (cy, el, selector) => {
+    const els = querySelectorAllDeep(selector, el[0])
 
-    // for each of the selection, find all descendent
-    // elements who have a shadow root, and return those
-    // roots.
-    for (let i = 0; i < el.length; i++) {
-      roots.push(...$dom.findAllShadowRoots(el[i]))
-    }
-
-    // add the roots to the existing selection
-    const elementsWithShadow = el.add(roots)
-
-    // query the entire set of [selection + shadow roots]
-    return elementsWithShadow.find(arg1, arg2)
+    return cy.$$(els)
   },
   parents: (cy, el, arg1) => {
     let parents = []

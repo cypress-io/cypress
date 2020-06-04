@@ -20467,6 +20467,11 @@ qs@~5.1.0:
   resolved "https://registry.yarnpkg.com/qs/-/qs-5.1.0.tgz#4d932e5c7ea411cca76a312d39a606200fd50cd9"
   integrity sha1-TZMuXH6kEcynajEtOaYGIA/VDNk=
 
+query-selector-shadow-dom@0.5.0:
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/query-selector-shadow-dom/-/query-selector-shadow-dom-0.5.0.tgz#e4d2bef51e89106636e17de956f6d892291e337d"
+  integrity sha512-yYETZdBUK5SfisGoqYcNxa1F3JVFCr74WRMwOnFFRX2RmjfQDDt42of2Tt/9CwfwLQeBBjlVX93ZVvhp4Ij2zQ==
+
 query-string@^5.0.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/query-string/-/query-string-5.1.1.tgz#a78c012b71c17e05f2e3fa2319dd330682efb3cb"

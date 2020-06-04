@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
+const { querySelectorAllDeep } = require('query-selector-shadow-dom')
 
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
@@ -281,15 +282,12 @@ module.exports = (Commands, Cypress, cy, state) => {
         let $el
 
         try {
-          // only support shadow traversal if we're not searching
-          // within a subject and have been explicitly told to ignore
-          // boundaries.
-          if (!options.ignoreShadowBoundaries) {
-            $el = cy.$$(selector, options.withinSubject)
-          } else {
-            const elementsWithShadow = $dom.findAllShadowRoots(options.withinSubject || state('document'))
+          if (options.ignoreShadowBoundaries) {
+            const els = querySelectorAllDeep(selector, options.withinSubject || state('document'))
 
-            $el = cy.$$(selector, elementsWithShadow)
+            $el = cy.$$(els)
+          } else {
+            $el = cy.$$(selector, options.withinSubject)
           }
 
           // jQuery v3 has removed its deprecated properties like ".selector"

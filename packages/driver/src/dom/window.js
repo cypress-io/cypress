@@ -3,7 +3,7 @@ const $document = require('./document')
 
 /**
  * @param {HTMLElement} el
- * @returns {Window&typeof globalThis}
+ * @returns {Window & typeof globalThis}
  */
 const getWindowByElement = function (el) {
   if (isWindow(el)) {

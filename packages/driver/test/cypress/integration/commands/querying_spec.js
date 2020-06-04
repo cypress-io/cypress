@@ -592,7 +592,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     // NOTE: FLAKY in CI, need to investigate further
-    it('retries finding elements until something is found', () => {
+    it.skip('retries finding elements until something is found', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
       // wait until we're ALMOST about to time out before
@@ -908,6 +908,42 @@ describe('src/cy/commands/querying', () => {
         cy
         .get('button:first').as('btn')
         .get('@btn').should('have.class', 'foo-bar-baz')
+      })
+    })
+
+    describe('ignoreShadowBoundaries', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/shadow-dom.html')
+      })
+
+      it('finds elements within shadow roots', () => {
+        cy.get('.shadow-content-1', { ignoreShadowBoundaries: true })
+        .should('have.text', 'Shadow Content 1')
+      })
+
+      it('finds shadow elements within shadow roots', () => {
+        cy.get('.shadow-content-5', { ignoreShadowBoundaries: true })
+        .should('have.text', 'Shadow Content 5')
+      })
+
+      it('finds light elements within shadow slots', () => {
+        cy.get('.in-shadow-slot', { ignoreShadowBoundaries: true })
+        .should('have.text', 'In Shadow Slot')
+      })
+
+      it('finds elements within shadow roots with cross-boundary selector', () => {
+        cy.get('#parent-of-shadow-container-0 .shadow-content-3', { ignoreShadowBoundaries: true })
+        .should('have.text', 'Shadow Content 3')
+      })
+
+      it('finds elements outside shadow roots', () => {
+        cy.get('#non-shadow-element', { ignoreShadowBoundaries: true })
+        .should('have.text', 'Non Shadow')
+      })
+
+      it('finds elements in and out of shadow roots', () => {
+        cy.get('.in-and-out', { ignoreShadowBoundaries: true })
+        .should('have.length', 2)
       })
     })
 

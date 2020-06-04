@@ -1213,61 +1213,6 @@ const elementFromPoint = (doc, x, y) => {
   return node ?? immediate
 }
 
-const findAllShadowRoots = (root: Node): Node[] => {
-  const nodes: Node[] = []
-  let roots: Node[] = [root]
-  let currentRoot: Node|undefined
-
-  // iterate through all shadow roots we find
-  // and try find shadow roots within them, until
-  // there are none left to find.
-  while ((currentRoot = roots.pop())) {
-    const childRoots = findShadowRoots(currentRoot)
-
-    if (childRoots.length > 0) {
-      roots.push(...childRoots)
-      nodes.push(...childRoots)
-    }
-  }
-
-  return nodes
-}
-
-const findShadowRoots = (root: Node): Node[] => {
-  // get the document for this node
-  const doc = root.getRootNode({ composed: true }) as Document
-  // create a walker for efficiently traversing the
-  // dom of this node
-  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
-    acceptNode (node) {
-      // we only care about nodes which have a shadow root
-      if ((node as Element).shadowRoot) {
-        return NodeFilter.FILTER_ACCEPT
-      }
-
-      // we skip other nodes, but continue to traverse their children
-      return NodeFilter.FILTER_SKIP
-    },
-  })
-
-  const nodes: Node[] = []
-  let currentNode
-
-  const rootAsElement = root as Element
-
-  if (rootAsElement.shadowRoot) {
-    nodes.push(rootAsElement.shadowRoot)
-  }
-
-  // walk the tree for nodes with shadow roots and
-  // append the shadow roots to our array
-  while ((currentNode = walker.nextNode())) {
-    nodes.push(currentNode.shadowRoot)
-  }
-
-  return nodes
-}
-
 export {
   elementFromPoint,
   isElement,
@@ -1311,8 +1256,6 @@ export {
   callNativeMethod,
   tryCallNativeMethod,
   findParent,
-  findAllShadowRoots,
-  findShadowRoots,
   getElements,
   getFirstFocusableEl,
   getActiveElByDocument,
