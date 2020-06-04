@@ -595,7 +595,7 @@ describe('src/cy/commands/querying', () => {
     })
 
     // NOTE: FLAKY in CI, need to investigate further
-    it('retries finding elements until something is found', () => {
+    it.skip('retries finding elements until something is found', () => {
       const missingEl = $('<div />', { id: 'missing-el' })
 
       // wait until we're ALMOST about to time out before
