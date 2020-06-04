@@ -285,7 +285,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     return _emit('route:added', frame)
   }
 
-  function route (matcher: RouteMatcher, handler: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+  function route2 (matcher: RouteMatcher, handler: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+    if (!Cypress.config('experimentalNetworkMocking')) {
+      return $errUtils.throwErrByPath('net_stubbing.route2_needs_experimental')
+    }
+
     function _getMatcherOptions (): RouteMatcherOptions {
       if (_.isString(matcher) && (_isRegExp(handler) || typeof handler === 'string') && arg2) {
         // method, url, handler
@@ -311,10 +315,6 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     return _addRoute(_getMatcherOptions(), handler as RouteHandler)
     .then(() => null)
-  }
-
-  function server (): void {
-    $errUtils.warnByPath('warn_server_deprecated')
   }
 
   function _onRequestReceived (frame: NetEventFrames.HttpRequestReceived) {
@@ -569,17 +569,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
   })
 
-  const _experimentalOverride = (experimentalFn) => {
-    return (originalFn, ...args) => {
-      if (Cypress.config('experimentalNetworkMocking')) {
-        return experimentalFn(...args)
-      }
-
-      return originalFn(...args)
-    }
-  }
-
-  // TODO: once new net stubbing is official, this can use Commands.addAll
-  Commands.overwrite('route', _experimentalOverride(route))
-  Commands.overwrite('server', _experimentalOverride(server))
+  Commands.addAll({
+    route2,
+  })
 }

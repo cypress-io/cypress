@@ -2411,7 +2411,7 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
-     * A new version of the `cy.route` API that works on the HTTP layer, instead of stubbing out XMLHttpRequests.
+     * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
      * @default false
      */
     experimentalNetworkMocking: boolean

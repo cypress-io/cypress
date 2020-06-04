@@ -200,8 +200,8 @@ export type StringMatcher = GlobPattern | RegExp
 declare global {
   namespace Cypress {
     interface Chainable<Subject = any> {
-      route(url: RouteMatcher, response?: RouteHandler): Chainable<null>
-      route(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route2(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
     }
   }
 }

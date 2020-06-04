@@ -52,7 +52,7 @@ interface StringValues {
 */
 const _summaries: StringValues = {
   experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
-  experimentalNetworkMocking: 'A new version of the `cy.route` API that works on the HTTP layer, instead of stubbing out XMLHttpRequests.',
+  experimentalNetworkMocking: 'Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
 }

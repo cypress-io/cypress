@@ -907,11 +907,12 @@ module.exports = {
   },
 
   net_stubbing: {
+    route2_needs_experimental: `${cmd('route2')} requires experimental network mocking to be enabled.\n\nSet the \`experimentalNetworkMocking\` config value to \`true\` to access this command.\n\nRead more: https://on.cypress.io/experiments`,
     invalid_handler: ({ handler }) => {
-      return `${cmd('route')}'s \`handler\` argument must be a String, StaticResponse, HttpController function, or WebSocketController.\n\nYou passed: ${format(handler)}`
+      return `${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, HttpController function, or WebSocketController.\n\nYou passed: ${format(handler)}`
     },
     invalid_static_response: ({ err, staticResponse }) => {
-      return `An invalid StaticResponse was supplied to ${cmd('route')}. ${err.message}\n\nYou passed: ${format(staticResponse)}`
+      return `An invalid StaticResponse was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(staticResponse)}`
     },
     warn_multiple_next_calls: ({ route, req }) => {
       return `next() was called multiple times in a request handler, but the request can only be passed on once, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
@@ -928,7 +929,6 @@ module.exports = {
     warn_reply_called_after_next: ({ route, req }) => {
       return `req.reply() was called after next() in a request handler, but req.reply() can not be called after the request has been passed on, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
-    warn_server_deprecated: `${cmd('server')} is no longer required to use ${cmd('route')}. You can safely remove it from your test code.`,
   },
 
   ng: {
