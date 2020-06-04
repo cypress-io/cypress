@@ -466,3 +466,47 @@ namespace CypressDomTests {
   Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
   Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
 }
+
+namespace CypressTestConfigOverridesTests {
+  // set config on a per-test basis
+  it('test', {
+    browser: {name: 'firefox'}
+  }, () => {})
+  it('test', {
+    browser: [{name: 'firefox'}, {name: 'chrome'}]
+  }, () => {})
+  it('test', {
+    baseUrl: 'www.foobar.com',
+    browser: 'firefox'
+  }, () => {})
+  it('test', {
+    browser: {foo: 'bar'} // $ExpectError
+  }, () => {})
+
+  it.skip('test', {}, () => {})
+  it.only('test', {}, () => {})
+  xit('test', {}, () => {})
+
+  specify('test', {}, () => {})
+  specify.only('test', {}, () => {})
+  specify.skip('test', {}, () => {})
+  xspecify('test', {}, () => {})
+
+  // set config on a per-suite basis
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+  }, () => {})
+
+  context('suite', {}, () => {})
+
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+    foo: 'foo' // $ExpectError
+  }, () => {})
+
+  describe.only('suite', {}, () => {})
+  describe.skip('suite', {}, () => {})
+  xdescribe('suite', {}, () => {})
+}

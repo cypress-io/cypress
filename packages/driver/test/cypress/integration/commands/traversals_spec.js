@@ -39,11 +39,9 @@ describe('src/cy/commands/traversals', () => {
         })
       })
 
-      describe('errors', () => {
-        beforeEach(() => {
-          Cypress.config('defaultCommandTimeout', 100)
-        })
-
+      describe('errors', {
+        defaultCommandTimeout: 100,
+      }, () => {
         it('throws when options.length isnt a number', (done) => {
           cy.on('fail', (err) => {
             expect(err.message).to.include('You must provide a valid number to a `length` assertion. You passed: `asdf`')
@@ -310,10 +308,10 @@ describe('src/cy/commands/traversals', () => {
     })
   })
 
-  describe('errors', () => {
+  describe('errors', {
+    defaultCommandTimeout: 100,
+  }, () => {
     beforeEach(function () {
-      Cypress.config('defaultCommandTimeout', 100)
-
       this.logs = []
 
       cy.on('log:added', (attrs, log) => {

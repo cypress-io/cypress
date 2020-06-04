@@ -1,13 +1,9 @@
-const { _, $ } = Cypress
+const { $ } = Cypress
 
-// backup the original config
-const ORIG_CONFIG = _.clone(Cypress.config())
+let isActuallyInteractive
 
 beforeEach(() => {
-  // restore it before each test
-  Cypress.config(ORIG_CONFIG)
-
-  const isActuallyInteractive = Cypress.config('isInteractive')
+  isActuallyInteractive = Cypress.config('isInteractive')
 
   // always set that we're interactive so we
   // get consistent passes and failures when running

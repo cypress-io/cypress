@@ -8,13 +8,13 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('assertion verification', () => {
+    describe('assertion verification', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
         this.remoteWindow = cy.state('window')
 
         delete this.remoteWindow.foo
-
-        Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
 
@@ -185,13 +185,13 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('assertion verification', () => {
+    describe('assertion verification', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
         this.remoteDocument = cy.state('window').document
 
         delete this.remoteDocument.foo
-
-        Cypress.config('defaultCommandTimeout', 100)
 
         this.logs = []
 
@@ -442,10 +442,10 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -790,10 +790,10 @@ describe('src/cy/commands/window', () => {
       })
     })
 
-    context('errors', () => {
+    context('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

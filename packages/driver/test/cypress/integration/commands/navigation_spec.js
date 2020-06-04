@@ -1,5 +1,6 @@
 const Cookie = require('js-cookie')
 const { stripIndent } = require('common-tags')
+const helpers = require('../../support/helpers')
 
 const { _, Promise, $ } = Cypress
 
@@ -72,6 +73,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
+    it('sdfsdfdsf', function () {
+      $('sd')
+    })
+
     it('removes window:load listeners', () => {
       const listeners = cy.listeners('window:load')
 
@@ -84,10 +89,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy.reload().then(() => {
         expect(timeout).to.be.calledWith(4567, 'reload')
@@ -122,10 +127,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -146,7 +151,9 @@ describe('src/cy/commands/navigation', () => {
         cy.reload(Infinity)
       })
 
-      it('throws passing more than 2 args', (done) => {
+      it('throws passing more than 2 args', {
+        defaultCommandTimeout: 1000,
+      }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('`cy.reload()` can only accept a boolean or `options` as its arguments.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/reload')
@@ -298,10 +305,10 @@ describe('src/cy/commands/navigation', () => {
     })
 
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy
       .visit('/fixtures/jquery.html')
@@ -368,10 +375,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -541,10 +548,10 @@ describe('src/cy/commands/navigation', () => {
 
   context('#visit', () => {
     // TODO: fix this
-    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', () => {
+    it.skip('(FLAKY) sets timeout to Cypress.config(pageLoadTimeout)', {
+      pageLoadTimeout: 4567,
+    }, () => {
       const timeout = cy.spy(Promise.prototype, 'timeout')
-
-      Cypress.config('pageLoadTimeout', 4567)
 
       cy.visit('/fixtures/jquery.html').then(() => {
         expect(timeout).to.be.calledWith(4567)
@@ -688,9 +695,9 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    it('does not support file:// protocol', (done) => {
-      Cypress.config('baseUrl', '')
-
+    it('does not support file:// protocol', {
+      baseUrl: '',
+    }, (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.visit()` failed because the \'file://...\' protocol is not supported by Cypress.')
 
@@ -1195,10 +1202,10 @@ describe('src/cy/commands/navigation', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1949,6 +1956,8 @@ describe('src/cy/commands/navigation', () => {
     })
 
     describe('errors', () => {
+      helpers.registerCypressConfigBackupRestore()
+
       beforeEach(function () {
         this.logs = []
 

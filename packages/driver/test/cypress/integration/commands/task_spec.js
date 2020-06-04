@@ -1,9 +1,10 @@
 const { _, Promise } = Cypress
 
 describe('src/cy/commands/task', () => {
-  context('#task', () => {
+  context('#task', {
+    taskTimeout: 2500,
+  }, () => {
     beforeEach(() => {
-      Cypress.config('taskTimeout', 2500)
       cy.stub(Cypress, 'backend').callThrough()
     })
 
@@ -113,10 +114,10 @@ describe('src/cy/commands/task', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

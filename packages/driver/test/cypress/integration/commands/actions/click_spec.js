@@ -1391,9 +1391,10 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('does not throw when waiting for animations is disabled', () => {
+      it('does not throw when waiting for animations is disabled', {
+        waitForAnimations: false,
+      }, () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-        Cypress.config('waitForAnimations', false)
 
         cy.get('button:first').click().then(() => {
           expect(cy.ensureElementIsNotAnimating).not.to.be.called
@@ -1843,10 +1844,10 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2982,10 +2983,10 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -3420,10 +3421,10 @@ describe('src/cy/commands/actions/click', () => {
       cy.getAll('el2', 'focus pointerdown pointerup contextmenu').each(shouldBeCalled)
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
