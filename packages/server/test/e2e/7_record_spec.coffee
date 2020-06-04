@@ -3,7 +3,7 @@ path = require("path")
 Promise = require("bluebird")
 bodyParser = require("body-parser")
 jsonSchemas = require("@cypress/json-schemas").api
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 fs = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
 

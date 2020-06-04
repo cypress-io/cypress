@@ -91,21 +91,6 @@
     }
   }
 
-  .runnable-err-print {
-    background: none;
-    border: solid 2px $err-text;
-    border-radius: 3px;
-    color: $err-text;
-    font-size: 8px;
-    padding: 0.4em;
-
-    &:hover,
-    &:focus {
-      background: rgba(255, 255, 255, 0.6);
-      outline: none;
-    }
-  }
-
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
@@ -131,35 +116,73 @@
   }
 
   .runnable-err-stack-expander {
-    cursor: pointer;
-    outline: none;
-    padding: 0 10px 2px 5px;
+    display: flex;
 
-    &:hover,
-    &:focus {
-      color: lighten($err-text, 10%);
+    .collapsible-header {
+      flex-grow: 1;
+
+      &:focus {
+        outline: 0;
+
+        div {
+          background: #fee0e3;
+        }
+      }
+
+      div {
+        background: #ffeaec;
+        cursor: pointer;
+        outline: none;
+        padding: 7px 5px;
+        width: 100%;
+
+        &:hover {
+          background: #fee0e3;
+        }
+
+        .collapsible-header-text {
+          color: #4f4f4f;
+          font-size: 13px;
+        }
+
+        .collapsible-indicator {
+          line-height: 18px;
+          color: #bbbcbd !important;
+        }
+      }
     }
 
-    .collapsible-header-text {
-      text-decoration: underline;
+    .runnable-err-print {
+      background: #ffeaec;
+      color: #4f4f4f;
+      cursor: pointer;
       font-size: 13px;
-    }
+      padding: 7px 10px;
 
-    .collapsible-indicator {
-      line-height: 18px;
-      color: #eb535e !important;
-    }
+      &:hover,
+      &:focus {
+        outline: none;
+        background: #fee0e3;
+      }
 
-    .collapsible-more {
-      display: none;
+      i {
+        border: solid 1px #4f4f4f;
+        border-radius: 4px;
+        font-size: 6px;
+        padding: 4px 3px;
+        vertical-align: middle;
+      }
+
+      span {
+        vertical-align: middle;
+      }
     }
   }
 
   .runnable-err-stack-trace {
+    font-family: $monospace;
     overflow: auto;
     padding: 10px;
-    font-family: $monospace;
-    margin-left: 15px;
 
     .err-stack-line {
       white-space: pre;
@@ -174,7 +197,7 @@
   .test-err-code-frame {
     background-color: #fff;
     border: 1px solid #ffe4e7;
-    margin: 10px;
+    margin: 0 10px 10px;
 
     .runnable-err-file-path {
       &:before {

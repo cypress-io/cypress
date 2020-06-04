@@ -2507,8 +2507,22 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
-    beforeScreenshot(doc: Document): void
-    afterScreenshot(doc: Document): void
+    onBeforeScreenshot: ($el: JQuery) => void
+    onAfterScreenshot: ($el: JQuery, props: {
+      path: string,
+      size: number,
+      dimensions: {
+        width: number,
+        height: number
+      },
+      multipart: boolean,
+      pixelRatio: number,
+      takenAt: string,
+      name: string,
+      blackout: string[],
+      duration: number,
+      testAttemptIndex: number
+    }) => void
   }
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
@@ -4714,7 +4728,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any[]
+    message: any
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }

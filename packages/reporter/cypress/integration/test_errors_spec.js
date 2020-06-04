@@ -126,11 +126,6 @@ describe('test errors', function () {
       this.setError(this.commandErr)
     })
 
-    it('hovering shows tooltip', function () {
-      cy.get('.runnable-err-print').trigger('mouseover')
-      cy.get('.cy-tooltip').should('have.text', 'Print error to console')
-    })
-
     it('clicking prints to console', function () {
       cy.spy(this.runner, 'emit')
       cy.get('.runnable-err-print').click().should(() => {
@@ -146,6 +141,15 @@ describe('test errors', function () {
     it('does not collapse test when clicking', () => {
       cy.get('.runnable-err-print').click()
       cy.get('.command-wrapper').should('be.visible')
+    })
+
+    it('does not expand or collapse stack trace when clicking', () => {
+      cy.get('.runnable-err-print').click()
+      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+      cy.contains('View stack trace').click()
+      cy.get('.runnable-err-stack-trace').should('be.visible')
+      cy.get('.runnable-err-print').click()
+      cy.get('.runnable-err-stack-trace').should('be.visible')
     })
   })
 
