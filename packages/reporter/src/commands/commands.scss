@@ -16,7 +16,7 @@
       margin-right: 3px;
     }
 
-    .hook-name {
+    .hook-name > .collapsible-header {
       border-bottom: 1px solid transparent;
       text-transform: uppercase;
       color: #959595;
@@ -36,6 +36,10 @@
       &:hover:focus {
         border-bottom: 1px dotted #959595;
         color: #333;
+      }
+
+      > .collapsible-header-inner:focus {
+        outline: 0;
       }
 
       .hook-failed-message {

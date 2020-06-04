@@ -1,5 +1,5 @@
 SseStream = require("ssestream")
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 
 clients = 0
 

@@ -38,6 +38,9 @@ if (window.Cypress) {
   window.localBus = localBus
 }
 
+/**
+ * @type {Cypress.Cypress}
+ */
 let Cypress
 
 const eventManager = {

@@ -19,7 +19,7 @@ describe('<Collapsible />', () => {
   it('renders with headerClass on the header when specified', () => {
     const component = shallow(<Collapsible headerClass='foo' />)
 
-    expect(component.find('.collapsible-header')).to.have.className('foo')
+    expect(component.find('.collapsible-header-wrapper')).to.have.className('foo')
   })
 
   it('renders with headerStyle when specified', () => {
