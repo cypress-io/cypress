@@ -229,6 +229,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Fire automation:request event for internal use.
+     */
+    automation(eventName: string, ...args: any[]): Promise<any>
+
+    /**
      * Promise wrapper for certain internal tasks.
      */
     backend: Backend

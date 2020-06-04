@@ -31,6 +31,10 @@ namespace CypressJqueryTests {
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
 
+namespace CypressAutomationTests {
+  Cypress.automation('hello') // $ExpectType Promise<any>
+}
+
 namespace CypressConfigTests {
   // getters
   Cypress.config('baseUrl') // $ExpectType string | null
