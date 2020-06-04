@@ -355,9 +355,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => void): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
-      overwrite(name: string, fn: (...args: any[]) => void): void
+      add(name: string, fn: (...args: any[]) => void | Chainable): void
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => void | Chainable): void
+      overwrite(name: string, fn: (...args: any[]) => void | Chainable): void
     }
 
     /**
