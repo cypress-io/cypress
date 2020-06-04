@@ -1,6 +1,6 @@
 path = require("path")
 humanInterval = require("human-interval")
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 glob = require("../../lib/util/glob")
 videoCapture = require("../../lib/video_capture")
 Fixtures = require("../support/helpers/fixtures")

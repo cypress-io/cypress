@@ -1,4 +1,4 @@
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 
 configWithInvalidViewport = Fixtures.projectPath("config-with-invalid-viewport")

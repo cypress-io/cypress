@@ -769,9 +769,9 @@ describe('src/cy/commands/screenshot', () => {
         Cypress.automation.withArgs('take:screenshot').resolves(this.serverResult)
       })
 
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
         cy.screenshot().then(() => {
@@ -809,10 +809,10 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
