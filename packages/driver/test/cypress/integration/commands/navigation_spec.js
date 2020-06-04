@@ -151,7 +151,9 @@ describe('src/cy/commands/navigation', () => {
         cy.reload(Infinity)
       })
 
-      it('throws passing more than 2 args', (done) => {
+      it('throws passing more than 2 args', {
+        defaultCommandTimeout: 1000,
+      }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('`cy.reload()` can only accept a boolean or `options` as its arguments.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/reload')
