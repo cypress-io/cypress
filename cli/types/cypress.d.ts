@@ -75,6 +75,8 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
+
   interface ViewportPosition extends WindowPosition {
     right: number
     bottom: number
@@ -229,6 +231,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Fire automation:request event for internal use.
+     */
+    automation(eventName: string, ...args: any[]): Promise<any>
+
+    /**
      * Promise wrapper for certain internal tasks.
      */
     backend: Backend
@@ -327,12 +334,15 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Returns true if currently running the supplied browser name or matcher object.
+     * Returns true if currently running the supplied browser name or matcher object. Also accepts an array of matchers.
      * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
      * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
+     * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
+     * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
      * @param matcher browser name or matcher object to check.
      */
-    isBrowser(name: BrowserName | Partial<Browser>): boolean
+    isBrowser(name: IsBrowserMatcher): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -2422,6 +2432,11 @@ declare namespace Cypress {
     experimentalShadowDomSupport: boolean
   }
 
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
+    // retries?: number
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
+  }
+
   /**
    * All configuration items are optional.
    */
@@ -2512,8 +2527,22 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
-    beforeScreenshot(doc: Document): void
-    afterScreenshot(doc: Document): void
+    onBeforeScreenshot: ($el: JQuery) => void
+    onAfterScreenshot: ($el: JQuery, props: {
+      path: string,
+      size: number,
+      dimensions: {
+        width: number,
+        height: number
+      },
+      multipart: boolean,
+      pixelRatio: number,
+      takenAt: string,
+      name: string,
+      blackout: string[],
+      duration: number,
+      testAttemptIndex: number
+    }) => void
   }
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
@@ -4719,7 +4748,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any[]
+    message: any
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }
@@ -4800,4 +4829,66 @@ declare namespace Cypress {
   ```
    */
   interface cy extends Chainable<undefined> {}
+}
+
+declare namespace Mocha {
+  interface TestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+  interface ExclusiveTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+  interface PendingTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+
+  interface SuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+  }
+
+  interface ExclusiveSuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites. Indicates this suite should be executed exclusively.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+  }
+
+  interface PendingSuiteFunction {
+    (title: string,  config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+  }
 }

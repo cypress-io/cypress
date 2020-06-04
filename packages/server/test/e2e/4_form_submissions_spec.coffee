@@ -4,7 +4,7 @@ Promise = require("bluebird")
 bodyParser = require("body-parser")
 multiparty = require("multiparty")
 fs = require("../../lib/util/fs")
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 
 HTTPS_PORT = 11443

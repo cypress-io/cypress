@@ -7,21 +7,12 @@
     display: block;
   }
 
-  .collapsible-more {
-    display: inline-block;
-    margin-left: 5px;
-  }
-
-  .is-open > .collapsible-header > .collapsible-more {
-    display: none;
-  }
-
   .collapsible-indicator {
     @extend .#{$fa-css-prefix}-caret-right;
     margin-right: 3px;
   }
 
-  .is-open > .collapsible-header > .collapsible-indicator {
+  .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
     @extend .#{$fa-css-prefix}-caret-down;
   }
 }

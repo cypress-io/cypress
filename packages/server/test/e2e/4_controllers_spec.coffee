@@ -1,7 +1,7 @@
 fs = require("fs-extra")
 path = require("path")
 
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 
 nonExistentSpec = Fixtures.projectPath("non-existent-spec")

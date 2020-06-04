@@ -4,11 +4,11 @@ const { _, Promise } = Cypress
 const RESPONSE_TIMEOUT = 22222
 
 describe('src/cy/commands/request', () => {
-  context('#request', () => {
+  context('#request', {
+    responseTimeout: RESPONSE_TIMEOUT,
+  }, () => {
     beforeEach(() => {
       cy.stub(Cypress, 'backend').callThrough()
-
-      Cypress.config('responseTimeout', RESPONSE_TIMEOUT)
     })
 
     describe('argument signature', () => {
@@ -139,9 +139,9 @@ describe('src/cy/commands/request', () => {
       })
 
       context('url normalization', () => {
-        it('uses absolute urls and adds trailing slash', () => {
-          Cypress.config('baseUrl', 'http://localhost:8080/app')
-
+        it('uses absolute urls and adds trailing slash', {
+          baseUrl: 'http://localhost:8080/app',
+        }, () => {
           cy.request('https://www.foo.com').then(function () {
             this.expectOptionsToBe({
               url: 'https://www.foo.com/',
@@ -165,9 +165,10 @@ describe('src/cy/commands/request', () => {
           })
         })
 
-        it('prefixes with baseUrl when origin is empty', () => {
+        it('prefixes with baseUrl when origin is empty', {
+          baseUrl: 'http://localhost:8080/app',
+        }, () => {
           cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
-          Cypress.config('baseUrl', 'http://localhost:8080/app')
 
           cy.request('/foo/bar?cat=1').then(function () {
             this.expectOptionsToBe({
@@ -176,8 +177,9 @@ describe('src/cy/commands/request', () => {
           })
         })
 
-        it('prefixes with baseUrl over current origin', () => {
-          Cypress.config('baseUrl', 'http://localhost:8080/app')
+        it('prefixes with baseUrl over current origin', {
+          baseUrl: 'http://localhost:8080/app',
+        }, () => {
           cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('http://localhost:1234')
 
           cy.request('foobar?cat=1').then(function () {
@@ -517,9 +519,9 @@ describe('src/cy/commands/request', () => {
         .resolves({ isOkStatusCode: true, status: 200 })
       })
 
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         const timeout = cy.spy(Promise.prototype, 'timeout')
 
         cy.request('http://www.foo.com').then(() => {
@@ -751,10 +753,10 @@ describe('src/cy/commands/request', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -783,8 +785,9 @@ describe('src/cy/commands/request', () => {
         cy.request()
       })
 
-      it('throws when url is not FQDN', function (done) {
-        Cypress.config('baseUrl', '')
+      it('throws when url is not FQDN', {
+        baseUrl: '',
+      }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
 
         cy.on('fail', (err) => {
@@ -802,9 +805,10 @@ describe('src/cy/commands/request', () => {
         cy.request('/foo/bar')
       })
 
-      it('throws when url is not FQDN, notes that configFile is disabled', function (done) {
-        Cypress.config('baseUrl', '')
-        Cypress.config('configFile', false)
+      it('throws when url is not FQDN, notes that configFile is disabled', {
+        baseUrl: '',
+        configFile: false,
+      }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
 
         cy.on('fail', (err) => {
@@ -821,9 +825,10 @@ describe('src/cy/commands/request', () => {
         cy.request('/foo/bar')
       })
 
-      it('throws when url is not FQDN, notes that configFile is non-default', function (done) {
-        Cypress.config('baseUrl', '')
-        Cypress.config('configFile', 'foo.json')
+      it('throws when url is not FQDN, notes that configFile is non-default', {
+        baseUrl: '',
+        configFile: 'foo.json',
+      }, function (done) {
         cy.stub(cy, 'getRemoteLocation').withArgs('origin').returns('')
 
         cy.on('fail', (err) => {

@@ -1,5 +1,5 @@
-const path = require('path')
-const e2e = require('../support/helpers/e2e')
+import path from 'path'
+import e2e from '../support/helpers/e2e'
 
 describe('e2e issue 7217', () => {
   e2e.setup()

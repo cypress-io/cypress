@@ -1,7 +1,7 @@
 path = require("path")
 exec = require("child_process").exec
 
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 Fixtures = require("../support/helpers/fixtures")
 launcher = require("@packages/launcher")
 

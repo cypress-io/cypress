@@ -1,7 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _ } = Cypress
-
-const $dom = require('../../../../src/dom')
+const { _, $, dom } = Cypress
 
 describe('src/cy/commands/misc', () => {
   before(() => {
@@ -151,11 +148,11 @@ describe('src/cy/commands/misc', () => {
         const btn = $btn.get(0)
 
         cy.wrap([btn]).click().then(($btn) => {
-          expect($dom.isJquery($btn)).to.be.true
+          expect(dom.isJquery($btn)).to.be.true
         })
 
         cy.wrap([btn, btn]).click({ multiple: true }).then(($btns) => {
-          expect($dom.isJquery($btns)).to.be.true
+          expect(dom.isJquery($btns)).to.be.true
         })
       })
     })

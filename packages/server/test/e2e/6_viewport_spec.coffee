@@ -1,4 +1,4 @@
-e2e = require("../support/helpers/e2e")
+e2e = require("../support/helpers/e2e").default
 
 describe "e2e viewport", ->
   e2e.setup({

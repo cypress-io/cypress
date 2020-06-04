@@ -1008,10 +1008,10 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 200,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 200)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1881,10 +1881,10 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -2007,6 +2007,9 @@ describe('src/cy/commands/xhr', () => {
       })
 
       it('sets err on log when caused by the XHR response', function (done) {
+        // NOTE: sometimes the .then command will timeout before the request finishes
+        // so bump the timeout here. This does not increase test duration
+        Cypress.config('defaultCommandTimeout', 1000)
         this.route.restore()
 
         cy.on('fail', (err) => {
