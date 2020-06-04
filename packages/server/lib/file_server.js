@@ -1,82 +1,91 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-//# TODO: move this to packages/core-file-server
+// TODO: move this to packages/core-file-server
 
-const _            = require("lodash");
-const debug        = require("debug")("cypress:server:file_server");
-const url          = require("url");
-const http         = require("http");
-const path         = require("path");
-const send         = require("send");
-const errors       = require("./errors");
-const allowDestroy = require("./util/server_destroy");
-const random       = require("./util/random");
-const networkFailures = require("./util/network_failures");
+const _ = require('lodash')
+const debug = require('debug')('cypress:server:file_server')
+const url = require('url')
+const http = require('http')
+const path = require('path')
+const send = require('send')
+const errors = require('./errors')
+const allowDestroy = require('./util/server_destroy')
+const random = require('./util/random')
+const networkFailures = require('./util/network_failures')
 
-const onRequest = function(req, res, expectedToken, fileServerFolder) {
-  const token = req.headers['x-cypress-authorization'];
+const onRequest = function (req, res, expectedToken, fileServerFolder) {
+  const token = req.headers['x-cypress-authorization']
 
   if (token !== expectedToken) {
-    debug('authorization failed on file_server request %o', { reqUrl: req.url, expectedToken, token });
-    res.statusCode = 401;
-    res.end();
-    return;
+    debug('authorization failed on file_server request %o', { reqUrl: req.url, expectedToken, token })
+    res.statusCode = 401
+    res.end()
+
+    return
   }
 
   const args = _.compact([
     fileServerFolder,
-    req.url
-  ]);
+    req.url,
+  ])
 
-  //# strip off any query params from our req's url
-  //# since we're pulling this from the file system
-  //# it does not understand query params
-  //# and make sure we decode the uri which swaps out
-  //# %20 with white space
-  const file = decodeURI(url.parse(path.join(...args)).pathname);
+  // strip off any query params from our req's url
+  // since we're pulling this from the file system
+  // it does not understand query params
+  // and make sure we decode the uri which swaps out
+  // %20 with white space
+  const file = decodeURI(url.parse(path.join(...args)).pathname)
 
-  res.setHeader("x-cypress-file-path", file);
+  res.setHeader('x-cypress-file-path', file)
 
   return send(req, url.parse(req.url).pathname, {
-    root: path.resolve(fileServerFolder)
+    root: path.resolve(fileServerFolder),
   })
-  .on("error", function(err) {
-    res.setHeader("x-cypress-file-server-error", true);
-    res.setHeader("content-type", "text/html");
-    res.statusCode = err.status;
-    return res.end(networkFailures.get(file, err.status));
-}).pipe(res);
-};
+  .on('error', (err) => {
+    res.setHeader('x-cypress-file-server-error', true)
+    res.setHeader('content-type', 'text/html')
+    res.statusCode = err.status
+
+    return res.end(networkFailures.get(file, err.status))
+  }).pipe(res)
+}
 
 module.exports = {
-  create(fileServerFolder) {
-    return new Promise(function(resolve) {
-      const token = random.id(64);
+  create (fileServerFolder) {
+    return new Promise(((resolve) => {
+      const token = random.id(64)
 
-      const srv = http.createServer((req, res) => onRequest(req, res, token, fileServerFolder));
+      const srv = http.createServer((req, res) => {
+        return onRequest(req, res, token, fileServerFolder)
+      })
 
-      allowDestroy(srv);
+      allowDestroy(srv)
 
-      return srv.listen(0, '127.0.0.1', function() {
+      return srv.listen(0, '127.0.0.1', () => {
         return resolve({
           token,
 
-          port() {
-            return srv.address().port;
+          port () {
+            return srv.address().port
           },
 
-          address() {
-            return "http://localhost:" + this.port();
+          address () {
+            return `http://localhost:${this.port()}`
           },
 
-          close() {
-            return srv.destroyAsync();
-          }
-        });
-      });
-    });
-  }
-};
+          close () {
+            return srv.destroyAsync()
+          },
+        })
+      })
+    }))
+  },
+}

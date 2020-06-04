@@ -1,213 +1,231 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-let intervals;
-const _          = require("lodash");
-const os         = require("os");
-const debug      = require("debug")("cypress:server:api");
-const request    = require("@cypress/request-promise");
-const errors     = require("@cypress/request-promise/errors");
-const Promise    = require("bluebird");
-const humanInterval = require("human-interval");
+let intervals
+const _ = require('lodash')
+const os = require('os')
+const debug = require('debug')('cypress:server:api')
+const request = require('@cypress/request-promise')
+const errors = require('@cypress/request-promise/errors')
+const Promise = require('bluebird')
+const humanInterval = require('human-interval')
 const {
-  agent
-} = require("@packages/network");
-const pkg        = require("@packages/root");
-const machineId  = require("./util/machine_id");
-const routes     = require("./util/routes");
-const system     = require("./util/system");
-const cache      = require("./cache");
+  agent,
+} = require('@packages/network')
+const pkg = require('@packages/root')
+const machineId = require('./util/machine_id')
+const routes = require('./util/routes')
+const system = require('./util/system')
+const cache = require('./cache')
 
-const THIRTY_SECONDS = humanInterval("30 seconds");
-const SIXTY_SECONDS = humanInterval("60 seconds");
-const TWO_MINUTES = humanInterval("2 minutes");
+const THIRTY_SECONDS = humanInterval('30 seconds')
+const SIXTY_SECONDS = humanInterval('60 seconds')
+const TWO_MINUTES = humanInterval('2 minutes')
 
 let DELAYS = [
   THIRTY_SECONDS,
   SIXTY_SECONDS,
-  TWO_MINUTES
-];
+  TWO_MINUTES,
+]
 
-let responseCache = {};
+let responseCache = {}
 
-if (intervals = process.env.API_RETRY_INTERVALS) {
+intervals = process.env.API_RETRY_INTERVALS
+
+if (intervals) {
   DELAYS = _
   .chain(intervals)
-  .split(",")
+  .split(',')
   .map(_.toNumber)
-  .value();
+  .value()
 }
 
-const rp = request.defaults(function(params = {}, callback) {
-  let resp;
+const rp = request.defaults((params = {}, callback) => {
+  let resp
+
   if (params.cacheable && (resp = getCachedResponse(params))) {
-    debug("resolving with cached response for ", params.url);
-    return Promise.resolve(resp);
+    debug('resolving with cached response for ', params.url)
+
+    return Promise.resolve(resp)
   }
 
   _.defaults(params, {
     agent,
     proxy: null,
     gzip: true,
-    cacheable: false
-  });
+    cacheable: false,
+  })
 
-  const headers = params.headers != null ? params.headers : (params.headers = {});
+  const headers = params.headers != null ? params.headers : (params.headers = {})
 
   _.defaults(headers, {
-    "x-os-name":         os.platform(),
-    "x-cypress-version": pkg.version
-  });
+    'x-os-name': os.platform(),
+    'x-cypress-version': pkg.version,
+  })
 
-  const method = params.method.toLowerCase();
+  const method = params.method.toLowerCase()
 
   // use %j argument to ensure deep nested properties are serialized
   debug(
-    "request to url: %s with params: %j and token: %s",
+    'request to url: %s with params: %j and token: %s',
     `${params.method} ${params.url}`,
-    _.pick(params, "body", "headers"),
-    params.auth && params.auth.bearer
-  );
+    _.pick(params, 'body', 'headers'),
+    params.auth && params.auth.bearer,
+  )
 
   return request[method](params, callback)
   .promise()
-  .tap(function(resp) {
+  .tap((resp) => {
     if (params.cacheable) {
-      debug("caching response for ", params.url);
-      cacheResponse(resp, params);
+      debug('caching response for ', params.url)
+      cacheResponse(resp, params)
     }
 
-    return debug("response %o", resp);
-  });
-});
+    return debug('response %o', resp)
+  })
+})
 
-var cacheResponse = (resp, params) => responseCache[params.url] = resp;
+const cacheResponse = (resp, params) => {
+  return responseCache[params.url] = resp
+}
 
-var getCachedResponse = params => responseCache[params.url];
+const getCachedResponse = (params) => {
+  return responseCache[params.url]
+}
 
-const formatResponseBody = function(err) {
-  //# if the body is JSON object
+const formatResponseBody = function (err) {
+  // if the body is JSON object
   if (_.isObject(err.error)) {
-    //# transform the error message to include the
-    //# stringified body (represented as the 'error' property)
-    const body = JSON.stringify(err.error, null, 2);
-    err.message = [err.statusCode, body].join("\n\n");
+    // transform the error message to include the
+    // stringified body (represented as the 'error' property)
+    const body = JSON.stringify(err.error, null, 2)
+
+    err.message = [err.statusCode, body].join('\n\n')
   }
 
-  throw err;
-};
+  throw err
+}
 
-const tagError = function(err) {
-  err.isApiError = true;
-  throw err;
-};
+const tagError = function (err) {
+  err.isApiError = true
+  throw err
+}
 
-//# retry on timeouts, 5xx errors, or any error without a status code
-const isRetriableError = err => (err instanceof Promise.TimeoutError) ||
+// retry on timeouts, 5xx errors, or any error without a status code
+const isRetriableError = (err) => {
+  return (err instanceof Promise.TimeoutError) ||
 (500 <= err.statusCode && err.statusCode < 600) ||
-(err.statusCode == null);
+(err.statusCode == null)
+}
 
 module.exports = {
   rp,
 
-  ping() {
+  ping () {
     return rp.get(routes.ping())
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getMe(authToken) {
+  getMe (authToken) {
     return rp.get({
       url: routes.me(),
       json: true,
       auth: {
-        bearer: authToken
-      }
-    });
+        bearer: authToken,
+      },
+    })
   },
 
-  getAuthUrls() {
+  getAuthUrls () {
     return rp.get({
       url: routes.auth(),
       json: true,
       cacheable: true,
       headers: {
-        "x-route-version": "2"
-      }
+        'x-route-version': '2',
+      },
     })
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getOrgs(authToken) {
+  getOrgs (authToken) {
     return rp.get({
       url: routes.orgs(),
       json: true,
       auth: {
-        bearer: authToken
-      }
+        bearer: authToken,
+      },
     })
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getProjects(authToken) {
+  getProjects (authToken) {
     return rp.get({
       url: routes.projects(),
       json: true,
       auth: {
-        bearer: authToken
-      }
+        bearer: authToken,
+      },
     })
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getProject(projectId, authToken) {
+  getProject (projectId, authToken) {
     return rp.get({
       url: routes.project(projectId),
       json: true,
       auth: {
-        bearer: authToken
+        bearer: authToken,
       },
       headers: {
-        "x-route-version": "2"
-      }
+        'x-route-version': '2',
+      },
     })
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getProjectRuns(projectId, authToken, options = {}) {
-    if (options.page == null) { options.page = 1; }
+  getProjectRuns (projectId, authToken, options = {}) {
+    if (options.page == null) {
+      options.page = 1
+    }
 
     return rp.get({
       url: routes.projectRuns(projectId),
       json: true,
       timeout: options.timeout != null ? options.timeout : 10000,
       auth: {
-        bearer: authToken
+        bearer: authToken,
       },
       headers: {
-        "x-route-version": "3"
-      }
+        'x-route-version': '3',
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  createRun(options = {}) {
+  createRun (options = {}) {
     const body = _.pick(options, [
-      "ci",
-      "specs",
-      "commit",
-      "group",
-      "platform",
-      "parallel",
-      "ciBuildId",
-      "projectId",
-      "recordKey",
-      "specPattern",
-      "tags"
-    ]);
+      'ci',
+      'specs',
+      'commit',
+      'group',
+      'platform',
+      'parallel',
+      'ciBuildId',
+      'projectId',
+      'recordKey',
+      'specPattern',
+      'tags',
+    ])
 
     return rp.post({
       body,
@@ -215,22 +233,22 @@ module.exports = {
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        "x-route-version": "4"
-      }
+        'x-route-version': '4',
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  createInstance(options = {}) {
-    const { runId, timeout } = options;
+  createInstance (options = {}) {
+    const { runId, timeout } = options
 
     const body = _.pick(options, [
-      "spec",
-      "groupId",
-      "machineId",
-      "platform"
-    ]);
+      'spec',
+      'groupId',
+      'machineId',
+      'platform',
+    ])
 
     return rp.post({
       body,
@@ -238,193 +256,201 @@ module.exports = {
       json: true,
       timeout: timeout != null ? timeout : SIXTY_SECONDS,
       headers: {
-        "x-route-version": "5"
-      }
+        'x-route-version': '5',
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  updateInstanceStdout(options = {}) {
+  updateInstanceStdout (options = {}) {
     return rp.put({
       url: routes.instanceStdout(options.instanceId),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       body: {
-        stdout: options.stdout
-      }
+        stdout: options.stdout,
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  updateInstance(options = {}) {
+  updateInstance (options = {}) {
     return rp.put({
       url: routes.instance(options.instanceId),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        "x-route-version": "2"
+        'x-route-version': '2',
       },
       body: _.pick(options, [
-        "stats",
-        "tests",
-        "error",
-        "video",
-        "hooks",
-        "stdout",
-        "screenshots",
-        "cypressConfig",
-        "reporterStats"
-      ])
+        'stats',
+        'tests',
+        'error',
+        'video',
+        'hooks',
+        'stdout',
+        'screenshots',
+        'cypressConfig',
+        'reporterStats',
+      ]),
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  createCrashReport(body, authToken, timeout = 3000) {
+  createCrashReport (body, authToken, timeout = 3000) {
     return rp.post({
       url: routes.exceptions(),
       json: true,
       body,
       auth: {
-        bearer: authToken
-      }
+        bearer: authToken,
+      },
     })
     .timeout(timeout)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  postLogout(authToken) {
+  postLogout (authToken) {
     return Promise.join(
       this.getAuthUrls(),
       machineId.machineId(),
-      (urls, machineId) => rp.post({
-        url: urls.dashboardLogoutUrl,
-        json: true,
-        auth: {
-          bearer: authToken
-        },
-        headers: {
-          "x-machine-id": machineId
-        }
-      })
-      .catch({statusCode: 401}, function() {}) //# do nothing on 401
-      .catch(tagError));
+      (urls, machineId) => {
+        return rp.post({
+          url: urls.dashboardLogoutUrl,
+          json: true,
+          auth: {
+            bearer: authToken,
+          },
+          headers: {
+            'x-machine-id': machineId,
+          },
+        })
+        .catch({ statusCode: 401 }, () => {}) // do nothing on 401
+        .catch(tagError)
+      },
+    )
   },
 
-  createProject(projectDetails, remoteOrigin, authToken) {
-    debug("create project with args %o", {
+  createProject (projectDetails, remoteOrigin, authToken) {
+    debug('create project with args %o', {
       projectDetails,
       remoteOrigin,
       authToken,
-    });
+    })
 
     return rp.post({
       url: routes.projects(),
       json: true,
       auth: {
-        bearer: authToken
+        bearer: authToken,
       },
       headers: {
-        "x-route-version": "2"
+        'x-route-version': '2',
       },
       body: {
         name: projectDetails.projectName,
         orgId: projectDetails.orgId,
         public: projectDetails.public,
-        remoteOrigin
-      }
+        remoteOrigin,
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  getProjectRecordKeys(projectId, authToken) {
+  getProjectRecordKeys (projectId, authToken) {
     return rp.get({
       url: routes.projectRecordKeys(projectId),
       json: true,
       auth: {
-        bearer: authToken
-      }
+        bearer: authToken,
+      },
     })
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  requestAccess(projectId, authToken) {
+  requestAccess (projectId, authToken) {
     return rp.post({
       url: routes.membershipRequests(projectId),
       json: true,
       auth: {
-        bearer: authToken
-      }
+        bearer: authToken,
+      },
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError);
+    .catch(tagError)
   },
 
-  _projectToken(method, projectId, authToken) {
+  _projectToken (method, projectId, authToken) {
     return rp({
       method,
       url: routes.projectToken(projectId),
       json: true,
       auth: {
-        bearer: authToken
+        bearer: authToken,
       },
       headers: {
-        "x-route-version": "2"
-      }
+        'x-route-version': '2',
+      },
     })
-    .get("apiToken")
-    .catch(tagError);
+    .get('apiToken')
+    .catch(tagError)
   },
 
-  getProjectToken(projectId, authToken) {
-    return this._projectToken("get", projectId, authToken);
+  getProjectToken (projectId, authToken) {
+    return this._projectToken('get', projectId, authToken)
   },
 
-  updateProjectToken(projectId, authToken) {
-    return this._projectToken("put", projectId, authToken);
+  updateProjectToken (projectId, authToken) {
+    return this._projectToken('put', projectId, authToken)
   },
 
-  retryWithBackoff(fn, options = {}) {
-    //# for e2e testing purposes
-    let attempt;
+  retryWithBackoff (fn, options = {}) {
+    // for e2e testing purposes
+    let attempt
+
     if (process.env.DISABLE_API_RETRIES) {
-      debug("api retries disabled");
-      return Promise.try(fn);
+      debug('api retries disabled')
+
+      return Promise.try(fn)
     }
 
-    return (attempt = retryIndex => Promise
-    .try(fn)
-    .catch(isRetriableError, function(err) {
-      if (retryIndex > DELAYS.length) {
-        throw err;
-      }
-
-      const delay = DELAYS[retryIndex];
-
-      if (options.onBeforeRetry) {
-        options.onBeforeRetry({
-          err,
-          delay,
-          retryIndex,
-          total: DELAYS.length
-        });
-      }
-
-      retryIndex++;
-
+    return (attempt = (retryIndex) => {
       return Promise
-      .delay(delay)
-      .then(function() {
-        debug(`retry #${retryIndex} after ${delay}ms`);
-        return attempt(retryIndex);
-      });
-    }))(0);
+      .try(fn)
+      .catch(isRetriableError, (err) => {
+        if (retryIndex > DELAYS.length) {
+          throw err
+        }
+
+        const delay = DELAYS[retryIndex]
+
+        if (options.onBeforeRetry) {
+          options.onBeforeRetry({
+            err,
+            delay,
+            retryIndex,
+            total: DELAYS.length,
+          })
+        }
+
+        retryIndex++
+
+        return Promise
+        .delay(delay)
+        .then(() => {
+          debug(`retry #${retryIndex} after ${delay}ms`)
+
+          return attempt(retryIndex)
+        })
+      })
+    })(0)
   },
 
-  clearCache() {
-    return responseCache = {};
-  }
-};
+  clearCache () {
+    responseCache = {}
+  },
+}

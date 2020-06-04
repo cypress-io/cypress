@@ -1,31 +1,38 @@
+/* eslint-disable
+    brace-style,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require('lodash');
+const _ = require('lodash')
 const {
-  dialog
-} = require("electron");
+  dialog,
+} = require('electron')
 
 module.exports = {
-  show() {
-    //# associate this dialog to the mainWindow
-    //# so the user never loses track of which
-    //# window the dialog belongs to. in other words
-    //# if they blur off, they only need to focus back
-    //# on the Cypress app for this dialog to appear again
-    //# https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
+  show () {
+    // associate this dialog to the mainWindow
+    // so the user never loses track of which
+    // window the dialog belongs to. in other words
+    // if they blur off, they only need to focus back
+    // on the Cypress app for this dialog to appear again
+    // https://developer.apple.com/library/mac/documentation/Cocoa/Conceptual/Sheets/Concepts/AboutSheets.html
 
     const props = {
-      //# we only want the user to select a single
-      //# directory. not multiple, and not files
-      properties: ["openDirectory"]
-    };
+      // we only want the user to select a single
+      // directory. not multiple, and not files
+      properties: ['openDirectory'],
+    }
 
     return dialog.showOpenDialog(props)
-    .then(obj => //# return the first path since there can only ever
-    //# be a single directory selection
-    _.get(obj, ['filePaths', 0]));
-  }
-};
+    .then((obj) => // return the first path since there can only ever
+    // be a single directory selection
+    {
+      return _.get(obj, ['filePaths', 0])
+    })
+  },
+}

@@ -1,81 +1,87 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS207: Consider shorter variations of null checks
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("./util/fs");
+require('./util/fs')
 
-const os      = require("os");
-//#
-//# NOTE
-//#
-//# by loading "./cwd" we are changing the current working directory
-//# to the "packages/server" folder
-const cwd     = require("./cwd");
-const Promise = require("bluebird");
-const debug = require("debug")("cypress:server");
+const os = require('os')
+//
+// NOTE
+//
+// by loading "./cwd" we are changing the current working directory
+// to the "packages/server" folder
+const cwd = require('./cwd')
+const Promise = require('bluebird')
+const debug = require('debug')('cypress:server')
 
-//# never cut off stack traces
-Error.stackTraceLimit = Infinity;
+// never cut off stack traces
+Error.stackTraceLimit = Infinity
 
-//# cannot use relative require statement
-//# here because when obfuscated package
-//# would not be available
-const pkg = require("@packages/root");
+// cannot use relative require statement
+// here because when obfuscated package
+// would not be available
+const pkg = require('@packages/root')
 
-//# instead of setting NODE_ENV we will
-//# use our own separate CYPRESS_INTERNAL_ENV so
-//# as not to conflict with CI providers
+// instead of setting NODE_ENV we will
+// use our own separate CYPRESS_INTERNAL_ENV so
+// as not to conflict with CI providers
 
-//# use env from package first
-//# or development as default
-const env = process.env["CYPRESS_INTERNAL_ENV"] || (process.env["CYPRESS_INTERNAL_ENV"] = pkg.env != null ? pkg.env : "development");
+// use env from package first
+// or development as default
+const env = process.env['CYPRESS_INTERNAL_ENV'] || (process.env['CYPRESS_INTERNAL_ENV'] = pkg.env != null ? pkg.env : 'development')
 
 const config = {
-  //# uses cancellation for automation timeouts
-  cancellation: true
-};
-
-if (env === "development") {
-  //# enable long stack traces in dev
-  config.longStackTraces = true;
+  // uses cancellation for automation timeouts
+  cancellation: true,
 }
 
-Promise.config(config);
+if (env === 'development') {
+  // enable long stack traces in dev
+  config.longStackTraces = true
+}
+
+Promise.config(config)
 
 // note: we print error in development mode only
 try {
-  //# i wish we didn't have to do this but we have to append
-  //# these command line switches immediately
+  // i wish we didn't have to do this but we have to append
+  // these command line switches immediately
   const {
-    app
-  } = require("electron");
-  app.commandLine.appendSwitch("disable-renderer-backgrounding", true);
-  app.commandLine.appendSwitch("ignore-certificate-errors", true);
+    app,
+  } = require('electron')
 
-  //# These flags are for webcam/WebRTC testing
-  //# https://github.com/cypress-io/cypress/issues/2704
-  app.commandLine.appendSwitch("use-fake-ui-for-media-stream");
-  app.commandLine.appendSwitch("use-fake-device-for-media-stream");
+  app.commandLine.appendSwitch('disable-renderer-backgrounding', true)
+  app.commandLine.appendSwitch('ignore-certificate-errors', true)
 
-  //# https://github.com/cypress-io/cypress/issues/2376
-  app.commandLine.appendSwitch("autoplay-policy", "no-user-gesture-required");
+  // These flags are for webcam/WebRTC testing
+  // https://github.com/cypress-io/cypress/issues/2704
+  app.commandLine.appendSwitch('use-fake-ui-for-media-stream')
+  app.commandLine.appendSwitch('use-fake-device-for-media-stream')
 
-  //# allows webSecurity: false to work as expected in webPreferences
-  //# https://github.com/electron/electron/issues/18214
-  app.commandLine.appendSwitch("disable-site-isolation-trials");
+  // https://github.com/cypress-io/cypress/issues/2376
+  app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 
-  if (os.platform() === "linux") {
-    app.disableHardwareAcceleration();
+  // allows webSecurity: false to work as expected in webPreferences
+  // https://github.com/electron/electron/issues/18214
+  app.commandLine.appendSwitch('disable-site-isolation-trials')
+
+  if (os.platform() === 'linux') {
+    app.disableHardwareAcceleration()
   }
 
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
-    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ');
-    electronLaunchArguments.forEach(app.commandLine.appendArgument);
-  }
+    const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
 
+    electronLaunchArguments.forEach(app.commandLine.appendArgument)
+  }
 } catch (e) {
-  debug("environment error %s", e.message);
+  debug('environment error %s', e.message)
 }
 
-module.exports = env;
+module.exports = env

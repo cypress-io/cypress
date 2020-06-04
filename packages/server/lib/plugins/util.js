@@ -1,75 +1,90 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const EE = require("events");
-const debug = require("debug")("cypress:server:plugins");
-const Promise = require("bluebird");
+const _ = require('lodash')
+const EE = require('events')
+const debug = require('debug')('cypress:server:plugins')
+const Promise = require('bluebird')
 
-const UNDEFINED_SERIALIZED = "__cypress_undefined__";
+const UNDEFINED_SERIALIZED = '__cypress_undefined__'
 
-const serializeError = err => _.pick(err, "name", "message", "stack", "code", "annotated", "type");
+const serializeError = (err) => {
+  return _.pick(err, 'name', 'message', 'stack', 'code', 'annotated', 'type')
+}
 
 module.exports = {
   serializeError,
 
-  wrapIpc(aProcess) {
-    const emitter = new EE();
+  wrapIpc (aProcess) {
+    const emitter = new EE()
 
-    aProcess.on("message", message => emitter.emit(message.event, ...message.args));
+    aProcess.on('message', (message) => {
+      return emitter.emit(message.event, ...message.args)
+    })
 
     return {
-      send(event, ...args) {
-        if (aProcess.killed) { return; }
+      send (event, ...args) {
+        if (aProcess.killed) {
+          return
+        }
 
         return aProcess.send({
           event,
-          args
-        });
+          args,
+        })
       },
 
       on: emitter.on.bind(emitter),
-      removeListener: emitter.removeListener.bind(emitter)
-    };
+      removeListener: emitter.removeListener.bind(emitter),
+    }
   },
 
-  wrapChildPromise(ipc, invoke, ids, args = []) {
-    return Promise.try(() => invoke(ids.eventId, args)).then(function(value) {
-      //# undefined is coerced into null when sent over ipc, but we need
-      //# to differentiate between them for 'task' event
+  wrapChildPromise (ipc, invoke, ids, args = []) {
+    return Promise.try(() => {
+      return invoke(ids.eventId, args)
+    }).then((value) => {
+      // undefined is coerced into null when sent over ipc, but we need
+      // to differentiate between them for 'task' event
       if (value === undefined) {
-        value = UNDEFINED_SERIALIZED;
+        value = UNDEFINED_SERIALIZED
       }
-      return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value);}).catch(err => ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err)));
+
+      return ipc.send(`promise:fulfilled:${ids.invocationId}`, null, value)
+    }).catch((err) => {
+      return ipc.send(`promise:fulfilled:${ids.invocationId}`, serializeError(err))
+    })
   },
 
-  wrapParentPromise(ipc, eventId, callback) {
-    const invocationId = _.uniqueId("inv");
+  wrapParentPromise (ipc, eventId, callback) {
+    const invocationId = _.uniqueId('inv')
 
-    return new Promise(function(resolve, reject) {
-      var handler = function(err, value) {
-        ipc.removeListener(`promise:fulfilled:${invocationId}`, handler);
+    return new Promise((resolve, reject) => {
+      const handler = function (err, value) {
+        ipc.removeListener(`promise:fulfilled:${invocationId}`, handler)
 
         if (err) {
-          debug("promise rejected for id %s %o", invocationId, ":", err.stack);
-          reject(_.extend(new Error(err.message), err));
-          return;
+          debug('promise rejected for id %s %o', invocationId, ':', err.stack)
+          reject(_.extend(new Error(err.message), err))
+
+          return
         }
 
         if (value === UNDEFINED_SERIALIZED) {
-          value = undefined;
+          value = undefined
         }
 
-        debug(`promise resolved for id '${invocationId}' with value`, value);
+        debug(`promise resolved for id '${invocationId}' with value`, value)
 
-        return resolve(value);
-      };
+        return resolve(value)
+      }
 
-      ipc.on(`promise:fulfilled:${invocationId}`, handler);
+      ipc.on(`promise:fulfilled:${invocationId}`, handler)
 
-      return callback(invocationId);
-    });
-  }
-};
+      return callback(invocationId)
+    })
+  },
+}

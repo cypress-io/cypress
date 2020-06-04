@@ -1,50 +1,71 @@
+/* eslint-disable
+    default-case,
+    no-case-declarations,
+    no-console,
+    no-const-assign,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * DS203: Remove `|| {}` from converted for-own loops
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _ = require("lodash");
-const strip = require("strip-ansi");
-const chalk = require("chalk");
-const AU = require('ansi_up');
-const Promise = require("bluebird");
+const _ = require('lodash')
+const strip = require('strip-ansi')
+const chalk = require('chalk')
+const AU = require('ansi_up')
+const Promise = require('bluebird')
 
-const ansi_up = new AU.default;
-ansi_up.use_classes = true;
+const ansi_up = new AU.default
 
-const twoOrMoreNewLinesRe = /\n{2,}/;
+ansi_up.use_classes = true
 
-const isProduction = () => process.env["CYPRESS_INTERNAL_ENV"] === "production";
+const twoOrMoreNewLinesRe = /\n{2,}/
 
-const listItems = paths => _
-.chain(paths)
-.map(p => "- " + chalk.blue(p)).join("\n")
-.value();
+const isProduction = () => {
+  return process.env['CYPRESS_INTERNAL_ENV'] === 'production'
+}
 
-const displayFlags = (obj, mapper) => _
-.chain(mapper)
-.map(function(flag, key) {
-  let v;
-  if (v = obj[key]) {
-    return `The ${flag} flag you passed was: ${chalk.blue(v)}`;
-  }}).compact()
-.join("\n")
-.value();
+const listItems = (paths) => {
+  return _
+  .chain(paths)
+  .map((p) => {
+    return `- ${chalk.blue(p)}`
+  }).join('\n')
+  .value()
+}
 
-const displayRetriesRemaining = function(tries) {
-  const times = tries === 1 ? 'time' : 'times';
+const displayFlags = (obj, mapper) => {
+  return _
+  .chain(mapper)
+  .map((flag, key) => {
+    let v
 
-  const lastTryNewLine = tries === 1 ? "\n" : "";
+    v = obj[key]
+
+    if (v) {
+      return `The ${flag} flag you passed was: ${chalk.blue(v)}`
+    }
+  }).compact()
+  .join('\n')
+  .value()
+}
+
+const displayRetriesRemaining = function (tries) {
+  const times = tries === 1 ? 'time' : 'times'
+
+  const lastTryNewLine = tries === 1 ? '\n' : ''
 
   return chalk.gray(
-    `We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`
-  );
-};
+    `We will try connecting to it ${tries} more ${times}...${lastTryNewLine}`,
+  )
+}
 
-const warnIfExplicitCiBuildId = function(ciBuildId) {
+const warnIfExplicitCiBuildId = function (ciBuildId) {
   if (!ciBuildId) {
-    return "";
+    return ''
   }
 
   return `\
@@ -53,60 +74,64 @@ It also looks like you also passed in an explicit --ci-build-id flag.
 This is only necessary if you are NOT running in one of our supported CI providers.
 
 This flag must be unique for each new run, but must also be identical for each machine you are trying to --group or run in --parallel.\
-`;
-};
+`
+}
 
-const trimMultipleNewLines = str => _
-.chain(str)
-.split(twoOrMoreNewLinesRe)
-.compact()
-.join("\n\n")
-.value();
+const trimMultipleNewLines = (str) => {
+  return _
+  .chain(str)
+  .split(twoOrMoreNewLinesRe)
+  .compact()
+  .join('\n\n')
+  .value()
+}
 
-const isCypressErr = err => Boolean(err.isCypressErr);
+const isCypressErr = (err) => {
+  return Boolean(err.isCypressErr)
+}
 
-const getMsgByType = function(type, arg1 = {}, arg2, arg3) {
+const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   switch (type) {
-    case "CANNOT_TRASH_ASSETS":
+    case 'CANNOT_TRASH_ASSETS':
       return `\
 Warning: We failed to trash the existing run results.
 
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "CANNOT_REMOVE_OLD_BROWSER_PROFILES":
+`
+    case 'CANNOT_REMOVE_OLD_BROWSER_PROFILES':
       return `\
 Warning: We failed to remove old browser profiles from previous runs.
 
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "VIDEO_RECORDING_FAILED":
+`
+    case 'VIDEO_RECORDING_FAILED':
       return `\
 Warning: We failed to record the video.
 
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "VIDEO_POST_PROCESSING_FAILED":
+`
+    case 'VIDEO_POST_PROCESSING_FAILED':
       return `\
 Warning: We failed processing this video.
 
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "CHROME_WEB_SECURITY_NOT_SUPPORTED":
+`
+    case 'CHROME_WEB_SECURITY_NOT_SUPPORTED':
       return `\
 Your project has set the configuration option: \`chromeWebSecurity: false\`
 
 This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.\
-`;
-    case "BROWSER_NOT_FOUND_BY_NAME":
-      var str = `\
+`
+    case 'BROWSER_NOT_FOUND_BY_NAME':
+      let str = `\
 Can't run because you've entered an invalid browser name.
 
 Browser: '${arg1}' was not found on your system or is not supported by Cypress.
@@ -122,35 +147,36 @@ You can also use a custom browser: https://on.cypress.io/customize-browsers
 
 Available browsers found on your system are:
 ${arg2}\
-`;
+`
 
       if (arg1 === 'canary') {
         str += `\
 \n\nNote: In Cypress 4.0, Canary must be launched as \`chrome:canary\`, not \`canary\`.
 
 See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.\
-`;
+`
       }
 
-      return str;
-    case "BROWSER_NOT_FOUND_BY_PATH":
-      var msg = `\
+      return str
+    case 'BROWSER_NOT_FOUND_BY_PATH':
+      const msg = `\
 We could not identify a known browser at the path you provided: \`${arg1}\`
 
 The output from the command we ran was:\
-`;
-      return {msg, details: arg2};
-    case "NOT_LOGGED_IN":
+`
+
+      return { msg, details: arg2 }
+    case 'NOT_LOGGED_IN':
       return `\
 You're not logged in.
 
 Run \`cypress open\` to open the Desktop App and log in.\
-`;
-    case "TESTS_DID_NOT_START_RETRYING":
-      return `Timed out waiting for the browser to connect. ${arg1}`;
-    case "TESTS_DID_NOT_START_FAILED":
-      return "The browser never connected. Something is wrong. The tests cannot run. Aborting...";
-    case "DASHBOARD_API_RESPONSE_FAILED_RETRYING":
+`
+    case 'TESTS_DID_NOT_START_RETRYING':
+      return `Timed out waiting for the browser to connect. ${arg1}`
+    case 'TESTS_DID_NOT_START_FAILED':
+      return 'The browser never connected. Something is wrong. The tests cannot run. Aborting...'
+    case 'DASHBOARD_API_RESPONSE_FAILED_RETRYING':
       return `\
 We encountered an unexpected error talking to our servers.
 
@@ -159,47 +185,47 @@ We will retry ${arg1.tries} more ${arg1.tries === 1 ? 'time' : 'times'} in ${arg
 The server's response was:
 
 ${arg1.response}\
-`;
-    case "DASHBOARD_CANNOT_PROCEED_IN_PARALLEL":
+`
+    case 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL':
       return `\
 We encountered an unexpected error talking to our servers.
 
 Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
 ${displayFlags(arg1.flags, {
-        group: "--group",
-        ciBuildId: "--ciBuildId",
-      })}
+    group: '--group',
+    ciBuildId: '--ciBuildId',
+  })}
 
 The server's response was:
 
 ${arg1.response}\
-`;
-    case "DASHBOARD_UNKNOWN_INVALID_REQUEST":
+`
+    case 'DASHBOARD_UNKNOWN_INVALID_REQUEST':
       return `\
 We encountered an unexpected error talking to our servers.
 
 There is likely something wrong with the request.
 
 ${displayFlags(arg1.flags, {
-        tags: "--tag",
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    tags: '--tag',
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 The server's response was:
 
 ${arg1.response}\
-`;
-    case "DASHBOARD_UNKNOWN_CREATE_RUN_WARNING":
+`
+    case 'DASHBOARD_UNKNOWN_CREATE_RUN_WARNING':
       return `\
 Warning from Cypress Dashboard: ${arg1.message}
 
 Details:
 ${JSON.stringify(arg1.props, null, 2)}\
-`;
-    case "DASHBOARD_STALE_RUN":
+`
+    case 'DASHBOARD_STALE_RUN':
       return `\
 You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
 
@@ -208,15 +234,15 @@ The existing run is: ${arg1.runUrl}
 You cannot parallelize a run that has been complete for that long.
 
 ${displayFlags(arg1, {
-        tags: "--tag",
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    tags: '--tag',
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 https://on.cypress.io/stale-run\
-`;
-    case "DASHBOARD_ALREADY_COMPLETE":
+`
+    case 'DASHBOARD_ALREADY_COMPLETE':
       return `\
 The run you are attempting to access is already complete and will not accept new groups.
 
@@ -225,48 +251,48 @@ The existing run is: ${arg1.runUrl}
 When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
 ${displayFlags(arg1, {
-        tags: "--tag",
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    tags: '--tag',
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 https://on.cypress.io/already-complete\
-`;
-    case "DASHBOARD_PARALLEL_REQUIRED":
+`
+    case 'DASHBOARD_PARALLEL_REQUIRED':
       return `\
 You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
 
 The existing run is: ${arg1.runUrl}
 
 ${displayFlags(arg1, {
-        tags: "--tag",
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    tags: '--tag',
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 You must use the --parallel flag with this group.
 
 https://on.cypress.io/parallel-required\
-`;
-    case "DASHBOARD_PARALLEL_DISALLOWED":
+`
+    case 'DASHBOARD_PARALLEL_DISALLOWED':
       return `\
 You passed the --parallel flag, but this run group was originally created without the --parallel flag.
 
 The existing run is: ${arg1.runUrl}
 
 ${displayFlags(arg1, {
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 You can not use the --parallel flag with this group.
 
 https://on.cypress.io/parallel-disallowed\
-`;
-    case "DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH":
+`
+    case 'DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH':
       return `\
 You passed the --parallel flag, but we do not parallelize tests across different environments.
 
@@ -277,45 +303,45 @@ The existing run is: ${arg1.runUrl}
 In order to run in parallel mode each machine must send identical environment parameters such as:
 
 ${listItems([
-        "specs",
-        "osName",
-        "osVersion",
-        "browserName",
-        "browserVersion (major)",
-      ])}
+    'specs',
+    'osName',
+    'osVersion',
+    'browserName',
+    'browserVersion (major)',
+  ])}
 
 This machine sent the following parameters:
 
 ${JSON.stringify(arg1.parameters, null, 2)}
 
 https://on.cypress.io/parallel-group-params-mismatch\
-`;
-    case "DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE":
+`
+    case 'DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE':
       return `\
 You passed the --group flag, but this group name has already been used for this run.
 
 The existing run is: ${arg1.runUrl}
 
 ${displayFlags(arg1, {
-        group: "--group",
-        parallel: "--parallel",
-        ciBuildId: "--ciBuildId",
-      })}
+    group: '--group',
+    parallel: '--parallel',
+    ciBuildId: '--ciBuildId',
+  })}
 
 If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
 ${warnIfExplicitCiBuildId(arg1.ciBuildId)}
 
 https://on.cypress.io/run-group-name-not-unique\
-`;
-    case "INDETERMINATE_CI_BUILD_ID":
+`
+    case 'INDETERMINATE_CI_BUILD_ID':
       return `\
 You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
 ${displayFlags(arg1, {
-        group: "--group",
-        parallel: "--parallel"
-      })}
+    group: '--group',
+    parallel: '--parallel',
+  })}
 
 In order to use either of these features a ciBuildId must be determined.
 
@@ -326,47 +352,47 @@ ${listItems(arg2)}
 Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
 https://on.cypress.io/indeterminate-ci-build-id\
-`;
-    case "RECORD_PARAMS_WITHOUT_RECORDING":
+`
+    case 'RECORD_PARAMS_WITHOUT_RECORDING':
       return `\
 You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
 ${displayFlags(arg1, {
-        ciBuildId: "--ci-build-id",
-        tags: "--tag",
-        group: "--group",
-        parallel: "--parallel"
-      })}
+    ciBuildId: '--ci-build-id',
+    tags: '--tag',
+    group: '--group',
+    parallel: '--parallel',
+  })}
 
 These flags can only be used when recording to the Cypress Dashboard service.
 
 https://on.cypress.io/record-params-without-recording\
-`;
-    case "INCORRECT_CI_BUILD_ID_USAGE":
+`
+    case 'INCORRECT_CI_BUILD_ID_USAGE':
       return `\
 You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
 ${displayFlags(arg1, {
-        ciBuildId: "--ci-build-id",
-      })}
+    ciBuildId: '--ci-build-id',
+  })}
 
 The --ci-build-id flag is used to either group or parallelize multiple runs together.
 
 https://on.cypress.io/incorrect-ci-build-id-usage\
-`;
-    case "RECORD_KEY_MISSING":
+`
+    case 'RECORD_KEY_MISSING':
       return `\
 You passed the --record flag but did not provide us your Record Key.
 
 You can pass us your Record Key like this:
 
-  ${chalk.blue("cypress run --record --key <record_key>")}
+  ${chalk.blue('cypress run --record --key <record_key>')}
 
 You can also set the key as an environment variable with the name CYPRESS_RECORD_KEY.
 
 https://on.cypress.io/how-do-i-record-runs\
-`;
-    case "CANNOT_RECORD_NO_PROJECT_ID":
+`
+    case 'CANNOT_RECORD_NO_PROJECT_ID':
       return `\
 You passed the --record flag but this project has not been setup to record.
 
@@ -379,8 +405,8 @@ You need to setup this project to record. This will generate a unique 'projectId
 Alternatively if you omit the --record flag this project will run without recording.
 
 https://on.cypress.io/recording-project-runs\
-`;
-    case "PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION":
+`
+    case 'PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION':
       return `\
 This project has been configured to record runs on our Dashboard.
 
@@ -392,35 +418,35 @@ This run will not be recorded.
 
 If you meant to have this run recorded please additionally pass this flag.
 
-  ${chalk.blue("cypress run --record")}
+  ${chalk.blue('cypress run --record')}
 
 If you don't want to record these runs, you can silence this warning:
 
-  ${chalk.yellow("cypress run --record false")}
+  ${chalk.yellow('cypress run --record false')}
 
 https://on.cypress.io/recording-project-runs\
-`;
-    case "CYPRESS_CI_DEPRECATED":
+`
+    case 'CYPRESS_CI_DEPRECATED':
       return `\
-You are using the deprecated command: ${chalk.yellow("cypress ci <key>")}
+You are using the deprecated command: ${chalk.yellow('cypress ci <key>')}
 
-Please switch and use: ${chalk.blue("cypress run --record --key <record_key>")}
+Please switch and use: ${chalk.blue('cypress run --record --key <record_key>')}
 
 https://on.cypress.io/cypress-ci-deprecated\
-`;
-    case "CYPRESS_CI_DEPRECATED_ENV_VAR":
+`
+    case 'CYPRESS_CI_DEPRECATED_ENV_VAR':
       return `\
-1. You are using the deprecated command: ${chalk.yellow("cypress ci")}
+1. You are using the deprecated command: ${chalk.yellow('cypress ci')}
 
-    Please switch and use: ${chalk.blue("cypress run --record")}
+    Please switch and use: ${chalk.blue('cypress run --record')}
 
-2. You are also using the environment variable: ${chalk.yellow("CYPRESS_CI_KEY")}
+2. You are also using the environment variable: ${chalk.yellow('CYPRESS_CI_KEY')}
 
-    Please rename this environment variable to: ${chalk.blue("CYPRESS_RECORD_KEY")}
+    Please rename this environment variable to: ${chalk.blue('CYPRESS_RECORD_KEY')}
 
 https://on.cypress.io/cypress-ci-deprecated\
-`;
-    case "DASHBOARD_INVALID_RUN_REQUEST":
+`
+    case 'DASHBOARD_INVALID_RUN_REQUEST':
       return `\
 Recording this run failed because the request was invalid.
 
@@ -433,8 +459,8 @@ ${JSON.stringify(arg1.errors, null, 2)}
 Request Sent:
 
 ${JSON.stringify(arg1.object, null, 2)}\
-`;
-    case "RECORDING_FROM_FORK_PR":
+`
+    case 'RECORDING_FROM_FORK_PR':
       return `\
 Warning: It looks like you are trying to record this run from a forked PR.
 
@@ -443,8 +469,8 @@ The 'Record Key' is missing. Your CI provider is likely not passing private envi
 These results will not be recorded.
 
 This error will not alter the exit code.\
-`;
-    case "DASHBOARD_CANNOT_UPLOAD_RESULTS":
+`
+    case 'DASHBOARD_CANNOT_UPLOAD_RESULTS':
       return `\
 Warning: We encountered an error while uploading results from your run.
 
@@ -453,8 +479,8 @@ These results will not be recorded.
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE":
+`
+    case 'DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE':
       return `\
 Warning: We encountered an error talking to our servers.
 
@@ -463,8 +489,8 @@ This run will not be recorded.
 This error will not alter the exit code.
 
 ${arg1}\
-`;
-    case "DASHBOARD_RECORD_KEY_NOT_VALID":
+`
+    case 'DASHBOARD_RECORD_KEY_NOT_VALID':
       return `\
 Your Record Key ${chalk.yellow(arg1)} is not valid with this project: ${chalk.blue(arg2)}
 
@@ -473,8 +499,8 @@ It may have been recently revoked by you or another user.
 Please log into the Dashboard to see the valid record keys.
 
 https://on.cypress.io/dashboard/projects/${arg2}\
-`;
-    case "DASHBOARD_PROJECT_NOT_FOUND":
+`
+    case 'DASHBOARD_PROJECT_NOT_FOUND':
       return `\
 We could not find a project with the ID: ${chalk.yellow(arg1)}
 
@@ -487,41 +513,43 @@ We will list the correct projectId in the 'Settings' tab.
 Alternatively, you can create a new project using the Desktop Application.
 
 https://on.cypress.io/dashboard\
-`;
-    case "NO_PROJECT_ID":
-      return `Can't find 'projectId' in the '${arg1}' file for this project: ` + chalk.blue(arg2);
-    case "NO_PROJECT_FOUND_AT_PROJECT_ROOT":
-      return "Can't find project at the path: " + chalk.blue(arg1);
-    case "CANNOT_FETCH_PROJECT_TOKEN":
-      return "Can't find project's secret key.";
-    case "CANNOT_CREATE_PROJECT_TOKEN":
-      return "Can't create project's secret key.";
-    case "PORT_IN_USE_SHORT":
-      return `Port ${arg1} is already in use.`;
-    case "PORT_IN_USE_LONG":
+`
+    case 'NO_PROJECT_ID':
+      return `Can't find 'projectId' in the '${arg1}' file for this project: ${chalk.blue(arg2)}`
+    case 'NO_PROJECT_FOUND_AT_PROJECT_ROOT':
+      return `Can't find project at the path: ${chalk.blue(arg1)}`
+    case 'CANNOT_FETCH_PROJECT_TOKEN':
+      return 'Can\'t find project\'s secret key.'
+    case 'CANNOT_CREATE_PROJECT_TOKEN':
+      return 'Can\'t create project\'s secret key.'
+    case 'PORT_IN_USE_SHORT':
+      return `Port ${arg1} is already in use.`
+    case 'PORT_IN_USE_LONG':
       return `\
 Can't run project because port is currently in use: ${chalk.blue(arg1)}
 
-${chalk.yellow("Assign a different port with the '--port <port>' argument or shut down the other running process.")}\
-`;
-    case "ERROR_READING_FILE":
-      var filePath = `\`${arg1}\``;
-      var err = `\`${arg2}\``;
+${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}\
+`
+    case 'ERROR_READING_FILE':
+      const filePath = `\`${arg1}\``
+      const err = `\`${arg2}\``
+
       return `\
 Error reading from: ${chalk.blue(filePath)}
 
 ${chalk.yellow(err)}\
-`;
-    case "ERROR_WRITING_FILE":
-      filePath = `\`${arg1}\``;
-      err = `\`${arg2}\``;
+`
+    case 'ERROR_WRITING_FILE':
+      filePath = `\`${arg1}\``
+      err = `\`${arg2}\``
+
       return `\
 Error writing to: ${chalk.blue(filePath)}
 
 ${chalk.yellow(err)}\
-`;
-    case "NO_SPECS_FOUND":
-      //# no glob provided, searched all specs
+`
+    case 'NO_SPECS_FOUND':
+      // no glob provided, searched all specs
       if (!arg2) {
         return `\
 Can't run because no spec files were found.
@@ -529,17 +557,18 @@ Can't run because no spec files were found.
 We searched for any files inside of this folder:
 
 ${chalk.blue(arg1)}\
-`;
-      } else {
-        return `\
+`
+      }
+
+      return `\
 Can't run because no spec files were found.
 
 We searched for any files matching this glob pattern:
 
 ${chalk.blue(arg2)}\
-`;
-      }
-    case "RENDERER_CRASHED":
+`
+
+    case 'RENDERER_CRASHED':
       return `\
 We detected that the Chromium Renderer process just crashed.
 
@@ -558,10 +587,10 @@ This can happen for a number of different reasons:
 You can learn more including how to fix Docker here:
 
 https://on.cypress.io/renderer-process-crashed\
-`;
-    case "AUTOMATION_SERVER_DISCONNECTED":
-      return "The automation client disconnected. Cannot continue running tests.";
-    case "SUPPORT_FILE_NOT_FOUND":
+`
+    case 'AUTOMATION_SERVER_DISCONNECTED':
+      return 'The automation client disconnected. Cannot continue running tests.'
+    case 'SUPPORT_FILE_NOT_FOUND':
       return `\
 The support file is missing or invalid.
 
@@ -572,8 +601,8 @@ Correct your \`${arg2}\`, create the appropriate file, or set \`supportFile\` to
 Or you might have renamed the extension of your \`supportFile\` to \`.ts\`. If that's the case, restart the test runner.
 
 Learn more at https://on.cypress.io/support-file-missing-or-invalid\
-`;
-    case "PLUGINS_FILE_ERROR":
+`
+    case 'PLUGINS_FILE_ERROR':
       msg = `\
 The plugins file is missing or invalid.
 
@@ -582,14 +611,14 @@ Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it c
 Or you might have renamed the extension of your \`pluginsFile\` to \`.ts\`. If that's the case, restart the test runner.
 
 Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.\
-`.trim();
+`.trim()
 
       if (arg2) {
-        return {msg, details: arg2};
+        return { msg, details: arg2 }
       }
 
-      return msg;
-    case "PLUGINS_DIDNT_EXPORT_FUNCTION":
+      return msg
+    case 'PLUGINS_DIDNT_EXPORT_FUNCTION':
       msg = `\
 The \`pluginsFile\` must export a function with the following signature:
 
@@ -604,30 +633,32 @@ Learn more: https://on.cypress.io/plugins-api
 We loaded the \`pluginsFile\` from: \`${arg1}\`
 
 It exported:\
-`;
+`
 
-      return {msg, details: JSON.stringify(arg2)};
-    case "PLUGINS_FUNCTION_ERROR":
+      return { msg, details: JSON.stringify(arg2) }
+    case 'PLUGINS_FUNCTION_ERROR':
       msg = `\
 The function exported by the plugins file threw an error.
 
 We invoked the function exported by \`${arg1}\`, but it threw an error.\
-`.trim();
+`.trim()
 
-      return {msg, details: arg2};
-    case "PLUGINS_UNEXPECTED_ERROR":
+      return { msg, details: arg2 }
+    case 'PLUGINS_UNEXPECTED_ERROR':
       msg = `\
 The following error was thrown by a plugin. We stopped running your tests because a plugin crashed. Please check your plugins file (\`${arg1}\`)\
-`.trim();
-      return {msg, details: arg2};
-    case "PLUGINS_VALIDATION_ERROR":
+`.trim()
+
+      return { msg, details: arg2 }
+    case 'PLUGINS_VALIDATION_ERROR':
       msg = `\
 The following validation error was thrown by your plugins file (\`${arg1}\`).\
-`.trim();
-      return {msg, details: arg2};
-    case "BUNDLE_ERROR":
-      //# IF YOU MODIFY THIS MAKE SURE TO UPDATE
-      //# THE ERROR MESSAGE IN THE RUNNER TOO
+`.trim()
+
+      return { msg, details: arg2 }
+    case 'BUNDLE_ERROR':
+      // IF YOU MODIFY THIS MAKE SURE TO UPDATE
+      // THE ERROR MESSAGE IN THE RUNNER TOO
       return `\
 Oops...we found an error preparing this test file:
 
@@ -643,32 +674,34 @@ This occurred while Cypress was compiling and bundling your test code. This is u
 - A syntax error in the file or one of its dependencies
 
 Fix the error in your code and re-run your tests.\
-`;
+`
     // happens when there is an error in configuration file like "cypress.json"
-    case "SETTINGS_VALIDATION_ERROR":
-      filePath = `\`${arg1}\``;
+    case 'SETTINGS_VALIDATION_ERROR':
+      filePath = `\`${arg1}\``
+
       return `\
 We found an invalid value in the file: ${chalk.blue(filePath)}
 
 ${chalk.yellow(arg2)}\
-`;
+`
     // happens when there is an invalid config value returnes from the
     // project's plugins file like "cypress/plugins.index.js"
-    case "PLUGINS_CONFIG_VALIDATION_ERROR":
-      filePath = `\`${arg1}\``;
+    case 'PLUGINS_CONFIG_VALIDATION_ERROR':
+      filePath = `\`${arg1}\``
+
       return `\
 An invalid configuration value returned from the plugins file: ${chalk.blue(filePath)}
 
 ${chalk.yellow(arg2)}\
-`;
+`
     // general configuration error not-specific to configuration or plugins files
-    case "CONFIG_VALIDATION_ERROR":
+    case 'CONFIG_VALIDATION_ERROR':
       return `\
 We found an invalid configuration value:
 
 ${chalk.yellow(arg1)}\
-`;
-    case "SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED":
+`
+    case 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED':
       return `\
 In Cypress v3.0.0 we removed the configuration option ${chalk.yellow('\`screenshotOnHeadlessFailure\`')}
 
@@ -684,28 +717,28 @@ Cypress.Screenshot.defaults({
 \`\`\`
 
 Learn more at https://on.cypress.io/screenshot-api\
-`;
-    case "RENAMED_CONFIG_OPTION":
+`
+    case 'RENAMED_CONFIG_OPTION':
       return `\
 A configuration option you have supplied has been renamed.
 
 Please rename ${chalk.yellow(arg1)} to ${chalk.blue(arg2)}\
-`;
-    case "CANNOT_CONNECT_BASE_URL":
+`
+    case 'CANNOT_CONNECT_BASE_URL':
       return `\
 Cypress failed to verify that your server is running.
 
 Please start this server and then run Cypress again.\
-`;
-    case "CANNOT_CONNECT_BASE_URL_WARNING":
+`
+    case 'CANNOT_CONNECT_BASE_URL_WARNING':
       return `\
 Cypress could not verify that this server is running:
 
   > ${chalk.blue(arg1)}
 
 This server has been configured as your \`baseUrl\`, and tests will likely fail if it is not running.\
-`;
-    case "CANNOT_CONNECT_BASE_URL_RETRYING":
+`
+    case 'CANNOT_CONNECT_BASE_URL_RETRYING':
       switch (arg1.attempt) {
         case 1:
           return `\
@@ -718,13 +751,13 @@ We are verifying this server because it has been configured as your \`baseUrl\`.
 Cypress automatically waits until your server is accessible before running tests.
 
 ${displayRetriesRemaining(arg1.remaining)}\
-`;
+`
         default:
           return `\
 ${displayRetriesRemaining(arg1.remaining)}\
-`;
+`
       }
-    case "INVALID_REPORTER_NAME":
+    case 'INVALID_REPORTER_NAME':
       return `\
 Could not load reporter by name: ${chalk.yellow(arg1.name)}
 
@@ -737,14 +770,14 @@ The error we received was:
 ${chalk.yellow(arg1.error)}
 
 Learn more at https://on.cypress.io/reporters\
-`;
-    case "CONFIG_FILE_NOT_FOUND":
+`
+    case 'CONFIG_FILE_NOT_FOUND':
       return `\
 Could not find a Cypress configuration file, exiting.
 
 We looked but did not find a ${chalk.blue(arg1)} file in this folder: ${chalk.blue(arg2)}\
-`;
-    case "INVOKED_BINARY_OUTSIDE_NPM_MODULE":
+`
+    case 'INVOKED_BINARY_OUTSIDE_NPM_MODULE':
       return `\
 It looks like you are running the Cypress binary directly.
 
@@ -753,92 +786,92 @@ This is not the recommended approach, and Cypress may not work correctly.
 Please install the 'cypress' NPM package and follow the instructions here:
 
 https://on.cypress.io/installing-cypress\
-`;
-    case "DUPLICATE_TASK_KEY":
+`
+    case 'DUPLICATE_TASK_KEY':
       return `\
 Warning: Multiple attempts to register the following task(s): ${chalk.blue(arg1)}. Only the last attempt will be registered.\
-`;
-    case "FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS":
+`
+    case 'FREE_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return `\
 You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
 To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
 ${arg1.link}\
-`;
-    case "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS":
+`
+    case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return `\
 You've exceeded the limit of private test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
 Your plan is now in a grace period, which means your tests will still be recorded until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
 ${arg1.link}\
-`;
-    case "PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS":
+`
+    case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
       return `\
 You've exceeded the limit of private test recordings under your current billing plan this month. ${arg1.usedTestsMessage}
 
 To upgrade your account, please visit your billing to upgrade to another billing plan.
 
 ${arg1.link}\
-`;
-    case "FREE_PLAN_EXCEEDS_MONTHLY_TESTS":
+`
+    case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS':
       return `\
 You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
 To continue recording tests this month you must upgrade your account. Please visit your billing to upgrade to another billing plan.
 
 ${arg1.link}\
-`;
-    case "FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS":
+`
+    case 'FREE_PLAN_IN_GRACE_PERIOD_EXCEEDS_MONTHLY_TESTS':
       return `\
 You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
 Your plan is now in a grace period, which means your tests will still be recorded until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue recording tests on the Cypress Dashboard in the future.
 
 ${arg1.link}\
-`;
-    case "PAID_PLAN_EXCEEDS_MONTHLY_TESTS":
+`
+    case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
       return `\
 You've exceeded the limit of test recordings under your current billing plan this month. ${arg1.usedTestsMessage}
 
 To upgrade your account, please visit your billing to upgrade to another billing plan.
 
 ${arg1.link}\
-`;
-    case "FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE":
+`
+    case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
       return `\
 Parallelization is not included under your free plan.
 
 Your plan is now in a grace period, which means your tests will still run in parallel until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests in parallel in the future.
 
 ${arg1.link}\
-`;
-    case "PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN":
+`
+    case 'PARALLEL_FEATURE_NOT_AVAILABLE_IN_PLAN':
       return `\
 Parallelization is not included under your current billing plan.
 
 To run your tests in parallel, please visit your billing and upgrade to another plan with parallelization.
 
 ${arg1.link}\
-`;
-    case "PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED":
+`
+    case 'PLAN_IN_GRACE_PERIOD_RUN_GROUPING_FEATURE_USED':
       return `\
 Grouping is not included under your free plan.
 
 Your plan is now in a grace period, which means your tests will still run with groups until ${arg1.gracePeriodMessage}. Please upgrade your plan to continue running your tests with groups in the future.
 
 ${arg1.link}\
-`;
-    case "RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN":
+`
+    case 'RUN_GROUPING_FEATURE_NOT_AVAILABLE_IN_PLAN':
       return `\
 Grouping is not included under your current billing plan.
 
 To run your tests with groups, please visit your billing and upgrade to another plan with grouping.
 
 ${arg1.link}\
-`;
-    case "FIXTURE_NOT_FOUND":
+`
+    case 'FIXTURE_NOT_FOUND':
       return `\
 A fixture file could not be found at any of the following paths:
 
@@ -850,20 +883,20 @@ Cypress looked for these file extensions at the provided path:
  > ${arg2.join(', ')}
 
 Provide a path to an existing fixture file.\
-`;
-    case "AUTH_COULD_NOT_LAUNCH_BROWSER":
+`
+    case 'AUTH_COULD_NOT_LAUNCH_BROWSER':
       return `\
 Cypress was unable to open your installed browser. To continue logging in, please open this URL in your web browser:
 
 \`\`\`
 ${arg1}
 \`\`\`\
-`;
-    case "AUTH_BROWSER_LAUNCHED":
+`
+    case 'AUTH_BROWSER_LAUNCHED':
       return `\
 Check your browser to continue logging in.\
-`;
-    case "BAD_POLICY_WARNING":
+`
+    case 'BAD_POLICY_WARNING':
       return `\
 Cypress detected policy settings on your computer that may cause issues.
 
@@ -872,28 +905,28 @@ The following policies were detected that may prevent Cypress from automating Ch
  > ${arg1.join('\n > ')}
 
 For more information, see https://on.cypress.io/bad-browser-policy\
-`;
-    case "BAD_POLICY_WARNING_TOOLTIP":
+`
+    case 'BAD_POLICY_WARNING_TOOLTIP':
       return `\
 Cypress detected policy settings on your computer that may cause issues with using this browser. For more information, see https://on.cypress.io/bad-browser-policy\
-`;
-    case "EXTENSION_NOT_LOADED":
+`
+    case 'EXTENSION_NOT_LOADED':
       return `\
 ${arg1} could not install the extension at path:
 
  > ${arg2}
 
 Please verify that this is the path to a valid, unpacked WebExtension.\
-`;
-    case "COULD_NOT_FIND_SYSTEM_NODE":
+`
+    case 'COULD_NOT_FIND_SYSTEM_NODE':
       return `\
 \`nodeVersion\` is set to \`system\`, but Cypress could not find a usable Node executable on your PATH.
 
 Make sure that your Node executable exists and can be run by the current user.
 
 Cypress will use the built-in Node version (v${arg1}) instead.\
-`;
-    case "INVALID_CYPRESS_INTERNAL_ENV":
+`
+    case 'INVALID_CYPRESS_INTERNAL_ENV':
       return `\
 We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 
@@ -902,12 +935,12 @@ We have detected an unknown or unsupported "CYPRESS_INTERNAL_ENV" value
 "CYPRESS_INTERNAL_ENV" is reserved and should only be used internally.
 
 Do not modify the "CYPRESS_INTERNAL_ENV" value.\
-`;
-    case "CDP_VERSION_TOO_OLD":
+`
+    case 'CDP_VERSION_TOO_OLD':
       return `\
 A minimum CDP version of v${arg1} is required, but the current browser has ${arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version'}.\
-`;
-    case "CDP_COULD_NOT_CONNECT":
+`
+    case 'CDP_COULD_NOT_CONNECT':
       return `\
 Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
@@ -918,8 +951,8 @@ The CDP port requested was ${chalk.yellow(arg1)}.
 Error details:
 
 ${arg2.stack}\
-`;
-    case "FIREFOX_COULD_NOT_CONNECT":
+`
+    case 'FIREFOX_COULD_NOT_CONNECT':
       return `\
 Cypress failed to make a connection to Firefox.
 
@@ -928,18 +961,18 @@ This usually indicates there was a problem opening the Firefox browser.
 Error details:
 
 ${arg1.stack}\
-`;
-    case "CDP_COULD_NOT_RECONNECT":
+`
+    case 'CDP_COULD_NOT_RECONNECT':
       return `\
 There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
 ${arg1.stack}\
-`;
-    case "CDP_RETRYING_CONNECTION":
+`
+    case 'CDP_RETRYING_CONNECTION':
       return `\
 Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)\
-`;
-    case "DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS":
+`
+    case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
       return `\
 Deprecation Warning: The \`before:browser:launch\` plugin event changed its signature in version \`4.0.0\`
 
@@ -948,8 +981,8 @@ The \`before:browser:launch\` plugin event switched from yielding the second arg
 We've detected that your code is still using the previous, deprecated interface signature.
 
 This code will not work in a future version of Cypress. Please see the upgrade guide: ${chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}\
-`;
-    case "UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES":
+`
+    case 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES':
       return `\
 The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
 
@@ -960,16 +993,16 @@ ${listItems(arg1)}
 ${listItems(arg2)}
 
 https://on.cypress.io/browser-launch-api\
-`;
-    case "COULD_NOT_PARSE_ARGUMENTS":
+`
+    case 'COULD_NOT_PARSE_ARGUMENTS':
       return `\
 Cypress encountered an error while parsing the argument ${chalk.gray(arg1)}
 
 You passed: ${arg2}
 
 The error was: ${arg3}\
-`;
-    case "FIREFOX_MARIONETTE_FAILURE":
+`
+    case 'FIREFOX_MARIONETTE_FAILURE':
       return `\
 Cypress could not connect to Firefox.
 
@@ -978,8 +1011,8 @@ An unexpected error was received from Marionette ${arg1}:
 ${arg2}
 
 To avoid this error, ensure that there are no other instances of Firefox launched by Cypress running.\
-`;
-    case "FOLDER_NOT_WRITABLE":
+`
+    case 'FOLDER_NOT_WRITABLE':
       return `\
 Folder ${arg1} is not writable.
 
@@ -988,94 +1021,100 @@ Writing to this directory is required by Cypress in order to store screenshots a
 Enable write permissions to this directory to ensure screenshots and videos are stored.
 
 If you don't require screenshots or videos to be stored you can safely ignore this warning.\
-`;
+`
   }
-};
+}
 
-const get = function(type, arg1, arg2, arg3) {
-  let details;
-  let msg = getMsgByType(type, arg1, arg2, arg3);
+const get = function (type, arg1, arg2, arg3) {
+  let details
+  let msg = getMsgByType(type, arg1, arg2, arg3)
 
   if (_.isObject(msg)) {
     ({
-      details
+      details,
     } = msg);
+
     ({
-      msg
-    } = msg);
+      msg,
+    } = msg)
   }
 
-  msg = trimMultipleNewLines(msg);
+  msg = trimMultipleNewLines(msg)
 
-  const err = new Error(msg);
-  err.isCypressErr = true;
-  err.type = type;
-  err.details = details;
+  const err = new Error(msg)
 
-  return err;
-};
+  err.isCypressErr = true
+  err.type = type
+  err.details = details
 
-const warning = function(type, arg1, arg2) {
-  const err = get(type, arg1, arg2);
-  log(err, "magenta");
+  return err
+}
 
-  return null;
-};
+const warning = function (type, arg1, arg2) {
+  const err = get(type, arg1, arg2)
 
-const throwErr = function(type, arg1, arg2, arg3) {
-  throw get(type, arg1, arg2, arg3);
-};
+  log(err, 'magenta')
 
-const clone = function(err, options = {}) {
+  return null
+}
+
+const throwErr = function (type, arg1, arg2, arg3) {
+  throw get(type, arg1, arg2, arg3)
+}
+
+const clone = function (err, options = {}) {
   _.defaults(options, {
-    html: false
-  });
+    html: false,
+  })
 
-  //# pull off these properties
-  const obj = _.pick(err, "type", "name", "stack", "fileName", "lineNumber", "columnNumber");
+  // pull off these properties
+  const obj = _.pick(err, 'type', 'name', 'stack', 'fileName', 'lineNumber', 'columnNumber')
 
   if (options.html) {
-    obj.message = ansi_up.ansi_to_html(err.message);
+    obj.message = ansi_up.ansi_to_html(err.message)
   } else {
-    obj.message = err.message;
+    obj.message = err.message
   }
 
-  //# and any own (custom) properties
-  //# of the err object
+  // and any own (custom) properties
+  // of the err object
   for (let prop of Object.keys(err || {})) {
-    const val = err[prop];
-    obj[prop] = val;
+    const val = err[prop]
+
+    obj[prop] = val
   }
 
-  return obj;
-};
+  return obj
+}
 
-var log = function(err, color = "red") {
-  console.log(chalk[color](err.message));
+const log = function (err, color = 'red') {
+  console.log(chalk[color](err.message))
 
   if (err.details) {
-    console.log("\n", chalk["yellow"](err.details));
+    console.log('\n', chalk['yellow'](err.details))
   }
 
-  //# bail if this error came from known
-  //# list of Cypress errors
-  if (isCypressErr(err)) { return; }
+  // bail if this error came from known
+  // list of Cypress errors
+  if (isCypressErr(err)) {
+    return
+  }
 
-  console.log(chalk[color](err.stack));
+  console.log(chalk[color](err.stack))
 
-  return err;
-};
+  return err
+}
 
-const logException = Promise.method(function(err) {
-  //# TODO: remove context here
+const logException = Promise.method(function (err) {
+  // TODO: remove context here
   if (this.log(err) && isProduction()) {
-    //# log this exception since
-    //# its not a known error
-    return require("./logger")
+    // log this exception since
+    // its not a known error
+    return require('./logger')
     .createException(err)
-    .catch(function() {});
+    .catch(() => {})
   }
-});
+})
 
 module.exports = {
   get,
@@ -1098,5 +1137,5 @@ module.exports = {
 
   stripAnsi: strip,
 
-  displayFlags
-};
+  displayFlags,
+}

@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 // lightweight logging for Node
 // only shows log messages if running with
 //   DEBUG=cypress:start ...
@@ -10,4 +12,4 @@
 // you can construct it yourself, just make sure
 // to prefix label with "cypress:server:", for example
 //   log = require('debug')('cypress:server:bundle')
-module.exports = require('debug')('cypress:server');
+module.exports = require('debug')('cypress:server')
