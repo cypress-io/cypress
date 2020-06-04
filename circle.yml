@@ -204,10 +204,15 @@ commands:
         description: Url to wait-on before starting tests
         type: string
         default: ""
+      # if the repo to clone and test is a monorepo, you can
+      # run tests inside a specific subfolder
       folder:
         description: Subfolder to test in
         type: string
         default: ""
+      # you can test new features in the test runner against recipes or other repos
+      # by opening a pull request in those repos and running this test job
+      # against a pull request number in the example repo
       pull_request_id:
         description: Pull request number to check out before installing and testing
         type: integer
@@ -1261,12 +1266,14 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-kitchensink
+          browser: "electron"
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
     steps:
       - test-binary-against-repo:
           repo: cypress-test-awesome-typescript-loader
+          browser: "electron"
 
   "test-binary-against-kitchensink-firefox":
     <<: *defaults
