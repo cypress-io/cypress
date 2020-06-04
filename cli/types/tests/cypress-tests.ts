@@ -32,7 +32,7 @@ namespace CypressJqueryTests {
 }
 
 namespace CypressAutomationTests {
-  Cypress.automation('hello') // $ExpectType Promise<void>
+  Cypress.automation('hello') // $ExpectType Promise<any>
 }
 
 namespace CypressConfigTests {

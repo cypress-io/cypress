@@ -231,7 +231,7 @@ declare namespace Cypress {
     /**
      * Fire automation:request event for internal use.
      */
-    automation(eventName: string, ...args: any[]): Promise<void>
+    automation(eventName: string, ...args: any[]): Promise<any>
 
     /**
      * Promise wrapper for certain internal tasks.
