@@ -71,7 +71,7 @@ describe "Server", ->
             httpsServer.start(8443),
 
             ## and open our cypress server
-            @server = Server()
+            @server = new Server()
 
             @server.open(cfg)
             .spread (port) =>

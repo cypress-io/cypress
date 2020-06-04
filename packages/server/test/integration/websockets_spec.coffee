@@ -30,7 +30,7 @@ describe "Web Sockets", ->
     .then (@cfg) =>
       @ws = new ws.Server({port: wsPort})
 
-      @server = Server()
+      @server = new Server()
 
       @server.open(@cfg)
       .then =>

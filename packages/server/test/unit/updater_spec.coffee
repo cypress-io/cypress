@@ -10,13 +10,13 @@ _           = require("lodash")
 describe "lib/updater", ->
   context "interface", ->
     it "returns an updater instance", ->
-      u = Updater({})
+      u = new Updater({})
       expect(u).to.be.instanceof Updater
 
   context "#getPackage", ->
     beforeEach ->
       pkg.foo = "bar"
-      @updater = Updater({})
+      @updater = new Updater({})
     afterEach ->
       delete pkg.foo
 
@@ -29,12 +29,12 @@ describe "lib/updater", ->
 
   context "#getClient", ->
     it "sets .client to new Updater", ->
-      u = Updater({})
+      u = new Updater({})
       u.getClient()
       expect(u.client).to.have.property("checkNewVersion")
 
     it "returns .client if exists", ->
-      u = Updater({})
+      u = new Updater({})
       client  = u.getClient()
       client2 = u.getClient()
       expect(client).to.eq(client2)
@@ -43,7 +43,7 @@ describe "lib/updater", ->
     beforeEach ->
       @get = sinon.spy(request, "get")
 
-      @updater = Updater({})
+      @updater = new Updater({})
 
     it "sends x-cypress-version", (done) ->
       @updater.getClient().checkNewVersion =>
@@ -78,12 +78,12 @@ describe "lib/updater", ->
         })
 
         done()
-      
+
       return
 
   context "#check", ->
     beforeEach ->
-      @updater = Updater({quit: sinon.spy()})
+      @updater = new Updater({quit: sinon.spy()})
       @updater.getClient()
       sinon.stub(@updater.client, "checkNewVersion")
 
