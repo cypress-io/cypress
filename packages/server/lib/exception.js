@@ -1,55 +1,65 @@
-_        = require("lodash")
-Promise  = require("bluebird")
-pkg      = require("@packages/root")
-path     = require("path")
-api      = require("./api")
-user     = require("./user")
-system   = require("./util/system")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _        = require("lodash");
+const Promise  = require("bluebird");
+const pkg      = require("@packages/root");
+const path     = require("path");
+const api      = require("./api");
+const user     = require("./user");
+const system   = require("./util/system");
 
-## strip everything but the file name to remove any sensitive
-## data in the path
-pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
-pathSepRe = /[\/\\]+/
-fileNameRe = /[^\s'/]+\.\w+:?\d*$/i
-stripPath = (text) ->
-  (text or "").replace pathRe, (path) ->
-    fileName = _.last(path.split(pathSepRe)) or ""
-    "<stripped-path>#{fileName}"
+//# strip everything but the file name to remove any sensitive
+//# data in the path
+const pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig;
+const pathSepRe = /[\/\\]+/;
+const fileNameRe = /[^\s'/]+\.\w+:?\d*$/i;
+const stripPath = text => (text || "").replace(pathRe, function(path) {
+  const fileName = _.last(path.split(pathSepRe)) || "";
+  return `<stripped-path>${fileName}`;
+});
 
-## POST https://api.cypress.io/exceptions
-## sets request body
-## err: {}
-## version: {}
+//# POST https://api.cypress.io/exceptions
+//# sets request body
+//# err: {}
+//# version: {}
 
 module.exports = {
-  getErr: (err) ->
-    {
-      name: stripPath(err.name)
-      message: stripPath(err.message)
+  getErr(err) {
+    return {
+      name: stripPath(err.name),
+      message: stripPath(err.message),
       stack: stripPath(err.stack)
+    };
+  },
+
+  getVersion() {
+    return pkg.version;
+  },
+
+  getBody(err) {
+    return system.info()
+    .then(systemInfo => {
+      return _.extend({
+        err: this.getErr(err),
+        version: this.getVersion()
+      }, systemInfo);
+    });
+  },
+
+  getAuthToken() {
+    return user.get().then(user => user && user.authToken);
+  },
+
+  create(err) {
+    if ((process.env["CYPRESS_INTERNAL_ENV"] !== "production") ||
+       (process.env["CYPRESS_CRASH_REPORTS"] === "0")) {
+      return Promise.resolve();
     }
 
-  getVersion: ->
-    pkg.version
-
-  getBody: (err) ->
-    system.info()
-    .then (systemInfo) =>
-      _.extend({
-        err: @getErr(err)
-        version: @getVersion()
-      }, systemInfo)
-
-  getAuthToken: ->
-    user.get().then (user) ->
-      user and user.authToken
-
-  create: (err) ->
-    if process.env["CYPRESS_INTERNAL_ENV"] isnt "production" or
-       process.env["CYPRESS_CRASH_REPORTS"] is "0"
-      return Promise.resolve()
-
-    Promise.join(@getBody(err), @getAuthToken())
-    .spread (body, authToken) ->
-      api.createCrashReport(body, authToken)
-}
+    return Promise.join(this.getBody(err), this.getAuthToken())
+    .spread((body, authToken) => api.createCrashReport(body, authToken));
+  }
+};

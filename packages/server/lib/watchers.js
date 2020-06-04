@@ -1,62 +1,89 @@
-_ = require("lodash")
-chokidar = require("chokidar")
-dependencyTree = require("dependency-tree")
-pathHelpers = require("./util/path_helpers")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS205: Consider reworking code to avoid use of IIFEs
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const chokidar = require("chokidar");
+const dependencyTree = require("dependency-tree");
+const pathHelpers = require("./util/path_helpers");
 
-class Watchers
-  constructor: ->
-    if not (@ instanceof Watchers)
-      return new Watchers
+class Watchers {
+  constructor() {
+    if (!(this instanceof Watchers)) {
+      return new Watchers;
+    }
 
-    @watchers = {}
+    this.watchers = {};
+  }
 
-  close: ->
-    for filePath of @watchers
-      @_remove(filePath)
+  close() {
+    return (() => {
+      const result = [];
+      for (let filePath in this.watchers) {
+        result.push(this._remove(filePath));
+      }
+      return result;
+    })();
+  }
 
-  watch: (filePath, options = {}) ->
-    _.defaults options,
-      useFsEvents: true
-      ignored:    null
-      onChange:   null
-      onReady:    null
+  watch(filePath, options = {}) {
+    _.defaults(options, {
+      useFsEvents: true,
+      ignored:    null,
+      onChange:   null,
+      onReady:    null,
       onError:    null
+    }
+    );
 
-    w = chokidar.watch(filePath, options)
+    const w = chokidar.watch(filePath, options);
 
-    @_add(filePath, w)
+    this._add(filePath, w);
 
-    if _.isFunction(options.onChange)
-      w.on "change", options.onChange
+    if (_.isFunction(options.onChange)) {
+      w.on("change", options.onChange);
+    }
 
-    if _.isFunction(options.onReady)
-      w.on "ready", options.onReady
+    if (_.isFunction(options.onReady)) {
+      w.on("ready", options.onReady);
+    }
 
-    if _.isFunction(options.onError)
-      w.on "error", options.onError
+    if (_.isFunction(options.onError)) {
+      w.on("error", options.onError);
+    }
 
-    return @
+    return this;
+  }
 
-  watchTree: (filePath, options = {}) ->
-    files = dependencyTree.toList({
-      filename: filePath
-      directory: process.cwd()
-      filter: (filePath) ->
-        filePath.indexOf("node_modules") is -1
-    })
+  watchTree(filePath, options = {}) {
+    const files = dependencyTree.toList({
+      filename: filePath,
+      directory: process.cwd(),
+      filter(filePath) {
+        return filePath.indexOf("node_modules") === -1;
+      }
+    });
 
-    _.each files, (file) =>
-      @watch(file, options)
+    return _.each(files, file => {
+      return this.watch(file, options);
+    });
+  }
 
-  _add: (filePath, watcher) ->
-    @_remove(filePath)
+  _add(filePath, watcher) {
+    this._remove(filePath);
 
-    @watchers[filePath] = watcher
+    return this.watchers[filePath] = watcher;
+  }
 
-  _remove: (filePath) ->
-    return if not watcher = @watchers[filePath]
+  _remove(filePath) {
+    let watcher;
+    if (!(watcher = this.watchers[filePath])) { return; }
 
-    watcher.close()
-    delete @watchers[filePath]
+    watcher.close();
+    return delete this.watchers[filePath];
+  }
+}
 
-module.exports = Watchers
+module.exports = Watchers;

@@ -1,64 +1,73 @@
-_      = require("lodash")
-cache  = require("../cache")
-send   = require("send")
-os     = require("os")
-fs     = require("../util/fs")
-path   = require("path")
-debug  = require("debug")("cypress:server:runner")
-pkg    = require("@packages/root")
-runner = require("@packages/runner/lib/resolve-dist")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _      = require("lodash");
+const cache  = require("../cache");
+const send   = require("send");
+const os     = require("os");
+const fs     = require("../util/fs");
+const path   = require("path");
+const debug  = require("debug")("cypress:server:runner");
+const pkg    = require("@packages/root");
+const runner = require("@packages/runner/lib/resolve-dist");
 
-PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, "..", "html", "non_proxied_error.html")
+const PATH_TO_NON_PROXIED_ERROR = path.join(__dirname, "..", "html", "non_proxied_error.html");
 
-_serveNonProxiedError = (res) ->
-  fs.readFile(PATH_TO_NON_PROXIED_ERROR)
-  .then (html) =>
-    res.type('html').end(html)
+const _serveNonProxiedError = res => fs.readFile(PATH_TO_NON_PROXIED_ERROR)
+.then(html => {
+  return res.type('html').end(html);
+});
 
 module.exports = {
-  serve: (req, res, options = {}) ->
-    if req.proxiedUrl.startsWith('/')
-      debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'))
-      return _serveNonProxiedError(res)
+  serve(req, res, options = {}) {
+    if (req.proxiedUrl.startsWith('/')) {
+      debug('request was not proxied via Cypress, erroring %o', _.pick(req, 'proxiedUrl'));
+      return _serveNonProxiedError(res);
+    }
 
-    { config, getRemoteState, project } = options
+    let { config, getRemoteState, project } = options;
 
-    { spec, browser } = project.getCurrentSpecAndBrowser()
+    const { spec, browser } = project.getCurrentSpecAndBrowser();
 
-    config = _.clone(config)
-    config.remote = getRemoteState()
-    config.version = pkg.version
-    config.platform = os.platform()
-    config.arch = os.arch()
-    config.spec = spec
-    config.browser = browser
+    config = _.clone(config);
+    config.remote = getRemoteState();
+    config.version = pkg.version;
+    config.platform = os.platform();
+    config.arch = os.arch();
+    config.spec = spec;
+    config.browser = browser;
 
     debug("serving runner index.html with config %o",
       _.pick(config, "version", "platform", "arch", "projectName")
-    )
-    # log the env object's keys without values to avoid leaking sensitive info
-    debug("env object has the following keys: %s", _.keys(config.env).join(", "))
+    );
+    // log the env object's keys without values to avoid leaking sensitive info
+    debug("env object has the following keys: %s", _.keys(config.env).join(", "));
 
-    ## base64 before embedding so user-supplied contents can't break out of <script>
-    ## https://github.com/cypress-io/cypress/issues/4952
-    base64Config = Buffer.from(JSON.stringify(config)).toString('base64')
+    //# base64 before embedding so user-supplied contents can't break out of <script>
+    //# https://github.com/cypress-io/cypress/issues/4952
+    const base64Config = Buffer.from(JSON.stringify(config)).toString('base64');
 
-    runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH or runner.getPathToIndex()
+    const runnerPath = process.env.CYPRESS_INTERNAL_RUNNER_PATH || runner.getPathToIndex();
 
-    res.render(runnerPath, {
-      base64Config
+    return res.render(runnerPath, {
+      base64Config,
       projectName: config.projectName
-    })
+    });
+  },
 
-  handle: (req, res) ->
-    pathToFile = runner.getPathToDist(req.params[0])
+  handle(req, res) {
+    const pathToFile = runner.getPathToDist(req.params[0]);
 
-    send(req, pathToFile)
-    .pipe(res)
+    return send(req, pathToFile)
+    .pipe(res);
+  },
 
-  handleSourceMappings: (req, res) ->
-    pathToFile = runner.getPathToSourceMappings()
+  handleSourceMappings(req, res) {
+    const pathToFile = runner.getPathToSourceMappings();
 
-    send(req, pathToFile)
-    .pipe(res)
-}
+    return send(req, pathToFile)
+    .pipe(res);
+  }
+};

@@ -1,53 +1,63 @@
-Promise  = require("bluebird")
-execa    = require("execa")
-R        = require("ramda")
-shellEnv = require("shell-env")
-log      = require("./log")
-utils    = require("./util/shell")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const Promise  = require("bluebird");
+const execa    = require("execa");
+const R        = require("ramda");
+const shellEnv = require("shell-env");
+const log      = require("./log");
+const utils    = require("./util/shell");
 
-pickMainProps = R.pick(["stdout", "stderr", "code"])
+const pickMainProps = R.pick(["stdout", "stderr", "code"]);
 
-trimStdio = R.evolve({
+const trimStdio = R.evolve({
   stdout: R.trim,
   stderr: R.trim
-})
+});
 
-loadShellVars = R.memoize(shellEnv)
+const loadShellVars = R.memoize(shellEnv);
 
 module.exports = {
-  run: (projectRoot, options) ->
-    cmd = options.cmd
+  run(projectRoot, options) {
+    let {
+      cmd
+    } = options;
 
-    shellCommand = (cmd, cwd, env, shell) ->
-      log("cy.exec found shell", shell)
-      log("and is running command:", options.cmd)
-      log("in folder:", projectRoot)
+    const shellCommand = function(cmd, cwd, env, shell) {
+      log("cy.exec found shell", shell);
+      log("and is running command:", options.cmd);
+      log("in folder:", projectRoot);
 
-      execa.shell(cmd, {cwd, env, shell})
-        # do we want to return all fields returned by execa?
-        .then (result) ->
-          result.shell = shell
-          result.cmd = cmd
-          result
-        .then pickMainProps
-        .catch pickMainProps # transform rejection into an object
-        .then trimStdio
+      return execa.shell(cmd, {cwd, env, shell})
+        // do we want to return all fields returned by execa?
+        .then(function(result) {
+          result.shell = shell;
+          result.cmd = cmd;
+          return result;}).then(pickMainProps)
+        .catch(pickMainProps) // transform rejection into an object
+        .then(trimStdio);
+    };
 
-    run = ->
-      loadShellVars()
-      .then (shellVariables) ->
-        env = R.mergeAll([{}, shellVariables, process.env, options.env])
-        utils.getShell(env.SHELL)
-        .then (shell) ->
-          cmd = utils.sourceShellCommand(options.cmd, shell)
-          shellCommand(cmd, projectRoot, env, shell)
+    const run = () => loadShellVars()
+    .then(function(shellVariables) {
+      const env = R.mergeAll([{}, shellVariables, process.env, options.env]);
+      return utils.getShell(env.SHELL)
+      .then(function(shell) {
+        cmd = utils.sourceShellCommand(options.cmd, shell);
+        return shellCommand(cmd, projectRoot, env, shell);
+      });
+    });
 
-    Promise
+    return Promise
     .try(run)
     .timeout(options.timeout)
-    .catch Promise.TimeoutError, ->
-      msg = "Process timed out\ncommand: #{options.cmd}"
-      err = new Error(msg)
-      err.timedOut = true
-      throw err
-}
+    .catch(Promise.TimeoutError, function() {
+      const msg = `Process timed out\ncommand: ${options.cmd}`;
+      const err = new Error(msg);
+      err.timedOut = true;
+      throw err;
+    });
+  }
+};

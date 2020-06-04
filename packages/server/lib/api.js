@@ -1,182 +1,204 @@
-_          = require("lodash")
-os         = require("os")
-debug      = require("debug")("cypress:server:api")
-request    = require("@cypress/request-promise")
-errors     = require("@cypress/request-promise/errors")
-Promise    = require("bluebird")
-humanInterval = require("human-interval")
-agent      = require("@packages/network").agent
-pkg        = require("@packages/root")
-machineId  = require("./util/machine_id")
-routes     = require("./util/routes")
-system     = require("./util/system")
-cache      = require("./cache")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let intervals;
+const _          = require("lodash");
+const os         = require("os");
+const debug      = require("debug")("cypress:server:api");
+const request    = require("@cypress/request-promise");
+const errors     = require("@cypress/request-promise/errors");
+const Promise    = require("bluebird");
+const humanInterval = require("human-interval");
+const {
+  agent
+} = require("@packages/network");
+const pkg        = require("@packages/root");
+const machineId  = require("./util/machine_id");
+const routes     = require("./util/routes");
+const system     = require("./util/system");
+const cache      = require("./cache");
 
-THIRTY_SECONDS = humanInterval("30 seconds")
-SIXTY_SECONDS = humanInterval("60 seconds")
-TWO_MINUTES = humanInterval("2 minutes")
+const THIRTY_SECONDS = humanInterval("30 seconds");
+const SIXTY_SECONDS = humanInterval("60 seconds");
+const TWO_MINUTES = humanInterval("2 minutes");
 
-DELAYS = [
-  THIRTY_SECONDS
-  SIXTY_SECONDS
+let DELAYS = [
+  THIRTY_SECONDS,
+  SIXTY_SECONDS,
   TWO_MINUTES
-]
+];
 
-responseCache = {}
+let responseCache = {};
 
-if intervals = process.env.API_RETRY_INTERVALS
+if (intervals = process.env.API_RETRY_INTERVALS) {
   DELAYS = _
   .chain(intervals)
   .split(",")
   .map(_.toNumber)
-  .value()
+  .value();
+}
 
-rp = request.defaults (params = {}, callback) ->
-  if params.cacheable and resp = getCachedResponse(params)
-    debug("resolving with cached response for ", params.url)
-    return Promise.resolve(resp)
+const rp = request.defaults(function(params = {}, callback) {
+  let resp;
+  if (params.cacheable && (resp = getCachedResponse(params))) {
+    debug("resolving with cached response for ", params.url);
+    return Promise.resolve(resp);
+  }
 
   _.defaults(params, {
-    agent: agent
-    proxy: null
-    gzip: true
+    agent,
+    proxy: null,
+    gzip: true,
     cacheable: false
-  })
+  });
 
-  headers = params.headers ?= {}
+  const headers = params.headers != null ? params.headers : (params.headers = {});
 
   _.defaults(headers, {
-    "x-os-name":         os.platform()
+    "x-os-name":         os.platform(),
     "x-cypress-version": pkg.version
-  })
+  });
 
-  method = params.method.toLowerCase()
+  const method = params.method.toLowerCase();
 
-  # use %j argument to ensure deep nested properties are serialized
+  // use %j argument to ensure deep nested properties are serialized
   debug(
     "request to url: %s with params: %j and token: %s",
-    "#{params.method} #{params.url}",
+    `${params.method} ${params.url}`,
     _.pick(params, "body", "headers"),
     params.auth && params.auth.bearer
-  )
+  );
 
-  request[method](params, callback)
+  return request[method](params, callback)
   .promise()
-  .tap (resp) ->
-    if params.cacheable
-      debug("caching response for ", params.url)
-      cacheResponse(resp, params)
+  .tap(function(resp) {
+    if (params.cacheable) {
+      debug("caching response for ", params.url);
+      cacheResponse(resp, params);
+    }
 
-    debug("response %o", resp)
+    return debug("response %o", resp);
+  });
+});
 
-cacheResponse = (resp, params) ->
-  responseCache[params.url] = resp
+var cacheResponse = (resp, params) => responseCache[params.url] = resp;
 
-getCachedResponse = (params) ->
-  responseCache[params.url]
+var getCachedResponse = params => responseCache[params.url];
 
-formatResponseBody = (err) ->
-  ## if the body is JSON object
-  if _.isObject(err.error)
-    ## transform the error message to include the
-    ## stringified body (represented as the 'error' property)
-    body = JSON.stringify(err.error, null, 2)
-    err.message = [err.statusCode, body].join("\n\n")
+const formatResponseBody = function(err) {
+  //# if the body is JSON object
+  if (_.isObject(err.error)) {
+    //# transform the error message to include the
+    //# stringified body (represented as the 'error' property)
+    const body = JSON.stringify(err.error, null, 2);
+    err.message = [err.statusCode, body].join("\n\n");
+  }
 
-  throw err
+  throw err;
+};
 
-tagError = (err) ->
-  err.isApiError = true
-  throw err
+const tagError = function(err) {
+  err.isApiError = true;
+  throw err;
+};
 
-## retry on timeouts, 5xx errors, or any error without a status code
-isRetriableError = (err) ->
-  (err instanceof Promise.TimeoutError) or
-  (500 <= err.statusCode < 600) or
-  not err.statusCode?
+//# retry on timeouts, 5xx errors, or any error without a status code
+const isRetriableError = err => (err instanceof Promise.TimeoutError) ||
+(500 <= err.statusCode && err.statusCode < 600) ||
+(err.statusCode == null);
 
 module.exports = {
-  rp
+  rp,
 
-  ping: ->
-    rp.get(routes.ping())
-    .catch(tagError)
+  ping() {
+    return rp.get(routes.ping())
+    .catch(tagError);
+  },
 
-  getMe: (authToken) ->
-    rp.get({
-      url: routes.me()
-      json: true
+  getMe(authToken) {
+    return rp.get({
+      url: routes.me(),
+      json: true,
       auth: {
         bearer: authToken
       }
-    })
+    });
+  },
 
-  getAuthUrls: ->
-    rp.get({
+  getAuthUrls() {
+    return rp.get({
       url: routes.auth(),
-      json: true
-      cacheable: true
+      json: true,
+      cacheable: true,
       headers: {
         "x-route-version": "2"
       }
     })
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getOrgs: (authToken) ->
-    rp.get({
-      url: routes.orgs()
-      json: true
+  getOrgs(authToken) {
+    return rp.get({
+      url: routes.orgs(),
+      json: true,
       auth: {
         bearer: authToken
       }
     })
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getProjects: (authToken) ->
-    rp.get({
-      url: routes.projects()
-      json: true
+  getProjects(authToken) {
+    return rp.get({
+      url: routes.projects(),
+      json: true,
       auth: {
         bearer: authToken
       }
     })
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getProject: (projectId, authToken) ->
-    rp.get({
-      url: routes.project(projectId)
-      json: true
+  getProject(projectId, authToken) {
+    return rp.get({
+      url: routes.project(projectId),
+      json: true,
       auth: {
         bearer: authToken
-      }
+      },
       headers: {
         "x-route-version": "2"
       }
     })
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getProjectRuns: (projectId, authToken, options = {}) ->
-    options.page ?= 1
+  getProjectRuns(projectId, authToken, options = {}) {
+    if (options.page == null) { options.page = 1; }
 
-    rp.get({
-      url: routes.projectRuns(projectId)
-      json: true
-      timeout: options.timeout ? 10000
+    return rp.get({
+      url: routes.projectRuns(projectId),
+      json: true,
+      timeout: options.timeout != null ? options.timeout : 10000,
       auth: {
         bearer: authToken
-      }
+      },
       headers: {
         "x-route-version": "3"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  createRun: (options = {}) ->
-    body = _.pick(options, [
-      "ci"
+  createRun(options = {}) {
+    const body = _.pick(options, [
+      "ci",
       "specs",
-      "commit"
+      "commit",
       "group",
       "platform",
       "parallel",
@@ -185,207 +207,224 @@ module.exports = {
       "recordKey",
       "specPattern",
       "tags"
-    ])
+    ]);
 
-    rp.post({
-      body
-      url: routes.runs()
-      json: true
-      timeout: options.timeout ? SIXTY_SECONDS
+    return rp.post({
+      body,
+      url: routes.runs(),
+      json: true,
+      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
         "x-route-version": "4"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  createInstance: (options = {}) ->
-    { runId, timeout } = options
+  createInstance(options = {}) {
+    const { runId, timeout } = options;
 
-    body = _.pick(options, [
-      "spec"
-      "groupId"
-      "machineId"
+    const body = _.pick(options, [
+      "spec",
+      "groupId",
+      "machineId",
       "platform"
-    ])
+    ]);
 
-    rp.post({
-      body
-      url: routes.instances(runId)
-      json: true
-      timeout: timeout ? SIXTY_SECONDS
+    return rp.post({
+      body,
+      url: routes.instances(runId),
+      json: true,
+      timeout: timeout != null ? timeout : SIXTY_SECONDS,
       headers: {
         "x-route-version": "5"
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  updateInstanceStdout: (options = {}) ->
-    rp.put({
-      url: routes.instanceStdout(options.instanceId)
-      json: true
-      timeout: options.timeout ? SIXTY_SECONDS
+  updateInstanceStdout(options = {}) {
+    return rp.put({
+      url: routes.instanceStdout(options.instanceId),
+      json: true,
+      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       body: {
         stdout: options.stdout
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  updateInstance: (options = {}) ->
-    rp.put({
-      url: routes.instance(options.instanceId)
-      json: true
-      timeout: options.timeout ? SIXTY_SECONDS
+  updateInstance(options = {}) {
+    return rp.put({
+      url: routes.instance(options.instanceId),
+      json: true,
+      timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
         "x-route-version": "2"
-      }
+      },
       body: _.pick(options, [
-        "stats"
-        "tests"
-        "error"
-        "video"
-        "hooks"
-        "stdout"
-        "screenshots"
-        "cypressConfig"
+        "stats",
+        "tests",
+        "error",
+        "video",
+        "hooks",
+        "stdout",
+        "screenshots",
+        "cypressConfig",
         "reporterStats"
       ])
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  createCrashReport: (body, authToken, timeout = 3000) ->
-    rp.post({
-      url: routes.exceptions()
-      json: true
-      body: body
+  createCrashReport(body, authToken, timeout = 3000) {
+    return rp.post({
+      url: routes.exceptions(),
+      json: true,
+      body,
       auth: {
         bearer: authToken
       }
     })
     .timeout(timeout)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  postLogout: (authToken) ->
-    Promise.join(
-      @getAuthUrls(),
+  postLogout(authToken) {
+    return Promise.join(
+      this.getAuthUrls(),
       machineId.machineId(),
-      (urls, machineId) ->
-        rp.post({
-          url: urls.dashboardLogoutUrl
-          json: true
-          auth: {
-            bearer: authToken
-          }
-          headers: {
-            "x-machine-id": machineId
-          }
-        })
-        .catch({statusCode: 401}, ->) ## do nothing on 401
-        .catch(tagError)
-  )
+      (urls, machineId) => rp.post({
+        url: urls.dashboardLogoutUrl,
+        json: true,
+        auth: {
+          bearer: authToken
+        },
+        headers: {
+          "x-machine-id": machineId
+        }
+      })
+      .catch({statusCode: 401}, function() {}) //# do nothing on 401
+      .catch(tagError));
+  },
 
-  createProject: (projectDetails, remoteOrigin, authToken) ->
+  createProject(projectDetails, remoteOrigin, authToken) {
     debug("create project with args %o", {
       projectDetails,
       remoteOrigin,
       authToken,
-    })
+    });
 
-    rp.post({
-      url: routes.projects()
-      json: true
+    return rp.post({
+      url: routes.projects(),
+      json: true,
       auth: {
         bearer: authToken
-      }
+      },
       headers: {
         "x-route-version": "2"
-      }
+      },
       body: {
-        name: projectDetails.projectName
-        orgId: projectDetails.orgId
-        public: projectDetails.public
-        remoteOrigin: remoteOrigin
+        name: projectDetails.projectName,
+        orgId: projectDetails.orgId,
+        public: projectDetails.public,
+        remoteOrigin
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getProjectRecordKeys: (projectId, authToken) ->
-    rp.get({
-      url: routes.projectRecordKeys(projectId)
-      json: true
+  getProjectRecordKeys(projectId, authToken) {
+    return rp.get({
+      url: routes.projectRecordKeys(projectId),
+      json: true,
       auth: {
         bearer: authToken
       }
     })
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  requestAccess: (projectId, authToken) ->
-    rp.post({
-      url: routes.membershipRequests(projectId)
-      json: true
+  requestAccess(projectId, authToken) {
+    return rp.post({
+      url: routes.membershipRequests(projectId),
+      json: true,
       auth: {
         bearer: authToken
       }
     })
     .catch(errors.StatusCodeError, formatResponseBody)
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  _projectToken: (method, projectId, authToken) ->
-    rp({
-      method: method
-      url: routes.projectToken(projectId)
-      json: true
+  _projectToken(method, projectId, authToken) {
+    return rp({
+      method,
+      url: routes.projectToken(projectId),
+      json: true,
       auth: {
         bearer: authToken
-      }
+      },
       headers: {
         "x-route-version": "2"
       }
     })
     .get("apiToken")
-    .catch(tagError)
+    .catch(tagError);
+  },
 
-  getProjectToken: (projectId, authToken) ->
-    @_projectToken("get", projectId, authToken)
+  getProjectToken(projectId, authToken) {
+    return this._projectToken("get", projectId, authToken);
+  },
 
-  updateProjectToken: (projectId, authToken) ->
-    @_projectToken("put", projectId, authToken)
+  updateProjectToken(projectId, authToken) {
+    return this._projectToken("put", projectId, authToken);
+  },
 
-  retryWithBackoff: (fn, options = {}) ->
-    ## for e2e testing purposes
-    if process.env.DISABLE_API_RETRIES
-      debug("api retries disabled")
-      return Promise.try(fn)
+  retryWithBackoff(fn, options = {}) {
+    //# for e2e testing purposes
+    let attempt;
+    if (process.env.DISABLE_API_RETRIES) {
+      debug("api retries disabled");
+      return Promise.try(fn);
+    }
 
-    do attempt = (retryIndex = 0) ->
-      Promise
-      .try(fn)
-      .catch isRetriableError, (err) ->
-        if retryIndex > DELAYS.length
-          throw err
+    return (attempt = retryIndex => Promise
+    .try(fn)
+    .catch(isRetriableError, function(err) {
+      if (retryIndex > DELAYS.length) {
+        throw err;
+      }
 
-        delay = DELAYS[retryIndex]
+      const delay = DELAYS[retryIndex];
 
-        if options.onBeforeRetry
-          options.onBeforeRetry({
-            err
-            delay
-            retryIndex
-            total: DELAYS.length
-          })
+      if (options.onBeforeRetry) {
+        options.onBeforeRetry({
+          err,
+          delay,
+          retryIndex,
+          total: DELAYS.length
+        });
+      }
 
-        retryIndex++
+      retryIndex++;
 
-        Promise
-        .delay(delay)
-        .then ->
-          debug("retry ##{retryIndex} after #{delay}ms")
-          attempt(retryIndex)
+      return Promise
+      .delay(delay)
+      .then(function() {
+        debug(`retry #${retryIndex} after ${delay}ms`);
+        return attempt(retryIndex);
+      });
+    }))(0);
+  },
 
-  clearCache: () ->
-    responseCache = {}
-}
+  clearCache() {
+    return responseCache = {};
+  }
+};

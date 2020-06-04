@@ -1,44 +1,55 @@
-require("./environment")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+let setContext;
+require("./environment");
 
-_        = require("lodash")
-path     = require("path")
-repl     = require("repl")
-history  = require("repl.history")
-browsers = require("./browsers")
-Fixtures = require("../test/support/helpers/fixtures")
+const _        = require("lodash");
+const path     = require("path");
+const repl     = require("repl");
+const history  = require("repl.history");
+const browsers = require("./browsers");
+const Fixtures = require("../test/support/helpers/fixtures");
 
-replServer = repl.start({
+const replServer = repl.start({
   prompt: "> "
-})
+});
 
-## preserve the repl history
-history(replServer, path.join(process.env.HOME, ".node_history"))
+//# preserve the repl history
+history(replServer, path.join(process.env.HOME, ".node_history"));
 
-req = replServer.context.require
+const req = replServer.context.require;
 
-getObj = ->
-  deploy = require("../deploy")
+const getObj = function() {
+  const deploy = require("../deploy");
 
   return {
-    lodash: _
-    deploy: deploy
-    darwin: deploy.getPlatform("darwin")
-    linux:  deploy.getPlatform("linux")
-    Fixtures: Fixtures
-    browsers: browsers
+    lodash: _,
+    deploy,
+    darwin: deploy.getPlatform("darwin"),
+    linux:  deploy.getPlatform("linux"),
+    Fixtures,
+    browsers,
 
-    reload: ->
-      for key of require.cache
-        delete require.cache[key]
+    reload() {
+      let key;
+      for (key in require.cache) {
+        delete require.cache[key];
+      }
 
-      for key of req.cache
-        delete req.cache[key]
+      for (key in req.cache) {
+        delete req.cache[key];
+      }
 
-      setContext()
+      return setContext();
+    },
 
-    r: (file) ->
-      return require(file)
-  }
+    r(file) {
+      return require(file);
+    }
+  };
+};
 
-do setContext = ->
-  _.extend replServer.context, getObj()
+(setContext = () => _.extend(replServer.context, getObj()))();

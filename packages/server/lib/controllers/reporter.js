@@ -1,11 +1,17 @@
-_ = require("lodash")
-send = require("send")
-reporter = require('@packages/reporter/lib/resolve-dist')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const send = require("send");
+const reporter = require('@packages/reporter/lib/resolve-dist');
 
 module.exports = {
-  handle: (req, res) ->
-    pathToFile = reporter.getPathToDist(req.params[0])
+  handle(req, res) {
+    const pathToFile = reporter.getPathToDist(req.params[0]);
 
-    send(req, pathToFile)
-    .pipe(res)
-}
+    return send(req, pathToFile)
+    .pipe(res);
+  }
+};

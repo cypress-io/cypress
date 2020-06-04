@@ -1,139 +1,164 @@
-_ = require("lodash")
-EE = require("events")
-path = require("path")
-debug = require("debug")("cypress:server:preprocessor")
-Promise = require("bluebird")
-appData = require("../util/app_data")
-cwd = require("../cwd")
-plugins = require("../plugins")
-resolve = require("./resolve")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS104: Avoid inline assignments
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const EE = require("events");
+const path = require("path");
+const debug = require("debug")("cypress:server:preprocessor");
+const Promise = require("bluebird");
+const appData = require("../util/app_data");
+const cwd = require("../cwd");
+const plugins = require("../plugins");
+const resolve = require("./resolve");
 
-errorMessage = (err = {}) ->
-  (err.stack ? err.annotated ? err.message ? err.toString())
-  ## strip out stack noise from parser like
-  ## at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
+const errorMessage = function(err = {}) {
+  let left, left1;
+  return ((left = (left1 = err.stack != null ? err.stack : err.annotated) != null ? left1 : err.message) != null ? left : err.toString())
+  //# strip out stack noise from parser like
+  //# at Parser.pp$5.raise (/path/to/node_modules/babylon/lib/index.js:4215:13)
   .replace(/\n\s*at.*/g, "")
-  .replace(/From previous event:\n?/g, "")
+  .replace(/From previous event:\n?/g, "");
+};
 
-clientSideError = (err) ->
-  console.log(err.message)
+const clientSideError = function(err) {
+  console.log(err.message);
 
-  err = errorMessage(err)
+  err = errorMessage(err);
 
-  """
-  (function () {
-    Cypress.action("spec:script:error", {
-      type: "BUNDLE_ERROR",
-      error: #{JSON.stringify(err)}
-    })
-  }())
-  """
+  return `\
+(function () {
+  Cypress.action("spec:script:error", {
+    type: "BUNDLE_ERROR",
+    error: ${JSON.stringify(err)}
+  })
+}())\
+`;
+};
 
-baseEmitter = new EE()
-fileObjects = {}
-fileProcessors = {}
+const baseEmitter = new EE();
+let fileObjects = {};
+let fileProcessors = {};
 
-createBrowserifyPreprocessor = (options) ->
-  debug("creating browserify preprocessor with options %o", options)
-  browserify = require("@cypress/browserify-preprocessor")
-  browserify(options)
+const createBrowserifyPreprocessor = function(options) {
+  debug("creating browserify preprocessor with options %o", options);
+  const browserify = require("@cypress/browserify-preprocessor");
+  return browserify(options);
+};
 
-setDefaultPreprocessor = (config) ->
-  debug("set default preprocessor")
+const setDefaultPreprocessor = function(config) {
+  debug("set default preprocessor");
 
-  tsPath = resolve.typescript(config)
+  const tsPath = resolve.typescript(config);
 
-  options = {
+  const options = {
     typescript: tsPath
-  }
-  plugins.register("file:preprocessor", API.createBrowserifyPreprocessor(options))
+  };
+  return plugins.register("file:preprocessor", API.createBrowserifyPreprocessor(options));
+};
 
-plugins.registerHandler (ipc) ->
-  ipc.on "preprocessor:rerun", (filePath) ->
-    debug("ipc preprocessor:rerun event")
-    baseEmitter.emit("file:updated", filePath)
+plugins.registerHandler(function(ipc) {
+  ipc.on("preprocessor:rerun", function(filePath) {
+    debug("ipc preprocessor:rerun event");
+    return baseEmitter.emit("file:updated", filePath);
+  });
 
-  baseEmitter.on "close", (filePath) ->
-    debug("base emitter plugin close event")
-    ipc.send("preprocessor:close", filePath)
+  return baseEmitter.on("close", function(filePath) {
+    debug("base emitter plugin close event");
+    return ipc.send("preprocessor:close", filePath);
+  });
+});
 
-# for simpler stubbing from unit tests
-API = {
-  errorMessage
+// for simpler stubbing from unit tests
+var API = {
+  errorMessage,
 
-  clientSideError
+  clientSideError,
 
-  setDefaultPreprocessor
+  setDefaultPreprocessor,
 
-  createBrowserifyPreprocessor
+  createBrowserifyPreprocessor,
 
-  emitter: baseEmitter
+  emitter: baseEmitter,
 
-  getFile: (filePath, config) ->
-    debug("getting file #{filePath}")
-    filePath = path.resolve(config.projectRoot, filePath)
+  getFile(filePath, config) {
+    let fileObject, fileProcessor;
+    debug(`getting file ${filePath}`);
+    filePath = path.resolve(config.projectRoot, filePath);
 
-    debug("getFile #{filePath}")
+    debug(`getFile ${filePath}`);
 
-    if not fileObject = fileObjects[filePath]
-      ## we should be watching the file if we are NOT
-      ## in a text terminal aka cypress run
-      ## TODO: rename this to config.isRunMode
-      ## vs config.isInterativeMode
-      shouldWatch = not config.isTextTerminal or Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
+    if (!(fileObject = fileObjects[filePath])) {
+      //# we should be watching the file if we are NOT
+      //# in a text terminal aka cypress run
+      //# TODO: rename this to config.isRunMode
+      //# vs config.isInterativeMode
+      const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH);
 
-      baseFilePath = filePath
+      const baseFilePath = filePath
       .replace(config.projectRoot, "")
-      .replace(config.integrationFolder, "")
+      .replace(config.integrationFolder, "");
 
-      fileObject = fileObjects[filePath] = _.extend(new EE(), {
+      fileObject = (fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
         outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath)
-      })
+      }));
 
-      fileObject.on "rerun", ->
-        debug("file object rerun event")
-        baseEmitter.emit("file:updated", filePath)
+      fileObject.on("rerun", function() {
+        debug("file object rerun event");
+        return baseEmitter.emit("file:updated", filePath);
+      });
 
-      baseEmitter.once "close", ->
-        debug("base emitter native close event")
-        fileObject.emit("close")
+      baseEmitter.once("close", function() {
+        debug("base emitter native close event");
+        return fileObject.emit("close");
+      });
+    }
 
-    if not plugins.has("file:preprocessor")
-      setDefaultPreprocessor(config)
+    if (!plugins.has("file:preprocessor")) {
+      setDefaultPreprocessor(config);
+    }
 
-    if config.isTextTerminal and fileProcessor = fileProcessors[filePath]
-      debug("headless and already processed")
-      return fileProcessor
+    if (config.isTextTerminal && (fileProcessor = fileProcessors[filePath])) {
+      debug("headless and already processed");
+      return fileProcessor;
+    }
 
-    preprocessor = fileProcessors[filePath] = Promise.try ->
-      plugins.execute("file:preprocessor", fileObject)
+    const preprocessor = (fileProcessors[filePath] = Promise.try(() => plugins.execute("file:preprocessor", fileObject)));
 
-    return preprocessor
+    return preprocessor;
+  },
 
-  removeFile: (filePath, config) ->
-    filePath = path.resolve(config.projectRoot, filePath)
+  removeFile(filePath, config) {
+    let fileObject;
+    filePath = path.resolve(config.projectRoot, filePath);
 
-    return if not fileProcessors[filePath]
+    if (!fileProcessors[filePath]) { return; }
 
-    debug("removeFile #{filePath}")
+    debug(`removeFile ${filePath}`);
 
-    baseEmitter.emit("close", filePath)
+    baseEmitter.emit("close", filePath);
 
-    if fileObject = fileObjects[filePath]
-      fileObject.emit("close")
+    if (fileObject = fileObjects[filePath]) {
+      fileObject.emit("close");
+    }
 
-    delete fileObjects[filePath]
-    delete fileProcessors[filePath]
+    delete fileObjects[filePath];
+    return delete fileProcessors[filePath];
+  },
 
-  close: ->
-    debug("close preprocessor")
+  close() {
+    debug("close preprocessor");
 
-    fileObjects = {}
-    fileProcessors = {}
-    baseEmitter.emit("close")
-    baseEmitter.removeAllListeners()
-}
+    fileObjects = {};
+    fileProcessors = {};
+    baseEmitter.emit("close");
+    return baseEmitter.removeAllListeners();
+  }
+};
 
-module.exports = API
+module.exports = API;

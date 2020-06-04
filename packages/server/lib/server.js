@@ -1,754 +1,836 @@
-_            = require("lodash")
-url          = require("url")
-http         = require("http")
-stream       = require("stream")
-express      = require("express")
-Promise      = require("bluebird")
-evilDns      = require("evil-dns")
-isHtml       = require("is-html")
-httpProxy    = require("http-proxy")
-la           = require("lazy-ass")
-check        = require("check-more-types")
-httpsProxy   = require("@packages/https-proxy")
-compression  = require("compression")
-debug        = require("debug")("cypress:server:server")
-{
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _            = require("lodash");
+const url          = require("url");
+const http         = require("http");
+const stream       = require("stream");
+const express      = require("express");
+const Promise      = require("bluebird");
+const evilDns      = require("evil-dns");
+const isHtml       = require("is-html");
+const httpProxy    = require("http-proxy");
+const la           = require("lazy-ass");
+const check        = require("check-more-types");
+const httpsProxy   = require("@packages/https-proxy");
+const compression  = require("compression");
+const debug        = require("debug")("cypress:server:server");
+const {
   agent,
   blacklist,
   concatStream,
   cors,
   uri
-} = require("@packages/network")
-{ NetworkProxy } = require("@packages/proxy")
-{ createInitialWorkers } = require("@packages/rewriter")
-origin       = require("./util/origin")
-ensureUrl    = require("./util/ensure-url")
-appData      = require("./util/app_data")
-statusCode   = require("./util/status_code")
-headersUtil  = require("./util/headers")
-allowDestroy = require("./util/server_destroy")
-{ SocketWhitelist } = require("./util/socket_whitelist")
-cwd          = require("./cwd")
-errors       = require("./errors")
-logger       = require("./logger")
-Socket       = require("./socket")
-Request      = require("./request")
-fileServer   = require("./file_server")
-templateEngine = require("./template_engine")
+} = require("@packages/network");
+const { NetworkProxy } = require("@packages/proxy");
+const { createInitialWorkers } = require("@packages/rewriter");
+const origin       = require("./util/origin");
+const ensureUrl    = require("./util/ensure-url");
+const appData      = require("./util/app_data");
+const statusCode   = require("./util/status_code");
+const headersUtil  = require("./util/headers");
+const allowDestroy = require("./util/server_destroy");
+const { SocketWhitelist } = require("./util/socket_whitelist");
+const cwd          = require("./cwd");
+const errors       = require("./errors");
+const logger       = require("./logger");
+const Socket       = require("./socket");
+const Request      = require("./request");
+const fileServer   = require("./file_server");
+const templateEngine = require("./template_engine");
 
-DEFAULT_DOMAIN_NAME    = "localhost"
-fullyQualifiedRe       = /^https?:\/\//
+const DEFAULT_DOMAIN_NAME    = "localhost";
+const fullyQualifiedRe       = /^https?:\/\//;
 
-ALLOWED_PROXY_BYPASS_URLS = [
+const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/static/favicon.ico'
-]
+];
 
-_isNonProxiedRequest = (req) ->
-  ## proxied HTTP requests have a URL like: "http://example.com/foo"
-  ## non-proxied HTTP requests have a URL like: "/foo"
-  req.proxiedUrl.startsWith('/')
+const _isNonProxiedRequest = req => //# proxied HTTP requests have a URL like: "http://example.com/foo"
+//# non-proxied HTTP requests have a URL like: "/foo"
+req.proxiedUrl.startsWith('/');
 
-_forceProxyMiddleware = (clientRoute) ->
-  ## normalize clientRoute to help with comparison
-  trimmedClientRoute = _.trimEnd(clientRoute, '/')
+const _forceProxyMiddleware = function(clientRoute) {
+  //# normalize clientRoute to help with comparison
+  const trimmedClientRoute = _.trimEnd(clientRoute, '/');
 
-  (req, res, next) ->
-    trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
+  return function(req, res, next) {
+    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/');
 
-    if _isNonProxiedRequest(req) and !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) and trimmedUrl isnt trimmedClientRoute
-      ## this request is non-proxied and non-whitelisted, redirect to the runner error page
-      return res.redirect(clientRoute)
+    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
+      //# this request is non-proxied and non-whitelisted, redirect to the runner error page
+      return res.redirect(clientRoute);
+    }
 
-    next()
+    return next();
+  };
+};
 
-isResponseHtml = (contentType, responseBuffer) ->
-  if contentType
-    return contentType is "text/html"
+const isResponseHtml = function(contentType, responseBuffer) {
+  let body;
+  if (contentType) {
+    return contentType === "text/html";
+  }
 
-  if body = _.invoke(responseBuffer, 'toString')
-    return isHtml(body)
+  if (body = _.invoke(responseBuffer, 'toString')) {
+    return isHtml(body);
+  }
 
-  return false
+  return false;
+};
 
-setProxiedUrl = (req) ->
-  ## proxiedUrl is the full URL with scheme, host, and port
-  ## it will only be fully-qualified if the request was proxied.
+const setProxiedUrl = function(req) {
+  //# proxiedUrl is the full URL with scheme, host, and port
+  //# it will only be fully-qualified if the request was proxied.
 
-  ## this function will set the URL of the request to be the path
-  ## only, which can then be used to proxy the request.
+  //# this function will set the URL of the request to be the path
+  //# only, which can then be used to proxy the request.
 
-  ## bail if we've already proxied the url
-  return if req.proxiedUrl
+  //# bail if we've already proxied the url
+  if (req.proxiedUrl) { return; }
 
-  ## backup the original proxied url
-  ## and slice out the host/origin
-  ## and only leave the path which is
-  ## how browsers would normally send
-  ## use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
+  //# backup the original proxied url
+  //# and slice out the host/origin
+  //# and only leave the path which is
+  //# how browsers would normally send
+  //# use their url
+  req.proxiedUrl = uri.removeDefaultPort(req.url).format();
 
-  req.url = uri.getPath(req.url)
+  return req.url = uri.getPath(req.url);
+};
 
-notSSE = (req, res) ->
-  req.headers.accept isnt "text/event-stream" and compression.filter(req, res)
+const notSSE = (req, res) => (req.headers.accept !== "text/event-stream") && compression.filter(req, res);
 
-## currently not making use of event emitter
-## but may do so soon
-class Server
-  constructor:  ->
-    if not (@ instanceof Server)
-      return new Server()
+//# currently not making use of event emitter
+//# but may do so soon
+class Server {
+  constructor() {
+    if (!(this instanceof Server)) {
+      return new Server();
+    }
 
-    @_socketWhitelist = new SocketWhitelist()
-    @_request    = null
-    @_middleware = null
-    @_server     = null
-    @_socket     = null
-    @_baseUrl    = null
-    @_nodeProxy  = null
-    @_fileServer = null
-    @_httpsProxy = null
-    @_urlResolver = null
+    this._socketWhitelist = new SocketWhitelist();
+    this._request    = null;
+    this._middleware = null;
+    this._server     = null;
+    this._socket     = null;
+    this._baseUrl    = null;
+    this._nodeProxy  = null;
+    this._fileServer = null;
+    this._httpsProxy = null;
+    this._urlResolver = null;
+  }
 
-  createExpressApp: (config) ->
-    { morgan, clientRoute } = config
-    app = express()
+  createExpressApp(config) {
+    const { morgan, clientRoute } = config;
+    const app = express();
 
-    ## set the cypress config from the cypress.json file
-    app.set("view engine", "html")
+    //# set the cypress config from the cypress.json file
+    app.set("view engine", "html");
 
-    ## since we use absolute paths, configure express-handlebars to not automatically find layouts
-    ## https://github.com/cypress-io/cypress/issues/2891
-    app.engine("html", templateEngine.render)
+    //# since we use absolute paths, configure express-handlebars to not automatically find layouts
+    //# https://github.com/cypress-io/cypress/issues/2891
+    app.engine("html", templateEngine.render);
 
-    ## handle the proxied url in case
-    ## we have not yet started our websocket server
-    app.use (req, res, next) =>
-      setProxiedUrl(req)
+    //# handle the proxied url in case
+    //# we have not yet started our websocket server
+    app.use((req, res, next) => {
+      let m;
+      setProxiedUrl(req);
 
-      ## if we've defined some middlware
-      ## then call this. useful in tests
-      if m = @_middleware
-        m(req, res)
+      //# if we've defined some middlware
+      //# then call this. useful in tests
+      if (m = this._middleware) {
+        m(req, res);
+      }
 
-      ## always continue on
+      //# always continue on
 
-      next()
+      return next();
+    });
 
-    app.use _forceProxyMiddleware(clientRoute)
+    app.use(_forceProxyMiddleware(clientRoute));
 
-    app.use require("cookie-parser")()
-    app.use compression({filter: notSSE})
-    app.use require("morgan")("dev") if morgan
+    app.use(require("cookie-parser")());
+    app.use(compression({filter: notSSE}));
+    if (morgan) { app.use(require("morgan")("dev")); }
 
-    ## errorhandler
-    app.use require("errorhandler")()
+    //# errorhandler
+    app.use(require("errorhandler")());
 
-    ## remove the express powered-by header
-    app.disable("x-powered-by")
+    //# remove the express powered-by header
+    app.disable("x-powered-by");
 
-    return app
+    return app;
+  }
 
-  createRoutes: ->
-    require("./routes").apply(null, arguments)
+  createRoutes() {
+    return require("./routes").apply(null, arguments);
+  }
 
-  getHttpServer: -> @_server
+  getHttpServer() { return this._server; }
 
-  portInUseErr: (port) ->
-    e = errors.get("PORT_IN_USE_SHORT", port)
-    e.port = port
-    e.portInUse = true
-    e
+  portInUseErr(port) {
+    const e = errors.get("PORT_IN_USE_SHORT", port);
+    e.port = port;
+    e.portInUse = true;
+    return e;
+  }
 
-  open: (config = {}, project, onError, onWarning) ->
-    debug("server open")
+  open(config = {}, project, onError, onWarning) {
+    debug("server open");
 
-    la(_.isPlainObject(config), "expected plain config object", config)
+    la(_.isPlainObject(config), "expected plain config object", config);
 
-    Promise.try =>
-      app = @createExpressApp(config)
+    return Promise.try(() => {
+      const app = this.createExpressApp(config);
 
-      logger.setSettings(config)
+      logger.setSettings(config);
 
-      ## generate our request instance
-      ## and set the responseTimeout
-      ## TODO: might not be needed anymore
-      @_request = Request({timeout: config.responseTimeout})
-      @_nodeProxy = httpProxy.createProxyServer()
+      //# generate our request instance
+      //# and set the responseTimeout
+      //# TODO: might not be needed anymore
+      this._request = Request({timeout: config.responseTimeout});
+      this._nodeProxy = httpProxy.createProxyServer();
 
-      getRemoteState = => @_getRemoteState()
+      const getRemoteState = () => this._getRemoteState();
 
-      getFileServerToken = => @_fileServer.token
+      const getFileServerToken = () => this._fileServer.token;
 
-      @_networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: @_request })
+      this._networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: this._request });
 
-      if config.experimentalSourceRewriting
-        createInitialWorkers()
+      if (config.experimentalSourceRewriting) {
+        createInitialWorkers();
+      }
 
-      @createHosts(config.hosts)
+      this.createHosts(config.hosts);
 
-      @createRoutes({
-        app
-        config
-        getRemoteState
-        networkProxy: @_networkProxy
-        onError
+      this.createRoutes({
+        app,
+        config,
+        getRemoteState,
+        networkProxy: this._networkProxy,
+        onError,
         project
-      })
+      });
 
-      @createServer(app, config, project, @_request, onWarning)
+      return this.createServer(app, config, project, this._request, onWarning);
+    });
+  }
 
-  createHosts: (hosts = {}) ->
-    _.each hosts, (ip, host) ->
-      evilDns.add(host, ip)
+  createHosts(hosts = {}) {
+    return _.each(hosts, (ip, host) => evilDns.add(host, ip));
+  }
 
-  createServer: (app, config, project, request, onWarning) ->
-    new Promise (resolve, reject) =>
-      {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config
+  createServer(app, config, project, request, onWarning) {
+    return new Promise((resolve, reject) => {
+      const {port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts} = config;
 
-      @_server  = http.createServer(app)
+      this._server  = http.createServer(app);
 
-      allowDestroy(@_server)
+      allowDestroy(this._server);
 
-      onError = (err) =>
-        ## if the server bombs before starting
-        ## and the err no is EADDRINUSE
-        ## then we know to display the custom err message
-        if err.code is "EADDRINUSE"
-          reject @portInUseErr(port)
+      const onError = err => {
+        //# if the server bombs before starting
+        //# and the err no is EADDRINUSE
+        //# then we know to display the custom err message
+        if (err.code === "EADDRINUSE") {
+          return reject(this.portInUseErr(port));
+        }
+      };
 
-      onUpgrade = (req, socket, head) =>
-        debug("Got UPGRADE request from %s", req.url)
+      const onUpgrade = (req, socket, head) => {
+        debug("Got UPGRADE request from %s", req.url);
 
-        @proxyWebsockets(@_nodeProxy, socketIoRoute, req, socket, head)
+        return this.proxyWebsockets(this._nodeProxy, socketIoRoute, req, socket, head);
+      };
 
-      callListeners = (req, res) =>
-        listeners = @_server.listeners("request").slice(0)
+      const callListeners = (req, res) => {
+        const listeners = this._server.listeners("request").slice(0);
 
-        @_callRequestListeners(@_server, listeners, req, res)
+        return this._callRequestListeners(this._server, listeners, req, res);
+      };
 
-      onSniUpgrade = (req, socket, head) =>
-        upgrades = @_server.listeners("upgrade").slice(0)
-        for upgrade in upgrades
-          upgrade.call(@_server, req, socket, head)
+      const onSniUpgrade = (req, socket, head) => {
+        const upgrades = this._server.listeners("upgrade").slice(0);
+        return upgrades.map((upgrade) =>
+          upgrade.call(this._server, req, socket, head));
+      };
 
-      @_server.on "connect", (req, socket, head) =>
-        debug("Got CONNECT request from %s", req.url)
+      this._server.on("connect", (req, socket, head) => {
+        debug("Got CONNECT request from %s", req.url);
 
-        socket.once 'upstream-connected', @_socketWhitelist.add
+        socket.once('upstream-connected', this._socketWhitelist.add);
 
-        @_httpsProxy.connect(req, socket, head, {
-          onDirectConnection: (req) =>
-            urlToCheck = "https://" + req.url
+        return this._httpsProxy.connect(req, socket, head, {
+          onDirectConnection: req => {
+            const urlToCheck = "https://" + req.url;
 
-            isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, @_remoteProps)
+            let isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, this._remoteProps);
 
-            word = if isMatching then "does" else "does not"
+            const word = isMatching ? "does" : "does not";
 
-            debug("HTTPS request #{word} match URL: #{urlToCheck} with props: %o", @_remoteProps)
+            debug(`HTTPS request ${word} match URL: ${urlToCheck} with props: %o`, this._remoteProps);
 
-            ## if we are currently matching then we're
-            ## not making a direct connection anyway
-            ## so we only need to check this if we
-            ## have blacklist hosts and are not matching.
-            ##
-            ## if we have blacklisted hosts lets
-            ## see if this matches - if so then
-            ## we cannot allow it to make a direct
-            ## connection
-            if blacklistHosts and not isMatching
-              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
+            //# if we are currently matching then we're
+            //# not making a direct connection anyway
+            //# so we only need to check this if we
+            //# have blacklist hosts and are not matching.
+            //#
+            //# if we have blacklisted hosts lets
+            //# see if this matches - if so then
+            //# we cannot allow it to make a direct
+            //# connection
+            if (blacklistHosts && !isMatching) {
+              isMatching = blacklist.matches(urlToCheck, blacklistHosts);
 
-              debug("HTTPS request #{urlToCheck} matches blacklist?", isMatching)
+              debug(`HTTPS request ${urlToCheck} matches blacklist?`, isMatching);
+            }
 
-            ## make a direct connection only if
-            ## our req url does not match the origin policy
-            ## which is the superDomain + port
-            return not isMatching
-        })
+            //# make a direct connection only if
+            //# our req url does not match the origin policy
+            //# which is the superDomain + port
+            return !isMatching;
+          }
+        });
+      });
 
-      @_server.on "upgrade", onUpgrade
+      this._server.on("upgrade", onUpgrade);
 
-      @_server.once "error", onError
+      this._server.once("error", onError);
 
-      @_listen(port, onError)
-      .then (port) =>
-        Promise.all([
+      return this._listen(port, onError)
+      .then(port => {
+        return Promise.all([
           httpsProxy.create(appData.path("proxy"), port, {
-            onRequest: callListeners
+            onRequest: callListeners,
             onUpgrade: onSniUpgrade
           }),
 
           fileServer.create(fileServerFolder)
         ])
-        .spread (httpsProxy, fileServer) =>
-          @_httpsProxy = httpsProxy
-          @_fileServer = fileServer
+        .spread((httpsProxy, fileServer) => {
+          this._httpsProxy = httpsProxy;
+          this._fileServer = fileServer;
 
-          ## if we have a baseUrl let's go ahead
-          ## and make sure the server is connectable!
-          if baseUrl
-            @_baseUrl = baseUrl
+          //# if we have a baseUrl let's go ahead
+          //# and make sure the server is connectable!
+          if (baseUrl) {
+            this._baseUrl = baseUrl;
 
-            if config.isTextTerminal
-              return @_retryBaseUrlCheck(baseUrl, onWarning)
+            if (config.isTextTerminal) {
+              return this._retryBaseUrlCheck(baseUrl, onWarning)
               .return(null)
-              .catch (e) ->
-                debug(e)
-                reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl))
+              .catch(function(e) {
+                debug(e);
+                return reject(errors.get("CANNOT_CONNECT_BASE_URL", baseUrl));
+              });
+            }
 
-            ensureUrl.isListening(baseUrl)
+            return ensureUrl.isListening(baseUrl)
             .return(null)
-            .catch (err) ->
-              errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
+            .catch(err => errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl));
+          }
+      }).then(warning => {
+          //# once we open set the domain
+          //# to root by default
+          //# which prevents a situation where navigating
+          //# to http sites redirects to /__/ cypress
+          this._onDomainSet(baseUrl != null ? baseUrl : "<root>");
 
-        .then (warning) =>
-          ## once we open set the domain
-          ## to root by default
-          ## which prevents a situation where navigating
-          ## to http sites redirects to /__/ cypress
-          @_onDomainSet(baseUrl ? "<root>")
+          return resolve([port, warning]);
+        });
+      });
+    });
+  }
 
-          resolve([port, warning])
+  _port() {
+    return _.chain(this._server).invoke("address").get("port").value();
+  }
 
-  _port: ->
-    _.chain(@_server).invoke("address").get("port").value()
+  _listen(port, onError) {
+    return new Promise(resolve => {
+      const listener = () => {
+        const address = this._server.address();
 
-  _listen: (port, onError) ->
-    new Promise (resolve) =>
-      listener = =>
-        address = @_server.address()
+        this.isListening = true;
 
-        @isListening = true
+        debug("Server listening on ", address);
 
-        debug("Server listening on ", address)
+        this._server.removeListener("error", onError);
 
-        @_server.removeListener "error", onError
+        return resolve(address.port);
+      };
 
-        resolve(address.port)
+      return this._server.listen(port || 0, '127.0.0.1', listener);
+    });
+  }
 
-      @_server.listen(port || 0, '127.0.0.1', listener)
+  _getRemoteState() {
+    // {
+    //   origin: "http://localhost:2020"
+    //   fileServer:
+    //   strategy: "file"
+    //   domainName: "localhost"
+    //   props: null
+    // }
 
-  _getRemoteState: ->
-    # {
-    #   origin: "http://localhost:2020"
-    #   fileServer:
-    #   strategy: "file"
-    #   domainName: "localhost"
-    #   props: null
-    # }
+    // {
+    //   origin: "https://foo.google.com"
+    //   strategy: "http"
+    //   domainName: "google.com"
+    //   props: {
+    //     port: 443
+    //     tld: "com"
+    //     domain: "google"
+    //   }
+    // }
 
-    # {
-    #   origin: "https://foo.google.com"
-    #   strategy: "http"
-    #   domainName: "google.com"
-    #   props: {
-    #     port: 443
-    #     tld: "com"
-    #     domain: "google"
-    #   }
-    # }
+    const props = _.extend({},  {
+      auth:       this._remoteAuth,
+      props:      this._remoteProps,
+      origin:     this._remoteOrigin,
+      strategy:   this._remoteStrategy,
+      visiting:   this._remoteVisitingUrl,
+      domainName: this._remoteDomainName,
+      fileServer: this._remoteFileServer
+    });
 
-    props = _.extend({},  {
-      auth:       @_remoteAuth
-      props:      @_remoteProps
-      origin:     @_remoteOrigin
-      strategy:   @_remoteStrategy
-      visiting:   @_remoteVisitingUrl
-      domainName: @_remoteDomainName
-      fileServer: @_remoteFileServer
-    })
+    debug("Getting remote state: %o", props);
 
-    debug("Getting remote state: %o", props)
+    return props;
+  }
 
-    return props
+  _onRequest(headers, automationRequest, options) {
+    return this._request.sendPromise(headers, automationRequest, options);
+  }
 
-  _onRequest: (headers, automationRequest, options) ->
-    @_request.sendPromise(headers, automationRequest, options)
-
-  _onResolveUrl: (urlStr, headers, automationRequest, options = { headers: {} }) ->
+  _onResolveUrl(urlStr, headers, automationRequest, options = { headers: {} }) {
+    let p;
     debug("resolving visit %o", {
-      url: urlStr
-      headers
+      url: urlStr,
+      headers,
       options
-    })
+    });
 
-    ## always clear buffers - reduces the possibility of a random HTTP request
-    ## accidentally retrieving buffered content at the wrong time
-    @_networkProxy.reset()
+    //# always clear buffers - reduces the possibility of a random HTTP request
+    //# accidentally retrieving buffered content at the wrong time
+    this._networkProxy.reset();
 
-    startTime = new Date()
+    const startTime = new Date();
 
-    ## if we have an existing url resolver
-    ## in flight then cancel it
-    if @_urlResolver
-      @_urlResolver.cancel()
+    //# if we have an existing url resolver
+    //# in flight then cancel it
+    if (this._urlResolver) {
+      this._urlResolver.cancel();
+    }
 
-    request = @_request
+    const request = this._request;
 
-    handlingLocalFile = false
-    previousState = _.clone @_getRemoteState()
+    let handlingLocalFile = false;
+    const previousState = _.clone(this._getRemoteState());
 
-    ## nuke any hashes from our url since
-    ## those those are client only and do
-    ## not apply to http requests
-    urlStr = url.parse(urlStr)
-    urlStr.hash = null
-    urlStr = urlStr.format()
+    //# nuke any hashes from our url since
+    //# those those are client only and do
+    //# not apply to http requests
+    urlStr = url.parse(urlStr);
+    urlStr.hash = null;
+    urlStr = urlStr.format();
 
-    originalUrl = urlStr
+    const originalUrl = urlStr;
 
-    reqStream = null
-    currentPromisePhase = null
+    let reqStream = null;
+    let currentPromisePhase = null;
 
-    runPhase = (fn) ->
-      return currentPromisePhase = fn()
+    const runPhase = fn => currentPromisePhase = fn();
 
-    return @_urlResolver = p = new Promise (resolve, reject, onCancel) =>
-      onCancel ->
-        p.currentPromisePhase = currentPromisePhase
-        p.reqStream = reqStream
+    return this._urlResolver = (p = new Promise((resolve, reject, onCancel) => {
+      let urlFile;
+      onCancel(function() {
+        p.currentPromisePhase = currentPromisePhase;
+        p.reqStream = reqStream;
 
-        _.invoke(reqStream, "abort")
-        _.invoke(currentPromisePhase, "cancel")
+        _.invoke(reqStream, "abort");
+        return _.invoke(currentPromisePhase, "cancel");
+      });
 
-      redirects = []
-      newUrl = null
+      const redirects = [];
+      let newUrl = null;
 
-      if not fullyQualifiedRe.test(urlStr)
-        handlingLocalFile = true
+      if (!fullyQualifiedRe.test(urlStr)) {
+        handlingLocalFile = true;
 
-        options.headers['x-cypress-authorization'] = @_fileServer.token
+        options.headers['x-cypress-authorization'] = this._fileServer.token;
 
-        @_remoteVisitingUrl = true
+        this._remoteVisitingUrl = true;
 
-        @_onDomainSet(urlStr, options)
+        this._onDomainSet(urlStr, options);
 
-        ## TODO: instead of joining remoteOrigin here
-        ## we can simply join our fileServer origin
-        ## and bypass all the remoteState.visiting shit
-        urlFile = url.resolve(@_remoteFileServer, urlStr)
-        urlStr  = url.resolve(@_remoteOrigin, urlStr)
+        //# TODO: instead of joining remoteOrigin here
+        //# we can simply join our fileServer origin
+        //# and bypass all the remoteState.visiting shit
+        urlFile = url.resolve(this._remoteFileServer, urlStr);
+        urlStr  = url.resolve(this._remoteOrigin, urlStr);
+      }
 
-      onReqError = (err) =>
-        ## only restore the previous state
-        ## if our promise is still pending
-        if p.isPending()
-          restorePreviousState()
+      const onReqError = err => {
+        //# only restore the previous state
+        //# if our promise is still pending
+        if (p.isPending()) {
+          restorePreviousState();
+        }
 
-        reject(err)
+        return reject(err);
+      };
 
-      onReqStreamReady = (str) =>
-        reqStream = str
+      const onReqStreamReady = str => {
+        reqStream = str;
 
-        str
+        return str
         .on("error", onReqError)
-        .on "response", (incomingRes) =>
+        .on("response", incomingRes => {
           debug(
             "resolve:url headers received, buffering response %o",
             _.pick(incomingRes, "headers", "statusCode")
-          )
+          );
 
-          newUrl ?= urlStr
+          if (newUrl == null) { newUrl = urlStr; }
 
-          runPhase =>
-            ## get the cookies that would be sent with this request so they can be rehydrated
-            automationRequest("get:cookies", {
+          return runPhase(() => {
+            //# get the cookies that would be sent with this request so they can be rehydrated
+            return automationRequest("get:cookies", {
               domain: cors.getSuperDomain(newUrl)
             })
-            .then (cookies) =>
-              @_remoteVisitingUrl = false
+            .then(cookies => {
+              let fp;
+              this._remoteVisitingUrl = false;
 
-              statusIs2xxOrAllowedFailure = ->
-                ## is our status code in the 2xx range, or have we disabled failing
-                ## on status code?
-                statusCode.isOk(incomingRes.statusCode) or (options.failOnStatusCode is false)
+              const statusIs2xxOrAllowedFailure = () => //# is our status code in the 2xx range, or have we disabled failing
+              //# on status code?
+              statusCode.isOk(incomingRes.statusCode) || options.failOnStatusCode === false;
 
-              isOk        = statusIs2xxOrAllowedFailure()
-              contentType = headersUtil.getContentType(incomingRes)
+              const isOk        = statusIs2xxOrAllowedFailure();
+              const contentType = headersUtil.getContentType(incomingRes);
 
-              details = {
-                isOkStatusCode: isOk
-                contentType
-                url: newUrl
-                status: incomingRes.statusCode
-                cookies
-                statusText: statusCode.getText(incomingRes.statusCode)
-                redirects
+              const details = {
+                isOkStatusCode: isOk,
+                contentType,
+                url: newUrl,
+                status: incomingRes.statusCode,
+                cookies,
+                statusText: statusCode.getText(incomingRes.statusCode),
+                redirects,
                 originalUrl
+              };
+
+              //# does this response have this cypress header?
+              if (fp = incomingRes.headers["x-cypress-file-path"]) {
+                //# if so we know this is a local file request
+                details.filePath = fp;
               }
 
-              ## does this response have this cypress header?
-              if fp = incomingRes.headers["x-cypress-file-path"]
-                ## if so we know this is a local file request
-                details.filePath = fp
+              debug("setting details resolving url %o", details);
 
-              debug("setting details resolving url %o", details)
+              const concatStr = concatStream(responseBuffer => {
+                //# buffer the entire response before resolving.
+                //# this allows us to detect & reject ETIMEDOUT errors
+                //# where the headers have been sent but the
+                //# connection hangs before receiving a body.
 
-              concatStr = concatStream (responseBuffer) =>
-                ## buffer the entire response before resolving.
-                ## this allows us to detect & reject ETIMEDOUT errors
-                ## where the headers have been sent but the
-                ## connection hangs before receiving a body.
+                //# if there is not a content-type, try to determine
+                //# if the response content is HTML-like
+                //# https://github.com/cypress-io/cypress/issues/1727
+                details.isHtml = isResponseHtml(contentType, responseBuffer);
 
-                ## if there is not a content-type, try to determine
-                ## if the response content is HTML-like
-                ## https://github.com/cypress-io/cypress/issues/1727
-                details.isHtml = isResponseHtml(contentType, responseBuffer)
+                debug("resolve:url response ended, setting buffer %o", { newUrl, details });
 
-                debug("resolve:url response ended, setting buffer %o", { newUrl, details })
+                details.totalTime = new Date() - startTime;
 
-                details.totalTime = new Date() - startTime
+                //# TODO: think about moving this logic back into the
+                //# frontend so that the driver can be in control of
+                //# when the server should cache the request buffer
+                //# and set the domain vs not
+                if (isOk && details.isHtml) {
+                  //# reset the domain to the new url if we're not
+                  //# handling a local file
+                  if (!handlingLocalFile) { this._onDomainSet(newUrl, options); }
 
-                ## TODO: think about moving this logic back into the
-                ## frontend so that the driver can be in control of
-                ## when the server should cache the request buffer
-                ## and set the domain vs not
-                if isOk and details.isHtml
-                  ## reset the domain to the new url if we're not
-                  ## handling a local file
-                  @_onDomainSet(newUrl, options) if not handlingLocalFile
-
-                  responseBufferStream = new stream.PassThrough({
+                  const responseBufferStream = new stream.PassThrough({
                     highWaterMark: Number.MAX_SAFE_INTEGER
-                  })
+                  });
 
-                  responseBufferStream.end(responseBuffer)
+                  responseBufferStream.end(responseBuffer);
 
-                  @_networkProxy.setHttpBuffer({
-                    url: newUrl
-                    stream: responseBufferStream
-                    details
-                    originalUrl: originalUrl
+                  this._networkProxy.setHttpBuffer({
+                    url: newUrl,
+                    stream: responseBufferStream,
+                    details,
+                    originalUrl,
                     response: incomingRes
-                  })
-                else
-                  ## TODO: move this logic to the driver too for
-                  ## the same reasons listed above
-                  restorePreviousState()
+                  });
+                } else {
+                  //# TODO: move this logic to the driver too for
+                  //# the same reasons listed above
+                  restorePreviousState();
+                }
 
-                resolve(details)
+                return resolve(details);
+              });
 
-              str.pipe(concatStr)
-            .catch(onReqError)
+              return str.pipe(concatStr);
+          }).catch(onReqError);
+          });
+        });
+      };
 
-      restorePreviousState = =>
-        @_remoteAuth         = previousState.auth
-        @_remoteProps        = previousState.props
-        @_remoteOrigin       = previousState.origin
-        @_remoteStrategy     = previousState.strategy
-        @_remoteFileServer   = previousState.fileServer
-        @_remoteDomainName   = previousState.domainName
-        @_remoteVisitingUrl  = previousState.visiting
+      var restorePreviousState = () => {
+        this._remoteAuth         = previousState.auth;
+        this._remoteProps        = previousState.props;
+        this._remoteOrigin       = previousState.origin;
+        this._remoteStrategy     = previousState.strategy;
+        this._remoteFileServer   = previousState.fileServer;
+        this._remoteDomainName   = previousState.domainName;
+        return this._remoteVisitingUrl  = previousState.visiting;
+      };
 
-      # if they're POSTing an object, querystringify their POST body
-      if options.method == 'POST' and _.isObject(options.body)
-        options.form = options.body
-        delete options.body
+      // if they're POSTing an object, querystringify their POST body
+      if ((options.method === 'POST') && _.isObject(options.body)) {
+        options.form = options.body;
+        delete options.body;
+      }
 
       _.assign(options, {
-        ## turn off gzip since we need to eventually
-        ## rewrite these contents
-        gzip: false
-        url: urlFile ? urlStr
+        //# turn off gzip since we need to eventually
+        //# rewrite these contents
+        gzip: false,
+        url: urlFile != null ? urlFile : urlStr,
         headers: _.assign({
           accept: "text/html,*/*"
-        }, options.headers)
-        onBeforeReqInit: runPhase
-        followRedirect: (incomingRes) ->
-          status = incomingRes.statusCode
-          next = incomingRes.headers.location
+        }, options.headers),
+        onBeforeReqInit: runPhase,
+        followRedirect(incomingRes) {
+          const status = incomingRes.statusCode;
+          const next = incomingRes.headers.location;
 
-          curr = newUrl ? urlStr
+          const curr = newUrl != null ? newUrl : urlStr;
 
-          newUrl = url.resolve(curr, next)
+          newUrl = url.resolve(curr, next);
 
-          redirects.push([status, newUrl].join(": "))
+          redirects.push([status, newUrl].join(": "));
 
-          return true
-      })
-
-      debug('sending request with options %o', options)
-
-      runPhase ->
-        request.sendStream(headers, automationRequest, options)
-        .then (createReqStream) ->
-          onReqStreamReady(createReqStream())
-        .catch(onReqError)
-
-  _onDomainSet: (fullyQualifiedUrl, options = {}) ->
-    l = (type, val) ->
-      debug("Setting", type, val)
-
-    @_remoteAuth = options.auth
-
-    l("remoteAuth", @_remoteAuth)
-
-    ## if this isn't a fully qualified url
-    ## or if this came to us as <root> in our tests
-    ## then we know to go back to our default domain
-    ## which is the localhost server
-    if fullyQualifiedUrl is "<root>" or not fullyQualifiedRe.test(fullyQualifiedUrl)
-      @_remoteOrigin = "http://#{DEFAULT_DOMAIN_NAME}:#{@_port()}"
-      @_remoteStrategy = "file"
-      @_remoteFileServer = "http://#{DEFAULT_DOMAIN_NAME}:#{@_fileServer?.port()}"
-      @_remoteDomainName = DEFAULT_DOMAIN_NAME
-      @_remoteProps = null
-
-      l("remoteOrigin", @_remoteOrigin)
-      l("remoteStrategy", @_remoteStrategy)
-      l("remoteHostAndPort", @_remoteProps)
-      l("remoteDocDomain", @_remoteDomainName)
-      l("remoteFileServer", @_remoteFileServer)
-
-    else
-      @_remoteOrigin = origin(fullyQualifiedUrl)
-
-      @_remoteStrategy = "http"
-
-      @_remoteFileServer = null
-
-      ## set an object with port, tld, and domain properties
-      ## as the remoteHostAndPort
-      @_remoteProps = cors.parseUrlIntoDomainTldPort(@_remoteOrigin)
-
-      @_remoteDomainName = _.compact([@_remoteProps.domain, @_remoteProps.tld]).join(".")
-
-      l("remoteOrigin", @_remoteOrigin)
-      l("remoteHostAndPort", @_remoteProps)
-      l("remoteDocDomain", @_remoteDomainName)
-
-    return @_getRemoteState()
-
-  _callRequestListeners: (server, listeners, req, res) ->
-    for listener in listeners
-      listener.call(server, req, res)
-
-  _normalizeReqUrl: (server) ->
-    ## because socket.io removes all of our request
-    ## events, it forces the socket.io traffic to be
-    ## handled first.
-    ## however we need to basically do the same thing
-    ## it does and after we call into socket.io go
-    ## through and remove all request listeners
-    ## and change the req.url by slicing out the host
-    ## because the browser is in proxy mode
-    listeners = server.listeners("request").slice(0)
-    server.removeAllListeners("request")
-    server.on "request", (req, res) =>
-      setProxiedUrl(req)
-
-      @_callRequestListeners(server, listeners, req, res)
-
-  _retryBaseUrlCheck: (baseUrl, onWarning) ->
-    ensureUrl.retryIsListening(baseUrl, {
-      retryIntervals: [3000, 3000, 4000],
-      onRetry: ({ attempt, delay, remaining }) ->
-        warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
-          remaining
-          attempt
-          delay
-          baseUrl
-        })
-
-        onWarning(warning)
-    })
-
-  proxyWebsockets: (proxy, socketIoRoute, req, socket, head) ->
-    ## bail if this is our own namespaced socket.io request
-    if req.url.startsWith(socketIoRoute)
-      if not @_socketWhitelist.isRequestWhitelisted(req)
-        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
-        socket.end()
-
-      ## we can return here either way, if the socket is still valid socket.io will hook it up
-      return
-
-    if (host = req.headers.host) and @_remoteProps and (remoteOrigin = @_remoteOrigin)
-      ## get the port from @_remoteProps
-      ## get the protocol from remoteOrigin
-      ## get the hostname from host header
-      {port}     = @_remoteProps
-      {protocol} = url.parse(remoteOrigin)
-      {hostname} = url.parse("http://#{host}")
-
-      onProxyErr = (err, req, res) ->
-        debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req })
-
-      proxy.ws(req, socket, head, {
-        secure: false
-        target: {
-          host: hostname
-          port: port
-          protocol: protocol
+          return true;
         }
-        agent: agent
-      }, onProxyErr)
-    else
-      ## we can't do anything with this socket
-      ## since we don't know how to proxy it!
-      socket.end() if socket.writable
+      });
 
-  reset: ->
-    @_networkProxy?.reset()
+      debug('sending request with options %o', options);
 
-    @_onDomainSet(@_baseUrl ? "<root>")
+      return runPhase(() => request.sendStream(headers, automationRequest, options)
+      .then(createReqStream => onReqStreamReady(createReqStream())).catch(onReqError));
+    }));
+  }
 
-  _close: ->
-    @reset()
+  _onDomainSet(fullyQualifiedUrl, options = {}) {
+    const l = (type, val) => debug("Setting", type, val);
 
-    logger.unsetSettings()
+    this._remoteAuth = options.auth;
 
-    evilDns.clear()
+    l("remoteAuth", this._remoteAuth);
 
-    ## bail early we dont have a server or we're not
-    ## currently listening
-    return Promise.resolve() if not @_server or not @isListening
+    //# if this isn't a fully qualified url
+    //# or if this came to us as <root> in our tests
+    //# then we know to go back to our default domain
+    //# which is the localhost server
+    if ((fullyQualifiedUrl === "<root>") || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
+      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`;
+      this._remoteStrategy = "file";
+      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`;
+      this._remoteDomainName = DEFAULT_DOMAIN_NAME;
+      this._remoteProps = null;
 
-    @_server.destroyAsync()
-    .then =>
-      @isListening = false
+      l("remoteOrigin", this._remoteOrigin);
+      l("remoteStrategy", this._remoteStrategy);
+      l("remoteHostAndPort", this._remoteProps);
+      l("remoteDocDomain", this._remoteDomainName);
+      l("remoteFileServer", this._remoteFileServer);
 
-  close: ->
-    Promise.join(
-      @_close()
-      @_socket?.close()
-      @_fileServer?.close()
-      @_httpsProxy?.close()
+    } else {
+      this._remoteOrigin = origin(fullyQualifiedUrl);
+
+      this._remoteStrategy = "http";
+
+      this._remoteFileServer = null;
+
+      //# set an object with port, tld, and domain properties
+      //# as the remoteHostAndPort
+      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin);
+
+      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join(".");
+
+      l("remoteOrigin", this._remoteOrigin);
+      l("remoteHostAndPort", this._remoteProps);
+      l("remoteDocDomain", this._remoteDomainName);
+    }
+
+    return this._getRemoteState();
+  }
+
+  _callRequestListeners(server, listeners, req, res) {
+    return listeners.map((listener) =>
+      listener.call(server, req, res));
+  }
+
+  _normalizeReqUrl(server) {
+    //# because socket.io removes all of our request
+    //# events, it forces the socket.io traffic to be
+    //# handled first.
+    //# however we need to basically do the same thing
+    //# it does and after we call into socket.io go
+    //# through and remove all request listeners
+    //# and change the req.url by slicing out the host
+    //# because the browser is in proxy mode
+    const listeners = server.listeners("request").slice(0);
+    server.removeAllListeners("request");
+    return server.on("request", (req, res) => {
+      setProxiedUrl(req);
+
+      return this._callRequestListeners(server, listeners, req, res);
+    });
+  }
+
+  _retryBaseUrlCheck(baseUrl, onWarning) {
+    return ensureUrl.retryIsListening(baseUrl, {
+      retryIntervals: [3000, 3000, 4000],
+      onRetry({ attempt, delay, remaining }) {
+        const warning = errors.get("CANNOT_CONNECT_BASE_URL_RETRYING", {
+          remaining,
+          attempt,
+          delay,
+          baseUrl
+        });
+
+        return onWarning(warning);
+      }
+    });
+  }
+
+  proxyWebsockets(proxy, socketIoRoute, req, socket, head) {
+    //# bail if this is our own namespaced socket.io request
+    let host, remoteOrigin;
+    if (req.url.startsWith(socketIoRoute)) {
+      if (!this._socketWhitelist.isRequestWhitelisted(req)) {
+        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.');
+        socket.end();
+      }
+
+      //# we can return here either way, if the socket is still valid socket.io will hook it up
+      return;
+    }
+
+    if ((host = req.headers.host) && this._remoteProps && (remoteOrigin = this._remoteOrigin)) {
+      //# get the port from @_remoteProps
+      //# get the protocol from remoteOrigin
+      //# get the hostname from host header
+      const {port}     = this._remoteProps;
+      const {protocol} = url.parse(remoteOrigin);
+      const {hostname} = url.parse(`http://${host}`);
+
+      const onProxyErr = (err, req, res) => debug("Got ERROR proxying websocket connection", { err, port, protocol, hostname, req });
+
+      return proxy.ws(req, socket, head, {
+        secure: false,
+        target: {
+          host: hostname,
+          port,
+          protocol
+        },
+        agent
+      }, onProxyErr);
+    } else {
+      //# we can't do anything with this socket
+      //# since we don't know how to proxy it!
+      if (socket.writable) { return socket.end(); }
+    }
+  }
+
+  reset() {
+    if (this._networkProxy != null) {
+      this._networkProxy.reset();
+    }
+
+    return this._onDomainSet(this._baseUrl != null ? this._baseUrl : "<root>");
+  }
+
+  _close() {
+    this.reset();
+
+    logger.unsetSettings();
+
+    evilDns.clear();
+
+    //# bail early we dont have a server or we're not
+    //# currently listening
+    if (!this._server || !this.isListening) { return Promise.resolve(); }
+
+    return this._server.destroyAsync()
+    .then(() => {
+      return this.isListening = false;
+    });
+  }
+
+  close() {
+    return Promise.join(
+      this._close(),
+      this._socket != null ? this._socket.close() : undefined,
+      this._fileServer != null ? this._fileServer.close() : undefined,
+      this._httpsProxy != null ? this._httpsProxy.close() : undefined
     )
-    .then =>
-      ## reset any middleware
-      @_middleware = null
+    .then(() => {
+      //# reset any middleware
+      return this._middleware = null;
+    });
+  }
 
-  end: ->
-    @_socket and @_socket.end()
+  end() {
+    return this._socket && this._socket.end();
+  }
 
-  changeToUrl: (url) ->
-    @_socket and @_socket.changeToUrl(url)
+  changeToUrl(url) {
+    return this._socket && this._socket.changeToUrl(url);
+  }
 
-  onTestFileChange: (filePath) ->
-    @_socket and @_socket.onTestFileChange(filePath)
+  onTestFileChange(filePath) {
+    return this._socket && this._socket.onTestFileChange(filePath);
+  }
 
-  onRequest: (fn) ->
-    @_middleware = fn
+  onRequest(fn) {
+    return this._middleware = fn;
+  }
 
-  onNextRequest: (fn) ->
-    @onRequest =>
-      fn.apply(@, arguments)
+  onNextRequest(fn) {
+    return this.onRequest(function() {
+      fn.apply(this, arguments);
 
-      @_middleware = null
+      return this._middleware = null;
+    }.bind(this));
+  }
 
-  startWebsockets: (automation, config, options = {}) ->
-    options.onResolveUrl = @_onResolveUrl.bind(@)
-    options.onRequest    = @_onRequest.bind(@)
+  startWebsockets(automation, config, options = {}) {
+    options.onResolveUrl = this._onResolveUrl.bind(this);
+    options.onRequest    = this._onRequest.bind(this);
 
-    options.onResetServerState = =>
-      @_networkProxy.reset()
+    options.onResetServerState = () => {
+      return this._networkProxy.reset();
+    };
 
-    @_socket = new Socket(config)
-    @_socket.startListening(@_server, automation, config, options)
-    @_normalizeReqUrl(@_server)
+    this._socket = new Socket(config);
+    this._socket.startListening(this._server, automation, config, options);
+    return this._normalizeReqUrl(this._server);
+  }
+}
 
-module.exports = Server
+module.exports = Server;

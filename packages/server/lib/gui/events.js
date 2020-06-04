@@ -1,360 +1,386 @@
-_           = require("lodash")
-ipc         = require("electron").ipcMain
-{ shell, clipboard } = require('electron')
-debug       = require('debug')('cypress:server:events')
-pluralize   = require("pluralize")
-stripAnsi   = require("strip-ansi")
-dialog      = require("./dialog")
-pkg         = require("./package")
-logs        = require("./logs")
-auth        = require("./auth")
-Windows     = require("./windows")
-api         = require("../api")
-open        = require("../util/open")
-user        = require("../user")
-errors      = require("../errors")
-Updater     = require("../updater")
-Project     = require("../project")
-openProject = require("../open_project")
-ensureUrl   = require("../util/ensure-url")
-chromePolicyCheck = require("../util/chrome_policy_check")
-browsers    = require("../browsers")
-konfig      = require("../konfig")
-editors     = require("../util/editors")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS103: Rewrite code to no longer use __guard__
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _           = require("lodash");
+const ipc         = require("electron").ipcMain;
+const { shell, clipboard } = require('electron');
+const debug       = require('debug')('cypress:server:events');
+const pluralize   = require("pluralize");
+const stripAnsi   = require("strip-ansi");
+const dialog      = require("./dialog");
+const pkg         = require("./package");
+const logs        = require("./logs");
+const auth        = require("./auth");
+const Windows     = require("./windows");
+const api         = require("../api");
+const open        = require("../util/open");
+const user        = require("../user");
+const errors      = require("../errors");
+const Updater     = require("../updater");
+const Project     = require("../project");
+const openProject = require("../open_project");
+const ensureUrl   = require("../util/ensure-url");
+const chromePolicyCheck = require("../util/chrome_policy_check");
+const browsers    = require("../browsers");
+const konfig      = require("../konfig");
+const editors     = require("../util/editors");
 
-nullifyUnserializableValues = (obj) =>
-  ## nullify values that cannot be cloned
-  ## https://github.com/cypress-io/cypress/issues/6750
-  _.cloneDeepWith obj, (val) =>
-    if _.isFunction(val)
-      return null
+const nullifyUnserializableValues = obj => {
+  //# nullify values that cannot be cloned
+  //# https://github.com/cypress-io/cypress/issues/6750
+  return _.cloneDeepWith(obj, val => {
+    if (_.isFunction(val)) {
+      return null;
+    }
+  });
+};
 
-handleEvent = (options, bus, event, id, type, arg) ->
-  debug("got request for event: %s, %o", type, arg)
+const handleEvent = function(options, bus, event, id, type, arg) {
+  debug("got request for event: %s, %o", type, arg);
 
-  sendResponse = (originalData = {}) ->
-    try
-      data = nullifyUnserializableValues(originalData)
+  const sendResponse = function(originalData = {}) {
+    try {
+      const data = nullifyUnserializableValues(originalData);
 
-      debug("sending ipc data %o", { type, data, originalData })
-      event.sender.send("response", data)
+      debug("sending ipc data %o", { type, data, originalData });
+      return event.sender.send("response", data);
+    } catch (error) {}
+  };
 
-  sendErr = (err) ->
-    debug("send error: %o", err)
-    sendResponse({id: id, __error: errors.clone(err, {html: true})})
+  const sendErr = function(err) {
+    debug("send error: %o", err);
+    return sendResponse({id, __error: errors.clone(err, {html: true})});
+  };
 
-  send = (data) ->
-    sendResponse({id: id, data: data})
+  const send = data => sendResponse({id, data});
 
-  sendNull = ->
-    send(null)
+  const sendNull = () => send(null);
 
-  onBus = (event) ->
-    bus.removeAllListeners(event)
-    bus.on(event, send)
+  const onBus = function(event) {
+    bus.removeAllListeners(event);
+    return bus.on(event, send);
+  };
 
-  switch type
-    when "on:menu:clicked"
-      onBus("menu:item:clicked")
+  switch (type) {
+    case "on:menu:clicked":
+      return onBus("menu:item:clicked");
 
-    when "on:app:event"
-      onBus("app:events")
+    case "on:app:event":
+      return onBus("app:events");
 
-    when "on:focus:tests"
-      onBus("focus:tests")
+    case "on:focus:tests":
+      return onBus("focus:tests");
 
-    when "on:spec:changed"
-      onBus("spec:changed")
+    case "on:spec:changed":
+      return onBus("spec:changed");
 
-    when "on:config:changed"
-      onBus("config:changed")
+    case "on:config:changed":
+      return onBus("config:changed");
 
-    when "on:project:error"
-      onBus("project:error")
+    case "on:project:error":
+      return onBus("project:error");
 
-    when "on:auth:message"
-      onBus("auth:message")
+    case "on:auth:message":
+      return onBus("auth:message");
 
-    when "on:project:warning"
-      onBus("project:warning")
+    case "on:project:warning":
+      return onBus("project:warning");
 
-    when "gui:error"
-      logs.error(arg)
+    case "gui:error":
+      return logs.error(arg)
       .then(sendNull)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "show:directory:dialog"
-      dialog.show()
+    case "show:directory:dialog":
+      return dialog.show()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "log:in"
-      user.logIn(arg)
+    case "log:in":
+      return user.logIn(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "log:out"
-      user.logOut()
+    case "log:out":
+      return user.logOut()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:current:user"
-      user.getSafely()
+    case "get:current:user":
+      return user.getSafely()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "external:open"
-      shell.openExternal(arg)
+    case "external:open":
+      return shell.openExternal(arg);
 
-    when "close:browser"
-      openProject.closeBrowser()
+    case "close:browser":
+      return openProject.closeBrowser()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "launch:browser"
-      # is there a way to lint the arguments received?
-      debug("launching browser for '%s' spec: %o", arg.specType, arg.spec)
-      # the "arg" should have objects for
-      #   - browser
-      #   - spec (with fields)
-      #       name, absolute, relative
-      #   - specType: "integration" | "component"
-      fullSpec = _.merge({}, arg.spec, {specType: arg.specType})
-      openProject.launch(arg.browser, fullSpec, {
-        projectRoot: options.projectRoot
-        onBrowserOpen: ->
-          send({browserOpened: true})
-        onBrowserClose: ->
-          send({browserClosed: true})
+    case "launch:browser":
+      // is there a way to lint the arguments received?
+      debug("launching browser for '%s' spec: %o", arg.specType, arg.spec);
+      // the "arg" should have objects for
+      //   - browser
+      //   - spec (with fields)
+      //       name, absolute, relative
+      //   - specType: "integration" | "component"
+      var fullSpec = _.merge({}, arg.spec, {specType: arg.specType});
+      return openProject.launch(arg.browser, fullSpec, {
+        projectRoot: options.projectRoot,
+        onBrowserOpen() {
+          return send({browserOpened: true});
+        },
+        onBrowserClose() {
+          return send({browserClosed: true});
+        }
       })
-      .catch (err) =>
-        err.title ?= 'Error launching browser'
+      .catch(err => {
+        if (err.title == null) { err.title = 'Error launching browser'; }
 
-        sendErr(err)
+        return sendErr(err);
+      });
 
-    when "begin:auth"
-      onMessage = (msg) ->
-        bus.emit('auth:message', msg)
+    case "begin:auth":
+      var onMessage = msg => bus.emit('auth:message', msg);
 
-      auth.start(onMessage)
+      return auth.start(onMessage)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "window:open"
-      Windows.open(options.projectRoot, arg)
+    case "window:open":
+      return Windows.open(options.projectRoot, arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "window:close"
-      Windows.getByWebContents(event.sender).destroy()
+    case "window:close":
+      return Windows.getByWebContents(event.sender).destroy();
 
-    when "open:finder"
-      open.opn(arg)
+    case "open:finder":
+      return open.opn(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:options"
-      pkg(options)
+    case "get:options":
+      return pkg(options)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "updater:check"
-      Updater.check({
-        onNewVersion: ({ version }) -> send(version)
-        onNoNewVersion: -> send(false)
-      })
+    case "updater:check":
+      return Updater.check({
+        onNewVersion({ version }) { return send(version); },
+        onNoNewVersion() { return send(false); }
+      });
 
-    when "get:logs"
-      logs.get()
+    case "get:logs":
+      return logs.get()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "clear:logs"
-      logs.clear()
+    case "clear:logs":
+      return logs.clear()
       .then(sendNull)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "on:log"
-      logs.onLog(send)
+    case "on:log":
+      return logs.onLog(send);
 
-    when "off:log"
-      logs.off()
-      send(null)
+    case "off:log":
+      logs.off();
+      return send(null);
 
-    when "get:orgs"
-      Project.getOrgs()
+    case "get:orgs":
+      return Project.getOrgs()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:projects"
-      Project.getPathsAndIds()
+    case "get:projects":
+      return Project.getPathsAndIds()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:project:statuses"
-      Project.getProjectStatuses(arg)
+    case "get:project:statuses":
+      return Project.getProjectStatuses(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:project:status"
-      Project.getProjectStatus(arg)
+    case "get:project:status":
+      return Project.getProjectStatus(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "add:project"
-      Project.add(arg, options)
+    case "add:project":
+      return Project.add(arg, options)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "remove:project"
-      Project.remove(arg)
-      .then -> send(arg)
-      .catch(sendErr)
+    case "remove:project":
+      return Project.remove(arg)
+      .then(() => send(arg))
+      .catch(sendErr);
 
-    when "open:project"
-      debug("open:project")
+    case "open:project":
+      debug("open:project");
 
-      onSettingsChanged = ->
-        bus.emit("config:changed")
+      var onSettingsChanged = () => bus.emit("config:changed");
 
-      onSpecChanged = (spec) ->
-        bus.emit("spec:changed", spec)
+      var onSpecChanged = spec => bus.emit("spec:changed", spec);
 
-      onFocusTests = ->
-        if _.isFunction(options.onFocusTests)
-          options.onFocusTests()
-        bus.emit("focus:tests")
+      var onFocusTests = function() {
+        if (_.isFunction(options.onFocusTests)) {
+          options.onFocusTests();
+        }
+        return bus.emit("focus:tests");
+      };
 
-      onError = (err) ->
-        bus.emit("project:error", errors.clone(err, {html: true}))
+      var onError = err => bus.emit("project:error", errors.clone(err, {html: true}));
 
-      onWarning = (warning) ->
-        warning.message = stripAnsi(warning.message)
-        bus.emit("project:warning", errors.clone(warning, {html: true}))
+      var onWarning = function(warning) {
+        warning.message = stripAnsi(warning.message);
+        return bus.emit("project:warning", errors.clone(warning, {html: true}));
+      };
 
-      browsers.getAllBrowsersWith(options.browser)
-      .then (browsers = []) ->
-        debug("setting found %s on the config", pluralize("browser", browsers.length, true))
-        options.config = _.assign(options.config, { browsers })
-      .then ->
-        chromePolicyCheck.run (err) ->
-          options.config.browsers.forEach (browser) ->
-            if browser.family == 'chromium'
-              browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP')
+      return browsers.getAllBrowsersWith(options.browser)
+      .then(function(browsers = []) {
+        debug("setting found %s on the config", pluralize("browser", browsers.length, true));
+        return options.config = _.assign(options.config, { browsers });}).then(function() {
+        chromePolicyCheck.run(err => options.config.browsers.forEach(function(browser) {
+          if (browser.family === 'chromium') {
+            return browser.warning = errors.getMsgByType('BAD_POLICY_WARNING_TOOLTIP');
+          }
+        }));
 
-        openProject.create(arg, options, {
-          onFocusTests: onFocusTests
-          onSpecChanged: onSpecChanged
-          onSettingsChanged: onSettingsChanged
-          onError: onError
-          onWarning: onWarning
-        })
-      .call("getConfig")
+        return openProject.create(arg, options, {
+          onFocusTests,
+          onSpecChanged,
+          onSettingsChanged,
+          onError,
+          onWarning
+        });}).call("getConfig")
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "close:project"
-      openProject.close()
+    case "close:project":
+      return openProject.close()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "setup:dashboard:project"
-      openProject.createCiProject(arg)
+    case "setup:dashboard:project":
+      return openProject.createCiProject(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:record:keys"
-      openProject.getRecordKeys()
+    case "get:record:keys":
+      return openProject.getRecordKeys()
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:user:editor"
-      editors.getUserEditor(true)
+    case "get:user:editor":
+      return editors.getUserEditor(true)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "set:user:editor"
-      editors.setUserEditor(arg)
+    case "set:user:editor":
+      return editors.setUserEditor(arg)
       .then(send)
-      .catch(sendErr)
+      .catch(sendErr);
 
-    when "get:specs"
-      openProject.getSpecChanges({
-        onChange: send
+    case "get:specs":
+      return openProject.getSpecChanges({
+        onChange: send,
         onError: sendErr
-      })
+      });
 
-    when "get:runs"
-      openProject.getRuns()
+    case "get:runs":
+      return openProject.getRuns()
       .then(send)
-      .catch (err) ->
-        err.type = if _.get(err, "statusCode") is 401
+      .catch(function(err) {
+        err.type = _.get(err, "statusCode") === 401 ?
           "UNAUTHENTICATED"
-        else if _.get(err, "cause.code") is "ESOCKETTIMEDOUT"
+        : _.get(err, "cause.code") === "ESOCKETTIMEDOUT" ?
           "TIMED_OUT"
-        else if _.get(err, "code") is "ENOTFOUND"
+        : _.get(err, "code") === "ENOTFOUND" ?
           "NO_CONNECTION"
-        else
-          err.type or "UNKNOWN"
+        :
+          err.type || "UNKNOWN";
 
-        sendErr(err)
+        return sendErr(err);
+      });
 
-    when "request:access"
-      openProject.requestAccess(arg)
+    case "request:access":
+      return openProject.requestAccess(arg)
       .then(send)
-      .catch (err) ->
-        err.type = if _.get(err, "statusCode") is 403
+      .catch(function(err) {
+        err.type = _.get(err, "statusCode") === 403 ?
           "ALREADY_MEMBER"
-        else if _.get(err, "statusCode") is 422 and /existing/.test(err.errors?.userId?.join(''))
+        : (_.get(err, "statusCode") === 422) && /existing/.test(__guard__(err.errors != null ? err.errors.userId : undefined, x => x.join(''))) ?
           "ALREADY_REQUESTED"
-        else
-          err.type or "UNKNOWN"
+        :
+          err.type || "UNKNOWN";
 
-        sendErr(err)
+        return sendErr(err);
+      });
 
-    when "onboarding:closed"
-      openProject.getProject()
+    case "onboarding:closed":
+      return openProject.getProject()
       .saveState({ showedOnBoardingModal: true })
-      .then(sendNull)
+      .then(sendNull);
 
-    when "ping:api:server"
-      apiUrl = konfig("api_url")
-      ensureUrl.isListening(apiUrl)
+    case "ping:api:server":
+      var apiUrl = konfig("api_url");
+      return ensureUrl.isListening(apiUrl)
       .then(send)
-      .catch (err) ->
-        ## if it's an aggegrate error, just send the first one
-        if err.length
-          subErr = err[0]
-          err.name = subErr.name or "#{subErr.code} #{subErr.address}:#{subErr.port}"
-          err.message = subErr.message or "#{subErr.code} #{subErr.address}:#{subErr.port}"
-        err.apiUrl = apiUrl
-        sendErr(err)
+      .catch(function(err) {
+        //# if it's an aggegrate error, just send the first one
+        if (err.length) {
+          const subErr = err[0];
+          err.name = subErr.name || `${subErr.code} ${subErr.address}:${subErr.port}`;
+          err.message = subErr.message || `${subErr.code} ${subErr.address}:${subErr.port}`;
+        }
+        err.apiUrl = apiUrl;
+        return sendErr(err);
+      });
 
-    when "ping:baseUrl"
-      baseUrl = arg
-      ensureUrl.isListening(baseUrl)
+    case "ping:baseUrl":
+      var baseUrl = arg;
+      return ensureUrl.isListening(baseUrl)
       .then(send)
-      .catch (err) ->
-        warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl)
-        sendErr(warning)
+      .catch(function(err) {
+        const warning = errors.get("CANNOT_CONNECT_BASE_URL_WARNING", baseUrl);
+        return sendErr(warning);
+      });
 
-    when "set:clipboard:text"
-      clipboard.writeText(arg)
-      sendNull()
+    case "set:clipboard:text":
+      clipboard.writeText(arg);
+      return sendNull();
 
-    else
-      throw new Error("No ipc event registered for: '#{type}'")
+    default:
+      throw new Error(`No ipc event registered for: '${type}'`);
+  }
+};
 
 module.exports = {
-  nullifyUnserializableValues
+  nullifyUnserializableValues,
 
-  handleEvent
+  handleEvent,
 
-  stop: ->
-    ipc.removeAllListeners()
+  stop() {
+    return ipc.removeAllListeners();
+  },
 
-  start: (options, bus) ->
-    ## curry left options
-    ipc.on "request", _.partial(@handleEvent, options, bus)
+  start(options, bus) {
+    //# curry left options
+    return ipc.on("request", _.partial(this.handleEvent, options, bus));
+  }
 
+};
+
+function __guard__(value, transform) {
+  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined;
 }

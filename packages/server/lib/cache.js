@@ -1,117 +1,150 @@
-_          = require("lodash")
-path       = require("path")
-Promise    = require("bluebird")
-fs         = require("./util/fs")
-appData    = require("./util/app_data")
-FileUtil   = require("./util/file")
-logger     = require("./logger")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _          = require("lodash");
+const path       = require("path");
+const Promise    = require("bluebird");
+const fs         = require("./util/fs");
+const appData    = require("./util/app_data");
+const FileUtil   = require("./util/file");
+const logger     = require("./logger");
 
-fileUtil = new FileUtil({
+const fileUtil = new FileUtil({
   path: appData.path("cache")
-})
+});
 
-convertProjectsToArray = (obj) ->
-  ## if our project structure is not
-  ## an array then its legacy and we
-  ## need to convert it
-  if not _.isArray(obj.PROJECTS)
-    obj.PROJECTS = _.chain(obj.PROJECTS).values().map("PATH").compact().value()
-    obj
+const convertProjectsToArray = function(obj) {
+  //# if our project structure is not
+  //# an array then its legacy and we
+  //# need to convert it
+  if (!_.isArray(obj.PROJECTS)) {
+    obj.PROJECTS = _.chain(obj.PROJECTS).values().map("PATH").compact().value();
+    return obj;
+  }
+};
 
-renameSessionToken = (obj) ->
-  if obj.USER and (st = obj.USER.session_token)
-    delete obj.USER.session_token
-    obj.USER.sessionToken = st
-    obj
+const renameSessionToken = function(obj) {
+  let st;
+  if (obj.USER && (st = obj.USER.session_token)) {
+    delete obj.USER.session_token;
+    obj.USER.sessionToken = st;
+    return obj;
+  }
+};
 
 module.exports = {
-  path: fileUtil.path
+  path: fileUtil.path,
 
-  defaults: ->
-    {
-      USER: {}
+  defaults() {
+    return {
+      USER: {},
       PROJECTS: []
+    };
+  },
+
+  _applyRewriteRules(obj = {}) {
+    return _.reduce([convertProjectsToArray, renameSessionToken], function(memo, fn) {
+      let ret;
+      if (ret = fn(memo)) {
+        return ret;
+      } else {
+        return memo;
+      }
     }
+    , _.cloneDeep(obj));
+  },
 
-  _applyRewriteRules: (obj = {}) ->
-    _.reduce [convertProjectsToArray, renameSessionToken], (memo, fn) ->
-      if ret = fn(memo)
-        return ret
-      else
-        return memo
-    , _.cloneDeep(obj)
+  read() {
+    return fileUtil.get().then(contents => {
+      return _.defaults(contents, this.defaults());
+    });
+  },
 
-  read: ->
-    fileUtil.get().then (contents) =>
-      _.defaults(contents, @defaults())
+  write(obj = {}) {
+    logger.info("writing to .cy cache", {cache: obj});
 
-  write: (obj = {}) ->
-    logger.info("writing to .cy cache", {cache: obj})
+    return fileUtil.set(obj).return(obj);
+  },
 
-    fileUtil.set(obj).return(obj)
+  _getProjects(tx) {
+    return tx.get("PROJECTS", []);
+  },
 
-  _getProjects: (tx) ->
-    tx.get("PROJECTS", [])
+  _removeProjects(tx, projects, paths) {
+    //# normalize paths in array
+    projects = _.without(projects, ...[].concat(paths));
 
-  _removeProjects: (tx, projects, paths) ->
-    ## normalize paths in array
-    projects = _.without(projects, [].concat(paths)...)
+    return tx.set({PROJECTS: projects});
+  },
 
-    tx.set({PROJECTS: projects})
+  getProjectRoots() {
+    return fileUtil.transaction(tx => {
+      return this._getProjects(tx).then(projects => {
+        const pathsToRemove = Promise.reduce(projects, (memo, path) => fs.statAsync(path)
+        .catch(() => memo.push(path)).return(memo)
+        , []);
 
-  getProjectRoots: ->
-    fileUtil.transaction (tx) =>
-      @_getProjects(tx).then (projects) =>
-        pathsToRemove = Promise.reduce projects, (memo, path) ->
-          fs.statAsync(path)
-          .catch ->
-            memo.push(path)
-          .return(memo)
-        , []
+        return pathsToRemove.then(removedPaths => {
+          return this._removeProjects(tx, projects, removedPaths);
+      }).then(() => {
+          return this._getProjects(tx);
+        });
+      });
+    });
+  },
 
-        pathsToRemove.then (removedPaths) =>
-          @_removeProjects(tx, projects, removedPaths)
-        .then =>
-          @_getProjects(tx)
+  removeProject(path) {
+    return fileUtil.transaction(tx => {
+      return this._getProjects(tx).then(projects => {
+        return this._removeProjects(tx, projects, path);
+      });
+    });
+  },
 
-  removeProject: (path) ->
-    fileUtil.transaction (tx) =>
-      @_getProjects(tx).then (projects) =>
-        @_removeProjects(tx, projects, path)
+  insertProject(path) {
+    return fileUtil.transaction(tx => {
+      return this._getProjects(tx).then(projects => {
+        //# projects are sorted by most recently used, so add a project to
+        //# the start or move it to the start if it already exists
+        const existingIndex = _.findIndex(projects, project => project === path);
+        if (existingIndex > -1) {
+          projects.splice(existingIndex, 1);
+        }
 
-  insertProject: (path) ->
-    fileUtil.transaction (tx) =>
-      @_getProjects(tx).then (projects) =>
-        ## projects are sorted by most recently used, so add a project to
-        ## the start or move it to the start if it already exists
-        existingIndex = _.findIndex projects, (project) -> project is path
-        if existingIndex > -1
-          projects.splice(existingIndex, 1)
+        projects.unshift(path);
+        return tx.set("PROJECTS", projects);
+      });
+    });
+  },
 
-        projects.unshift(path)
-        tx.set("PROJECTS", projects)
+  getUser() {
+    logger.info("getting user");
 
-  getUser: ->
-    logger.info "getting user"
+    return fileUtil.get("USER", {});
+  },
 
-    fileUtil.get("USER", {})
+  setUser(user) {
+    logger.info("setting user", {user});
 
-  setUser: (user) ->
-    logger.info("setting user", {user: user})
+    return fileUtil.set({USER: user});
+  },
 
-    fileUtil.set({USER: user})
+  removeUser() {
+    return fileUtil.set({USER: {}});
+  },
 
-  removeUser: ->
-    fileUtil.set({USER: {}})
+  remove() {
+    return fileUtil.remove();
+  },
 
-  remove: ->
-    fileUtil.remove()
+  //# for testing purposes
 
-  ## for testing purposes
+  __get: fileUtil.get.bind(fileUtil),
 
-  __get: fileUtil.get.bind(fileUtil)
-
-  __removeSync: ->
-    fileUtil._cache = {}
-    fs.removeSync(@path)
-}
+  __removeSync() {
+    fileUtil._cache = {};
+    return fs.removeSync(this.path);
+  }
+};
