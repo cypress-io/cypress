@@ -1579,7 +1579,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - shadows-everywhere
+              - pull/7469
         requires:
           - build-binary
           - build-npm-package
