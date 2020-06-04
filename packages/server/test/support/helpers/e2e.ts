@@ -206,7 +206,6 @@ const startServer = function (obj) {
 
   return new Bluebird((resolve) => {
     return srv.listen(port, () => {
-      // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)

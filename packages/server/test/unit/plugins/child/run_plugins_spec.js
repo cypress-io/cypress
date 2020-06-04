@@ -1,17 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../../spec_helper')
 
 const _ = require('lodash')
-const cp = require('child_process')
 const snapshot = require('snap-shot-it')
 
 const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
@@ -24,9 +13,6 @@ const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
 const colorCodeRe = /\[[0-9;]+m/gm
 const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
 
-const withoutStack = (err) => {
-  return _.omit(err, 'stack')
-}
 const withoutColorCodes = (str) => {
   return str.replace(colorCodeRe, '<color-code>')
 }
@@ -204,8 +190,6 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       it('wraps child promise', function () {
-        const args = ['arg1', 'arg2']
-
         this.ipc.on.withArgs('execute').yield('before:browser:launch', this.ids, this.args)
         expect(util.wrapChildPromise).to.be.called
         expect(util.wrapChildPromise.lastCall.args[0]).to.equal(this.ipc)

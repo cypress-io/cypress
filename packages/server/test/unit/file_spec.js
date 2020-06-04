@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const os = require('os')
@@ -23,8 +16,8 @@ describe('lib/util/file', () => {
 
     return fs.removeAsync(this.dir).catch(() => {})
   })
-  // ignore error if directory didn't exist in the first place
 
+  // ignore error if directory didn't exist in the first place
   it('throws if path is not specified', () => {
     expect(() => {
       return new FileUtil()

@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Bluebird = require('bluebird')
 const cert = require('@packages/https-proxy/test/helpers/certs')
@@ -87,8 +76,8 @@ const onServer = function (app) {
     , ms)
   })
 
-  app.get('/response_never_finishes', (req, res) => // dont ever end this response
-  {
+  app.get('/response_never_finishes', (req, res) => {
+    // dont ever end this response
     return res.type('html').write('foo\n')
   })
 
@@ -178,7 +167,7 @@ describe('e2e visit', () => {
       expectedExitCode: 1,
     })
 
-    return e2e.it('calls onBeforeLoad when overwriting cy.visit', {
+    e2e.it('calls onBeforeLoad when overwriting cy.visit', {
       snapshot: true,
       spec: 'issue_2196_spec.coffee',
     })
@@ -196,7 +185,7 @@ describe('e2e visit', () => {
       },
     })
 
-    return e2e.it('fails when response never ends', {
+    e2e.it('fails when response never ends', {
       spec: 'visit_response_never_ends_failing_spec.js',
       snapshot: true,
       expectedExitCode: 3,
@@ -215,7 +204,7 @@ describe('e2e visit', () => {
       },
     })
 
-    return e2e.it('fails when visit times out', {
+    e2e.it('fails when visit times out', {
       spec: 'visit_http_timeout_failing_spec.coffee',
       snapshot: true,
       expectedExitCode: 2,

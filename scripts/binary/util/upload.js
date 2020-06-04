@@ -1,20 +1,9 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const awspublish = require('gulp-awspublish')
 const human = require('human-interval')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const cp = require('child_process')
 const fse = require('fs-extra')
 const os = require('os')
 const Promise = require('bluebird')

@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const moment = require('moment')
 const parser = require('cookie-parser')
 const e2e = require('../support/helpers/e2e').default
@@ -135,8 +124,8 @@ const onServer = function (app) {
     return res.type('html').end()
   })
 
-  return app.get('/invalidControlCharCookie', (req, res) => // `http` lib throws an error if we use .setHeader to set this
-  {
+  return app.get('/invalidControlCharCookie', (req, res) => {
+    // `http` lib throws an error if we use .setHeader to set this
     return res.connection.end(`\
 HTTP/1.1 200 OK
 Content-Type: text/html
@@ -203,7 +192,7 @@ describe('e2e cookies', () => {
 
     // once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
     // we can remove this extra test case
-    return e2e.it('with forced SameSite strictness', {
+    e2e.it('with forced SameSite strictness', {
       config: {
         experimentalGetCookiesSameSite: true,
         baseUrl,
@@ -257,7 +246,7 @@ describe('e2e cookies', () => {
           https,
         ],
       ) => {
-        return e2e.it(`passes with baseurl: ${baseUrl}`, {
+        e2e.it(`passes with baseurl: ${baseUrl}`, {
           config: {
             experimentalGetCookiesSameSite: true,
             baseUrl,
@@ -281,7 +270,7 @@ describe('e2e cookies', () => {
         })
       })
 
-      return e2e.it('passes with no baseurl', {
+      e2e.it('passes with no baseurl', {
         config: {
           env: {
             httpUrl,

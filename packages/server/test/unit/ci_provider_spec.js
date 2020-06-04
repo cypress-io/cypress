@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const R = require('ramda')
 const mockedEnv = require('mocked-env')
 
 require('../spec_helper')
@@ -37,9 +25,9 @@ const expectsCommitDefaults = function (existing, expected) {
 describe('lib/util/ci_provider', () => {
   let resetEnv = null
 
-  afterEach(() => // we need to reset environment
-  // to avoid affecting tests in other suites
-  {
+  afterEach(() => {
+    // we need to reset environment
+    // to avoid affecting tests in other suites
     return typeof resetEnv === 'function' ? resetEnv() : undefined
   })
 

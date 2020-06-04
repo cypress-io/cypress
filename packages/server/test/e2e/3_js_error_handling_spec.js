@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const fs = require('fs')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
@@ -52,7 +45,7 @@ describe('e2e js error handling', () => {
     }],
   })
 
-  return e2e.it('fails', {
+  e2e.it('fails', {
     spec: 'js_error_handling_failing_spec.coffee',
     snapshot: true,
     expectedExitCode: 5,

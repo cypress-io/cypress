@@ -1,17 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const path = require('path')
-const R = require('ramda')
 const fs = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 
@@ -71,8 +60,6 @@ describe('lib/settings', () => {
           expect(err.message).to.include(projectRoot)
         })
       })
-
-      const noArguments = R.nAry(0)
 
       it('does not write initial file', () => {
         return settings.readEnv(projectRoot)

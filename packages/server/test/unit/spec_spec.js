@@ -1,23 +1,10 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
-const _ = require('lodash')
-const path = require('path')
 const spec = require(`${root}lib/controllers/spec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 
 describe('lib/controllers/spec', () => {
   const specName = 'sample.js'
-  const specSource = ';'
   const outputFilePath = 'foo/bar/sample.js'
 
   beforeEach(function () {

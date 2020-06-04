@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const ws = require('ws')
 
 const e2e = require('../support/helpers/e2e').default
@@ -43,7 +36,7 @@ describe('e2e websockets', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/556
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'websockets_spec.coffee',
     snapshot: true,
   })

@@ -1,20 +1,14 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
-let sizeOf = require('image-size')
-let fs = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
+let sizeOf = require('image-size')
+let fs = require('../../lib/util/fs')
 
 fs = Promise.promisifyAll(fs)
 sizeOf = Promise.promisify(sizeOf)
+
 const e2ePath = Fixtures.projectPath('e2e')
 
 const onServer = function (app) {
@@ -67,7 +61,7 @@ describe('e2e screenshots', () => {
   // this tests that screenshots can be manually generated
   // and are also generated automatically on failure with
   // the test title as the file name
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'screenshots_spec.js',
     expectedExitCode: 4,
     snapshot: true,

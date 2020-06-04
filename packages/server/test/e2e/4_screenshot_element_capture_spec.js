@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const e2e = require('../support/helpers/e2e').default
 
 const onServer = (app) => {
@@ -26,7 +19,7 @@ describe('e2e screenshot element capture', () => {
 
   // this tests that consistent screenshots are taken for element captures,
   // that the runner UI is hidden and that the page is scrolled properly
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'screenshot_element_capture_spec.coffee',
     snapshot: true,
   })

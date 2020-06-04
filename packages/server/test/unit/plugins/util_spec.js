@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const Promise = require('bluebird')
@@ -208,7 +198,7 @@ describe('lib/plugins/util', () => {
     })
 
     it('removes event listener once promise is fulfilled', function () {
-      const promise = util.wrapParentPromise(this.ipc, 0, this.callback)
+      util.wrapParentPromise(this.ipc, 0, this.callback)
       const invocationId = this.callback.lastCall.args[0]
 
       this.ipc.on.withArgs(`promise:fulfilled:${invocationId}`).yield(null, 'value')

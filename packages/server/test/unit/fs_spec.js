@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const fs = require(`${root}lib/util/fs`)
@@ -23,7 +13,6 @@ describe('lib/util/fs', () => {
 
     expect(console.error).to.be.calledWith(warning)
   })
-  // also print stack trace, maybe check that
 
   context('fs.pathExists', () => {
     it('finds this file', () => {

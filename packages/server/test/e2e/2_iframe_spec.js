@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const fs = require('fs')
 const path = require('path')
 const bodyParser = require('body-parser')
 const Fixtures = require('../support/helpers/fixtures')
@@ -64,8 +52,7 @@ outer contents
     return res.send('<html>simple</html>')
   })
 
-  app.get('/iframe', (req, res) => // send the iframe contents
-  {
+  app.get('/iframe', (req, res) => {
     return res.sendFile(path.join(e2ePath, 'static', 'iframe', 'index.html'))
   })
 
@@ -89,7 +76,7 @@ describe('e2e iframes', () => {
     },
   })
 
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'iframe_spec.coffee',
     snapshot: true,
     config: {

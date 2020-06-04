@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const str = require('underscore.string')
 const e2e = require('../support/helpers/e2e').default
 
 const onServer = function (app) {
@@ -69,7 +58,7 @@ describe('e2e web security', () => {
       },
     })
 
-    return e2e.it('fails', {
+    e2e.it('fails', {
       spec: 'web_security_spec.coffee',
       snapshot: true,
       expectedExitCode: 3,
@@ -94,7 +83,7 @@ describe('e2e web security', () => {
       },
     })
 
-    return e2e.it('passes', {
+    e2e.it('passes', {
       spec: 'web_security_spec.coffee',
       snapshot: true,
       browser: ['chrome', 'electron'],
@@ -109,7 +98,7 @@ context('firefox', () => {
     },
   })
 
-  return e2e.it('displays warning when firefox and chromeWebSecurity:false', {
+  e2e.it('displays warning when firefox and chromeWebSecurity:false', {
     spec: 'simple_passing_spec.coffee',
     snapshot: true,
     browser: 'firefox',

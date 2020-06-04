@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../lib/environment')
 
 const chai = require('chai')
@@ -26,7 +15,6 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 const path = require('path')
 const cache = require('../lib/cache')
-const appData = require('../lib/util/app_data')
 
 require('chai')
 .use(require('@cypress/sinon-chai'))
@@ -52,10 +40,10 @@ let hasOnly = false;
 ['it', 'describe', 'context'].forEach((prop) => {
   const backup = global[prop].only
 
-  global[prop].only = function () {
+  global[prop].only = function (...args) {
     hasOnly = true
 
-    return backup.apply(this, arguments)
+    return backup.apply(this, args)
   }
 })
 
@@ -67,16 +55,14 @@ sinon.usingPromise(Promise)
 // backup these originals
 const {
   restore,
-} = sinon
-const {
   useFakeTimers,
 } = sinon
 
-sinon.useFakeTimers = function () {
-  sinon._clock = useFakeTimers.apply(sinon, arguments)
+sinon.useFakeTimers = function (...args) {
+  sinon._clock = useFakeTimers.apply(sinon, args)
 }
 
-sinon.restore = function () {
+sinon.restore = function (...args) {
   let c
 
   c = sinon._clock
@@ -85,7 +71,7 @@ sinon.restore = function () {
     c.restore()
   }
 
-  return restore.apply(sinon, arguments)
+  return restore.apply(sinon, args)
 }
 
 mockery.enable({

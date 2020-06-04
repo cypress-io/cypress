@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const cors = require('cors')
 const parser = require('cookie-parser')
 const session = require('express-session')
@@ -128,7 +118,7 @@ describe('e2e subdomain', () => {
     },
   })
 
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'subdomain_spec.coffee',
     snapshot: true,
     config: {

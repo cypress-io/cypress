@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const la = require('lazy-ass')
 const net = require('net')
 

@@ -1,18 +1,7 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const R = require('ramda')
 const path = require('path')
-const files = require(`${root}lib/files`)
 const config = require(`${root}lib/config`)
 const specsUtil = require(`${root}lib/util/specs`)
 const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)

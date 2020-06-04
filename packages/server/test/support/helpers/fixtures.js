@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-console,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const fs = require('fs-extra')
 const path = require('path')
 const chokidar = require('chokidar')
@@ -41,18 +29,18 @@ module.exports = {
   },
 
   scaffoldWatch () {
-    let w
     const watchdir = path.resolve(__dirname, '../fixtures/projects')
 
     console.log('watching files due to --no-exit', watchdir)
 
-    w = chokidar.watch(watchdir, {
+    chokidar.watch(watchdir, {
     })
     .on('change', (srcFilepath, stats) => {
       const tmpFilepath = path.join(tmpDir, path.relative(watchdir, srcFilepath))
 
       return copyContents(srcFilepath, tmpFilepath)
-    }).on('error', console.error)
+    })
+    .on('error', console.error)
   },
 
   // removes all of the project fixtures
@@ -63,8 +51,8 @@ module.exports = {
 
   // returns the path to project fixture
   // in the tmpDir
-  project () {
-    return this.projectPath.apply(this, arguments)
+  project (...args) {
+    return this.projectPath.apply(this, args)
   },
 
   projectPath (name) {

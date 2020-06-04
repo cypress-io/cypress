@@ -1,19 +1,8 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const config = require(`${root}lib/config`)
 const files = require(`${root}lib/files`)
 const FixturesHelper = require(`${root}/test/support/helpers/fixtures`)
-const filesController = require(`${root}lib/controllers/files`)
 
 describe('lib/files', () => {
   beforeEach(function () {

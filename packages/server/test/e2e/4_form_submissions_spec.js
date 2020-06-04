@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const rp = require('@cypress/request-promise')
 const path = require('path')
 const Promise = require('bluebird')
@@ -111,7 +101,7 @@ describe('e2e forms', () => {
       snapshot: true,
     })
 
-    return e2e.it('failing', {
+    e2e.it('failing', {
       spec: 'form_submission_failing_spec.coffee',
       snapshot: true,
       expectedExitCode: 1,
@@ -142,12 +132,12 @@ describe('e2e forms', () => {
       ],
     })
 
-    before(() => // go out and fetch this image if we don't already have it
-    {
+    before(() => {
+      // go out and fetch this image if we don't already have it
       return fs
       .readFileAsync(pathToLargeImage)
-      .catch({ code: 'ENOENT' }, () => // 16MB image, too big to include with git repo
-      {
+      .catch({ code: 'ENOENT' }, () => {
+        // 16MB image, too big to include with git repo
         return rp('https://test-page-speed.cypress.io/files/huge-image.jpg')
         .then((resp) => {
           return fs.outputFileAsync(pathToLargeImage, resp)
@@ -163,7 +153,7 @@ describe('e2e forms', () => {
       snapshot: true,
     })
 
-    return e2e.it('passes with http on localhost', {
+    e2e.it('passes with http on localhost', {
       config: {
         baseUrl: `http://localhost:${HTTP_PORT}`,
       },

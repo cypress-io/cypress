@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const os = require('os')
@@ -17,7 +7,6 @@ const plugins = require(`${root}../lib/plugins`)
 const utils = require(`${root}../lib/browsers/utils`)
 const chrome = require(`${root}../lib/browsers/chrome`)
 const fs = require(`${root}../lib/util/fs`)
-const errors = require(`${root}../lib/errors`)
 
 describe('lib/browsers/chrome', () => {
   context('#open', () => {
@@ -98,8 +87,6 @@ describe('lib/browsers/chrome', () => {
     it('sets default window size in headless mode', function () {
       chrome._writeExtension.restore()
 
-      const pathToTheme = extension.getPathToTheme()
-
       return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
       .then(() => {
         const args = utils.launch.firstCall.args[2]
@@ -113,8 +100,6 @@ describe('lib/browsers/chrome', () => {
 
     it('does not load extension in headless mode', function () {
       chrome._writeExtension.restore()
-
-      const pathToTheme = extension.getPathToTheme()
 
       return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
       .then(() => {

@@ -1,24 +1,10 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
 const os = require('os')
-const http = require('http')
 const express = require('express')
 const Promise = require('bluebird')
-const {
-  connect,
-} = require('@packages/network')
-const routes = require(`${root}lib/routes`)
+const { connect } = require('@packages/network')
 const config = require(`${root}lib/config`)
 const logger = require(`${root}lib/logger`)
 const Server = require(`${root}lib/server`)

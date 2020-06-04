@@ -1,20 +1,8 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
 const R = require('ramda')
 const cp = require('child_process')
-const pr = require('../support/helpers/process')
 const pkg = require('../../package.json')
 const execa = require('execa')
 const semver = require('semver')
@@ -23,10 +11,10 @@ const anyLineWithCaret = (str) => {
   return str[0] === '>'
 }
 
-const clean = (str) => // remove blank lines and slice off any line
-// starting with a caret because thats junk
-// from npm logs
-{
+const clean = (str) => {
+  // remove blank lines and slice off any line
+  // starting with a caret because thats junk
+  // from npm logs
   return _
   .chain(str)
   .split('\n')

@@ -1,19 +1,5 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 let fs = require('fs-extra')
-const cp = require('child_process')
 const path = require('path')
 // we wrap glob to handle EMFILE error
 let glob = require('glob')
@@ -95,32 +81,33 @@ const copyAllToDist = function (distDir) {
   }
 
   const copyPackage = function (pkg) {
-    let globOptions
-
     console.log('** copy package: %s **', pkg)
 
     // copies the package to dist
     // including the default paths
     // and any specified in package.json files
     return Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
-    .then((json) => // grab all the files that match "files" wildcards
-    // but without all negated files ("!src/**/*.spec.js" for example)
-    // and default included paths
-    // and convert to relative paths
-    {
+    .then((json) => {
+      // grab all the files that match "files" wildcards
+      // but without all negated files ("!src/**/*.spec.js" for example)
+      // and default included paths
+      // and convert to relative paths
       return DEFAULT_PATHS
       .concat(json.files || [])
       .concat(json.main || [])
-    }).then((pkgFileMasks) => {},
-      debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks),
-      (globOptions = {
+    }).then((pkgFileMasks) => {
+      debug('for pkg %s have the following file masks %o', pkg, pkgFileMasks)
+      const globOptions = {
         cwd: pkg, // search in the package folder
         absolute: false, // and return relative file paths
         followSymbolicLinks: false, // do not follow symlinks
-      }),
-      externalUtils.globby(pkgFileMasks, globOptions)).map((foundFileRelativeToPackageFolder) => {
+      }
+
+      return externalUtils.globby(pkgFileMasks, globOptions)
+    }).map((foundFileRelativeToPackageFolder) => {
       return path.join(pkg, foundFileRelativeToPackageFolder)
-    }).tap(debug)
+    })
+    .tap(debug)
     .map(copyRelativePathToDist, { concurrency: 1 })
   }
 
@@ -172,8 +159,8 @@ const removeDevDependencies = function (packageFolder) {
 const retryGlobbing = function (pathToPackages, delay = 1000) {
   const retryGlob = () => {
     return glob(pathToPackages)
-    .catch({ code: 'EMFILE' }, () => // wait, then retry
-    {
+    .catch({ code: 'EMFILE' }, () => {
+      // wait, then retry
       return Promise
       .delay(delay)
       .then(retryGlob)
@@ -258,9 +245,6 @@ const symlinkAll = function (pathToDistPackages, pathTo) {
   console.log('symlink these packages', pathToDistPackages)
   la(check.unemptyString(pathToDistPackages),
     'missing paths to dist packages', pathToDistPackages)
-
-  const baseDir = path.dirname(pathTo())
-  const toBase = path.relative.bind(null, baseDir)
 
   const symlink = function (pkg) {
     // console.log(pkg, dist)

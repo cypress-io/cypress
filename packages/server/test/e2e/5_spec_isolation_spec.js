@@ -1,13 +1,3 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 const moment = require('moment')
@@ -122,8 +112,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       1234,
     )
 
-    const addFnAndAfterFn = (obj) => // add these two together
-    {
+    const addFnAndAfterFn = (obj) => {
       return obj.fnDuration + obj.afterFnDuration
     }
 
@@ -196,16 +185,16 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
 describe('e2e spec_isolation', () => {
   e2e.setup()
 
-  return e2e.it('fails', {
+  e2e.it('fails', {
     spec: specs,
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
     onRun (exec) {
       return exec()
-      .then(() => // now what we want to do is read in the outputPath
-      // and snapshot it so its what we expect after normalizing it
-      {
+      .then(() => {
+        // now what we want to do is read in the outputPath
+        // and snapshot it so its what we expect after normalizing it
         return fs.readJsonAsync(outputPath)
         .then((json) => {
         // ensure that config has been set

@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const path = require('path')
 const humanInterval = require('human-interval')
 const e2e = require('../support/helpers/e2e').default
 const glob = require('../../lib/util/glob')
@@ -26,7 +15,7 @@ describe('e2e video compression', () => {
     true,
     false,
   ].forEach((headed) => {
-    return e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
+    e2e.it(`passes (head${headed ? 'ed' : 'less'})`, {
       spec: 'video_compression_spec.coffee',
       snapshot: false,
       headed,

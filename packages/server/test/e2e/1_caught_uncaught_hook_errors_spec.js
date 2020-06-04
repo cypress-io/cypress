@@ -1,17 +1,4 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
-
-const e2ePath = Fixtures.projectPath('e2e')
 
 describe('e2e caught and uncaught hooks errors', () => {
   e2e.setup({

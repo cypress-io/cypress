@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const fse = require('fs-extra')
 const os = require('os')
@@ -28,7 +18,6 @@ const debug = require('debug')('cypress:binary')
 const R = require('ramda')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const humanInterval = require('human-interval')
 
 const meta = require('./meta')
 const smoke = require('./smoke')
@@ -95,18 +84,6 @@ const buildCypressApp = function (platform, version, options = {}) {
     log('#testBuiltStaticAssets')
 
     return testStaticAssets(distDir())
-  }
-
-  const canBuildInDocker = () => {
-    return (platform === 'linux') && (os.platform() === 'darwin')
-  }
-
-  const badPlatformMismatch = function () {
-    console.error(`⛔️  cannot build ${platform} from ${os.platform()}`)
-    console.error('⛔️  should use matching platform to build it')
-    console.error('program arguments')
-
-    return console.error(process.argv)
   }
 
   const checkPlatform = function () {

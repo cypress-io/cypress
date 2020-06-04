@@ -1,17 +1,5 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
-const _ = require('lodash')
 const EE = require('events')
 const extension = require('@packages/extension')
 const electron = require('electron')
@@ -86,7 +74,7 @@ describe('lib/gui/events', () => {
 
   context('.start', () => {
     it('ipc attaches callback on request', () => {
-      const handleEvent = sinon.stub(events, 'handleEvent')
+      sinon.stub(events, 'handleEvent')
 
       events.start({ foo: 'bar' })
 
@@ -557,9 +545,7 @@ describe('lib/gui/events', () => {
         return sinon.stub(Project.prototype, 'getConfig').resolves({ some: 'config' })
       })
 
-      afterEach(() => // close down 'open' projects
-      // to prevent side effects
-      {
+      afterEach(() => {
         return openProject.close()
       })
 

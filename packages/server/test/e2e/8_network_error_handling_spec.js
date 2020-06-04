@@ -1,33 +1,18 @@
-/* eslint-disable
-    no-console,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const express = require('express')
 const http = require('http')
 const https = require('https')
 const path = require('path')
-const net = require('net')
-const request = require('@cypress/request')
-const stream = require('stream')
 const debug = require('debug')('cypress:server:network-error-handling-spec')
 const Promise = require('bluebird')
 const bodyParser = require('body-parser')
 const DebugProxy = require('@cypress/debugging-proxy')
-let mitmProxy = require('http-mitm-proxy')
 const launcher = require('@packages/launcher')
 const chrome = require('../../lib/browsers/chrome')
 const e2e = require('../support/helpers/e2e').default
 const random = require('../../lib/util/random')
 const Fixtures = require('../support/helpers/fixtures')
+let mitmProxy = require('http-mitm-proxy')
 
 const PORT = 13370
 const PROXY_PORT = 13371

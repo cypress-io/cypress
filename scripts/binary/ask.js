@@ -1,21 +1,8 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 let fs = require('fs-extra')
 let glob = require('glob')
 const Promise = require('bluebird')
 const inquirer = require('inquirer')
-const la = require('lazy-ass')
-const check = require('check-more-types')
 const path = require('path')
 
 glob = Promise.promisify(glob)
@@ -190,8 +177,7 @@ const whichZipFile = () => {
   .get('zipFile')
 }
 
-const whichVersion = (distDir) => // realpath returns the absolute full path
-{
+const whichVersion = (distDir) => {
   return glob('*/package.json', { cwd: distDir, realpath: true })
   .map((pkg) => {
     return fs.readJsonAsync(pkg)
@@ -204,8 +190,7 @@ const whichVersion = (distDir) => // realpath returns the absolute full path
   })
 }
 
-const whichRelease = (distDir) => // realpath returns the absolute full path
-{
+const whichRelease = (distDir) => {
   return glob('*/package.json', { cwd: distDir, realpath: true })
   .map((pkg) => {
     return fs.readJsonAsync(pkg)

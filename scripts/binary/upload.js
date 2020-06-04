@@ -1,22 +1,9 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const awspublish = require('gulp-awspublish')
 const rename = require('gulp-rename')
 const gulpDebug = require('gulp-debug')
 let fs = require('fs-extra')
-const cp = require('child_process')
 const path = require('path')
 const gulp = require('gulp')
-const human = require('human-interval')
 const Promise = require('bluebird')
 const meta = require('./meta')
 const la = require('lazy-ass')
@@ -188,7 +175,7 @@ module.exports = {
           p.dirname = this.getUploadDirName({ version, platform })
 
           return p
-        })).pipe(debug())
+        })).pipe(gulpDebug())
         .pipe(publisher.publish(headers))
         .pipe(awspublish.reporter())
         .on('error', reject)

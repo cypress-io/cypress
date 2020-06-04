@@ -1,25 +1,10 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 delete global.fs
 
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
-const logger = require(`${root}lib/logger`)
-const cache = require(`${root}lib/cache`)
 const exception = require(`${root}lib/exception`)
-const Routes = require(`${root}lib/util/routes`)
-const Settings = require(`${root}lib/util/settings`)
 const system = require(`${root}lib/util/system`)
 const pkg = require('@packages/root')
 
@@ -52,6 +37,7 @@ describe('lib/exceptions', () => {
     describe('fields', () => {
       beforeEach(function () {
         try {
+          // eslint-disable-next-line no-undef
           return foo.bar()
         } catch (err) {
           this.err = err

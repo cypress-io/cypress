@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const e2e = require('../support/helpers/e2e').default
@@ -18,8 +7,7 @@ let counts = null
 const urlencodedParser = bodyParser.urlencoded({ extended: false })
 const jsonParser = bodyParser.json()
 
-const sendBackBody = (req, res) => // send back to the body
-{
+const sendBackBody = (req, res) => {
   return res.json(req.body)
 }
 
@@ -135,6 +123,7 @@ const onServer = function (app) {
         })
         .cookie('2293-session', true)
         .send({})
+      default:
     }
   })
 }

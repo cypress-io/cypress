@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
@@ -35,8 +25,6 @@ const config = require(`${root}lib/config`)
 const Server = require(`${root}lib/server`)
 const Project = require(`${root}lib/project`)
 const Watchers = require(`${root}lib/watchers`)
-const errors = require(`${root}lib/errors`)
-const files = require(`${root}lib/controllers/files`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 const resolve = require(`${root}lib/plugins/resolve`)
@@ -52,7 +40,7 @@ zlib = Promise.promisifyAll(zlib)
 const session = proxyquire('supertest-session', { supertest })
 
 const absolutePathRegex = /"\/[^{}]*?\.projects/g
-let sourceMapRegex = /\n\/\/# sourceMappingURL=.*$/im
+let sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
 
 const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
@@ -71,19 +59,6 @@ const removeWhitespace = function (c) {
 
 const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
-}
-
-const trimString = (s) => {
-  return _.trim(s)
-}
-const nonEmpty = (s) => {
-  return !_.isEmpty(s)
-}
-
-sourceMapRegex = /\n\/\/# sourceMappingURL\=.*/
-
-const removeSourceMapContents = (fileContents) => {
-  return fileContents.replace(sourceMapRegex, ';')
 }
 
 const browserifyFile = (filePath) => {
@@ -2909,8 +2884,6 @@ describe('Routes', () => {
       })
 
       it('injects document.domain on https requests to same superdomain but different subdomain', function () {
-        const contents = removeWhitespace(Fixtures.get('server/expected_https_inject.html'))
-
         return this.setup('https://www.foobar.com:8443')
         .then(() => {
           evilDns.add('*.foobar.com', '127.0.0.1')

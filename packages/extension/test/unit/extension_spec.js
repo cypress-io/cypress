@@ -1,21 +1,7 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
-let {
-  exec,
-} = require('child_process')
+let { exec } = require('child_process')
 let fs = require('fs-extra')
-const EE = require('events')
 const eol = require('eol')
 const path = require('path')
 const Promise = require('bluebird')

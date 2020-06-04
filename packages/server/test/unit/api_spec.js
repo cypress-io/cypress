@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
@@ -18,7 +7,6 @@ const {
 } = require('@packages/network')
 const pkg = require('@packages/root')
 const api = require(`${root}lib/api`)
-const browsers = require(`${root}lib/browsers`)
 const cache = require(`${root}lib/cache`)
 const machineId = require(`${root}lib/util/machine_id`)
 const Promise = require('bluebird')
@@ -785,8 +773,8 @@ describe('lib/api', () => {
 
     it('caches the response from the first request', () => {
       return api.getAuthUrls()
-      .then(() => // nock will throw if this makes a second HTTP call
-      {
+      .then(() => {
+        // nock will throw if this makes a second HTTP call
         return api.getAuthUrls()
       }).then((urls) => {
         expect(urls).to.deep.eq(AUTH_URLS)

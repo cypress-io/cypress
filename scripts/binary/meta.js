@@ -1,13 +1,3 @@
-/* eslint-disable
-    default-case,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
@@ -55,6 +45,8 @@ const buildDir = function (platform, ...args) {
 
       // x86 32bit architecture
       return path.resolve(root, 'win-ia32-unpacked', ...args)
+    default:
+      throw new Error('unexpected platform')
   }
 }
 
@@ -75,6 +67,8 @@ const zipDir = function (platform) {
       return buildDir(platform)
     case 'win32':
       return buildDir(platform)
+    default:
+      throw new Error('unexpected platform')
   }
 }
 
@@ -89,6 +83,8 @@ const buildAppDir = function (platform, ...args) {
       return buildDir(platform, 'resources', 'app', ...args)
     case 'win32':
       return buildDir(platform, 'resources', 'app', ...args)
+    default:
+      throw new Error('unexpected platform')
   }
 }
 
@@ -101,6 +97,8 @@ const buildAppExecutable = function (platform) {
       return buildDir(platform, 'Cypress')
     case 'win32':
       return buildDir(platform, 'Cypress')
+    default:
+      throw new Error('unexpected platform')
   }
 }
 

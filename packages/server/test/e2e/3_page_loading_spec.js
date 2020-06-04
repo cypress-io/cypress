@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const bodyParser = require('body-parser')
 const e2e = require('../support/helpers/e2e').default
 
@@ -84,7 +77,7 @@ describe('e2e page_loading', () => {
   // additionally this creates an edge case where after __cypress.initial is
   // set we send an XHR which should not inject because its requested for JSON
   // but that another XHR which is requested for html should inject
-  return e2e.it('passes', {
+  e2e.it('passes', {
     spec: 'page_loading_spec.coffee',
     snapshot: true,
   })

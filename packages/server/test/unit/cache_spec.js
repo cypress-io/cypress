@@ -1,18 +1,7 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
+require(`${root}lib/cwd`)
 
-const path = require('path')
 const Promise = require('bluebird')
-const cwd = require(`${root}lib/cwd`)
 const cache = require(`${root}lib/cache`)
 const fs = require(`${root}lib/util/fs`)
 const Fixtures = require('../support/helpers/fixtures')

@@ -1,29 +1,14 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-let fs = require('fs-extra')
 const Promise = require('bluebird')
 const bumpercar = require('@cypress/bumpercar')
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
 const R = require('ramda')
-const os = require('os')
 const { configFromEnvOrJsonFile, filenameToShellVariable } = require('@cypress/env-or-json-file')
 const makeEmptyGithubCommit = require('make-empty-github-commit')
 const parse = require('parse-github-repo-url')
 const { setCommitStatus } = require('@cypress/github-commit-status-check')
-
-fs = Promise.promisifyAll(fs)
 
 let car = null
 
@@ -361,9 +346,9 @@ Testing new Cypress version ${version}
       }
 
       return makeEmptyGithubCommit(specificBranchOptions)
-      .catch(() => // maybe there is no branch for next version
-      // try default branch
-      {
+      .catch(() => {
+        // maybe there is no branch for next version
+        // try default branch
         return makeEmptyGithubCommit(defaultOptions)
       }).then(createGithubCommitStatusCheck)
     }

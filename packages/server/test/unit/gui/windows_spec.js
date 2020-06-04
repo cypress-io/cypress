@@ -1,24 +1,11 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../../spec_helper')
 
 const _ = require('lodash')
 const path = require('path')
 const Promise = require('bluebird')
 const EE = require('events').EventEmitter
-const {
-  BrowserWindow,
-} = require('electron')
+const { BrowserWindow } = require('electron')
 const cyDesktop = require('@packages/desktop-gui')
-const user = require(`${root}../lib/user`)
 const Windows = require(`${root}../lib/gui/windows`)
 const savedState = require(`${root}../lib/saved_state`)
 

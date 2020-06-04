@@ -1,15 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 const _ = require('lodash')
 const http = require('http')
@@ -178,7 +166,7 @@ describe('app/background', () => {
     it('emits \'automation:push:request\'', (done) => {
       const info = { cause: 'explicit', cookie: { name: 'foo', value: 'bar' } }
 
-      const addListener = sinon.stub(browser.cookies.onChanged, 'addListener').yieldsAsync(info)
+      sinon.stub(browser.cookies.onChanged, 'addListener').yieldsAsync(info)
       const client = background.connect(`http://localhost:${PORT}`, '/__socket.io')
 
       return client.on('connect', () => {
@@ -259,8 +247,8 @@ describe('app/background', () => {
       })
       .then(() => {
         throw new Error('should have failed')
-      }).catch((err) => // we good if this hits
-      {
+      }).catch((err) => {
+        // we good if this hits
         expect(err).to.be.instanceof(Promise.RangeError)
       })
     })
@@ -300,8 +288,8 @@ describe('app/background', () => {
       })
       .then(() => {
         throw new Error('should have failed')
-      }).catch((err) => // we good if this hits
-      {
+      }).catch((err) => {
+        // we good if this hits
         expect(err).to.be.instanceof(Promise.RangeError)
       })
     })

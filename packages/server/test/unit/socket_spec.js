@@ -1,22 +1,9 @@
-/* eslint-disable
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const _ = require('lodash')
-const os = require('os')
 const path = require('path')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket')
-const extension = require('@packages/extension')
 const httpsAgent = require('https-proxy-agent')
 const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
@@ -113,9 +100,10 @@ describe('lib/socket', () => {
     context('on(automation:request)', () => {
       describe('#onAutomation', () => {
         let extensionBackgroundPage = null
+        let chrome
 
         before(() => {
-          global.chrome = {
+          chrome = global.chrome = {
             cookies: {
               set () {},
               getAll () {},
@@ -153,7 +141,7 @@ describe('lib/socket', () => {
         })
 
         after(() => {
-          return delete global.chrome
+          chrome = null
         })
 
         it('does not return cypress namespace or socket io cookies', function (done) {
@@ -336,13 +324,13 @@ describe('lib/socket', () => {
           })
         })
 
-        it('calls callback with error on rejection', function () {
-          const err = new Error('foo')
+        it('calls callback with error on rejection', function (done) {
+          const error = new Error('foo')
 
-          this.ar.withArgs('focus', { foo: 'bar' }).rejects(err)
+          this.ar.withArgs('focus', { foo: 'bar' }).rejects(error)
 
           return this.client.emit('automation:request', 'focus', { foo: 'bar' }, (resp) => {
-            expect(resp).to.deep.eq({ __error: err.message, __name: err.name, __stack: err.stack })
+            expect(resp.error.message).to.deep.eq(error.message)
 
             return done()
           })
@@ -574,7 +562,7 @@ describe('lib/socket', () => {
     context('constructor', () => {
       it('listens for \'file:updated\' on preprocessor', function () {
         this.cfg.watchForFileChanges = true
-        const socket = new Socket(this.cfg)
+        new Socket(this.cfg)
 
         expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
       })
@@ -582,7 +570,7 @@ describe('lib/socket', () => {
       it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
         preprocessor.emitter.on.reset()
         this.cfg.watchForFileChanges = false
-        const socket = new Socket(this.cfg)
+        new Socket(this.cfg)
 
         expect(preprocessor.emitter.on).not.to.be.called
       })

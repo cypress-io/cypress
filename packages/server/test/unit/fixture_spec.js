@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const path = require('path')
@@ -431,10 +421,7 @@ John,Chef,1982
       .then(() => {
         throw new Error('should have failed but did not')
       }).catch((err) => {
-        const p = `${this.fixturesFolder}/does-not-exist`
-
         expect(err.message).to.include('A fixture file could not be found')
-
         expect(err.message).to.include('/does-not-exist')
       })
     })

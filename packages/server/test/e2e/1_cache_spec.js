@@ -1,17 +1,5 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const fs = require('fs')
 const path = require('path')
-const express = require('express')
 const Fixtures = require('../support/helpers/fixtures')
 const e2e = require('../support/helpers/e2e').default
 
@@ -74,9 +62,9 @@ describe('e2e cache', () => {
       return e2e.exec(this, {
         spec: 'cache_clearing_spec.coffee',
       })
-      .then(() => // and after the cache is cleaned before
-      // opening the browser, it'll make a new request
-      {
+      .then(() => {
+        // and after the cache is cleaned before
+        // opening the browser, it'll make a new request
         expect(requestsForCache).to.eq(2)
       })
     })

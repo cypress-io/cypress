@@ -1,14 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const minimist = require('minimist')
 const Promise = require('bluebird')
 const la = require('lazy-ass')
@@ -19,7 +8,6 @@ const awspublish = require('gulp-awspublish')
 const rename = require('gulp-rename')
 const gulpDebug = require('gulp-debug')
 const gulp = require('gulp')
-const human = require('human-interval')
 const R = require('ramda')
 const hasha = require('hasha')
 

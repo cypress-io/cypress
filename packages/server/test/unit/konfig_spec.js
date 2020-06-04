@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 describe('lib/konfig', () => {
@@ -41,8 +31,6 @@ describe('lib/konfig', () => {
   })
 
   it('memoizes the result', () => {
-    const env = process.env['NODE_ENV']
-
     process.env['NODE_ENV'] = 'development'
     const config = require(`${root}lib/konfig`)
 
@@ -58,7 +46,7 @@ describe('lib/konfig', () => {
     delete process.env['NODE_ENV']
     delete require.cache[require.resolve(`${root}lib/konfig`)]
     expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
-    const config = require(`${root}lib/konfig`)
+    require(`${root}lib/konfig`)
 
     expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
     process.env['NODE_ENV'] = env

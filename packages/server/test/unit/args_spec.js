@@ -1,22 +1,10 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
-const _ = require('lodash')
 const path = require('path')
 const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const argsUtil = require(`${root}lib/util/args`)
-const proxyUtil = require(`${root}lib/util/proxy`)
 const getWindowsProxyUtil = require(`${root}lib/util/get-windows-proxy`)
 
 const cwd = process.cwd()

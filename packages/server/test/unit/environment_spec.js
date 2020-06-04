@@ -1,19 +1,10 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('../spec_helper')
 
 const Promise = require('bluebird')
 const pkg = require('@packages/root')
 const fs = require(`${root}lib/util/fs`)
 const mockedEnv = require('mocked-env')
-const {
-  app,
-} = require('electron')
+const { app } = require('electron')
 
 const setEnv = (env) => {
   process.env['CYPRESS_INTERNAL_ENV'] = env
