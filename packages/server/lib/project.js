@@ -54,7 +54,7 @@ class Project extends EE {
     }
 
     this.projectRoot = path.resolve(projectRoot)
-    this.watchers = Watchers()
+    this.watchers = new Watchers()
     this.cfg = null
     this.spec = null
     this.browser = null
@@ -68,7 +68,7 @@ class Project extends EE {
   open (options = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
-    this.server = Server()
+    this.server = new Server()
 
     _.defaults(options, {
       report: false,

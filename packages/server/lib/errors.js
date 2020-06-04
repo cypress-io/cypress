@@ -1,17 +1,4 @@
-/* eslint-disable
-    default-case,
-    no-case-declarations,
-    no-console,
-    no-const-assign,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS203: Remove `|| {}` from converted for-own loops
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-console */
 const _ = require('lodash')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
@@ -91,6 +78,9 @@ const isCypressErr = (err) => {
 }
 
 const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
+  // NOTE: declarations in case blocks are forbidden so we declare them up front
+  let filePath; let err; let msg; let str
+
   switch (type) {
     case 'CANNOT_TRASH_ASSETS':
       return `\
@@ -131,7 +121,7 @@ Your project has set the configuration option: \`chromeWebSecurity: false\`
 This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.\
 `
     case 'BROWSER_NOT_FOUND_BY_NAME':
-      let str = `\
+      str = `\
 Can't run because you've entered an invalid browser name.
 
 Browser: '${arg1}' was not found on your system or is not supported by Cypress.
@@ -159,7 +149,7 @@ See https://on.cypress.io/migration-guide for more information on breaking chang
 
       return str
     case 'BROWSER_NOT_FOUND_BY_PATH':
-      const msg = `\
+      msg = `\
 We could not identify a known browser at the path you provided: \`${arg1}\`
 
 The output from the command we ran was:\
@@ -531,8 +521,8 @@ Can't run project because port is currently in use: ${chalk.blue(arg1)}
 ${chalk.yellow('Assign a different port with the \'--port <port>\' argument or shut down the other running process.')}\
 `
     case 'ERROR_READING_FILE':
-      const filePath = `\`${arg1}\``
-      const err = `\`${arg2}\``
+      filePath = `\`${arg1}\``
+      err = `\`${arg2}\``
 
       return `\
 Error reading from: ${chalk.blue(filePath)}
@@ -1022,6 +1012,7 @@ Enable write permissions to this directory to ensure screenshots and videos are 
 
 If you don't require screenshots or videos to be stored you can safely ignore this warning.\
 `
+    default:
   }
 }
 

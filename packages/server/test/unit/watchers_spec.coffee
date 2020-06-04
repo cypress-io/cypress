@@ -13,7 +13,7 @@ describe "lib/watchers", ->
     })
 
     sinon.stub(chokidar, "watch").returns(@standardWatcher)
-    @watchers = Watchers()
+    @watchers = new Watchers()
 
   it "returns instance of watcher class", ->
     expect(@watchers).to.be.instanceof(Watchers)

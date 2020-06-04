@@ -1,16 +1,5 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+require('./cwd')
+
 const _ = require('lodash')
 const url = require('url')
 const http = require('http')
@@ -21,7 +10,6 @@ const evilDns = require('evil-dns')
 const isHtml = require('is-html')
 const httpProxy = require('http-proxy')
 const la = require('lazy-ass')
-const check = require('check-more-types')
 const httpsProxy = require('@packages/https-proxy')
 const compression = require('compression')
 const debug = require('debug')('cypress:server:server')
@@ -41,7 +29,6 @@ const statusCode = require('./util/status_code')
 const headersUtil = require('./util/headers')
 const allowDestroy = require('./util/server_destroy')
 const { SocketWhitelist } = require('./util/socket_whitelist')
-const cwd = require('./cwd')
 const errors = require('./errors')
 const logger = require('./logger')
 const Socket = require('./socket')
@@ -58,9 +45,9 @@ const ALLOWED_PROXY_BYPASS_URLS = [
   '/__cypress/static/favicon.ico',
 ]
 
-const _isNonProxiedRequest = (req) => // proxied HTTP requests have a URL like: "http://example.com/foo"
-// non-proxied HTTP requests have a URL like: "/foo"
-{
+const _isNonProxiedRequest = (req) => {
+  // proxied HTTP requests have a URL like: "http://example.com/foo"
+  // non-proxied HTTP requests have a URL like: "/foo"
   return req.proxiedUrl.startsWith('/')
 }
 
@@ -122,8 +109,6 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-// currently not making use of event emitter
-// but may do so soon
 class Server {
   constructor () {
     if (!(this instanceof Server)) {
@@ -156,16 +141,11 @@ class Server {
     // handle the proxied url in case
     // we have not yet started our websocket server
     app.use((req, res, next) => {
-      let m
-
       setProxiedUrl(req)
 
-      // if we've defined some middlware
-      // then call this. useful in tests
-      m = this._middleware
-
-      if (m) {
-        m(req, res)
+      // useful for tests
+      if (this._middleware) {
+        this._middleware(req, res)
       }
 
       // always continue on
@@ -190,8 +170,8 @@ class Server {
     return app
   }
 
-  createRoutes () {
-    return require('./routes').apply(null, arguments)
+  createRoutes (...args) {
+    return require('./routes').apply(null, args)
   }
 
   getHttpServer () {
@@ -488,7 +468,7 @@ class Server {
       return currentPromisePhase = fn()
     }
 
-    this._urlResolver = (p = new Promise((resolve, reject, onCancel) => {
+    return this._urlResolver = (p = new Promise((resolve, reject, onCancel) => {
       let urlFile
 
       onCancel(() => {
@@ -554,9 +534,9 @@ class Server {
 
               this._remoteVisitingUrl = false
 
-              const statusIs2xxOrAllowedFailure = () => // is our status code in the 2xx range, or have we disabled failing
-              // on status code?
-              {
+              const statusIs2xxOrAllowedFailure = () => {
+                // is our status code in the 2xx range, or have we disabled failing
+                // on status code?
                 return statusCode.isOk(incomingRes.statusCode) || options.failOnStatusCode === false
               }
 

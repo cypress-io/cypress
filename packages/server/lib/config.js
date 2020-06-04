@@ -1,21 +1,6 @@
-/* eslint-disable
-    default-case,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const R = require('ramda')
-const la = require('lazy-ass')
 const path = require('path')
-const check = require('check-more-types')
 const Promise = require('bluebird')
 const deepDiff = require('return-deep-diff')
 const errors = require('./errors')
@@ -42,7 +27,6 @@ const CYPRESS_SPECIAL_ENV_VARS = [
 
 const dashesOrUnderscoresRe = /^(_-)+/
 const oneOrMoreSpacesRe = /\s+/
-const everythingAfterFirstEqualRe = /=(.+)/
 
 const toWords = (str) => {
   return str.trim().split(oneOrMoreSpacesRe)
@@ -257,6 +241,7 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        default:
       }
     }
   })
@@ -312,7 +297,7 @@ const utils = {
   //   null - if there is an error finding the file
   discoverModuleFile (options) {
     debug('discover module file %o', options)
-    const { filename, projectRoot, isDefault } = options
+    const { filename, isDefault } = options
 
     if (!isDefault) {
       // they have it explicitly set, so it should be there
@@ -524,11 +509,12 @@ module.exports = {
     })
   },
 
-  updateWithPluginValues (cfg, overrides = {}) {
-    // diff the overrides with cfg
-    // including nested objects (env)
-    debug('starting config %o', cfg)
-    debug('overrides %o', overrides)
+  updateWithPluginValues (cfg, overrides) {
+    if (!overrides) {
+      overrides = {}
+    }
+
+    debug('updateWithPluginValues %o', { cfg, overrides })
 
     // make sure every option returned from the plugins file
     // passes our validation functions
@@ -789,8 +775,6 @@ module.exports = {
       })
       .then((result) => {
         if (result === null) {
-          const configFile = obj.configFile || CONFIG_DEFAULTS.configFile
-
           return errors.throw('PLUGINS_FILE_ERROR', path.resolve(obj.projectRoot, pluginsFile))
         }
 

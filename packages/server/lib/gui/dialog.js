@@ -1,17 +1,5 @@
-/* eslint-disable
-    brace-style,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const {
-  dialog,
-} = require('electron')
+const { dialog } = require('electron')
 
 module.exports = {
   show () {
@@ -29,9 +17,9 @@ module.exports = {
     }
 
     return dialog.showOpenDialog(props)
-    .then((obj) => // return the first path since there can only ever
-    // be a single directory selection
-    {
+    .then((obj) => {
+      // return the first path since there can only ever
+      // be a single directory selection
       return _.get(obj, ['filePaths', 0])
     })
   },

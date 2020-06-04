@@ -1,22 +1,11 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 require('./util/fs')
 
 const os = require('os')
-//
-// NOTE
-//
-// by loading "./cwd" we are changing the current working directory
+
+// NOTE: by loading "./cwd" we are changing the current working directory
 // to the "packages/server" folder
-const cwd = require('./cwd')
+require('./cwd')
+
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server')
 
@@ -48,7 +37,7 @@ if (env === 'development') {
 
 Promise.config(config)
 
-// note: we print error in development mode only
+// NOTE: errors are printed in development mode only
 try {
   // i wish we didn't have to do this but we have to append
   // these command line switches immediately

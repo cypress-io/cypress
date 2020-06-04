@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-console,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const chalk = require('chalk')
 const logger = require('../logger')
 
@@ -40,6 +30,7 @@ module.exports = {
         const str = JSON.stringify(log)
         const color = (i % 2) === 0 ? 'cyan' : 'yellow'
 
+        // eslint-disable-next-line no-console
         return console.log(chalk[color](str))
       })
     })

@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const R = require('ramda')
 const path = require('path')
@@ -17,7 +6,6 @@ const cwd = require('../cwd')
 const glob = require('../util/glob')
 const specsUtil = require('../util/specs')
 const pathHelpers = require('../util/path_helpers')
-const CacheBuster = require('../util/cache_buster')
 const debug = require('debug')('cypress:server:controllers')
 const { escapeFilenameInUrl } = require('../util/escape_filename')
 
@@ -87,8 +75,8 @@ module.exports = {
           return true
         }).then(R.tap((specs) => {
           return debug('filtered __all specs %o', specs)
-        })).map((spec) => // grab the name of each
-        {
+        })).map((spec) => {
+          // grab the name of each
           return spec.absolute
         }).map(convertSpecPath)
       }

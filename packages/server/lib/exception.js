@@ -1,17 +1,6 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const Promise = require('bluebird')
 const pkg = require('@packages/root')
-const path = require('path')
 const api = require('./api')
 const user = require('./user')
 const system = require('./util/system')
@@ -20,7 +9,6 @@ const system = require('./util/system')
 // data in the path
 const pathRe = /'?((\/|\\+|[a-z]:\\)[^\s']+)+'?/ig
 const pathSepRe = /[\/\\]+/
-const fileNameRe = /[^\s'/]+\.\w+:?\d*$/i
 const stripPath = (text) => {
   return (text || '').replace(pathRe, (path) => {
     const fileName = _.last(path.split(pathSepRe)) || ''

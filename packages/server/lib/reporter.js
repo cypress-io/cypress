@@ -1,17 +1,3 @@
-/* eslint-disable
-    no-case-declarations,
-    no-self-assign,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS205: Consider reworking code to avoid use of IIFEs
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const path = require('path')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
@@ -24,8 +10,6 @@ const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
 const { overrideRequire } = require('./override_require')
-
-const STATS = 'suites tests passes pending failures start end duration'.split(' ')
 
 // override calls to `require('mocha*')` when to always resolve with a mocha we control
 // otherwise mocha will be resolved from project's node_modules and might not work with our code
@@ -135,10 +119,9 @@ const mergeRunnable = (eventName) => {
 }
 
 const safelyMergeRunnable = function (hookProps, runnables) {
-  let runnable
   const { hookId, title, hookName, body, type } = hookProps
 
-  if (!(runnable = runnables[hookId])) {
+  if (!runnables[hookId]) {
     runnables[hookId] = {
       hookId,
       type,
@@ -158,9 +141,6 @@ const mergeErr = function (runnable, runnables, stats) {
 
   test.err = runnable.err
   test.state = 'failed'
-  if (test.duration == null) {
-    test.duration = test.duration
-  }
 
   if (runnable.type === 'hook') {
     test.failedFromHookId = runnable.hookId
@@ -223,7 +203,11 @@ class Reporter {
     this.reporterOptions = reporterOptions
   }
 
-  setRunnables (rootRunnable = { title: '' }) {
+  setRunnables (rootRunnable) {
+    if (!rootRunnable) {
+      rootRunnable = { title: '' }
+    }
+
     // manage stats ourselves
     this.stats = { suites: 0, tests: 0, passes: 0, pending: 0, skipped: 0, failures: 0 }
     this.runnables = {}
@@ -246,6 +230,7 @@ class Reporter {
     const runnable = (() => {
       switch (type) {
         case 'suite':
+          // eslint-disable-next-line no-case-declarations
           const suite = createSuite(runnableProps, parent)
 
           suite.tests = _.map(runnableProps.tests, (testProps) => {

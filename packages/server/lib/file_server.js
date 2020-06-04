@@ -1,13 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 // TODO: move this to packages/core-file-server
 
 const _ = require('lodash')
@@ -16,7 +6,6 @@ const url = require('url')
 const http = require('http')
 const path = require('path')
 const send = require('send')
-const errors = require('./errors')
 const allowDestroy = require('./util/server_destroy')
 const random = require('./util/random')
 const networkFailures = require('./util/network_failures')

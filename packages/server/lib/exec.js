@@ -1,10 +1,3 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const Promise = require('bluebird')
 const execa = require('execa')
 const R = require('ramda')
@@ -33,8 +26,8 @@ module.exports = {
       log('in folder:', projectRoot)
 
       return execa.shell(cmd, { cwd, env, shell })
-      // do we want to return all fields returned by execa?
       .then((result) => {
+        // do we want to return all fields returned by execa?
         result.shell = shell
         result.cmd = cmd
 

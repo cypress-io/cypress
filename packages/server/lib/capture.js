@@ -1,13 +1,3 @@
-/* eslint-disable
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _write = process.stdout.write
 const _log = process.log
 
@@ -18,19 +8,11 @@ const restore = function () {
 }
 
 const stdout = function () {
-  // always restore right when we start capturing
-  // restore()
-
   const logs = []
 
-  // lazily backup write to enable
-  // injection
-  const {
-    write,
-  } = process.stdout
-  const {
-    log,
-  } = process
+  // lazily backup write to enable injection
+  const { write } = process.stdout
+  const { log } = process
 
   // electron adds a new process.log
   // method for windows instead of process.stdout.write
@@ -39,6 +21,7 @@ const stdout = function () {
     process.log = function (str) {
       logs.push(str)
 
+      // eslint-disable-next-line prefer-rest-params
       return log.apply(this, arguments)
     }
   }
@@ -46,6 +29,7 @@ const stdout = function () {
   process.stdout.write = function (str) {
     logs.push(str)
 
+    // eslint-disable-next-line prefer-rest-params
     return write.apply(this, arguments)
   }
 

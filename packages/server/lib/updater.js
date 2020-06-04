@@ -1,32 +1,13 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:updater')
 const semver = require('semver')
 const request = require('@cypress/request')
 const NwUpdater = require('node-webkit-updater')
 const pkg = require('@packages/root')
-const {
-  agent,
-} = require('@packages/network')
+const { agent } = require('@packages/network')
 const cwd = require('./cwd')
 const konfig = require('./konfig')
 const { machineId } = require('./util/machine_id')
-
-// backup the original cwd
-const localCwd = cwd()
-
-const osxAppRe = /\.app$/
-const linuxAppRe = /Cypress$/i
 
 NwUpdater.prototype.checkNewVersion = function (cb) {
   const gotManifest = function (err, req, data) {
@@ -146,7 +127,7 @@ class Updater {
   }
 
   static check (options = {}) {
-    return Updater().check(options)
+    return new Updater().check(options)
   }
 }
 

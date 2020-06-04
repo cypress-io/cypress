@@ -1,14 +1,3 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
 const mime = require('mime')
 const path = require('path')
@@ -22,7 +11,6 @@ let debug = require('debug')('cypress:server:screenshot')
 const plugins = require('./plugins')
 const fs = require('./util/fs')
 const glob = require('./util/glob')
-const pathHelpers = require('./util/path_helpers')
 
 const RUNNABLE_SEPARATOR = ' -- '
 const pathSeparatorRe = /[\\\/]/g
@@ -201,8 +189,8 @@ const clearMultipartState = function () {
   multipartImages = []
 }
 
-const imagesMatch = (img1, img2) => // using Buffer::equals here
-{
+const imagesMatch = (img1, img2) => {
+  // using Buffer::equals here
   return img1.bitmap.data.equals(img2.bitmap.data)
 }
 
@@ -313,9 +301,9 @@ const ensureUniquePath = function (withoutExt, extension, num = 0) {
   })
 }
 
-const sanitizeToString = (title) => // test titles may be values which aren't strings like
-// null or undefined - so convert before trying to sanitize
-{
+const sanitizeToString = (title) => {
+  // test titles may be values which aren't strings like
+  // null or undefined - so convert before trying to sanitize
   return sanitize(_.toString(title))
 }
 

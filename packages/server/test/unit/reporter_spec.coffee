@@ -5,7 +5,7 @@ snapshot = require("snap-shot-it")
 
 describe "lib/reporter", ->
   beforeEach ->
-    @reporter = Reporter()
+    @reporter = new Reporter()
 
     @root = {
       id: 'r1'

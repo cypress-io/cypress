@@ -1,34 +1,22 @@
-/* eslint-disable
-    no-console,
-    no-undef,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+require('../cwd')
+
 const _ = require('lodash')
 const EE = require('events')
 const path = require('path')
 const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
-const cwd = require('../cwd')
 const plugins = require('../plugins')
 const resolve = require('./resolve')
 
 const errorMessage = function (err = {}) {
-  return ((((left1 = err.stack != null ? err.stack : err.annotated) != null ? left1 : err.message) || err.toString()))
+  return (err.stack || err.annotated || err.message || err.toString())
   .replace(/\n\s*at.*/g, '')
   .replace(/From previous event:\n?/g, '')
 }
 
 const clientSideError = function (err) {
+  // eslint-disable-next-line no-console
   console.log(err.message)
 
   err = errorMessage(err)

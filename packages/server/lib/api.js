@@ -1,15 +1,3 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-let intervals
 const _ = require('lodash')
 const os = require('os')
 const debug = require('debug')('cypress:server:api')
@@ -17,18 +5,16 @@ const request = require('@cypress/request-promise')
 const errors = require('@cypress/request-promise/errors')
 const Promise = require('bluebird')
 const humanInterval = require('human-interval')
-const {
-  agent,
-} = require('@packages/network')
+const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
 const routes = require('./util/routes')
-const system = require('./util/system')
-const cache = require('./cache')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
 const TWO_MINUTES = humanInterval('2 minutes')
+
+let intervals
 
 let DELAYS = [
   THIRTY_SECONDS,
@@ -122,8 +108,8 @@ const tagError = function (err) {
 // retry on timeouts, 5xx errors, or any error without a status code
 const isRetriableError = (err) => {
   return (err instanceof Promise.TimeoutError) ||
-(500 <= err.statusCode && err.statusCode < 600) ||
-(err.statusCode == null)
+    (500 <= err.statusCode && err.statusCode < 600) ||
+    (err.statusCode == null)
 }
 
 module.exports = {

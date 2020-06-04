@@ -1,29 +1,10 @@
-/* eslint-disable
-    brace-style,
-    no-unused-vars,
-    prefer-rest-params,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS104: Avoid inline assignments
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const _ = require('lodash')
-const uri = require('url')
 const Promise = require('bluebird')
 const cyDesktop = require('@packages/desktop-gui')
-const extension = require('@packages/extension')
 const contextMenu = require('electron-context-menu')
-const {
-  BrowserWindow,
-} = require('electron')
+const { BrowserWindow } = require('electron')
 const debug = require('debug')('cypress:server:windows')
 const cwd = require('../cwd')
-const user = require('../user')
 const savedState = require('../saved_state')
 
 let windows = {}
@@ -40,15 +21,6 @@ const getUrl = function (type) {
 
 const getByType = (type) => {
   return windows[type]
-}
-
-const getCookieUrl = (props) => {
-  return extension.getCookieUrl(props)
-}
-
-const firstOrNull = (cookies) => // normalize into null when empty array
-{
-  return cookies[0] != null ? cookies[0] : null
 }
 
 const setWindowProxy = function (win) {
@@ -175,18 +147,18 @@ module.exports = {
 
     const win = this._newBrowserWindow(options)
 
-    win.on('blur', function () {
-      return options.onBlur.apply(win, arguments)
+    win.on('blur', function (...args) {
+      return options.onBlur.apply(win, args)
     })
 
-    win.on('focus', function () {
-      return options.onFocus.apply(win, arguments)
+    win.on('focus', function (...args) {
+      return options.onFocus.apply(win, args)
     })
 
-    win.once('closed', function () {
+    win.once('closed', function (...args) {
       win.removeAllListeners()
 
-      return options.onClose.apply(win, arguments)
+      return options.onClose.apply(win, args)
     })
 
     // the webview loses focus on navigation, so we
@@ -200,12 +172,12 @@ module.exports = {
       })
     }
 
-    win.webContents.on('crashed', function () {
-      return options.onCrashed.apply(win, arguments)
+    win.webContents.on('crashed', function (...args) {
+      return options.onCrashed.apply(win, args)
     })
 
-    win.webContents.on('new-window', function () {
-      return options.onNewWindow.apply(win, arguments)
+    win.webContents.on('new-window', function (...args) {
+      return options.onNewWindow.apply(win, args)
     })
 
     ts = options.trackState
@@ -267,9 +239,8 @@ module.exports = {
 
     win.webContents.id = _.uniqueId('webContents')
 
-    win.once('closed', () => // slice the window out of windows reference
-    {
-      return delete windows[options.type]
+    win.once('closed', () => {
+      delete windows[options.type]
     })
 
     // enable our url to be a promise

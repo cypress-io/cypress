@@ -1,21 +1,9 @@
-/* eslint-disable
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
-const _ = require('lodash')
 const path = require('path')
 const check = require('syntax-error')
 const debug = require('debug')('cypress:server:fixture')
 const coffee = require('../../../packages/coffee')
 const Promise = require('bluebird')
 const jsonlint = require('jsonlint')
-const cwd = require('./cwd')
 const errors = require('./errors')
 const fs = require('./util/fs')
 const glob = require('./util/glob')
@@ -38,10 +26,6 @@ const extensions = [
 
 const queue = {}
 
-const lastCharacterIsNewLine = (str) => {
-  return str[str.length - 1] === '\n'
-}
-
 const friendlyJsonParse = function (s) {
   jsonlint.parse(s) // might throw good error
 
@@ -58,8 +42,6 @@ module.exports = {
     return this.fileExists(p)
     .then(function () {
       debug('fixture exact name exists', p)
-
-      const ext = path.extname(fixture)
 
       return this.parseFile(p, fixture, options)
     }).catch(function (e) {

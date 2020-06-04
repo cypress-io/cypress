@@ -160,7 +160,7 @@ describe "Routes", ->
             httpsServer.start(8443),
 
             ## and open our cypress server
-            @server = Server(Watchers())
+            @server = new Server(new Watchers())
 
             @server.open(cfg, project)
             .spread (port) =>

@@ -1,16 +1,8 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const path = require('path')
 
 // helper for resolving to the current working directory
 // since electron does not play nice with process.cwd()
 // this function should always return path.dirname('package.json')
-
 const appPath = (function () {
   // if lib is our basename then we haven't
   // been concatted or moved and we need to

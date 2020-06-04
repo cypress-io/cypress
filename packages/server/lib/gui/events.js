@@ -1,16 +1,4 @@
-/* eslint-disable
-    no-case-declarations,
-    no-unused-vars,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * DS103: Rewrite code to no longer use __guard__
- * DS207: Consider shorter variations of null checks
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-case-declarations */
 const _ = require('lodash')
 const ipc = require('electron').ipcMain
 const { shell, clipboard } = require('electron')
@@ -22,7 +10,6 @@ const pkg = require('./package')
 const logs = require('./logs')
 const auth = require('./auth')
 const Windows = require('./windows')
-const api = require('../api')
 const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
@@ -356,9 +343,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch((err) => {
         err.type = _.get(err, 'statusCode') === 403 ?
           'ALREADY_MEMBER'
-          : (_.get(err, 'statusCode') === 422) && /existing/.test(__guard__(err.errors != null ? err.errors.userId : undefined, (x) => {
+          : (_.get(err, 'statusCode') === 422) && /existing/.test(err.errors && err.errors.userId, (x) => {
             return x.join('')
-          })) ?
+          }) ?
             'ALREADY_REQUESTED'
             :
             err.type || 'UNKNOWN'
@@ -425,8 +412,4 @@ module.exports = {
     return ipc.on('request', _.partial(this.handleEvent, options, bus))
   },
 
-}
-
-function __guard__ (value, transform) {
-  return (typeof value !== 'undefined' && value !== null) ? transform(value) : undefined
 }
