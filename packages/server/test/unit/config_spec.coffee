@@ -826,6 +826,7 @@ describe "lib/config", ->
             nodeVersion:                { value: "default", from: "default" },
             experimentalComponentTesting: { value: false, from: "default" },
             componentFolder:              { value: "cypress/component", from: "default" },
+            experimentalShadowDomSupport: { value: false, from: "default" },
           })
 
       it "sets config, envFile and env", ->
@@ -899,6 +900,7 @@ describe "lib/config", ->
             nodeVersion:                { value: "default", from: "default" },
             experimentalComponentTesting: { value: false, from: "default" },
             componentFolder:              { value: "cypress/component", from: "default" },
+            experimentalShadowDomSupport: { value: false, from: "default" },
             env: {
               foo: {
                 value: "foo"

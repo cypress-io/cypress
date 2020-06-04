@@ -86,6 +86,10 @@ module.exports = (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
+      if (!Cypress.config('experimentalShadowDomSupport')) {
+        options.ignoreShadowBoundaries = false
+      }
+
       let aliasObj
       const consoleProps = {}
       const start = (aliasType) => {
@@ -280,10 +284,10 @@ module.exports = (Commands, Cypress, cy, state) => {
           // only support shadow traversal if we're not searching
           // within a subject and have been explicitly told to ignore
           // boundaries.
-          if (!options.ignoreShadowBoundaries || options.withinSubject) {
+          if (!options.ignoreShadowBoundaries) {
             $el = cy.$$(selector, options.withinSubject)
           } else {
-            const elementsWithShadow = $dom.findAllShadowRoots(state('document'))
+            const elementsWithShadow = $dom.findAllShadowRoots(options.withinSubject || state('document'))
 
             $el = cy.$$(selector, elementsWithShadow)
           }
@@ -532,50 +536,6 @@ module.exports = (Commands, Cypress, cy, state) => {
   })
 
   Commands.addAll({ prevSubject: 'element' }, {
-    shadow (subject, options) {
-      const userOptions = options || {}
-
-      options = _.defaults({}, userOptions, { log: true })
-
-      const consoleProps = {
-        'Applied To': $dom.getElements(subject),
-      }
-
-      if (options.log !== false) {
-        options._log = Cypress.log({
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
-
-      const setEl = ($el) => {
-        if (options.log === false) {
-          return
-        }
-
-        consoleProps.Yielded = $dom.getElements($el)
-        consoleProps.Elements = $el?.length
-
-        return options._log.set({ $el })
-      }
-
-      const getShadowRoots = () => {
-        // find all shadow roots of the subject(s), if any exist
-        const $el = subject
-        .map((i, node) => node.shadowRoot)
-        .filter((i, node) => node !== undefined && node !== null)
-
-        setEl($el)
-
-        return cy.verifyUpcomingAssertions($el, options, {
-          onRetry: getShadowRoots,
-        })
-      }
-
-      return getShadowRoots()
-    },
-
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
@@ -659,4 +619,50 @@ module.exports = (Commands, Cypress, cy, state) => {
       return subject
     },
   })
+
+  if (Cypress.config('experimentalShadowDomSupport')) {
+    Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
+      const userOptions = options || {}
+
+      options = _.defaults({}, userOptions, { log: true })
+
+      const consoleProps = {
+        'Applied To': $dom.getElements(subject),
+      }
+
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          consoleProps () {
+            return consoleProps
+          },
+        })
+      }
+
+      const setEl = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        consoleProps.Yielded = $dom.getElements($el)
+        consoleProps.Elements = $el?.length
+
+        return options._log.set({ $el })
+      }
+
+      const getShadowRoots = () => {
+        // find all shadow roots of the subject(s), if any exist
+        const $el = subject
+        .map((i, node) => node.shadowRoot)
+        .filter((i, node) => node !== undefined && node !== null)
+
+        setEl($el)
+
+        return cy.verifyUpcomingAssertions($el, options, {
+          onRetry: getShadowRoots,
+        })
+      }
+
+      return getShadowRoots()
+    })
+  }
 }

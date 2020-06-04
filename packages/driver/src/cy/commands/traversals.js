@@ -98,6 +98,10 @@ module.exports = (Commands, Cypress, cy) => {
         })
       }
 
+      if (!Cypress.config('experimentalShadowDomSupport')) {
+        options.ignoreShadowBoundaries = false
+      }
+
       const setEl = ($el) => {
         if (options.log === false) {
           return
