@@ -194,8 +194,8 @@ commands:
       browser:
         description: Name of the browser to use
         type: enum
-        enum: ["electron", "chrome", "firefox"]
-        default: "electron"
+        enum: ["", "electron", "chrome", "firefox"]
+        default: ""
       command:
         description: Test command to run to start Cypress tests
         type: string
@@ -260,9 +260,18 @@ commands:
       - when:
           condition: << parameters.folder >>
           steps:
-            - run:
-                working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
-                command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - when:
+                condition: << parameters.browser >>
+                steps:
+                - run:
+                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                    command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: << parameters.browser >>
+                steps:
+                - run:
+                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                    command: <<parameters.command>>
             - store_artifacts:
                 name: screenshots
                 path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/screenshots
