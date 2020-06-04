@@ -69,10 +69,10 @@ describe('src/cy/commands/fixtures', () => {
       ].join(''))
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -85,9 +85,9 @@ describe('src/cy/commands/fixtures', () => {
         return null
       })
 
-      it('throws if fixturesFolder is set to false', function (done) {
-        Cypress.config('fixturesFolder', false)
-
+      it('throws if fixturesFolder is set to false', {
+        fixturesFolder: false,
+      }, function (done) {
         cy.on('fail', () => {
           const { lastLog } = this
 
@@ -163,9 +163,9 @@ describe('src/cy/commands/fixtures', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.backend.withArgs('get:fixture').resolves({ foo: 'bar' })
 
         const timeout = cy.spy(Promise.prototype, 'timeout')

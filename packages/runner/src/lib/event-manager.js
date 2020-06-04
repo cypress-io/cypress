@@ -32,6 +32,9 @@ const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+/**
+ * @type {Cypress.Cypress}
+ */
 let Cypress
 
 const eventManager = {

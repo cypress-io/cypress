@@ -18,6 +18,74 @@ const runnableResetTimeout = Runnable.prototype.resetTimeout
 delete window.mocha
 delete window.Mocha
 
+function invokeFnWithOriginalTitle (ctx, originalTitle, mochaArgs, fn) {
+  const ret = fn.apply(ctx, mochaArgs)
+
+  ret.originalTitle = originalTitle
+
+  return ret
+}
+function overloadMochaFnForConfig (fnName, specWindow) {
+  const _fn = specWindow[fnName]
+
+  const fnType = fnName === 'it' || fnName === 'specify' ? 'Test' : 'Suite'
+
+  function overrideFn (fn) {
+    specWindow[fnName] = fn()
+    specWindow[fnName]['only'] = fn('only')
+    specWindow[fnName]['skip'] = fn('skip')
+    // override xit, xdescribe, etc
+    if (specWindow[`x${fnName}`]) specWindow[`x${fnName}`] = specWindow[fnName]['skip']
+  }
+
+  overrideFn(function (subFn) {
+    return function (...args) {
+      /**
+       * @type {Cypress.Cypress}
+       */
+      const Cypress = specWindow.Cypress
+
+      const origFn = subFn ? _fn[subFn] : _fn
+
+      if (args.length > 2 && _.isObject(args[1])) {
+        const opts = _.defaults({}, args[1], {
+          browser: null,
+        })
+
+        const mochaArgs = [args[0], args[2]]
+
+        const configMatchesBrowser = opts.browser == null || Cypress.isBrowser(opts.browser, `${fnType} config value \`{ browser }\``)
+
+        if (!configMatchesBrowser) {
+          // TODO: this would mess up the dashboard since it would be registered as a new test
+          const originalTitle = mochaArgs[0]
+
+          mochaArgs[0] = `${originalTitle} (skipped due to browser)`
+
+          // TODO: weird edge case where you have an .only but also skipped the test due to the browser
+          if (subFn === 'only') {
+            mochaArgs[1] = function () {
+              this.skip()
+            }
+
+            return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, origFn)
+          }
+
+          return invokeFnWithOriginalTitle(this, originalTitle, mochaArgs, _fn['skip'])
+        }
+
+        const ret = origFn.apply(this, mochaArgs)
+
+        ret.cfg = opts
+
+        return ret
+      }
+
+      return origFn.apply(this, args)
+    }
+  })
+}
+
 const ui = (specWindow, _mocha) => {
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
@@ -34,13 +102,20 @@ const ui = (specWindow, _mocha) => {
     // such as describe, it, before, beforeEach, etc
     this.suite.emit('pre-require', specWindow, null, this)
 
+    // allow testConfigOverrides/suite-config-overrides
+    // by accepting 3 arguments to it/describe/context
+    overloadMochaFnForConfig('it', specWindow)
+    overloadMochaFnForConfig('specify', specWindow)
+    overloadMochaFnForConfig('describe', specWindow)
+    overloadMochaFnForConfig('context', specWindow)
+
     return this
   }
 
   return _mocha.ui('bdd')
 }
 
-const set = (specWindow, _mocha) => {
+const setMochaProps = (specWindow, _mocha) => {
   // Mocha is usually defined in the spec when used normally
   // in the browser or node, so we add it as a global
   // for our users too
@@ -67,7 +142,7 @@ const globals = (specWindow, reporter) => {
   })
 
   // set mocha props on the specWindow
-  set(specWindow, _mocha)
+  setMochaProps(specWindow, _mocha)
 
   // return the newly created mocha instance
   return _mocha

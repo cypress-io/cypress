@@ -522,9 +522,10 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
-      it('does not throw when waiting for animations is disabled', () => {
+      it('does not throw when waiting for animations is disabled', {
+        waitForAnimations: false,
+      }, () => {
         cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-        Cypress.config('waitForAnimations', false)
 
         cy.get('button:first').trigger('mouseover').then(() => {
           expect(cy.ensureElementIsNotAnimating).not.to.be.called
@@ -572,10 +573,10 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
-    describe('assertion verification', () => {
+    describe('assertion verification', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         cy.on('log:added', (attrs, log) => {
           if (log.get('name') === 'assert') {
             this.lastLog = log
@@ -741,10 +742,10 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

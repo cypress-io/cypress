@@ -1008,10 +1008,10 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 200,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 200)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1881,10 +1881,10 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 100)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

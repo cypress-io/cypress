@@ -303,9 +303,10 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('does not throw when waiting for animations is disabled', () => {
+    it('does not throw when waiting for animations is disabled', {
+      waitForAnimations: false,
+    }, () => {
       cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
-      Cypress.config('waitForAnimations', false)
 
       cy.get(':text:first').type('foo').then(() => {
         expect(cy.ensureElementIsNotAnimating).not.to.be.called
