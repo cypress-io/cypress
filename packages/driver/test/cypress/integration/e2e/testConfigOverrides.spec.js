@@ -326,7 +326,7 @@ describe('per-test config', () => {
   })
 })
 
-describe('per-test-config baseUrl @slow', () => {
+describe('testConfigOverrides baseUrl @slow', () => {
   it('visit 1', { baseUrl: 'http://localhost:3501' }, () => {
     cy.visit('/fixtures/generic.html')
     cy.url().should('eq', 'http://localhost:3501/fixtures/generic.html')

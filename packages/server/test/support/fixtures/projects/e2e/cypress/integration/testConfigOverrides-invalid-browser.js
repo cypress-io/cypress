@@ -1,5 +1,5 @@
 describe('suite', () => {
-  it('has invalid per-test-config', {
+  it('has invalid testConfigOverrides', {
     browser: true,
   }, () => {})
 })

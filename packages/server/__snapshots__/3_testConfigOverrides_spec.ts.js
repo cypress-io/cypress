@@ -1,4 +1,4 @@
-exports['per-test-config / fails when passing invalid config value browser'] = `
+exports['testConfigOverrides / fails when passing invalid config value browser'] = `
 
 ====================================================================================================
 
@@ -7,14 +7,14 @@ exports['per-test-config / fails when passing invalid config value browser'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (per-test-config-invalid-browser.js)                                       │
-  │ Searched:   cypress/integration/per-test-config-invalid-browser.js                             │
+  │ Specs:      1 found (testConfigOverrides-invalid-browser.js)                                   │
+  │ Searched:   cypress/integration/testConfigOverrides-invalid-browser.js                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  per-test-config-invalid-browser.js                                              (1 of 1)
+  Running:  testConfigOverrides-invalid-browser.js                                          (1 of 1)
 
 
   1) An uncaught error was detected outside of a test
@@ -48,21 +48,21 @@ We dynamically generated a new test to display this failure.
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     per-test-config-invalid-browser.js                                               │
+  │ Spec Ran:     testConfigOverrides-invalid-browser.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/per-test-config-invalid-browser.js/An uncaught      (1280x720)
-     error was detected outside of a test (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/testConfigOverrides-invalid-browser.js/An uncau     (1280x720)
+     ght error was detected outside of a test (failed).png                                          
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/per-test-config-invalid-browser     (X second)
-                          .js.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid-bro     (X second)
+                          wser.js.mp4                                                               
 
 
 ====================================================================================================
@@ -72,14 +72,15 @@ We dynamically generated a new test to display this failure.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  per-test-config-invalid-browser.js       XX:XX        1        -        1        -        - │
+  │ ✖  testConfigOverrides-invalid-browser      XX:XX        1        -        1        -        - │
+  │    .js                                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
 
-exports['per-test-config / has originalTitle when skip due to browser config'] = `
+exports['testConfigOverrides / has originalTitle when skip due to browser config'] = `
 
 ====================================================================================================
 
@@ -88,18 +89,18 @@ exports['per-test-config / has originalTitle when skip due to browser config'] =
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (per-test-config-skip-browser.js)                                          │
-  │ Searched:   cypress/integration/per-test-config-skip-browser.js                                │
+  │ Specs:      1 found (testConfigOverrides-skip-browser.js)                                      │
+  │ Searched:   cypress/integration/testConfigOverrides-skip-browser.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  per-test-config-skip-browser.js                                                 (1 of 1)
+  Running:  testConfigOverrides-skip-browser.js                                             (1 of 1)
 
 
   suite
-    - has invalid per-test-config (skipped due to browser)
+    - has invalid testConfigOverrides (skipped due to browser)
 
 
   0 passing
@@ -117,15 +118,15 @@ exports['per-test-config / has originalTitle when skip due to browser config'] =
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     per-test-config-skip-browser.js                                                  │
+  │ Spec Ran:     testConfigOverrides-skip-browser.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/per-test-config-skip-browser.js     (X second)
-                          .mp4                                                                      
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-skip-browse     (X second)
+                          r.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -135,7 +136,7 @@ exports['per-test-config / has originalTitle when skip due to browser config'] =
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  per-test-config-skip-browser.js          XX:XX        1        -        -        1        - │
+  │ ✔  testConfigOverrides-skip-browser.js      XX:XX        1        -        -        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        -        -        1        -  
 

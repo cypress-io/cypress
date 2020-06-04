@@ -102,7 +102,7 @@ const ui = (specWindow, _mocha) => {
     // such as describe, it, before, beforeEach, etc
     this.suite.emit('pre-require', specWindow, null, this)
 
-    // allow per-test-config/per-suite-config
+    // allow testConfigOverrides/suite-config-overrides
     // by accepting 3 arguments to it/describe/context
     overloadMochaFnForConfig('it', specWindow)
     overloadMochaFnForConfig('specify', specWindow)
