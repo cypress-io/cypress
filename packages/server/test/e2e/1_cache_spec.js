@@ -1,63 +1,74 @@
-fs         = require("fs")
-path       = require("path")
-express    = require("express")
-Fixtures   = require("../support/helpers/fixtures")
-e2e        = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const fs         = require("fs");
+const path       = require("path");
+const express    = require("express");
+const Fixtures   = require("../support/helpers/fixtures");
+const e2e        = require("../support/helpers/e2e").default;
 
-replacerRe = /(<h1>)\w+(<\/h1>)/
+const replacerRe = /(<h1>)\w+(<\/h1>)/;
 
-e2ePath = Fixtures.projectPath("e2e")
+const e2ePath = Fixtures.projectPath("e2e");
 
-requestsForCache = 0
+let requestsForCache = 0;
 
-onServer = (app) ->
-  app.post "/write/:text", (req, res) ->
-    file = path.join(e2ePath, "index.html")
+const onServer = function(app) {
+  app.post("/write/:text", function(req, res) {
+    const file = path.join(e2ePath, "index.html");
 
-    fs.readFile file, "utf8", (err, str) ->
-      ## replace the word between <h1>...</h1>
-      str = str.replace(replacerRe, "$1#{req.params.text}$2")
+    return fs.readFile(file, "utf8", function(err, str) {
+      //# replace the word between <h1>...</h1>
+      str = str.replace(replacerRe, `$1${req.params.text}$2`);
 
-      fs.writeFile file, str, (err) ->
-        res.sendStatus(200)
+      return fs.writeFile(file, str, err => res.sendStatus(200));
+    });
+  });
 
-  app.get "/cached", (req, res) ->
-    requestsForCache += 1
+  return app.get("/cached", function(req, res) {
+    requestsForCache += 1;
 
-    res
+    return res
     .set("cache-control", "public, max-age=3600")
-    .send("this response will be disk cached")
+    .send("this response will be disk cached");
+  });
+};
 
-describe "e2e cache", ->
+describe("e2e cache", function() {
   e2e.setup({
     servers: {
-      port: 1515
-      onServer: onServer
+      port: 1515,
+      onServer,
       static: {
-        ## force caching to happen
+        //# force caching to happen
         maxAge: 3600000
       }
     }
-  })
+  });
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "cache_spec.coffee"
+  it("passes", function() {
+    return e2e.exec(this, {
+      spec: "cache_spec.coffee",
       snapshot: true
-    })
+    });
+  });
 
-  it "clears cache when browser is spawned", ->
-    e2e.exec(@, {
+  return it("clears cache when browser is spawned", function() {
+    return e2e.exec(this, {
       spec: "cache_clearing_spec.coffee"
     })
-    .then =>
-      ## only 1 request should have gone out
-      expect(requestsForCache).to.eq(1)
+    .then(() => {
+      //# only 1 request should have gone out
+      expect(requestsForCache).to.eq(1);
 
-      e2e.exec(@, {
+      return e2e.exec(this, {
         spec: "cache_clearing_spec.coffee"
       })
-      .then ->
-        ## and after the cache is cleaned before
-        ## opening the browser, it'll make a new request
-        expect(requestsForCache).to.eq(2)
+      .then(() => //# and after the cache is cleaned before
+      //# opening the browser, it'll make a new request
+      expect(requestsForCache).to.eq(2));
+    });
+  });
+});

@@ -1,108 +1,130 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-nmi         = require("node-machine-id")
-cwd         = require("#{root}lib/cwd")
-request     = require("@cypress/request")
-Updater     = require("#{root}lib/updater")
-pkg         = require("@packages/root")
-_           = require("lodash")
+const nmi         = require("node-machine-id");
+const cwd         = require(`${root}lib/cwd`);
+const request     = require("@cypress/request");
+const Updater     = require(`${root}lib/updater`);
+const pkg         = require("@packages/root");
+const _           = require("lodash");
 
-describe "lib/updater", ->
-  context "interface", ->
-    it "returns an updater instance", ->
-      u = new Updater({})
-      expect(u).to.be.instanceof Updater
+describe("lib/updater", function() {
+  context("interface", () => it("returns an updater instance", function() {
+    const u = new Updater({});
+    return expect(u).to.be.instanceof(Updater);
+  }));
 
-  context "#getPackage", ->
-    beforeEach ->
-      pkg.foo = "bar"
-      @updater = new Updater({})
-    afterEach ->
-      delete pkg.foo
+  context("#getPackage", function() {
+    beforeEach(function() {
+      pkg.foo = "bar";
+      return this.updater = new Updater({});
+    });
+    afterEach(() => delete pkg.foo);
 
-    it "inserts manifestUrl to package.json", ->
-      expected = _.extend({}, pkg, {
-        foo: "bar"
+    return it("inserts manifestUrl to package.json", function() {
+      const expected = _.extend({}, pkg, {
+        foo: "bar",
         manifestUrl: "https://download.cypress.io/desktop.json"
-      })
-      expect(@updater.getPackage()).to.deep.eq expected
+      });
+      return expect(this.updater.getPackage()).to.deep.eq(expected);
+    });
+  });
 
-  context "#getClient", ->
-    it "sets .client to new Updater", ->
-      u = new Updater({})
-      u.getClient()
-      expect(u.client).to.have.property("checkNewVersion")
+  context("#getClient", function() {
+    it("sets .client to new Updater", function() {
+      const u = new Updater({});
+      u.getClient();
+      return expect(u.client).to.have.property("checkNewVersion");
+    });
 
-    it "returns .client if exists", ->
-      u = new Updater({})
-      client  = u.getClient()
-      client2 = u.getClient()
-      expect(client).to.eq(client2)
+    return it("returns .client if exists", function() {
+      const u = new Updater({});
+      const client  = u.getClient();
+      const client2 = u.getClient();
+      return expect(client).to.eq(client2);
+    });
+  });
 
-  context "#checkNewVersion", ->
-    beforeEach ->
-      @get = sinon.spy(request, "get")
+  context("#checkNewVersion", function() {
+    beforeEach(function() {
+      this.get = sinon.spy(request, "get");
 
-      @updater = new Updater({})
+      return this.updater = new Updater({});
+    });
 
-    it "sends x-cypress-version", (done) ->
-      @updater.getClient().checkNewVersion =>
-        expect(@get).to.be.calledWithMatch({
+    it("sends x-cypress-version", function(done) {
+      this.updater.getClient().checkNewVersion(() => {
+        expect(this.get).to.be.calledWithMatch({
           headers: {
             "x-cypress-version": pkg.version
           }
-        })
-        done()
-      return
+        });
+        return done();
+      });
+    });
 
-    it "sends x-machine-id", (done) ->
+    it("sends x-machine-id", function(done) {
       nmi.machineId()
-      .then (id) =>
-        @updater.getClient().checkNewVersion =>
-          expect(@get).to.be.calledWithMatch({
+      .then(id => {
+        return this.updater.getClient().checkNewVersion(() => {
+          expect(this.get).to.be.calledWithMatch({
             headers: {
               "x-machine-id": id
             }
-          })
-          done()
-      return
+          });
+          return done();
+        });
+      });
+    });
 
-    it "sends x-machine-id as null on error", (done) ->
-      sinon.stub(nmi, "machineId").rejects(new Error())
+    return it("sends x-machine-id as null on error", function(done) {
+      sinon.stub(nmi, "machineId").rejects(new Error());
 
-      @updater.getClient().checkNewVersion =>
-        expect(@get).to.be.calledWithMatch({
+      this.updater.getClient().checkNewVersion(() => {
+        expect(this.get).to.be.calledWithMatch({
           headers: {
             "x-machine-id": null
           }
-        })
+        });
 
-        done()
+        return done();
+      });
 
-      return
+    });
+  });
 
-  context "#check", ->
-    beforeEach ->
-      @updater = new Updater({quit: sinon.spy()})
-      @updater.getClient()
-      sinon.stub(@updater.client, "checkNewVersion")
+  return context("#check", function() {
+    beforeEach(function() {
+      this.updater = new Updater({quit: sinon.spy()});
+      this.updater.getClient();
+      return sinon.stub(this.updater.client, "checkNewVersion");
+    });
 
-    it "calls checkNewVersion", ->
-      @updater.check()
-      expect(@updater.client.checkNewVersion).to.be.called
+    it("calls checkNewVersion", function() {
+      this.updater.check();
+      return expect(this.updater.client.checkNewVersion).to.be.called;
+    });
 
-    it "calls options.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.yields(null, true, {})
+    it("calls options.newVersionExists when there is a no version", function() {
+      this.updater.client.checkNewVersion.yields(null, true, {});
 
-      options = {onNewVersion: sinon.spy()}
-      @updater.check(options)
+      const options = {onNewVersion: sinon.spy()};
+      this.updater.check(options);
 
-      expect(options.onNewVersion).to.be.calledWith({})
+      return expect(options.onNewVersion).to.be.calledWith({});
+    });
 
-    it "calls options.newVersionExists when there is a no version", ->
-      @updater.client.checkNewVersion.yields(null, false)
+    return it("calls options.newVersionExists when there is a no version", function() {
+      this.updater.client.checkNewVersion.yields(null, false);
 
-      options = {onNoNewVersion: sinon.spy()}
-      @updater.check(options)
+      const options = {onNoNewVersion: sinon.spy()};
+      this.updater.check(options);
 
-      expect(options.onNoNewVersion).to.be.called
+      return expect(options.onNoNewVersion).to.be.called;
+    });
+  });
+});

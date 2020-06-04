@@ -1,175 +1,187 @@
-bodyParser   = require("body-parser")
-cookieParser = require("cookie-parser")
-e2e          = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const bodyParser   = require("body-parser");
+const cookieParser = require("cookie-parser");
+const e2e          = require("../support/helpers/e2e").default;
 
-counts = null
+let counts = null;
 
-urlencodedParser = bodyParser.urlencoded({ extended: false })
-jsonParser       = bodyParser.json()
+const urlencodedParser = bodyParser.urlencoded({ extended: false });
+const jsonParser       = bodyParser.json();
 
-sendBackBody = (req, res) ->
-  ## send back to the body
-  res.json(req.body)
+const sendBackBody = (req, res) => //# send back to the body
+res.json(req.body);
 
-onServer3 = (app) ->
-  app.get "/login", (req, res) ->
-    res.cookie("session", "1")
+const onServer3 = function(app) {
+  app.get("/login", function(req, res) {
+    res.cookie("session", "1");
 
-    res.send("<html>login</html>")
+    return res.send("<html>login</html>");
+  });
 
-  app.post "/login", (req, res) ->
-    res.cookie("session", "2")
+  app.post("/login", function(req, res) {
+    res.cookie("session", "2");
 
-    res.redirect("/cookies")
+    return res.redirect("/cookies");
+  });
 
-  app.get "/cookies", (req, res) ->
-    res.json({
-      cookie: req.headers.cookie
-    })
+  return app.get("/cookies", (req, res) => res.json({
+    cookie: req.headers.cookie
+  }));
+};
 
-onServer2 = (app) ->
-  app.get "/statusCode", (req, res) ->
-    code = req.query.code
+const onServer2 = function(app) {
+  app.get("/statusCode", function(req, res) {
+    const {
+      code
+    } = req.query;
 
-    res.sendStatus(code)
+    return res.sendStatus(code);
+  });
 
-  app.get "/params", (req, res) ->
-    res.json({
-      url: req.url
-      params: req.query
-    })
+  app.get("/params", (req, res) => res.json({
+    url: req.url,
+    params: req.query
+  }));
 
-  app.get "/redirect", (req, res) ->
-    res.redirect("/home")
+  app.get("/redirect", (req, res) => res.redirect("/home"));
 
-  app.get "/redirectWithCookie", (req, res) ->
-    res.cookie('foo', 'bar')
-    res.redirect("/home")
+  app.get("/redirectWithCookie", function(req, res) {
+    res.cookie('foo', 'bar');
+    return res.redirect("/home");
+  });
 
-  app.get "/home", (req, res) ->
-    res.send("<html>home</html>")
+  app.get("/home", (req, res) => res.send("<html>home</html>"));
 
-  app.post "/redirectPost", (req, res) ->
-    res.redirect("/home")
+  app.post("/redirectPost", (req, res) => res.redirect("/home"));
 
-  app.get "/headers", (req, res) ->
-    res.json({
-      headers: req.headers
-    })
+  app.get("/headers", (req, res) => res.json({
+    headers: req.headers
+  }));
 
-  app.post "/form", urlencodedParser, sendBackBody
+  app.post("/form", urlencodedParser, sendBackBody);
 
-  app.post "/json", jsonParser, sendBackBody
+  return app.post("/json", jsonParser, sendBackBody);
+};
 
-onServer = (app) ->
-  app.use(cookieParser())
+const onServer = function(app) {
+  app.use(cookieParser());
 
-  app.get "/cookies*", (req, res) ->
-    res.json(req.cookies)
+  app.get("/cookies*", (req, res) => res.json(req.cookies));
 
-  app.get "/counts", (req, res) ->
-    res.json(counts)
+  app.get("/counts", (req, res) => res.json(counts));
 
-  app.get "*", (req, res) ->
-    host = req.get("host")
+  return app.get("*", function(req, res) {
+    const host = req.get("host");
 
-    counts[host] += 1
+    counts[host] += 1;
 
-    switch host
-      when "localhost:2290"
-        res
+    switch (host) {
+      case "localhost:2290":
+        return res
         .cookie("2290", true, {
           path: "/cookies/one"
         })
-        .redirect("http://localhost:2291/")
+        .redirect("http://localhost:2291/");
 
-      when "localhost:2291"
-        res
+      case "localhost:2291":
+        return res
         .cookie("2291", true, {
           path: "/cookies/two"
         })
-        .redirect("http://localhost:2292/")
+        .redirect("http://localhost:2292/");
 
-      when "localhost:2292"
-        res
+      case "localhost:2292":
+        return res
         .set('Content-Type', 'text/html')
         .cookie("2292", true, {
           path: "/cookies/three"
         })
-        .send("<html><head></head><body>hi</body></html>")
+        .send("<html><head></head><body>hi</body></html>");
 
-      when "localhost:2293"
-        res
+      case "localhost:2293":
+        return res
         .cookie("2293", true, {
-          httpOnly: true
+          httpOnly: true,
           maxAge: 60000
         })
         .cookie("2293-session", true)
-        .send({})
+        .send({});
+    }
+  });
+};
 
-describe "e2e requests", ->
+describe("e2e requests", function() {
   e2e.setup({
     servers: [{
-      port: 2290
-      onServer: onServer
+      port: 2290,
+      onServer
     },{
-      port: 2291
-      onServer: onServer
+      port: 2291,
+      onServer
     },{
-      port: 2292
-      onServer: onServer
+      port: 2292,
+      onServer
     },{
-      port: 2293
-      onServer: onServer
+      port: 2293,
+      onServer
     }, {
-      port: 2294
+      port: 2294,
       onServer: onServer2
     }, {
-      port: 2295
+      port: 2295,
       onServer: onServer3
     }]
-  })
+  });
 
-  beforeEach ->
-    counts = {
-      "localhost:2290": 0
-      "localhost:2291": 0
-      "localhost:2292": 0
-      "localhost:2293": 0
-    }
+  beforeEach(() => counts = {
+    "localhost:2290": 0,
+    "localhost:2291": 0,
+    "localhost:2292": 0,
+    "localhost:2293": 0
+  });
 
-  e2e.it "passes", {
-    spec: "request_spec.coffee"
+  e2e.it("passes", {
+    spec: "request_spec.coffee",
     snapshot: true
-  }
+  });
 
-  it "fails when network immediately fails", ->
-    e2e.exec(@, {
-      spec: "request_http_network_error_failing_spec.coffee"
-      snapshot: true
+  it("fails when network immediately fails", function() {
+    return e2e.exec(this, {
+      spec: "request_http_network_error_failing_spec.coffee",
+      snapshot: true,
       expectedExitCode: 1
-    })
+    });
+  });
 
-  it "fails on status code", ->
-    e2e.exec(@, {
-      spec: "request_status_code_failing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
-      onStdout: (stdout) ->
-        stdout
+  it("fails on status code", function() {
+    return e2e.exec(this, {
+      spec: "request_status_code_failing_spec.coffee",
+      snapshot: true,
+      expectedExitCode: 1,
+      onStdout(stdout) {
+        return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
         .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
-    })
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",');
+      }
+    });
+  });
 
-  it "prints long http props on fail", ->
-    e2e.exec(@, {
-      spec: "request_long_http_props_failing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
-      onStdout: (stdout) ->
-        stdout
+  return it("prints long http props on fail", function() {
+    return e2e.exec(this, {
+      spec: "request_long_http_props_failing_spec.coffee",
+      snapshot: true,
+      expectedExitCode: 1,
+      onStdout(stdout) {
+        return stdout
         .replace(/"user-agent": ".+",/, '"user-agent": "foo",')
         .replace(/"etag": "(.+),/, '"etag": "W/13-52060a5f",')
-        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",')
-    })
+        .replace(/"date": "(.+),/, '"date": "Fri, 18 Aug 2017 15:01:13 GMT",');
+      }
+    });
+  });
+});

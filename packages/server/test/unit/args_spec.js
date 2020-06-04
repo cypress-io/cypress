@@ -1,486 +1,537 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-_        = require("lodash")
-path     = require("path")
-os       = require("os")
-snapshot = require("snap-shot-it")
-stripAnsi = require("strip-ansi")
-argsUtil  = require("#{root}lib/util/args")
-proxyUtil = require("#{root}lib/util/proxy")
-getWindowsProxyUtil = require("#{root}lib/util/get-windows-proxy")
+const _        = require("lodash");
+const path     = require("path");
+const os       = require("os");
+const snapshot = require("snap-shot-it");
+const stripAnsi = require("strip-ansi");
+const argsUtil  = require(`${root}lib/util/args`);
+const proxyUtil = require(`${root}lib/util/proxy`);
+const getWindowsProxyUtil = require(`${root}lib/util/get-windows-proxy`);
 
-cwd = process.cwd()
+const cwd = process.cwd();
 
-describe "lib/util/args", ->
-  beforeEach ->
-    @setup = (args...) ->
-      argsUtil.toObject(args)
+describe("lib/util/args", function() {
+  beforeEach(function() {
+    return this.setup = (...args) => argsUtil.toObject(args);
+  });
 
-  context "--smoke-test", ->
-    it "sets pong to ping", ->
-      options = @setup("--smoke-test", "--ping=123")
-      expect(options.pong).to.eq 123
+  context("--smoke-test", () => it("sets pong to ping", function() {
+    const options = this.setup("--smoke-test", "--ping=123");
+    return expect(options.pong).to.eq(123);
+  }));
 
-  context "--project", ->
-    it "sets projectRoot", ->
-      projectRoot = path.resolve(cwd, "./foo/bar")
-      options = @setup("--project", "./foo/bar")
-      expect(options.projectRoot).to.eq projectRoot
+  context("--project", () => it("sets projectRoot", function() {
+    const projectRoot = path.resolve(cwd, "./foo/bar");
+    const options = this.setup("--project", "./foo/bar");
+    return expect(options.projectRoot).to.eq(projectRoot);
+  }));
 
-  context "--run-project", ->
-    it "sets projectRoot", ->
-      projectRoot = path.resolve(cwd, "/baz")
-      options = @setup("--run-project", "/baz")
-      expect(options.projectRoot).to.eq projectRoot
+  context("--run-project", function() {
+    it("sets projectRoot", function() {
+      const projectRoot = path.resolve(cwd, "/baz");
+      const options = this.setup("--run-project", "/baz");
+      return expect(options.projectRoot).to.eq(projectRoot);
+    });
 
-    it "strips single double quote from the end", ->
-      # https://github.com/cypress-io/cypress/issues/535
-      # NPM does not pass correctly options that end with backslash
-      options = @setup("--run-project", "C:\\foo\"")
-      expect(options.runProject).to.eq("C:\\foo")
+    it("strips single double quote from the end", function() {
+      // https://github.com/cypress-io/cypress/issues/535
+      // NPM does not pass correctly options that end with backslash
+      const options = this.setup("--run-project", "C:\\foo\"");
+      return expect(options.runProject).to.eq("C:\\foo");
+    });
 
-    it "does not strip if there are multiple double quotes", ->
-      options = @setup("--run-project", '"foo bar"')
-      expect(options.runProject).to.eq('"foo bar"')
+    return it("does not strip if there are multiple double quotes", function() {
+      const options = this.setup("--run-project", '"foo bar"');
+      return expect(options.runProject).to.eq('"foo bar"');
+    });
+  });
 
-  context "--spec", ->
-    it "converts to array", ->
-      options = @setup("--run-project", "foo", "--spec", "cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js")
-      expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/a.js")
-      expect(options.spec[1]).to.eq("#{cwd}/cypress/integration/b.js")
-      expect(options.spec[2]).to.eq("#{cwd}/cypress/integration/c.js")
+  context("--spec", function() {
+    it("converts to array", function() {
+      const options = this.setup("--run-project", "foo", "--spec", "cypress/integration/a.js,cypress/integration/b.js,cypress/integration/c.js");
+      expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/a.js`);
+      expect(options.spec[1]).to.eq(`${cwd}/cypress/integration/b.js`);
+      return expect(options.spec[2]).to.eq(`${cwd}/cypress/integration/c.js`);
+    });
 
-    it "discards wrapping single quotes", ->
-      options = @setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'")
-      expect(options.spec[0]).to.eq("#{cwd}/cypress/integration/foo_spec.js")
+    return it("discards wrapping single quotes", function() {
+      const options = this.setup("--run-project", "foo", "--spec", "'cypress/integration/foo_spec.js'");
+      return expect(options.spec[0]).to.eq(`${cwd}/cypress/integration/foo_spec.js`);
+    });
+  });
 
-  context "--tag", ->
-    it "converts to array", ->
-      options = @setup("--run-project", "foo", "--tag", "nightly,production,build")
-      expect(options.tag[0]).to.eq("nightly")
-      expect(options.tag[1]).to.eq("production")
-      expect(options.tag[2]).to.eq("build")
+  context("--tag", () => it("converts to array", function() {
+    const options = this.setup("--run-project", "foo", "--tag", "nightly,production,build");
+    expect(options.tag[0]).to.eq("nightly");
+    expect(options.tag[1]).to.eq("production");
+    return expect(options.tag[2]).to.eq("build");
+  }));
 
-  context "--port", ->
-    it "converts to Number", ->
-      options = @setup("--port", "8080")
-      expect(options.config.port).to.eq(8080)
+  context("--port", () => it("converts to Number", function() {
+    const options = this.setup("--port", "8080");
+    return expect(options.config.port).to.eq(8080);
+  }));
 
-  context "--env", ->
-    it "converts to object literal", ->
-      options = @setup("--env", "foo=bar,version=0.12.1,host=localhost:8888,bar=qux=")
-      expect(options.config.env).to.deep.eq({
-        foo: "bar"
-        version: "0.12.1"
-        host: "localhost:8888"
+  context("--env", function() {
+    it("converts to object literal", function() {
+      const options = this.setup("--env", "foo=bar,version=0.12.1,host=localhost:8888,bar=qux=");
+      return expect(options.config.env).to.deep.eq({
+        foo: "bar",
+        version: "0.12.1",
+        host: "localhost:8888",
         bar: "qux="
-      })
+      });
+    });
 
-    it "throws if env string cannot be parsed", ->
-      expect () =>
-        @setup("--env", "nonono")
-      .to.throw
+    return it("throws if env string cannot be parsed", function() {
+      expect(() => {
+        return this.setup("--env", "nonono");
+    }).to.throw;
 
-      # now look at the error
-      try
-        @setup("--env", "nonono")
-      catch err
-        snapshot("invalid env error", stripAnsi(err.message))
+      // now look at the error
+      try {
+        return this.setup("--env", "nonono");
+      } catch (err) {
+        return snapshot("invalid env error", stripAnsi(err.message));
+      }
+    });
+  });
 
-  context "--reporterOptions", ->
-    it "converts to object literal", ->
-      reporterOpts = {
+  context("--reporterOptions", function() {
+    it("converts to object literal", function() {
+      const reporterOpts = {
         mochaFile: "path/to/results.xml",
         testCaseSwitchClassnameAndName: true,
         suiteTitleSeparatedBy: ".=|"
-      }
+      };
 
-      options = @setup("--reporterOptions", JSON.stringify(reporterOpts))
+      const options = this.setup("--reporterOptions", JSON.stringify(reporterOpts));
 
-      expect(options.config.reporterOptions).to.deep.eq(reporterOpts)
+      return expect(options.config.reporterOptions).to.deep.eq(reporterOpts);
+    });
 
-    it "converts nested objects with mixed assignment usage", ->
-      reporterOpts = {
+    it("converts nested objects with mixed assignment usage", function() {
+      const reporterOpts = {
         reporterEnabled: 'JSON, Spec',
         jsonReporterOptions: {
           toConsole: true
         }
-      }
+      };
 
-      ## as a full blown object
-      options = @setup("--reporterOptions", JSON.stringify(reporterOpts))
-      expect(options.config.reporterOptions).to.deep.eq(reporterOpts)
+      //# as a full blown object
+      let options = this.setup("--reporterOptions", JSON.stringify(reporterOpts));
+      expect(options.config.reporterOptions).to.deep.eq(reporterOpts);
 
-      ## as mixed usage
-      nestedJSON = JSON.stringify(reporterOpts.jsonReporterOptions)
+      //# as mixed usage
+      const nestedJSON = JSON.stringify(reporterOpts.jsonReporterOptions);
 
-      options = @setup(
+      options = this.setup(
         "--reporterOptions",
-        "reporterEnabled=JSON,jsonReporterOptions=#{nestedJSON}"
-      )
-      expect(options.config.reporterOptions).to.deep.eq({
+        `reporterEnabled=JSON,jsonReporterOptions=${nestedJSON}`
+      );
+      return expect(options.config.reporterOptions).to.deep.eq({
         reporterEnabled: 'JSON',
         jsonReporterOptions: {
           toConsole: true
         }
-      })
+      });
+    });
 
-    it "throws if reporter string cannot be parsed", ->
-      expect () =>
-        @setup("--reporterOptions", "abc")
-      .to.throw
+    return it("throws if reporter string cannot be parsed", function() {
+      expect(() => {
+        return this.setup("--reporterOptions", "abc");
+    }).to.throw;
 
-      # now look at the error
-      try
-        @setup("--reporterOptions", "abc")
-      catch err
-        snapshot("invalid reporter options error", stripAnsi(err.message))
+      // now look at the error
+      try {
+        return this.setup("--reporterOptions", "abc");
+      } catch (err) {
+        return snapshot("invalid reporter options error", stripAnsi(err.message));
+      }
+    });
+  });
 
-  context "--config", ->
-    it "converts to object literal", ->
-      options = @setup("--config", "pageLoadTimeout=10000,waitForAnimations=false")
+  context("--config", function() {
+    it("converts to object literal", function() {
+      const options = this.setup("--config", "pageLoadTimeout=10000,waitForAnimations=false");
 
-      expect(options.config.pageLoadTimeout).eq(10000)
-      expect(options.config.waitForAnimations).eq(false)
+      expect(options.config.pageLoadTimeout).eq(10000);
+      return expect(options.config.waitForAnimations).eq(false);
+    });
 
-    it "converts straight JSON stringification", ->
-      config = {
+    it("converts straight JSON stringification", function() {
+      const config = {
         pageLoadTimeout: 10000,
         waitForAnimations: false
-      }
+      };
 
-      options = @setup("--config", JSON.stringify(config))
-      expect(options.config).to.deep.eq(config)
+      const options = this.setup("--config", JSON.stringify(config));
+      return expect(options.config).to.deep.eq(config);
+    });
 
-    it "converts nested usage with JSON stringification", ->
-      config = {
+    it("converts nested usage with JSON stringification", function() {
+      const config = {
         pageLoadTimeout: 10000,
         waitForAnimations: false,
         blacklistHosts: ["one.com", "www.two.io"],
         hosts: {
           "foobar.com": "127.0.0.1",
         }
-      }
+      };
 
-      ## as a full blown object
-      options = @setup("--config", JSON.stringify(config))
-      expect(options.config).to.deep.eq(config)
+      //# as a full blown object
+      let options = this.setup("--config", JSON.stringify(config));
+      expect(options.config).to.deep.eq(config);
 
-      ## as mixed usage
-      hosts = JSON.stringify(config.hosts)
-      blacklistHosts = JSON.stringify(config.blacklistHosts)
+      //# as mixed usage
+      const hosts = JSON.stringify(config.hosts);
+      const blacklistHosts = JSON.stringify(config.blacklistHosts);
 
-      options = @setup(
+      options = this.setup(
         "--config",
         [
           "pageLoadTimeout=10000",
           "waitForAnimations=false",
-          "hosts=#{hosts}",
-          "blacklistHosts=#{blacklistHosts}",
+          `hosts=${hosts}`,
+          `blacklistHosts=${blacklistHosts}`,
         ].join(",")
 
-      )
-      expect(options.config).to.deep.eq(config)
+      );
+      return expect(options.config).to.deep.eq(config);
+    });
 
-    it "whitelists config properties", ->
-      options = @setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file")
+    it("whitelists config properties", function() {
+      const options = this.setup("--config", "foo=bar,port=1111,supportFile=path/to/support_file");
 
-      expect(options.config.port).to.eq(1111)
-      expect(options.config.supportFile).to.eq("path/to/support_file")
-      expect(options).not.to.have.property("foo")
+      expect(options.config.port).to.eq(1111);
+      expect(options.config.supportFile).to.eq("path/to/support_file");
+      return expect(options).not.to.have.property("foo");
+    });
 
-    it "overrides port in config", ->
-      options = @setup("--port", 2222, "--config", "port=3333")
-      expect(options.config.port).to.eq(2222)
+    it("overrides port in config", function() {
+      let options = this.setup("--port", 2222, "--config", "port=3333");
+      expect(options.config.port).to.eq(2222);
 
-      options = @setup("--port", 2222)
-      expect(options.config.port).to.eq(2222)
+      options = this.setup("--port", 2222);
+      return expect(options.config.port).to.eq(2222);
+    });
 
-    it "throws if config string cannot be parsed", ->
-      expect () =>
-        @setup("--config", "xyz")
-      .to.throw
+    return it("throws if config string cannot be parsed", function() {
+      expect(() => {
+        return this.setup("--config", "xyz");
+    }).to.throw;
 
-      # now look at the error
-      try
-        @setup("--config", "xyz")
-      catch err
-        snapshot("invalid config error", stripAnsi(err.message))
+      // now look at the error
+      try {
+        return this.setup("--config", "xyz");
+      } catch (err) {
+        return snapshot("invalid config error", stripAnsi(err.message));
+      }
+    });
+  });
 
-  context ".toArray", ->
-    beforeEach ->
-      @obj = {config: {foo: "bar"}, project: "foo/bar"}
+  context(".toArray", function() {
+    beforeEach(function() {
+      return this.obj = {config: {foo: "bar"}, project: "foo/bar"};});
 
-    it "rejects values which have an cooresponding underscore'd key", ->
-      expect(argsUtil.toArray(@obj)).to.deep.eq([
-        "--config=#{JSON.stringify({foo: 'bar'})}"
+    return it("rejects values which have an cooresponding underscore'd key", function() {
+      return expect(argsUtil.toArray(this.obj)).to.deep.eq([
+        `--config=${JSON.stringify({foo: 'bar'})}`,
         "--project=foo/bar",
-      ])
+      ]);
+    });
+  });
 
-  context ".toObject", ->
-    beforeEach ->
-      @hosts = { a: "b", b: "c" }
-      @blacklistHosts = ["a.com", "b.com"]
-      @specs = [
+  context(".toObject", function() {
+    beforeEach(function() {
+      this.hosts = { a: "b", b: "c" };
+      this.blacklistHosts = ["a.com", "b.com"];
+      this.specs = [
         path.join(cwd, "foo"),
         path.join(cwd, "bar"),
         path.join(cwd, "baz")
-      ]
-      @env = {
-        foo: "bar"
-        baz: "quux"
+      ];
+      this.env = {
+        foo: "bar",
+        baz: "quux",
         bar: "foo=quz"
-      }
-      @config = {
-        env: @env
-        hosts: @hosts
-        requestTimeout: 1234
-        blacklistHosts: @blacklistHosts
+      };
+      this.config = {
+        env: this.env,
+        hosts: this.hosts,
+        requestTimeout: 1234,
+        blacklistHosts: this.blacklistHosts,
         reporterOptions: {
           foo: "bar"
         }
-      }
+      };
 
-      s = (str) ->
-        JSON.stringify(str)
+      const s = str => JSON.stringify(str);
 
-      ## make sure it works with both --env=foo=bar and --config foo=bar
-      @obj = @setup(
+      //# make sure it works with both --env=foo=bar and --config foo=bar
+      return this.obj = this.setup(
         "--get-key",
         "--env=foo=bar,baz=quux,bar=foo=quz",
         "--config",
-        "requestTimeout=1234,blacklistHosts=#{s(@blacklistHosts)},hosts=#{s(@hosts)}"
-        "--reporter-options=foo=bar"
-        "--spec=foo,bar,baz",
-      )
+        `requestTimeout=1234,blacklistHosts=${s(this.blacklistHosts)},hosts=${s(this.hosts)}`,
+        "--reporter-options=foo=bar",
+        "--spec=foo,bar,baz"
+      );
+    });
 
-    it "coerces booleans", ->
-      expect(@setup("--foo=true").foo).be.true
-      expect(@setup("--no-record").record).to.be.false
-      expect(@setup("--record=false").record).to.be.false
+    it("coerces booleans", function() {
+      expect(this.setup("--foo=true").foo).be.true;
+      expect(this.setup("--no-record").record).to.be.false;
+      return expect(this.setup("--record=false").record).to.be.false;
+    });
 
-    it "backs up env, config, reporterOptions, spec", ->
-      expect(@obj).to.deep.eq({
-        cwd
-        _: []
-        config: @config
-        getKey: true
-        invokedFromCli: false
-        spec: @specs
-      })
+    it("backs up env, config, reporterOptions, spec", function() {
+      return expect(this.obj).to.deep.eq({
+        cwd,
+        _: [],
+        config: this.config,
+        getKey: true,
+        invokedFromCli: false,
+        spec: this.specs
+      });
+    });
 
-    it "can transpose back to an array", ->
-      mergedConfig = JSON.stringify({
-        requestTimeout: @config.requestTimeout
-        blacklistHosts: @blacklistHosts
-        hosts: @hosts
-        env: @env
+    return it("can transpose back to an array", function() {
+      const mergedConfig = JSON.stringify({
+        requestTimeout: this.config.requestTimeout,
+        blacklistHosts: this.blacklistHosts,
+        hosts: this.hosts,
+        env: this.env,
         reporterOptions: {
           foo: "bar"
         }
-      })
+      });
 
-      args = argsUtil.toArray(@obj)
+      const args = argsUtil.toArray(this.obj);
 
       expect(args).to.deep.eq([
-        "--config=#{mergedConfig}"
-        "--cwd=#{cwd}"
-        "--getKey=true"
-        "--spec=#{JSON.stringify(@specs)}",
-      ])
+        `--config=${mergedConfig}`,
+        `--cwd=${cwd}`,
+        "--getKey=true",
+        `--spec=${JSON.stringify(this.specs)}`,
+      ]);
 
-      expect(argsUtil.toObject(args)).to.deep.eq({
-        cwd
-        _: []
-        getKey: true
-        invokedFromCli: true
-        config: @config
-        spec: @specs
-      })
+      return expect(argsUtil.toObject(args)).to.deep.eq({
+        cwd,
+        _: [],
+        getKey: true,
+        invokedFromCli: true,
+        config: this.config,
+        spec: this.specs
+      });
+    });
+  });
 
-  context "--updating", ->
+  context("--updating", function() {
 
-    ## updating from 0.13.9 will omit the appPath + execPath so we must
-    ## handle these missing arguments manually
-    it "slurps up appPath + execPath if updating and these are omitted", ->
-      argv = [
-        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
-        "/Applications/Cypress.app"
-        "/Applications/Cypress.app"
+    //# updating from 0.13.9 will omit the appPath + execPath so we must
+    //# handle these missing arguments manually
+    it("slurps up appPath + execPath if updating and these are omitted", function() {
+      const argv = [
+        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress",
+        "/Applications/Cypress.app",
+        "/Applications/Cypress.app",
         "--updating"
-      ]
+      ];
 
-      expect(argsUtil.toObject(argv)).to.deep.eq({
-        cwd
+      return expect(argsUtil.toObject(argv)).to.deep.eq({
+        cwd,
         _: [
-          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
+          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress",
+          "/Applications/Cypress.app",
           "/Applications/Cypress.app"
-          "/Applications/Cypress.app"
-        ]
-        config: {}
-        appPath: "/Applications/Cypress.app"
-        execPath: "/Applications/Cypress.app"
-        invokedFromCli: false
+        ],
+        config: {},
+        appPath: "/Applications/Cypress.app",
+        execPath: "/Applications/Cypress.app",
+        invokedFromCli: false,
         updating: true
-      })
+      });
+    });
 
-    it "does not slurp up appPath + execPath if updating and these are already present in args", ->
-      argv = [
-        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
-        "/Applications/Cypress.app1"
-        "/Applications/Cypress.app2"
-        "--app-path=a"
-        "--exec-path=e"
+    return it("does not slurp up appPath + execPath if updating and these are already present in args", function() {
+      const argv = [
+        "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress",
+        "/Applications/Cypress.app1",
+        "/Applications/Cypress.app2",
+        "--app-path=a",
+        "--exec-path=e",
         "--updating"
-      ]
+      ];
 
-      expect(argsUtil.toObject(argv)).to.deep.eq({
-        cwd
+      return expect(argsUtil.toObject(argv)).to.deep.eq({
+        cwd,
         _: [
-          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress"
-          "/Applications/Cypress.app1"
+          "/private/var/folders/wr/3xdzqnq16lz5r1j_xtl443580000gn/T/cypress/Cypress.app/Contents/MacOS/Cypress",
+          "/Applications/Cypress.app1",
           "/Applications/Cypress.app2"
-        ]
-        config: {}
-        appPath: "a"
-        execPath: "e"
-        invokedFromCli: false
+        ],
+        config: {},
+        appPath: "a",
+        execPath: "e",
+        invokedFromCli: false,
         updating: true
-      })
+      });
+    });
+  });
 
-  context "with proxy", ->
-    beforeEach ->
-      process.env = @originalEnv
-      delete process.env.HTTP_PROXY
-      delete process.env.HTTPS_PROXY
-      delete process.env.NO_PROXY
-      delete process.env.http_proxy
-      delete process.env.https_proxy
-      delete process.env.no_proxy
+  return context("with proxy", function() {
+    beforeEach(function() {
+      process.env = this.originalEnv;
+      delete process.env.HTTP_PROXY;
+      delete process.env.HTTPS_PROXY;
+      delete process.env.NO_PROXY;
+      delete process.env.http_proxy;
+      delete process.env.https_proxy;
+      return delete process.env.no_proxy;
+    });
 
-    it "sets options from environment", ->
-      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
-      process.env.NO_PROXY = "a,b,c"
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyServer).to.eq "http://foo-bar.baz:123"
-      expect(options.proxyBypassList).to.eq "a,b,c,127.0.0.1,::1,localhost"
-      expect(process.env.HTTPS_PROXY).to.eq process.env.HTTP_PROXY
+    it("sets options from environment", function() {
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123";
+      process.env.NO_PROXY = "a,b,c";
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyServer).to.eq("http://foo-bar.baz:123");
+      expect(options.proxyBypassList).to.eq("a,b,c,127.0.0.1,::1,localhost");
+      return expect(process.env.HTTPS_PROXY).to.eq(process.env.HTTP_PROXY);
+    });
 
-    it "loads from Windows registry if not defined", ->
+    it("loads from Windows registry if not defined", function() {
       sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns({
         httpProxy: "http://quux.quuz",
         noProxy: "d,e,f"
-      })
-      sinon.stub(os, "platform").returns("win32")
-      options = @setup()
-      expect(options.proxySource).to.eq "win32"
-      expect(options.proxyServer).to.eq "http://quux.quuz"
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyServer).to.eq process.env.HTTPS_PROXY
-      expect(options.proxyBypassList).to.eq "d,e,f,127.0.0.1,::1,localhost"
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+      });
+      sinon.stub(os, "platform").returns("win32");
+      const options = this.setup();
+      expect(options.proxySource).to.eq("win32");
+      expect(options.proxyServer).to.eq("http://quux.quuz");
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyServer).to.eq(process.env.HTTPS_PROXY);
+      expect(options.proxyBypassList).to.eq("d,e,f,127.0.0.1,::1,localhost");
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    ['', 'false', '0'].forEach (override) ->
-      it "doesn't load from Windows registry if HTTP_PROXY overridden with string '#{override}'", ->
-        sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns()
-        sinon.stub(os, "platform").returns("win32")
-        process.env.HTTP_PROXY = override
-        options = @setup()
-        expect(getWindowsProxyUtil.getWindowsProxy).to.not.beCalled
-        expect(options.proxySource).to.be.undefined
-        expect(options.proxyServer).to.be.undefined
-        expect(options.proxyBypassList).to.be.undefined
-        expect(process.env.HTTP_PROXY).to.be.undefined
-        expect(process.env.HTTPS_PROXY).to.be.undefined
-        expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
+    ['', 'false', '0'].forEach(override => it(`doesn't load from Windows registry if HTTP_PROXY overridden with string '${override}'`, function() {
+      sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns();
+      sinon.stub(os, "platform").returns("win32");
+      process.env.HTTP_PROXY = override;
+      const options = this.setup();
+      expect(getWindowsProxyUtil.getWindowsProxy).to.not.beCalled;
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.be.undefined;
+      expect(options.proxyBypassList).to.be.undefined;
+      expect(process.env.HTTP_PROXY).to.be.undefined;
+      expect(process.env.HTTPS_PROXY).to.be.undefined;
+      return expect(process.env.NO_PROXY).to.eq("127.0.0.1,::1,localhost");
+    }));
 
-    it "doesn't mess with env vars if Windows registry doesn't have proxy", ->
-      sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns()
-      sinon.stub(os, "platform").returns("win32")
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.be.undefined
-      expect(options.proxyBypassList).to.be.undefined
-      expect(process.env.HTTP_PROXY).to.be.undefined
-      expect(process.env.HTTPS_PROXY).to.be.undefined
-      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
+    it("doesn't mess with env vars if Windows registry doesn't have proxy", function() {
+      sinon.stub(getWindowsProxyUtil, "getWindowsProxy").returns();
+      sinon.stub(os, "platform").returns("win32");
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.be.undefined;
+      expect(options.proxyBypassList).to.be.undefined;
+      expect(process.env.HTTP_PROXY).to.be.undefined;
+      expect(process.env.HTTPS_PROXY).to.be.undefined;
+      return expect(process.env.NO_PROXY).to.eq("127.0.0.1,::1,localhost");
+    });
 
-    it "sets a default NO_PROXY", ->
-      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "127.0.0.1,::1,localhost"
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+    it("sets a default NO_PROXY", function() {
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123";
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyBypassList).to.eq("127.0.0.1,::1,localhost");
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "does not add localhost to NO_PROXY if NO_PROXY contains <-loopback>", ->
-      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
-      process.env.NO_PROXY = "a,b,c,<-loopback>,d"
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "a,b,c,<-loopback>,d"
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+    it("does not add localhost to NO_PROXY if NO_PROXY contains <-loopback>", function() {
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123";
+      process.env.NO_PROXY = "a,b,c,<-loopback>,d";
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyBypassList).to.eq("a,b,c,<-loopback>,d");
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "sets a default localhost NO_PROXY if NO_PROXY = ''", ->
-      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
-      process.env.NO_PROXY = ""
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "127.0.0.1,::1,localhost"
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+    it("sets a default localhost NO_PROXY if NO_PROXY = ''", function() {
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123";
+      process.env.NO_PROXY = "";
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyBypassList).to.eq("127.0.0.1,::1,localhost");
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "does not set a default localhost NO_PROXY if NO_PROXY = '<-loopback>'", ->
-      process.env.HTTP_PROXY = "http://foo-bar.baz:123"
-      process.env.NO_PROXY = "<-loopback>"
-      options = @setup()
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq "<-loopback>"
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+    it("does not set a default localhost NO_PROXY if NO_PROXY = '<-loopback>'", function() {
+      process.env.HTTP_PROXY = "http://foo-bar.baz:123";
+      process.env.NO_PROXY = "<-loopback>";
+      const options = this.setup();
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      expect(options.proxyBypassList).to.eq("<-loopback>");
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "copies lowercase proxy vars to uppercase", ->
-      process.env.http_proxy = "http://foo-bar.baz:123"
-      process.env.https_proxy = "https://foo-bar.baz:123"
-      process.env.no_proxy = "http://no-proxy.holla"
-      expect(process.env.HTTP_PROXY).to.be.undefined
-      expect(process.env.HTTPS_PROXY).to.be.undefined
-      expect(process.env.NO_PROXY).to.be.undefined
+    it("copies lowercase proxy vars to uppercase", function() {
+      process.env.http_proxy = "http://foo-bar.baz:123";
+      process.env.https_proxy = "https://foo-bar.baz:123";
+      process.env.no_proxy = "http://no-proxy.holla";
+      expect(process.env.HTTP_PROXY).to.be.undefined;
+      expect(process.env.HTTPS_PROXY).to.be.undefined;
+      expect(process.env.NO_PROXY).to.be.undefined;
 
-      options = @setup()
+      const options = this.setup();
 
-      expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
-      expect(process.env.HTTPS_PROXY).to.eq "https://foo-bar.baz:123"
-      expect(process.env.NO_PROXY).to.eq "http://no-proxy.holla,127.0.0.1,::1,localhost"
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+      expect(process.env.HTTP_PROXY).to.eq("http://foo-bar.baz:123");
+      expect(process.env.HTTPS_PROXY).to.eq("https://foo-bar.baz:123");
+      expect(process.env.NO_PROXY).to.eq("http://no-proxy.holla,127.0.0.1,::1,localhost");
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "can use npm_config_proxy", ->
-      process.env.npm_config_proxy = "http://foo-bar.baz:123"
-      expect(process.env.HTTP_PROXY).to.be.undefined
+    it("can use npm_config_proxy", function() {
+      process.env.npm_config_proxy = "http://foo-bar.baz:123";
+      expect(process.env.HTTP_PROXY).to.be.undefined;
 
-      options = @setup()
+      const options = this.setup();
 
-      expect(process.env.HTTP_PROXY).to.eq "http://foo-bar.baz:123"
-      expect(process.env.HTTPS_PROXY).to.eq "http://foo-bar.baz:123"
-      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.eq process.env.NO_PROXY
+      expect(process.env.HTTP_PROXY).to.eq("http://foo-bar.baz:123");
+      expect(process.env.HTTPS_PROXY).to.eq("http://foo-bar.baz:123");
+      expect(process.env.NO_PROXY).to.eq("127.0.0.1,::1,localhost");
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      return expect(options.proxyBypassList).to.eq(process.env.NO_PROXY);
+    });
 
-    it "can override npm_config_proxy with falsy HTTP_PROXY", ->
-      process.env.npm_config_proxy = "http://foo-bar.baz:123"
-      process.env.HTTP_PROXY = ""
+    return it("can override npm_config_proxy with falsy HTTP_PROXY", function() {
+      process.env.npm_config_proxy = "http://foo-bar.baz:123";
+      process.env.HTTP_PROXY = "";
 
-      options = @setup()
+      const options = this.setup();
 
-      expect(process.env.HTTP_PROXY).to.be.undefined
-      expect(process.env.HTTPS_PROXY).to.be.undefined
-      expect(process.env.NO_PROXY).to.eq "127.0.0.1,::1,localhost"
-      expect(options.proxySource).to.be.undefined
-      expect(options.proxyServer).to.eq process.env.HTTP_PROXY
-      expect(options.proxyBypassList).to.be.undefined
+      expect(process.env.HTTP_PROXY).to.be.undefined;
+      expect(process.env.HTTPS_PROXY).to.be.undefined;
+      expect(process.env.NO_PROXY).to.eq("127.0.0.1,::1,localhost");
+      expect(options.proxySource).to.be.undefined;
+      expect(options.proxyServer).to.eq(process.env.HTTP_PROXY);
+      return expect(options.proxyBypassList).to.be.undefined;
+    });
+  });
+});

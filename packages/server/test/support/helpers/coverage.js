@@ -1,30 +1,35 @@
-path           = require("path")
-coffeeCoverage = require("coffee-coverage")
+/*
+ * decaffeinate suggestions:
+ * DS209: Avoid top-level return
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const path           = require("path");
+const coffeeCoverage = require("coffee-coverage");
 
-return if not process.env["NODE_COVERAGE"]
+if (!process.env["NODE_COVERAGE"]) { return; }
 
-projectRoot = path.resolve(__dirname, "../../..")
-coverageVar = coffeeCoverage.findIstanbulVariable()
+const projectRoot = path.resolve(__dirname, "../../..");
+const coverageVar = coffeeCoverage.findIstanbulVariable();
 
-## Only write a coverage report if we"re not running inside of Istanbul.
-writeOnExit = if coverageVar then null else projectRoot + "/coverage/coverage-coffee.json"
+//# Only write a coverage report if we"re not running inside of Istanbul.
+const writeOnExit = coverageVar ? null : projectRoot + "/coverage/coverage-coffee.json";
 
 coffeeCoverage.register({
-  instrumentor: "istanbul"
-  basePath: projectRoot
+  instrumentor: "istanbul",
+  basePath: projectRoot,
   exclude: ["/gulpfile.coffee", "/deploy", "/build", "/dist", "/tmp", "/test", "/spec", "/app", "/bower_components", "/cache", "/support", "/node_modules", "/.git", "/.cy", "/.projects"],
-  coverageVar: coverageVar
-  writeOnExit: writeOnExit
+  coverageVar,
+  writeOnExit,
   initAll: true
-})
+});
 
-## using hack found here to prevent problems with
-## coffee-coverage being replaced by modules which
-## use coffeescript/register
-## https://github.com/abresas/register-coffee-coverage/blob/master/index.js
-loader = require.extensions[".coffee"]
+//# using hack found here to prevent problems with
+//# coffee-coverage being replaced by modules which
+//# use coffeescript/register
+//# https://github.com/abresas/register-coffee-coverage/blob/master/index.js
+const loader = require.extensions[".coffee"];
 
-Object.defineProperty require.extensions, ".coffee", {
-  get: -> loader
-  set: -> loader
-}
+Object.defineProperty(require.extensions, ".coffee", {
+  get() { return loader; },
+  set() { return loader; }
+});

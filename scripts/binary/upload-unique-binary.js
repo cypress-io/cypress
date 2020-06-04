@@ -1,168 +1,183 @@
-minimist = require("minimist")
-Promise = require("bluebird")
-la = require("lazy-ass")
-check = require("check-more-types")
-fs = require("fs")
-path = require("path")
-awspublish = require('gulp-awspublish')
-rename = require('gulp-rename')
-gulpDebug = require('gulp-debug')
-gulp = require("gulp")
-human = require("human-interval")
-R = require("ramda")
-hasha = require('hasha')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const minimist = require("minimist");
+const Promise = require("bluebird");
+const la = require("lazy-ass");
+const check = require("check-more-types");
+const fs = require("fs");
+const path = require("path");
+const awspublish = require('gulp-awspublish');
+const rename = require('gulp-rename');
+const gulpDebug = require('gulp-debug');
+const gulp = require("gulp");
+const human = require("human-interval");
+const R = require("ramda");
+const hasha = require('hasha');
 
-uploadUtils = require("./util/upload")
-s3helpers = require("./s3-api").s3helpers
+const uploadUtils = require("./util/upload");
+const {
+  s3helpers
+} = require("./s3-api");
 
-# we zip the binary on every platform and upload under same name
-binaryExtension = ".zip"
-uploadFileName = "cypress.zip"
+// we zip the binary on every platform and upload under same name
+const binaryExtension = ".zip";
+const uploadFileName = "cypress.zip";
 
-isBinaryFile = check.extension(binaryExtension)
+const isBinaryFile = check.extension(binaryExtension);
 
-rootFolder = "beta"
-folder = "binary"
+const rootFolder = "beta";
+const folder = "binary";
 
-# the binary will be uploaded into unique folder
-# in our case something like this
-# https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.zip
-getCDN = ({version, hash, filename, platform}) ->
-  la(check.semver(version), 'invalid version', version)
-  la(check.unemptyString(hash), 'missing hash', hash)
-  la(check.unemptyString(filename), 'missing filename', filename)
-  la(isBinaryFile(filename), 'wrong extension for file', filename)
-  la(check.unemptyString(platform), 'missing platform', platform)
+// the binary will be uploaded into unique folder
+// in our case something like this
+// https://cdn.cypress.io/desktop/binary/0.20.2/<platform>/<some unique version info>/cypress.zip
+const getCDN = function({version, hash, filename, platform}) {
+  la(check.semver(version), 'invalid version', version);
+  la(check.unemptyString(hash), 'missing hash', hash);
+  la(check.unemptyString(filename), 'missing filename', filename);
+  la(isBinaryFile(filename), 'wrong extension for file', filename);
+  la(check.unemptyString(platform), 'missing platform', platform);
 
-  cdnUrl = uploadUtils.getUploadUrl()
-  la(check.url(cdnUrl), "could not get cdn url", cdnUrl)
-  [cdnUrl, rootFolder, folder, version, platform, hash, filename].join("/")
+  const cdnUrl = uploadUtils.getUploadUrl();
+  la(check.url(cdnUrl), "could not get cdn url", cdnUrl);
+  return [cdnUrl, rootFolder, folder, version, platform, hash, filename].join("/");
+};
 
-# returns folder that contains beta (unreleased) binaries for given version
-#
-getUploadVersionDirName = (options) ->
-  la(check.unemptyString(options.version), 'missing version', options)
+// returns folder that contains beta (unreleased) binaries for given version
+//
+const getUploadVersionDirName = function(options) {
+  la(check.unemptyString(options.version), 'missing version', options);
 
-  dir = [rootFolder, folder, options.version].join("/")
-  dir
+  const dir = [rootFolder, folder, options.version].join("/");
+  return dir;
+};
 
-getUploadDirForPlatform = (options, platformArch) ->
+const getUploadDirForPlatform = function(options, platformArch) {
   la(uploadUtils.isValidPlatformArch(platformArch),
-    'missing or invalid platformArch', platformArch)
+    'missing or invalid platformArch', platformArch);
 
-  versionDir = getUploadVersionDirName(options)
-  la(check.unemptyString(versionDir), 'could not form folder from', options)
+  const versionDir = getUploadVersionDirName(options);
+  la(check.unemptyString(versionDir), 'could not form folder from', options);
 
-  dir = [versionDir, platformArch].join("/")
-  dir
+  const dir = [versionDir, platformArch].join("/");
+  return dir;
+};
 
-getUploadDirName = (options) ->
-  la(check.unemptyString(options.hash), 'missing hash', options)
+const getUploadDirName = function(options) {
+  la(check.unemptyString(options.hash), 'missing hash', options);
 
-  uploadFolder = getUploadDirForPlatform(options, options.platformArch)
-  la(check.unemptyString(uploadFolder), 'could not form folder from', options)
+  const uploadFolder = getUploadDirForPlatform(options, options.platformArch);
+  la(check.unemptyString(uploadFolder), 'could not form folder from', options);
 
-  dir = [uploadFolder, options.hash, null].join("/")
-  dir
+  const dir = [uploadFolder, options.hash, null].join("/");
+  return dir;
+};
 
-uploadFile = (options) ->
-  new Promise (resolve, reject) ->
-    publisher = uploadUtils.getPublisher()
+const uploadFile = options => new Promise(function(resolve, reject) {
+  const publisher = uploadUtils.getPublisher();
 
-    headers = {}
-    headers["Cache-Control"] = "no-cache"
+  const headers = {};
+  headers["Cache-Control"] = "no-cache";
 
-    key = null
+  let key = null;
 
-    gulp.src(options.file)
-    .pipe rename (p) =>
-      p.basename = path.basename(uploadFileName, binaryExtension)
-      p.dirname = getUploadDirName(options)
-      console.log("renaming upload to", p.dirname, p.basename)
-      la(check.unemptyString(p.basename), "missing basename")
-      la(check.unemptyString(p.dirname), "missing dirname")
-      key = p.dirname + uploadFileName
-      p
-    .pipe gulpDebug()
-    .pipe publisher.publish(headers)
-    .pipe awspublish.reporter()
-    .on "error", reject
-    .on "end", () -> resolve(key)
+  return gulp.src(options.file)
+  .pipe(rename(p => {
+    p.basename = path.basename(uploadFileName, binaryExtension);
+    p.dirname = getUploadDirName(options);
+    console.log("renaming upload to", p.dirname, p.basename);
+    la(check.unemptyString(p.basename), "missing basename");
+    la(check.unemptyString(p.dirname), "missing dirname");
+    key = p.dirname + uploadFileName;
+    return p;
+  })).pipe(gulpDebug())
+  .pipe(publisher.publish(headers))
+  .pipe(awspublish.reporter())
+  .on("error", reject)
+  .on("end", () => resolve(key));
+});
 
-setChecksum = (filename, key) =>
-  console.log('setting checksum for file %s', filename)
-  console.log('on s3 object %s', key)
+const setChecksum = (filename, key) => {
+  console.log('setting checksum for file %s', filename);
+  console.log('on s3 object %s', key);
 
-  la(check.unemptyString(filename), 'expected filename', filename)
-  la(check.unemptyString(key), 'expected uploaded S3 key', key)
+  la(check.unemptyString(filename), 'expected filename', filename);
+  la(check.unemptyString(key), 'expected uploaded S3 key', key);
 
-  checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' })
-  size = fs.statSync(filename).size
-  console.log('SHA256 checksum %s', checksum)
-  console.log('size', size)
+  const checksum = hasha.fromFileSync(filename, { algorithm: 'sha512' });
+  const {
+    size
+  } = fs.statSync(filename);
+  console.log('SHA256 checksum %s', checksum);
+  console.log('size', size);
 
-  aws = uploadUtils.getS3Credentials()
-  s3 = s3helpers.makeS3(aws)
-  # S3 object metadata can only have string values
-  metadata = {
+  const aws = uploadUtils.getS3Credentials();
+  const s3 = s3helpers.makeS3(aws);
+  // S3 object metadata can only have string values
+  const metadata = {
     checksum,
     size: String(size)
-  }
-  # by default s3.copyObject does not preserve ACL when copying
-  # thus we need to reset it for our public files
-  s3helpers.setUserMetadata(aws.bucket, key, metadata,
-    'application/zip', 'public-read', s3)
+  };
+  // by default s3.copyObject does not preserve ACL when copying
+  // thus we need to reset it for our public files
+  return s3helpers.setUserMetadata(aws.bucket, key, metadata,
+    'application/zip', 'public-read', s3);
+};
 
-uploadUniqueBinary = (args = []) ->
-  options = minimist(args, {
+const uploadUniqueBinary = function(args = []) {
+  const options = minimist(args, {
     string: ["version", "file", "hash", "platform"],
     alias: {
       version: "v",
       file: "f",
       hash: "h"
     }
-  })
-  console.log("Upload unique binary options")
-  pickOptions = R.pick(["file", "version", "hash"])
-  console.log(pickOptions(options))
+  });
+  console.log("Upload unique binary options");
+  const pickOptions = R.pick(["file", "version", "hash"]);
+  console.log(pickOptions(options));
 
-  la(check.unemptyString(options.file), "missing file to upload", options)
+  la(check.unemptyString(options.file), "missing file to upload", options);
   la(isBinaryFile(options.file),
-    "invalid file to upload extension", options.file)
+    "invalid file to upload extension", options.file);
 
-  if not options.hash
-    options.hash = uploadUtils.formHashFromEnvironment()
+  if (!options.hash) {
+    options.hash = uploadUtils.formHashFromEnvironment();
+  }
 
-  la(check.unemptyString(options.hash), "missing hash to give", options)
-  la(check.unemptyString(options.version), "missing version", options)
+  la(check.unemptyString(options.hash), "missing hash to give", options);
+  la(check.unemptyString(options.version), "missing version", options);
 
-  la(fs.existsSync(options.file), "cannot find file", options.file)
+  la(fs.existsSync(options.file), "cannot find file", options.file);
 
-  platform = options.platform ? process.platform
+  const platform = options.platform != null ? options.platform : process.platform;
 
-  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform)
+  options.platformArch = uploadUtils.getUploadNameByOsAndArch(platform);
 
-  uploadFile(options)
-  .then (key) ->
-    setChecksum(options.file, key)
-  .then () ->
-    cdnUrl = getCDN({
+  return uploadFile(options)
+  .then(key => setChecksum(options.file, key)).then(function() {
+    const cdnUrl = getCDN({
       version: options.version,
       hash: options.hash,
-      filename: uploadFileName
+      filename: uploadFileName,
       platform: options.platformArch
-    })
-    console.log("Binary can be downloaded using URL")
-    console.log(cdnUrl)
-    cdnUrl
-  .then uploadUtils.saveUrl("binary-url.json")
+    });
+    console.log("Binary can be downloaded using URL");
+    console.log(cdnUrl);
+    return cdnUrl;}).then(uploadUtils.saveUrl("binary-url.json"));
+};
 
 module.exports = {
   getUploadDirName,
   getUploadDirForPlatform,
   uploadUniqueBinary,
   getCDN
-}
+};
 
-if not module.parent
-  uploadUniqueBinary(process.argv)
+if (!module.parent) {
+  uploadUniqueBinary(process.argv);
+}

@@ -1,13 +1,20 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-origin = require("#{root}lib/util/origin")
+const origin = require(`${root}lib/util/origin`);
 
-describe "lib/util/origin", ->
-  beforeEach ->
-    @expects = (url, expected) ->
-      expect(origin(url)).to.eq(expected)
+describe("lib/util/origin", function() {
+  beforeEach(function() {
+    return this.expects = (url, expected) => expect(origin(url)).to.eq(expected);
+  });
 
-  it "strips everything but the remote origin", ->
-    @expects("http://localhost:9999/foo/bar?baz=quux#/index.html", "http://localhost:9999")
-    @expects("https://www.google.com/", "https://www.google.com")
-    @expects("https://app.foobar.co.uk:1234/a=b", "https://app.foobar.co.uk:1234")
+  return it("strips everything but the remote origin", function() {
+    this.expects("http://localhost:9999/foo/bar?baz=quux#/index.html", "http://localhost:9999");
+    this.expects("https://www.google.com/", "https://www.google.com");
+    return this.expects("https://app.foobar.co.uk:1234/a=b", "https://app.foobar.co.uk:1234");
+  });
+});

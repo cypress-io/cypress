@@ -1,246 +1,273 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
-ws          = require("ws")
-httpsProxyAgent  = require("https-proxy-agent")
-evilDns     = require("evil-dns")
-Promise     = require("bluebird")
-socketIo    = require("#{root}../socket")
-httpsServer = require("#{root}../https-proxy/test/helpers/https_server")
-config      = require("#{root}lib/config")
-Server      = require("#{root}lib/server")
-Automation  = require("#{root}lib/automation")
-Fixtures    = require("#{root}/test/support/helpers/fixtures")
+const ws          = require("ws");
+const httpsProxyAgent  = require("https-proxy-agent");
+const evilDns     = require("evil-dns");
+const Promise     = require("bluebird");
+const socketIo    = require(`${root}../socket`);
+const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`);
+const config      = require(`${root}lib/config`);
+const Server      = require(`${root}lib/server`);
+const Automation  = require(`${root}lib/automation`);
+const Fixtures    = require(`${root}/test/support/helpers/fixtures`);
 
-cyPort  = 12345
-otherPort = 55551
-wsPort  = 20000
-wssPort = 8443
+const cyPort  = 12345;
+const otherPort = 55551;
+const wsPort  = 20000;
+const wssPort = 8443;
 
-describe "Web Sockets", ->
-  require("mocha-banner").register()
+describe("Web Sockets", function() {
+  require("mocha-banner").register();
 
-  beforeEach ->
-    Fixtures.scaffold()
+  beforeEach(function() {
+    Fixtures.scaffold();
 
-    @idsPath = Fixtures.projectPath("ids")
+    this.idsPath = Fixtures.projectPath("ids");
 
-    config.get(@idsPath, {port: cyPort})
-    .then (@cfg) =>
-      @ws = new ws.Server({port: wsPort})
+    return config.get(this.idsPath, {port: cyPort})
+    .then(cfg => {
+      this.cfg = cfg;
+      this.ws = new ws.Server({port: wsPort});
 
-      @server = new Server()
+      this.server = new Server();
 
-      @server.open(@cfg)
-      .then =>
-        httpsServer.start(wssPort)
-      .then (httpsSrv) =>
-        @wss = new ws.Server({server: httpsSrv})
+      return this.server.open(this.cfg)
+      .then(() => {
+        return httpsServer.start(wssPort);
+    }).then(httpsSrv => {
+        return this.wss = new ws.Server({server: httpsSrv});
+      });
+    });
+  });
 
-  afterEach ->
-    Fixtures.remove()
+  afterEach(function() {
+    Fixtures.remove();
 
-    evilDns.clear()
+    evilDns.clear();
 
-    @ws.close()
-    @wss.close()
+    this.ws.close();
+    this.wss.close();
 
-    Promise.join(
-      @server.close(),
+    return Promise.join(
+      this.server.close(),
       httpsServer.stop()
-    )
+    );
+  });
 
-  context "proxying external websocket requests", ->
-    it "ends the socket connection without remoteHost", (done) ->
-      @server._onDomainSet()
+  context("proxying external websocket requests", function() {
+    it("ends the socket connection without remoteHost", function(done) {
+      this.server._onDomainSet();
 
-      client = new ws("ws://localhost:#{cyPort}")
+      const client = new ws(`ws://localhost:${cyPort}`);
 
-      client.on "error", (err) ->
-        expect(err.code).to.eq("ECONNRESET")
-        done()
+      return client.on("error", function(err) {
+        expect(err.code).to.eq("ECONNRESET");
+        return done();
+      });
+    });
 
-    it "sends back ECONNRESET when error upgrading", (done) ->
-      agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+    it("sends back ECONNRESET when error upgrading", function(done) {
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`);
 
-      @server._onDomainSet("http://localhost:#{otherPort}")
+      this.server._onDomainSet(`http://localhost:${otherPort}`);
 
-      client = new ws("ws://localhost:#{otherPort}", {
-        agent: agent
-      })
+      const client = new ws(`ws://localhost:${otherPort}`, {
+        agent
+      });
 
-      client.on "error", (err) ->
-        expect(err.code).to.eq('ECONNRESET')
-        expect(err.message).to.eq('socket hang up')
+      return client.on("error", function(err) {
+        expect(err.code).to.eq('ECONNRESET');
+        expect(err.message).to.eq('socket hang up');
 
-        done()
+        return done();
+      });
+    });
 
-    it "proxies https messages", (done) ->
-      @server._onDomainSet("https://localhost:#{wssPort}")
+    it("proxies https messages", function(done) {
+      this.server._onDomainSet(`https://localhost:${wssPort}`);
 
-      @wss.on "connection", (c) ->
-        c.on "message", (msg) ->
-          c.send "response:#{msg}"
+      this.wss.on("connection", c => c.on("message", msg => c.send(`response:${msg}`)));
 
-      client = new ws("ws://localhost:#{cyPort}")
+      const client = new ws(`ws://localhost:${cyPort}`);
 
-      client.on "message", (data) ->
-        expect(data).to.eq("response:foo")
-        done()
+      client.on("message", function(data) {
+        expect(data).to.eq("response:foo");
+        return done();
+      });
 
-      client.on "open", ->
-        client.send("foo")
+      return client.on("open", () => client.send("foo"));
+    });
 
-    it "proxies http messages through http proxy", (done) ->
-      ## force node into legit proxy mode like a browser
-      agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+    it("proxies http messages through http proxy", function(done) {
+      //# force node into legit proxy mode like a browser
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`);
 
-      @server._onDomainSet("http://localhost:#{wsPort}")
+      this.server._onDomainSet(`http://localhost:${wsPort}`);
 
-      @ws.on "connection", (c) ->
-        c.on "message", (msg) ->
-          c.send "response:#{msg}"
+      this.ws.on("connection", c => c.on("message", msg => c.send(`response:${msg}`)));
 
-      client = new ws("ws://localhost:#{wsPort}", {
-        agent: agent
-      })
+      const client = new ws(`ws://localhost:${wsPort}`, {
+        agent
+      });
 
-      client.on "message", (data) ->
-        expect(data).to.eq("response:foo")
-        done()
+      client.on("message", function(data) {
+        expect(data).to.eq("response:foo");
+        return done();
+      });
 
-      client.on "open", ->
-        client.send("foo")
+      return client.on("open", () => client.send("foo"));
+    });
 
-    it "proxies https messages through http", (done) ->
-      ## force node into legit proxy mode like a browser
-      agent = new httpsProxyAgent({
-        host: "localhost"
-        port: cyPort
+    it("proxies https messages through http", function(done) {
+      //# force node into legit proxy mode like a browser
+      const agent = new httpsProxyAgent({
+        host: "localhost",
+        port: cyPort,
         rejectUnauthorized: false
-      })
+      });
 
-      @server._onDomainSet("https://localhost:#{wssPort}")
+      this.server._onDomainSet(`https://localhost:${wssPort}`);
 
-      @wss.on "connection", (c) ->
-        c.on "message", (msg) ->
-          c.send "response:#{msg}"
+      this.wss.on("connection", c => c.on("message", msg => c.send(`response:${msg}`)));
 
-      client = new ws("wss://localhost:#{wssPort}", {
-        agent: agent
-      })
+      const client = new ws(`wss://localhost:${wssPort}`, {
+        agent
+      });
 
-      client.on "message", (data) ->
-        expect(data).to.eq("response:foo")
-        done()
+      client.on("message", function(data) {
+        expect(data).to.eq("response:foo");
+        return done();
+      });
 
-      client.on "open", ->
-        client.send("foo")
+      return client.on("open", () => client.send("foo"));
+    });
 
-    it "proxies through subdomain by using host header", (done) ->
-      ## we specifically only allow remote connections
-      ## to ws.foobar.com since that is where the websocket
-      ## server is mounted and this tests that we make
-      ## a connection to the right host instead of the
-      ## origin (which isnt ws.foobar.com)
-      nock.enableNetConnect("ws.foobar.com")
+    return it("proxies through subdomain by using host header", function(done) {
+      //# we specifically only allow remote connections
+      //# to ws.foobar.com since that is where the websocket
+      //# server is mounted and this tests that we make
+      //# a connection to the right host instead of the
+      //# origin (which isnt ws.foobar.com)
+      nock.enableNetConnect("ws.foobar.com");
 
-      evilDns.add("ws.foobar.com", "127.0.0.1")
+      evilDns.add("ws.foobar.com", "127.0.0.1");
 
-      ## force node into legit proxy mode like a browser
-      agent = new httpsProxyAgent({
-        host: "localhost"
-        port: cyPort
+      //# force node into legit proxy mode like a browser
+      const agent = new httpsProxyAgent({
+        host: "localhost",
+        port: cyPort,
         rejectUnauthorized: false
-      })
+      });
 
-      @server._onDomainSet("https://foobar.com:#{wssPort}")
+      this.server._onDomainSet(`https://foobar.com:${wssPort}`);
 
-      @wss.on "connection", (c) ->
-        c.on "message", (msg) ->
-          c.send "response:#{msg}"
+      this.wss.on("connection", c => c.on("message", msg => c.send(`response:${msg}`)));
 
-      client = new ws("wss://ws.foobar.com:#{wssPort}", {
-        agent: agent
-      })
+      const client = new ws(`wss://ws.foobar.com:${wssPort}`, {
+        agent
+      });
 
-      client.on "message", (data) ->
-        expect(data).to.eq("response:foo")
-        done()
+      client.on("message", function(data) {
+        expect(data).to.eq("response:foo");
+        return done();
+      });
 
-      client.on "open", ->
-        client.send("foo")
+      return client.on("open", () => client.send("foo"));
+    });
+  });
 
-  context "socket.io handling", ->
-    beforeEach ->
-      @automation = Automation.create(@cfg.namespace, @cfg.socketIoCookie, @cfg.screenshotsFolder)
+  return context("socket.io handling", function() {
+    beforeEach(function() {
+      this.automation = Automation.create(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder);
 
-      @server.startWebsockets(@automation, @cfg, {})
+      return this.server.startWebsockets(this.automation, this.cfg, {});
+    });
 
-    testSocketIo = (wsUrl, beforeFn) ->
-      context 'behind Cy proxy', ->
-        beforeEach (done) ->
-          ## force node into legit proxy mode like a browser
-          agent = new httpsProxyAgent("http://localhost:#{cyPort}")
+    const testSocketIo = function(wsUrl, beforeFn) {
+      context('behind Cy proxy', function() {
+        beforeEach(function(done) {
+          //# force node into legit proxy mode like a browser
+          const agent = new httpsProxyAgent(`http://localhost:${cyPort}`);
 
-          beforeFn?.call(@)
+          if (beforeFn != null) {
+            beforeFn.call(this);
+          }
 
-          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
-            agent: agent
-            path: @cfg.socketIoRoute
-            transports: ["websocket"]
-            parser: socketIo.circularParser
+          this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
+            agent,
+            path: this.cfg.socketIoRoute,
+            transports: ["websocket"],
+            parser: socketIo.circularParser,
             rejectUnauthorized: false
-          })
-          @wsClient.on "connect", -> done()
+          });
+          return this.wsClient.on("connect", () => done());
+        });
 
-        afterEach ->
-          @wsClient.disconnect()
+        afterEach(function() {
+          return this.wsClient.disconnect();
+        });
 
-        it "continues to handle socket.io requests just fine", (done) ->
-          @wsClient.emit "backend:request", "get:fixture", "example.json", {}, (data) ->
-            expect(data.response).to.deep.eq({foo: "bar"})
-            done()
+        return it("continues to handle socket.io requests just fine", function(done) {
+          return this.wsClient.emit("backend:request", "get:fixture", "example.json", {}, function(data) {
+            expect(data.response).to.deep.eq({foo: "bar"});
+            return done();
+          });
+        });
+      });
 
-      context 'without Cy proxy', ->
-        beforeEach ->
-          beforeFn?.call(@)
+      return context('without Cy proxy', function() {
+        beforeEach(function() {
+          return (beforeFn != null ? beforeFn.call(this) : undefined);
+        });
 
-        afterEach ->
-          @wsClient.disconnect()
+        afterEach(function() {
+          return this.wsClient.disconnect();
+        });
 
-        it "fails to connect via websocket", (done) ->
-          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
-            path: @cfg.socketIoRoute
-            transports: ["websocket"]
-            parser: socketIo.circularParser
-            rejectUnauthorized: false
+        it("fails to connect via websocket", function(done) {
+          this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
+            path: this.cfg.socketIoRoute,
+            transports: ["websocket"],
+            parser: socketIo.circularParser,
+            rejectUnauthorized: false,
             reconnection: false
-          })
+          });
 
-          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
-          @wsClient.on "connect_error", -> done()
+          this.wsClient.on("connect", () => done(new Error('should not have been able to connect')));
+          return this.wsClient.on("connect_error", () => done());
+        });
 
-        it "fails to connect via polling", (done) ->
-          @wsClient = socketIo.client(wsUrl || @cfg.proxyUrl, {
-            path: @cfg.socketIoRoute
-            transports: ["polling"]
-            parser: socketIo.circularParser
-            rejectUnauthorized: false
+        return it("fails to connect via polling", function(done) {
+          this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
+            path: this.cfg.socketIoRoute,
+            transports: ["polling"],
+            parser: socketIo.circularParser,
+            rejectUnauthorized: false,
             reconnection: false
-          })
+          });
 
-          @wsClient.on "connect", -> done(new Error('should not have been able to connect'))
-          @wsClient.on "connect_error", -> done()
+          this.wsClient.on("connect", () => done(new Error('should not have been able to connect')));
+          return this.wsClient.on("connect_error", () => done());
+        });
+      });
+    };
 
-    context "http", ->
-      testSocketIo()
+    context("http", () => testSocketIo());
 
-    context "when http superDomain has been set", ->
-      testSocketIo "http://localhost:#{otherPort}", ->
-        @server._onDomainSet("http://localhost:#{otherPort}")
+    context("when http superDomain has been set", () => testSocketIo(`http://localhost:${otherPort}`, function() {
+      return this.server._onDomainSet(`http://localhost:${otherPort}`);
+    }));
 
-    context "when https superDomain has been set", ->
-      testSocketIo "http://localhost:#{wssPort}", ->
-        @server._onDomainSet("http://localhost:#{wssPort}")
+    return context("when https superDomain has been set", () => testSocketIo(`http://localhost:${wssPort}`, function() {
+      return this.server._onDomainSet(`http://localhost:${wssPort}`);
+    }));
+  });
+});

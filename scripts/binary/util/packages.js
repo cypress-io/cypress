@@ -1,249 +1,260 @@
-_ = require("lodash")
-fs = require("fs-extra")
-cp = require("child_process")
-path = require("path")
-# we wrap glob to handle EMFILE error
-glob = require("glob")
-Promise = require("bluebird")
-retry = require("bluebird-retry")
-la = require("lazy-ass")
-check = require("check-more-types")
-execa = require("execa")
-R = require("ramda")
-os = require("os")
-prettyMs = require("pretty-ms")
-pluralize = require('pluralize')
-debug = require("debug")("cypress:binary")
-externalUtils = require("./3rd-party")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+let fs = require("fs-extra");
+const cp = require("child_process");
+const path = require("path");
+// we wrap glob to handle EMFILE error
+let glob = require("glob");
+const Promise = require("bluebird");
+const retry = require("bluebird-retry");
+const la = require("lazy-ass");
+const check = require("check-more-types");
+const execa = require("execa");
+const R = require("ramda");
+const os = require("os");
+const prettyMs = require("pretty-ms");
+const pluralize = require('pluralize');
+const debug = require("debug")("cypress:binary");
+const externalUtils = require("./3rd-party");
 
-fs = Promise.promisifyAll(fs)
-glob = Promise.promisify(glob)
+fs = Promise.promisifyAll(fs);
+glob = Promise.promisify(glob);
 
-DEFAULT_PATHS = "package.json".split(" ")
+const DEFAULT_PATHS = "package.json".split(" ");
 
-pathToPackageJson = (packageFolder) ->
-  la(check.unemptyString(packageFolder), "expected package path", packageFolder)
-  path.join(packageFolder, "package.json")
+const pathToPackageJson = function(packageFolder) {
+  la(check.unemptyString(packageFolder), "expected package path", packageFolder);
+  return path.join(packageFolder, "package.json");
+};
 
-createCLIExecutable = (command) ->
-  (args, cwd, env = {}) ->
-    commandToExecute = "#{command} " + args.join(" ")
-    console.log(commandToExecute)
-    if cwd
-      console.log("in folder:", cwd)
+const createCLIExecutable = command => (function(args, cwd, env = {}) {
+  const commandToExecute = `${command} ` + args.join(" ");
+  console.log(commandToExecute);
+  if (cwd) {
+    console.log("in folder:", cwd);
+  }
 
-    la(check.maybe.string(cwd), "invalid CWD string", cwd)
-    execa(command, args, { stdio: "inherit", cwd, env })
-    # if everything is ok, resolve with nothing
-    .then R.always(undefined)
-    .catch (result) ->
-      msg = "#{commandToExecute} failed with exit code: #{result.code}"
-      throw new Error(msg)
+  la(check.maybe.string(cwd), "invalid CWD string", cwd);
+  return execa(command, args, { stdio: "inherit", cwd, env })
+  // if everything is ok, resolve with nothing
+  .then(R.always(undefined))
+  .catch(function(result) {
+    const msg = `${commandToExecute} failed with exit code: ${result.code}`;
+    throw new Error(msg);
+  });
+});
 
-yarn = createCLIExecutable('yarn')
-npx = createCLIExecutable('npx')
+const yarn = createCLIExecutable('yarn');
+const npx = createCLIExecutable('npx');
 
-runAllBuild = _.partial(npx, ["lerna", "run", "build-prod", "--ignore", "cli"])
+const runAllBuild = _.partial(npx, ["lerna", "run", "build-prod", "--ignore", "cli"]);
 
-# removes transpiled JS files in the original package folders
-runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"])
+// removes transpiled JS files in the original package folders
+const runAllCleanJs = _.partial(npx, ["lerna", "run", "clean-js", "--ignore", "cli"]);
 
-## @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
-getPackagesWithScript = (scriptName) ->
-  Promise.resolve(glob('./packages/*/package.json'))
-  .map (pkgPath) ->
-    fs.readJsonAsync(pkgPath)
-    .then (json) ->
-      if json.scripts?.build
-        return path.basename(path.dirname(pkgPath))
-  .filter(Boolean)
+//# @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
+const getPackagesWithScript = scriptName => Promise.resolve(glob('./packages/*/package.json'))
+.map(pkgPath => fs.readJsonAsync(pkgPath)
+.then(function(json) {
+  if (json.scripts != null ? json.scripts.build : undefined) {
+    return path.basename(path.dirname(pkgPath));
+  }
+})).filter(Boolean);
 
-copyAllToDist = (distDir) ->
-  copyRelativePathToDist = (relative) ->
-    dest = path.join(distDir, relative)
+const copyAllToDist = function(distDir) {
+  const copyRelativePathToDist = function(relative) {
+    const dest = path.join(distDir, relative);
 
-    retry ->
-      console.log(relative, "->", dest)
+    return retry(function() {
+      console.log(relative, "->", dest);
 
-      fs.copyAsync(relative, dest)
+      return fs.copyAsync(relative, dest);
+    });
+  };
 
-  copyPackage = (pkg) ->
-    console.log('** copy package: %s **', pkg)
+  const copyPackage = function(pkg) {
+    let globOptions;
+    console.log('** copy package: %s **', pkg);
 
-    ## copies the package to dist
-    ## including the default paths
-    ## and any specified in package.json files
-    Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
-    .then (json) ->
-      ## grab all the files that match "files" wildcards
-      ## but without all negated files ("!src/**/*.spec.js" for example)
-      ## and default included paths
-      ## and convert to relative paths
-      DEFAULT_PATHS
-        .concat(json.files or [])
-        .concat(json.main or [])
-    .then (pkgFileMasks) ->
-      debug("for pkg %s have the following file masks %o", pkg, pkgFileMasks)
-      globOptions = {
-        cwd: pkg, # search in the package folder
-        absolute: false # and return relative file paths
-        followSymbolicLinks: false # do not follow symlinks
-      }
-      externalUtils.globby(pkgFileMasks, globOptions)
-    # we find paths like "src/main.js" wrt "packages/foo"
-    # now we need to get the file path wrt current working directory
-    # like "packages/foo/src/main.js" so when we copy
-    # into the dist folder we get "<dist?/packages/foo/src/main.js"
-    .map (foundFileRelativeToPackageFolder) ->
-      path.join(pkg, foundFileRelativeToPackageFolder)
-    .tap(debug)
-    .map(copyRelativePathToDist, {concurrency: 1})
+    //# copies the package to dist
+    //# including the default paths
+    //# and any specified in package.json files
+    return Promise.resolve(fs.readJsonAsync(pathToPackageJson(pkg)))
+    .then(json => //# grab all the files that match "files" wildcards
+    //# but without all negated files ("!src/**/*.spec.js" for example)
+    //# and default included paths
+    //# and convert to relative paths
+    DEFAULT_PATHS
+      .concat(json.files || [])
+      .concat(json.main || [])).then(function(pkgFileMasks) {},
+      debug("for pkg %s have the following file masks %o", pkg, pkgFileMasks),
+      (globOptions = {
+        cwd: pkg, // search in the package folder
+        absolute: false, // and return relative file paths
+        followSymbolicLinks: false // do not follow symlinks
+      }),
+      externalUtils.globby(pkgFileMasks, globOptions)).map(foundFileRelativeToPackageFolder => path.join(pkg, foundFileRelativeToPackageFolder)).tap(debug)
+    .map(copyRelativePathToDist, {concurrency: 1});
+  };
 
-        ## fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
-        ## 1/1  41688
-        ## 1/5  42218
-        ## 1/10 42566
-        ## 2/1  45041
-        ## 2/2  43589
-        ## 3/3  51399
+        //# fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
+        //# 1/1  41688
+        //# 1/5  42218
+        //# 1/10 42566
+        //# 2/1  45041
+        //# 2/2  43589
+        //# 3/3  51399
 
-        ## cp -R concurrency tests
-        ## 1/1 65811
+        //# cp -R concurrency tests
+        //# 1/1 65811
 
-  started = new Date()
+  const started = new Date();
 
-  fs.ensureDirAsync(distDir)
-  .then ->
-    glob("./packages/*")
-    .map(copyPackage, {concurrency: 1})
-  .then ->
-    console.log("Finished Copying %dms", new Date() - started)
-    console.log("")
+  return fs.ensureDirAsync(distDir)
+  .then(() => glob("./packages/*")
+  .map(copyPackage, {concurrency: 1})).then(function() {
+    console.log("Finished Copying %dms", new Date() - started);
+    return console.log("");
+  });
+};
 
-forceNpmInstall = (packagePath, packageToInstall) ->
-  console.log("Force installing %s", packageToInstall)
-  console.log("in %s", packagePath)
-  la(check.unemptyString(packageToInstall), "missing package to install")
-  yarn(["install", "--force", packageToInstall], packagePath)
+const forceNpmInstall = function(packagePath, packageToInstall) {
+  console.log("Force installing %s", packageToInstall);
+  console.log("in %s", packagePath);
+  la(check.unemptyString(packageToInstall), "missing package to install");
+  return yarn(["install", "--force", packageToInstall], packagePath);
+};
 
-removeDevDependencies = (packageFolder) ->
-  packagePath = pathToPackageJson(packageFolder)
-  console.log("removing devDependencies from %s", packagePath)
+const removeDevDependencies = function(packageFolder) {
+  const packagePath = pathToPackageJson(packageFolder);
+  console.log("removing devDependencies from %s", packagePath);
 
-  fs.readJsonAsync(packagePath)
-  .then (json) ->
-    delete json.devDependencies
-    fs.writeJsonAsync(packagePath, json, {spaces: 2})
+  return fs.readJsonAsync(packagePath)
+  .then(function(json) {
+    delete json.devDependencies;
+    return fs.writeJsonAsync(packagePath, json, {spaces: 2});
+  });
+};
 
-retryGlobbing = (pathToPackages, delay = 1000) ->
-  retryGlob = ->
-    glob(pathToPackages)
-    .catch {code: "EMFILE"}, ->
-      ## wait, then retry
-      Promise
-      .delay(delay)
-      .then(retryGlob)
+const retryGlobbing = function(pathToPackages, delay = 1000) {
+  var retryGlob = () => glob(pathToPackages)
+  .catch({code: "EMFILE"}, () => //# wait, then retry
+  Promise
+  .delay(delay)
+  .then(retryGlob));
 
-  retryGlob()
+  return retryGlob();
+};
 
-# installs all packages given a wildcard
-# pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
-npmInstallAll = (pathToPackages) ->
-  console.log("npmInstallAll packages in #{pathToPackages}")
+// installs all packages given a wildcard
+// pathToPackages would be something like "C:\projects\cypress\dist\win32\packages\*"
+const npmInstallAll = function(pathToPackages) {
+  console.log(`npmInstallAll packages in ${pathToPackages}`);
 
-  started = new Date()
+  const started = new Date();
 
-  retryNpmInstall = (pkg) ->
-    console.log("installing %s", pkg)
-    console.log("NODE_ENV is %s", process.env.NODE_ENV)
+  var retryNpmInstall = function(pkg) {
+    console.log("installing %s", pkg);
+    console.log("NODE_ENV is %s", process.env.NODE_ENV);
 
-    # force installing only PRODUCTION dependencies
-    # https://docs.npmjs.com/cli/install
-    npmInstall = _.partial(yarn, ["install", "--production"])
+    // force installing only PRODUCTION dependencies
+    // https://docs.npmjs.com/cli/install
+    const npmInstall = _.partial(yarn, ["install", "--production"]);
 
-    npmInstall(pkg, {NODE_ENV: "production"})
-    .catch {code: "EMFILE"}, ->
-      Promise
-      .delay(1000)
-      .then ->
-        retryNpmInstall(pkg)
-    .catch (err) ->
-      console.log(err, err.code)
-      throw err
+    return npmInstall(pkg, {NODE_ENV: "production"})
+    .catch({code: "EMFILE"}, () => Promise
+    .delay(1000)
+    .then(() => retryNpmInstall(pkg))).catch(function(err) {
+      console.log(err, err.code);
+      throw err;
+    });
+  };
 
-  printFolders = (folders) ->
-    console.log("found %s", pluralize("folder", folders.length, true))
+  const printFolders = folders => console.log("found %s", pluralize("folder", folders.length, true));
 
-  ## only installs production dependencies
-  retryGlobbing(pathToPackages)
+  //# only installs production dependencies
+  return retryGlobbing(pathToPackages)
   .tap(printFolders)
-  .mapSeries (packageFolder) ->
-    removeDevDependencies(packageFolder)
-    .then ->
-      retryNpmInstall(packageFolder)
-  .then ->
-    end = new Date()
-    console.log("Finished NPM Installing", prettyMs(end - started))
+  .mapSeries(packageFolder => removeDevDependencies(packageFolder)
+  .then(() => retryNpmInstall(packageFolder))).then(function() {
+    const end = new Date();
+    return console.log("Finished NPM Installing", prettyMs(end - started));
+  });
+};
 
-removePackageJson = (filename) ->
-  if filename.endsWith("/package.json") then path.dirname(filename) else filename
+const removePackageJson = function(filename) {
+  if (filename.endsWith("/package.json")) { return path.dirname(filename); } else { return filename; }
+};
 
-ensureFoundSomething = (files) ->
-  if files.length == 0
-    throw new Error("Could not find any files")
-  files
+const ensureFoundSomething = function(files) {
+  if (files.length === 0) {
+    throw new Error("Could not find any files");
+  }
+  return files;
+};
 
-symlinkType = () ->
-  if os.platform() == "win32"
-    "junction"
-  else
-    "dir"
+const symlinkType = function() {
+  if (os.platform() === "win32") {
+    return "junction";
+  } else {
+    return "dir";
+  }
+};
 
-symlinkAll = (pathToDistPackages, pathTo) ->
-  console.log("symlink these packages", pathToDistPackages)
+const symlinkAll = function(pathToDistPackages, pathTo) {
+  console.log("symlink these packages", pathToDistPackages);
   la(check.unemptyString(pathToDistPackages),
-    "missing paths to dist packages", pathToDistPackages)
+    "missing paths to dist packages", pathToDistPackages);
 
-  baseDir = path.dirname(pathTo())
-  toBase = path.relative.bind(null, baseDir)
+  const baseDir = path.dirname(pathTo());
+  const toBase = path.relative.bind(null, baseDir);
 
-  symlink = (pkg) ->
-    # console.log(pkg, dist)
-    ## strip off the initial './'
-    ## ./packages/foo -> node_modules/@packages/foo
-    pkg = removePackageJson(pkg)
-    dest = pathTo("node_modules", "@packages", path.basename(pkg))
-    relativeDest = path.relative(dest + '/..', pkg)
+  const symlink = function(pkg) {
+    // console.log(pkg, dist)
+    //# strip off the initial './'
+    //# ./packages/foo -> node_modules/@packages/foo
+    pkg = removePackageJson(pkg);
+    const dest = pathTo("node_modules", "@packages", path.basename(pkg));
+    const relativeDest = path.relative(dest + '/..', pkg);
 
-    type = symlinkType()
-    console.log(relativeDest, "link ->", dest, "type", type)
+    const type = symlinkType();
+    console.log(relativeDest, "link ->", dest, "type", type);
 
-    fs.ensureSymlinkAsync(relativeDest, dest, symlinkType)
-    .catch((err) ->
-      if not err.message.includes "EEXIST"
-        throw err
-    )
+    return fs.ensureSymlinkAsync(relativeDest, dest, symlinkType)
+    .catch(function(err) {
+      if (!err.message.includes("EEXIST")) {
+        throw err;
+      }
+    });
+  };
 
-  glob(pathToDistPackages)
+  return glob(pathToDistPackages)
   .then(ensureFoundSomething)
-  .map(symlink)
+  .map(symlink);
+};
 
 module.exports = {
-  runAllBuild
+  runAllBuild,
 
-  copyAllToDist
+  copyAllToDist,
 
-  npmInstallAll
+  npmInstallAll,
 
-  symlinkAll
+  symlinkAll,
 
-  runAllCleanJs
+  runAllCleanJs,
 
-  forceNpmInstall
+  forceNpmInstall,
 
   getPackagesWithScript
-}
+};
 
-if not module.parent
-  console.log("demo force install")
-  forceNpmInstall("packages/server", "@ffmpeg-installer/win32-x64")
+if (!module.parent) {
+  console.log("demo force install");
+  forceNpmInstall("packages/server", "@ffmpeg-installer/win32-x64");
+}

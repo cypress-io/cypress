@@ -1,111 +1,128 @@
-_ = require("lodash")
-path = require("path")
-awspublish = require('gulp-awspublish')
-human = require("human-interval")
-la = require("lazy-ass")
-check = require("check-more-types")
-cp = require("child_process")
-fse = require("fs-extra")
-os = require("os")
-Promise = require("bluebird")
-{configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file')
-konfig = require('../get-config')()
-{ purgeCloudflareCache } = require('./purge-cloudflare-cache')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const path = require("path");
+const awspublish = require('gulp-awspublish');
+const human = require("human-interval");
+const la = require("lazy-ass");
+const check = require("check-more-types");
+const cp = require("child_process");
+const fse = require("fs-extra");
+const os = require("os");
+const Promise = require("bluebird");
+const {configFromEnvOrJsonFile, filenameToShellVariable} = require('@cypress/env-or-json-file');
+const konfig = require('../get-config')();
+const { purgeCloudflareCache } = require('./purge-cloudflare-cache');
 
-getUploadUrl = () ->
-  url = konfig("cdn_url")
-  la(check.url(url), "could not get CDN url", url)
-  console.log("upload url", url)
-  url
+const getUploadUrl = function() {
+  const url = konfig("cdn_url");
+  la(check.url(url), "could not get CDN url", url);
+  console.log("upload url", url);
+  return url;
+};
 
-formHashFromEnvironment = () ->
-  env = process.env
-  if env.BUILDKITE
-    return "buildkite-#{env.BUILDKITE_BRANCH}-#{env.BUILDKITE_COMMIT}-#{env.BUILDKITE_BUILD_NUMBER}"
-  if env.CIRCLECI
-    return "circle-#{env.CIRCLE_BRANCH}-#{env.CIRCLE_SHA1}-#{env.CIRCLE_BUILD_NUM}"
-  if env.APPVEYOR
-    return "appveyor-#{env.APPVEYOR_REPO_BRANCH}-#{env.APPVEYOR_REPO_COMMIT}-#{env.APPVEYOR_BUILD_ID}"
-
-  throw new Error("Do not know how to form unique build hash on this CI")
-
-getS3Credentials = () ->
-  key = path.join('scripts', 'support', 'aws-credentials.json')
-  config = configFromEnvOrJsonFile(key)
-
-  if !config
-    console.error('⛔️  Cannot find AWS credentials')
-    console.error('Using @cypress/env-or-json-file module')
-    console.error('and filename', key)
-    console.error('which is environment variable', filenameToShellVariable(key))
-    console.error('available environment variable keys')
-    console.error(Object.keys(process.env))
-    throw new Error('AWS config not found')
-
-  la(check.unemptyString(config.bucket), 'missing AWS config bucket')
-  la(check.unemptyString(config.folder), 'missing AWS config folder')
-  la(check.unemptyString(config.key), 'missing AWS key')
-  la(check.unemptyString(config.secret), 'missing AWS secret key')
-
-  config
-
-getPublisher = (getAwsObj = getS3Credentials) ->
-  aws = getAwsObj()
-
-  # console.log("aws.bucket", aws.bucket)
-  awspublish.create {
-    httpOptions: {
-      timeout: human("10 minutes")
-    }
-    params: {
-      Bucket:        aws.bucket
-    }
-    accessKeyId:     aws.key
-    secretAccessKey: aws.secret
+const formHashFromEnvironment = function() {
+  const {
+    env
+  } = process;
+  if (env.BUILDKITE) {
+    return `buildkite-${env.BUILDKITE_BRANCH}-${env.BUILDKITE_COMMIT}-${env.BUILDKITE_BUILD_NUMBER}`;
+  }
+  if (env.CIRCLECI) {
+    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}-${env.CIRCLE_BUILD_NUM}`;
+  }
+  if (env.APPVEYOR) {
+    return `appveyor-${env.APPVEYOR_REPO_BRANCH}-${env.APPVEYOR_REPO_COMMIT}-${env.APPVEYOR_BUILD_ID}`;
   }
 
-getDesktopUrl = (version, osName, zipName) ->
-  url = getUploadUrl()
-  [url, "desktop", version, osName, zipName].join("/")
+  throw new Error("Do not know how to form unique build hash on this CI");
+};
 
-# purges desktop application url from Cloudflare cache
-purgeDesktopAppFromCache = ({version, platform, zipName}) ->
-  la(check.unemptyString(version), "missing desktop version", version)
-  la(check.unemptyString(platform), "missing platform", platform)
-  la(check.unemptyString(zipName), "missing zip filename")
+const getS3Credentials = function() {
+  const key = path.join('scripts', 'support', 'aws-credentials.json');
+  const config = configFromEnvOrJsonFile(key);
+
+  if (!config) {
+    console.error('⛔️  Cannot find AWS credentials');
+    console.error('Using @cypress/env-or-json-file module');
+    console.error('and filename', key);
+    console.error('which is environment variable', filenameToShellVariable(key));
+    console.error('available environment variable keys');
+    console.error(Object.keys(process.env));
+    throw new Error('AWS config not found');
+  }
+
+  la(check.unemptyString(config.bucket), 'missing AWS config bucket');
+  la(check.unemptyString(config.folder), 'missing AWS config folder');
+  la(check.unemptyString(config.key), 'missing AWS key');
+  la(check.unemptyString(config.secret), 'missing AWS secret key');
+
+  return config;
+};
+
+const getPublisher = function(getAwsObj = getS3Credentials) {
+  const aws = getAwsObj();
+
+  // console.log("aws.bucket", aws.bucket)
+  return awspublish.create({
+    httpOptions: {
+      timeout: human("10 minutes")
+    },
+    params: {
+      Bucket:        aws.bucket
+    },
+    accessKeyId:     aws.key,
+    secretAccessKey: aws.secret
+  });
+};
+
+const getDesktopUrl = function(version, osName, zipName) {
+  const url = getUploadUrl();
+  return [url, "desktop", version, osName, zipName].join("/");
+};
+
+// purges desktop application url from Cloudflare cache
+const purgeDesktopAppFromCache = function({version, platform, zipName}) {
+  la(check.unemptyString(version), "missing desktop version", version);
+  la(check.unemptyString(platform), "missing platform", platform);
+  la(check.unemptyString(zipName), "missing zip filename");
   la(check.extension("zip", zipName),
-    "zip filename should end with .zip", zipName)
+    "zip filename should end with .zip", zipName);
 
-  osName = getUploadNameByOsAndArch(platform)
-  la(check.unemptyString(osName), "missing osName", osName)
-  url = getDesktopUrl(version, osName, zipName)
+  const osName = getUploadNameByOsAndArch(platform);
+  la(check.unemptyString(osName), "missing osName", osName);
+  const url = getDesktopUrl(version, osName, zipName);
 
-  purgeCloudflareCache(url)
+  return purgeCloudflareCache(url);
+};
 
-# purges links to desktop app for all platforms
-# for a given version
-purgeDesktopAppAllPlatforms = (version, zipName) ->
-  la(check.unemptyString(version), "missing desktop version", version)
-  la(check.unemptyString(zipName), "missing zipName", zipName)
+// purges links to desktop app for all platforms
+// for a given version
+const purgeDesktopAppAllPlatforms = function(version, zipName) {
+  la(check.unemptyString(version), "missing desktop version", version);
+  la(check.unemptyString(zipName), "missing zipName", zipName);
 
-  platforms = ["darwin", "linux", "win32"]
-  console.log("purging all desktop links for version #{version} from Cloudflare")
-  Promise.mapSeries platforms, (platform) ->
-    purgeDesktopAppFromCache({version, platform, zipName})
+  const platforms = ["darwin", "linux", "win32"];
+  console.log(`purging all desktop links for version ${version} from Cloudflare`);
+  return Promise.mapSeries(platforms, platform => purgeDesktopAppFromCache({version, platform, zipName}));
+};
 
-# all architectures we are building test runner for
-validPlatformArchs = ["darwin-x64", "linux-x64", "win32-ia32", "win32-x64"]
-# simple check for platform-arch string
-# example: isValidPlatformArch("darwin") // FALSE
-isValidPlatformArch = check.oneOf(validPlatformArchs)
+// all architectures we are building test runner for
+const validPlatformArchs = ["darwin-x64", "linux-x64", "win32-ia32", "win32-x64"];
+// simple check for platform-arch string
+// example: isValidPlatformArch("darwin") // FALSE
+const isValidPlatformArch = check.oneOf(validPlatformArchs);
 
-getValidPlatformArchs = () -> validPlatformArchs
+const getValidPlatformArchs = () => validPlatformArchs;
 
-getUploadNameByOsAndArch = (platform) ->
-  ## just hard code for now...
-  arch = os.arch()
+var getUploadNameByOsAndArch = function(platform) {
+  //# just hard code for now...
+  const arch = os.arch();
 
-  uploadNames = {
+  const uploadNames = {
     darwin: {
       "x64": "darwin-x64"
     },
@@ -116,21 +133,25 @@ getUploadNameByOsAndArch = (platform) ->
       "x64": "win32-x64",
       "ia32": "win32-ia32"
     }
+  };
+  const name = _.get(uploadNames[platform], arch);
+  if (!name) {
+    throw new Error(`Cannot find upload name for OS: '${platform}' with arch: '${arch}'`);
   }
-  name = _.get(uploadNames[platform], arch)
-  if not name
-    throw new Error("Cannot find upload name for OS: '#{platform}' with arch: '#{arch}'")
-  la(isValidPlatformArch(name), "formed invalid platform", name, "from", platform, arch)
+  la(isValidPlatformArch(name), "formed invalid platform", name, "from", platform, arch);
 
-  name
+  return name;
+};
 
-saveUrl = (filename) -> (url) ->
-  la(check.unemptyString(filename), "missing filename", filename)
-  la(check.url(url), "invalid url to save", url)
-  s = JSON.stringify({url})
-  fse.writeFile(filename, s)
-  .then =>
-    console.log("saved url", url, "into file", filename)
+const saveUrl = filename => (function(url) {
+  la(check.unemptyString(filename), "missing filename", filename);
+  la(check.url(url), "invalid url to save", url);
+  const s = JSON.stringify({url});
+  return fse.writeFile(filename, s)
+  .then(() => {
+    return console.log("saved url", url, "into file", filename);
+  });
+});
 
 module.exports = {
   getS3Credentials,
@@ -144,4 +165,4 @@ module.exports = {
   saveUrl,
   formHashFromEnvironment,
   getUploadUrl
-}
+};

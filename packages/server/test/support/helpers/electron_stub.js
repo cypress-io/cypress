@@ -1,42 +1,47 @@
-## a stubbed out version of electron
-## for using in all of our tests :-)
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# a stubbed out version of electron
+//# for using in all of our tests :-)
 module.exports = {
-  shell: {}
-  dialog: {}
+  shell: {},
+  dialog: {},
   ipcMain: {
-    on: ->
-    removeAllListeners: ->
-  }
+    on() {},
+    removeAllListeners() {}
+  },
   nativeImage: {
-    createFromPath: -> {}
-  }
+    createFromPath() { return {}; }
+  },
   app: {
-    on: ->
-    exit: ->
+    on() {},
+    exit() {},
     commandLine: {
-      appendSwitch: ->
-      appendArgument: ->
+      appendSwitch() {},
+      appendArgument() {}
     },
-    disableHardwareAcceleration: ->
-  }
+    disableHardwareAcceleration() {}
+  },
   systemPreferences: {
-    isDarkMode: ->
-    subscribeNotification: ->
-  }
+    isDarkMode() {},
+    subscribeNotification() {}
+  },
   BrowserWindow: {
-    fromWebContents: ->
-    getExtensions: ->
-    removeExtension: ->
-    addExtension: ->
-  }
+    fromWebContents() {},
+    getExtensions() {},
+    removeExtension() {},
+    addExtension() {}
+  },
   Menu: {
-    buildFromTemplate: ->
-    setApplicationMenu: ->
-  }
-  Tray: -> {
-    on: ->
-    setToolTip: ->
-    setImage: ->
-    setPressedImage: ->
-  }
-}
+    buildFromTemplate() {},
+    setApplicationMenu() {}
+  },
+  Tray() { return {
+    on() {},
+    setToolTip() {},
+    setImage() {},
+    setPressedImage() {}
+  }; }
+};

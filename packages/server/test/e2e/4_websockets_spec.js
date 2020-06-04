@@ -1,36 +1,39 @@
-ws = require("ws")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const ws = require("ws");
 
-e2e = require("../support/helpers/e2e").default
+const e2e = require("../support/helpers/e2e").default;
 
-onServer = (app) ->
-  app.get "/foo", (req, res) ->
-    res.send("<html>foo></html>")
+const onServer = app => app.get("/foo", (req, res) => res.send("<html>foo></html>"));
 
-onWsServer = (app, server) ->
-  wss = new ws.Server({ server })
-  wss.on "connection", (ws) ->
-    ws.on "message", (msg) ->
-      ws.send(msg + "bar")
+const onWsServer = function(app, server) {
+  const wss = new ws.Server({ server });
+  return wss.on("connection", ws => ws.on("message", msg => ws.send(msg + "bar")));
+};
 
-onWssServer = (app) ->
+const onWssServer = function(app) {};
 
-describe "e2e websockets", ->
+describe("e2e websockets", function() {
   e2e.setup({
     servers: [{
-      port: 3038
-      static: true
-      onServer: onServer
+      port: 3038,
+      static: true,
+      onServer
     }, {
-      port: 3039
+      port: 3039,
       onServer: onWsServer
     }, {
-      port: 3040
+      port: 3040,
       onServer: onWssServer
     }]
-  })
+  });
 
-  ## https://github.com/cypress-io/cypress/issues/556
-  e2e.it "passes", {
-    spec: "websockets_spec.coffee"
+  //# https://github.com/cypress-io/cypress/issues/556
+  return e2e.it("passes", {
+    spec: "websockets_spec.coffee",
     snapshot: true
-  }
+  });
+});

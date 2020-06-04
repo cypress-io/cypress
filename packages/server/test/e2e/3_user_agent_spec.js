@@ -1,29 +1,36 @@
-e2e = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const e2e = require("../support/helpers/e2e").default;
 
-onServer = (app) ->
-  app.get "/agent", (req, res) ->
-    agent = req.headers["user-agent"]
+const onServer = function(app) {
+  app.get("/agent", function(req, res) {
+    const agent = req.headers["user-agent"];
 
-    res.send("<html><span id='agent'>#{agent}</span></html>")
+    return res.send(`<html><span id='agent'>${agent}</span></html>`);
+  });
 
-  app.put "/agent", (req, res) ->
-    res.json({
-      userAgent: req.headers["user-agent"]
-    })
+  return app.put("/agent", (req, res) => res.json({
+    userAgent: req.headers["user-agent"]
+  }));
+};
 
-describe "e2e user agent", ->
+describe("e2e user agent", function() {
   e2e.setup({
     servers: {
-      port: 4545
-      onServer: onServer
-    }
+      port: 4545,
+      onServer
+    },
     settings: {
-      userAgent: "foo bar baz agent"
+      userAgent: "foo bar baz agent",
       baseUrl: "http://localhost:4545"
     }
-  })
+  });
 
-  e2e.it "passes", {
-    spec: "user_agent_spec.coffee"
+  return e2e.it("passes", {
+    spec: "user_agent_spec.coffee",
     snapshot: true
-  }
+  });
+});

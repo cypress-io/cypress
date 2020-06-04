@@ -1,40 +1,45 @@
-require("../spec_helper")
-_          = require("lodash")
-http       = require("http")
-socket     = require("@packages/socket")
-Promise    = require("bluebird")
-mockRequire = require('mock-require')
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
+const _          = require("lodash");
+const http       = require("http");
+const socket     = require("@packages/socket");
+const Promise    = require("bluebird");
+const mockRequire = require('mock-require');
 
 
-browser = {
+const browser = {
   cookies: {
-    set: ->
-    getAll: ->
-    remove: ->
+    set() {},
+    getAll() {},
+    remove() {},
     onChanged: {
-      addListener: ->
+      addListener() {}
     }
-  }
+  },
   windows: {
-    getLastFocused: ->
-  }
+    getLastFocused() {}
+  },
   runtime: {
 
-  }
+  },
   tabs: {
-    query: ->
-    executeScript: ->
-    captureVisibleTab: ->
+    query() {},
+    executeScript() {},
+    captureVisibleTab() {}
   }
-}
+};
 
-mockRequire('webextension-polyfill', browser)
+mockRequire('webextension-polyfill', browser);
 
-background = require("../../app/background")
+const background = require("../../app/background");
 
-PORT = 12345
+const PORT = 12345;
 
-tab1 = {
+const tab1 = {
   "active": false,
   "audible": false,
   "favIconUrl": "http://localhost:2020/__cypress/static/img/favicon.ico",
@@ -53,9 +58,9 @@ tab1 = {
   "url": "http://localhost:2020/__/#tests",
   "width": 1920,
   "windowId": 1
-}
+};
 
-tab2 = {
+const tab2 = {
   "active": true,
   "audible": false,
   "favIconUrl": "http://localhost:2020/__cypress/static/img/favicon.ico",
@@ -74,9 +79,9 @@ tab2 = {
   "url": "https://localhost:2020/__/#tests",
   "width": 1920,
   "windowId": 1
-}
+};
 
-tab3 = {
+const tab3 = {
   "active": true,
   "audible": false,
   "favIconUrl": "http://localhost:2020/__cypress/static/img/favicon.ico",
@@ -95,221 +100,245 @@ tab3 = {
   "url": "about:blank",
   "width": 1920,
   "windowId": 1
-}
+};
 
-describe "app/background", ->
-  beforeEach (done) ->
-    @httpSrv = http.createServer()
-    @server  = socket.server(@httpSrv, {path: "/__socket.io"})
-    @httpSrv.listen(PORT, done)
+describe("app/background", function() {
+  beforeEach(function(done) {
+    this.httpSrv = http.createServer();
+    this.server  = socket.server(this.httpSrv, {path: "/__socket.io"});
+    return this.httpSrv.listen(PORT, done);
+  });
 
-  afterEach (done)  ->
-    @server.close()
-    @httpSrv.close -> done()
+  afterEach(function(done)  {
+    this.server.close();
+    return this.httpSrv.close(() => done());
+  });
 
-  context ".connect", ->
-    it "can connect", (done) ->
-      @server.on "connection", -> done()
+  context(".connect", function() {
+    it("can connect", function(done) {
+      this.server.on("connection", () => done());
 
-      background.connect("http://localhost:#{PORT}", "/__socket.io")
+      return background.connect(`http://localhost:${PORT}`, "/__socket.io");
+    });
 
-    it "emits 'automation:client:connected'", (done) ->
-      client = background.connect("http://localhost:#{PORT}", "/__socket.io")
+    it("emits 'automation:client:connected'", function(done) {
+      const client = background.connect(`http://localhost:${PORT}`, "/__socket.io");
 
-      sinon.spy(client, "emit")
+      sinon.spy(client, "emit");
 
-      client.on "connect", _.once ->
-        expect(client.emit).to.be.calledWith("automation:client:connected")
-        done()
+      return client.on("connect", _.once(function() {
+        expect(client.emit).to.be.calledWith("automation:client:connected");
+        return done();
+      })
+      );
+    });
 
-    it "listens to cookie changes", (done) ->
-      addListener = sinon.stub(browser.cookies.onChanged, "addListener")
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+    return it("listens to cookie changes", function(done) {
+      const addListener = sinon.stub(browser.cookies.onChanged, "addListener");
+      const client      = background.connect(`http://localhost:${PORT}`, "/__socket.io");
 
-      client.on "connect", _.once ->
-        expect(addListener).to.be.calledOnce
-        done()
+      return client.on("connect", _.once(function() {
+        expect(addListener).to.be.calledOnce;
+        return done();
+      })
+      );
+    });
+  });
 
-  context "onChanged", ->
-    it "does not emit when cause is overwrite", (done) ->
-      addListener = sinon.stub(browser.cookies.onChanged, "addListener")
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+  context("onChanged", function() {
+    it("does not emit when cause is overwrite", function(done) {
+      const addListener = sinon.stub(browser.cookies.onChanged, "addListener");
+      const client      = background.connect(`http://localhost:${PORT}`, "/__socket.io");
 
-      sinon.spy(client, "emit")
+      sinon.spy(client, "emit");
 
-      client.on "connect", _.once ->
-        fn = addListener.getCall(0).args[0]
+      return client.on("connect", _.once(function() {
+        const fn = addListener.getCall(0).args[0];
 
-        fn({cause: "overwrite"})
+        fn({cause: "overwrite"});
 
-        expect(client.emit).not.to.be.calledWith("automation:push:request")
-        done()
+        expect(client.emit).not.to.be.calledWith("automation:push:request");
+        return done();
+      })
+      );
+    });
 
-    it "emits 'automation:push:request'", (done) ->
-      info = { cause: "explicit", cookie: {name: "foo", value: "bar"} }
+    return it("emits 'automation:push:request'", function(done) {
+      const info = { cause: "explicit", cookie: {name: "foo", value: "bar"} };
 
-      addListener = sinon.stub(browser.cookies.onChanged, "addListener").yieldsAsync(info)
-      client      = background.connect("http://localhost:#{PORT}", "/__socket.io")
+      const addListener = sinon.stub(browser.cookies.onChanged, "addListener").yieldsAsync(info);
+      const client      = background.connect(`http://localhost:${PORT}`, "/__socket.io");
 
-      client.on "connect", ->
-        client.emit = _.once (req, msg, data) ->
-          expect(req).to.eq("automation:push:request")
-          expect(msg).to.eq("change:cookie")
-          expect(data).to.deep.eq(info)
-          done()
+      return client.on("connect", () => client.emit = _.once(function(req, msg, data) {
+        expect(req).to.eq("automation:push:request");
+        expect(msg).to.eq("change:cookie");
+        expect(data).to.deep.eq(info);
+        return done();
+      }));
+    });
+  });
 
-  context ".getAll", ->
-    it "resolves with specific cookie properties", ->
-      sinon.stub(browser.cookies, "getAll")
-      .withArgs({domain: "localhost"})
+  context(".getAll", () => it("resolves with specific cookie properties", function() {
+    sinon.stub(browser.cookies, "getAll")
+    .withArgs({domain: "localhost"})
+    .resolves([
+      {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123},
+      {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
+    ]);
+
+    return background.getAll({domain: "localhost"})
+    .then(cookies => expect(cookies).to.deep.eq([
+      {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123},
+      {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
+    ]));
+  }));
+
+  context(".query", function() {
+    beforeEach(function() {
+      return this.code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent";
+    });
+
+    it("resolves on the 1st tab", function() {
+      sinon.stub(browser.tabs, "query")
+      .withArgs({windowType: "normal"})
+      .resolves([tab1]);
+
+      sinon.stub(browser.tabs, "executeScript")
+      .withArgs(tab1.id, {code: this.code})
+      .resolves(["1234"]);
+
+      return background.query({
+        string: "1234",
+        element: "__cypress-string"
+      });
+    });
+
+    it("resolves on the 2nd tab", function() {
+      sinon.stub(browser.tabs, "query")
+      .withArgs({windowType: "normal"})
+      .resolves([tab1, tab2]);
+
+      sinon.stub(browser.tabs, "executeScript")
+      .withArgs(tab1.id, {code: this.code})
+      .resolves(["foobarbaz"])
+      .withArgs(tab2.id, {code: this.code})
+      .resolves(["1234"]);
+
+      return background.query({
+        string: "1234",
+        element: "__cypress-string"
+      });
+    });
+
+    it("filters out tabs that don't start with http", function() {
+      sinon.stub(browser.tabs, "query")
+      .resolves([tab3]);
+
+      return background.query({
+        string: "1234",
+        element: "__cypress-string"
+      })
+      .then(function() {
+        throw new Error("should have failed");}).catch(err => //# we good if this hits
+      expect(err).to.be.instanceof(Promise.RangeError));
+    });
+
+    it("rejects if no tab matches", function() {
+      sinon.stub(browser.tabs, "query")
+      .withArgs({windowType: "normal"})
+      .resolves([tab1, tab2]);
+
+      sinon.stub(browser.tabs, "executeScript")
+      .withArgs(tab1.id, {code: this.code})
+      .resolves(["foobarbaz"])
+      .withArgs(tab2.id, {code: this.code})
+      .resolves(["foobarbaz2"]);
+
+      return background.query({
+        string: "1234",
+        element: "__cypress-string"
+      })
+      .then(function() {
+        throw new Error("should have failed");}).catch(function(err) {
+        //# we good if this hits
+        expect(err.length).to.eq(2);
+        return expect(err).to.be.instanceof(Promise.AggregateError);
+      });
+    });
+
+    return it("rejects if no tabs were found", function() {
+      sinon.stub(browser.tabs, "query")
+      .resolves([]);
+
+      return background.query({
+        string: "1234",
+        element: "__cypress-string"
+      })
+      .then(function() {
+        throw new Error("should have failed");}).catch(err => //# we good if this hits
+      expect(err).to.be.instanceof(Promise.RangeError));
+    });
+  });
+
+  return context("integration", function() {
+    beforeEach(function(done) {
+      done = _.once(done);
+      this.server.on("connection", socket1 => { this.socket = socket1; return done(); });
+
+      return this.client = background.connect(`http://localhost:${PORT}`, "/__socket.io");
+    });
+
+    describe("get:cookies", function() {
+      beforeEach(() => sinon.stub(browser.cookies, "getAll")
+      .withArgs({domain: "google.com"})
+      .resolves([{}, {}]));
+
+      return it("returns all cookies", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.deep.eq([{}, {}]);
+          return done();
+        });
+
+        return this.server.emit("automation:request", 123, "get:cookies", {domain: "google.com"});
+      });
+    });
+
+    describe("get:cookie", function() {
+      beforeEach(() => sinon.stub(browser.cookies, "getAll")
+      .withArgs({domain: "google.com", name: "session"})
       .resolves([
-        {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
-        {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
+        {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123}
       ])
+      .withArgs({domain: "google.com", name: "doesNotExist"})
+      .resolves([]));
 
-      background.getAll({domain: "localhost"})
-      .then (cookies) ->
-        expect(cookies).to.deep.eq([
-          {name: "foo", value: "f", path: "/", domain: "localhost", secure: true, httpOnly: true, expirationDate: 123}
-          {name: "bar", value: "b", path: "/", domain: "localhost", secure: false, httpOnly: false, expirationDate: 456}
-        ])
+      it("returns a specific cookie by name", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123});
+          return done();
+        });
 
-  context ".query", ->
-    beforeEach ->
-      @code = "var s; (s = document.getElementById('__cypress-string')) && s.textContent"
+        return this.server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"});
+      });
 
-    it "resolves on the 1st tab", ->
-      sinon.stub(browser.tabs, "query")
-      .withArgs({windowType: "normal"})
-      .resolves([tab1])
+      return it("returns null when no cookie by name is found", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.be.null;
+          return done();
+        });
 
-      sinon.stub(browser.tabs, "executeScript")
-      .withArgs(tab1.id, {code: @code})
-      .resolves(["1234"])
+        return this.server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "doesNotExist"});
+      });
+    });
 
-      background.query({
-        string: "1234"
-        element: "__cypress-string"
-      })
+    describe("set:cookie", function() {
+      beforeEach(function() {
+        browser.runtime.lastError = {message: "some error"};
 
-    it "resolves on the 2nd tab", ->
-      sinon.stub(browser.tabs, "query")
-      .withArgs({windowType: "normal"})
-      .resolves([tab1, tab2])
-
-      sinon.stub(browser.tabs, "executeScript")
-      .withArgs(tab1.id, {code: @code})
-      .resolves(["foobarbaz"])
-      .withArgs(tab2.id, {code: @code})
-      .resolves(["1234"])
-
-      background.query({
-        string: "1234"
-        element: "__cypress-string"
-      })
-
-    it "filters out tabs that don't start with http", ->
-      sinon.stub(browser.tabs, "query")
-      .resolves([tab3])
-
-      background.query({
-        string: "1234"
-        element: "__cypress-string"
-      })
-      .then ->
-        throw new Error("should have failed")
-      .catch (err) ->
-        ## we good if this hits
-        expect(err).to.be.instanceof(Promise.RangeError)
-
-    it "rejects if no tab matches", ->
-      sinon.stub(browser.tabs, "query")
-      .withArgs({windowType: "normal"})
-      .resolves([tab1, tab2])
-
-      sinon.stub(browser.tabs, "executeScript")
-      .withArgs(tab1.id, {code: @code})
-      .resolves(["foobarbaz"])
-      .withArgs(tab2.id, {code: @code})
-      .resolves(["foobarbaz2"])
-
-      background.query({
-        string: "1234"
-        element: "__cypress-string"
-      })
-      .then ->
-        throw new Error("should have failed")
-      .catch (err) ->
-        ## we good if this hits
-        expect(err.length).to.eq(2)
-        expect(err).to.be.instanceof(Promise.AggregateError)
-
-    it "rejects if no tabs were found", ->
-      sinon.stub(browser.tabs, "query")
-      .resolves([])
-
-      background.query({
-        string: "1234"
-        element: "__cypress-string"
-      })
-      .then ->
-        throw new Error("should have failed")
-      .catch (err) ->
-        ## we good if this hits
-        expect(err).to.be.instanceof(Promise.RangeError)
-
-  context "integration", ->
-    beforeEach (done) ->
-      done = _.once(done)
-      @server.on "connection", (@socket) => done()
-
-      @client = background.connect("http://localhost:#{PORT}", "/__socket.io")
-
-    describe "get:cookies", ->
-      beforeEach ->
-        sinon.stub(browser.cookies, "getAll")
-        .withArgs({domain: "google.com"})
-        .resolves([{}, {}])
-
-      it "returns all cookies", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq([{}, {}])
-          done()
-
-        @server.emit("automation:request", 123, "get:cookies", {domain: "google.com"})
-
-    describe "get:cookie", ->
-      beforeEach ->
-        sinon.stub(browser.cookies, "getAll")
-        .withArgs({domain: "google.com", name: "session"})
-        .resolves([
-          {name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123}
-        ])
-        .withArgs({domain: "google.com", name: "doesNotExist"})
-        .resolves([])
-
-      it "returns a specific cookie by name", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/login", domain: "google", secure: true, httpOnly: true, expirationDate: 123})
-          done()
-
-        @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "session"})
-
-      it "returns null when no cookie by name is found", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.be.null
-          done()
-
-        @server.emit("automation:request", 123, "get:cookie", {domain: "google.com", name: "doesNotExist"})
-
-    describe "set:cookie", ->
-      beforeEach ->
-        browser.runtime.lastError = {message: "some error"}
-
-        sinon.stub(browser.cookies, "set")
+        return sinon.stub(browser.cookies, "set")
         .withArgs({domain: "google.com", name: "session", value: "key", path: "/", secure: false, url: "http://google.com/"})
         .resolves(
           {name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false}
@@ -318,42 +347,50 @@ describe "app/background", ->
         .resolves(
           {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false}
         )
-        ## 'domain' cannot not set when it's localhost
+        //# 'domain' cannot not set when it's localhost
         .withArgs({name: "foo", value: "bar", secure: true, path: "/foo", url: "https://localhost/foo"})
-        .rejects({message: "some error"})
+        .rejects({message: "some error"});
+      });
 
-      it "resolves with the cookie details", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false})
-          done()
+      it("resolves with the cookie details", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google", secure: false, httpOnly: false});
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", secure: false, value: "key", path: "/"})
+        return this.server.emit("automation:request", 123, "set:cookie", {domain: "google.com", name: "session", secure: false, value: "key", path: "/"});
+      });
 
-      it "does not set url when already present", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false})
-          done()
+      it("does not set url when already present", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.deep.eq({name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: false});
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "set:cookie", {url: "https://www.google.com", name: "session", value: "key"})
+        return this.server.emit("automation:request", 123, "set:cookie", {url: "https://www.google.com", name: "session", value: "key"});
+      });
 
-      it "rejects with error", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq("some error")
-          done()
+      return it("rejects with error", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.__error).to.eq("some error");
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar", domain: "localhost", secure: true, path: "/foo"})
+        return this.server.emit("automation:request", 123, "set:cookie", {name: "foo", value: "bar", domain: "localhost", secure: true, path: "/foo"});
+      });
+    });
 
-    describe "clear:cookies", ->
-      beforeEach ->
-        browser.runtime.lastError = {message: "some error"}
+    describe("clear:cookies", function() {
+      beforeEach(function() {
+        browser.runtime.lastError = {message: "some error"};
 
         sinon.stub(browser.cookies, "getAll")
         .withArgs({domain: "google.com"})
         .resolves([
-          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
+          {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123},
           {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expirationDate: 456}
         ])
         .withArgs({domain: "should.throw"})
@@ -363,9 +400,9 @@ describe "app/background", ->
         .withArgs({domain: "no.details"})
         .resolves([
           {name: "shouldThrow", value: "key", path: "/", domain: "no.details", secure: false, httpOnly: true, expirationDate: 123}
-        ])
+        ]);
 
-        sinon.stub(browser.cookies, "remove")
+        return sinon.stub(browser.cookies, "remove")
         .withArgs({name: "session", url: "https://google.com/"})
         .resolves(
           {name: "session", url: "https://google.com/", storeId: "123"}
@@ -377,38 +414,46 @@ describe "app/background", ->
         .withArgs({name: "noDetails", url: "http://no.details/"})
         .resolves(null)
         .withArgs({name: "shouldThrow", url: "http://should.throw/"})
-        .rejects({message: "some error"})
+        .rejects({message: "some error"});
+      });
 
-      it "resolves with array of removed cookies", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
+      it("resolves with array of removed cookies", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
           expect(obj.response).to.deep.eq([
-            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
+            {name: "session", value: "key", path: "/",    domain: "google.com", secure: true, httpOnly: true, expirationDate: 123},
             {name: "foo",     value: "bar", path: "/foo", domain: "google.com", secure: false, httpOnly: false, expirationDate: 456}
-          ])
-          done()
+          ]);
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookies", {domain: "google.com"})
+        return this.server.emit("automation:request", 123, "clear:cookies", {domain: "google.com"});
+      });
 
-      it "rejects with error thrown", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq("some error")
-          done()
+      it("rejects with error thrown", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.__error).to.eq("some error");
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookies", {domain: "should.throw"})
+        return this.server.emit("automation:request", 123, "clear:cookies", {domain: "should.throw"});
+      });
 
-      it "rejects when no details", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq("Removing cookie failed for: #{JSON.stringify({url: "http://no.details/", name: "shouldThrow"})}")
-          done()
+      return it("rejects when no details", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.__error).to.eq(`Removing cookie failed for: ${JSON.stringify({url: "http://no.details/", name: "shouldThrow"})}`);
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookies", {domain: "no.details"})
+        return this.server.emit("automation:request", 123, "clear:cookies", {domain: "no.details"});
+      });
+    });
 
-    describe "clear:cookie", ->
-      beforeEach ->
-        browser.runtime.lastError = {message: "some error"}
+    describe("clear:cookie", function() {
+      beforeEach(function() {
+        browser.runtime.lastError = {message: "some error"};
 
         sinon.stub(browser.cookies, "getAll")
         .withArgs({domain: "google.com", name: "session"})
@@ -420,81 +465,96 @@ describe "app/background", ->
         .withArgs({domain: "cdn.github.com", name: "shouldThrow"})
         .resolves([
           {name: "shouldThrow", value: "key", path: "/assets", domain: "cdn.github.com", secure: false, httpOnly: true, expirationDate: 123}
-        ])
+        ]);
 
-        sinon.stub(browser.cookies, "remove")
+        return sinon.stub(browser.cookies, "remove")
         .withArgs({name: "session", url: "https://google.com/"})
         .resolves(
           {name: "session", url: "https://google.com/", storeId: "123"}
         )
         .withArgs({name: "shouldThrow", url: "http://cdn.github.com/assets"})
-        .rejects({message: "some error"})
+        .rejects({message: "some error"});
+      });
 
-      it "resolves single removed cookie", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
+      it("resolves single removed cookie", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
           expect(obj.response).to.deep.eq(
             {name: "session", value: "key", path: "/", domain: "google.com", secure: true, httpOnly: true, expirationDate: 123}
-          )
-          done()
+          );
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookie", {domain: "google.com", name: "session"})
+        return this.server.emit("automation:request", 123, "clear:cookie", {domain: "google.com", name: "session"});
+      });
 
-      it "returns null when no cookie by name is found", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.be.null
-          done()
+      it("returns null when no cookie by name is found", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.be.null;
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookie", {domain: "google.com", name: "doesNotExist"})
+        return this.server.emit("automation:request", 123, "clear:cookie", {domain: "google.com", name: "doesNotExist"});
+      });
 
-      it "rejects with error", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq("some error")
-          done()
+      return it("rejects with error", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.__error).to.eq("some error");
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "clear:cookie", {domain: "cdn.github.com", name: "shouldThrow"})
+        return this.server.emit("automation:request", 123, "clear:cookie", {domain: "cdn.github.com", name: "shouldThrow"});
+      });
+    });
 
-    describe "is:automation:client:connected", ->
-      beforeEach ->
-        sinon.stub(browser.tabs, "query")
-        .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
-        .resolves([])
+    describe("is:automation:client:connected", function() {
+      beforeEach(() => sinon.stub(browser.tabs, "query")
+      .withArgs({url: "CHANGE_ME_HOST/*", windowType: "normal"})
+      .resolves([]));
 
-      it "queries url and resolve", (done) ->
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.be.undefined
-          done()
+      return it("queries url and resolve", function(done) {
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.be.undefined;
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "is:automation:client:connected")
+        return this.server.emit("automation:request", 123, "is:automation:client:connected");
+      });
+    });
 
-    describe "take:screenshot", ->
-      beforeEach ->
-        sinon.stub(browser.windows, "getLastFocused").resolves({id: 1})
+    return describe("take:screenshot", function() {
+      beforeEach(() => sinon.stub(browser.windows, "getLastFocused").resolves({id: 1}));
 
-      afterEach ->
-        delete browser.runtime.lastError
+      afterEach(() => delete browser.runtime.lastError);
 
-      it "resolves with screenshot", (done) ->
+      it("resolves with screenshot", function(done) {
         sinon.stub(browser.tabs, "captureVisibleTab")
         .withArgs(1, {format: "png"})
-        .resolves("foobarbaz")
+        .resolves("foobarbaz");
 
-        @socket.on "automation:response", (id, obj = {}) ->
-          expect(id).to.eq(123)
-          expect(obj.response).to.eq("foobarbaz")
-          done()
+        this.socket.on("automation:response", function(id, obj = {}) {
+          expect(id).to.eq(123);
+          expect(obj.response).to.eq("foobarbaz");
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "take:screenshot")
+        return this.server.emit("automation:request", 123, "take:screenshot");
+      });
 
-      it "rejects with browser.runtime.lastError", (done) ->
-        sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).rejects(new Error("some error"))
+      return it("rejects with browser.runtime.lastError", function(done) {
+        sinon.stub(browser.tabs, "captureVisibleTab").withArgs(1, {format: "png"}).rejects(new Error("some error"));
 
-        @socket.on "automation:response", (id, obj) ->
-          expect(id).to.eq(123)
-          expect(obj.__error).to.eq("some error")
-          done()
+        this.socket.on("automation:response", function(id, obj) {
+          expect(id).to.eq(123);
+          expect(obj.__error).to.eq("some error");
+          return done();
+        });
 
-        @server.emit("automation:request", 123, "take:screenshot")
+        return this.server.emit("automation:request", 123, "take:screenshot");
+      });
+    });
+  });
+});

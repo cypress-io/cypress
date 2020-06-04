@@ -1,66 +1,87 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-describe "lib/konfig", ->
-  beforeEach ->
-    @env = process.env["CYPRESS_INTERNAL_ENV"]
+describe("lib/konfig", function() {
+  beforeEach(function() {
+    this.env = process.env["CYPRESS_INTERNAL_ENV"];
 
-    @setup = (env) =>
-      process.env["CYPRESS_INTERNAL_ENV"] = env
+    return this.setup = env => {
+      process.env["CYPRESS_INTERNAL_ENV"] = env;
 
-      @konfig = require("#{root}lib/konfig")
+      this.konfig = require(`${root}lib/konfig`);
 
-      @eq = (key, val) =>
-        expect(@konfig(key)).to.eq(val)
+      return this.eq = (key, val) => {
+        return expect(this.konfig(key)).to.eq(val);
+      };
+    };
+  });
 
-  afterEach ->
-    process.env["CYPRESS_INTERNAL_ENV"] = @env
+  afterEach(function() {
+    process.env["CYPRESS_INTERNAL_ENV"] = this.env;
 
-    delete require.cache[require.resolve("#{root}lib/konfig")]
+    return delete require.cache[require.resolve(`${root}lib/konfig`)];});
 
-  it "does not set global.config", ->
-    delete global.config
-    delete require.cache[require.resolve("#{root}lib/konfig")]
+  it("does not set global.config", function() {
+    delete global.config;
+    delete require.cache[require.resolve(`${root}lib/konfig`)];
 
-    require("#{root}lib/konfig")
-    expect(global.config).not.to.be.ok
+    require(`${root}lib/konfig`);
+    return expect(global.config).not.to.be.ok;
+  });
 
-  it "memoizes the result", ->
-    env = process.env["NODE_ENV"]
+  it("memoizes the result", function() {
+    const env = process.env["NODE_ENV"];
 
-    process.env["NODE_ENV"] = "development"
-    config = require("#{root}lib/konfig")
+    process.env["NODE_ENV"] = "development";
+    const config = require(`${root}lib/konfig`);
 
-    process.env["NODE_ENV"] = "test"
-    config2 = require("#{root}lib/konfig")
+    process.env["NODE_ENV"] = "test";
+    const config2 = require(`${root}lib/konfig`);
 
-    expect(config).to.eq(config2)
+    return expect(config).to.eq(config2);
+  });
 
-  it "does not add NODE_ENV to process env if input env did not contain one", ->
-    env = process.env["NODE_ENV"]
-    delete process.env["NODE_ENV"]
-    delete require.cache[require.resolve("#{root}lib/konfig")]
-    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
-    config = require("#{root}lib/konfig")
-    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false)
-    process.env["NODE_ENV"] = env
+  it("does not add NODE_ENV to process env if input env did not contain one", function() {
+    const env = process.env["NODE_ENV"];
+    delete process.env["NODE_ENV"];
+    delete require.cache[require.resolve(`${root}lib/konfig`)];
+    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false);
+    const config = require(`${root}lib/konfig`);
+    expect(process.env.hasOwnProperty('NODE_ENV')).to.eq(false);
+    return process.env["NODE_ENV"] = env;
+  });
 
-  context "development", ->
-    beforeEach ->
-      @setup("development")
+  context("development", function() {
+    beforeEach(function() {
+      return this.setup("development");
+    });
 
-    it "api_url", ->
-      @eq("api_url", "http://localhost:1234/")
+    return it("api_url", function() {
+      return this.eq("api_url", "http://localhost:1234/");
+    });
+  });
 
-  context "test", ->
-    beforeEach ->
-      @setup("test")
+  context("test", function() {
+    beforeEach(function() {
+      return this.setup("test");
+    });
 
-    it "api_url", ->
-      @eq("api_url", "http://localhost:1234/")
+    return it("api_url", function() {
+      return this.eq("api_url", "http://localhost:1234/");
+    });
+  });
 
-  context "production", ->
-    beforeEach ->
-      @setup("production")
+  return context("production", function() {
+    beforeEach(function() {
+      return this.setup("production");
+    });
 
-    it "api_url", ->
-      @eq("api_url", "https://api.cypress.io/")
+    return it("api_url", function() {
+      return this.eq("api_url", "https://api.cypress.io/");
+    });
+  });
+});

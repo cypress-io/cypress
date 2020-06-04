@@ -1,64 +1,81 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-_ = require("lodash")
-path = require("path")
-spec = require("#{root}lib/controllers/spec")
-preprocessor = require("#{root}lib/plugins/preprocessor")
+const _ = require("lodash");
+const path = require("path");
+const spec = require(`${root}lib/controllers/spec`);
+const preprocessor = require(`${root}lib/plugins/preprocessor`);
 
-describe "lib/controllers/spec", ->
-  specName = "sample.js"
-  specSource = ";"
-  outputFilePath = "foo/bar/sample.js"
+describe("lib/controllers/spec", function() {
+  const specName = "sample.js";
+  const specSource = ";";
+  const outputFilePath = "foo/bar/sample.js";
 
-  beforeEach ->
-    @project = {
+  beforeEach(function() {
+    this.project = {
       emit: sinon.spy()
-    }
+    };
 
-    @res = {
-      set: sinon.spy()
-      type: sinon.spy()
-      send: sinon.spy()
+    this.res = {
+      set: sinon.spy(),
+      type: sinon.spy(),
+      send: sinon.spy(),
       sendFile: sinon.stub()
-    }
+    };
 
-    sinon.stub(preprocessor, "getFile").resolves(outputFilePath)
-    @onError = sinon.spy()
+    sinon.stub(preprocessor, "getFile").resolves(outputFilePath);
+    this.onError = sinon.spy();
 
-    @handle = (filePath, config = {}) =>
-      spec.handle(filePath, {}, @res, config, (->), @onError)
+    return this.handle = (filePath, config = {}) => {
+      return spec.handle(filePath, {}, this.res, config, (function() {}), this.onError);
+    };
+  });
 
-  it "sets the correct content type", ->
-    @handle(specName)
+  it("sets the correct content type", function() {
+    this.handle(specName);
 
-    expect(@res.type)
+    return expect(this.res.type)
       .to.be.calledOnce
-      .and.to.be.calledWith("js")
+      .and.to.be.calledWith("js");
+  });
 
-  it "sends the file resolved from the preprocessor", ->
-    @res.sendFile.yields()
-    @handle(specName).then =>
-      expect(@res.sendFile).to.be.calledWith(outputFilePath)
+  it("sends the file resolved from the preprocessor", function() {
+    this.res.sendFile.yields();
+    return this.handle(specName).then(() => {
+      return expect(this.res.sendFile).to.be.calledWith(outputFilePath);
+    });
+  });
 
-  it "sends a client-side error in interactive mode", ->
-    preprocessor.getFile.rejects(new Error("Reason request failed"))
+  it("sends a client-side error in interactive mode", function() {
+    preprocessor.getFile.rejects(new Error("Reason request failed"));
 
-    @handle(specName).then =>
-      expect(@res.send).to.be.called
-      expect(@res.send.firstCall.args[0]).to.include("(function")
-      expect(@res.send.firstCall.args[0]).to.include("Reason request failed")
+    return this.handle(specName).then(() => {
+      expect(this.res.send).to.be.called;
+      expect(this.res.send.firstCall.args[0]).to.include("(function");
+      return expect(this.res.send.firstCall.args[0]).to.include("Reason request failed");
+    });
+  });
 
-  it "calls onError callback in run mode", ->
-    preprocessor.getFile.rejects(new Error("Reason request failed"))
+  it("calls onError callback in run mode", function() {
+    preprocessor.getFile.rejects(new Error("Reason request failed"));
 
-    @handle(specName, {isTextTerminal: true}).then =>
-      expect(@onError).to.be.called
-      expect(@onError.lastCall.args[0].message).to.include("Oops...we found an error preparing this test file")
-      expect(@onError.lastCall.args[0].message).to.include("Reason request failed")
+    return this.handle(specName, {isTextTerminal: true}).then(() => {
+      expect(this.onError).to.be.called;
+      expect(this.onError.lastCall.args[0].message).to.include("Oops...we found an error preparing this test file");
+      return expect(this.onError.lastCall.args[0].message).to.include("Reason request failed");
+    });
+  });
 
-  it "errors when sending file errors", ->
-    sendFileErr = new Error("ENOENT")
-    @res.sendFile.yields(sendFileErr)
-    @handle(specName).then =>
-      expect(@res.send.firstCall.args[0]).to.include("(function")
-      expect(@res.send.firstCall.args[0]).to.include("ENOENT")
+  return it("errors when sending file errors", function() {
+    const sendFileErr = new Error("ENOENT");
+    this.res.sendFile.yields(sendFileErr);
+    return this.handle(specName).then(() => {
+      expect(this.res.send.firstCall.args[0]).to.include("(function");
+      return expect(this.res.send.firstCall.args[0]).to.include("ENOENT");
+    });
+  });
+});

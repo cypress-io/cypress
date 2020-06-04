@@ -1,27 +1,33 @@
-path       = require("path")
-Promise    = require("bluebird")
-fs         = require("../../lib/util/fs")
-Fixtures   = require("../support/helpers/fixtures")
-e2e        = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const path       = require("path");
+const Promise    = require("bluebird");
+let fs         = require("../../lib/util/fs");
+const Fixtures   = require("../support/helpers/fixtures");
+const e2e        = require("../support/helpers/e2e").default;
 
-fs = Promise.promisifyAll(fs)
+fs = Promise.promisifyAll(fs);
 
-noScaffoldingPath = Fixtures.projectPath("no-scaffolding")
-supportPath       = path.join(noScaffoldingPath, "cypress", "support")
+const noScaffoldingPath = Fixtures.projectPath("no-scaffolding");
+const supportPath       = path.join(noScaffoldingPath, "cypress", "support");
 
-describe "e2e new project", ->
-  e2e.setup()
+describe("e2e new project", function() {
+  e2e.setup();
 
-  it "passes", ->
-    fs
+  return it("passes", function() {
+    return fs
     .statAsync(supportPath)
-    .then ->
-      throw new Error("support folder should not exist")
-    .catch =>
-      e2e.exec(@, {
-        project: noScaffoldingPath
-        sanitizeScreenshotDimensions: true
+    .then(function() {
+      throw new Error("support folder should not exist");}).catch(() => {
+      return e2e.exec(this, {
+        project: noScaffoldingPath,
+        sanitizeScreenshotDimensions: true,
         snapshot: true
       })
-      .then ->
-        fs.statAsync(supportPath)
+      .then(() => fs.statAsync(supportPath));
+    });
+  });
+});

@@ -1,32 +1,37 @@
-e2e = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const e2e = require("../support/helpers/e2e").default;
 
-onServer = (app) ->
-  app.get "/", (req, res) ->
-    res.send("<html>hi there</html>")
+const onServer = function(app) {
+  app.get("/", (req, res) => res.send("<html>hi there</html>"));
 
-  app.get "/req", (req, res) ->
-    res.sendStatus(200)
+  app.get("/req", (req, res) => res.sendStatus(200));
 
-  app.get "/status", (req, res) ->
-    res.sendStatus(503)
+  return app.get("/status", (req, res) => res.sendStatus(503));
+};
 
-describe "e2e blacklist", ->
+describe("e2e blacklist", function() {
   e2e.setup({
     servers: [{
-      port: 3131
+      port: 3131,
       onServer
     }, {
-      port: 3232
+      port: 3232,
       onServer
-    }]
+    }],
     settings: {
-      baseUrl: "http://localhost:3232"
+      baseUrl: "http://localhost:3232",
       blacklistHosts: "localhost:3131"
     }
-  })
+  });
 
-  it "passes", ->
-    e2e.exec(@, {
-      spec: "blacklist_hosts_spec.coffee"
+  return it("passes", function() {
+    return e2e.exec(this, {
+      spec: "blacklist_hosts_spec.coffee",
       snapshot: true
-    })
+    });
+  });
+});

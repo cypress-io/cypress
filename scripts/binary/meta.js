@@ -1,93 +1,106 @@
-path = require("path")
-la = require("lazy-ass")
-check = require("check-more-types")
-R = require("ramda")
-os = require("os")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const path = require("path");
+const la = require("lazy-ass");
+const check = require("check-more-types");
+const R = require("ramda");
+const os = require("os");
 
-# canonical platform names
-platforms = {
-  darwin: "darwin"
+// canonical platform names
+const platforms = {
+  darwin: "darwin",
   linux: "linux",
   windows: "win32"
-}
+};
 
-isValidPlatform = check.oneOf(R.values(platforms))
+const isValidPlatform = check.oneOf(R.values(platforms));
 
-checkPlatform = (platform) ->
-  la(isValidPlatform(platform),
-    "invalid build platform", platform, "valid choices", R.values(platforms))
+const checkPlatform = platform => la(isValidPlatform(platform),
+  "invalid build platform", platform, "valid choices", R.values(platforms));
 
-buildRootDir = () ->
-  path.resolve("build")
+const buildRootDir = () => path.resolve("build");
 
-## returns a path into the /build directory
-## the output folder should look something like this
-## build/
-##   <platform>/ = linux or darwin
-##     ... platform-specific files
-buildDir = (platform, args...) ->
-  checkPlatform(platform)
-  root = buildRootDir()
-  switch platform
-    when "darwin"
-      # the new electron-builder for some reason adds its own platform
-      # subfolder and it is NOT "darwin" but "mac"
-      path.resolve(root, "mac", args...)
-    when "linux"
-      path.resolve(root, "linux-unpacked", args...)
-    when "win32"
-      if os.arch() == "x64"
-        path.resolve(root, "win-unpacked", args...)
-      else
-        # x86 32bit architecture
-        path.resolve(root, "win-ia32-unpacked", args...)
+//# returns a path into the /build directory
+//# the output folder should look something like this
+//# build/
+//#   <platform>/ = linux or darwin
+//#     ... platform-specific files
+const buildDir = function(platform, ...args) {
+  checkPlatform(platform);
+  const root = buildRootDir();
+  switch (platform) {
+    case "darwin":
+      // the new electron-builder for some reason adds its own platform
+      // subfolder and it is NOT "darwin" but "mac"
+      return path.resolve(root, "mac", ...args);
+    case "linux":
+      return path.resolve(root, "linux-unpacked", ...args);
+    case "win32":
+      if (os.arch() === "x64") {
+        return path.resolve(root, "win-unpacked", ...args);
+      } else {
+        // x86 32bit architecture
+        return path.resolve(root, "win-ia32-unpacked", ...args);
+      }
+  }
+};
 
-## returns a path into the /dist directory
-distDir = (platform, args...) ->
-  checkPlatform(platform)
-  path.resolve("dist", platform, args...)
+//# returns a path into the /dist directory
+const distDir = function(platform, ...args) {
+  checkPlatform(platform);
+  return path.resolve("dist", platform, ...args);
+};
 
-## returns folder to zip before uploading
-zipDir = (platform) ->
-  checkPlatform(platform)
-  switch platform
-    when "darwin"
-      buildDir(platform, "Cypress.app")
-    when "linux"
-      buildDir(platform)
-    when "win32"
-      buildDir(platform)
+//# returns folder to zip before uploading
+const zipDir = function(platform) {
+  checkPlatform(platform);
+  switch (platform) {
+    case "darwin":
+      return buildDir(platform, "Cypress.app");
+    case "linux":
+      return buildDir(platform);
+    case "win32":
+      return buildDir(platform);
+  }
+};
 
-## returns a path into the /build/*/app directory
-## specific to each platform
-buildAppDir = (platform, args...) ->
-  checkPlatform(platform)
-  switch platform
-    when "darwin"
-      buildDir(platform, "Cypress.app", "Contents", "resources", "app", args...)
-    when "linux"
-      buildDir(platform, "resources", "app", args...)
-    when "win32"
-      buildDir(platform, "resources", "app", args...)
+//# returns a path into the /build/*/app directory
+//# specific to each platform
+const buildAppDir = function(platform, ...args) {
+  checkPlatform(platform);
+  switch (platform) {
+    case "darwin":
+      return buildDir(platform, "Cypress.app", "Contents", "resources", "app", ...args);
+    case "linux":
+      return buildDir(platform, "resources", "app", ...args);
+    case "win32":
+      return buildDir(platform, "resources", "app", ...args);
+  }
+};
 
-buildAppExecutable = (platform) ->
-  checkPlatform(platform)
-  switch platform
-    when "darwin"
-      buildDir(platform, "Cypress.app", "Contents", "MacOS", "Cypress")
-    when "linux"
-      buildDir(platform, "Cypress")
-    when "win32"
-      buildDir(platform, "Cypress")
+const buildAppExecutable = function(platform) {
+  checkPlatform(platform);
+  switch (platform) {
+    case "darwin":
+      return buildDir(platform, "Cypress.app", "Contents", "MacOS", "Cypress");
+    case "linux":
+      return buildDir(platform, "Cypress");
+    case "win32":
+      return buildDir(platform, "Cypress");
+  }
+};
 
 module.exports = {
-  isValidPlatform
-  buildRootDir
-  buildDir
-  distDir
-  zipDir
-  buildAppDir
-  buildAppExecutable
+  isValidPlatform,
+  buildRootDir,
+  buildDir,
+  distDir,
+  zipDir,
+  buildAppDir,
+  buildAppExecutable,
   cacheDir: path.join(process.cwd(), "cache"),
   platforms
-}
+};

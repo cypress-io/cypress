@@ -1,23 +1,29 @@
-e2e = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const e2e = require("../support/helpers/e2e").default;
 
-hosts = {
-  "app.localhost": "127.0.0.1"
+const hosts = {
+  "app.localhost": "127.0.0.1",
   "foo.bar.baz.com.au": "127.0.0.1"
-}
+};
 
-describe "e2e domain", ->
+describe("e2e domain", function() {
   e2e.setup({
     servers: {
-      port: 4848
+      port: 4848,
       static: true
     }
-  })
+  });
 
-  e2e.it "passes", {
-    spec: "domain*"
-    snapshot: true
-    video: false
+  return e2e.it("passes", {
+    spec: "domain*",
+    snapshot: true,
+    video: false,
     config: {
       hosts
     }
-  }
+  });
+});

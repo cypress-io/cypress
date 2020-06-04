@@ -1,386 +1,455 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-_             = require("lodash")
-os            = require("os")
-http          = require("http")
-express       = require("express")
-Promise       = require("bluebird")
-connect       = require("@packages/network").connect
-routes        = require("#{root}lib/routes")
-config        = require("#{root}lib/config")
-logger        = require("#{root}lib/logger")
-Server        = require("#{root}lib/server")
-Socket        = require("#{root}lib/socket")
-fileServer    = require("#{root}lib/file_server")
-ensureUrl     = require("#{root}lib/util/ensure-url")
+const _             = require("lodash");
+const os            = require("os");
+const http          = require("http");
+const express       = require("express");
+const Promise       = require("bluebird");
+const {
+  connect
+} = require("@packages/network");
+const routes        = require(`${root}lib/routes`);
+const config        = require(`${root}lib/config`);
+const logger        = require(`${root}lib/logger`);
+const Server        = require(`${root}lib/server`);
+const Socket        = require(`${root}lib/socket`);
+const fileServer    = require(`${root}lib/file_server`);
+const ensureUrl     = require(`${root}lib/util/ensure-url`);
 
-morganFn = ->
-mockery.registerMock("morgan", -> morganFn)
+const morganFn = function() {};
+mockery.registerMock("morgan", () => morganFn);
 
-describe "lib/server", ->
-  beforeEach ->
-    @fileServer = {
-      close: ->
-      port: -> 1111
-    }
-    sinon.stub(fileServer, "create").returns(@fileServer)
+describe("lib/server", function() {
+  beforeEach(function() {
+    this.fileServer = {
+      close() {},
+      port() { return 1111; }
+    };
+    sinon.stub(fileServer, "create").returns(this.fileServer);
 
-    config.set({projectRoot: "/foo/bar/"})
-    .then (cfg) =>
-      @config = cfg
-      @server = new Server()
+    return config.set({projectRoot: "/foo/bar/"})
+    .then(cfg => {
+      this.config = cfg;
+      this.server = new Server();
 
-      @oldFileServer = @server._fileServer
-      @server._fileServer = @fileServer
+      this.oldFileServer = this.server._fileServer;
+      return this.server._fileServer = this.fileServer;
+    });
+  });
 
-  afterEach ->
-    @server and @server.close()
+  afterEach(function() {
+    return this.server && this.server.close();
+  });
 
-  context "#createExpressApp", ->
-    beforeEach ->
-      @use = sinon.spy(express.application, "use")
+  context("#createExpressApp", function() {
+    beforeEach(function() {
+      return this.use = sinon.spy(express.application, "use");
+    });
 
-    it "instantiates express instance without morgan", ->
-      app = @server.createExpressApp({ morgan: false })
-      expect(app.get("view engine")).to.eq("html")
-      expect(@use).not.to.be.calledWith(morganFn)
+    it("instantiates express instance without morgan", function() {
+      const app = this.server.createExpressApp({ morgan: false });
+      expect(app.get("view engine")).to.eq("html");
+      return expect(this.use).not.to.be.calledWith(morganFn);
+    });
 
-    it "requires morgan if true", ->
-      @server.createExpressApp({ morgan: true })
-      expect(@use).to.be.calledWith(morganFn)
+    return it("requires morgan if true", function() {
+      this.server.createExpressApp({ morgan: true });
+      return expect(this.use).to.be.calledWith(morganFn);
+    });
+  });
 
-  context "#open", ->
-    beforeEach ->
-      sinon.stub(@server, "createServer").resolves()
+  context("#open", function() {
+    beforeEach(function() {
+      return sinon.stub(this.server, "createServer").resolves();
+    });
 
-    it "calls #createExpressApp with morgan", ->
-      sinon.spy(@server, "createExpressApp")
+    it("calls #createExpressApp with morgan", function() {
+      sinon.spy(this.server, "createExpressApp");
 
-      _.extend @config, {port: 54321, morgan: false}
+      _.extend(this.config, {port: 54321, morgan: false});
 
-      @server.open(@config)
-      .then =>
-        expect(@server.createExpressApp).to.be.calledWithMatch({ morgan: false })
+      return this.server.open(this.config)
+      .then(() => {
+        return expect(this.server.createExpressApp).to.be.calledWithMatch({ morgan: false });
+      });
+    });
 
-    it "calls #createServer with port", ->
-      _.extend @config, {port: 54321}
+    it("calls #createServer with port", function() {
+      _.extend(this.config, {port: 54321});
 
-      obj = {}
+      const obj = {};
 
-      sinon.stub(@server, "createRoutes")
-      sinon.stub(@server, "createExpressApp").returns(obj)
+      sinon.stub(this.server, "createRoutes");
+      sinon.stub(this.server, "createExpressApp").returns(obj);
 
-      @server.open(@config)
-      .then =>
-        expect(@server.createServer).to.be.calledWith(obj, @config)
+      return this.server.open(this.config)
+      .then(() => {
+        return expect(this.server.createServer).to.be.calledWith(obj, this.config);
+      });
+    });
 
-    it "calls #createRoutes with app + config", ->
-      app = {}
-      project = {}
-      onError = sinon.spy()
-      sinon.stub(@server, "createRoutes")
-      sinon.stub(@server, "createExpressApp").returns(app)
+    it("calls #createRoutes with app + config", function() {
+      const app = {};
+      const project = {};
+      const onError = sinon.spy();
+      sinon.stub(this.server, "createRoutes");
+      sinon.stub(this.server, "createExpressApp").returns(app);
 
-      @server.open(@config, project, onError)
-      .then =>
-        expect(@server.createRoutes).to.be.called
-        expect(@server.createRoutes.lastCall.args[0].app).to.equal(app)
-        expect(@server.createRoutes.lastCall.args[0].config).to.equal(@config)
-        expect(@server.createRoutes.lastCall.args[0].project).to.equal(project)
-        expect(@server.createRoutes.lastCall.args[0].onError).to.equal(onError)
+      return this.server.open(this.config, project, onError)
+      .then(() => {
+        expect(this.server.createRoutes).to.be.called;
+        expect(this.server.createRoutes.lastCall.args[0].app).to.equal(app);
+        expect(this.server.createRoutes.lastCall.args[0].config).to.equal(this.config);
+        expect(this.server.createRoutes.lastCall.args[0].project).to.equal(project);
+        return expect(this.server.createRoutes.lastCall.args[0].onError).to.equal(onError);
+      });
+    });
 
-    it "calls #createServer with port + fileServerFolder + socketIoRoute + app", ->
-      obj = {}
+    it("calls #createServer with port + fileServerFolder + socketIoRoute + app", function() {
+      const obj = {};
 
-      sinon.stub(@server, "createRoutes")
-      sinon.stub(@server, "createExpressApp").returns(obj)
+      sinon.stub(this.server, "createRoutes");
+      sinon.stub(this.server, "createExpressApp").returns(obj);
 
-      @server.open(@config)
-      .then =>
-        expect(@server.createServer).to.be.calledWith(obj, @config)
+      return this.server.open(this.config)
+      .then(() => {
+        return expect(this.server.createServer).to.be.calledWith(obj, this.config);
+      });
+    });
 
-    it "calls logger.setSettings with config", ->
-      sinon.spy(logger, "setSettings")
+    return it("calls logger.setSettings with config", function() {
+      sinon.spy(logger, "setSettings");
 
-      @server.open(@config)
-      .then (ret) =>
-        expect(logger.setSettings).to.be.calledWith(@config)
+      return this.server.open(this.config)
+      .then(ret => {
+        return expect(logger.setSettings).to.be.calledWith(this.config);
+      });
+    });
+  });
 
-  context "#createServer", ->
-    beforeEach ->
-      @port = 54321
-      @app  = @server.createExpressApp({ morgan: true })
+  context("#createServer", function() {
+    beforeEach(function() {
+      this.port = 54321;
+      return this.app  = this.server.createExpressApp({ morgan: true });
+    });
 
-    it "isListening=true", ->
-      @server.createServer(@app, {port: @port})
-      .then =>
-        expect(@server.isListening).to.be.true
+    it("isListening=true", function() {
+      return this.server.createServer(this.app, {port: this.port})
+      .then(() => {
+        return expect(this.server.isListening).to.be.true;
+      });
+    });
 
-    it "resolves with http server port", ->
-      @server.createServer(@app, {port: @port})
-      .spread (port) =>
-        expect(port).to.eq(@port)
+    it("resolves with http server port", function() {
+      return this.server.createServer(this.app, {port: this.port})
+      .spread(port => {
+        return expect(port).to.eq(this.port);
+      });
+    });
 
-    it "all servers listen only on localhost and no other interface", ->
-      fileServer.create.restore()
-      @server._fileServer = @oldFileServer
+    it("all servers listen only on localhost and no other interface", function() {
+      fileServer.create.restore();
+      this.server._fileServer = this.oldFileServer;
 
-      interfaces = _.flatten(_.values(os.networkInterfaces()))
-      nonLoopback = interfaces.find (iface) =>
-        iface.family == "IPv4" && iface.address != "127.0.0.1"
+      const interfaces = _.flatten(_.values(os.networkInterfaces()));
+      const nonLoopback = interfaces.find(iface => {
+        return (iface.family === "IPv4") && (iface.address !== "127.0.0.1");
+      });
 
-      ## verify that we can connect to `port` over loopback
-      ## and not over another configured IPv4 address
-      tryOnlyLoopbackConnect = (port) =>
-        Promise.all([
-          connect.byPortAndAddress(port, "127.0.0.1")
+      //# verify that we can connect to `port` over loopback
+      //# and not over another configured IPv4 address
+      const tryOnlyLoopbackConnect = port => {
+        return Promise.all([
+          connect.byPortAndAddress(port, "127.0.0.1"),
           connect.byPortAndAddress(port, nonLoopback)
-          .then ->
-            throw new Error("Shouldn't be able to connect on #{nonLoopback.address}:#{port}")
-          .catch { errno: "ECONNREFUSED" }, ->
-        ])
+          .then(function() {
+            throw new Error(`Shouldn't be able to connect on ${nonLoopback.address}:${port}`);}).catch({ errno: "ECONNREFUSED" }, function() {})
+        ]);
+      };
 
-      @server.createServer(@app, {})
-      .spread (port) =>
-        Promise.map(
+      return this.server.createServer(this.app, {})
+      .spread(port => {
+        return Promise.map(
           [
-            port
-            @server._fileServer.port()
-            @server._httpsProxy._sniPort
+            port,
+            this.server._fileServer.port(),
+            this.server._httpsProxy._sniPort
           ],
           tryOnlyLoopbackConnect
-        )
+        );
+      });
+    });
 
-    it "resolves with warning if cannot connect to baseUrl", ->
-      sinon.stub(ensureUrl, "isListening").rejects()
-      @server.createServer(@app, {port: @port, baseUrl: "http://localhost:#{@port}"})
-      .spread (port, warning) =>
-        expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING")
-        expect(warning.message).to.include(@port)
+    it("resolves with warning if cannot connect to baseUrl", function() {
+      sinon.stub(ensureUrl, "isListening").rejects();
+      return this.server.createServer(this.app, {port: this.port, baseUrl: `http://localhost:${this.port}`})
+      .spread((port, warning) => {
+        expect(warning.type).to.eq("CANNOT_CONNECT_BASE_URL_WARNING");
+        return expect(warning.message).to.include(this.port);
+      });
+    });
 
-    context "errors", ->
-      it "rejects with portInUse", ->
-        @server.createServer(@app, {port: @port})
-        .then =>
-          @server.createServer(@app, {port: @port})
-        .then ->
-          throw new Error("should have failed but didn't")
-        .catch (err) =>
-          expect(err.type).to.eq("PORT_IN_USE_SHORT")
-          expect(err.message).to.include(@port)
+    return context("errors", () => it("rejects with portInUse", function() {
+      return this.server.createServer(this.app, {port: this.port})
+      .then(() => {
+        return this.server.createServer(this.app, {port: this.port});
+    }).then(function() {
+        throw new Error("should have failed but didn't");}).catch(err => {
+        expect(err.type).to.eq("PORT_IN_USE_SHORT");
+        return expect(err.message).to.include(this.port);
+      });
+    }));
+  });
 
-  context "#end", ->
-    it "calls this._socket.end", ->
-      socket = sinon.stub({
-        end: ->
-        close: ->
-      })
+  context("#end", function() {
+    it("calls this._socket.end", function() {
+      const socket = sinon.stub({
+        end() {},
+        close() {}
+      });
 
-      @server._socket = socket
+      this.server._socket = socket;
 
-      @server.end()
-      expect(socket.end).to.be.called
+      this.server.end();
+      return expect(socket.end).to.be.called;
+    });
 
-    it "is noop without this._socket", ->
-      @server.end()
+    return it("is noop without this._socket", function() {
+      return this.server.end();
+    });
+  });
 
-  context "#startWebsockets", ->
-    beforeEach ->
-      @startListening = sinon.stub(Socket.prototype, "startListening")
+  context("#startWebsockets", function() {
+    beforeEach(function() {
+      return this.startListening = sinon.stub(Socket.prototype, "startListening");
+    });
 
-    it "sets _socket and calls _socket#startListening", ->
-      @server.open(@config)
-      .then =>
-        arg2 = {}
-        @server.startWebsockets(1, 2, arg2)
+    return it("sets _socket and calls _socket#startListening", function() {
+      return this.server.open(this.config)
+      .then(() => {
+        const arg2 = {};
+        this.server.startWebsockets(1, 2, arg2);
 
-        expect(@startListening).to.be.calledWith(@server.getHttpServer(), 1, 2, arg2)
+        return expect(this.startListening).to.be.calledWith(this.server.getHttpServer(), 1, 2, arg2);
+      });
+    });
+  });
 
-  context "#reset", ->
-    beforeEach ->
-      @server.open(@config)
-      .then =>
-        @buffers = @server._networkProxy.http
-        sinon.stub(@buffers, "reset")
+  context("#reset", function() {
+    beforeEach(function() {
+      return this.server.open(this.config)
+      .then(() => {
+        this.buffers = this.server._networkProxy.http;
+        return sinon.stub(this.buffers, "reset");
+      });
+    });
 
-    it "resets the buffers", ->
-      @server.reset()
-      expect(@buffers.reset).to.be.called
+    it("resets the buffers", function() {
+      this.server.reset();
+      return expect(this.buffers.reset).to.be.called;
+    });
 
-    it "sets the domain to the previous base url if set", ->
-      @server._baseUrl = "http://localhost:3000"
-      @server.reset()
-      expect(@server._remoteStrategy).to.equal("http")
+    it("sets the domain to the previous base url if set", function() {
+      this.server._baseUrl = "http://localhost:3000";
+      this.server.reset();
+      return expect(this.server._remoteStrategy).to.equal("http");
+    });
 
-    it "sets the domain to <root> if not set", ->
-      @server.reset()
-      expect(@server._remoteStrategy).to.equal("file")
+    return it("sets the domain to <root> if not set", function() {
+      this.server.reset();
+      return expect(this.server._remoteStrategy).to.equal("file");
+    });
+  });
 
-  context "#close", ->
-    it "returns a promise", ->
-      expect(@server.close()).to.be.instanceof Promise
+  context("#close", function() {
+    it("returns a promise", function() {
+      return expect(this.server.close()).to.be.instanceof(Promise);
+    });
 
-    it "calls close on this.server", ->
-      @server.open(@config)
-      .then =>
-        @server.close()
+    it("calls close on this.server", function() {
+      return this.server.open(this.config)
+      .then(() => {
+        return this.server.close();
+      });
+    });
 
-    it "isListening=false", ->
-      @server.open(@config)
-      .then =>
-        @server.close()
-      .then =>
-        expect(@server.isListening).to.be.false
+    it("isListening=false", function() {
+      return this.server.open(this.config)
+      .then(() => {
+        return this.server.close();
+    }).then(() => {
+        return expect(this.server.isListening).to.be.false;
+      });
+    });
 
-    it "clears settings from Log", ->
-      logger.setSettings({})
+    it("clears settings from Log", function() {
+      logger.setSettings({});
 
-      @server.close()
-      .then ->
-        expect(logger.getSettings()).to.be.undefined
+      return this.server.close()
+      .then(() => expect(logger.getSettings()).to.be.undefined);
+    });
 
-    it "calls close on this._socket", ->
-      @server._socket = {close: sinon.spy()}
+    return it("calls close on this._socket", function() {
+      this.server._socket = {close: sinon.spy()};
 
-      @server.close()
-      .then =>
-        expect(@server._socket.close).to.be.calledOnce
+      return this.server.close()
+      .then(() => {
+        return expect(this.server._socket.close).to.be.calledOnce;
+      });
+    });
+  });
 
-  context "#proxyWebsockets", ->
-    beforeEach ->
-      @proxy  = sinon.stub({
-        ws: ->
-        on: ->
-      })
-      @socket = sinon.stub({end: ->})
-      @head   = {}
+  context("#proxyWebsockets", function() {
+    beforeEach(function() {
+      this.proxy  = sinon.stub({
+        ws() {},
+        on() {}
+      });
+      this.socket = sinon.stub({end() {}});
+      return this.head   = {};});
 
-    it "is noop if req.url startsWith socketIoRoute", ->
-      socket = {
-        remotePort: 12345
+    it("is noop if req.url startsWith socketIoRoute", function() {
+      const socket = {
+        remotePort: 12345,
         remoteAddress: '127.0.0.1'
-      }
+      };
 
-      @server._socketWhitelist.add({
+      this.server._socketWhitelist.add({
         localPort: socket.remotePort,
         once: _.noop
-      })
+      });
 
-      noop = @server.proxyWebsockets(@proxy, "/foo", {
+      const noop = this.server.proxyWebsockets(this.proxy, "/foo", {
         url: "/foobarbaz",
         socket
-      })
+      });
 
-      expect(noop).to.be.undefined
+      return expect(noop).to.be.undefined;
+    });
 
-    it "calls proxy.ws with hostname + port", ->
-      @server._onDomainSet("https://www.google.com")
+    it("calls proxy.ws with hostname + port", function() {
+      this.server._onDomainSet("https://www.google.com");
 
-      req = {
-        url: "/"
+      const req = {
+        url: "/",
         headers: {
           host: "www.google.com"
         }
-      }
+      };
 
-      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
+      this.server.proxyWebsockets(this.proxy, "/foo", req, this.socket, this.head);
 
-      expect(@proxy.ws).to.be.calledWithMatch(req, @socket, @head, {
-        secure: false
+      return expect(this.proxy.ws).to.be.calledWithMatch(req, this.socket, this.head, {
+        secure: false,
         target: {
-          host: "www.google.com"
-          port: "443"
+          host: "www.google.com",
+          port: "443",
           protocol: "https:"
         }
-      })
+      });
+    });
 
-    it "ends the socket if its writable and there is no __cypress.remoteHost", ->
-      req = {
-        url: "/"
+    return it("ends the socket if its writable and there is no __cypress.remoteHost", function() {
+      const req = {
+        url: "/",
         headers: {
           cookie: "foo=bar"
         }
-      }
+      };
 
-      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
-      expect(@socket.end).not.to.be.called
+      this.server.proxyWebsockets(this.proxy, "/foo", req, this.socket, this.head);
+      expect(this.socket.end).not.to.be.called;
 
-      @socket.writable = true
-      @server.proxyWebsockets(@proxy, "/foo", req, @socket, @head)
-      expect(@socket.end).to.be.called
+      this.socket.writable = true;
+      this.server.proxyWebsockets(this.proxy, "/foo", req, this.socket, this.head);
+      return expect(this.socket.end).to.be.called;
+    });
+  });
 
-  context "#_onDomainSet", ->
-    beforeEach ->
-      @server = new Server()
+  return context("#_onDomainSet", function() {
+    beforeEach(function() {
+      return this.server = new Server();
+    });
 
-    it "sets port to 443 when omitted and https:", ->
-      ret = @server._onDomainSet("https://staging.google.com/foo/bar")
+    it("sets port to 443 when omitted and https:", function() {
+      const ret = this.server._onDomainSet("https://staging.google.com/foo/bar");
 
-      expect(ret).to.deep.eq({
-        auth: undefined
-        origin: "https://staging.google.com"
-        strategy: "http"
-        domainName: "google.com"
-        visiting: undefined
-        fileServer: null
+      return expect(ret).to.deep.eq({
+        auth: undefined,
+        origin: "https://staging.google.com",
+        strategy: "http",
+        domainName: "google.com",
+        visiting: undefined,
+        fileServer: null,
         props: {
-          port: "443"
-          domain: "google"
+          port: "443",
+          domain: "google",
           tld: "com"
         }
-      })
+      });
+    });
 
-    it "sets port to 80 when omitted and http:", ->
-      ret = @server._onDomainSet("http://staging.google.com/foo/bar")
+    it("sets port to 80 when omitted and http:", function() {
+      const ret = this.server._onDomainSet("http://staging.google.com/foo/bar");
 
-      expect(ret).to.deep.eq({
-        auth: undefined
-        origin: "http://staging.google.com"
-        strategy: "http"
-        domainName: "google.com"
-        visiting: undefined
-        fileServer: null
+      return expect(ret).to.deep.eq({
+        auth: undefined,
+        origin: "http://staging.google.com",
+        strategy: "http",
+        domainName: "google.com",
+        visiting: undefined,
+        fileServer: null,
         props: {
-          port: "80"
-          domain: "google"
+          port: "80",
+          domain: "google",
           tld: "com"
         }
-      })
+      });
+    });
 
-    it "sets host + port to localhost", ->
-      ret = @server._onDomainSet("http://localhost:4200/a/b?q=1#asdf")
+    it("sets host + port to localhost", function() {
+      const ret = this.server._onDomainSet("http://localhost:4200/a/b?q=1#asdf");
 
-      expect(ret).to.deep.eq({
-        auth: undefined
-        origin: "http://localhost:4200"
-        strategy: "http"
-        domainName: "localhost"
-        visiting: undefined
-        fileServer: null
+      return expect(ret).to.deep.eq({
+        auth: undefined,
+        origin: "http://localhost:4200",
+        strategy: "http",
+        domainName: "localhost",
+        visiting: undefined,
+        fileServer: null,
         props: {
-          port: "4200"
-          domain: ""
+          port: "4200",
+          domain: "",
           tld: "localhost"
         }
-      })
+      });
+    });
 
-    it "sets <root> when not http url", ->
-      @server._server = {
-        address: -> {port: 9999}
-      }
+    return it("sets <root> when not http url", function() {
+      this.server._server = {
+        address() { return {port: 9999}; }
+      };
 
-      @server._fileServer = {
-        port: -> 9998
-      }
+      this.server._fileServer = {
+        port() { return 9998; }
+      };
 
-      ret = @server._onDomainSet("/index.html")
+      const ret = this.server._onDomainSet("/index.html");
 
-      expect(ret).to.deep.eq({
-        auth: undefined
-        origin: "http://localhost:9999"
-        strategy: "file"
-        domainName: "localhost"
-        fileServer: "http://localhost:9998"
-        props: null
+      return expect(ret).to.deep.eq({
+        auth: undefined,
+        origin: "http://localhost:9999",
+        strategy: "file",
+        domainName: "localhost",
+        fileServer: "http://localhost:9998",
+        props: null,
         visiting: undefined
-      })
+      });
+    });
+  });
+});

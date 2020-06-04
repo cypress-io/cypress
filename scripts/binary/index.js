@@ -1,225 +1,249 @@
-## store the cwd
-cwd = process.cwd()
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * DS207: Consider shorter variations of null checks
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+//# store the cwd
+const cwd = process.cwd();
 
-path     = require("path")
-_        = require("lodash")
-os       = require("os")
-gift     = require("gift")
-chalk    = require("chalk")
-Promise  = require("bluebird")
-minimist = require("minimist")
-la       = require("lazy-ass")
-check    = require("check-more-types")
-debug    = require("debug")("cypress:binary")
-questionsRemain = require("@cypress/questions-remain")
-R        = require("ramda")
+const path     = require("path");
+const _        = require("lodash");
+const os       = require("os");
+const gift     = require("gift");
+const chalk    = require("chalk");
+const Promise  = require("bluebird");
+const minimist = require("minimist");
+const la       = require("lazy-ass");
+const check    = require("check-more-types");
+const debug    = require("debug")("cypress:binary");
+const questionsRemain = require("@cypress/questions-remain");
+const R        = require("ramda");
 
-zip      = require("./zip")
-ask      = require("./ask")
-bump     = require("./bump")
-meta     = require("./meta")
-build    = require("./build")
-upload   = require("./upload")
-uploadUtils = require("./util/upload")
-{uploadNpmPackage} = require("./upload-npm-package")
-{uploadUniqueBinary} = require("./upload-unique-binary")
-{moveBinaries} = require('./move-binaries')
+const zip      = require("./zip");
+const ask      = require("./ask");
+const bump     = require("./bump");
+const meta     = require("./meta");
+const build    = require("./build");
+const upload   = require("./upload");
+const uploadUtils = require("./util/upload");
+const {uploadNpmPackage} = require("./upload-npm-package");
+const {uploadUniqueBinary} = require("./upload-unique-binary");
+const {moveBinaries} = require('./move-binaries');
 
-## initialize on existing repo
-repo = Promise.promisifyAll(gift(cwd))
+//# initialize on existing repo
+const repo = Promise.promisifyAll(gift(cwd));
 
-success = (str) ->
-  console.log chalk.bgGreen(" " + chalk.black(str) + " ")
+const success = str => console.log(chalk.bgGreen(" " + chalk.black(str) + " "));
 
-fail = (str) ->
-  console.log chalk.bgRed(" " + chalk.black(str) + " ")
+const fail = str => console.log(chalk.bgRed(" " + chalk.black(str) + " "));
 
-zippedFilename = R.always(upload.zipName)
+const zippedFilename = R.always(upload.zipName);
 
-# goes through the list of properties and asks relevant question
-# resolves with all relevant options set
-# if the property already exists, skips the question
-askMissingOptions = (properties = []) ->
-  questions = {
+// goes through the list of properties and asks relevant question
+// resolves with all relevant options set
+// if the property already exists, skips the question
+const askMissingOptions = function(properties = []) {
+  const questions = {
     platform: ask.whichPlatform,
     version: ask.deployNewVersion,
-    # note: zip file might not be absolute
-    zip: ask.whichZipFile
-    nextVersion: ask.nextVersion
+    // note: zip file might not be absolute
+    zip: ask.whichZipFile,
+    nextVersion: ask.nextVersion,
     commit: ask.toCommit
-  }
-  pickedQuestions = _.pick(questions, properties)
-  questionsRemain(pickedQuestions)
+  };
+  const pickedQuestions = _.pick(questions, properties);
+  return questionsRemain(pickedQuestions);
+};
 
-## hack for @packages/server modifying cwd
-process.chdir(cwd)
+//# hack for @packages/server modifying cwd
+process.chdir(cwd);
 
-commitVersion = (version) ->
-  msg = "release #{version} [skip ci]"
+const commitVersion = function(version) {
+  const msg = `release ${version} [skip ci]`;
 
-  repo.commitAsync(msg, {
+  return repo.commitAsync(msg, {
     'allow-empty': true,
-  })
+  });
+};
 
-deploy = {
-  meta:   meta
+const deploy = {
+  meta,
 
-  parseOptions: (argv) ->
-    opts = minimist(argv, {
-      boolean: ["skip-clean"]
+  parseOptions(argv) {
+    const opts = minimist(argv, {
+      boolean: ["skip-clean"],
       default: {
         "skip-clean": false
-      }
+      },
       alias: {
         skipClean: "skip-clean",
         zip: ["zipFile", "zip-file", "filename"]
       }
-    })
-    opts.runTests = false if opts["skip-tests"]
-    if not opts.platform and os.platform() == meta.platforms.linux
-      # only can build Linux on Linux
-      opts.platform = meta.platforms.linux
+    });
+    if (opts["skip-tests"]) { opts.runTests = false; }
+    if (!opts.platform && (os.platform() === meta.platforms.linux)) {
+      // only can build Linux on Linux
+      opts.platform = meta.platforms.linux;
+    }
 
-    # windows aliases
-    if opts.platform == "win32" or opts.platform == "win" or opts.platform == "windows"
-      opts.platform = meta.platforms.windows
+    // windows aliases
+    if ((opts.platform === "win32") || (opts.platform === "win") || (opts.platform === "windows")) {
+      opts.platform = meta.platforms.windows;
+    }
 
-    if not opts.platform and os.platform() == meta.platforms.windows
-      # only can build Windows binary on Windows platform
-      opts.platform = meta.platforms.windows
+    if (!opts.platform && (os.platform() === meta.platforms.windows)) {
+      // only can build Windows binary on Windows platform
+      opts.platform = meta.platforms.windows;
+    }
 
-    # be a little bit user-friendly and allow aliased values
-    if opts.platform == "mac"
-      opts.platform = meta.platforms.darwin
+    // be a little bit user-friendly and allow aliased values
+    if (opts.platform === "mac") {
+      opts.platform = meta.platforms.darwin;
+    }
 
-    debug("parsed command line options")
-    debug(opts)
-    opts
+    debug("parsed command line options");
+    debug(opts);
+    return opts;
+  },
 
-  bump: ->
-    ask.whichBumpTask()
-    .then (task) ->
-      switch task
-        when "run"
-          bump.runTestProjects()
-        when "version"
-          ask.whichVersion(meta.distDir(""))
-          .then (v) ->
-            bump.version(v)
+  bump() {
+    return ask.whichBumpTask()
+    .then(function(task) {
+      switch (task) {
+        case "run":
+          return bump.runTestProjects();
+        case "version":
+          return ask.whichVersion(meta.distDir(""))
+          .then(v => bump.version(v));
+      }
+    });
+  },
 
-  ## sets environment variable on each CI provider
-  ## to NEXT version to build
-  setNextVersion: ->
-    options = @parseOptions(process.argv)
+  //# sets environment variable on each CI provider
+  //# to NEXT version to build
+  setNextVersion() {
+    const options = this.parseOptions(process.argv);
 
-    askMissingOptions(['nextVersion'])(options)
-    .then ({nextVersion}) ->
-      bump.nextVersion(nextVersion)
+    return askMissingOptions(['nextVersion'])(options)
+    .then(({nextVersion}) => bump.nextVersion(nextVersion));
+  },
 
-  release: ->
-    ## read off the argv
-    options = @parseOptions(process.argv)
+  release() {
+    //# read off the argv
+    const options = this.parseOptions(process.argv);
 
-    release = ({ version, commit, nextVersion }) =>
-      upload.s3Manifest(version)
-      .then ->
-        if commit
-          commitVersion(version)
-      .then ->
-        bump.nextVersion(nextVersion)
-      .then ->
-        success("Release Complete")
-      .catch (err) ->
-        fail("Release Failed")
-        throw err
+    const release = ({ version, commit, nextVersion }) => {
+      return upload.s3Manifest(version)
+      .then(function() {
+        if (commit) {
+          return commitVersion(version);
+        }}).then(() => bump.nextVersion(nextVersion)).then(() => success("Release Complete")).catch(function(err) {
+        fail("Release Failed");
+        throw err;
+      });
+    };
 
-    askMissingOptions(['version', 'nextVersion'])(options)
-    .then(release)
+    return askMissingOptions(['version', 'nextVersion'])(options)
+    .then(release);
+  },
 
-  build: (options) ->
-    console.log('#build')
-    options ?= @parseOptions(process.argv)
-    debug("parsed build options %o", options)
+  build(options) {
+    console.log('#build');
+    if (options == null) { options = this.parseOptions(process.argv); }
+    debug("parsed build options %o", options);
 
-    askMissingOptions(['version', 'platform'])(options)
-    .then ->
-      debug("building binary: platform %s version %s", options.platform, options.version)
-      build(options.platform, options.version, options)
+    return askMissingOptions(['version', 'platform'])(options)
+    .then(function() {
+      debug("building binary: platform %s version %s", options.platform, options.version);
+      return build(options.platform, options.version, options);
+    });
+  },
 
-  zip: (options) ->
-    console.log('#zip')
-    if !options then options = @parseOptions(process.argv)
-    askMissingOptions(['platform'])(options)
-    .then (options) ->
-      zipDir = meta.zipDir(options.platform)
-      console.log("directory to zip %s", zipDir)
-      options.zip = path.resolve(zippedFilename(options.platform))
-      zip.ditto(zipDir, options.zip)
+  zip(options) {
+    console.log('#zip');
+    if (!options) { options = this.parseOptions(process.argv); }
+    return askMissingOptions(['platform'])(options)
+    .then(function(options) {
+      const zipDir = meta.zipDir(options.platform);
+      console.log("directory to zip %s", zipDir);
+      options.zip = path.resolve(zippedFilename(options.platform));
+      return zip.ditto(zipDir, options.zip);
+    });
+  },
 
-  # upload Cypress NPM package file
-  "upload-npm-package": (args = process.argv) ->
-    console.log('#packageUpload')
-    uploadNpmPackage(args)
+  // upload Cypress NPM package file
+  "upload-npm-package"(args = process.argv) {
+    console.log('#packageUpload');
+    return uploadNpmPackage(args);
+  },
 
-  # upload Cypress binary zip file under unique hash
-  "upload-unique-binary": (args = process.argv) ->
-    console.log('#uniqueBinaryUpload')
-    uploadUniqueBinary(args)
+  // upload Cypress binary zip file under unique hash
+  "upload-unique-binary"(args = process.argv) {
+    console.log('#uniqueBinaryUpload');
+    return uploadUniqueBinary(args);
+  },
 
-  # uploads a single built Cypress binary ZIP file
-  # usually a binary is built on CI and is uploaded
-  upload: (options) ->
-    console.log('#upload')
+  // uploads a single built Cypress binary ZIP file
+  // usually a binary is built on CI and is uploaded
+  upload(options) {
+    console.log('#upload');
 
-    if not options
-      options = @parseOptions(process.argv)
+    if (!options) {
+      options = this.parseOptions(process.argv);
+    }
 
-    askMissingOptions(['version', 'platform', 'zip'])(options)
-    .then (options) ->
+    return askMissingOptions(['version', 'platform', 'zip'])(options)
+    .then(function(options) {
       la(check.unemptyString(options.zip),
-        "missing zipped filename", options)
-      options.zip = path.resolve(options.zip)
-      options
-    .then (options) ->
-      console.log("Need to upload file %s", options.zip)
+        "missing zipped filename", options);
+      options.zip = path.resolve(options.zip);
+      return options;}).then(function(options) {
+      console.log("Need to upload file %s", options.zip);
       console.log("for platform %s version %s",
-        options.platform, options.version)
+        options.platform, options.version);
 
-      upload.toS3({
+      return upload.toS3({
         zipFile: options.zip,
         version: options.version,
         platform: options.platform,
-      })
+      });
+    });
+  },
 
-  "move-binaries": (args = process.argv) ->
-    console.log('#moveBinaries')
-    moveBinaries(args)
+  "move-binaries"(args = process.argv) {
+    console.log('#moveBinaries');
+    return moveBinaries(args);
+  },
 
-  # purge all platforms of a desktop app for specific version
-  "purge-version": (args = process.argv) ->
-    console.log('#purge-version')
-    options = minimist(args, {
+  // purge all platforms of a desktop app for specific version
+  "purge-version"(args = process.argv) {
+    console.log('#purge-version');
+    const options = minimist(args, {
       string: 'version',
       alias: {
         version: 'v'
       }
-    })
-    la(check.unemptyString(options.version), "missing app version to purge", options)
-    uploadUtils.purgeDesktopAppAllPlatforms(options.version, upload.zipName)
+    });
+    la(check.unemptyString(options.version), "missing app version to purge", options);
+    return uploadUtils.purgeDesktopAppAllPlatforms(options.version, upload.zipName);
+  },
 
-  # goes through the entire pipeline:
-  #   - build
-  #   - zip
-  #   - upload
-  deploy: ->
-    options = @parseOptions(process.argv)
+  // goes through the entire pipeline:
+  //   - build
+  //   - zip
+  //   - upload
+  deploy() {
+    const options = this.parseOptions(process.argv);
 
-    askMissingOptions(['version', 'platform'])(options)
-    .then (options) =>
-      @build(options)
-      .then => @zip(options)
-      # assumes options.zip contains the zipped filename
-      .then => @upload(options)
-}
+    return askMissingOptions(['version', 'platform'])(options)
+    .then(options => {
+      return this.build(options)
+      .then(() => this.zip(options))
+      // assumes options.zip contains the zipped filename
+      .then(() => this.upload(options));
+    });
+  }
+};
 
-module.exports = _.bindAll(deploy, _.functions(deploy))
+module.exports = _.bindAll(deploy, _.functions(deploy));

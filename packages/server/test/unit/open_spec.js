@@ -1,40 +1,47 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-cp   = require("child_process")
-open = require("#{root}lib/util/open")
+const cp   = require("child_process");
+const open = require(`${root}lib/util/open`);
 
-platform = (p) ->
-  Object.defineProperty(process, "platform", {
-    value: p
-  })
+const platform = p => Object.defineProperty(process, "platform", {
+  value: p
+});
 
-describe "lib/util/open", ->
-  beforeEach ->
-    @platform = process.platform
+describe("lib/util/open", function() {
+  beforeEach(function() {
+    this.platform = process.platform;
 
-    cpStub = sinon.stub({
-      once: ->
-      unref: ->
-    })
+    const cpStub = sinon.stub({
+      once() {},
+      unref() {}
+    });
 
-    cpStub.once.withArgs("close").yieldsAsync(0)
+    cpStub.once.withArgs("close").yieldsAsync(0);
 
-    sinon.stub(cp, "spawn").returns(cpStub)
+    return sinon.stub(cp, "spawn").returns(cpStub);
+  });
 
-  afterEach ->
-    ## reset the platform
-    platform(@platform)
+  afterEach(function() {
+    //# reset the platform
+    return platform(this.platform);
+  });
 
-  it "spawns process with osx args", ->
-    platform("darwin")
+  it("spawns process with osx args", function() {
+    platform("darwin");
 
-    open.opn("../foo", {args: "-R"})
-    .then ->
-      expect(cp.spawn).to.be.calledWith("open", ["-W", "-R", "../foo"])
+    return open.opn("../foo", {args: "-R"})
+    .then(() => expect(cp.spawn).to.be.calledWith("open", ["-W", "-R", "../foo"]));
+  });
 
-  it "spawns process with linux args", ->
-    platform("linux")
+  return it("spawns process with linux args", function() {
+    platform("linux");
 
-    open.opn("../foo", {args: "-R"})
-    .then ->
-      expect(cp.spawn).to.be.calledWithMatch("xdg-open", ["../foo"])
+    return open.opn("../foo", {args: "-R"})
+    .then(() => expect(cp.spawn).to.be.calledWithMatch("xdg-open", ["../foo"]));
+  });
+});

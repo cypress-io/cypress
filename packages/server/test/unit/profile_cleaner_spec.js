@@ -1,44 +1,48 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-os = require("os")
-path = require("path")
-fs = require("#{root}/lib/util/fs")
-findProcess = require("#{root}lib/util/find_process")
-profileCleaner = require("#{root}lib/util/profile_cleaner")
+const os = require("os");
+const path = require("path");
+const fs = require(`${root}/lib/util/fs`);
+const findProcess = require(`${root}lib/util/find_process`);
+const profileCleaner = require(`${root}lib/util/profile_cleaner`);
 
-tmpDir = os.tmpdir()
-pidProfilesFolder = path.join(tmpDir, "pid-profiles")
+const tmpDir = os.tmpdir();
+const pidProfilesFolder = path.join(tmpDir, "pid-profiles");
 
-describe "lib/util/profile_cleaner", ->
-  context '.isCypressProcess', ->
-    it 'finds cypress processes by name or cmd', ->
-      isProc = (obj, bool) ->
-        expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool)
+describe("lib/util/profile_cleaner", function() {
+  context('.isCypressProcess', () => it('finds cypress processes by name or cmd', function() {
+    const isProc = (obj, bool) => expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool);
 
-      processes = [
-        {
-          name: 'CYPRESS'
-        },
-        {
-          cmd: 'path/to/Cypress -- some args'
-        },
-        {
-          name: 'nope',
-          cmd: 'not found'
-        }
-      ]
+    const processes = [
+      {
+        name: 'CYPRESS'
+      },
+      {
+        cmd: 'path/to/Cypress -- some args'
+      },
+      {
+        name: 'nope',
+        cmd: 'not found'
+      }
+    ];
 
-      isProc(processes[0], true)
-      isProc(processes[1], true)
-      isProc(processes[2], false)
+    isProc(processes[0], true);
+    isProc(processes[1], true);
+    return isProc(processes[2], false);
+  }));
 
-  context ".removeInactiveByPid", ->
-    beforeEach ->
+  return context(".removeInactiveByPid", function() {
+    beforeEach(function() {
       sinon.stub(findProcess, 'byPid')
       .withArgs(53301)
       .resolves([
         {
-          pid: '53301'
+          pid: '53301',
           ppid: '53300',
           uid: '501',
           gid: '20',
@@ -49,43 +53,42 @@ describe "lib/util/profile_cleaner", ->
       .withArgs(12345)
       .resolves([
         {
-          pid: '12345'
+          pid: '12345',
           name: 'Foo',
           cmd: 'node foo bar'
         }
       ])
       .withArgs(9999)
-      .resolves([])
+      .resolves([]);
 
-      createFolder = (folder) ->
-        fs.ensureDirAsync(path.join(pidProfilesFolder, folder))
+      const createFolder = folder => fs.ensureDirAsync(path.join(pidProfilesFolder, folder));
 
-      Promise.all([
-        createFolder("run-9999")
-        createFolder("run-12345")
-        createFolder("run-53301")
+      return Promise.all([
+        createFolder("run-9999"),
+        createFolder("run-12345"),
+        createFolder("run-53301"),
         createFolder("foo-53301")
-      ])
+      ]);
+    });
 
-    afterEach ->
-      fs.removeAsync(pidProfilesFolder)
+    afterEach(() => fs.removeAsync(pidProfilesFolder));
 
-    it "removes profiles which are not cypress pids", ->
-      expected = (folder, condition) ->
-        pathToFolder = path.join(pidProfilesFolder, folder)
+    return it("removes profiles which are not cypress pids", function() {
+      const expected = function(folder, condition) {
+        const pathToFolder = path.join(pidProfilesFolder, folder);
 
-        fs
+        return fs
         .pathExists(pathToFolder)
-        .then (bool) ->
-          expect(bool, "expected folder: #{pathToFolder} to exist? #{condition}").to.eq(condition)
+        .then(bool => expect(bool, `expected folder: ${pathToFolder} to exist? ${condition}`).to.eq(condition));
+      };
 
-      profileCleaner.removeInactiveByPid(pidProfilesFolder, "run-")
-      .then ->
-        Promise.all([
-          expected('run-9999', false),
-          expected('run-12345', false),
-          expected('run-53301', true),
-          expected('foo-53301', true),
-        ])
-      .finally ->
-        findProcess.byPid.restore()
+      return profileCleaner.removeInactiveByPid(pidProfilesFolder, "run-")
+      .then(() => Promise.all([
+        expected('run-9999', false),
+        expected('run-12345', false),
+        expected('run-53301', true),
+        expected('foo-53301', true),
+      ])).finally(() => findProcess.byPid.restore());
+    });
+  });
+});

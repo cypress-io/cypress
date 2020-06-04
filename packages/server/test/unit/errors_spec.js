@@ -1,137 +1,162 @@
-require("../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../spec_helper");
 
-style = require("ansi-styles")
-chalk  = require("chalk")
-errors = require("#{root}lib/errors")
-logger = require("#{root}lib/logger")
-snapshot = require("snap-shot-it")
+const style = require("ansi-styles");
+const chalk  = require("chalk");
+const errors = require(`${root}lib/errors`);
+const logger = require(`${root}lib/logger`);
+const snapshot = require("snap-shot-it");
 
-describe "lib/errors", ->
-  beforeEach ->
-    sinon.spy(console, "log")
+describe("lib/errors", function() {
+  beforeEach(() => sinon.spy(console, "log"));
 
-  context ".log", ->
-    it "uses red by default", ->
-      err = errors.get("NOT_LOGGED_IN")
+  context(".log", function() {
+    it("uses red by default", function() {
+      const err = errors.get("NOT_LOGGED_IN");
 
-      ret = errors.log(err)
+      const ret = errors.log(err);
 
-      expect(ret).to.be.undefined
+      expect(ret).to.be.undefined;
 
-      red = style.red
+      const {
+        red
+      } = style;
 
-      expect(console.log).to.be.calledWithMatch(red.open)
-      expect(console.log).to.be.calledWithMatch(red.close)
+      expect(console.log).to.be.calledWithMatch(red.open);
+      return expect(console.log).to.be.calledWithMatch(red.close);
+    });
 
-    it "can change the color", ->
-      err = errors.get("NOT_LOGGED_IN")
+    it("can change the color", function() {
+      const err = errors.get("NOT_LOGGED_IN");
 
-      ret = errors.log(err, "yellow")
+      const ret = errors.log(err, "yellow");
 
-      expect(ret).to.be.undefined
+      expect(ret).to.be.undefined;
 
-      yellow = style.yellow
+      const {
+        yellow
+      } = style;
 
-      expect(console.log).to.be.calledWithMatch(yellow.open)
-      expect(console.log).to.be.calledWithMatch(yellow.close)
+      expect(console.log).to.be.calledWithMatch(yellow.open);
+      return expect(console.log).to.be.calledWithMatch(yellow.close);
+    });
 
-    it "logs err.message", ->
-      err = errors.get("NO_PROJECT_ID", "foo/bar/baz")
+    it("logs err.message", function() {
+      const err = errors.get("NO_PROJECT_ID", "foo/bar/baz");
 
-      ret = errors.log(err)
+      const ret = errors.log(err);
 
-      expect(ret).to.be.undefined
+      expect(ret).to.be.undefined;
 
-      expect(console.log).to.be.calledWithMatch("foo/bar/baz")
+      return expect(console.log).to.be.calledWithMatch("foo/bar/baz");
+    });
 
-    it "logs err.details", ->
-      err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh")
+    it("logs err.details", function() {
+      const err = errors.get("PLUGINS_FUNCTION_ERROR", "foo/bar/baz", "details huh");
 
-      ret = errors.log(err)
+      const ret = errors.log(err);
 
-      expect(ret).to.be.undefined
+      expect(ret).to.be.undefined;
 
-      expect(console.log).to.be.calledWithMatch("foo/bar/baz")
-      expect(console.log).to.be.calledWithMatch("\n", "details huh")
+      expect(console.log).to.be.calledWithMatch("foo/bar/baz");
+      return expect(console.log).to.be.calledWithMatch("\n", "details huh");
+    });
 
-    it "logs err.stack in development", ->
-      process.env.CYPRESS_INTERNAL_ENV = "development"
+    return it("logs err.stack in development", function() {
+      process.env.CYPRESS_INTERNAL_ENV = "development";
 
-      err = new Error("foo")
+      const err = new Error("foo");
 
-      ret = errors.log(err)
+      const ret = errors.log(err);
 
-      expect(ret).to.eq(err)
+      expect(ret).to.eq(err);
 
-      expect(console.log).to.be.calledWith(chalk.red(err.stack))
+      return expect(console.log).to.be.calledWith(chalk.red(err.stack));
+    });
+  });
 
-  context ".logException", ->
-    it "calls logger.createException with unknown error", ->
-      sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
+  context(".logException", function() {
+    it("calls logger.createException with unknown error", function() {
+      sinon.stub(logger, "createException").resolves();
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production");
 
-      err = new Error("foo")
+      const err = new Error("foo");
 
-      errors.logException(err)
-      .then ->
-        expect(console.log).to.be.calledWith(chalk.red(err.stack))
-        expect(logger.createException).to.be.calledWith(err)
+      return errors.logException(err)
+      .then(function() {
+        expect(console.log).to.be.calledWith(chalk.red(err.stack));
+        return expect(logger.createException).to.be.calledWith(err);
+      });
+    });
 
-    it "does not call logger.createException when known error", ->
-      sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
+    it("does not call logger.createException when known error", function() {
+      sinon.stub(logger, "createException").resolves();
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production");
 
-      err = errors.get("NOT_LOGGED_IN")
+      const err = errors.get("NOT_LOGGED_IN");
 
-      errors.logException(err)
-      .then ->
-        expect(console.log).not.to.be.calledWith(err.stack)
-        expect(logger.createException).not.to.be.called
+      return errors.logException(err)
+      .then(function() {
+        expect(console.log).not.to.be.calledWith(err.stack);
+        return expect(logger.createException).not.to.be.called;
+      });
+    });
 
-    it "does not call logger.createException when not in production env", ->
-      sinon.stub(logger, "createException").resolves()
-      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("development")
+    it("does not call logger.createException when not in production env", function() {
+      sinon.stub(logger, "createException").resolves();
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("development");
 
-      err = new Error("foo")
+      const err = new Error("foo");
 
-      errors.logException(err)
-      .then ->
-        expect(console.log).not.to.be.calledWith(err.stack)
-        expect(logger.createException).not.to.be.called
+      return errors.logException(err)
+      .then(function() {
+        expect(console.log).not.to.be.calledWith(err.stack);
+        return expect(logger.createException).not.to.be.called;
+      });
+    });
 
-    it "swallows creating exception errors", ->
-      sinon.stub(logger, "createException").rejects(new Error("foo"))
-      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production")
+    return it("swallows creating exception errors", function() {
+      sinon.stub(logger, "createException").rejects(new Error("foo"));
+      sinon.stub(process.env, "CYPRESS_INTERNAL_ENV").value("production");
 
-      err = errors.get("NOT_LOGGED_IN")
+      const err = errors.get("NOT_LOGGED_IN");
 
-      errors.logException(err)
-      .then (ret) ->
-        expect(ret).to.be.undefined
+      return errors.logException(err)
+      .then(ret => expect(ret).to.be.undefined);
+    });
+  });
 
-  context ".clone", ->
-    it "converts err.message from ansi to html with span classes when html true", ->
-      err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
-      obj = errors.clone(err, {html: true})
-      expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>')
+  context(".clone", function() {
+    it("converts err.message from ansi to html with span classes when html true", function() {
+      const err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"));
+      const obj = errors.clone(err, {html: true});
+      return expect(obj.message).to.eq('foo<span class="ansi-blue-fg">bar</span><span class="ansi-yellow-fg">baz</span>');
+    });
 
-    it "does not convert err.message from ansi to html when no html option", ->
-      err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"))
-      obj = errors.clone(err)
-      expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m')
+    return it("does not convert err.message from ansi to html when no html option", function() {
+      const err = new Error("foo" + chalk.blue("bar") + chalk.yellow("baz"));
+      const obj = errors.clone(err);
+      return expect(obj.message).to.eq('foo\u001b[34mbar\u001b[39m\u001b[33mbaz\u001b[39m');
+    });
+  });
 
-  context ".displayFlags", ->
-    it "returns string formatted from selected keys", ->
-      options = {
-        tags: "nightly,staging",
-        name: "my tests",
-        unused: "some other value"
-      }
-      # we are only interested in showig tags and name values
-      # and prepending them with custom prefixes
-      mapping = {
-        tags: "--tag",
-        name: "--name"
-      }
-      text = errors.displayFlags(options, mapping)
-      snapshot("tags and name only", text)
+  return context(".displayFlags", () => it("returns string formatted from selected keys", function() {
+    const options = {
+      tags: "nightly,staging",
+      name: "my tests",
+      unused: "some other value"
+    };
+    // we are only interested in showig tags and name values
+    // and prepending them with custom prefixes
+    const mapping = {
+      tags: "--tag",
+      name: "--name"
+    };
+    const text = errors.displayFlags(options, mapping);
+    return snapshot("tags and name only", text);
+  }));
+});

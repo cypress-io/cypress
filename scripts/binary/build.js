@@ -1,381 +1,422 @@
-_ = require("lodash")
-fse = require("fs-extra")
-os = require("os")
-del = require("del")
-path = require("path")
-cp = require("child_process")
-gulp = require("gulp")
-chalk = require("chalk")
-Promise = require("bluebird")
-gulpDebug = require("gulp-debug")
-gulpCoffee = require("gulp-coffee")
-pluralize = require("pluralize")
-vinylPaths = require("vinyl-paths")
-coffee = require("@packages/coffee")
-execa = require("execa")
-electron = require("@packages/electron")
-debug = require("debug")("cypress:binary")
-R = require("ramda")
-la = require("lazy-ass")
-check = require("check-more-types")
-humanInterval = require("human-interval")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const _ = require("lodash");
+const fse = require("fs-extra");
+const os = require("os");
+const del = require("del");
+const path = require("path");
+const cp = require("child_process");
+const gulp = require("gulp");
+const chalk = require("chalk");
+const Promise = require("bluebird");
+const gulpDebug = require("gulp-debug");
+const gulpCoffee = require("gulp-coffee");
+const pluralize = require("pluralize");
+const vinylPaths = require("vinyl-paths");
+const coffee = require("@packages/coffee");
+const execa = require("execa");
+const electron = require("@packages/electron");
+const debug = require("debug")("cypress:binary");
+const R = require("ramda");
+const la = require("lazy-ass");
+const check = require("check-more-types");
+const humanInterval = require("human-interval");
 
-meta = require("./meta")
-smoke = require("./smoke")
-packages = require("./util/packages")
-xvfb = require("../../cli/lib/exec/xvfb")
-{ transformRequires } = require('./util/transform-requires')
-{ testStaticAssets } = require('./util/testStaticAssets')
-performanceTracking = require('../../packages/server/test/support/helpers/performance.js')
+const meta = require("./meta");
+const smoke = require("./smoke");
+const packages = require("./util/packages");
+const xvfb = require("../../cli/lib/exec/xvfb");
+const { transformRequires } = require('./util/transform-requires');
+const { testStaticAssets } = require('./util/testStaticAssets');
+const performanceTracking = require('../../packages/server/test/support/helpers/performance.js');
 
-rootPackage = require("@packages/root")
+const rootPackage = require("@packages/root");
 
-fs = Promise.promisifyAll(fse)
+const fs = Promise.promisifyAll(fse);
 
-logger = (msg, platform) ->
-  time = new Date()
-  timeStamp = time.toLocaleTimeString()
-  console.log(timeStamp, chalk.yellow(msg), chalk.blue(platform))
+const logger = function(msg, platform) {
+  const time = new Date();
+  const timeStamp = time.toLocaleTimeString();
+  return console.log(timeStamp, chalk.yellow(msg), chalk.blue(platform));
+};
 
-logBuiltAllPackages = () ->
-  console.log("built all packages")
+const logBuiltAllPackages = () => console.log("built all packages");
 
-# can pass options to better control the build
-# for example
-#   skipClean - do not delete "dist" folder before build
-buildCypressApp = (platform, version, options = {}) ->
-  la(check.unemptyString(version), "missing version to build", version)
+// can pass options to better control the build
+// for example
+//   skipClean - do not delete "dist" folder before build
+const buildCypressApp = function(platform, version, options = {}) {
+  la(check.unemptyString(version), "missing version to build", version);
 
-  distDir = _.partial(meta.distDir, platform)
-  buildDir = _.partial(meta.buildDir, platform)
-  buildAppDir = _.partial(meta.buildAppDir, platform)
+  const distDir = _.partial(meta.distDir, platform);
+  const buildDir = _.partial(meta.buildDir, platform);
+  const buildAppDir = _.partial(meta.buildAppDir, platform);
 
-  log = _.partialRight(logger, platform)
+  const log = _.partialRight(logger, platform);
 
-  testVersion = (folderNameFn) -> () ->
-    log("#testVersion")
-    dir = folderNameFn()
-    la(check.unemptyString(dir), "missing folder for platform", platform)
-    console.log("testing dist package version")
-    console.log("by calling: node index.js --version")
-    console.log("in the folder %s", dir)
+  const testVersion = folderNameFn => (function() {
+    log("#testVersion");
+    const dir = folderNameFn();
+    la(check.unemptyString(dir), "missing folder for platform", platform);
+    console.log("testing dist package version");
+    console.log("by calling: node index.js --version");
+    console.log("in the folder %s", dir);
 
-    execa("node", ["index.js", "--version"], {
+    return execa("node", ["index.js", "--version"], {
       cwd: dir
-    }).then (result) ->
+    }).then(function(result) {
       la(check.unemptyString(result.stdout),
-        'missing output when getting built version', result)
+        'missing output when getting built version', result);
 
-      console.log('app in %s', dir)
-      console.log('built app version', result.stdout)
-      la(result.stdout == version, "different version reported",
-        result.stdout, "from input version to build", version)
-      console.log('✅ using node --version works')
+      console.log('app in %s', dir);
+      console.log('built app version', result.stdout);
+      la(result.stdout === version, "different version reported",
+        result.stdout, "from input version to build", version);
+      return console.log('✅ using node --version works');
+    });
+  });
 
-  testBuiltStaticAssets = ->
-    log('#testBuiltStaticAssets')
-    testStaticAssets(distDir())
+  const testBuiltStaticAssets = function() {
+    log('#testBuiltStaticAssets');
+    return testStaticAssets(distDir());
+  };
 
-  canBuildInDocker = ->
-    platform is "linux" and os.platform() is "darwin"
+  const canBuildInDocker = () => (platform === "linux") && (os.platform() === "darwin");
 
-  badPlatformMismatch = ->
-    console.error("⛔️  cannot build #{platform} from #{os.platform()}")
-    console.error("⛔️  should use matching platform to build it")
-    console.error("program arguments")
-    console.error(process.argv)
+  const badPlatformMismatch = function() {
+    console.error(`⛔️  cannot build ${platform} from ${os.platform()}`);
+    console.error("⛔️  should use matching platform to build it");
+    console.error("program arguments");
+    return console.error(process.argv);
+  };
 
-  checkPlatform = ->
-    log("#checkPlatform")
-    if platform is os.platform()
-      return
+  const checkPlatform = function() {
+    log("#checkPlatform");
+    if (platform === os.platform()) {
+      return;
+    }
 
-    console.log("trying to build #{platform} from #{os.platform()}")
-    if platform is "linux" and os.platform() is "darwin"
-      console.log("npm run binary-build-linux")
-    Promise.reject(new Error("Build platform mismatch"))
+    console.log(`trying to build ${platform} from ${os.platform()}`);
+    if ((platform === "linux") && (os.platform() === "darwin")) {
+      console.log("npm run binary-build-linux");
+    }
+    return Promise.reject(new Error("Build platform mismatch"));
+  };
 
-  cleanupPlatform = ->
-    log("#cleanupPlatform")
+  const cleanupPlatform = function() {
+    log("#cleanupPlatform");
 
-    if options.skipClean
-      log("skipClean")
-      return
+    if (options.skipClean) {
+      log("skipClean");
+      return;
+    }
 
-    cleanup = ->
-      dir = distDir()
-      la(check.unemptyString(dir), "empty dist dir", dir, "for platform", platform)
-      fs.removeAsync(distDir())
+    const cleanup = function() {
+      const dir = distDir();
+      la(check.unemptyString(dir), "empty dist dir", dir, "for platform", platform);
+      return fs.removeAsync(distDir());
+    };
 
-    cleanup()
-    .catch(cleanup)
+    return cleanup()
+    .catch(cleanup);
+  };
 
-  buildPackages = ->
-    log("#buildPackages")
+  const buildPackages = function() {
+    log("#buildPackages");
 
-    packages.runAllBuild()
-    # Promise.resolve()
-    .then(R.tap(logBuiltAllPackages))
+    return packages.runAllBuild()
+    // Promise.resolve()
+    .then(R.tap(logBuiltAllPackages));
+  };
 
-  copyPackages = ->
-    log("#copyPackages")
+  const copyPackages = function() {
+    log("#copyPackages");
 
-    packages.copyAllToDist(distDir())
+    return packages.copyAllToDist(distDir());
+  };
 
-  transformSymlinkRequires = ->
-    log("#transformSymlinkRequires")
+  const transformSymlinkRequires = function() {
+    log("#transformSymlinkRequires");
 
-    transformRequires(distDir())
-    .then (replaceCount) ->
-      la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
+    return transformRequires(distDir())
+    .then(replaceCount => la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount));
+  };
 
-  npmInstallPackages = ->
-    log("#npmInstallPackages")
+  const npmInstallPackages = function() {
+    log("#npmInstallPackages");
 
-    pathToPackages = distDir("packages", "*")
-    packages.npmInstallAll(pathToPackages)
+    const pathToPackages = distDir("packages", "*");
+    return packages.npmInstallAll(pathToPackages);
+  };
 
-  createRootPackage = ->
-    log("#createRootPackage #{platform} #{version}")
+  const createRootPackage = function() {
+    log(`#createRootPackage ${platform} ${version}`);
 
-    fs.outputJsonAsync(distDir("package.json"), {
-      name: "cypress"
+    return fs.outputJsonAsync(distDir("package.json"), {
+      name: "cypress",
       productName: "Cypress",
-      description: rootPackage.description
-      version: version
-      main: "index.js"
-      scripts: {}
+      description: rootPackage.description,
+      version,
+      main: "index.js",
+      scripts: {},
       env: "production"
     })
-    .then =>
-      str = """
-      process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
-      require('./packages/server')
-      """
+    .then(() => {
+      const str = `\
+process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
+require('./packages/server')\
+`;
 
-      fs.outputFileAsync(distDir("index.js"), str)
+      return fs.outputFileAsync(distDir("index.js"), str);
+    });
+  };
 
-  removeTypeScript = ->
-    ## remove the .ts files in our packages
-    log("#removeTypeScript")
-    del([
-      ## include ts files of packages
-      distDir("**", "*.ts")
+  const removeTypeScript = function() {
+    //# remove the .ts files in our packages
+    log("#removeTypeScript");
+    return del([
+      //# include ts files of packages
+      distDir("**", "*.ts"),
 
-      ## except those in node_modules
+      //# except those in node_modules
       "!" + distDir("**", "node_modules", "**", "*.ts")
     ])
-    .then (paths) ->
+    .then(function(paths) {
       console.log(
         "deleted %d TS %s",
         paths.length,
         pluralize("file", paths.length)
-      )
-      console.log(paths)
+      );
+      return console.log(paths);
+    });
+  };
 
-  # we also don't need ".bin" links inside Electron application
-  # thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
-  removeBinFolders = ->
-    log("#removeBinFolders")
+  // we also don't need ".bin" links inside Electron application
+  // thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
+  const removeBinFolders = function() {
+    log("#removeBinFolders");
 
-    searchMask = distDir("packages", "*", "node_modules", ".bin")
-    console.log("searching for", searchMask)
+    const searchMask = distDir("packages", "*", "node_modules", ".bin");
+    console.log("searching for", searchMask);
 
-    del([searchMask])
-    .then (paths) ->
+    return del([searchMask])
+    .then(function(paths) {
       console.log(
         "deleted %d .bin %s",
         paths.length,
         pluralize("folder", paths.length)
-      )
-      console.log(paths)
+      );
+      return console.log(paths);
+    });
+  };
 
-  removeCyFolders = ->
-    log("#removeCyFolders")
+  const removeCyFolders = function() {
+    log("#removeCyFolders");
 
-    searchMask = distDir("packages", "server", ".cy")
-    console.log("searching", searchMask)
+    const searchMask = distDir("packages", "server", ".cy");
+    console.log("searching", searchMask);
 
-    del([searchMask])
-    .then (paths) ->
+    return del([searchMask])
+    .then(function(paths) {
       console.log(
         "deleted %d .cy %s",
         paths.length,
         pluralize("file", paths.length)
-      )
-      console.log(paths)
+      );
+      return console.log(paths);
+    });
+  };
 
-  cleanJs = ->
-    log("#cleanJs")
+  const cleanJs = function() {
+    log("#cleanJs");
 
-    packages.runAllCleanJs()
+    return packages.runAllCleanJs();
+  };
 
-  convertCoffeeToJs = ->
-    log("#convertCoffeeToJs")
+  const convertCoffeeToJs = function() {
+    log("#convertCoffeeToJs");
 
-    ## grab everything in src
-    ## convert to js
-    new Promise (resolve, reject) =>
-      gulp.src([
-        ## include coffee files of packages
-        distDir("**", "*.coffee")
+    //# grab everything in src
+    //# convert to js
+    return new Promise((resolve, reject) => {
+      return gulp.src([
+        //# include coffee files of packages
+        distDir("**", "*.coffee"),
 
-        ## except those in node_modules
+        //# except those in node_modules
         "!" + distDir("**", "node_modules", "**", "*.coffee")
       ], { sourcemaps: true })
-      .pipe vinylPaths(del)
+      .pipe(vinylPaths(del))
       .pipe(gulpDebug())
-      .pipe gulpCoffee({
-        coffee: coffee
-      })
-      .pipe gulp.dest(distDir())
+      .pipe(gulpCoffee({
+        coffee
+      })).pipe(gulp.dest(distDir()))
       .on("end", resolve)
-      .on("error", reject)
+      .on("error", reject);
+    });
+  };
 
-  getIconFilename = (platform) ->
-    filenames = {
-      darwin: "cypress.icns"
-      win32: "cypress.ico"
+  const getIconFilename = function(platform) {
+    const filenames = {
+      darwin: "cypress.icns",
+      win32: "cypress.ico",
       linux: "icon_512x512.png"
-    }
-    iconFilename = electron.icons().getPathToIcon(filenames[platform])
-    console.log("For platform #{platform} using icon #{iconFilename}")
-    iconFilename
+    };
+    const iconFilename = electron.icons().getPathToIcon(filenames[platform]);
+    console.log(`For platform ${platform} using icon ${iconFilename}`);
+    return iconFilename;
+  };
 
-  electronPackAndSign = ->
-    log("#electronPackAndSign")
+  const electronPackAndSign = function() {
+    log("#electronPackAndSign");
 
-    # See the internal wiki document "Signing Test Runner on MacOS"
-    # to learn how to get the right Mac certificate for signing and notarizing
-    # the built Test Runner application
+    // See the internal wiki document "Signing Test Runner on MacOS"
+    // to learn how to get the right Mac certificate for signing and notarizing
+    // the built Test Runner application
 
-    appFolder = distDir()
-    outputFolder = meta.buildRootDir(platform)
-    electronVersion = electron.getElectronVersion()
-    la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion)
-    iconFilename = getIconFilename(platform)
+    const appFolder = distDir();
+    const outputFolder = meta.buildRootDir(platform);
+    const electronVersion = electron.getElectronVersion();
+    la(check.unemptyString(electronVersion), "missing Electron version to pack", electronVersion);
+    const iconFilename = getIconFilename(platform);
 
-    console.log("output folder: #{outputFolder}")
+    console.log(`output folder: ${outputFolder}`);
 
-    args = [
+    const args = [
       "--publish=never",
-      "--c.electronVersion=#{electronVersion}",
-      "--c.directories.app=#{appFolder}",
-      "--c.directories.output=#{outputFolder}",
-      "--c.icon=#{iconFilename}",
-      # for now we cannot pack source files in asar file
-      # because electron-builder does not copy nested folders
-      # from packages/*/node_modules
-      # see https://github.com/electron-userland/electron-builder/issues/3185
-      # so we will copy those folders later ourselves
+      `--c.electronVersion=${electronVersion}`,
+      `--c.directories.app=${appFolder}`,
+      `--c.directories.output=${outputFolder}`,
+      `--c.icon=${iconFilename}`,
+      // for now we cannot pack source files in asar file
+      // because electron-builder does not copy nested folders
+      // from packages/*/node_modules
+      // see https://github.com/electron-userland/electron-builder/issues/3185
+      // so we will copy those folders later ourselves
       "--c.asar=false"
-    ]
-    opts = {
+    ];
+    const opts = {
       stdio: "inherit"
-    }
-    console.log("electron-builder arguments:")
-    console.log(args.join(' '))
+    };
+    console.log("electron-builder arguments:");
+    console.log(args.join(' '));
 
-    execa('electron-builder', args, opts)
+    return execa('electron-builder', args, opts);
+  };
 
-  removeDevElectronApp = ->
-    log("#removeDevElectronApp")
-    # when we copy packages/electron, we get the "dist" folder with
-    # empty Electron app, symlinked to our server folder
-    # in production build, we do not need this link, and it
-    # would not work anyway with code signing
+  const removeDevElectronApp = function() {
+    log("#removeDevElectronApp");
+    // when we copy packages/electron, we get the "dist" folder with
+    // empty Electron app, symlinked to our server folder
+    // in production build, we do not need this link, and it
+    // would not work anyway with code signing
 
-    # hint: you can see all symlinks in the build folder
-    # using "find build/darwin/Cypress.app/ -type l -ls"
-    console.log("platform", platform)
-    electronDistFolder = distDir("packages", "electron", "dist")
+    // hint: you can see all symlinks in the build folder
+    // using "find build/darwin/Cypress.app/ -type l -ls"
+    console.log("platform", platform);
+    const electronDistFolder = distDir("packages", "electron", "dist");
     la(check.unemptyString(electronDistFolder),
-      "empty electron dist folder for platform", platform)
+      "empty electron dist folder for platform", platform);
 
-    console.log("Removing unnecessary folder '#{electronDistFolder}'")
-    fs.removeAsync(electronDistFolder) # .catch(_.noop) why are we ignoring an error here?!
+    console.log(`Removing unnecessary folder '${electronDistFolder}'`);
+    return fs.removeAsync(electronDistFolder); // .catch(_.noop) why are we ignoring an error here?!
+  };
 
-  lsDistFolder = ->
-    log('#lsDistFolder')
-    buildFolder = buildDir()
-    console.log("in build folder %s", buildFolder)
-    execa('ls', ['-la', buildFolder])
-    .then R.prop("stdout")
-    .then console.log
+  const lsDistFolder = function() {
+    log('#lsDistFolder');
+    const buildFolder = buildDir();
+    console.log("in build folder %s", buildFolder);
+    return execa('ls', ['-la', buildFolder])
+    .then(R.prop("stdout"))
+    .then(console.log);
+  };
 
-  runSmokeTests = ->
-    log("#runSmokeTests")
+  const runSmokeTests = function() {
+    log("#runSmokeTests");
 
-    run = ->
-      # make sure to use a longer timeout - on Mac the first
-      # launch of a built application invokes gatekeeper check
-      # which takes a couple of seconds
-      executablePath = meta.buildAppExecutable(platform)
-      smoke.test(executablePath)
+    const run = function() {
+      // make sure to use a longer timeout - on Mac the first
+      // launch of a built application invokes gatekeeper check
+      // which takes a couple of seconds
+      const executablePath = meta.buildAppExecutable(platform);
+      return smoke.test(executablePath);
+    };
 
-    if xvfb.isNeeded()
-      xvfb.start()
+    if (xvfb.isNeeded()) {
+      return xvfb.start()
       .then(run)
-      .finally(xvfb.stop)
-    else
-      run()
+      .finally(xvfb.stop);
+    } else {
+      return run();
+    }
+  };
 
-  verifyAppCanOpen = ->
-    if (platform != "darwin") then return Promise.resolve()
+  const verifyAppCanOpen = function() {
+    if (platform !== "darwin") { return Promise.resolve(); }
 
-    appFolder = meta.zipDir(platform)
-    log("#verifyAppCanOpen #{appFolder}")
-    new Promise (resolve, reject) =>
-      args = ["-a", "-vvvv", appFolder]
-      debug("cmd: spctl #{args.join(' ')}")
-      sp = cp.spawn "spctl", args, {stdio: "inherit"}
-      sp.on "exit", (code) ->
-        if code is 0
-          resolve()
-        else
-          reject new Error("Verifying App via GateKeeper failed")
+    const appFolder = meta.zipDir(platform);
+    log(`#verifyAppCanOpen ${appFolder}`);
+    return new Promise((resolve, reject) => {
+      const args = ["-a", "-vvvv", appFolder];
+      debug(`cmd: spctl ${args.join(' ')}`);
+      const sp = cp.spawn("spctl", args, {stdio: "inherit"});
+      return sp.on("exit", function(code) {
+        if (code === 0) {
+          return resolve();
+        } else {
+          return reject(new Error("Verifying App via GateKeeper failed"));
+        }
+      });
+    });
+  };
 
-  printPackageSizes = ->
-    appFolder = meta.buildAppDir(platform, "packages")
-    log("#printPackageSizes #{appFolder}")
+  const printPackageSizes = function() {
+    const appFolder = meta.buildAppDir(platform, "packages");
+    log(`#printPackageSizes ${appFolder}`);
 
-    if (platform == "win32") then return Promise.resolve()
+    if (platform === "win32") { return Promise.resolve(); }
 
-    # "du" - disk usage utility
-    # -d -1 depth of 1
-    # -h human readable sizes (K and M)
-    args = ["-d", "1", appFolder]
+    // "du" - disk usage utility
+    // -d -1 depth of 1
+    // -h human readable sizes (K and M)
+    const args = ["-d", "1", appFolder];
 
-    parseDiskUsage = (result) ->
-      lines = result.stdout.split(os.EOL)
-      # will store {package name: package size}
-      data = {}
+    const parseDiskUsage = function(result) {
+      const lines = result.stdout.split(os.EOL);
+      // will store {package name: package size}
+      const data = {};
 
-      lines.forEach (line) ->
-        parts = line.split('\t')
-        packageSize = parseFloat(parts[0])
-        folder = parts[1]
+      lines.forEach(function(line) {
+        const parts = line.split('\t');
+        const packageSize = parseFloat(parts[0]);
+        const folder = parts[1];
 
-        packageName = path.basename(folder)
-        if packageName is "packages"
-          return # root "packages" information
+        const packageName = path.basename(folder);
+        if (packageName === "packages") {
+          return; // root "packages" information
+        }
 
-        data[packageName] = packageSize
+        return data[packageName] = packageSize;
+      });
 
-      return data
+      return data;
+    };
 
-    printDiskUsage = (sizes) ->
-      bySize = R.sortBy(R.prop('1'))
-      console.log(bySize(R.toPairs(sizes)))
+    const printDiskUsage = function(sizes) {
+      const bySize = R.sortBy(R.prop('1'));
+      return console.log(bySize(R.toPairs(sizes)));
+    };
 
-    execa("du", args)
+    return execa("du", args)
     .then(parseDiskUsage)
     .then(R.tap(printDiskUsage))
-    .then((sizes) ->
-      performanceTracking.track('test runner size', sizes)
-    )
+    .then(sizes => performanceTracking.track('test runner size', sizes));
+  };
 
-  Promise.resolve()
+  return Promise.resolve()
   .then(checkPlatform)
   .then(cleanupPlatform)
   .then(buildPackages)
@@ -399,6 +440,7 @@ buildCypressApp = (platform, version, options = {}) ->
   .then(printPackageSizes)
   .return({
     buildDir: buildDir()
-  })
+  });
+};
 
-module.exports = buildCypressApp
+module.exports = buildCypressApp;

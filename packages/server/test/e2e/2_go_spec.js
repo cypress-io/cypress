@@ -1,24 +1,29 @@
-e2e = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const e2e = require("../support/helpers/e2e").default;
 
-onServer = (app) ->
-  app.get "/first", (req, res) ->
-    res.send("<html><h1>first</h1><a href='/second'>second</a></html>")
+const onServer = function(app) {
+  app.get("/first", (req, res) => res.send("<html><h1>first</h1><a href='/second'>second</a></html>"));
 
-  app.get "/second", (req, res) ->
-    res.send("<html><h1>second</h1></html>")
+  return app.get("/second", (req, res) => res.send("<html><h1>second</h1></html>"));
+};
 
-describe "e2e go", ->
+describe("e2e go", function() {
   e2e.setup({
     servers: {
-      port: 1818
-      onServer: onServer
+      port: 1818,
+      onServer
     }
-  })
+  });
 
-  ## this tests that history changes work as intended
-  ## there have been regressions in electron which would
-  ## otherwise cause these tests to fail
-  e2e.it "passes", {
-    spec: "go_spec.coffee"
+  //# this tests that history changes work as intended
+  //# there have been regressions in electron which would
+  //# otherwise cause these tests to fail
+  return e2e.it("passes", {
+    spec: "go_spec.coffee",
     snapshot: true
-  }
+  });
+});

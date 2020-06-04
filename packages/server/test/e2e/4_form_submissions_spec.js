@@ -1,145 +1,150 @@
-rp = require("@cypress/request-promise")
-path = require("path")
-Promise = require("bluebird")
-bodyParser = require("body-parser")
-multiparty = require("multiparty")
-fs = require("../../lib/util/fs")
-e2e = require("../support/helpers/e2e").default
-Fixtures = require("../support/helpers/fixtures")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const rp = require("@cypress/request-promise");
+const path = require("path");
+const Promise = require("bluebird");
+const bodyParser = require("body-parser");
+const multiparty = require("multiparty");
+const fs = require("../../lib/util/fs");
+const e2e = require("../support/helpers/e2e").default;
+const Fixtures = require("../support/helpers/fixtures");
 
-HTTPS_PORT = 11443
-HTTP_PORT = 11180
-describe "e2e form submissions", ->
-  e2e.setup()
+const HTTPS_PORT = 11443;
+const HTTP_PORT = 11180;
+describe("e2e form submissions", () => e2e.setup());
 
-e2ePath = Fixtures.projectPath("e2e")
-pathToLargeImage = Fixtures.path("server/imgs/earth.jpg")
+const e2ePath = Fixtures.projectPath("e2e");
+const pathToLargeImage = Fixtures.path("server/imgs/earth.jpg");
 
-getFormHtml = (formAttrs, textValue = '') ->
-  """
-  <html>
-    <body>
-      <form method="POST" #{formAttrs}>
-        <input name="foo" type="text" value="#{textValue}"/>
-        <input name="bar" type="file"/>
-        <input type="submit"/>
-      </form>
-    </body>
-  </html>
-  """
+const getFormHtml = (formAttrs, textValue = '') => `\
+<html>
+<body>
+  <form method="POST" ${formAttrs}>
+    <input name="foo" type="text" value="${textValue}"/>
+    <input name="bar" type="file"/>
+    <input type="submit"/>
+  </form>
+</body>
+</html>\
+`;
 
-onServer = (app) ->
-  app.post "/verify-attachment", (req, res) ->
-    form = new multiparty.Form()
+const onServer = function(app) {
+  app.post("/verify-attachment", function(req, res) {
+    const form = new multiparty.Form();
 
-    form.parse req, (err, fields, files) ->
-      fixturePath = path.resolve(e2ePath, "cypress", "fixtures", fields["foo"][0])
-      filePath = files["bar"][0].path
+    return form.parse(req, function(err, fields, files) {
+      const fixturePath = path.resolve(e2ePath, "cypress", "fixtures", fields["foo"][0]);
+      const filePath = files["bar"][0].path;
 
-      Promise.props({
+      return Promise.props({
         fixture: fs.readFileAsync(fixturePath),
         upload: fs.readFileAsync(filePath)
       })
-      .then ({ fixture, upload }) ->
-        ret = fixture.compare(upload)
+      .then(function({ fixture, upload }) {
+        const ret = fixture.compare(upload);
 
-        if ret is 0
-          return res.send('files match')
+        if (ret === 0) {
+          return res.send('files match');
+        }
 
-        res.send(
-          """
-          file did not match. file at #{fixturePath} did not match #{filePath}.
-          <br/>
-          <hr/>
-          buffer compare yielded: #{ret}
-          """
-        )
+        return res.send(
+          `\
+file did not match. file at ${fixturePath} did not match ${filePath}.
+<br/>
+<hr/>
+buffer compare yielded: ${ret}\
+`
+        );
+      });
+    });
+  });
 
-  ## all routes below this point will have bodies parsed
+  //# all routes below this point will have bodies parsed
   app.use(bodyParser.text({
-    type: '*/*' ## parse any content-type
-  }))
+    type: '*/*' //# parse any content-type
+  }));
 
-  app.get "/", (req, res) ->
-    res
-    .type('html')
-    .send(getFormHtml('action="/dump-body"'))
+  app.get("/", (req, res) => res
+  .type('html')
+  .send(getFormHtml('action="/dump-body"')));
 
-  app.get "/multipart-form-data", (req, res) ->
-    res
-    .type('html')
-    .send(getFormHtml('action="/dump-body" enctype="multipart/form-data"'))
+  app.get("/multipart-form-data", (req, res) => res
+  .type('html')
+  .send(getFormHtml('action="/dump-body" enctype="multipart/form-data"')));
 
-  app.get "/multipart-with-attachment", (req, res) ->
-    res
-    .type('html')
-    .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath))
+  app.get("/multipart-with-attachment", (req, res) => res
+  .type('html')
+  .send(getFormHtml('action="/verify-attachment" enctype="multipart/form-data"', req.query.fixturePath)));
 
-  app.post "/dump-body", (req, res) ->
-    res
-    .type('html')
-    .send(req.body)
+  return app.post("/dump-body", (req, res) => res
+  .type('html')
+  .send(req.body));
+};
 
-describe "e2e forms", ->
-  context "submissions with jquery XHR POST", ->
-    e2e.setup()
+describe("e2e forms", function() {
+  context("submissions with jquery XHR POST", function() {
+    e2e.setup();
 
-    e2e.it "passing", {
-      spec: "form_submission_passing_spec.coffee"
+    e2e.it("passing", {
+      spec: "form_submission_passing_spec.coffee",
       snapshot: true
-    }
+    });
 
-    e2e.it "failing", {
-      spec: "form_submission_failing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
-      onStdout: (stdout) =>
-        stdout
-        .replace(/((?:      -)+[^\n]+\n)/gm, '') ## remove variable diff
-    }
+    return e2e.it("failing", {
+      spec: "form_submission_failing_spec.coffee",
+      snapshot: true,
+      expectedExitCode: 1,
+      onStdout: stdout => {
+        return stdout
+        .replace(/((?:      -)+[^\n]+\n)/gm, '');
+      } //# remove variable diff
+    });
+});
 
-  context "<form> submissions", ->
+  return context("<form> submissions", function() {
     e2e.setup({
       settings: {
         env: {
           PATH_TO_LARGE_IMAGE: pathToLargeImage
         }
-      }
+      },
       servers: [
         {
-          port: HTTPS_PORT
-          https: true
+          port: HTTPS_PORT,
+          https: true,
           onServer
         },
         {
-          port: HTTP_PORT
+          port: HTTP_PORT,
           onServer
         }
       ]
-    })
+    });
 
-    before ->
-      ## go out and fetch this image if we don't already have it
-      fs
-      .readFileAsync(pathToLargeImage)
-      .catch { code: "ENOENT"}, ->
-        ## 16MB image, too big to include with git repo
-        rp("https://test-page-speed.cypress.io/files/huge-image.jpg")
-        .then (resp) ->
-          fs.outputFileAsync(pathToLargeImage, resp)
+    before(() => //# go out and fetch this image if we don't already have it
+    fs
+    .readFileAsync(pathToLargeImage)
+    .catch({ code: "ENOENT"}, () => //# 16MB image, too big to include with git repo
+    rp("https://test-page-speed.cypress.io/files/huge-image.jpg")
+    .then(resp => fs.outputFileAsync(pathToLargeImage, resp))));
 
-    e2e.it "passes with https on localhost", {
+    e2e.it("passes with https on localhost", {
       config: {
-        baseUrl: "https://localhost:#{HTTPS_PORT}"
-      }
-      spec: "form_submission_multipart_spec.coffee"
+        baseUrl: `https://localhost:${HTTPS_PORT}`
+      },
+      spec: "form_submission_multipart_spec.coffee",
       snapshot: true
-    }
+    });
 
-    e2e.it "passes with http on localhost", {
+    return e2e.it("passes with http on localhost", {
       config: {
-        baseUrl: "http://localhost:#{HTTP_PORT}"
-      }
-      spec: "form_submission_multipart_spec.coffee"
+        baseUrl: `http://localhost:${HTTP_PORT}`
+      },
+      spec: "form_submission_multipart_spec.coffee",
       snapshot: true
-    }
+    });
+});
+});

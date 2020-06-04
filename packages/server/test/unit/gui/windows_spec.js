@@ -1,164 +1,192 @@
-require("../../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../../spec_helper");
 
-_             = require("lodash")
-path          = require("path")
-Promise       = require("bluebird")
-EE            = require("events").EventEmitter
-BrowserWindow = require("electron").BrowserWindow
-cyDesktop     = require("@packages/desktop-gui")
-user          = require("#{root}../lib/user")
-Windows       = require("#{root}../lib/gui/windows")
-savedState    = require("#{root}../lib/saved_state")
+const _             = require("lodash");
+const path          = require("path");
+const Promise       = require("bluebird");
+const EE            = require("events").EventEmitter;
+const {
+  BrowserWindow
+} = require("electron");
+const cyDesktop     = require("@packages/desktop-gui");
+const user          = require(`${root}../lib/user`);
+const Windows       = require(`${root}../lib/gui/windows`);
+const savedState    = require(`${root}../lib/saved_state`);
 
-DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36"
+const DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36";
 
-describe "lib/gui/windows", ->
-  beforeEach ->
-    Windows.reset()
+describe("lib/gui/windows", function() {
+  beforeEach(function() {
+    Windows.reset();
 
-    @win = new EE()
-    @win.loadURL = sinon.stub()
-    @win.destroy = sinon.stub()
-    @win.getSize = sinon.stub().returns([1, 2])
-    @win.getPosition = sinon.stub().returns([3, 4])
-    @win.webContents = new EE()
-    @win.webContents.openDevTools = sinon.stub()
-    @win.webContents.userAgent = DEFAULT_USER_AGENT
-    @win.isDestroyed = sinon.stub().returns(false)
+    this.win = new EE();
+    this.win.loadURL = sinon.stub();
+    this.win.destroy = sinon.stub();
+    this.win.getSize = sinon.stub().returns([1, 2]);
+    this.win.getPosition = sinon.stub().returns([3, 4]);
+    this.win.webContents = new EE();
+    this.win.webContents.openDevTools = sinon.stub();
+    this.win.webContents.userAgent = DEFAULT_USER_AGENT;
+    this.win.isDestroyed = sinon.stub().returns(false);
 
-    sinon.stub(Windows, "_newBrowserWindow").returns(@win)
+    return sinon.stub(Windows, "_newBrowserWindow").returns(this.win);
+  });
 
-  afterEach ->
-    Windows.reset()
+  afterEach(() => Windows.reset());
 
-  context ".getByWebContents", ->
-    beforeEach ->
-      sinon.stub(BrowserWindow, "fromWebContents")
+  context(".getByWebContents", function() {
+    beforeEach(() => sinon.stub(BrowserWindow, "fromWebContents"));
 
-    it "calls BrowserWindow.fromWebContents", ->
-      BrowserWindow.fromWebContents.withArgs("foo").returns("bar")
-      expect(Windows.getByWebContents("foo")).to.eq("bar")
+    return it("calls BrowserWindow.fromWebContents", function() {
+      BrowserWindow.fromWebContents.withArgs("foo").returns("bar");
+      return expect(Windows.getByWebContents("foo")).to.eq("bar");
+    });
+  });
 
-  context ".open", ->
-    beforeEach ->
-      sinon.stub(Windows, "create").returns(@win)
+  context(".open", function() {
+    beforeEach(function() {
+      return sinon.stub(Windows, "create").returns(this.win);
+    });
 
-    it "sets default options", ->
-      options = {
+    return it("sets default options", function() {
+      const options = {
         type: "INDEX"
-      }
+      };
 
-      Windows.open("/path/to/project", options)
-      .then (win) ->
+      return Windows.open("/path/to/project", options)
+      .then(function(win) {
         expect(options).to.deep.eq({
-          height: 500
-          width: 600
-          type: "INDEX"
-          show: true
-          url: cyDesktop.getPathToIndex()
+          height: 500,
+          width: 600,
+          type: "INDEX",
+          show: true,
+          url: cyDesktop.getPathToIndex(),
           webPreferences: {
             preload: path.resolve("lib", "ipc", "ipc.js")
           }
-        })
+        });
 
-        expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
+        return expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex());
+      });
+    });
+  });
 
-  context ".create", ->
-    it "opens dev tools if saved state is open", ->
-      Windows.create("/foo/", {devTools: true})
-      expect(@win.webContents.openDevTools).to.be.called
+  context(".create", () => it("opens dev tools if saved state is open", function() {
+    Windows.create("/foo/", {devTools: true});
+    expect(this.win.webContents.openDevTools).to.be.called;
 
-      Windows.create("/foo/", {})
-      expect(@win.webContents.openDevTools).not.to.be.calledTwice
+    Windows.create("/foo/", {});
+    return expect(this.win.webContents.openDevTools).not.to.be.calledTwice;
+  }));
 
-    ## TODO: test everything else going on in this method!
+    //# TODO: test everything else going on in this method!
 
-  context ".trackState", ->
-    beforeEach ->
-      savedState.create()
-      .then (@state) =>
-        sinon.stub(@state, "set")
+  return context(".trackState", function() {
+    beforeEach(function() {
+      return savedState.create()
+      .then(state => {
+        this.state = state;
+        sinon.stub(this.state, "set");
 
-        @projectRoot = undefined
-        @keys = {
-          width: "theWidth"
-          height: "someHeight"
-          x: "anX"
-          y: "aY"
+        this.projectRoot = undefined;
+        return this.keys = {
+          width: "theWidth",
+          height: "someHeight",
+          x: "anX",
+          y: "aY",
           devTools: "whatsUpWithDevTools"
-        }
+        };
+    });});
 
-    it "saves size and position when window resizes, debounced", ->
-      ## tried using useFakeTimers here, but it didn't work for some
-      ## reason, so this is the next best thing
-      sinon.stub(_, "debounce").returnsArg(0)
+    it("saves size and position when window resizes, debounced", function() {
+      //# tried using useFakeTimers here, but it didn't work for some
+      //# reason, so this is the next best thing
+      sinon.stub(_, "debounce").returnsArg(0);
 
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.emit("resize")
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.emit("resize");
 
-      expect(_.debounce).to.be.called
+      expect(_.debounce).to.be.called;
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).to.be.calledWith({
-          theWidth: 1
-          someHeight: 2
-          anX: 3
+      .then(() => {
+        return expect(this.state.set).to.be.calledWith({
+          theWidth: 1,
+          someHeight: 2,
+          anX: 3,
           aY: 4
-        })
+        });
+      });
+    });
 
-    it "returns if window isDestroyed on resize", ->
-      @win.isDestroyed.returns(true)
+    it("returns if window isDestroyed on resize", function() {
+      this.win.isDestroyed.returns(true);
 
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.emit("resize")
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.emit("resize");
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).not.to.be.called
+      .then(() => {
+        return expect(this.state.set).not.to.be.called;
+      });
+    });
 
-    it "saves position when window moves, debounced", ->
-      ## tried using useFakeTimers here, but it didn't work for some
-      ## reason, so this is the next best thing
-      sinon.stub(_, "debounce").returnsArg(0)
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.emit("moved")
+    it("saves position when window moves, debounced", function() {
+      //# tried using useFakeTimers here, but it didn't work for some
+      //# reason, so this is the next best thing
+      sinon.stub(_, "debounce").returnsArg(0);
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.emit("moved");
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).to.be.calledWith({
-          anX: 3
+      .then(() => {
+        return expect(this.state.set).to.be.calledWith({
+          anX: 3,
           aY: 4
-        })
+        });
+      });
+    });
 
-    it "returns if window isDestroyed on moved", ->
-      @win.isDestroyed.returns(true)
+    it("returns if window isDestroyed on moved", function() {
+      this.win.isDestroyed.returns(true);
 
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.emit("moved")
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.emit("moved");
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).not.to.be.called
+      .then(() => {
+        return expect(this.state.set).not.to.be.called;
+      });
+    });
 
-    it "saves dev tools state when opened", ->
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.webContents.emit("devtools-opened")
+    it("saves dev tools state when opened", function() {
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.webContents.emit("devtools-opened");
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).to.be.calledWith({whatsUpWithDevTools: true})
+      .then(() => {
+        return expect(this.state.set).to.be.calledWith({whatsUpWithDevTools: true});
+      });
+    });
 
-    it "saves dev tools state when closed", ->
-      Windows.trackState(@projectRoot, false, @win, @keys)
-      @win.webContents.emit("devtools-closed")
+    return it("saves dev tools state when closed", function() {
+      Windows.trackState(this.projectRoot, false, this.win, this.keys);
+      this.win.webContents.emit("devtools-closed");
 
-      Promise
+      return Promise
       .delay(100)
-      .then () =>
-        expect(@state.set).to.be.calledWith({whatsUpWithDevTools: false})
+      .then(() => {
+        return expect(this.state.set).to.be.calledWith({whatsUpWithDevTools: false});
+      });
+    });
+  });
+});

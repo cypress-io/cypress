@@ -1,34 +1,40 @@
-e2e = require("../support/helpers/e2e").default
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const e2e = require("../support/helpers/e2e").default;
 
-onServer = (app) ->
-  app.get "/app/html", (req, res) ->
-    res.send("<html>Herman Melville</html>")
+const onServer = app => app.get("/app/html", (req, res) => res.send("<html>Herman Melville</html>"));
 
-describe "e2e baseUrl", ->
-  context "https", ->
+describe("e2e baseUrl", function() {
+  context("https", function() {
     e2e.setup({
       settings: {
         baseUrl: "https://httpbin.org"
       }
-    })
+    });
 
-    e2e.it "passes", {
-      spec: "base_url_spec.coffee"
+    return e2e.it("passes", {
+      spec: "base_url_spec.coffee",
       snapshot: true
-    }
+    });
+});
 
-  context "http", ->
+  return context("http", function() {
     e2e.setup({
       servers: {
-        port: 9999
-        onServer: onServer
-      }
+        port: 9999,
+        onServer
+      },
       settings: {
         baseUrl: "http://localhost:9999/app"
       }
-    })
+    });
 
-    e2e.it "passes", {
-      spec: "base_url_spec.coffee"
+    return e2e.it("passes", {
+      spec: "base_url_spec.coffee",
       snapshot: true
-    }
+    });
+});
+});

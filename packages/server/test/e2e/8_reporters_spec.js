@@ -1,120 +1,142 @@
-path     = require("path")
-Promise  = require("bluebird")
-cp       = require("child_process")
-fs       = require("../../lib/util/fs")
-glob     = require("../../lib/util/glob")
-e2e      = require("../support/helpers/e2e").default
-Fixtures = require("../support/helpers/fixtures")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const path     = require("path");
+const Promise  = require("bluebird");
+const cp       = require("child_process");
+const fs       = require("../../lib/util/fs");
+const glob     = require("../../lib/util/glob");
+const e2e      = require("../support/helpers/e2e").default;
+const Fixtures = require("../support/helpers/fixtures");
 
-e2ePath  = Fixtures.projectPath("e2e")
+const e2ePath  = Fixtures.projectPath("e2e");
 
-mochaAwesomes = [
-  "mochawesome-1.5.2"
-  "mochawesome-2.3.1"
+const mochaAwesomes = [
+  "mochawesome-1.5.2",
+  "mochawesome-2.3.1",
   "mochawesome-3.0.1"
-]
+];
 
-describe "e2e reporters", ->
-  e2e.setup()
+describe("e2e reporters", function() {
+  e2e.setup();
 
-  it "reports error if cannot load reporter", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
+  it("reports error if cannot load reporter", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
+      snapshot: true,
+      expectedExitCode: 1,
       reporter: "module-does-not-exist"
-    })
+    });
+  });
 
-  ## https://github.com/cypress-io/cypress/issues/1192
-  it "reports error when thrown from reporter", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
-      snapshot: true
-      expectedExitCode: 1
+  //# https://github.com/cypress-io/cypress/issues/1192
+  it("reports error when thrown from reporter", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
+      snapshot: true,
+      expectedExitCode: 1,
       reporter: "reporters/throws.js"
-    })
+    });
+  });
 
-  it "supports junit reporter and reporter options", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
-      snapshot: true
-      reporter: "junit"
+  it("supports junit reporter and reporter options", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
+      snapshot: true,
+      reporter: "junit",
       reporterOptions: "mochaFile=junit-output/result.[hash].xml,testCaseSwitchClassnameAndName=true"
     })
-    .then ->
-      glob(path.join(e2ePath, "junit-output", "result.*.xml"))
-      .then (paths) ->
-        expect(paths.length).to.eq(1)
+    .then(() => glob(path.join(e2ePath, "junit-output", "result.*.xml"))
+    .then(function(paths) {
+      expect(paths.length).to.eq(1);
 
-        fs.readFileAsync(paths[0], "utf8")
-        .then (str) ->
-          expect(str).to.include("<testsuite name=\"simple passing spec\"")
-          expect(str).to.include("<testcase name=\"passes\"")
-          expect(str).to.include("classname=\"simple passing spec passes\"")
+      return fs.readFileAsync(paths[0], "utf8")
+      .then(function(str) {
+        expect(str).to.include("<testsuite name=\"simple passing spec\"");
+        expect(str).to.include("<testcase name=\"passes\"");
+        return expect(str).to.include("classname=\"simple passing spec passes\"");
+      });
+    }));
+  });
 
-  it "supports local custom reporter", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
-      snapshot: true
+  it("supports local custom reporter", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
+      snapshot: true,
       reporter: "reporters/custom.js"
-    })
+    });
+  });
 
-  it "sends file to reporter", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
+  it("sends file to reporter", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
       reporter: "reporters/uses-file.js"
     })
     .get("stdout")
-    .then (stdout) ->
-      expect(stdout).to.include("suite.file: cypress/integration/simple_passing_spec.coffee")
+    .then(stdout => expect(stdout).to.include("suite.file: cypress/integration/simple_passing_spec.coffee"));
+  });
 
-  describe "mochawesome", ->
-    mochaAwesomes.forEach (ma) ->
-      it "passes with #{ma} npm custom reporter", ->
-        e2e.exec(@, {
-          spec: "simple_passing_spec.coffee"
-          snapshot: true
-          ## cypress supports passing module name, relative path, or absolute path
-          reporter: require.resolve(ma)
-        })
-        .then ->
-          if ma is "mochawesome-1.5.2"
-            fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
-            .then (xml) ->
-              expect(xml).to.include("<h3 class=\"suite-title\">simple passing spec</h3>")
-              expect(xml).to.include("<div class=\"status-item status-item-passing-pct success\">100% Passing</div>")
-          else
-            fs.readJsonAsync(path.join(e2ePath, "mochawesome-report", "mochawesome.json"))
-            .then (json) ->
-              expect(json.stats).to.be.an('object')
-              expect(json.stats.passes).to.eq(1)
+  describe("mochawesome", () => mochaAwesomes.forEach(function(ma) {
+    it(`passes with ${ma} npm custom reporter`, function() {
+      return e2e.exec(this, {
+        spec: "simple_passing_spec.coffee",
+        snapshot: true,
+        //# cypress supports passing module name, relative path, or absolute path
+        reporter: require.resolve(ma)
+      })
+      .then(function() {
+        if (ma === "mochawesome-1.5.2") {
+          return fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
+          .then(function(xml) {
+            expect(xml).to.include("<h3 class=\"suite-title\">simple passing spec</h3>");
+            return expect(xml).to.include("<div class=\"status-item status-item-passing-pct success\">100% Passing</div>");
+          });
+        } else {
+          return fs.readJsonAsync(path.join(e2ePath, "mochawesome-report", "mochawesome.json"))
+          .then(function(json) {
+            expect(json.stats).to.be.an('object');
+            return expect(json.stats.passes).to.eq(1);
+          });
+        }
+      });
+    });
 
-      it "fails with #{ma} npm custom reporter", ->
-        e2e.exec(@, {
-          spec: "simple_failing_hook_spec.coffee"
-          snapshot: true
-          expectedExitCode: 3
-          reporter: require.resolve(ma)
-        })
-        .then ->
-          if ma is "mochawesome-1.5.2"
-            fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
-            .then (xml) ->
-              expect(xml).to.include("<h3 class=\"suite-title\">simple failing hook spec</h3>")
-              expect(xml).to.include("<div class=\"status-item status-item-hooks danger\">3 Failed Hooks</div>")
-          else
-            fs.readJsonAsync(path.join(e2ePath, "mochawesome-report", "mochawesome.json"))
-            .then (json) ->
-              ## mochawesome does not consider hooks to be
-              ## 'failures' but it does collect them in 'other'
-              expect(json.stats).to.be.an('object')
-              expect(json.stats.failures).to.eq(0)
-              expect(json.stats.other).to.eq(3)
+    return it(`fails with ${ma} npm custom reporter`, function() {
+      return e2e.exec(this, {
+        spec: "simple_failing_hook_spec.coffee",
+        snapshot: true,
+        expectedExitCode: 3,
+        reporter: require.resolve(ma)
+      })
+      .then(function() {
+        if (ma === "mochawesome-1.5.2") {
+          return fs.readFileAsync(path.join(e2ePath, "mochawesome-reports", "mochawesome.html"), "utf8")
+          .then(function(xml) {
+            expect(xml).to.include("<h3 class=\"suite-title\">simple failing hook spec</h3>");
+            return expect(xml).to.include("<div class=\"status-item status-item-hooks danger\">3 Failed Hooks</div>");
+          });
+        } else {
+          return fs.readJsonAsync(path.join(e2ePath, "mochawesome-report", "mochawesome.json"))
+          .then(function(json) {
+            //# mochawesome does not consider hooks to be
+            //# 'failures' but it does collect them in 'other'
+            expect(json.stats).to.be.an('object');
+            expect(json.stats.failures).to.eq(0);
+            return expect(json.stats.other).to.eq(3);
+          });
+        }
+      });
+    });
+  }));
 
-  it "supports teamcity reporter and reporter options", ->
-    e2e.exec(@, {
-      spec: "simple_passing_spec.coffee"
-      snapshot: true
-      reporter: "teamcity"
+  return it("supports teamcity reporter and reporter options", function() {
+    return e2e.exec(this, {
+      spec: "simple_passing_spec.coffee",
+      snapshot: true,
+      reporter: "teamcity",
       reporterOptions: "topLevelSuite=top suite,flowId=12345,useStdError='true',useStdError='true',recordHookFailures='true',actualVsExpected='true'"
-    })
+    });
+  });
+});

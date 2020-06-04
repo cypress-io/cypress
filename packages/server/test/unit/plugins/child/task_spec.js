@@ -1,64 +1,78 @@
-require("../../../spec_helper")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+require("../../../spec_helper");
 
-EE = require('events')
+const EE = require('events');
 
-util = require("#{root}../../lib/plugins/util")
-task = require("#{root}../../lib/plugins/child/task")
+const util = require(`${root}../../lib/plugins/util`);
+const task = require(`${root}../../lib/plugins/child/task`);
 
-describe "lib/plugins/child/task", ->
-  beforeEach ->
-    @ipc = {
-      send: sinon.spy()
-      on: sinon.stub()
+describe("lib/plugins/child/task", function() {
+  beforeEach(function() {
+    this.ipc = {
+      send: sinon.spy(),
+      on: sinon.stub(),
       removeListener: sinon.spy()
-    }
-    @events = {
+    };
+    this.events = {
       "1": {
-        event: "task"
+        event: "task",
         handler: {
-          "the:task": sinon.stub().returns("result")
-          "another:task": sinon.stub().returns("result")
-          "a:third:task": -> "foo"
+          "the:task": sinon.stub().returns("result"),
+          "another:task": sinon.stub().returns("result"),
+          "a:third:task"() { return "foo"; }
         }
       }
-    }
-    @ids = {}
+    };
+    this.ids = {};
 
-    sinon.stub(util, "wrapChildPromise")
+    return sinon.stub(util, "wrapChildPromise");
+  });
 
-  context ".getBody", ->
-    it "returns the stringified body of the event handler", ->
-      task.getBody(@ipc, @events, @ids, ["a:third:task"])
-      expect(util.wrapChildPromise).to.be.called
-      result = util.wrapChildPromise.lastCall.args[1]("1")
-      expect(result.replace(/\s+/g, '')).to.equal("function(){return\"foo\";}")
+  context(".getBody", function() {
+    it("returns the stringified body of the event handler", function() {
+      task.getBody(this.ipc, this.events, this.ids, ["a:third:task"]);
+      expect(util.wrapChildPromise).to.be.called;
+      const result = util.wrapChildPromise.lastCall.args[1]("1");
+      return expect(result.replace(/\s+/g, '')).to.equal("function(){return\"foo\";}");
+    });
 
-    it "returns an empty string if event handler cannot be found", ->
-      task.getBody(@ipc, @events, @ids, ["non:existent"])
-      expect(util.wrapChildPromise).to.be.called
-      result = util.wrapChildPromise.lastCall.args[1]("1")
-      expect(result).to.equal("")
+    return it("returns an empty string if event handler cannot be found", function() {
+      task.getBody(this.ipc, this.events, this.ids, ["non:existent"]);
+      expect(util.wrapChildPromise).to.be.called;
+      const result = util.wrapChildPromise.lastCall.args[1]("1");
+      return expect(result).to.equal("");
+    });
+  });
 
-  context ".getKeys", ->
-    it "returns the registered task keys", ->
-      task.getKeys(@ipc, @events, @ids)
-      expect(util.wrapChildPromise).to.be.called
-      result = util.wrapChildPromise.lastCall.args[1]("1")
-      expect(result).to.eql(["the:task", "another:task", "a:third:task"])
+  context(".getKeys", () => it("returns the registered task keys", function() {
+    task.getKeys(this.ipc, this.events, this.ids);
+    expect(util.wrapChildPromise).to.be.called;
+    const result = util.wrapChildPromise.lastCall.args[1]("1");
+    return expect(result).to.eql(["the:task", "another:task", "a:third:task"]);
+  }));
 
-  context ".wrap", ->
-    it "passes through ipc and ids", ->
-      task.wrap(@ipc, @events, @ids, ["the:task"])
-      expect(util.wrapChildPromise).to.be.called
-      expect(util.wrapChildPromise.lastCall.args[0]).to.be.equal(@ipc)
-      expect(util.wrapChildPromise.lastCall.args[2]).to.be.equal(@ids)
+  return context(".wrap", function() {
+    it("passes through ipc and ids", function() {
+      task.wrap(this.ipc, this.events, this.ids, ["the:task"]);
+      expect(util.wrapChildPromise).to.be.called;
+      expect(util.wrapChildPromise.lastCall.args[0]).to.be.equal(this.ipc);
+      return expect(util.wrapChildPromise.lastCall.args[2]).to.be.equal(this.ids);
+    });
 
-    it "invokes the callback for the given task if it exists and returns the result", ->
-      task.wrap(@ipc, @events, @ids, ["the:task", "the:arg"])
-      result = util.wrapChildPromise.lastCall.args[1]("1", ["the:arg"])
-      expect(@events["1"].handler["the:task"]).to.be.calledWith("the:arg")
-      expect(result).to.equal("result")
+    it("invokes the callback for the given task if it exists and returns the result", function() {
+      task.wrap(this.ipc, this.events, this.ids, ["the:task", "the:arg"]);
+      const result = util.wrapChildPromise.lastCall.args[1]("1", ["the:arg"]);
+      expect(this.events["1"].handler["the:task"]).to.be.calledWith("the:arg");
+      return expect(result).to.equal("result");
+    });
 
-    it "returns __cypress_unhandled__ if the task doesn't exist", ->
-      task.wrap(@ipc, @events, @ids, ["nope"])
-      expect(util.wrapChildPromise.lastCall.args[1]("1")).to.equal("__cypress_unhandled__")
+    return it("returns __cypress_unhandled__ if the task doesn't exist", function() {
+      task.wrap(this.ipc, this.events, this.ids, ["nope"]);
+      return expect(util.wrapChildPromise.lastCall.args[1]("1")).to.equal("__cypress_unhandled__");
+    });
+  });
+});

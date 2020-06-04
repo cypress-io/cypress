@@ -1,6 +1,12 @@
-chalk = require("chalk")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const chalk = require("chalk");
 
-module.exports = (msg, color = "yellow") ->
-  return if process.env["NODE_ENV"] is "test"
+module.exports = function(msg, color = "yellow") {
+  if (process.env["NODE_ENV"] === "test") { return; }
 
-  console.log chalk[color](msg), chalk.bgWhite(chalk.black(@osName))
+  return console.log(chalk[color](msg), chalk.bgWhite(chalk.black(this.osName)));
+};

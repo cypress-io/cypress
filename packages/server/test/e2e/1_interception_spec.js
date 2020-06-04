@@ -1,62 +1,70 @@
-compression = require("compression")
-e2e = require("../support/helpers/e2e").default
-Fixtures = require("../support/helpers/fixtures")
-path = require("path")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+const compression = require("compression");
+const e2e = require("../support/helpers/e2e").default;
+const Fixtures = require("../support/helpers/fixtures");
+const path = require("path");
 
-PORT = 9876
+const PORT = 9876;
 
-## based off of the most common encodings used on the Internet:
-## https://w3techs.com/technologies/overview/character_encoding/all
-## as of this writing, these tests will cover ~99% of websites
-TEST_ENCODINGS = [
-  "iso-8859-1"
-  "euc-kr"
-  "shift-jis"
+//# based off of the most common encodings used on the Internet:
+//# https://w3techs.com/technologies/overview/character_encoding/all
+//# as of this writing, these tests will cover ~99% of websites
+const TEST_ENCODINGS = [
+  "iso-8859-1",
+  "euc-kr",
+  "shift-jis",
   "gb2312"
-]
+];
 
-e2ePath = Fixtures.projectPath("e2e")
+const e2ePath = Fixtures.projectPath("e2e");
 
-fullController = (charset) ->
-  (req, res) ->
-    res.set({ 'content-type': "text/html;charset=#{charset}" });
-    res.sendFile(path.join(e2ePath, "static/charsets/#{charset}.html"))
+const fullController = charset => (function(req, res) {
+  res.set({ 'content-type': `text/html;charset=${charset}` });
+  return res.sendFile(path.join(e2ePath, `static/charsets/${charset}.html`));
+});
 
-pageOnlyController = (charset) ->
-  (req, res) ->
-    res.set()
-    res.sendFile(path.join(e2ePath, "static/charsets/#{charset}.html"), {
-      headers: { 'content-type': "text/html" }
-    })
+const pageOnlyController = charset => (function(req, res) {
+  res.set();
+  return res.sendFile(path.join(e2ePath, `static/charsets/${charset}.html`), {
+    headers: { 'content-type': "text/html" }
+  });
+});
 
-describe "e2e interception spec", ->
-  e2e.setup
+describe("e2e interception spec", function() {
+  e2e.setup({
     servers: [
       {
-        onServer: (app) ->
-          TEST_ENCODINGS.forEach (enc) ->
-            app.get "/#{enc}.html", fullController(enc)
+        onServer(app) {
+          return TEST_ENCODINGS.forEach(function(enc) {
+            app.get(`/${enc}.html`, fullController(enc));
 
-            app.use "/#{enc}.html.gz", compression()
-            app.get "/#{enc}.html.gz", fullController(enc)
+            app.use(`/${enc}.html.gz`, compression());
+            app.get(`/${enc}.html.gz`, fullController(enc));
 
-            app.get "/#{enc}.html.pageonly", pageOnlyController(enc)
+            app.get(`/${enc}.html.pageonly`, pageOnlyController(enc));
 
-            app.use "/#{enc}.html.gz.pageonly", compression()
-            app.get "/#{enc}.html.gz.pageonly", pageOnlyController(enc)
+            app.use(`/${enc}.html.gz.pageonly`, compression());
+            return app.get(`/${enc}.html.gz.pageonly`, pageOnlyController(enc));
+          });
+        },
 
         port: PORT
       }
-    ]
+    ]});
 
-  context "character encodings", ->
-    ## https://github.com/cypress-io/cypress/issues/1543
-    it "does not mangle non-UTF-8 text", ->
-      e2e.exec(@, {
-        spec: "character_encoding_spec.js"
-        config: {
-          defaultCommandTimeout: 100
-          baseUrl: "http://localhost:9876"
-        }
-        snapshot: true
-      })
+  return context("character encodings", () => //# https://github.com/cypress-io/cypress/issues/1543
+  it("does not mangle non-UTF-8 text", function() {
+    return e2e.exec(this, {
+      spec: "character_encoding_spec.js",
+      config: {
+        defaultCommandTimeout: 100,
+        baseUrl: "http://localhost:9876"
+      },
+      snapshot: true
+    });
+  }));
+});
