@@ -1,473 +1,539 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { EventEmitter } = require("events");
+const { EventEmitter } = require('events')
 const {
-  _
-} = Cypress;
+  _,
+} = Cypress
 
-const addLog = function(runner, log) {
+const addLog = function (runner, log) {
   const defaultLog = {
     event: false,
-    hookName: "test",
+    hookName: 'test',
     id: _.uniqueId('l'),
-    instrument: "command",
+    instrument: 'command',
     renderProps: {},
-    state: "passed",
-    testId: "r3",
-    type: "parent",
-    url: "http://example.com"
-  };
+    state: 'passed',
+    testId: 'r3',
+    type: 'parent',
+    url: 'http://example.com',
+  }
 
-  return runner.emit("reporter:log:add", _.extend(defaultLog, log));
-};
+  return runner.emit('reporter:log:add', _.extend(defaultLog, log))
+}
 
-describe("aliases", function() {
-  context("route aliases", function() {
-    beforeEach(function() {
-      cy.fixture("runnables_aliases").as("runnables");
+describe('aliases', () => {
+  context('route aliases', () => {
+    beforeEach(function () {
+      cy.fixture('runnables_aliases').as('runnables')
 
-      this.runner = new EventEmitter();
+      this.runner = new EventEmitter()
 
-      cy.visit("dist").then(win => {
+      cy.visit('dist').then((win) => {
         return win.render({
           runner: this.runner,
-          specPath: "/foo/bar"
-        });
-      });
+          specPath: '/foo/bar',
+        })
+      })
 
-      return cy.get(".reporter").then(() => {
-        this.runner.emit("runnables:ready", this.runnables);
-        return this.runner.emit("reporter:start", {});
-      });
-    });
+      return cy.get('.reporter').then(() => {
+        this.runner.emit('runnables:ready', this.runnables)
 
+        return this.runner.emit('reporter:start', {})
+      })
+    })
 
-    describe("without duplicates", function() {
-      beforeEach(function() {
+    describe('without duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          alias: "getUsers",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getUsers',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /users", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /users', indicator: 'passed' },
+        })
+
         return addLog(this.runner, {
-          aliasType: "route",
-          message: "@getUsers, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getUsers, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 1,
-            name: "getUsers",
-            ordinal: "1st"
+            name: 'getUsers',
+            ordinal: '1st',
           }],
-        });
-      });
+        })
+      })
 
-      it("has correct alias class", () => cy.contains('.command-number', '1')
+      it('has correct alias class', () => {
+        return cy.contains('.command-number', '1')
         .parent()
         .find('.command-alias')
-        .should('have.class', 'route'));
+        .should('have.class', 'route')
+      })
 
-      return it("render without a count", function() {
+      it('render without a count', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@getUsers')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'getUsers'"));
-      });
-    });
+          return cy.contains('.command-alias', '@getUsers')
+          .trigger('mouseover')
+        })
 
-    describe("with consecutive duplicates", function() {
-      beforeEach(function() {
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'getUsers\'')
+        })
+      })
+    })
+
+    describe('with consecutive duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          alias: "getPosts",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getPosts',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /posts", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          alias: "getPosts",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getPosts',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /posts", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          aliasType: "route",
-          message: "@getPosts, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getPosts, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 1,
-            name: "getPosts",
-            ordinal: "1st"
+            name: 'getPosts',
+            ordinal: '1st',
           }],
-        });
+        })
+
         return addLog(this.runner, {
-          aliasType: "route",
-          message: "@getPosts, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getPosts, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 2,
-            name: "getPosts",
-            ordinal: "2nd"
+            name: 'getPosts',
+            ordinal: '2nd',
           }],
-        });
-      });
+        })
+      })
 
-      it("renders all aliases ", () => cy.get('.command-alias').should('have.length', 3));
+      it('renders all aliases ', () => {
+        return cy.get('.command-alias').should('have.length', 3)
+      })
 
-      it("render with counts in non-event commands", function() {
+      it('render with counts in non-event commands', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.contains('.command-alias-count', '1');
-            return cy.contains('.command-alias', '@getPosts')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '1')
 
-        cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found 1st alias for: 'getPosts'"));
+          return cy.contains('.command-alias', '@getPosts')
+          .trigger('mouseover')
+        })
+
+        cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
+        })
 
         cy.contains('.command-number', '2')
-          .parent()
-          .within(function() {
-            cy.contains('.command-alias-count', '2');
-            return cy.contains('.command-alias', '@getPosts')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '2')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'"));
-      });
+          return cy.contains('.command-alias', '@getPosts')
+          .trigger('mouseover')
+        })
 
-      it("render with counts in event commands when collapsed", () => cy.get(".command-wrapper")
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found 2nd alias for: \'getPosts\'')
+        })
+      })
+
+      it('render with counts in event commands when collapsed', () => {
+        return cy.get('.command-wrapper')
         .first()
-        .within(function() {
-          cy.contains('.num-duplicates', '2');
-          return cy.contains('.command-alias', 'getPosts');
-      }));
+        .within(() => {
+          cy.contains('.num-duplicates', '2')
 
-      return it("render without counts in event commands when expanded", function() {
-        cy.get(".command-expander")
-          .first()
-          .click();
+          return cy.contains('.command-alias', 'getPosts')
+        })
+      })
 
-        return cy.get(".command-wrapper")
-          .first()
-          .within(function($commandWrapper) {
-            cy.get('.num-duplicates').should('not.be.visible');
-            return cy.contains('.command-alias', 'getPosts');
-        });
-      });
-    });
+      it('render without counts in event commands when expanded', () => {
+        cy.get('.command-expander')
+        .first()
+        .click()
 
-    return describe("with non-consecutive duplicates", function() {
-      beforeEach(function() {
+        return cy.get('.command-wrapper')
+        .first()
+        .within(($commandWrapper) => {
+          cy.get('.num-duplicates').should('not.be.visible')
+
+          return cy.contains('.command-alias', 'getPosts')
+        })
+      })
+    })
+
+    describe('with non-consecutive duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          alias: "getPosts",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getPosts',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /posts", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          alias: "getUsers",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getUsers',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /users", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /users', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          alias: "getPosts",
-          aliasType: "route",
-          displayName: "xhr stub",
+          alias: 'getPosts',
+          aliasType: 'route',
+          displayName: 'xhr stub',
           event: true,
-          name: "xhr",
-          renderProps: {message: "GET --- /posts", indicator: "passed"}
-        });
+          name: 'xhr',
+          renderProps: { message: 'GET --- /posts', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          aliasType: "route",
-          message: "@getPosts, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getPosts, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 1,
-            name: "getPosts",
-            ordinal: "1st"
+            name: 'getPosts',
+            ordinal: '1st',
           }],
-        });
+        })
+
         addLog(this.runner, {
-          aliasType: "route",
-          message: "@getUsers, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getUsers, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 1,
-            name: "getUsers",
-            ordinal: "1st"
+            name: 'getUsers',
+            ordinal: '1st',
           }],
-        });
+        })
+
         return addLog(this.runner, {
-          aliasType: "route",
-          message: "@getPosts, function(){}",
-          name: "wait",
+          aliasType: 'route',
+          message: '@getPosts, function(){}',
+          name: 'wait',
           referencesAlias: [{
             cardinal: 2,
-            name: "getPosts",
-            ordinal: "2nd"
+            name: 'getPosts',
+            ordinal: '2nd',
           }],
-        });
-      });
+        })
+      })
 
-      return it("render with counts", function() {
+      it('render with counts', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.contains('.command-alias-count', '1');
-            return cy.contains('.command-alias', '@getPosts')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '1')
 
-        cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found 1st alias for: 'getPosts'"));
+          return cy.contains('.command-alias', '@getPosts')
+          .trigger('mouseover')
+        })
+
+        cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found 1st alias for: \'getPosts\'')
+        })
 
         cy.contains('.command-number', '3')
-          .parent()
-          .within(function() {
-            cy.contains('.command-alias-count', '2');
-            return cy.contains('.command-alias', '@getPosts')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.contains('.command-alias-count', '2')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found 2nd alias for: 'getPosts'"));
-      });
-    });
-  });
+          return cy.contains('.command-alias', '@getPosts')
+          .trigger('mouseover')
+        })
 
-  return context("element aliases", function() {
-    beforeEach(function() {
-      cy.fixture("runnables_aliases").as("runnables");
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found 2nd alias for: \'getPosts\'')
+        })
+      })
+    })
+  })
 
-      this.runner = new EventEmitter();
+  context('element aliases', () => {
+    beforeEach(function () {
+      cy.fixture('runnables_aliases').as('runnables')
 
-      cy.visit("cypress/support/index.html").then(win => {
+      this.runner = new EventEmitter()
+
+      cy.visit('cypress/support/index.html').then((win) => {
         return win.render({
           runner: this.runner,
-          specPath: "/foo/bar"
-        });
-      });
+          specPath: '/foo/bar',
+        })
+      })
 
-      return cy.get(".reporter").then(() => {
-        this.runner.emit("runnables:ready", this.runnables);
-        return this.runner.emit("reporter:start", {});
-      });
-    });
+      return cy.get('.reporter').then(() => {
+        this.runner.emit('runnables:ready', this.runnables)
 
-    describe("without duplicates", function() {
-      beforeEach(function() {
+        return this.runner.emit('reporter:start', {})
+      })
+    })
+
+    describe('without duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "body",
-          alias: "barAlias",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: 'body',
+          alias: 'barAlias',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         return addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 1,
-            name: "barAlias",
-            ordinal: "1st"
+            name: 'barAlias',
+            ordinal: '1st',
           }],
-        });
-      });
+        })
+      })
 
-      it("has correct alias class", () => cy.contains('.command-number', '1')
+      it('has correct alias class', () => {
+        return cy.contains('.command-number', '1')
         .parent()
         .find('.command-alias')
-        .should('have.class', 'dom'));
+        .should('have.class', 'dom')
+      })
 
-      return it("render without a count", function() {
+      it('render without a count', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@barAlias')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'barAlias'"));
-      });
-    });
+          return cy.contains('.command-alias', '@barAlias')
+          .trigger('mouseover')
+        })
 
-    describe("with consecutive duplicates", function() {
-      beforeEach(function() {
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'barAlias\'')
+        })
+      })
+    })
+
+    describe('with consecutive duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "[attr='dropdown']",
-          alias: "dropdown",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: '[attr=\'dropdown\']',
+          alias: 'dropdown',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "select",
-          alias: "dropdown",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: 'select',
+          alias: 'dropdown',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 1,
-            name: "dropdown",
-            ordinal: "1st"
+            name: 'dropdown',
+            ordinal: '1st',
           }],
-        });
+        })
+
         return addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 2,
-            name: "dropdown",
-            ordinal: "2nd"
+            name: 'dropdown',
+            ordinal: '2nd',
           }],
-        });
-      });
+        })
+      })
 
-      it("render without a count in non-event commands", function() {
+      it('render without a count in non-event commands', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@dropdown')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'dropdown'"));
+          return cy.contains('.command-alias', '@dropdown')
+          .trigger('mouseover')
+        })
+
+        cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+        })
 
         cy.contains('.command-number', '2')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@dropdown')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'dropdown'"));
-      });
+          return cy.contains('.command-alias', '@dropdown')
+          .trigger('mouseover')
+        })
 
-      return it("render without counts in event commands when collapsed", () => cy.get(".command-wrapper")
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+        })
+      })
+
+      it('render without counts in event commands when collapsed', () => {
+        return cy.get('.command-wrapper')
         .first()
-        .within(function() {
-          cy.get('.num-duplicates').should('not.be.visible');
-          return cy.contains('.command-alias', 'dropdown');
-      }));
-    });
+        .within(() => {
+          cy.get('.num-duplicates').should('not.be.visible')
 
-    return describe("with non-consecutive duplicates", function() {
-      beforeEach(function() {
+          return cy.contains('.command-alias', 'dropdown')
+        })
+      })
+    })
+
+    describe('with non-consecutive duplicates', () => {
+      beforeEach(function () {
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "[attr='dropdown']",
-          alias: "dropdown",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: '[attr=\'dropdown\']',
+          alias: 'dropdown',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "[attr='modal']",
-          alias: "modal",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: '[attr=\'modal\']',
+          alias: 'modal',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          state: "passed",
-          name: "get",
-          message: "[attr='dropdown']",
-          alias: "dropdown",
-          aliasType: "dom",
+          state: 'passed',
+          name: 'get',
+          message: '[attr=\'dropdown\']',
+          alias: 'dropdown',
+          aliasType: 'dom',
           event: true,
-          renderProps: {message: "", indicator: "passed"}
-        });
+          renderProps: { message: '', indicator: 'passed' },
+        })
+
         addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 1,
-            name: "dropdown",
-            ordinal: "1st"
+            name: 'dropdown',
+            ordinal: '1st',
           }],
-        });
+        })
+
         addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 1,
-            name: "modal",
-            ordinal: "1st"
+            name: 'modal',
+            ordinal: '1st',
           }],
-        });
+        })
+
         return addLog(this.runner, {
-          aliasType: "dom",
-          message: "",
-          name: "get",
+          aliasType: 'dom',
+          message: '',
+          name: 'get',
           referencesAlias: [{
             cardinal: 2,
-            name: "dropdown",
-            ordinal: "2nd"
+            name: 'dropdown',
+            ordinal: '2nd',
           }],
-        });
-      });
+        })
+      })
 
-      it("renders all aliases ", () => cy.get('.command-alias').should('have.length', 6));
+      it('renders all aliases ', () => {
+        return cy.get('.command-alias').should('have.length', 6)
+      })
 
-      return it("render without counts", function() {
+      it('render without counts', () => {
         cy.contains('.command-number', '1')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@dropdown')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'dropdown'"));
+          return cy.contains('.command-alias', '@dropdown')
+          .trigger('mouseover')
+        })
+
+        cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+        })
 
         cy.contains('.command-number', '3')
-          .parent()
-          .within(function() {
-            cy.get('.command-alias-count').should('not.exist');
-            return cy.contains('.command-alias', '@dropdown')
-              .trigger("mouseover");
-        });
+        .parent()
+        .within(() => {
+          cy.get('.command-alias-count').should('not.exist')
 
-        return cy.get(".cy-tooltip span").should($tooltip => expect($tooltip).to.contain("Found an alias for: 'dropdown'"));
-      });
-    });
-  });
-});
+          return cy.contains('.command-alias', '@dropdown')
+          .trigger('mouseover')
+        })
+
+        return cy.get('.cy-tooltip span').should(($tooltip) => {
+          expect($tooltip).to.contain('Found an alias for: \'dropdown\'')
+        })
+      })
+    })
+  })
+})

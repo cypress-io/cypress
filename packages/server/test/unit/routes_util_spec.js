@@ -1,32 +1,56 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../spec_helper");
+require('../spec_helper')
 
-const routes = require(`${root}/lib/util/routes`);
+const routes = require(`${root}/lib/util/routes`)
 
-describe("lib/util/routes", function() {
-  it("api", () => expect(routes.api()).to.eq("http://localhost:1234/"));
+describe('lib/util/routes', () => {
+  it('api', () => {
+    expect(routes.api()).to.eq('http://localhost:1234/')
+  })
 
-  it("auth", () => expect(routes.auth()).to.eq("http://localhost:1234/auth"));
+  it('auth', () => {
+    expect(routes.auth()).to.eq('http://localhost:1234/auth')
+  })
 
-  it("ping", () => expect(routes.ping()).to.eq("http://localhost:1234/ping"));
+  it('ping', () => {
+    expect(routes.ping()).to.eq('http://localhost:1234/ping')
+  })
 
-  it("runs", () => expect(routes.runs()).to.eq("http://localhost:1234/runs"));
+  it('runs', () => {
+    expect(routes.runs()).to.eq('http://localhost:1234/runs')
+  })
 
-  it("instances", () => expect(routes.instances(123)).to.eq("http://localhost:1234/runs/123/instances"));
+  it('instances', () => {
+    expect(routes.instances(123)).to.eq('http://localhost:1234/runs/123/instances')
+  })
 
-  it("instance", () => expect(routes.instance(123)).to.eq("http://localhost:1234/instances/123"));
+  it('instance', () => {
+    expect(routes.instance(123)).to.eq('http://localhost:1234/instances/123')
+  })
 
-  it("projects", () => expect(routes.projects()).to.eq("http://localhost:1234/projects"));
+  it('projects', () => {
+    expect(routes.projects()).to.eq('http://localhost:1234/projects')
+  })
 
-  it("project", () => expect(routes.project("123-foo")).to.eq("http://localhost:1234/projects/123-foo"));
+  it('project', () => {
+    expect(routes.project('123-foo')).to.eq('http://localhost:1234/projects/123-foo')
+  })
 
-  it("projectRuns", () => expect(routes.projectRuns("123-foo")).to.eq("http://localhost:1234/projects/123-foo/runs"));
+  it('projectRuns', () => {
+    expect(routes.projectRuns('123-foo')).to.eq('http://localhost:1234/projects/123-foo/runs')
+  })
 
-  it("projectToken", () => expect(routes.projectToken("123-foo")).to.eq("http://localhost:1234/projects/123-foo/token"));
+  it('projectToken', () => {
+    expect(routes.projectToken('123-foo')).to.eq('http://localhost:1234/projects/123-foo/token')
+  })
 
-  return it("exceptions", () => expect(routes.exceptions()).to.eq("http://localhost:1234/exceptions"));
-});
+  it('exceptions', () => {
+    expect(routes.exceptions()).to.eq('http://localhost:1234/exceptions')
+  })
+})

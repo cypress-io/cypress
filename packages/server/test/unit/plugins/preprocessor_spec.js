@@ -1,94 +1,110 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../../spec_helper");
+require('../../spec_helper')
 
-const resolve = require('resolve');
-const EE = require("events");
-const Fixtures = require("../../support/helpers/fixtures");
-const path = require("path");
-const appData = require(`${root}../lib/util/app_data`);
-const savedState = require(`${root}../lib/saved_state`);
+const resolve = require('resolve')
+const EE = require('events')
+const Fixtures = require('../../support/helpers/fixtures')
+const path = require('path')
+const appData = require(`${root}../lib/util/app_data`)
+const savedState = require(`${root}../lib/saved_state`)
 
-const plugins = require(`${root}../lib/plugins`);
-const preprocessor = require(`${root}../lib/plugins/preprocessor`);
+const plugins = require(`${root}../lib/plugins`)
+const preprocessor = require(`${root}../lib/plugins/preprocessor`)
 
-describe("lib/plugins/preprocessor", function() {
-  beforeEach(function() {
-    Fixtures.scaffold();
-    this.todosPath = Fixtures.projectPath("todos");
+describe('lib/plugins/preprocessor', () => {
+  beforeEach(function () {
+    Fixtures.scaffold()
+    this.todosPath = Fixtures.projectPath('todos')
 
-    this.filePath = "path/to/test.coffee";
-    this.fullFilePath = path.join(this.todosPath, this.filePath);
-    this.integrationFolder = '/integration-path/';
+    this.filePath = 'path/to/test.coffee'
+    this.fullFilePath = path.join(this.todosPath, this.filePath)
+    this.integrationFolder = '/integration-path/'
 
-    this.testPath = path.join(this.todosPath, "test.coffee");
-    this.localPreprocessorPath = path.join(this.todosPath, "prep.coffee");
+    this.testPath = path.join(this.todosPath, 'test.coffee')
+    this.localPreprocessorPath = path.join(this.todosPath, 'prep.coffee')
 
-    this.plugin = sinon.stub().returns("/path/to/output.js");
-    plugins.register("file:preprocessor", this.plugin);
+    this.plugin = sinon.stub().returns('/path/to/output.js')
+    plugins.register('file:preprocessor', this.plugin)
 
-    preprocessor.close();
+    preprocessor.close()
 
-    return this.config = {
-      preprocessor: "custom",
-      projectRoot: this.todosPath
-    };});
+    this.config = {
+      preprocessor: 'custom',
+      projectRoot: this.todosPath,
+    }
+  })
 
-  context("#getFile", function() {
-    it("executes the plugin with file path", function() {
-      preprocessor.getFile(this.filePath, this.config);
-      expect(this.plugin).to.be.called;
-      return expect(this.plugin.lastCall.args[0].filePath).to.equal(this.fullFilePath);
-    });
+  context('#getFile', () => {
+    it('executes the plugin with file path', function () {
+      preprocessor.getFile(this.filePath, this.config)
+      expect(this.plugin).to.be.called
 
-    it("executes the plugin with output path", function() {
-      preprocessor.getFile(this.filePath, this.config);
-      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), "bundles", this.filePath);
-      return expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath);
-    });
+      expect(this.plugin.lastCall.args[0].filePath).to.equal(this.fullFilePath)
+    })
 
-    it("executes the plugin with output path when integrationFolder was defined", function() {
-      preprocessor.getFile(this.integrationFolder + this.filePath, Object.assign({integrationFolder: this.integrationFolder}, this.config));
-      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), "bundles", this.filePath);
-      return expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath);
-    });
+    it('executes the plugin with output path', function () {
+      preprocessor.getFile(this.filePath, this.config)
+      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), 'bundles', this.filePath)
 
-    it("returns a promise resolved with the plugin's outputPath", function() {
-      return preprocessor.getFile(this.filePath, this.config).then(filePath => expect(filePath).to.equal("/path/to/output.js"));
-    });
+      expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
+    })
 
-    it("emits 'file:updated' with filePath when 'rerun' is emitted", function() {
-      const fileUpdated = sinon.spy();
-      preprocessor.emitter.on("file:updated", fileUpdated);
-      preprocessor.getFile(this.filePath, this.config);
-      this.plugin.lastCall.args[0].emit("rerun");
-      return expect(fileUpdated).to.be.calledWith(this.fullFilePath);
-    });
+    it('executes the plugin with output path when integrationFolder was defined', function () {
+      preprocessor.getFile(this.integrationFolder + this.filePath, Object.assign({ integrationFolder: this.integrationFolder }, this.config))
+      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), 'bundles', this.filePath)
 
-    it("invokes plugin again when isTextTerminal: false", function() {
-      this.config.isTextTerminal = false;
-      preprocessor.getFile(this.filePath, this.config);
-      preprocessor.getFile(this.filePath, this.config);
-      return expect(this.plugin).to.be.calledTwice;
-    });
+      expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
+    })
 
-    it("does not invoke plugin again when isTextTerminal: true", function() {
-      this.config.isTextTerminal = true;
-      preprocessor.getFile(this.filePath, this.config);
-      preprocessor.getFile(this.filePath, this.config);
-      return expect(this.plugin).to.be.calledOnce;
-    });
+    it('returns a promise resolved with the plugin\'s outputPath', function () {
+      return preprocessor.getFile(this.filePath, this.config).then((filePath) => {
+        expect(filePath).to.equal('/path/to/output.js')
+      })
+    })
 
-    return it("uses default preprocessor if none registered", function() {
-      plugins._reset();
-      sinon.stub(plugins, "register");
-      sinon.stub(plugins, "execute").returns(function() {});
-      const browserifyFn = function() {};
-      const browserify = sinon.stub().returns(browserifyFn);
-      //# mock default options
+    it('emits \'file:updated\' with filePath when \'rerun\' is emitted', function () {
+      const fileUpdated = sinon.spy()
+
+      preprocessor.emitter.on('file:updated', fileUpdated)
+      preprocessor.getFile(this.filePath, this.config)
+      this.plugin.lastCall.args[0].emit('rerun')
+
+      expect(fileUpdated).to.be.calledWith(this.fullFilePath)
+    })
+
+    it('invokes plugin again when isTextTerminal: false', function () {
+      this.config.isTextTerminal = false
+      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin).to.be.calledTwice
+    })
+
+    it('does not invoke plugin again when isTextTerminal: true', function () {
+      this.config.isTextTerminal = true
+      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.getFile(this.filePath, this.config)
+
+      expect(this.plugin).to.be.calledOnce
+    })
+
+    it('uses default preprocessor if none registered', function () {
+      plugins._reset()
+      sinon.stub(plugins, 'register')
+      sinon.stub(plugins, 'execute').returns(() => {})
+      const browserifyFn = function () {}
+      const browserify = sinon.stub().returns(browserifyFn)
+
+      // mock default options
       browserify.defaultOptions = {
         browserifyOptions: {
           extensions: [],
@@ -97,132 +113,158 @@ describe("lib/plugins/preprocessor", function() {
             ['babelify', {
               presets: [],
               extensions: [],
-            }]
-          ]
-        }
-      };
-      mockery.registerMock("@cypress/browserify-preprocessor", browserify);
-      preprocessor.getFile(this.filePath, this.config);
-      expect(plugins.register).to.be.calledWith("file:preprocessor", browserifyFn);
-      return expect(browserify).to.be.called;
-    });
-  });
+            }],
+          ],
+        },
+      }
 
-  context("#removeFile", function() {
-    it("emits 'close'", function() {
-      preprocessor.getFile(this.filePath, this.config);
-      const onClose = sinon.spy();
-      this.plugin.lastCall.args[0].on("close", onClose);
-      preprocessor.removeFile(this.filePath, this.config);
-      return expect(onClose).to.be.called;
-    });
+      mockery.registerMock('@cypress/browserify-preprocessor', browserify)
+      preprocessor.getFile(this.filePath, this.config)
+      expect(plugins.register).to.be.calledWith('file:preprocessor', browserifyFn)
 
-    return it("emits 'close' with file path on base emitter", function() {
-      const onClose = sinon.spy();
-      preprocessor.emitter.on("close", onClose);
-      preprocessor.getFile(this.filePath, this.config);
-      preprocessor.removeFile(this.filePath, this.config);
-      return expect(onClose).to.be.calledWith(this.fullFilePath);
-    });
-  });
+      expect(browserify).to.be.called
+    })
+  })
 
-  context("#close", function() {
-    it("emits 'close' on config emitter", function() {
-      preprocessor.getFile(this.filePath, this.config);
-      const onClose = sinon.spy();
-      this.plugin.lastCall.args[0].on("close", onClose);
-      preprocessor.close();
-      return expect(onClose).to.be.called;
-    });
+  context('#removeFile', () => {
+    it('emits \'close\'', function () {
+      preprocessor.getFile(this.filePath, this.config)
+      const onClose = sinon.spy()
 
-    return it("emits 'close' on base emitter", function() {
-      const onClose = sinon.spy();
-      preprocessor.emitter.on("close", onClose);
-      preprocessor.getFile(this.filePath, this.config);
-      preprocessor.close();
-      return expect(onClose).to.be.called;
-    });
-  });
+      this.plugin.lastCall.args[0].on('close', onClose)
+      preprocessor.removeFile(this.filePath, this.config)
 
-  context("#clientSideError", function() {
-    beforeEach(() => sinon.stub(console, "error")); //# keep noise out of console
+      expect(onClose).to.be.called
+    })
 
-    it("send javascript string with the error", () => expect(preprocessor.clientSideError("an error")).to.equal(`\
+    it('emits \'close\' with file path on base emitter', function () {
+      const onClose = sinon.spy()
+
+      preprocessor.emitter.on('close', onClose)
+      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.removeFile(this.filePath, this.config)
+
+      expect(onClose).to.be.calledWith(this.fullFilePath)
+    })
+  })
+
+  context('#close', () => {
+    it('emits \'close\' on config emitter', function () {
+      preprocessor.getFile(this.filePath, this.config)
+      const onClose = sinon.spy()
+
+      this.plugin.lastCall.args[0].on('close', onClose)
+      preprocessor.close()
+
+      expect(onClose).to.be.called
+    })
+
+    it('emits \'close\' on base emitter', function () {
+      const onClose = sinon.spy()
+
+      preprocessor.emitter.on('close', onClose)
+      preprocessor.getFile(this.filePath, this.config)
+      preprocessor.close()
+
+      expect(onClose).to.be.called
+    })
+  })
+
+  context('#clientSideError', () => {
+    beforeEach(() => {
+      return sinon.stub(console, 'error')
+    }) // keep noise out of console
+
+    it('send javascript string with the error', () => {
+      expect(preprocessor.clientSideError('an error')).to.equal(`\
 (function () {
 Cypress.action("spec:script:error", {
   type: "BUNDLE_ERROR",
   error: "an error"
 })
 }())\
-`));
+`)
+    })
 
+    it('does not replace new lines with {newline} placeholder', () => {
+      expect(preprocessor.clientSideError('with\nnew\nlines')).to.include('error: "with\\nnew\\nlines"')
+    })
 
-    it("does not replace new lines with {newline} placeholder", () => expect(preprocessor.clientSideError("with\nnew\nlines")).to.include('error: "with\\nnew\\nlines"'));
+    it('does not remove command line syntax highlighting characters', () => {
+      expect(preprocessor.clientSideError('[30mfoo[100mbar[7mbaz')).to.include('error: "[30mfoo[100mbar[7mbaz"')
+    })
+  })
 
-    return it("does not remove command line syntax highlighting characters", () => expect(preprocessor.clientSideError("[30mfoo[100mbar[7mbaz")).to.include('error: "[30mfoo[100mbar[7mbaz"'));
-  });
+  context('#errorMessage', () => {
+    it('handles error strings', () => {
+      expect(preprocessor.errorMessage('error string')).to.include('error string')
+    })
 
-  context("#errorMessage", function() {
-    it("handles error strings", () => expect(preprocessor.errorMessage("error string")).to.include("error string"));
+    it('handles standard error objects and sends the stack', () => {
+      const err = new Error()
 
-    it("handles standard error objects and sends the stack", function() {
-      const err = new Error();
-      err.stack = "error object stack";
+      err.stack = 'error object stack'
 
-      return expect(preprocessor.errorMessage(err)).to.equal("error object stack");
-    });
+      expect(preprocessor.errorMessage(err)).to.equal('error object stack')
+    })
 
-    it("sends err.annotated if stack is not present", function() {
+    it('sends err.annotated if stack is not present', () => {
       const err = {
         stack: undefined,
-        annotated: "annotation"
-      };
+        annotated: 'annotation',
+      }
 
-      return expect(preprocessor.errorMessage(err)).to.equal("annotation");
-    });
+      expect(preprocessor.errorMessage(err)).to.equal('annotation')
+    })
 
-    it("sends err.message if stack and annotated are not present", function() {
+    it('sends err.message if stack and annotated are not present', () => {
       const err = {
         stack: undefined,
-        message: "message"
-      };
+        message: 'message',
+      }
 
-      return expect(preprocessor.errorMessage(err)).to.equal("message");
-    });
+      expect(preprocessor.errorMessage(err)).to.equal('message')
+    })
 
-    return it("removes stack lines", () => expect(preprocessor.errorMessage("foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)")).to.equal("foo\n baz"));
-  });
+    it('removes stack lines', () => {
+      expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')).to.equal('foo\n baz')
+    })
+  })
 
-  return context("#setDefaultPreprocessor", function() {
-    it("finds TypeScript in the project root", function() {
-      const mockPlugin = {};
-      sinon.stub(plugins, "register");
-      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin);
+  context('#setDefaultPreprocessor', () => {
+    it('finds TypeScript in the project root', function () {
+      const mockPlugin = {}
 
-      preprocessor.setDefaultPreprocessor(this.config);
+      sinon.stub(plugins, 'register')
+      sinon.stub(preprocessor, 'createBrowserifyPreprocessor').returns(mockPlugin)
 
-      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin);
+      preprocessor.setDefaultPreprocessor(this.config)
+
+      expect(plugins.register).to.be.calledWithExactly('file:preprocessor', mockPlugin)
       // in this mock project, the TypeScript should be found
       // from the monorepo
-      const monorepoRoot = path.join(__dirname, "../../../../..");
-      const typescript = resolve.sync("typescript", {
-        basedir: monorepoRoot
-      });
-      return expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript });
-    });
+      const monorepoRoot = path.join(__dirname, '../../../../..')
+      const typescript = resolve.sync('typescript', {
+        basedir: monorepoRoot,
+      })
 
-    return it("does not have typescript if not found", function() {
-      const mockPlugin = {};
-      sinon.stub(plugins, "register");
-      sinon.stub(preprocessor, "createBrowserifyPreprocessor").returns(mockPlugin);
-      sinon.stub(resolve, "sync")
-        .withArgs("typescript", { basedir: this.todosPath })
-        .throws(new Error('TypeScript not found'));
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript })
+    })
 
-      preprocessor.setDefaultPreprocessor(this.config);
+    it('does not have typescript if not found', function () {
+      const mockPlugin = {}
 
-      expect(plugins.register).to.be.calledWithExactly("file:preprocessor", mockPlugin);
-      return expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript: null });
-    });
-  });
-});
+      sinon.stub(plugins, 'register')
+      sinon.stub(preprocessor, 'createBrowserifyPreprocessor').returns(mockPlugin)
+      sinon.stub(resolve, 'sync')
+      .withArgs('typescript', { basedir: this.todosPath })
+      .throws(new Error('TypeScript not found'))
+
+      preprocessor.setDefaultPreprocessor(this.config)
+
+      expect(plugins.register).to.be.calledWithExactly('file:preprocessor', mockPlugin)
+
+      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript: null })
+    })
+  })
+})

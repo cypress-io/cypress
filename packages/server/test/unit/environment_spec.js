@@ -1,86 +1,120 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../spec_helper");
+require('../spec_helper')
 
-const Promise = require("bluebird");
-const pkg = require("@packages/root");
-const fs = require(`${root}lib/util/fs`);
-const mockedEnv = require('mocked-env');
+const Promise = require('bluebird')
+const pkg = require('@packages/root')
+const fs = require(`${root}lib/util/fs`)
+const mockedEnv = require('mocked-env')
 const {
-  app
-} = require("electron");
+  app,
+} = require('electron')
 
-const setEnv = env => {
-  process.env["CYPRESS_INTERNAL_ENV"] = env;
-  return expectedEnv(env);
-};
+const setEnv = (env) => {
+  process.env['CYPRESS_INTERNAL_ENV'] = env
 
-var expectedEnv = function(env) {
-  require(`${root}lib/environment`);
-  return expect(process.env["CYPRESS_INTERNAL_ENV"]).to.eq(env);
-};
+  return expectedEnv(env)
+}
 
-const setPkg = env => {
-  pkg.env = env;
-  return expectedEnv(env);
-};
+const expectedEnv = function (env) {
+  require(`${root}lib/environment`)
 
-const env = process.env["CYPRESS_INTERNAL_ENV"];
+  expect(process.env['CYPRESS_INTERNAL_ENV']).to.eq(env)
+}
 
-describe("lib/environment", function() {
-  beforeEach(function() {
-    sinon.stub(Promise, "config");
-    delete process.env["CYPRESS_INTERNAL_ENV"];
-    return delete require.cache[require.resolve(`${root}lib/environment`)];});
+const setPkg = (env) => {
+  pkg.env = env
 
-  afterEach(function() {
-    delete require.cache[require.resolve(`${root}lib/environment`)];
-    return delete process.env["CYPRESS_INTERNAL_ENV"];});
+  return expectedEnv(env)
+}
 
-  after(() => process.env["CYPRESS_INTERNAL_ENV"] = env);
+const env = process.env['CYPRESS_INTERNAL_ENV']
 
-  context("parses ELECTRON_EXTRA_LAUNCH_ARGS", function() {
-    let restore = null;
+describe('lib/environment', () => {
+  beforeEach(() => {
+    sinon.stub(Promise, 'config')
+    delete process.env['CYPRESS_INTERNAL_ENV']
 
-    beforeEach(() => restore = mockedEnv({
-      ELECTRON_EXTRA_LAUNCH_ARGS: "--foo --bar=baz --quux=true"
-    }));
+    return delete require.cache[require.resolve(`${root}lib/environment`)]
+  })
 
-    it("sets launch args", function() {
-      sinon.stub(app.commandLine, "appendArgument");
-      require(`${root}lib/environment`);
-      expect(app.commandLine.appendArgument).to.have.been.calledWith("--foo");
-      expect(app.commandLine.appendArgument).to.have.been.calledWith("--bar=baz");
-      return expect(app.commandLine.appendArgument).to.have.been.calledWith("--quux=true");
-    });
+  afterEach(() => {
+    delete require.cache[require.resolve(`${root}lib/environment`)]
 
-    return afterEach(() => restore());
-  });
+    return delete process.env['CYPRESS_INTERNAL_ENV']
+  })
 
-  context("#existing process.env.CYPRESS_INTERNAL_ENV", function() {
-    it("is production", () => setEnv("production"));
+  after(() => {
+    return process.env['CYPRESS_INTERNAL_ENV'] = env
+  })
 
-    it("is development", () => setEnv("development"));
+  context('parses ELECTRON_EXTRA_LAUNCH_ARGS', () => {
+    let restore = null
 
-    return it("is staging", () => setEnv("staging"));
-  });
+    beforeEach(() => {
+      return restore = mockedEnv({
+        ELECTRON_EXTRA_LAUNCH_ARGS: '--foo --bar=baz --quux=true',
+      })
+    })
 
-  context("uses package.json env", function() {
-    afterEach(() => delete pkg.env);
+    it('sets launch args', () => {
+      sinon.stub(app.commandLine, 'appendArgument')
+      require(`${root}lib/environment`)
+      expect(app.commandLine.appendArgument).to.have.been.calledWith('--foo')
+      expect(app.commandLine.appendArgument).to.have.been.calledWith('--bar=baz')
 
-    it("is production", () => setPkg("production"));
+      expect(app.commandLine.appendArgument).to.have.been.calledWith('--quux=true')
+    })
 
-    it("is staging", () => setPkg("staging"));
+    return afterEach(() => {
+      return restore()
+    })
+  })
 
-    return it("is test", () => setPkg("test"));
-  });
+  context('#existing process.env.CYPRESS_INTERNAL_ENV', () => {
+    it('is production', () => {
+      return setEnv('production')
+    })
 
-  return context("it uses development by default", function() {
-    beforeEach(() => sinon.stub(fs, "readJsonSync").returns({}));
+    it('is development', () => {
+      return setEnv('development')
+    })
 
-    return it("is development", () => expectedEnv("development"));
-  });
-});
+    it('is staging', () => {
+      return setEnv('staging')
+    })
+  })
+
+  context('uses package.json env', () => {
+    afterEach(() => {
+      return delete pkg.env
+    })
+
+    it('is production', () => {
+      return setPkg('production')
+    })
+
+    it('is staging', () => {
+      return setPkg('staging')
+    })
+
+    it('is test', () => {
+      return setPkg('test')
+    })
+  })
+
+  context('it uses development by default', () => {
+    beforeEach(() => {
+      return sinon.stub(fs, 'readJsonSync').returns({})
+    })
+
+    it('is development', () => {
+      return expectedEnv('development')
+    })
+  })
+})

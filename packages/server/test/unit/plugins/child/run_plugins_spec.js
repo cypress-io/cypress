@@ -1,234 +1,277 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../../../spec_helper");
+require('../../../spec_helper')
 
-const _ = require("lodash");
-const cp = require("child_process");
-const snapshot = require("snap-shot-it");
+const _ = require('lodash')
+const cp = require('child_process')
+const snapshot = require('snap-shot-it')
 
-const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`);
-const task = require(`${root}../../lib/plugins/child/task`);
-const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`);
-const util = require(`${root}../../lib/plugins/util`);
-const browserUtils = require(`${root}../../lib/browsers/utils`);
-const Fixtures = require(`${root}../../test/support/helpers/fixtures`);
+const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
+const task = require(`${root}../../lib/plugins/child/task`)
+const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
+const util = require(`${root}../../lib/plugins/util`)
+const browserUtils = require(`${root}../../lib/browsers/utils`)
+const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
 
-const colorCodeRe = /\[[0-9;]+m/gm;
-const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi;
+const colorCodeRe = /\[[0-9;]+m/gm
+const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
 
-const withoutStack = err => _.omit(err, "stack");
-const withoutColorCodes = str => str.replace(colorCodeRe, "<color-code>");
-const withoutPath = str => str.replace(pathRe, '<path>$2)');
+const withoutStack = (err) => {
+  return _.omit(err, 'stack')
+}
+const withoutColorCodes = (str) => {
+  return str.replace(colorCodeRe, '<color-code>')
+}
+const withoutPath = (str) => {
+  return str.replace(pathRe, '<path>$2)')
+}
 
-describe("lib/plugins/child/run_plugins", function() {
-  beforeEach(function() {
-    return this.ipc = {
+describe('lib/plugins/child/run_plugins', () => {
+  beforeEach(function () {
+    this.ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
-      removeListener: sinon.spy()
-    };});
+      removeListener: sinon.spy(),
+    }
+  })
 
-  afterEach(function() {
-    mockery.deregisterMock("plugins-file");
-    return mockery.deregisterSubstitute("plugins-file");
-  });
+  afterEach(() => {
+    mockery.deregisterMock('plugins-file')
 
-  it("sends error message if pluginsFile is missing", function() {
-    mockery.registerSubstitute("plugins-file", "/does/not/exist.coffee");
-    runPlugins(this.ipc, "plugins-file");
-    expect(this.ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file");
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0]);
-  });
+    return mockery.deregisterSubstitute('plugins-file')
+  })
 
-  it("sends error message if requiring pluginsFile errors", function() {
-    //# path for substitute is relative to lib/plugins/child/plugins_child.js
+  it('sends error message if pluginsFile is missing', function () {
+    mockery.registerSubstitute('plugins-file', '/does/not/exist.coffee')
+    runPlugins(this.ipc, 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
+
+    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
+  })
+
+  it('sends error message if requiring pluginsFile errors', function () {
+    // path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute(
-      "plugins-file",
-      Fixtures.path("server/throws_error.coffee")
-    );
-    runPlugins(this.ipc, "plugins-file");
-    expect(this.ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file");
-    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0]);
-  });
+      'plugins-file',
+      Fixtures.path('server/throws_error.coffee'),
+    )
 
-  it("sends error message if pluginsFile has syntax error", function() {
-    //# path for substitute is relative to lib/plugins/child/plugins_child.js
+    runPlugins(this.ipc, 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
+
+    return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
+  })
+
+  it('sends error message if pluginsFile has syntax error', function () {
+    // path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute(
-      "plugins-file",
-      Fixtures.path("server/syntax_error.coffee")
-    );
-    runPlugins(this.ipc, "plugins-file");
-    expect(this.ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file");
-    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3])));
-  });
+      'plugins-file',
+      Fixtures.path('server/syntax_error.coffee'),
+    )
 
-  it("sends error message if pluginsFile does not export a function", function() {
-    mockery.registerMock("plugins-file", null);
-    runPlugins(this.ipc, "plugins-file");
-    expect(this.ipc.send).to.be.calledWith("load:error", "PLUGINS_DIDNT_EXPORT_FUNCTION", "plugins-file");
-    return snapshot(JSON.stringify(this.ipc.send.lastCall.args[3]));
-  });
+    runPlugins(this.ipc, 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
-  describe("on 'load' message", function() {
-    it("sends error if pluginsFile function rejects the promise", function(done) {
-      const err = new Error('foo');
-      const pluginsFn = sinon.stub().rejects(err);
+    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3])))
+  })
 
-      mockery.registerMock("plugins-file", pluginsFn);
-      this.ipc.on.withArgs("load").yields({});
-      runPlugins(this.ipc, "plugins-file");
+  it('sends error message if pluginsFile does not export a function', function () {
+    mockery.registerMock('plugins-file', null)
+    runPlugins(this.ipc, 'plugins-file')
+    expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', 'plugins-file')
 
-      return this.ipc.send = _.once(function(event, errorType, pluginsFile, stack) {
-        expect(event).to.eq("load:error");
-        expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR");
-        expect(pluginsFile).to.eq("plugins-file");
-        expect(stack).to.eq(err.stack);
-        return done();
-      });
-    });
+    return snapshot(JSON.stringify(this.ipc.send.lastCall.args[3]))
+  })
 
-    it("calls function exported by pluginsFile with register function and config", function() {
-      const pluginsFn = sinon.spy();
-      mockery.registerMock("plugins-file", pluginsFn);
-      runPlugins(this.ipc, "plugins-file");
-      const config = {};
-      this.ipc.on.withArgs("load").yield(config);
-      expect(pluginsFn).to.be.called;
-      expect(pluginsFn.lastCall.args[0]).to.be.a("function");
-      return expect(pluginsFn.lastCall.args[1]).to.equal(config);
-    });
+  describe('on \'load\' message', () => {
+    it('sends error if pluginsFile function rejects the promise', function (done) {
+      const err = new Error('foo')
+      const pluginsFn = sinon.stub().rejects(err)
 
-    return it("sends error if pluginsFile function throws an error", function(done) {
-      const err = new Error('foo');
+      mockery.registerMock('plugins-file', pluginsFn)
+      this.ipc.on.withArgs('load').yields({})
+      runPlugins(this.ipc, 'plugins-file')
 
-      mockery.registerMock("plugins-file", function() { throw err; });
-      runPlugins(this.ipc, "plugins-file");
-      this.ipc.on.withArgs("load").yield();
+      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
+        expect(event).to.eq('load:error')
+        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(pluginsFile).to.eq('plugins-file')
+        expect(stack).to.eq(err.stack)
 
-      return this.ipc.send = _.once(function(event, errorType, pluginsFile, stack) {
-        expect(event).to.eq("load:error");
-        expect(errorType).to.eq("PLUGINS_FUNCTION_ERROR");
-        expect(pluginsFile).to.eq("plugins-file");
-        expect(stack).to.eq(err.stack);
-        return done();
-      });
-    });
-  });
+        return done()
+      })
+    })
 
-  describe("on 'execute' message", function() {
-    beforeEach(function() {
-      sinon.stub(preprocessor, "wrap");
+    it('calls function exported by pluginsFile with register function and config', function () {
+      const pluginsFn = sinon.spy()
 
-      this.onFilePreprocessor = sinon.stub().resolves();
-      this.beforeBrowserLaunch = sinon.stub().resolves();
-      this.taskRequested = sinon.stub().resolves("foo");
+      mockery.registerMock('plugins-file', pluginsFn)
+      runPlugins(this.ipc, 'plugins-file')
+      const config = {}
 
-      const pluginsFn = register => {
-        register("file:preprocessor", this.onFilePreprocessor);
-        register("before:browser:launch", this.beforeBrowserLaunch);
-        return register("task", this.taskRequested);
-      };
+      this.ipc.on.withArgs('load').yield(config)
+      expect(pluginsFn).to.be.called
+      expect(pluginsFn.lastCall.args[0]).to.be.a('function')
 
-      mockery.registerMock("plugins-file", pluginsFn);
+      expect(pluginsFn.lastCall.args[1]).to.equal(config)
+    })
 
-      runPlugins(this.ipc, "plugins-file");
+    it('sends error if pluginsFile function throws an error', function (done) {
+      const err = new Error('foo')
 
-      return this.ipc.on.withArgs("load").yield();
-    });
+      mockery.registerMock('plugins-file', () => {
+        throw err
+      })
 
-    context("file:preprocessor", function() {
-      beforeEach(function() {
-        return this.ids = { eventId: 0, invocationId: "00" };});
+      runPlugins(this.ipc, 'plugins-file')
+      this.ipc.on.withArgs('load').yield()
 
-      it("calls preprocessor handler", function() {
-        const args = ["arg1", "arg2"];
-        this.ipc.on.withArgs("execute").yield("file:preprocessor", this.ids, args);
-        expect(preprocessor.wrap).to.be.called;
-        expect(preprocessor.wrap.lastCall.args[0]).to.equal(this.ipc);
-        expect(preprocessor.wrap.lastCall.args[1]).to.be.a("function");
-        expect(preprocessor.wrap.lastCall.args[2]).to.equal(this.ids);
-        return expect(preprocessor.wrap.lastCall.args[3]).to.equal(args);
-      });
+      this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
+        expect(event).to.eq('load:error')
+        expect(errorType).to.eq('PLUGINS_FUNCTION_ERROR')
+        expect(pluginsFile).to.eq('plugins-file')
+        expect(stack).to.eq(err.stack)
 
-      return it("invokes registered function when invoked by handler", function() {
-        this.ipc.on.withArgs("execute").yield("file:preprocessor", this.ids, []);
-        preprocessor.wrap.lastCall.args[1](2, ["one", "two"]);
-        return expect(this.onFilePreprocessor).to.be.calledWith("one", "two");
-      });
-    });
+        return done()
+      })
+    })
+  })
 
-    context("before:browser:launch", function() {
-      beforeEach(function() {
-        sinon.stub(util, "wrapChildPromise");
+  describe('on \'execute\' message', () => {
+    beforeEach(function () {
+      sinon.stub(preprocessor, 'wrap')
 
-        const browser = {};
-        const launchOptions = browserUtils.getDefaultLaunchOptions({});
+      this.onFilePreprocessor = sinon.stub().resolves()
+      this.beforeBrowserLaunch = sinon.stub().resolves()
+      this.taskRequested = sinon.stub().resolves('foo')
 
-        this.args = [browser, launchOptions];
-        return this.ids = { eventId: 1, invocationId: "00" };});
+      const pluginsFn = (register) => {
+        register('file:preprocessor', this.onFilePreprocessor)
+        register('before:browser:launch', this.beforeBrowserLaunch)
 
-      it("wraps child promise", function() {
-        const args = ["arg1", "arg2"];
-        this.ipc.on.withArgs("execute").yield("before:browser:launch", this.ids, this.args);
-        expect(util.wrapChildPromise).to.be.called;
-        expect(util.wrapChildPromise.lastCall.args[0]).to.equal(this.ipc);
-        expect(util.wrapChildPromise.lastCall.args[1]).to.be.a("function");
-        expect(util.wrapChildPromise.lastCall.args[2]).to.equal(this.ids);
-        return expect(util.wrapChildPromise.lastCall.args[3]).to.equal(this.args);
-      });
+        return register('task', this.taskRequested)
+      }
 
-      return it("invokes registered function when invoked by handler", function() {
-        this.ipc.on.withArgs("execute").yield("before:browser:launch", this.ids, this.args);
-        util.wrapChildPromise.lastCall.args[1](3, this.args);
-        return expect(this.beforeBrowserLaunch).to.be.calledWith(...this.args);
-      });
-    });
+      mockery.registerMock('plugins-file', pluginsFn)
 
-    return context("task", function() {
-      beforeEach(function() {
-        sinon.stub(task, "wrap");
-        return this.ids = { eventId: 5, invocationId: "00" };});
+      runPlugins(this.ipc, 'plugins-file')
 
-      return it("calls task handler", function() {
-        const args = ["arg1"];
-        this.ipc.on.withArgs("execute").yield("task", this.ids, args);
-        expect(task.wrap).to.be.called;
-        expect(task.wrap.lastCall.args[0]).to.equal(this.ipc);
-        expect(task.wrap.lastCall.args[1]).to.be.an("object");
-        expect(task.wrap.lastCall.args[2]).to.equal(this.ids);
-        return expect(task.wrap.lastCall.args[3]).to.equal(args);
-      });
-    });
-  });
+      return this.ipc.on.withArgs('load').yield()
+    })
 
-  return describe("errors", function() {
-    beforeEach(function() {
-      mockery.registerMock("plugins-file", function() {});
-      sinon.stub(process, "on");
+    context('file:preprocessor', () => {
+      beforeEach(function () {
+        this.ids = { eventId: 0, invocationId: '00' }
+      })
+
+      it('calls preprocessor handler', function () {
+        const args = ['arg1', 'arg2']
+
+        this.ipc.on.withArgs('execute').yield('file:preprocessor', this.ids, args)
+        expect(preprocessor.wrap).to.be.called
+        expect(preprocessor.wrap.lastCall.args[0]).to.equal(this.ipc)
+        expect(preprocessor.wrap.lastCall.args[1]).to.be.a('function')
+        expect(preprocessor.wrap.lastCall.args[2]).to.equal(this.ids)
+
+        expect(preprocessor.wrap.lastCall.args[3]).to.equal(args)
+      })
+
+      it('invokes registered function when invoked by handler', function () {
+        this.ipc.on.withArgs('execute').yield('file:preprocessor', this.ids, [])
+        preprocessor.wrap.lastCall.args[1](2, ['one', 'two'])
+
+        expect(this.onFilePreprocessor).to.be.calledWith('one', 'two')
+      })
+    })
+
+    context('before:browser:launch', () => {
+      beforeEach(function () {
+        sinon.stub(util, 'wrapChildPromise')
+
+        const browser = {}
+        const launchOptions = browserUtils.getDefaultLaunchOptions({})
+
+        this.args = [browser, launchOptions]
+        this.ids = { eventId: 1, invocationId: '00' }
+      })
+
+      it('wraps child promise', function () {
+        const args = ['arg1', 'arg2']
+
+        this.ipc.on.withArgs('execute').yield('before:browser:launch', this.ids, this.args)
+        expect(util.wrapChildPromise).to.be.called
+        expect(util.wrapChildPromise.lastCall.args[0]).to.equal(this.ipc)
+        expect(util.wrapChildPromise.lastCall.args[1]).to.be.a('function')
+        expect(util.wrapChildPromise.lastCall.args[2]).to.equal(this.ids)
+
+        expect(util.wrapChildPromise.lastCall.args[3]).to.equal(this.args)
+      })
+
+      it('invokes registered function when invoked by handler', function () {
+        this.ipc.on.withArgs('execute').yield('before:browser:launch', this.ids, this.args)
+        util.wrapChildPromise.lastCall.args[1](3, this.args)
+
+        expect(this.beforeBrowserLaunch).to.be.calledWith(...this.args)
+      })
+    })
+
+    context('task', () => {
+      beforeEach(function () {
+        sinon.stub(task, 'wrap')
+        this.ids = { eventId: 5, invocationId: '00' }
+      })
+
+      it('calls task handler', function () {
+        const args = ['arg1']
+
+        this.ipc.on.withArgs('execute').yield('task', this.ids, args)
+        expect(task.wrap).to.be.called
+        expect(task.wrap.lastCall.args[0]).to.equal(this.ipc)
+        expect(task.wrap.lastCall.args[1]).to.be.an('object')
+        expect(task.wrap.lastCall.args[2]).to.equal(this.ids)
+
+        expect(task.wrap.lastCall.args[3]).to.equal(args)
+      })
+    })
+  })
+
+  describe('errors', () => {
+    beforeEach(function () {
+      mockery.registerMock('plugins-file', () => {})
+      sinon.stub(process, 'on')
 
       this.err = {
-        name: "error name",
-        message: "error message"
-      };
-      return runPlugins(this.ipc, "plugins-file");
-    });
+        name: 'error name',
+        message: 'error message',
+      }
 
-    it("sends the serialized error via ipc on process uncaughtException", function() {
-      process.on.withArgs("uncaughtException").yield(this.err);
-      return expect(this.ipc.send).to.be.calledWith("error", this.err);
-    });
+      return runPlugins(this.ipc, 'plugins-file')
+    })
 
-    it("sends the serialized error via ipc on process unhandledRejection", function() {
-      process.on.withArgs("unhandledRejection").yield(this.err);
-      return expect(this.ipc.send).to.be.calledWith("error", this.err);
-    });
+    it('sends the serialized error via ipc on process uncaughtException', function () {
+      process.on.withArgs('uncaughtException').yield(this.err)
 
-    return it("sends the serialized reason via ipc on process unhandledRejection", function() {
-      process.on.withArgs("unhandledRejection").yield({ reason: this.err });
-      return expect(this.ipc.send).to.be.calledWith("error", this.err);
-    });
-  });
-});
+      expect(this.ipc.send).to.be.calledWith('error', this.err)
+    })
+
+    it('sends the serialized error via ipc on process unhandledRejection', function () {
+      process.on.withArgs('unhandledRejection').yield(this.err)
+
+      expect(this.ipc.send).to.be.calledWith('error', this.err)
+    })
+
+    it('sends the serialized reason via ipc on process unhandledRejection', function () {
+      process.on.withArgs('unhandledRejection').yield({ reason: this.err })
+
+      expect(this.ipc.send).to.be.calledWith('error', this.err)
+    })
+  })
+})

@@ -1,43 +1,50 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../spec_helper");
+require('../spec_helper')
 
-const os = require("os");
-const path = require("path");
-const fs = require(`${root}/lib/util/fs`);
-const findProcess = require(`${root}lib/util/find_process`);
-const profileCleaner = require(`${root}lib/util/profile_cleaner`);
+const os = require('os')
+const path = require('path')
+const fs = require(`${root}/lib/util/fs`)
+const findProcess = require(`${root}lib/util/find_process`)
+const profileCleaner = require(`${root}lib/util/profile_cleaner`)
 
-const tmpDir = os.tmpdir();
-const pidProfilesFolder = path.join(tmpDir, "pid-profiles");
+const tmpDir = os.tmpdir()
+const pidProfilesFolder = path.join(tmpDir, 'pid-profiles')
 
-describe("lib/util/profile_cleaner", function() {
-  context('.isCypressProcess', () => it('finds cypress processes by name or cmd', function() {
-    const isProc = (obj, bool) => expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool);
-
-    const processes = [
-      {
-        name: 'CYPRESS'
-      },
-      {
-        cmd: 'path/to/Cypress -- some args'
-      },
-      {
-        name: 'nope',
-        cmd: 'not found'
+describe('lib/util/profile_cleaner', () => {
+  context('.isCypressProcess', () => {
+    it('finds cypress processes by name or cmd', () => {
+      const isProc = (obj, bool) => {
+        expect(profileCleaner.isCypressProcess(obj), JSON.stringify(obj)).to.eq(bool)
       }
-    ];
 
-    isProc(processes[0], true);
-    isProc(processes[1], true);
-    return isProc(processes[2], false);
-  }));
+      const processes = [
+        {
+          name: 'CYPRESS',
+        },
+        {
+          cmd: 'path/to/Cypress -- some args',
+        },
+        {
+          name: 'nope',
+          cmd: 'not found',
+        },
+      ]
 
-  return context(".removeInactiveByPid", function() {
-    beforeEach(function() {
+      isProc(processes[0], true)
+      isProc(processes[1], true)
+
+      return isProc(processes[2], false)
+    })
+  })
+
+  context('.removeInactiveByPid', () => {
+    beforeEach(() => {
       sinon.stub(findProcess, 'byPid')
       .withArgs(53301)
       .resolves([
@@ -47,48 +54,58 @@ describe("lib/util/profile_cleaner", function() {
           uid: '501',
           gid: '20',
           name: 'Cypress',
-          cmd: '/Users/bmann/Library/Caches/Cypress/3.0.3/Cypress.app/Contents/MacOS/Cypress --project /Users/bmann/Dev/cypress-dashboard --cwd /Users/bmann/Dev/cypress-dashboard'
-        }
+          cmd: '/Users/bmann/Library/Caches/Cypress/3.0.3/Cypress.app/Contents/MacOS/Cypress --project /Users/bmann/Dev/cypress-dashboard --cwd /Users/bmann/Dev/cypress-dashboard',
+        },
       ])
       .withArgs(12345)
       .resolves([
         {
           pid: '12345',
           name: 'Foo',
-          cmd: 'node foo bar'
-        }
+          cmd: 'node foo bar',
+        },
       ])
       .withArgs(9999)
-      .resolves([]);
+      .resolves([])
 
-      const createFolder = folder => fs.ensureDirAsync(path.join(pidProfilesFolder, folder));
+      const createFolder = (folder) => {
+        return fs.ensureDirAsync(path.join(pidProfilesFolder, folder))
+      }
 
       return Promise.all([
-        createFolder("run-9999"),
-        createFolder("run-12345"),
-        createFolder("run-53301"),
-        createFolder("foo-53301")
-      ]);
-    });
+        createFolder('run-9999'),
+        createFolder('run-12345'),
+        createFolder('run-53301'),
+        createFolder('foo-53301'),
+      ])
+    })
 
-    afterEach(() => fs.removeAsync(pidProfilesFolder));
+    afterEach(() => {
+      return fs.removeAsync(pidProfilesFolder)
+    })
 
-    return it("removes profiles which are not cypress pids", function() {
-      const expected = function(folder, condition) {
-        const pathToFolder = path.join(pidProfilesFolder, folder);
+    it('removes profiles which are not cypress pids', () => {
+      const expected = function (folder, condition) {
+        const pathToFolder = path.join(pidProfilesFolder, folder)
 
         return fs
         .pathExists(pathToFolder)
-        .then(bool => expect(bool, `expected folder: ${pathToFolder} to exist? ${condition}`).to.eq(condition));
-      };
+        .then((bool) => {
+          expect(bool, `expected folder: ${pathToFolder} to exist? ${condition}`).to.eq(condition)
+        })
+      }
 
-      return profileCleaner.removeInactiveByPid(pidProfilesFolder, "run-")
-      .then(() => Promise.all([
-        expected('run-9999', false),
-        expected('run-12345', false),
-        expected('run-53301', true),
-        expected('foo-53301', true),
-      ])).finally(() => findProcess.byPid.restore());
-    });
-  });
-});
+      return profileCleaner.removeInactiveByPid(pidProfilesFolder, 'run-')
+      .then(() => {
+        return Promise.all([
+          expected('run-9999', false),
+          expected('run-12345', false),
+          expected('run-53301', true),
+          expected('foo-53301', true),
+        ])
+      }).finally(() => {
+        return findProcess.byPid.restore()
+      })
+    })
+  })
+})

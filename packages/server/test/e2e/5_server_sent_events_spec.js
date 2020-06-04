@@ -1,69 +1,80 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const SseStream = require("ssestream");
-const e2e = require("../support/helpers/e2e").default;
+const SseStream = require('ssestream')
+const e2e = require('../support/helpers/e2e').default
 
-let clients = 0;
+let clients = 0
 
-const onServer = function(app, srv) {
-  app.get("/clients", (req, res) => res.json({ clients }));
+const onServer = function (app, srv) {
+  app.get('/clients', (req, res) => {
+    return res.json({ clients })
+  })
 
-  app.get("/foo", (req, res) => res.send("<html>foo></html>"));
+  app.get('/foo', (req, res) => {
+    return res.send('<html>foo></html>')
+  })
 
-  return app.get("/sse", (req, res) => req.socket.destroy());
-};
+  return app.get('/sse', (req, res) => {
+    return req.socket.destroy()
+  })
+}
 
-const onSSEServer = app => app.get("/sse", function(req, res) {
-  let int;
-  clients += 1;
+const onSSEServer = (app) => {
+  return app.get('/sse', function (req, res) {
+    let int
 
-  res.on("close", function() {
-    clearInterval(int);
-    return clients -= 1;
-  });
+    clients += 1
 
-  res.set({
-    "Access-Control-Allow-Origin": "*"
-  });
+    res.on('close', () => {
+      clearInterval(int)
+      clients -= 1
+    })
 
-  this.sseStream = new SseStream(req);
-  this.sseStream.pipe(res);
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+    })
 
-  let i = 0;
+    this.sseStream = new SseStream(req)
+    this.sseStream.pipe(res)
 
-  return int = setInterval(() => {
-    i += 1;
+    let i = 0
 
-    return this.sseStream.write({
-      data: "" + i
-    });
-  }
-  , 100);
-});
+    int = setInterval(() => {
+      i += 1
 
-const onSSEsServer = function(app) {};
+      return this.sseStream.write({
+        data: `${i}`,
+      })
+    }
+    , 100)
+  })
+}
 
-describe("e2e server sent events", function() {
+const onSSEsServer = function (app) {}
+
+describe('e2e server sent events', () => {
   e2e.setup({
     servers: [{
       port: 3038,
       static: true,
-      onServer
+      onServer,
     }, {
       port: 3039,
-      onServer: onSSEServer
+      onServer: onSSEServer,
     }, {
       port: 3040,
-      onServer: onSSEsServer
-    }]
-  });
+      onServer: onSSEsServer,
+    }],
+  })
 
-  //# https://github.com/cypress-io/cypress/issues/1440
-  return e2e.it("passes", {
-    spec: "server_sent_events_spec.coffee",
-    snapshot: true
-  });
-});
+  // https://github.com/cypress-io/cypress/issues/1440
+  return e2e.it('passes', {
+    spec: 'server_sent_events_spec.coffee',
+    snapshot: true,
+  })
+})

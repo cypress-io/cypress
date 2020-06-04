@@ -1,97 +1,117 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../../../spec_helper");
+require('../../../spec_helper')
 
-const EE = require('events');
+const EE = require('events')
 
-const util = require(`${root}../../lib/plugins/util`);
-const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`);
+const util = require(`${root}../../lib/plugins/util`)
+const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
 
-describe("lib/plugins/child/preprocessor", function() {
-  beforeEach(function() {
+describe('lib/plugins/child/preprocessor', () => {
+  beforeEach(function () {
     this.ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
-      removeListener: sinon.spy()
-    };
-    this.invoke = sinon.spy();
-    this.ids = {};
+      removeListener: sinon.spy(),
+    }
+
+    this.invoke = sinon.spy()
+    this.ids = {}
     this.file = {
       filePath: 'file/path',
       outputPath: 'output/path',
-      shouldWatch: true
-    };
+      shouldWatch: true,
+    }
+
     this.file2 = {
       filePath: 'file2/path',
       outputPath: 'output/path2',
-      shouldWatch: true
-    };
+      shouldWatch: true,
+    }
 
-    sinon.stub(util, "wrapChildPromise");
+    sinon.stub(util, 'wrapChildPromise')
 
-    return preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file]);
-  });
+    return preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file])
+  })
 
-  afterEach(() => preprocessor._clearFiles());
+  afterEach(() => {
+    return preprocessor._clearFiles()
+  })
 
-  it("passes through ipc, invoke function, and ids", function() {
-    return expect(util.wrapChildPromise).to.be.calledWith(this.ipc, this.invoke, this.ids);
-  });
+  it('passes through ipc, invoke function, and ids', function () {
+    expect(util.wrapChildPromise).to.be.calledWith(this.ipc, this.invoke, this.ids)
+  })
 
-  it("passes through simple file values", function() {
-    const file = util.wrapChildPromise.lastCall.args[3][0];
-    expect(file.filePath).to.equal(this.file.filePath);
-    expect(file.outputPath).to.equal(this.file.outputPath);
-    return expect(file.shouldWatch).to.equal(this.file.shouldWatch);
-  });
+  it('passes through simple file values', function () {
+    const file = util.wrapChildPromise.lastCall.args[3][0]
 
-  it("re-applies event emitter methods to file", () => expect(util.wrapChildPromise.lastCall.args[3][0]).to.be.an.instanceOf(EE));
+    expect(file.filePath).to.equal(this.file.filePath)
+    expect(file.outputPath).to.equal(this.file.outputPath)
 
-  it("sends 'preprocessor:rerun' through ipc on 'rerun' event", function() {
-    const file = util.wrapChildPromise.lastCall.args[3][0];
-    file.emit("rerun");
-    return expect(this.ipc.send).to.be.calledWith("preprocessor:rerun", this.file.filePath);
-  });
+    expect(file.shouldWatch).to.equal(this.file.shouldWatch)
+  })
 
-  it("emits 'close' when ipc emits 'preprocessor:close' with same file path", function() {
-    const file = util.wrapChildPromise.lastCall.args[3][0];
-    const handler = sinon.spy();
-    file.on("close", handler);
-    this.ipc.on.withArgs("preprocessor:close").yield(this.file.filePath);
-    return expect(handler).to.be.called;
-  });
+  it('re-applies event emitter methods to file', () => {
+    expect(util.wrapChildPromise.lastCall.args[3][0]).to.be.an.instanceOf(EE)
+  })
 
-  it("does not close file when ipc emits 'preprocessor:close' with different file path", function() {
-    const file = util.wrapChildPromise.lastCall.args[3][0];
-    const handler = sinon.spy();
-    file.on("close", handler);
-    this.ipc.on.withArgs("preprocessor:close").yield("different/path");
-    return expect(handler).not.to.be.called;
-  });
+  it('sends \'preprocessor:rerun\' through ipc on \'rerun\' event', function () {
+    const file = util.wrapChildPromise.lastCall.args[3][0]
 
-  it("passes existing file if called again with same file path", function() {
-    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file]);
-    const file1 = util.wrapChildPromise.firstCall.args[3][0];
-    const file2 = util.wrapChildPromise.lastCall.args[3][0];
-    return expect(file1).to.equal(file2);
-  });
+    file.emit('rerun')
 
-  it("deletes stored file objects on close(filePath)", function() {
-    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2]);
-    this.ipc.on.withArgs("preprocessor:close").yield(this.file.filePath);
-    const files = preprocessor._getFiles();
-    expect(Object.keys(files).length).to.equal(1);
-    expect(files[this.file2.filePath]).to.exist;
-    return expect(files[this.file.filePath]).to.be.undefined;
-  });
+    expect(this.ipc.send).to.be.calledWith('preprocessor:rerun', this.file.filePath)
+  })
 
-  return it("deletes all stored file objects on close()", function() {
-    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2]);
-    this.ipc.on.withArgs("preprocessor:close").yield();
-    const files = preprocessor._getFiles();
-    return expect(Object.keys(files).length).to.equal(0);
-  });
-});
+  it('emits \'close\' when ipc emits \'preprocessor:close\' with same file path', function () {
+    const file = util.wrapChildPromise.lastCall.args[3][0]
+    const handler = sinon.spy()
+
+    file.on('close', handler)
+    this.ipc.on.withArgs('preprocessor:close').yield(this.file.filePath)
+
+    expect(handler).to.be.called
+  })
+
+  it('does not close file when ipc emits \'preprocessor:close\' with different file path', function () {
+    const file = util.wrapChildPromise.lastCall.args[3][0]
+    const handler = sinon.spy()
+
+    file.on('close', handler)
+    this.ipc.on.withArgs('preprocessor:close').yield('different/path')
+
+    expect(handler).not.to.be.called
+  })
+
+  it('passes existing file if called again with same file path', function () {
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file])
+    const file1 = util.wrapChildPromise.firstCall.args[3][0]
+    const file2 = util.wrapChildPromise.lastCall.args[3][0]
+
+    expect(file1).to.equal(file2)
+  })
+
+  it('deletes stored file objects on close(filePath)', function () {
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2])
+    this.ipc.on.withArgs('preprocessor:close').yield(this.file.filePath)
+    const files = preprocessor._getFiles()
+
+    expect(Object.keys(files).length).to.equal(1)
+    expect(files[this.file2.filePath]).to.exist
+
+    expect(files[this.file.filePath]).to.be.undefined
+  })
+
+  it('deletes all stored file objects on close()', function () {
+    preprocessor.wrap(this.ipc, this.invoke, this.ids, [this.file2])
+    this.ipc.on.withArgs('preprocessor:close').yield()
+    const files = preprocessor._getFiles()
+
+    expect(Object.keys(files).length).to.equal(0)
+  })
+})

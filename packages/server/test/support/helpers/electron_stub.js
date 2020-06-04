@@ -1,47 +1,53 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-//# a stubbed out version of electron
-//# for using in all of our tests :-)
+// a stubbed out version of electron
+// for using in all of our tests :-)
 module.exports = {
   shell: {},
   dialog: {},
   ipcMain: {
-    on() {},
-    removeAllListeners() {}
+    on () {},
+    removeAllListeners () {},
   },
   nativeImage: {
-    createFromPath() { return {}; }
+    createFromPath () {
+      return {}
+    },
   },
   app: {
-    on() {},
-    exit() {},
+    on () {},
+    exit () {},
     commandLine: {
-      appendSwitch() {},
-      appendArgument() {}
+      appendSwitch () {},
+      appendArgument () {},
     },
-    disableHardwareAcceleration() {}
+    disableHardwareAcceleration () {},
   },
   systemPreferences: {
-    isDarkMode() {},
-    subscribeNotification() {}
+    isDarkMode () {},
+    subscribeNotification () {},
   },
   BrowserWindow: {
-    fromWebContents() {},
-    getExtensions() {},
-    removeExtension() {},
-    addExtension() {}
+    fromWebContents () {},
+    getExtensions () {},
+    removeExtension () {},
+    addExtension () {},
   },
   Menu: {
-    buildFromTemplate() {},
-    setApplicationMenu() {}
+    buildFromTemplate () {},
+    setApplicationMenu () {},
   },
-  Tray() { return {
-    on() {},
-    setToolTip() {},
-    setImage() {},
-    setPressedImage() {}
-  }; }
-};
+  Tray () {
+    return {
+      on () {},
+      setToolTip () {},
+      setImage () {},
+      setPressedImage () {},
+    }
+  },
+}

@@ -1,58 +1,67 @@
+/* eslint-disable
+    no-console,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const e2e = require("../support/helpers/e2e").default;
-const Fixtures = require("../support/helpers/fixtures");
-const snapshot = require("snap-shot-it");
-const path = require("path");
+const e2e = require('../support/helpers/e2e').default
+const Fixtures = require('../support/helpers/fixtures')
+const snapshot = require('snap-shot-it')
+const path = require('path')
 
-describe("e2e component tests", function() {
-  e2e.setup();
+describe('e2e component tests', () => {
+  e2e.setup()
 
-  const project = Fixtures.projectPath("component-tests");
+  const project = Fixtures.projectPath('component-tests')
 
-  it("runs just the integration spec file", function() {
+  it('runs just the integration spec file', function () {
     return e2e.exec(this, {
       project,
-      spec: "integration-spec.js",
+      spec: 'integration-spec.js',
       config: {
-        video: false
-      }
+        video: false,
+      },
     })
-    .then(function(result) {
-      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout));
-      return snapshot('integration spec run', runSummary);
-    });
-  });
+    .then((result) => {
+      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
 
-  it("runs component spec file", function() {
+      return snapshot('integration spec run', runSummary)
+    })
+  })
+
+  it('runs component spec file', function () {
     // for now the component spec should use full path
-    const spec = path.join(project, "cypress/component-tests/foo.spec.js");
+    const spec = path.join(project, 'cypress/component-tests/foo.spec.js')
+
     return e2e.exec(this, {
       project,
       spec,
       config: {
-        video: false
-      }
+        video: false,
+      },
     })
-    .then(function(result) {
-      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout));
-      return console.log(runSummary);
-    });
-  });
+    .then((result) => {
+      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
 
-  return it("runs integration and component spec file when running all tests", function() {
+      return console.log(runSummary)
+    })
+  })
+
+  it('runs integration and component spec file when running all tests', function () {
     return e2e.exec(this, {
       project,
       config: {
-        video: false
-      }
+        video: false,
+      },
     })
-    .then(function(result) {
-      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout));
-      return snapshot('all tests results summary', runSummary);
-    });
-  });
-});
+    .then((result) => {
+      const runSummary = e2e.leaveRunFinishedTable(e2e.normalizeStdout(result.stdout))
+
+      return snapshot('all tests results summary', runSummary)
+    })
+  })
+})

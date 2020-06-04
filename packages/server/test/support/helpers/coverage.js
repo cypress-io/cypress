@@ -1,3 +1,5 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS209: Avoid top-level return
@@ -11,7 +13,7 @@ if (!process.env["NODE_COVERAGE"]) { return; }
 const projectRoot = path.resolve(__dirname, "../../..");
 const coverageVar = coffeeCoverage.findIstanbulVariable();
 
-//# Only write a coverage report if we"re not running inside of Istanbul.
+// Only write a coverage report if we"re not running inside of Istanbul.
 const writeOnExit = coverageVar ? null : projectRoot + "/coverage/coverage-coffee.json";
 
 coffeeCoverage.register({
@@ -23,10 +25,10 @@ coffeeCoverage.register({
   initAll: true
 });
 
-//# using hack found here to prevent problems with
-//# coffee-coverage being replaced by modules which
-//# use coffeescript/register
-//# https://github.com/abresas/register-coffee-coverage/blob/master/index.js
+// using hack found here to prevent problems with
+// coffee-coverage being replaced by modules which
+// use coffeescript/register
+// https://github.com/abresas/register-coffee-coverage/blob/master/index.js
 const loader = require.extensions[".coffee"];
 
 Object.defineProperty(require.extensions, ".coffee", {

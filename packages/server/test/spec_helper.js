@@ -1,130 +1,141 @@
+/* eslint-disable
+    no-unused-vars,
+    prefer-rest-params,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../lib/environment");
+require('../lib/environment')
 
-const chai = require('chai');
-chai.use(require('chai-subset'));
+const chai = require('chai')
 
-global.root      = "../../";
-global.supertest = require("supertest");
-global.nock      = require("nock");
-global.expect    = chai.expect;
-global.mockery   = require("mockery");
-global.proxyquire = require("proxyquire");
-global.sinon     = require("sinon");
-const _                = require("lodash");
-const Promise          = require("bluebird");
-const path             = require("path");
-const cache            = require("../lib/cache");
-const appData          = require("../lib/util/app_data");
+chai.use(require('chai-subset'))
 
-require("chai")
-.use(require("@cypress/sinon-chai"))
-.use(require("chai-uuid"))
-.use(require("chai-as-promised"));
+global.root = '../../'
+global.supertest = require('supertest')
+global.nock = require('nock')
+global.expect = chai.expect
+global.mockery = require('mockery')
+global.proxyquire = require('proxyquire')
+global.sinon = require('sinon')
+const _ = require('lodash')
+const Promise = require('bluebird')
+const path = require('path')
+const cache = require('../lib/cache')
+const appData = require('../lib/util/app_data')
+
+require('chai')
+.use(require('@cypress/sinon-chai'))
+.use(require('chai-uuid'))
+.use(require('chai-as-promised'))
 
 if (process.env.UPDATE) {
-  throw new Error("You're using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1");
+  throw new Error('You\'re using UPDATE=1 which is the old way of updating snapshots.\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
 }
 
 if (process.env.UPDATE_SNAPSHOT) {
-  throw new Error("You're using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1");
+  throw new Error('You\'re using UPDATE_SNAPSHOT=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
 }
 
 if (process.env.UPDATE_SNAPSHOTS) {
-  throw new Error("You're using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1");
+  throw new Error('You\'re using UPDATE_SNAPSHOTS=1\n\nThe correct environment variable is SNAPSHOT_UPDATE=1')
 }
 
 let hasOnly = false;
 
-//# hack for older version of mocha so that
-//# snap-shot-it can find suite._onlyTests
-["it", "describe", "context"].forEach(function(prop) {
-  const backup = global[prop].only;
+// hack for older version of mocha so that
+// snap-shot-it can find suite._onlyTests
+['it', 'describe', 'context'].forEach((prop) => {
+  const backup = global[prop].only
 
-  return global[prop].only = function() {
-    hasOnly = true;
+  global[prop].only = function () {
+    hasOnly = true
 
-    return backup.apply(this, arguments);
-  };
-});
+    return backup.apply(this, arguments)
+  }
+})
 
-const originalEnv = process.env;
-const env = _.clone(process.env);
+const originalEnv = process.env
+const env = _.clone(process.env)
 
-sinon.usingPromise(Promise);
+sinon.usingPromise(Promise)
 
-//# backup these originals
+// backup these originals
 const {
-  restore
-} = sinon;
+  restore,
+} = sinon
 const {
-  useFakeTimers
-} = sinon;
+  useFakeTimers,
+} = sinon
 
-sinon.useFakeTimers = function() {
-  return sinon._clock = useFakeTimers.apply(sinon, arguments);
-};
+sinon.useFakeTimers = function () {
+  sinon._clock = useFakeTimers.apply(sinon, arguments)
+}
 
-sinon.restore = function() {
-  let c;
-  if (c = sinon._clock) {
-    c.restore();
+sinon.restore = function () {
+  let c
+
+  c = sinon._clock
+
+  if (c) {
+    c.restore()
   }
 
-  return restore.apply(sinon, arguments);
-};
+  return restore.apply(sinon, arguments)
+}
 
 mockery.enable({
-  warnOnUnregistered: false
-});
+  warnOnUnregistered: false,
+})
 
-//# stub out the entire electron object for our stub
-//# we must use an absolute path here because of the way mockery internally loads this
-//# module - meaning the first time electron is required it'll use this path string
-//# so because its required from a separate module we must use an absolute reference to it
+// stub out the entire electron object for our stub
+// we must use an absolute path here because of the way mockery internally loads this
+// module - meaning the first time electron is required it'll use this path string
+// so because its required from a separate module we must use an absolute reference to it
 mockery.registerSubstitute(
-  "electron",
-  path.join(__dirname, "./support/helpers/electron_stub")
-);
+  'electron',
+  path.join(__dirname, './support/helpers/electron_stub'),
+)
 
-//# stub out electron's original-fs module which is available when running in electron
-mockery.registerMock("original-fs", {});
+// stub out electron's original-fs module which is available when running in electron
+mockery.registerMock('original-fs', {})
 
-before(function() {
+before(function () {
   if (hasOnly) {
-    return this.test.parent._onlyTests = [true];
-  }});
+    this.test.parent._onlyTests = [true]
+  }
+})
 
-  // appData.ensure()
+// appData.ensure()
 
-beforeEach(function() {
-  this.originalEnv = originalEnv;
+beforeEach(function () {
+  this.originalEnv = originalEnv
 
-  nock.disableNetConnect();
-  nock.enableNetConnect(/localhost/);
+  nock.disableNetConnect()
+  nock.enableNetConnect(/localhost/)
 
-  //# always clean up the cache
-  //# before each test
-  return cache.remove();
-});
+  // always clean up the cache
+  // before each test
+  return cache.remove()
+})
 
-afterEach(function() {
-  sinon.restore();
+afterEach(() => {
+  sinon.restore()
 
-  nock.cleanAll();
-  nock.enableNetConnect();
+  nock.cleanAll()
+  nock.enableNetConnect()
 
-  return process.env = _.clone(env);
-});
+  process.env = _.clone(env)
+})
 
 module.exports = {
   expect: global.expect,
   nock: global.nock,
   proxyquire: global.proxyquire,
   sinon: global.sinon,
-  root: global.root
-};
+  root: global.root,
+}

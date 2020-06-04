@@ -1,194 +1,242 @@
+/* eslint-disable
+    brace-style,
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const _        = require("lodash");
-let fs       = require("fs-extra");
-let glob     = require("glob");
-const Promise  = require("bluebird");
-const inquirer = require("inquirer");
-const la       = require("lazy-ass");
-const check    = require("check-more-types");
-const path     = require("path");
+const _ = require('lodash')
+let fs = require('fs-extra')
+let glob = require('glob')
+const Promise = require('bluebird')
+const inquirer = require('inquirer')
+const la = require('lazy-ass')
+const check = require('check-more-types')
+const path = require('path')
 
-glob = Promise.promisify(glob);
+glob = Promise.promisify(glob)
 
-const prompt = questions => Promise.resolve(inquirer.prompt(questions));
+const prompt = (questions) => {
+  return Promise.resolve(inquirer.prompt(questions))
+}
 
-fs = Promise.promisifyAll(fs);
+fs = Promise.promisifyAll(fs)
 
-const getZipFile = () => [{
-  name: "zipFile",
-  type: "string",
-  default: "cypress.zip",
-  message: "Which zip file should we upload?"
-}];
+const getZipFile = () => {
+  return [{
+    name: 'zipFile',
+    type: 'string',
+    default: 'cypress.zip',
+    message: 'Which zip file should we upload?',
+  }]
+}
 
-const getPlatformQuestion = () => [{
-  name: "platform",
-  type: "list",
-  message: "Which OS should we deploy?",
-  choices: [{
-    name: "Mac",
-    value: "darwin"
-  },{
-    name: "Linux",
-    value: "linux"
+const getPlatformQuestion = () => {
+  return [{
+    name: 'platform',
+    type: 'list',
+    message: 'Which OS should we deploy?',
+    choices: [{
+      name: 'Mac',
+      value: 'darwin',
+    }, {
+      name: 'Linux',
+      value: 'linux',
+    }, {
+      name: 'Windows',
+      value: 'win32',
+    }],
+  }]
+}
+
+const getQuestions = (version) => {
+  return [{
+    name: 'publish',
+    type: 'list',
+    message: `Publish a new version? (currently: ${version})`,
+    choices: [{
+      name: 'Yes: set a new version and deploy new version.',
+      value: true,
+    }, {
+      name: 'No:  just override the current deploy’ed version.',
+      value: false,
+    }],
   }, {
-    name: "Windows",
-    value: "win32"
+    name: 'version',
+    type: 'input',
+    message: `Bump version to...? (currently: ${version})`,
+    default () {
+      const a = version.split('.')
+      let v = a[a.length - 1]
+
+      v = Number(v) + 1
+      a.splice(a.length - 1, 1, v)
+
+      return a.join('.')
+    },
+    when (answers) {
+      return answers.publish
+    },
   }]
-}];
+}
 
-const getQuestions = version => [{
-  name: "publish",
-  type: "list",
-  message: `Publish a new version? (currently: ${version})`,
-  choices: [{
-    name: "Yes: set a new version and deploy new version.",
-    value: true
-  },{
-    name: "No:  just override the current deploy’ed version.",
-    value: false
+const getReleases = (releases) => {
+  return [{
+    name: 'release',
+    type: 'list',
+    message: 'Release which version?',
+    choices: _.map(releases, (r) => {
+      return {
+        name: r,
+        value: r,
+      }
+    }),
   }]
-},{
-  name: "version",
-  type: "input",
-  message: `Bump version to...? (currently: ${version})`,
-  default() {
-    const a = version.split(".");
-    let v = a[a.length - 1];
-    v = Number(v) + 1;
-    a.splice(a.length - 1, 1, v);
-    return a.join(".");
-  },
-  when(answers) {
-    return answers.publish;
-  }
-}];
+}
 
-const getReleases = releases => [{
-  name: "release",
-  type: "list",
-  message: "Release which version?",
-  choices: _.map(releases, r => ({
-    name: r,
-    value: r
-  }))
-}];
-
-const getNextVersion = function({ version } = {}) {
+const getNextVersion = function ({ version } = {}) {
   if (!version) {
     ({
-      version
-    } = require(path.join(__dirname, "..", "..", "package.json")));
+      version,
+    } = require(path.join(__dirname, '..', '..', 'package.json')))
   }
 
-  const message = `Bump next version to...? (currently: ${version})`;
-  const defaultVersion = function() {
-    const a = version.split(".");
-    let v = a[a.length - 1];
-    v = Number(v) + 1;
-    a.splice(a.length - 1, 1, v);
-    return a.join(".");
-  };
+  const message = `Bump next version to...? (currently: ${version})`
+  const defaultVersion = function () {
+    const a = version.split('.')
+    let v = a[a.length - 1]
+
+    v = Number(v) + 1
+    a.splice(a.length - 1, 1, v)
+
+    return a.join('.')
+  }
 
   return [{
-    name: "nextVersion",
-    type: "input",
+    name: 'nextVersion',
+    type: 'input',
     message,
-    default: defaultVersion
-  }];
-};
-
-const getVersions = releases => [{
-  name: "version",
-  type: "list",
-  message: "Bump to which version?",
-  choices: _.map(releases, r => ({
-    name: r,
-    value: r
-  }))
-}];
-
-const getBumpTasks = () => [{
-  name: "task",
-  type: "list",
-  message: "Which bump task?",
-  choices: [{
-    name: "Bump Cypress Binary Version for all CI providers",
-    value: "version"
-  },{
-    name: "Run All Projects for all CI providers",
-    value: "run"
+    default: defaultVersion,
   }]
-}];
+}
 
-const getCommitVersion = version => [{
-  name: "commit",
-  type: "list",
-  message: `Commit this new version to git? (currently: ${version})`,
-  choices: [{
-    name: "Yes: commit and push this new release version.",
-    value: true
-  },{
-    name: "No:  do not commit.",
-    value: false
+const getVersions = (releases) => {
+  return [{
+    name: 'version',
+    type: 'list',
+    message: 'Bump to which version?',
+    choices: _.map(releases, (r) => {
+      return {
+        name: r,
+        value: r,
+      }
+    }),
   }]
-}];
+}
 
-const deployNewVersion = () => fs.readJsonAsync("./package.json")
-.then(json => {
-  return prompt(getQuestions(json.version))
-  .then(function(answers) {
-    //# set the new version if we're publishing!
-    //# update our own local package.json as well
-    if (answers.publish) {
+const getBumpTasks = () => {
+  return [{
+    name: 'task',
+    type: 'list',
+    message: 'Which bump task?',
+    choices: [{
+      name: 'Bump Cypress Binary Version for all CI providers',
+      value: 'version',
+    }, {
+      name: 'Run All Projects for all CI providers',
+      value: 'run',
+    }],
+  }]
+}
+
+const getCommitVersion = (version) => {
+  return [{
+    name: 'commit',
+    type: 'list',
+    message: `Commit this new version to git? (currently: ${version})`,
+    choices: [{
+      name: 'Yes: commit and push this new release version.',
+      value: true,
+    }, {
+      name: 'No:  do not commit.',
+      value: false,
+    }],
+  }]
+}
+
+const deployNewVersion = () => {
+  return fs.readJsonAsync('./package.json')
+  .then((json) => {
+    return prompt(getQuestions(json.version))
+    .then((answers) => {
+    // set the new version if we're publishing!
+    // update our own local package.json as well
+      if (answers.publish) {
       // @updateLocalPackageJson(answers.version, json).then ->
-      return answers.version;
-    } else {
-      return json.version;
-    }
-  });
-});
+        return answers.version
+      }
 
-const whichZipFile = () => prompt(getZipFile())
-.get("zipFile");
+      return json.version
+    })
+  })
+}
 
-const whichVersion = distDir => //# realpath returns the absolute full path
-glob("*/package.json", {cwd: distDir, realpath: true})
-.map(pkg => fs.readJsonAsync(pkg)
-.get("version")).then(function(versions) {
-  versions = _.uniq(versions);
+const whichZipFile = () => {
+  return prompt(getZipFile())
+  .get('zipFile')
+}
 
-  return prompt(getVersions(versions))
-  .get("version");
-});
+const whichVersion = (distDir) => // realpath returns the absolute full path
+{
+  return glob('*/package.json', { cwd: distDir, realpath: true })
+  .map((pkg) => {
+    return fs.readJsonAsync(pkg)
+    .get('version')
+  }).then((versions) => {
+    versions = _.uniq(versions)
 
-const whichRelease = distDir => //# realpath returns the absolute full path
-glob("*/package.json", {cwd: distDir, realpath: true})
-.map(pkg => {
-  return fs.readJsonAsync(pkg)
-  .get("version");
-}).then(versions => {
-  versions = _.uniq(versions);
+    return prompt(getVersions(versions))
+    .get('version')
+  })
+}
 
-  return prompt(getReleases(versions))
-  .get("release");
-});
+const whichRelease = (distDir) => // realpath returns the absolute full path
+{
+  return glob('*/package.json', { cwd: distDir, realpath: true })
+  .map((pkg) => {
+    return fs.readJsonAsync(pkg)
+    .get('version')
+  }).then((versions) => {
+    versions = _.uniq(versions)
 
-const whichPlatform = () => prompt(getPlatformQuestion())
-.get("platform");
+    return prompt(getReleases(versions))
+    .get('release')
+  })
+}
 
-const whichBumpTask = () => prompt(getBumpTasks())
-.get("task");
+const whichPlatform = () => {
+  return prompt(getPlatformQuestion())
+  .get('platform')
+}
 
-const nextVersion = version => prompt(getNextVersion(version))
-.get("nextVersion");
+const whichBumpTask = () => {
+  return prompt(getBumpTasks())
+  .get('task')
+}
 
-const toCommit = ({ version }) => prompt(getCommitVersion(version))
-.get("commit");
+const nextVersion = (version) => {
+  return prompt(getNextVersion(version))
+  .get('nextVersion')
+}
+
+const toCommit = ({ version }) => {
+  return prompt(getCommitVersion(version))
+  .get('commit')
+}
 
 module.exports = {
   toCommit,
@@ -204,6 +252,6 @@ module.exports = {
   whichVersion,
   whichRelease,
   whichPlatform,
-  whichBumpTask
+  whichBumpTask,
 
-};
+}

@@ -1,453 +1,480 @@
+/* eslint-disable
+    no-unused-vars,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-require("../../spec_helper");
+require('../../spec_helper')
 
-const os = require("os");
+const os = require('os')
 
-const extension = require("@packages/extension");
-const plugins = require(`${root}../lib/plugins`);
-const utils = require(`${root}../lib/browsers/utils`);
-const chrome = require(`${root}../lib/browsers/chrome`);
-const fs = require(`${root}../lib/util/fs`);
-const errors = require(`${root}../lib/errors`);
+const extension = require('@packages/extension')
+const plugins = require(`${root}../lib/plugins`)
+const utils = require(`${root}../lib/browsers/utils`)
+const chrome = require(`${root}../lib/browsers/chrome`)
+const fs = require(`${root}../lib/util/fs`)
+const errors = require(`${root}../lib/errors`)
 
-describe("lib/browsers/chrome", function() {
-  context("#open", function() {
-    beforeEach(function() {
+describe('lib/browsers/chrome', () => {
+  context('#open', () => {
+    beforeEach(function () {
       // mock CRI client during testing
       this.criClient = {
         ensureMinimumProtocolVersion: sinon.stub().resolves(),
         send: sinon.stub().resolves(),
         Page: {
-          screencastFrame: sinon.stub().returns()
+          screencastFrame: sinon.stub().returns(),
         },
-        close: sinon.stub().resolves()
-      };
+        close: sinon.stub().resolves(),
+      }
+
       this.automation = {
-        use: sinon.stub().returns()
-      };
+        use: sinon.stub().returns(),
+      }
+
       // mock launched browser child process object
       this.launchedBrowser = {
-        kill: sinon.stub().returns()
-      };
+        kill: sinon.stub().returns(),
+      }
 
-      sinon.stub(chrome, "_writeExtension").resolves("/path/to/ext");
-      sinon.stub(chrome, "_connectToChromeRemoteInterface").resolves(this.criClient);
-      sinon.stub(plugins, "execute").callThrough();
-      sinon.stub(utils, "launch").resolves(this.launchedBrowser);
-      sinon.stub(utils, "getProfileDir").returns("/profile/dir");
-      sinon.stub(utils, "ensureCleanCache").resolves("/profile/dir/CypressCache");
+      sinon.stub(chrome, '_writeExtension').resolves('/path/to/ext')
+      sinon.stub(chrome, '_connectToChromeRemoteInterface').resolves(this.criClient)
+      sinon.stub(plugins, 'execute').callThrough()
+      sinon.stub(utils, 'launch').resolves(this.launchedBrowser)
+      sinon.stub(utils, 'getProfileDir').returns('/profile/dir')
+      sinon.stub(utils, 'ensureCleanCache').resolves('/profile/dir/CypressCache')
 
-      this.readJson = sinon.stub(fs, 'readJson');
-      this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' });
-      this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' });
-      this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' });
+      this.readJson = sinon.stub(fs, 'readJson')
+      this.readJson.withArgs('/profile/dir/Default/Preferences').rejects({ code: 'ENOENT' })
+      this.readJson.withArgs('/profile/dir/Default/Secure Preferences').rejects({ code: 'ENOENT' })
+      this.readJson.withArgs('/profile/dir/Local State').rejects({ code: 'ENOENT' })
 
       // port for Chrome remote interface communication
-      return sinon.stub(utils, "getPort").resolves(50505);
-    });
+      return sinon.stub(utils, 'getPort').resolves(50505)
+    })
 
-    afterEach(function() {
-      return expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce;
-    });
+    afterEach(function () {
+      expect(this.criClient.ensureMinimumProtocolVersion).to.be.calledOnce
+    })
 
-    it("focuses on the page and calls CRI Page.visit", function() {
-      return chrome.open("chrome", "http://", {}, this.automation)
+    it('focuses on the page and calls CRI Page.visit', function () {
+      return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
-        expect(utils.getPort).to.have.been.calledOnce; // to get remote interface port
-        expect(this.criClient.send).to.have.been.calledTwice;
-        expect(this.criClient.send).to.have.been.calledWith("Page.bringToFront");
-        return expect(this.criClient.send).to.have.been.calledWith("Page.navigate");
-      });
-    });
+        expect(utils.getPort).to.have.been.calledOnce // to get remote interface port
+        expect(this.criClient.send).to.have.been.calledTwice
+        expect(this.criClient.send).to.have.been.calledWith('Page.bringToFront')
 
-    it("is noop without before:browser:launch", function() {
-      return chrome.open("chrome", "http://", {}, this.automation)
-      .then(() => expect(plugins.execute).not.to.be.called);
-    });
+        expect(this.criClient.send).to.have.been.calledWith('Page.navigate')
+      })
+    })
 
-    it("is noop if newArgs are not returned", function() {
-      const args = [];
+    it('is noop without before:browser:launch', function () {
+      return chrome.open('chrome', 'http://', {}, this.automation)
+      .then(() => {
+        expect(plugins.execute).not.to.be.called
+      })
+    })
 
-      sinon.stub(chrome, "_getArgs").returns(args);
-      sinon.stub(plugins, 'has').returns(true);
+    it('is noop if newArgs are not returned', function () {
+      const args = []
 
-      plugins.execute.resolves(null);
+      sinon.stub(chrome, '_getArgs').returns(args)
+      sinon.stub(plugins, 'has').returns(true)
 
-      return chrome.open("chrome", "http://", {}, this.automation)
+      plugins.execute.resolves(null)
+
+      return chrome.open('chrome', 'http://', {}, this.automation)
       .then(() => {
         // to initialize remote interface client and prepare for true tests
         // we load the browser with blank page first
-        return expect(utils.launch).to.be.calledWith("chrome", "about:blank", args);
-      });
-    });
+        expect(utils.launch).to.be.calledWith('chrome', 'about:blank', args)
+      })
+    })
 
-    it("sets default window size in headless mode", function() {
-      chrome._writeExtension.restore();
+    it('sets default window size in headless mode', function () {
+      chrome._writeExtension.restore()
 
-      const pathToTheme = extension.getPathToTheme();
+      const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, this.automation)
+      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
       .then(() => {
-        const args = utils.launch.firstCall.args[2];
+        const args = utils.launch.firstCall.args[2]
 
-        return expect(args).to.include.members([
-          "--headless",
-          "--window-size=1280,720"
-        ]);
-      });
-    });
+        expect(args).to.include.members([
+          '--headless',
+          '--window-size=1280,720',
+        ])
+      })
+    })
 
-    it("does not load extension in headless mode", function() {
-      chrome._writeExtension.restore();
+    it('does not load extension in headless mode', function () {
+      chrome._writeExtension.restore()
 
-      const pathToTheme = extension.getPathToTheme();
+      const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open({ isHeadless: true, isHeaded: false }, "http://", {}, this.automation)
+      return chrome.open({ isHeadless: true, isHeaded: false }, 'http://', {}, this.automation)
       .then(() => {
-        const args = utils.launch.firstCall.args[2];
+        const args = utils.launch.firstCall.args[2]
 
-        return expect(args).to.include.members([
-          "--headless",
-          "--remote-debugging-port=50505",
-          "--remote-debugging-address=127.0.0.1",
-          "--user-data-dir=/profile/dir",
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ]);
-      });
-    });
+        expect(args).to.include.members([
+          '--headless',
+          '--remote-debugging-port=50505',
+          '--remote-debugging-address=127.0.0.1',
+          '--user-data-dir=/profile/dir',
+          '--disk-cache-dir=/profile/dir/CypressCache',
+        ])
+      })
+    })
 
-    it("uses a custom profilePath if supplied", function() {
-      chrome._writeExtension.restore();
-      utils.getProfileDir.restore();
+    it('uses a custom profilePath if supplied', function () {
+      chrome._writeExtension.restore()
+      utils.getProfileDir.restore()
 
-      const profilePath = '/home/foo/snap/chromium/current';
-      const fullPath = `${profilePath}/Cypress/chromium-stable/interactive`;
+      const profilePath = '/home/foo/snap/chromium/current'
+      const fullPath = `${profilePath}/Cypress/chromium-stable/interactive`
 
-      this.readJson.withArgs(`${fullPath}/Default/Preferences`).rejects({ code: 'ENOENT' });
-      this.readJson.withArgs(`${fullPath}/Default/Secure Preferences`).rejects({ code: 'ENOENT' });
-      this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' });
+      this.readJson.withArgs(`${fullPath}/Default/Preferences`).rejects({ code: 'ENOENT' })
+      this.readJson.withArgs(`${fullPath}/Default/Secure Preferences`).rejects({ code: 'ENOENT' })
+      this.readJson.withArgs(`${fullPath}/Local State`).rejects({ code: 'ENOENT' })
 
       return chrome.open({
         isHeadless: true,
         isHeaded: false,
         profilePath,
         name: 'chromium',
-        channel: 'stable'
-      }, "http://", {}, this.automation)
+        channel: 'stable',
+      }, 'http://', {}, this.automation)
       .then(() => {
-        const args = utils.launch.firstCall.args[2];
-
-        return expect(args).to.include.members([
-          `--user-data-dir=${fullPath}`
-        ]);
-      });
-    });
-
-    it("DEPRECATED: normalizes --load-extension if provided in plugin", function() {
-      plugins.register('before:browser:launch', (browser, config) => Promise.resolve(["--foo=bar", "--load-extension=/foo/bar/baz.js"]));
-
-      const pathToTheme = extension.getPathToTheme();
-
-      const onWarning = sinon.stub();
-
-      return chrome.open("chrome", "http://", { onWarning }, this.automation)
-      .then(() => {
-        const args = utils.launch.firstCall.args[2];
-
-        expect(args).to.deep.eq([
-          "--foo=bar",
-          `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
-          "--user-data-dir=/profile/dir",
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ]);
-
-        return expect(onWarning).calledOnce;
-      });
-    });
-
-    it("normalizes --load-extension if provided in plugin", function() {
-      plugins.register('before:browser:launch', (browser, config) => Promise.resolve({
-        args: ["--foo=bar", "--load-extension=/foo/bar/baz.js"]
-      }));
-
-      const pathToTheme = extension.getPathToTheme();
-
-      return chrome.open("chrome", "http://", {}, this.automation)
-      .then(() => {
-        const args = utils.launch.firstCall.args[2];
-
-        return expect(args).to.include.members([
-          "--foo=bar",
-          `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
-          "--user-data-dir=/profile/dir",
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ]);
-      });
-    });
-
-    it("normalizes multiple extensions from plugins", function() {
-      plugins.register('before:browser:launch', (browser, config) => Promise.resolve({args: ["--foo=bar", "--load-extension=/foo/bar/baz.js,/quux.js"]}));
-
-      const pathToTheme = extension.getPathToTheme();
-
-      const onWarning = sinon.stub();
-
-      return chrome.open("chrome", "http://", { onWarning }, this.automation)
-      .then(() => {
-        const args = utils.launch.firstCall.args[2];
+        const args = utils.launch.firstCall.args[2]
 
         expect(args).to.include.members([
-          "--foo=bar",
-          `--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,${pathToTheme}`,
-          "--user-data-dir=/profile/dir",
-          "--disk-cache-dir=/profile/dir/CypressCache"
-        ]);
+          `--user-data-dir=${fullPath}`,
+        ])
+      })
+    })
 
-        return expect(onWarning).not.calledOnce;
-      });
-    });
+    it('DEPRECATED: normalizes --load-extension if provided in plugin', function () {
+      plugins.register('before:browser:launch', (browser, config) => {
+        return Promise.resolve(['--foo=bar', '--load-extension=/foo/bar/baz.js'])
+      })
 
-    it("cleans up an unclean browser profile exit status", function() {
-      this.readJson.withArgs("/profile/dir/Default/Preferences").resolves({
-        profile: {
-          exit_type: "Abnormal",
-          exited_cleanly: false
-        }
-      });
-      sinon.stub(fs, "outputJson").resolves();
+      const pathToTheme = extension.getPathToTheme()
 
-      return chrome.open("chrome", "http://", {}, this.automation)
-      .then(() => expect(fs.outputJson).to.be.calledWith("/profile/dir/Default/Preferences", {
-        profile: {
-          exit_type: "Normal",
-          exited_cleanly: true
-        }
-      }));
-    });
+      const onWarning = sinon.stub()
 
-    it("calls cri client close on kill", function() {
-      //# need a reference here since the stub will be monkey-patched
-      const {
-        kill
-      } = this.launchedBrowser;
-
-      return chrome.open("chrome", "http://", {}, this.automation)
+      return chrome.open('chrome', 'http://', { onWarning }, this.automation)
       .then(() => {
-        expect(this.launchedBrowser.kill).to.be.a("function");
-        return this.launchedBrowser.kill();
-    }).then(() => {
-        expect(this.criClient.close).to.be.calledOnce;
-        return expect(kill).to.be.calledOnce;
-      });
-    });
+        const args = utils.launch.firstCall.args[2]
 
-    return it("rejects if CDP version check fails", function() {
-      this.criClient.ensureMinimumProtocolVersion.rejects();
+        expect(args).to.deep.eq([
+          '--foo=bar',
+          `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
+          '--user-data-dir=/profile/dir',
+          '--disk-cache-dir=/profile/dir/CypressCache',
+        ])
 
-      return expect(chrome.open("chrome", "http://", {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.');
-    });
-  });
+        expect(onWarning).calledOnce
+      })
+    })
 
-  context("#_getArgs", function() {
-    it("disables gpu when linux", function() {
-      sinon.stub(os, "platform").returns("linux");
+    it('normalizes --load-extension if provided in plugin', function () {
+      plugins.register('before:browser:launch', (browser, config) => {
+        return Promise.resolve({
+          args: ['--foo=bar', '--load-extension=/foo/bar/baz.js'],
+        })
+      })
 
-      const args = chrome._getArgs({}, {});
+      const pathToTheme = extension.getPathToTheme()
 
-      return expect(args).to.include("--disable-gpu");
-    });
+      return chrome.open('chrome', 'http://', {}, this.automation)
+      .then(() => {
+        const args = utils.launch.firstCall.args[2]
 
-    it("does not disable gpu when not linux", function() {
-      sinon.stub(os, "platform").returns("darwin");
+        expect(args).to.include.members([
+          '--foo=bar',
+          `--load-extension=/foo/bar/baz.js,/path/to/ext,${pathToTheme}`,
+          '--user-data-dir=/profile/dir',
+          '--disk-cache-dir=/profile/dir/CypressCache',
+        ])
+      })
+    })
 
-      const args = chrome._getArgs({}, {});
+    it('normalizes multiple extensions from plugins', function () {
+      plugins.register('before:browser:launch', (browser, config) => {
+        return Promise.resolve({ args: ['--foo=bar', '--load-extension=/foo/bar/baz.js,/quux.js'] })
+      })
 
-      return expect(args).not.to.include("--disable-gpu");
-    });
+      const pathToTheme = extension.getPathToTheme()
 
-    it("turns off sandbox when linux", function() {
-      sinon.stub(os, "platform").returns("linux");
+      const onWarning = sinon.stub()
 
-      const args = chrome._getArgs({}, {});
+      return chrome.open('chrome', 'http://', { onWarning }, this.automation)
+      .then(() => {
+        const args = utils.launch.firstCall.args[2]
 
-      return expect(args).to.include("--no-sandbox");
-    });
+        expect(args).to.include.members([
+          '--foo=bar',
+          `--load-extension=/foo/bar/baz.js,/quux.js,/path/to/ext,${pathToTheme}`,
+          '--user-data-dir=/profile/dir',
+          '--disk-cache-dir=/profile/dir/CypressCache',
+        ])
 
-    it("does not turn off sandbox when not linux", function() {
-      sinon.stub(os, "platform").returns("win32");
+        expect(onWarning).not.calledOnce
+      })
+    })
 
-      const args = chrome._getArgs({}, {});
+    it('cleans up an unclean browser profile exit status', function () {
+      this.readJson.withArgs('/profile/dir/Default/Preferences').resolves({
+        profile: {
+          exit_type: 'Abnormal',
+          exited_cleanly: false,
+        },
+      })
 
-      return expect(args).not.to.include("--no-sandbox");
-    });
+      sinon.stub(fs, 'outputJson').resolves()
 
-    it("adds user agent when options.userAgent", function() {
+      return chrome.open('chrome', 'http://', {}, this.automation)
+      .then(() => {
+        expect(fs.outputJson).to.be.calledWith('/profile/dir/Default/Preferences', {
+          profile: {
+            exit_type: 'Normal',
+            exited_cleanly: true,
+          },
+        })
+      })
+    })
+
+    it('calls cri client close on kill', function () {
+      // need a reference here since the stub will be monkey-patched
+      const {
+        kill,
+      } = this.launchedBrowser
+
+      return chrome.open('chrome', 'http://', {}, this.automation)
+      .then(() => {
+        expect(this.launchedBrowser.kill).to.be.a('function')
+
+        return this.launchedBrowser.kill()
+      }).then(() => {
+        expect(this.criClient.close).to.be.calledOnce
+
+        expect(kill).to.be.calledOnce
+      })
+    })
+
+    it('rejects if CDP version check fails', function () {
+      this.criClient.ensureMinimumProtocolVersion.rejects()
+
+      expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+    })
+  })
+
+  context('#_getArgs', () => {
+    it('disables gpu when linux', () => {
+      sinon.stub(os, 'platform').returns('linux')
+
+      const args = chrome._getArgs({}, {})
+
+      expect(args).to.include('--disable-gpu')
+    })
+
+    it('does not disable gpu when not linux', () => {
+      sinon.stub(os, 'platform').returns('darwin')
+
+      const args = chrome._getArgs({}, {})
+
+      expect(args).not.to.include('--disable-gpu')
+    })
+
+    it('turns off sandbox when linux', () => {
+      sinon.stub(os, 'platform').returns('linux')
+
+      const args = chrome._getArgs({}, {})
+
+      expect(args).to.include('--no-sandbox')
+    })
+
+    it('does not turn off sandbox when not linux', () => {
+      sinon.stub(os, 'platform').returns('win32')
+
+      const args = chrome._getArgs({}, {})
+
+      expect(args).not.to.include('--no-sandbox')
+    })
+
+    it('adds user agent when options.userAgent', () => {
       const args = chrome._getArgs({}, {
-        userAgent: "foo"
-      });
+        userAgent: 'foo',
+      })
 
-      return expect(args).to.include("--user-agent=foo");
-    });
+      expect(args).to.include('--user-agent=foo')
+    })
 
-    it("does not add user agent", function() {
-      const args = chrome._getArgs({}, {});
+    it('does not add user agent', () => {
+      const args = chrome._getArgs({}, {})
 
-      return expect(args).not.to.include("--user-agent=foo");
-    });
+      expect(args).not.to.include('--user-agent=foo')
+    })
 
-    it("disables RootLayerScrolling in versions 66 or 67", function() {
-      const arg = "--disable-blink-features=RootLayerScrolling";
+    it('disables RootLayerScrolling in versions 66 or 67', () => {
+      const arg = '--disable-blink-features=RootLayerScrolling'
 
-      const disabledRootLayerScrolling = function(version, bool) {
+      const disabledRootLayerScrolling = function (version, bool) {
         const args = chrome._getArgs({
-          majorVersion: version
-        }, {});
+          majorVersion: version,
+        }, {})
 
         if (bool) {
-          return expect(args).to.include(arg);
-        } else {
-          return expect(args).not.to.include(arg);
+          expect(args).to.include(arg)
         }
-      };
 
-      disabledRootLayerScrolling("65", false);
-      disabledRootLayerScrolling("66", true);
-      disabledRootLayerScrolling("67", true);
-      return disabledRootLayerScrolling("68", false);
-    });
+        expect(args).not.to.include(arg)
+      }
 
-    //# https://github.com/cypress-io/cypress/issues/1872
-    return it("adds <-loopback> proxy bypass rule in version 72+", function() {
-      const arg = "--proxy-bypass-list=<-loopback>";
+      disabledRootLayerScrolling('65', false)
+      disabledRootLayerScrolling('66', true)
+      disabledRootLayerScrolling('67', true)
 
-      const chromeVersionHasLoopback = function(version, bool) {
+      return disabledRootLayerScrolling('68', false)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/1872
+    it('adds <-loopback> proxy bypass rule in version 72+', () => {
+      const arg = '--proxy-bypass-list=<-loopback>'
+
+      const chromeVersionHasLoopback = function (version, bool) {
         const args = chrome._getArgs({
-          majorVersion: version
-        }, {});
+          majorVersion: version,
+        }, {})
 
         if (bool) {
-          return expect(args).to.include(arg);
-        } else {
-          return expect(args).not.to.include(arg);
+          expect(args).to.include(arg)
         }
-      };
 
-      chromeVersionHasLoopback("71", false);
-      chromeVersionHasLoopback("72", true);
-      return chromeVersionHasLoopback("73", true);
-    });
-  });
+        expect(args).not.to.include(arg)
+      }
 
-  context("#_getChromePreferences", function() {
-    it("returns map of empty if the files do not exist", function() {
+      chromeVersionHasLoopback('71', false)
+      chromeVersionHasLoopback('72', true)
+
+      return chromeVersionHasLoopback('73', true)
+    })
+  })
+
+  context('#_getChromePreferences', () => {
+    it('returns map of empty if the files do not exist', () => {
       sinon.stub(fs, 'readJson')
       .withArgs('/foo/Default/Preferences').rejects({ code: 'ENOENT' })
       .withArgs('/foo/Default/Secure Preferences').rejects({ code: 'ENOENT' })
-      .withArgs('/foo/Local State').rejects({ code: 'ENOENT' });
+      .withArgs('/foo/Local State').rejects({ code: 'ENOENT' })
 
-      return expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: {},
         defaultSecure: {},
-        localState: {}
-      });
-    });
+        localState: {},
+      })
+    })
 
-    return it("returns map of json objects if the files do exist", function() {
+    it('returns map of json objects if the files do exist', () => {
       sinon.stub(fs, 'readJson')
       .withArgs('/foo/Default/Preferences').resolves({ foo: 'bar' })
       .withArgs('/foo/Default/Secure Preferences').resolves({ bar: 'baz' })
-      .withArgs('/foo/Local State').resolves({ baz: 'quux' });
+      .withArgs('/foo/Local State').resolves({ baz: 'quux' })
 
-      return expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
+      expect(chrome._getChromePreferences('/foo')).to.eventually.deep.eq({
         default: { foo: 'bar' },
         defaultSecure: { bar: 'baz' },
-        localState: { baz: 'quux' }
-      });
-    });
-  });
+        localState: { baz: 'quux' },
+      })
+    })
+  })
 
-  context("#_mergeChromePreferences", () => it("merges as expected", function() {
-    const originalPrefs = {
-      default: {},
-      defaultSecure: {
-        foo: 'bar',
-        deleteThis: 'nephew'
-      },
-      localState: {}
-    };
-
-    const newPrefs = {
-      default: {
-        something: {
-          nested: 'here'
+  context('#_mergeChromePreferences', () => {
+    it('merges as expected', () => {
+      const originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar',
+          deleteThis: 'nephew',
         },
-      },
-      defaultSecure: {
-        deleteThis: null
-      },
-      someGarbage: true
-    };
+        localState: {},
+      }
 
-    const expected = {
-      default: {
-        something: {
-          nested: 'here'
-        }
-      },
-      defaultSecure: {
-        foo: 'bar'
-      },
-      localState: {}
-    };
-
-    return expect(chrome._mergeChromePreferences(originalPrefs, newPrefs)).to.deep.eq(expected);
-  }));
-
-  return context("#_writeChromePreferences", () => it("writes json as expected", function() {
-    const outputJson = sinon.stub(fs, 'outputJson');
-    const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves();
-    const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves();
-    const statePrefs = outputJson.withArgs('/foo/Local State').resolves();
-
-    const originalPrefs = {
-      default: {},
-      defaultSecure: {
-        foo: 'bar',
-        deleteThis: 'nephew'
-      },
-      localState: {}
-    };
-
-    const newPrefs = chrome._mergeChromePreferences(originalPrefs, {
-      default: {
-        something: {
-          nested: 'here'
+      const newPrefs = {
+        default: {
+          something: {
+            nested: 'here',
+          },
         },
-      },
-      defaultSecure: {
-        deleteThis: null
-      },
-      someGarbage: true
-    });
-
-    return expect(chrome._writeChromePreferences('/foo', originalPrefs, newPrefs)).to.eventually.equal()
-    .then(function() {
-      expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
-        something: {
-          nested: 'here'
+        defaultSecure: {
+          deleteThis: null,
         },
-      });
+        someGarbage: true,
+      }
 
-      expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
-        foo: 'bar'
-      });
+      const expected = {
+        default: {
+          something: {
+            nested: 'here',
+          },
+        },
+        defaultSecure: {
+          foo: 'bar',
+        },
+        localState: {},
+      }
 
-      //# no changes were made
-      return expect(statePrefs).to.not.be.called;
-    });
-  }));
-});
+      expect(chrome._mergeChromePreferences(originalPrefs, newPrefs)).to.deep.eq(expected)
+    })
+  })
+
+  context('#_writeChromePreferences', () => {
+    it('writes json as expected', () => {
+      const outputJson = sinon.stub(fs, 'outputJson')
+      const defaultPrefs = outputJson.withArgs('/foo/Default/Preferences').resolves()
+      const securePrefs = outputJson.withArgs('/foo/Default/Secure Preferences').resolves()
+      const statePrefs = outputJson.withArgs('/foo/Local State').resolves()
+
+      const originalPrefs = {
+        default: {},
+        defaultSecure: {
+          foo: 'bar',
+          deleteThis: 'nephew',
+        },
+        localState: {},
+      }
+
+      const newPrefs = chrome._mergeChromePreferences(originalPrefs, {
+        default: {
+          something: {
+            nested: 'here',
+          },
+        },
+        defaultSecure: {
+          deleteThis: null,
+        },
+        someGarbage: true,
+      })
+
+      expect(chrome._writeChromePreferences('/foo', originalPrefs, newPrefs)).to.eventually.equal()
+      .then(() => {
+        expect(defaultPrefs).to.be.calledWith('/foo/Default/Preferences', {
+          something: {
+            nested: 'here',
+          },
+        })
+
+        expect(securePrefs).to.be.calledWith('/foo/Default/Secure Preferences', {
+          foo: 'bar',
+        })
+
+        // no changes were made
+        expect(statePrefs).to.not.be.called
+      })
+    })
+  })
+})
