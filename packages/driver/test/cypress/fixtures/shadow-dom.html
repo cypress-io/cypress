@@ -2,28 +2,38 @@
 <html>
   <head>
     <title>Shadow DOM Fixture</title>
+  </head>
+  <body>
+    <div id="non-shadow-element" class="in-and-out">Non Shadow</div>
+    <cy-test-element id="shadow-element" class="in-and-out" content="Shadow Content 1"></cy-test-element>
+    <cy-test-element id="shadow-element-2" content="Shadow Content 2"></cy-test-element>
+    <div id="parent-of-shadow-container-0">
+      <div id="parent-of-shadow-container-1">
+        <cy-test-element id="shadow-container-child" content="Shadow Content 3"></cy-test-element>
+      </div>
+    </div>
+    <cy-test-element content="Shadow Content 4">
+      <cy-test-element content="Shadow Content 5"></cy-test-element>
+    </cy-test-element>
+    <cy-test-element content="Shadow Content 6">
+      <div class="in-shadow-slot">In Shadow Slot</div>
+    </cy-test-element>
+
     <script type="text/javascript">
       if (window.customElements) {
         window.customElements.define('cy-test-element', class extends HTMLElement {
-          constructor() {
+          constructor () {
             super()
-            const root = this.attachShadow({mode: 'open'})
+
+            const root = this.attachShadow({ mode: 'open' })
             const para = document.createElement('p')
-            para.textContent = 'Foo'
-            root.appendChild(para);
+            const content = this.getAttribute('content')
+            const className = content.replace(/\s+/g, '-').toLowerCase()
+
+            root.innerHTML = `<p class="${className}">${content}</p><slot></slot>`
           }
         })
       }
     </script>
-  </head>
-  <body>
-    <div id="non-shadow-element">Foo</div>
-    <cy-test-element id="shadow-element"></cy-test-element>
-    <cy-test-element id="shadow-element-2"></cy-test-element>
-    <div id="parent-of-shadow-container-0">
-      <div id="parent-of-shadow-container-1">
-        <cy-test-element id="shadow-container-child"></cy-test-element>
-      </div>
-    </div>
   </body>
 </html>
