@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
+const ordinal = require('ordinal')
 
 const $errUtils = require('../../cypress/error_utils')
 
@@ -14,7 +15,7 @@ const getNumRequests = (state, alias) => {
 
   state('aliasRequests', requests)
 
-  return [index, _.ordinalize(requests[alias])]
+  return [index, ordinal(requests[alias])]
 }
 
 const throwErr = (arg) => {
