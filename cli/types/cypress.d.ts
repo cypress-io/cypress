@@ -317,6 +317,11 @@ declare namespace Cypress {
     getFirefoxGcInterval(): number | null | undefined
 
     /**
+     * @returns the number of test retries currently enabled for the run
+     */
+    getTestRetries(): number | null
+
+    /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
      * @see https://on.cypress.io/iscy
@@ -2410,6 +2415,14 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+
+    /**
+     * Number of times to retry a failed test.
+     * If a number is set, tests will retry in both runMode and openMode.
+     * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
+     * @default null
+     */
+    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
   }
 
   /**
@@ -2501,8 +2514,22 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
-    beforeScreenshot(doc: Document): void
-    afterScreenshot(doc: Document): void
+    onBeforeScreenshot: ($el: JQuery) => void
+    onAfterScreenshot: ($el: JQuery, props: {
+      path: string,
+      size: 12,
+      dimensions: {
+        width: number,
+        height: number
+      },
+      multipart: boolean,
+      pixelRatio: number,
+      takenAt: string,
+      name: string,
+      blackout: string[],
+      duration: number,
+      testAttemptIndex: number
+    }) => void
   }
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
@@ -4708,7 +4735,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any[]
+    message: any[] | string
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }
