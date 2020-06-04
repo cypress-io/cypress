@@ -1,6 +1,6 @@
 moment   = require("moment")
 parser   = require("cookie-parser")
-e2e      = require("../support/helpers/e2e")
+e2e      = require("../support/helpers/e2e").default
 humanInterval = require("human-interval")
 
 onServer = (app) ->

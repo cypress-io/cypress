@@ -1,5 +1,5 @@
 Fixtures   = require("../support/helpers/fixtures")
-e2e        = require("../support/helpers/e2e")
+e2e        = require("../support/helpers/e2e").default
 
 bustedSupportFile = Fixtures.projectPath("busted-support-file")
 

@@ -1,7 +1,7 @@
 cors     = require("cors")
 parser   = require("cookie-parser")
 session  = require("express-session")
-e2e      = require("../support/helpers/e2e")
+e2e      = require("../support/helpers/e2e").default
 
 onServer = (app) ->
   app.use(parser())

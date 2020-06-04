@@ -1,4 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
+const { $ } = Cypress
 
 describe('driver/src/cypress/cy', () => {
   let body

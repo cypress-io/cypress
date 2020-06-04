@@ -4,7 +4,7 @@ Promise  = require("bluebird")
 sizeOf   = require("image-size")
 fs       = require("../../lib/util/fs")
 Fixtures = require("../support/helpers/fixtures")
-e2e      = require("../support/helpers/e2e")
+e2e      = require("../support/helpers/e2e").default
 
 fs      = Promise.promisifyAll(fs)
 sizeOf  = Promise.promisify(sizeOf)

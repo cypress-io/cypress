@@ -1,5 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
-const { _, dom } = Cypress
+const { _, $, dom } = Cypress
 
 const helpers = require('../../support/helpers')
 
