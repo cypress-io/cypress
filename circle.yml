@@ -226,9 +226,11 @@ commands:
           steps:
             - run:
                 name: Check out PR << parameters.pull_request_id >>
+                working_directory: /tmp/<<parameters.repo>>
                 command: |
                   git fetch origin pull/<< parameters.pull_request_id >>/head:pr-<< parameters.pull_request_id >>
                   git checkout pr-<< parameters.pull_request_id >>
+                  git log
       - run:
           command: npm install
           working_directory: /tmp/<<parameters.repo>>
