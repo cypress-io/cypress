@@ -31,8 +31,7 @@ const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
-// get the fetch polyfill as a string so we can "eval" it in the app window
-const fetchPolyfill = require('unfetch')
+const fetchPolyfill = require('unfetch').default
 
 const privateProps = {
   props: { name: 'state', url: true },
