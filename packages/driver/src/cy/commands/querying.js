@@ -287,7 +287,10 @@ module.exports = (Commands, Cypress, cy, state) => {
           if (!options.ignoreShadowBoundaries) {
             $el = cy.$$(selector, options.withinSubject)
           } else {
-            const elementsWithShadow = $dom.findAllShadowRoots(options.withinSubject || cy.state('document'))
+            const root = options.withinSubject || cy.state('document')
+            const elementsWithShadow = $dom.findAllShadowRoots(root)
+
+            elementsWithShadow.push(root)
 
             $el = cy.$$(selector, elementsWithShadow)
           }
