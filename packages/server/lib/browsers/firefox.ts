@@ -3,7 +3,6 @@ import Bluebird from 'bluebird'
 import fs from 'fs-extra'
 import Debug from 'debug'
 import getPort from 'get-port'
-import os from 'os'
 import path from 'path'
 import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
@@ -12,7 +11,8 @@ import utils from './utils'
 import * as launcherDebug from '@packages/launcher/lib/log'
 import { Browser, BrowserInstance } from './types'
 import { EventEmitter } from 'events'
-
+import os from 'os'
+import treeKill from 'tree-kill'
 const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
@@ -290,16 +290,15 @@ const defaultPreferences = {
   'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
 }
 
-export function _createDetachedInstance (quitFn: () => Promise<void>): BrowserInstance {
+export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
   const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
 
-  detachedInstance.kill = () => {
-    quitFn()
-    .catch((err) => {
-      debug('error thrown while force-exiting detached instance, continuing %o', { err })
-    })
-    .then(() => {
-      debug('force-exit of detached instance completed')
+  detachedInstance.pid = browserInstance.pid
+
+  // kill the entire process tree, from the spawned instance up
+  detachedInstance.kill = (): void => {
+    treeKill(browserInstance.pid, (err?, result?) => {
+      debug('force-exit of process tree complete %o', { err, result })
       detachedInstance.emit('exit')
     })
   }
@@ -439,49 +438,11 @@ export async function open (browser: Browser, url, options: any = {}): Bluebird<
     errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
   })
 
-  // Override the .kill method for Windows so that the Browsers closes b/w specs
   if (os.platform() === 'win32') {
-    browserInstance.kill = async (...args) => {
-      debug('closing firefox on Windows')
-
-      killFirefoxInstanceWin32(browserInstance)
-    }
-  }
-
-  const [, { marionetteQuit }] = await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
-  .tapCatch((err) => {
-    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
-  })
-
-  if (os.platform() === 'win32') {
-    return _createDetachedInstance(marionetteQuit)
+    // override the .kill method for Windows so that the detached Firefox process closes between specs
+    // @see https://github.com/cypress-io/cypress/issues/6392
+    return _createDetachedInstance(browserInstance)
   }
 
   return browserInstance
-}
-
-const killFirefoxInstanceWin32 = (browserInstance) => {
-  let instanceKill = `TASKKILL /T /PID ${browserInstance.pid}`
-
-  let parentPidFile = browserInstance.spawnargs[browserInstance.spawnargs.length - 1].split('\\')
-  let parentPidWithFilename = parentPidFile[parentPidFile.length - 1].split('-')
-  let parentPid = parentPidWithFilename[parentPidWithFilename.length - 1]
-
-  let parentKill = `TASKKILL /T /PID ${parentPid}`
-
-  const exec = _.noop
-
-  exec(instanceKill, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
-    debug('killed child process in exec')
-    debug('instance/child process kill error:', error)
-    debug('instance/child process kill stdout', stdout)
-    debug('instance/child process kill stderr', stderr)
-
-    exec(parentKill, { shell: 'cmd.exe' }, (error, stdout, stderr) => {
-      debug('killed parent process in exec')
-      debug('parent process kill error:', error)
-      debug('parent process kill stdout', stdout)
-      debug('parent process kill stderr', stderr)
-    })
-  })
 }

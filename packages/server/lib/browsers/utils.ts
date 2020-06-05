@@ -231,7 +231,7 @@ export = {
     debug('getBrowsers')
 
     return launcher.detect()
-    .then((browsers = []) => {
+    .then((browsers: FoundBrowser[] = []) => {
       let majorVersion
 
       debug('found browsers %o', { browsers })

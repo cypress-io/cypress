@@ -9,4 +9,5 @@ export type Browser = FoundBrowser & {
 
 export type BrowserInstance = EventEmitter & {
   kill: () => void
+  pid: number
 }
