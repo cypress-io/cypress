@@ -1,5 +1,4 @@
-import helper from '../../spec_helper'
-const { expect, root } = helper as {expect: Chai.ExpectStatic, root: string}
+import { expect, root } from '../../spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
