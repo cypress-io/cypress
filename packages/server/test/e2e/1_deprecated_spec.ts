@@ -1,5 +1,5 @@
 import e2e from '../support/helpers/e2e'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 const beforeBrowserLaunchProject = Fixtures.projectPath('plugin-before-browser-launch-deprecation')
 

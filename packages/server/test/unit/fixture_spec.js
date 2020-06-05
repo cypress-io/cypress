@@ -101,8 +101,8 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         return fs.readFileAsync(`${this.fixturesFolder}/bad_json.json`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 {
-"bad": "json"
-"should": "not parse"
+  "bad": "json"
+  "should": "not parse"
 }\
 `)
         })
@@ -122,8 +122,8 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         return fs.readFileAsync(`${this.fixturesFolder}/words.json`, 'utf8').then((json) => {
           expect(json).to.eq(`\
 {
-"some": "multiple space separate words",
-"that": "should keep their spaces"
+  "some": "multiple space separate words",
+  "that": "should keep their spaces"
 }\
 `)
         })
@@ -153,12 +153,12 @@ Expecting 'EOF', '}', ':', ',', ']', got 'STRING'\
         return fs.readFileAsync(`${this.fixturesFolder}/empty_objects.json`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 {
-"empty": {
-  "object": {},
-  "array": [],
-  "object2": {\n\n    },
-  "array2": [\n\n    ]
-}
+  "empty": {
+    "object": {},
+    "array": [],
+    "object2": {\n\n    },
+    "array2": [\n\n    ]
+  }
 }\
 `)
         })
@@ -232,8 +232,8 @@ ParseError: Unterminated string constant\
         return fs.readFileAsync(`${this.fixturesFolder}/no_format.coffee`, 'utf8').then((str) => {
           expect(str).to.eq(`\
 [
-{id: 1}
-{id: 2}
+  {id: 1}
+  {id: 2}
 ]\
 `)
         })

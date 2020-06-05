@@ -70,25 +70,25 @@ describe('Extension', () => {
         const result = eol.auto(str)
         const expected = eol.auto(`\
 (function() {
-var HOST, PATH, automation, client, fail, invoke,
-  slice = [].slice;
+  var HOST, PATH, automation, client, fail, invoke,
+    slice = [].slice;
 
-HOST = "http://dev.local:8080";
+  HOST = "http://dev.local:8080";
 
-PATH = "/__foo";
+  PATH = "/__foo";
 
-client = io.connect(HOST, {
-  path: PATH
-});
+  client = io.connect(HOST, {
+    path: PATH
+  });
 
-automation = {
-  getAllCookies: function(filter, fn) {
-    if (filter == null) {
-      filter = {};
+  automation = {
+    getAllCookies: function(filter, fn) {
+      if (filter == null) {
+        filter = {};
+      }
+      return chrome.cookies.getAll(filter, fn);
     }
-    return chrome.cookies.getAll(filter, fn);
-  }
-};
+  };
 
 }).call(this);
 \

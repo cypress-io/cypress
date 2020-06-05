@@ -36,8 +36,8 @@ Cypress detected policy settings on your computer that may cause issues.
 
 The following policies were detected that may prevent Cypress from automating Chrome:
 
-> HKEY_LOCAL_MACHINE\\Software\\Policies\\Google\\Chrome\\ProxyServer
-> HKEY_CURRENT_USER\\Software\\Policies\\Google\\Chromium\\ExtensionSettings
+ > HKEY_LOCAL_MACHINE\\Software\\Policies\\Google\\Chrome\\ProxyServer
+ > HKEY_CURRENT_USER\\Software\\Policies\\Google\\Chromium\\ExtensionSettings
 
 For more information, see https://on.cypress.io/bad-browser-policy\
 `))

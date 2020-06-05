@@ -254,7 +254,7 @@ describe('lib/browsers/chrome', () => {
     it('rejects if CDP version check fails', function () {
       this.criClient.ensureMinimumProtocolVersion.rejects()
 
-      expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
+      return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
   })
 
@@ -314,7 +314,7 @@ describe('lib/browsers/chrome', () => {
         }, {})
 
         if (bool) {
-          expect(args).to.include(arg)
+          return expect(args).to.include(arg)
         }
 
         expect(args).not.to.include(arg)
@@ -324,7 +324,7 @@ describe('lib/browsers/chrome', () => {
       disabledRootLayerScrolling('66', true)
       disabledRootLayerScrolling('67', true)
 
-      return disabledRootLayerScrolling('68', false)
+      disabledRootLayerScrolling('68', false)
     })
 
     // https://github.com/cypress-io/cypress/issues/1872
@@ -337,7 +337,7 @@ describe('lib/browsers/chrome', () => {
         }, {})
 
         if (bool) {
-          expect(args).to.include(arg)
+          return expect(args).to.include(arg)
         }
 
         expect(args).not.to.include(arg)

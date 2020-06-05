@@ -50,7 +50,7 @@ describe('lib/browsers/index', () => {
     })
 
     it('throws when no browser can be found', () => {
-      expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
+      return expect(browsers.ensureAndGetByNameOrPath('browserNotGonnaBeFound'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return snapshot(normalizeBrowsers(err.message))
@@ -64,7 +64,7 @@ describe('lib/browsers/index', () => {
         { name: 'firefox', channel: 'stable' },
       ])
 
-      expect(browsers.ensureAndGetByNameOrPath('canary'))
+      return expect(browsers.ensureAndGetByNameOrPath('canary'))
       .to.be.rejectedWith({ type: 'BROWSER_NOT_FOUND_BY_NAME' })
       .then((err) => {
         return snapshot(err.message)

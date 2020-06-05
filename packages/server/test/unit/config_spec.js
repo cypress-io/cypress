@@ -1654,14 +1654,14 @@ describe('lib/config', () => {
 
       const obj = config.setAbsolutePaths({
         projectRoot,
-        supportFile: 'test/unit/config_spec.coffee',
+        supportFile: 'test/unit/config_spec.js',
       })
 
       return config.setSupportFileAndFolder(obj)
       .then((result) => {
         expect(result).to.eql({
           projectRoot,
-          supportFile: `${projectRoot}/test/unit/config_spec.coffee`,
+          supportFile: `${projectRoot}/test/unit/config_spec.js`,
           supportFolder: `${projectRoot}/test/unit`,
         })
       })

@@ -264,11 +264,11 @@ describe('lib/api', () => {
 401
 
 {
-"errors": {
-  "permission": [
-    "denied"
-  ]
-}
+  "errors": {
+    "permission": [
+      "denied"
+    ]
+  }
 }\
 `)
       })
@@ -382,11 +382,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "runId": [
-    "is required"
-  ]
-}
+  "errors": {
+    "runId": [
+      "is required"
+    ]
+  }
 }\
 `)
       })
@@ -493,11 +493,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "tests": [
-    "is required"
-  ]
-}
+  "errors": {
+    "tests": [
+      "is required"
+    ]
+  }
 }\
 `)
       })
@@ -597,11 +597,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "tests": [
-    "is required"
-  ]
-}
+  "errors": {
+    "tests": [
+      "is required"
+    ]
+  }
 }\
 `)
       })
@@ -688,11 +688,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "tests": [
-    "is required"
-  ]
-}
+  "errors": {
+    "tests": [
+      "is required"
+    ]
+  }
 }\
 `)
       })
@@ -894,11 +894,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "orgId": [
-    "is required"
-  ]
-}
+  "errors": {
+    "orgId": [
+      "is required"
+    ]
+  }
 }\
 `)
       })
@@ -985,11 +985,11 @@ describe('lib/api', () => {
 422
 
 {
-"errors": {
-  "access": [
-    "already requested"
-  ]
-}
+  "errors": {
+    "access": [
+      "already requested"
+    ]
+  }
 }\
 `)
       })

@@ -166,10 +166,10 @@ describe('lib/plugins/preprocessor', () => {
     it('send javascript string with the error', () => {
       expect(preprocessor.clientSideError('an error')).to.equal(`\
 (function () {
-Cypress.action("spec:script:error", {
-  type: "BUNDLE_ERROR",
-  error: "an error"
-})
+  Cypress.action("spec:script:error", {
+    type: "BUNDLE_ERROR",
+    error: "an error"
+  })
 }())\
 `)
     })

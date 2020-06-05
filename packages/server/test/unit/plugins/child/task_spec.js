@@ -35,7 +35,7 @@ describe('lib/plugins/child/task', () => {
       expect(util.wrapChildPromise).to.be.called
       const result = util.wrapChildPromise.lastCall.args[1]('1')
 
-      expect(result.replace(/\s+/g, '')).to.equal('function(){return"foo";}')
+      expect(result.replace(/\s+/g, '')).to.equal('\'a:third:task\'(){return\'foo\'}')
     })
 
     it('returns an empty string if event handler cannot be found', function () {
