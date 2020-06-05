@@ -17,7 +17,7 @@ describe('App', () => {
     cy.contains('.item', 'oranges 🍊').should('be.visible')
   })
 
-  it('sets default cart otherwise', () => {
+  it('updates localStorage after adding an item to the cart', () => {
     mount(<App />)
     cy.contains('.item', 'kiwi 🥝').should('be.visible')
     cy.contains('Add juice').click()
