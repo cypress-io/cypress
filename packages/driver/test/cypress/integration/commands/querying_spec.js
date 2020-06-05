@@ -931,7 +931,8 @@ describe('src/cy/commands/querying', () => {
         .should('have.text', 'In Shadow Slot')
       })
 
-      it('finds elements within shadow roots with cross-boundary selector', () => {
+      // TODO: enable once we support cross-boundary selectors nicely
+      it.skip('finds elements within shadow roots with cross-boundary selector', () => {
         cy.get('#parent-of-shadow-container-0 .shadow-3', { ignoreShadowBoundaries: true })
         .should('have.text', 'Shadow Content 3')
       })
@@ -2377,7 +2378,7 @@ space
     })
 
     it('returns the shadow root of an individual element', () => {
-      cy.get('#shadow-element').shadow()
+      cy.get('#shadow-element-1').shadow()
       .then(($roots) => {
         expect($roots.length).to.eq(1)
       })
@@ -2386,7 +2387,7 @@ space
     it('returns a set of shadow roots for a set of elements', () => {
       const $shadowElements = cy.$$('#shadow-element, #shadow-element-2')
 
-      cy.get('#shadow-element, #shadow-element-2').shadow()
+      cy.get('#shadow-element-1, #shadow-element-2').shadow()
       .then(($roots) => {
         expect($roots.length).to.eq(2)
         expect($roots.get(0)).to.eq($shadowElements.get(0).shadowRoot)
@@ -2425,11 +2426,11 @@ space
           }
         })
 
-        cy.get('#shadow-element').shadow()
+        cy.get('#shadow-element-1').shadow()
       })
 
       it('snapshots after finding element', () => {
-        cy.get('#shadow-element').shadow()
+        cy.get('#shadow-element-1').shadow()
         .then(function () {
           const { lastLog } = this
 
@@ -2439,7 +2440,7 @@ space
       })
 
       it('has the $el', () => {
-        cy.get('#shadow-element').shadow()
+        cy.get('#shadow-element-1').shadow()
         .then(function ($el) {
           const { lastLog } = this
 
@@ -2448,7 +2449,7 @@ space
       })
 
       it('#consoleProps', () => {
-        cy.get('#shadow-element').shadow()
+        cy.get('#shadow-element-1').shadow()
         .then(function ($el) {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
             'Applied To': helpers.getFirstSubjectByName('get').get(0),
@@ -2460,7 +2461,7 @@ space
       })
 
       it('can be turned off', () => {
-        cy.get('#shadow-element').shadow({ log: false })
+        cy.get('#shadow-element-1').shadow({ log: false })
         .then(function () {
           const { lastLog } = this
 
