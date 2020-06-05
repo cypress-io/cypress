@@ -235,7 +235,7 @@ commands:
                 command: |
                   git fetch origin pull/<< parameters.pull_request_id >>/head:pr-<< parameters.pull_request_id >>
                   git checkout pr-<< parameters.pull_request_id >>
-                  git log
+                  git log -n 2
       - run:
           command: npm install
           working_directory: /tmp/<<parameters.repo>>
