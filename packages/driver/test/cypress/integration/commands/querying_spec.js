@@ -917,12 +917,12 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('finds elements within shadow roots', () => {
-        cy.get('.shadow-content-1', { ignoreShadowBoundaries: true })
+        cy.get('.shadow-1', { ignoreShadowBoundaries: true })
         .should('have.text', 'Shadow Content 1')
       })
 
       it('finds shadow elements within shadow roots', () => {
-        cy.get('.shadow-content-5', { ignoreShadowBoundaries: true })
+        cy.get('.shadow-5', { ignoreShadowBoundaries: true })
         .should('have.text', 'Shadow Content 5')
       })
 
@@ -932,7 +932,7 @@ describe('src/cy/commands/querying', () => {
       })
 
       it('finds elements within shadow roots with cross-boundary selector', () => {
-        cy.get('#parent-of-shadow-container-0 .shadow-content-3', { ignoreShadowBoundaries: true })
+        cy.get('#parent-of-shadow-container-0 .shadow-3', { ignoreShadowBoundaries: true })
         .should('have.text', 'Shadow Content 3')
       })
 
