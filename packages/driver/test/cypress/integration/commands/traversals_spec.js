@@ -370,7 +370,7 @@ describe('src/cy/commands/traversals', () => {
 
     describe('find', () => {
       it('retrieves a matching element beyond shadow boundaries', () => {
-        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
         const parent = cy.$$('#parent-of-shadow-container-0')
 
         cy
@@ -383,12 +383,12 @@ describe('src/cy/commands/traversals', () => {
       })
 
       it('retrieves a matching element when no shadow roots', () => {
-        const el = cy.$$('#shadow-container-child')[0]
+        const el = cy.$$('#shadow-element-3')[0]
         const parent = cy.$$('#parent-of-shadow-container-0')
 
         cy
         .get(parent)
-        .find('#shadow-container-child', { ignoreShadowBoundaries: true })
+        .find('#shadow-element-3', { ignoreShadowBoundaries: true })
         .then(($element) => {
           expect($element.length).to.eq(1)
           expect($element[0]).to.eq(el)
@@ -396,8 +396,8 @@ describe('src/cy/commands/traversals', () => {
       })
 
       it('allows traversal from a document', () => {
-        const parent = cy.$$('#shadow-container-child')[0].shadowRoot
-        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+        const parent = cy.$$('#shadow-element-3')[0].shadowRoot
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
         cy
         .get(parent)
@@ -411,7 +411,7 @@ describe('src/cy/commands/traversals', () => {
 
     describe('closest', () => {
       it('retrieves the closest element beyond shadow boundaries', () => {
-        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
         cy
         .get(el)
@@ -423,7 +423,7 @@ describe('src/cy/commands/traversals', () => {
       })
 
       it('retrieves closest elements normally when no shadow roots', () => {
-        const el = cy.$$('#shadow-container-child')
+        const el = cy.$$('#shadow-element-3')
 
         cy
         .get(el)
@@ -437,14 +437,14 @@ describe('src/cy/commands/traversals', () => {
 
     describe('parents', () => {
       it('retrieves all parents, including those beyond shadow boundaries', () => {
-        const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
         cy
         .get(el)
         .parents({ ignoreShadowBoundaries: true })
         .then(($parents) => {
           expect($parents.length).to.eq(5)
-          expect($parents[0].id).to.eq('shadow-container-child')
+          expect($parents[0].id).to.eq('shadow-element-3')
           expect($parents[1].id).to.eq('parent-of-shadow-container-1')
           expect($parents[2].id).to.eq('parent-of-shadow-container-0')
           expect($parents[3].nodeName).to.eq('BODY')
@@ -453,7 +453,7 @@ describe('src/cy/commands/traversals', () => {
       })
 
       it('retrieves parents normally when no shadow roots exist', () => {
-        const el = cy.$$('#shadow-container-child')
+        const el = cy.$$('#shadow-element-3')
 
         cy
         .get(el)
