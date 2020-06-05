@@ -1,1 +1,1 @@
-module.exports = (onFn, config) ->
+module.exports = function(onFn, config) {};
