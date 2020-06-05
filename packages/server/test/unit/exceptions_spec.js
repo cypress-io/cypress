@@ -22,7 +22,7 @@ describe('lib/exceptions', () => {
       sinon.stub(user, 'get').resolves({})
 
       return exception.getAuthToken().then((authToken) => {
-        expect(authToken).to.be.undinefed
+        expect(authToken).to.be.undefined
       })
     })
   })

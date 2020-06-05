@@ -464,7 +464,7 @@ describe('lib/util/args', () => {
         process.env.HTTP_PROXY = override
         const options = this.setup()
 
-        expect(getWindowsProxyUtil.getWindowsProxy).to.not.beCalled
+        expect(getWindowsProxyUtil.getWindowsProxy).to.not.called
         expect(options.proxySource).to.be.undefined
         expect(options.proxyServer).to.be.undefined
         expect(options.proxyBypassList).to.be.undefined

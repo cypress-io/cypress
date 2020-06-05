@@ -4,7 +4,6 @@ const resolve = require('resolve')
 const Fixtures = require('../../support/helpers/fixtures')
 const path = require('path')
 const appData = require(`${root}../lib/util/app_data`)
-const savedState = require(`${root}../lib/saved_state`)
 
 const plugins = require(`${root}../lib/plugins`)
 const preprocessor = require(`${root}../lib/plugins/preprocessor`)
@@ -42,14 +41,14 @@ describe('lib/plugins/preprocessor', () => {
 
     it('executes the plugin with output path', function () {
       preprocessor.getFile(this.filePath, this.config)
-      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), 'bundles', this.filePath)
+      const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
 
       expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
     })
 
     it('executes the plugin with output path when integrationFolder was defined', function () {
       preprocessor.getFile(this.integrationFolder + this.filePath, Object.assign({ integrationFolder: this.integrationFolder }, this.config))
-      const expectedPath = appData.projectsPath(savedState.toHashName(this.todosPath), 'bundles', this.filePath)
+      const expectedPath = appData.projectsPath(appData.toHashName(this.todosPath), 'bundles', this.filePath)
 
       expect(this.plugin.lastCall.args[0].outputPath).to.equal(expectedPath)
     })

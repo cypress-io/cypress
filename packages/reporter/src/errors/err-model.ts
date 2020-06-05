@@ -2,13 +2,7 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
-export interface FileDetails {
-  absoluteFile: string
-  column: number
-  line: number
-  originalFile: string
-  relativeFile: string
-}
+import { FileDetails } from '../opener/file-model'
 
 interface ParsedStackMessageLine {
   message: string

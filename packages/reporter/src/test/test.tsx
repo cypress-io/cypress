@@ -78,7 +78,7 @@ class Test extends Component<Props> {
         style={{ paddingLeft: indent(model.level) }}
       >
         <div className='runnable-content-region'>
-          <i aria-hidden="true" className='runnable-state fas'></i>
+          <i aria-hidden="true" className='runnable-state fas' />
           <div
             aria-expanded={this._shouldBeOpen() === true}
             className='runnable-title'
@@ -91,7 +91,7 @@ class Test extends Component<Props> {
           </div>
           <div className='runnable-controls'>
             <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-              <i className='fas fa-exclamation-triangle'></i>
+              <i className='fas fa-exclamation-triangle' />
             </Tooltip>
           </div>
         </div>

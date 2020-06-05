@@ -37,7 +37,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
   it('sends error message if pluginsFile is missing', function () {
     mockery.registerSubstitute('plugins-file', '/does/not/exist.coffee')
-    runPlugins(this.ipc, 'plugins-file')
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
     return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
@@ -50,7 +50,7 @@ describe('lib/plugins/child/run_plugins', () => {
       Fixtures.path('server/throws_error.coffee'),
     )
 
-    runPlugins(this.ipc, 'plugins-file')
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
     return snapshot(this.ipc.send.lastCall.args[3].split('\n')[0])
@@ -63,7 +63,7 @@ describe('lib/plugins/child/run_plugins', () => {
       Fixtures.path('server/syntax_error.coffee'),
     )
 
-    runPlugins(this.ipc, 'plugins-file')
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
     return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3])))
@@ -71,7 +71,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
   it('sends error message if pluginsFile does not export a function', function () {
     mockery.registerMock('plugins-file', null)
-    runPlugins(this.ipc, 'plugins-file')
+    runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_DIDNT_EXPORT_FUNCTION', 'plugins-file')
 
     return snapshot(JSON.stringify(this.ipc.send.lastCall.args[3]))
@@ -84,7 +84,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
       mockery.registerMock('plugins-file', pluginsFn)
       this.ipc.on.withArgs('load').yields({})
-      runPlugins(this.ipc, 'plugins-file')
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
       this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
         expect(event).to.eq('load:error')
@@ -100,7 +100,7 @@ describe('lib/plugins/child/run_plugins', () => {
       const pluginsFn = sinon.spy()
 
       mockery.registerMock('plugins-file', pluginsFn)
-      runPlugins(this.ipc, 'plugins-file')
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
       const config = {}
 
       this.ipc.on.withArgs('load').yield(config)
@@ -117,7 +117,7 @@ describe('lib/plugins/child/run_plugins', () => {
         throw err
       })
 
-      runPlugins(this.ipc, 'plugins-file')
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
       this.ipc.on.withArgs('load').yield()
 
       this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
@@ -148,7 +148,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
       mockery.registerMock('plugins-file', pluginsFn)
 
-      runPlugins(this.ipc, 'plugins-file')
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
       return this.ipc.on.withArgs('load').yield()
     })
@@ -237,7 +237,7 @@ describe('lib/plugins/child/run_plugins', () => {
         message: 'error message',
       }
 
-      return runPlugins(this.ipc, 'plugins-file')
+      return runPlugins(this.ipc, 'plugins-file', 'proj-root')
     })
 
     it('sends the serialized error via ipc on process uncaughtException', function () {

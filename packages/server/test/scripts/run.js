@@ -115,6 +115,7 @@ commandAndArguments.args.push(
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  '--extension=js,coffee,ts',
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
 )

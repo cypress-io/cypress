@@ -62,12 +62,12 @@ const TestError = observer((props: TestErrorProps) => {
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle'></i>
+            <i className='fas fa-exclamation-circle' />
             {err.name}
           </div>
         </div>
         <div className='runnable-err-message'>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span>
+          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />
         </div>
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
