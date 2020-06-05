@@ -681,8 +681,17 @@ describe('intercept blur methods correctly', () => {
       `).appendTo(cy.$$('body'))
 
       cy.get('area')
-      // NOTE: wait needed for firefox, otherwise element is not yet ready/loaded
-      .wait(100)
+
+      // make sure the element can receive focus then reset activeElement with blur
+      // without this firefox can fail due to <area> not being ready to receive focus
+      // seems unrelated to 'load' state
+      .should(($el) => {
+        $el.focus()
+        expect($el).be.focused
+        $el.blur()
+      })
+
+      // do the actual test now
       .focus()
       .should('have.focus')
     })
