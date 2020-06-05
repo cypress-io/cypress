@@ -31,6 +31,9 @@ const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
+// get the fetch polyfill as a string so we can "eval" it in the app window
+const fetchPolyfill = require('unfetch').default.toString()
+
 const privateProps = {
   props: { name: 'state', url: true },
   privates: { name: 'state', url: false },
@@ -258,6 +261,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+
+      // drop "fetch" polyfill that replaces it with XMLHttpRequest
+      // by using "eval" we force the polyfill to use XMLHttpRequest objects
+      // from the app iframe that we wrap for network stubbing
+      contentWindow.eval(`fetch=${fetchPolyfill}`)
     } catch (error) {} // eslint-disable-line no-empty
   }
 

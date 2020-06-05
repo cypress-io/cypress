@@ -22866,7 +22866,7 @@ socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-bin
     circular-json "0.5.9"
     component-emitter "1.2.1"
     debug "~4.1.0"
-    has-binary2 "~1.0.2"
+    has-binary2 cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92
 
 socket.io-client@2.3.0:
   version "2.3.0"
@@ -24746,6 +24746,11 @@ undertaker@^1.2.1:
     object.defaults "^1.0.0"
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
+
+unfetch@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/unfetch/-/unfetch-4.1.0.tgz#6ec2dd0de887e58a4dee83a050ded80ffc4137db"
+  integrity sha512-crP/n3eAPUJxZXM9T80/yv0YhkTEx2K1D3h7D1AJM6fzsWZrxdyRuLN0JH/dkZh1LNH8LxCnBzoPFCPbb2iGpg==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
