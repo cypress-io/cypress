@@ -24,7 +24,7 @@ describe "lib/exceptions", ->
       sinon.stub(user, "get").resolves({})
 
       exception.getAuthToken().then (authToken) ->
-        expect(authToken).to.be.undinefed
+        expect(authToken).to.be.undefined
 
   context ".getErr", ->
     it "returns an object literal", ->

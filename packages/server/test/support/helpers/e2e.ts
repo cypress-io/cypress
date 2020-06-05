@@ -606,6 +606,12 @@ const e2e = {
     debug('processed options %o', options)
     let args = this.args(options)
 
+    const specifiedBrowser = process.env.BROWSER
+
+    if (specifiedBrowser && (![].concat(options.browser).includes(specifiedBrowser))) {
+      ctx.skip()
+    }
+
     args = ['index.js'].concat(args)
 
     let stdout = ''
