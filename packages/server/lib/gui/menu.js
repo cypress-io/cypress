@@ -14,8 +14,8 @@ module.exports = {
       withDevTools: false,
     })
 
-    // this set by modes/interactive.coffee and needs to be preserved if the menu
-    // is set again by launcher.coffee when the Electron browser is run
+    // this set by modes/interactive and needs to be preserved if the menu
+    // is set again by launcher when the Electron browser is run
     if (options.onLogOutClicked) {
       ({ onLogOutClicked } = options)
     }
