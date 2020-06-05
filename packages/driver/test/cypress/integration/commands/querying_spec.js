@@ -2385,7 +2385,7 @@ space
     })
 
     it('returns a set of shadow roots for a set of elements', () => {
-      const $shadowElements = cy.$$('#shadow-element, #shadow-element-2')
+      const $shadowElements = cy.$$('#shadow-element-1, #shadow-element-2')
 
       cy.get('#shadow-element-1, #shadow-element-2').shadow()
       .then(($roots) => {
