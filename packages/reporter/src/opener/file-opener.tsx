@@ -2,13 +2,9 @@ import _ from 'lodash'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
 import React, { MouseEvent } from 'react'
-// @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
-// @ts-ignore
-import { EditorPicker } from '@packages/ui-components'
 
 import EditorPickerModal, { Editor } from './editor-picker-modal'
-import { FileDetails } from './err-model'
+import { FileDetails } from './file-model'
 import events from '../lib/events'
 
 interface GetUserEditorResult {
@@ -17,7 +13,8 @@ interface GetUserEditorResult {
 }
 
 interface Props {
-  fileDetails: FileDetails
+  fileDetails: FileDetails,
+  className?: string
 }
 
 const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetails) => {
@@ -29,7 +26,7 @@ const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetai
   })
 }
 
-const ErrorFilePath = observer(({ fileDetails }: Props) => {
+const FileOpener = observer(({ fileDetails, className }: Props) => {
   const state = useLocalStore(() => ({
     editors: [] as Editor[],
     chosenEditor: {} as Editor,
@@ -80,8 +77,8 @@ const ErrorFilePath = observer(({ fileDetails }: Props) => {
   const { originalFile, line, column } = fileDetails
 
   return (
-    <a className='runnable-err-file-path' onClick={attemptOpenFile} href='#'>
-      {originalFile}:{line}:{column}
+    <a className={className} onClick={attemptOpenFile} href='#'>
+      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
       <EditorPickerModal
         chosenEditor={state.chosenEditor}
         editors={state.editors}
@@ -94,4 +91,4 @@ const ErrorFilePath = observer(({ fileDetails }: Props) => {
   )
 })
 
-export default ErrorFilePath
+export default FileOpener
