@@ -3672,7 +3672,7 @@ describe('composed events', () => {
   })
 
   it('should compose click events', (done) => {
-    const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('click', () => {
       done()
@@ -3684,7 +3684,7 @@ describe('composed events', () => {
   })
 
   it('should compose dblclick events', (done) => {
-    const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('dblclick', () => {
       done()
@@ -3696,7 +3696,7 @@ describe('composed events', () => {
   })
 
   it('should compose right click events', (done) => {
-    const el = cy.$$('#shadow-container-child')[0].shadowRoot.querySelector('p')
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
       done()
