@@ -32,7 +32,7 @@ describe "lib/plugins/child/run_plugins", ->
 
   it "sends error message if pluginsFile is missing", ->
     mockery.registerSubstitute("plugins-file", "/does/not/exist.coffee")
-    runPlugins(@ipc, "plugins-file")
+    runPlugins(@ipc, "plugins-file", "proj-root")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
     snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
@@ -42,7 +42,7 @@ describe "lib/plugins/child/run_plugins", ->
       "plugins-file",
       Fixtures.path("server/throws_error.coffee")
     )
-    runPlugins(@ipc, "plugins-file")
+    runPlugins(@ipc, "plugins-file", "proj-root")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
     snapshot(@ipc.send.lastCall.args[3].split('\n')[0])
 
@@ -52,13 +52,13 @@ describe "lib/plugins/child/run_plugins", ->
       "plugins-file",
       Fixtures.path("server/syntax_error.coffee")
     )
-    runPlugins(@ipc, "plugins-file")
+    runPlugins(@ipc, "plugins-file", "proj-root")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_FILE_ERROR", "plugins-file")
     snapshot(withoutColorCodes(withoutPath(@ipc.send.lastCall.args[3])))
 
   it "sends error message if pluginsFile does not export a function", ->
     mockery.registerMock("plugins-file", null)
-    runPlugins(@ipc, "plugins-file")
+    runPlugins(@ipc, "plugins-file", "proj-root")
     expect(@ipc.send).to.be.calledWith("load:error", "PLUGINS_DIDNT_EXPORT_FUNCTION", "plugins-file")
     snapshot(JSON.stringify(@ipc.send.lastCall.args[3]))
 
@@ -69,7 +69,7 @@ describe "lib/plugins/child/run_plugins", ->
 
       mockery.registerMock("plugins-file", pluginsFn)
       @ipc.on.withArgs("load").yields({})
-      runPlugins(@ipc, "plugins-file")
+      runPlugins(@ipc, "plugins-file", "proj-root")
 
       @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
         expect(event).to.eq("load:error")
@@ -81,7 +81,7 @@ describe "lib/plugins/child/run_plugins", ->
     it "calls function exported by pluginsFile with register function and config", ->
       pluginsFn = sinon.spy()
       mockery.registerMock("plugins-file", pluginsFn)
-      runPlugins(@ipc, "plugins-file")
+      runPlugins(@ipc, "plugins-file", "proj-root")
       config = {}
       @ipc.on.withArgs("load").yield(config)
       expect(pluginsFn).to.be.called
@@ -92,7 +92,7 @@ describe "lib/plugins/child/run_plugins", ->
       err = new Error('foo')
 
       mockery.registerMock "plugins-file", -> throw err
-      runPlugins(@ipc, "plugins-file")
+      runPlugins(@ipc, "plugins-file", "proj-root")
       @ipc.on.withArgs("load").yield()
 
       @ipc.send = _.once (event, errorType, pluginsFile, stack) ->
@@ -117,7 +117,7 @@ describe "lib/plugins/child/run_plugins", ->
 
       mockery.registerMock("plugins-file", pluginsFn)
 
-      runPlugins(@ipc, "plugins-file")
+      runPlugins(@ipc, "plugins-file", "proj-root")
 
       @ipc.on.withArgs("load").yield()
 
@@ -186,7 +186,7 @@ describe "lib/plugins/child/run_plugins", ->
         name: "error name"
         message: "error message"
       }
-      runPlugins(@ipc, "plugins-file")
+      runPlugins(@ipc, "plugins-file", "proj-root")
 
     it "sends the serialized error via ipc on process uncaughtException", ->
       process.on.withArgs("uncaughtException").yield(@err)
