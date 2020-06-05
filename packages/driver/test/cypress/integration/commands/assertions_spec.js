@@ -2512,6 +2512,19 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.attr('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('throws when the type of the expected value is object', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Expected value should not be an object')
+
+          done()
+        })
+
+        const $div = cy.$$('<div foo="bar" fizz="buzz">foo</div>')
+
+        expect($div).to.have.attr({})
+      })
     })
 
     context('prop', () => {
@@ -2628,6 +2641,19 @@ describe('src/cy/commands/assertions', () => {
 
         expect({}).to.have.prop('foo')
       })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('throws when the type of the expected value is object', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Expected value should not be an object')
+
+          done()
+        })
+
+        const $div = cy.$$('<input type="checkbox" />')
+
+        expect($div).to.have.prop({})
+      })
     })
 
     context('css', () => {
@@ -2697,6 +2723,19 @@ describe('src/cy/commands/assertions', () => {
         })
 
         expect({}).to.have.css('foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7353
+      it('throws when the type of the expected value is object', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('Expected value should not be an object')
+
+          done()
+        })
+
+        const $div = cy.$$('<div style="display: none; position: absolute;">div</div>')
+
+        expect($div).to.have.css({})
       })
     })
   })

@@ -2,6 +2,7 @@ const _ = require('lodash')
 const $ = require('jquery')
 const $dom = require('../dom')
 const $elements = require('../dom/elements')
+const $errUtils = require('./error_utils')
 
 const selectors = {
   visible: 'visible',
@@ -283,6 +284,10 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
 
       // when we only have 1 argument dont worry about val
       if (arguments.length === 1) {
+        if (_.isPlainObject(name)) {
+          $errUtils.throwErrByPath('chai.no_plain_object')
+        }
+
         assert(
           this,
           accessor,

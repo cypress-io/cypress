@@ -176,6 +176,7 @@ module.exports = {
 
         This can sometimes happen if a previous assertion changed the subject.`
     },
+    no_plain_object: 'Expected value should not be an object',
   },
 
   check_uncheck: {
