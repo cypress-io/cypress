@@ -25,7 +25,7 @@ describe('e2e blacklist', () => {
     }],
     settings: {
       baseUrl: 'http://localhost:3232',
-      blacklistHosts: 'localhost:3131',
+      blocklistHosts: 'localhost:3131',
     },
   })
 

@@ -57,7 +57,7 @@ folders.push('componentFolder')
 const configKeys = toWords(`\
 animationDistanceThreshold      fileServerFolder
 baseUrl                         fixturesFolder
-blacklistHosts
+blocklistHosts
 chromeWebSecurity
 modifyObstructiveCode           integrationFolder
 env                             pluginsFile
@@ -119,7 +119,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blacklistHosts: null,
+  blocklistHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
   socketIoRoute: '/__socket.io',
@@ -175,7 +175,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blacklistHosts: v.isStringOrArrayOfStrings,
+  blocklistHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
   configFile: v.isStringOrFalse,

@@ -47,10 +47,10 @@ const RedirectToClientRouteIfNotProxied: RequestMiddleware = function () {
 }
 
 const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
-  const { blacklistHosts } = this.config
+  const { blocklistHosts } = this.config
 
-  if (blacklistHosts) {
-    const matches = blacklist.matches(this.req.proxiedUrl, blacklistHosts)
+  if (blocklistHosts) {
+    const matches = blacklist.matches(this.req.proxiedUrl, blocklistHosts)
 
     if (matches) {
       this.res.set('x-cypress-matched-blacklisted-host', matches)

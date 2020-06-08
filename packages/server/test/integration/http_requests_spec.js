@@ -3731,7 +3731,7 @@ describe('Routes', () => {
       beforeEach(function () {
         return this.setup({
           config: {
-            blacklistHosts: [
+            blocklistHosts: [
               '*.google.com',
               'shop.apple.com',
               'cypress.io',

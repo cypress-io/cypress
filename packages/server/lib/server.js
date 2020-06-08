@@ -240,7 +240,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Promise((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, blocklistHosts } = config
 
       this._server = http.createServer(app)
 
@@ -299,8 +299,8 @@ class Server {
             // see if this matches - if so then
             // we cannot allow it to make a direct
             // connection
-            if (blacklistHosts && !isMatching) {
-              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
+            if (blocklistHosts && !isMatching) {
+              isMatching = blacklist.matches(urlToCheck, blocklistHosts)
 
               debug(`HTTPS request ${urlToCheck} matches blacklist?`, isMatching)
             }
