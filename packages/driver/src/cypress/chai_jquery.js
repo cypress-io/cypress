@@ -178,7 +178,12 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   chai.Assertion.addMethod('value', function (value) {
-    value = maybeCastNumberToString(value)
+    const $el = wrap(this)
+    const tagName = $el.prop('tagName')
+
+    if (tagName !== 'PROGRESS' && tagName !== 'METER' && tagName !== 'LI') {
+      value = maybeCastNumberToString(value)
+    }
 
     assertDom(
       this,
@@ -188,7 +193,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       value,
     )
 
-    const actual = wrap(this).val()
+    const actual = $el.val()
 
     return assertPartial(
       this,
