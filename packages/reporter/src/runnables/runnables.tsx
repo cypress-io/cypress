@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
+import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
@@ -55,6 +56,7 @@ class Runnables extends Component<RunnablesProps> {
 
     return (
       <div ref='container' className='container'>
+        <RunnableHeader specPath={specPath} />
         {content(runnablesStore, specPath, error)}
       </div>
     )

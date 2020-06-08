@@ -1,13 +1,10 @@
 // const _ = require('lodash')
 import _ from 'lodash'
-import underscoreInflection from '@cypress/underscore.inflection'
 
 import clean from 'underscore.string/clean'
 import count from 'underscore.string/count'
 import isBlank from 'underscore.string/isBlank'
 import toBoolean from 'underscore.string/toBoolean'
-
-const inflection = underscoreInflection(_)
 
 // only export exactly what we need, nothing more!
 _.mixin({
@@ -15,7 +12,6 @@ _.mixin({
   count,
   isBlank,
   toBoolean,
-  ordinalize: inflection.ordinalize,
 })
 
 declare module 'lodash' {
@@ -24,7 +20,6 @@ declare module 'lodash' {
     count(...args): LoDashExplicitWrapper<TValue>
     isBlank(...args): LoDashExplicitWrapper<TValue>
     toBoolean(...args): LoDashExplicitWrapper<TValue>
-    ordinalize(...args): LoDashExplicitWrapper<TValue>
   }
 
   export interface LodashStatic<TValue> {
@@ -32,7 +27,6 @@ declare module 'lodash' {
     count(...args): LoDashExplicitWrapper<TValue>
     isBlank(...args): LoDashExplicitWrapper<TValue>
     toBoolean(...args): LoDashExplicitWrapper<TValue>
-    ordinalize(...args): LoDashExplicitWrapper<TValue>
   }
 }
 

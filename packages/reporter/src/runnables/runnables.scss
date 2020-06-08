@@ -75,7 +75,7 @@
     }
 
     &.test.runnable-failed > .runnable-wrapper {
-      border-left: 10px solid $fail;
+      border-left: 5px solid $fail;
 
       .fa-exclamation-triangle.has-command-failures {
         visibility: visible;
@@ -84,12 +84,12 @@
 
     &.suite.runnable-pending > div > .runnable-wrapper,
     &.test.runnable-pending > .runnable-wrapper {
-      border-left: 10px solid lighten($pending, 25%);
+      border-left: 5px solid lighten($pending, 25%);
     }
 
     &.suite.runnable-passed > div > .runnable-wrapper,
     &.test.runnable-passed > .runnable-wrapper {
-      border-left: 10px solid $pass;
+      border-left: 5px solid $pass;
     }
 
     &.runnable-skipped > .runnable-wrapper {
@@ -105,20 +105,11 @@
 
     &.suite.runnable-skipped > div > .runnable-wrapper,
     &.test.runnable-skipped > .runnable-wrapper {
-      border-left: 10px solid #9a9aaa;
+      border-left: 5px solid #9a9aaa;
     }
 
     &.suite.runnable-failed > div > .runnable-wrapper {
-      border-left: 10px solid $fail;
-
-      .collapsible-more {
-        border-radius: 3px;
-        background-color: $fail;
-        color: #FFF;
-        padding: 0 4px 0 3px;
-        font-size: 10px;
-        margin-left: 2px;
-      }
+      border-left: 5px solid $fail;
     }
 
     &.test.runnable-failed {
@@ -136,11 +127,13 @@
       }
     }
 
-    &.suite > div > .runnable-wrapper:focus {
-      outline: 0;
+    &.suite > div > .runnable-wrapper {
+      .collapsible-header:focus, .collapsible-header-inner:focus {
+        outline: 0;
 
-      .runnable-title {
-        outline: 1px dotted;
+        .runnable-title {
+          outline: 1px dotted;
+        }
       }
     }
 
@@ -170,7 +163,15 @@
   .runnable-wrapper {
     padding: 5px 15px 5px 5px;
     overflow: hidden;
-    border-left: 10px solid transparent;
+    border-left: 5px solid transparent;
+  }
+
+  .collapsible > .runnable-wrapper {
+    padding: 0;
+
+    .collapsible-header {
+      padding: 5px 15px 5px 5px;
+    }
   }
 
   .runnable-title {
@@ -195,7 +196,7 @@
     }
   }
 
-  .suite > div > .runnable-wrapper,
+  .suite > div .runnable-wrapper,
   .test .runnable-content-region {
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -233,10 +234,33 @@
     display: flex;
   }
 
-  .test > .runnable-wrapper > .collapsible > .collapsible-header {
-    .collapsible-indicator,
-    .collapsible-more {
+  .test > .runnable-wrapper > .collapsible > .collapsible-header-wrapper > .collapsible-header {
+    .collapsible-indicator {
       display: none;
+    }
+  }
+
+  .runnable-header {
+    background: #f2f2f2;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 24px;
+    overflow-wrap: break-word;
+    padding: 5px 10px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+
+    a:before,
+    span:before {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-file;
+      color: #bdbdbd;
+      display: inline;
+      margin-right: 5px;
     }
   }
 }

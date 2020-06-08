@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
-import ErrorFilePath from './error-file-path'
+import FileOpener from '../opener/file-opener'
 import Err from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
@@ -62,7 +62,7 @@ const ErrorStack = observer(({ err }: Props) => {
     }
 
     const link = (
-      <ErrorFilePath key={key} fileDetails={stackLine} />
+      <FileOpener key={key} className="runnable-err-file-path" fileDetails={stackLine} />
     )
 
     return makeLine(key, [whitespace, `at ${fn} (`, link, ')'])

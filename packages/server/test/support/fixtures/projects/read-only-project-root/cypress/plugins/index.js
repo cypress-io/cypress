@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const fs = require('fs')
 const { expect } = require('chai')
 

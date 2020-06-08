@@ -54,7 +54,7 @@ class Project extends EE {
     }
 
     this.projectRoot = path.resolve(projectRoot)
-    this.watchers = Watchers()
+    this.watchers = new Watchers()
     this.cfg = null
     this.spec = null
     this.browser = null
@@ -68,7 +68,7 @@ class Project extends EE {
   open (options = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
-    this.server = Server()
+    this.server = new Server()
 
     _.defaults(options, {
       report: false,
@@ -581,11 +581,20 @@ class Project extends EE {
     // and example support file if dir doesnt exist
     push(scaffold.support(cfg.supportFolder, cfg))
 
-    // if we're in headed mode add these other scaffolding
-    // tasks
-    if (!cfg.isTextTerminal) {
+    // if we're in headed mode add these other scaffolding tasks
+    debug('scaffold flags %o', {
+      isTextTerminal: cfg.isTextTerminal,
+      CYPRESS_INTERNAL_FORCE_SCAFFOLD: process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD,
+    })
+
+    const scaffoldExamples = !cfg.isTextTerminal || process.env.CYPRESS_INTERNAL_FORCE_SCAFFOLD
+
+    if (scaffoldExamples) {
+      debug('will scaffold integration and fixtures folder')
       push(scaffold.integration(cfg.integrationFolder, cfg))
       push(scaffold.fixture(cfg.fixturesFolder, cfg))
+    } else {
+      debug('will not scaffold integration or fixtures folder')
     }
 
     return Promise.all(scaffolds)

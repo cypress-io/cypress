@@ -3,10 +3,10 @@ const { _, Promise } = Cypress
 describe('src/cy/commands/exec', () => {
   const okResponse = { code: 0 }
 
-  context('#exec', () => {
+  context('#exec', {
+    execTimeout: 2500,
+  }, () => {
     beforeEach(() => {
-      Cypress.config('execTimeout', 2500)
-
       // call through normally on everything
       cy.stub(Cypress, 'backend').callThrough()
     })
@@ -122,10 +122,10 @@ describe('src/cy/commands/exec', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

@@ -88,7 +88,7 @@ const previousCwd = process.cwd()
 
 const snapshotConsoleLogs = function (name) {
   const args = _
-  .chain(console.log.args) // eslint-disable-line no-console
+  .chain(console.log.args)
   .map((innerArgs) => {
     return innerArgs.join(' ')
   }).join('\n')
@@ -105,7 +105,7 @@ describe('lib/cypress', () => {
   require('mocha-banner').register()
 
   beforeEach(function () {
-    this.timeout(5000)
+    this.timeout(8000)
 
     cache.__removeSync()
 
@@ -247,7 +247,6 @@ describe('lib/cypress', () => {
 
         return cypress.start(['--get-key', `--project=${this.todosPath}`])
       }).then(() => {
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWith('new-key-123')
         this.expectExitWith(0)
       })
@@ -318,7 +317,6 @@ describe('lib/cypress', () => {
 
         return cypress.start(['--new-key', `--project=${this.todosPath}`])
       }).then(() => {
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWith('new-key-123')
         this.expectExitWith(0)
       })
@@ -728,11 +726,8 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf'])
       .then(() => {
         expect(errors.warning).to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('You also provided your Record Key, but you did not pass the --record flag.')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('cypress run --record')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/recording-project-runs')
       })
     })
@@ -745,9 +740,7 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`])
       .then(() => {
         expect(errors.warning).to.be.calledWith('CANNOT_REMOVE_OLD_BROWSER_PROFILES', err.stack)
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('Warning: We failed to remove old browser profiles from previous runs.')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch(err.message)
       })
     })
@@ -756,7 +749,6 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.pristinePath}`, '--key=asdf'])
       .then(() => {
         expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
-        // eslint-disable-next-line no-console
         expect(console.log).not.to.be.calledWithMatch('cypress run --key <record_key>')
       })
     })
@@ -765,7 +757,6 @@ describe('lib/cypress', () => {
       return cypress.start([`--run-project=${this.todosPath}`, '--key=asdf', '--record=false'])
       .then(() => {
         expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION', 'abc123')
-        // eslint-disable-next-line no-console
         expect(console.log).not.to.be.calledWithMatch('cypress run --key <record_key>')
       })
     })
@@ -792,7 +783,7 @@ describe('lib/cypress', () => {
         const found1 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Browser: \'foo\' was not found on your system.',
+              'Browser: \'foo\' was not found on your system or is not supported by Cypress.',
             )
           })
         })
@@ -802,12 +793,22 @@ describe('lib/cypress', () => {
         const found2 = _.find(argsSet, (args) => {
           return _.find(args, (arg) => {
             return arg.message && arg.message.includes(
-              'Available browsers found are: chrome, chromium, chrome:canary, electron',
+              'Cypress supports the following browsers:',
             )
           })
         })
 
-        expect(found2, 'browser names should be listed').to.be.ok
+        expect(found2, 'supported browsers should be listed').to.be.ok
+
+        const found3 = _.find(argsSet, (args) => {
+          return _.find(args, (arg) => {
+            return arg.message && arg.message.includes(
+              'Available browsers found on your system are:\n- chrome\n- chromium\n- chrome:canary\n- electron',
+            )
+          })
+        })
+
+        expect(found3, 'browser names should be listed').to.be.ok
       })
     })
 
@@ -1370,9 +1371,7 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('cypress run --record --key <record_key>')
         expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION')
         this.expectExitWith(3)
@@ -1391,11 +1390,8 @@ describe('lib/cypress', () => {
       ])
       .then(() => {
         expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED_ENV_VAR')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('cypress ci')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('cypress run --record')
         this.expectExitWith(3)
       })
@@ -1708,7 +1704,6 @@ describe('lib/cypress', () => {
 
   context('--return-pkg', () => {
     beforeEach(() => {
-      // eslint-disable-next-line no-console
       console.log.restore()
 
       sinon.stub(console, 'log')
@@ -1717,7 +1712,6 @@ describe('lib/cypress', () => {
     it('logs package.json and exits', function () {
       return cypress.start(['--return-pkg'])
       .then(() => {
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('{"name":"cypress"')
         this.expectExitWith(0)
       })
@@ -1726,7 +1720,6 @@ describe('lib/cypress', () => {
 
   context('--version', () => {
     beforeEach(() => {
-      // eslint-disable-next-line no-console
       console.log.restore()
 
       sinon.stub(console, 'log')
@@ -1735,7 +1728,6 @@ describe('lib/cypress', () => {
     it('logs version and exits', function () {
       return cypress.start(['--version'])
       .then(() => {
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWith(pkg.version)
         this.expectExitWith(0)
       })
@@ -1744,7 +1736,6 @@ describe('lib/cypress', () => {
 
   context('--smoke-test', () => {
     beforeEach(() => {
-      // eslint-disable-next-line no-console
       console.log.restore()
 
       sinon.stub(console, 'log')
@@ -1753,7 +1744,6 @@ describe('lib/cypress', () => {
     it('logs pong value and exits', function () {
       return cypress.start(['--smoke-test', '--ping=abc123'])
       .then(() => {
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWith('abc123')
         this.expectExitWith(0)
       })
@@ -1981,9 +1971,7 @@ describe('lib/cypress', () => {
     it('shows warning if Cypress has been started directly', () => {
       return cypress.start().then(() => {
         expect(errors.warning).to.be.calledWith('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('It looks like you are running the Cypress binary directly.')
-        // eslint-disable-next-line no-console
         expect(console.log).to.be.calledWithMatch('https://on.cypress.io/installing-cypress')
       })
     })

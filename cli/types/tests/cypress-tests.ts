@@ -31,6 +31,10 @@ namespace CypressJqueryTests {
   Cypress.$('selector').click() // $ExpectType JQuery<HTMLElement>
 }
 
+namespace CypressAutomationTests {
+  Cypress.automation('hello') // $ExpectType Promise<any>
+}
+
 namespace CypressConfigTests {
   // getters
   Cypress.config('baseUrl') // $ExpectType string | null
@@ -40,6 +44,8 @@ namespace CypressConfigTests {
   Cypress.config('baseUrl', '.') // $ExpectType void
   Cypress.config('baseUrl', null) // $ExpectType void
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
+
+  Cypress.config('taskTimeout') // $ExpectType number
 }
 
 namespace CypressEnvTests {
@@ -322,17 +328,19 @@ namespace CypressFilterTests {
     })
 }
 
-cy.screenshot('example-name')
-cy.screenshot('example', {log: false})
-cy.screenshot({log: false})
-cy.screenshot({
-  log: true,
-  blackout: []
-})
-cy.screenshot('example', {
-  log: true,
-  blackout: []
-})
+namespace CypressScreenshotTests {
+  cy.screenshot('example-name')
+  cy.screenshot('example', { log: false })
+  cy.screenshot({ log: false })
+  cy.screenshot({
+    log: true,
+    blackout: []
+  })
+  cy.screenshot('example', {
+    log: true,
+    blackout: []
+  })
+}
 
 namespace CypressTriggerTests {
   cy.get('something')
@@ -459,4 +467,62 @@ namespace CypressDomTests {
   Cypress.dom.getElementAtPointFromViewport(el, 1, 2) // $ExpectError
   Cypress.dom.getElementCoordinatesByPosition(doc, 'top') // $ExpectError
   Cypress.dom.getElementCoordinatesByPositionRelativeToXY(doc, 1, 2) // $ExpectError
+}
+
+namespace CypressTestConfigOverridesTests {
+  // set config on a per-test basis
+  it('test', {
+    browser: {name: 'firefox'}
+  }, () => {})
+  it('test', {
+    browser: [{name: 'firefox'}, {name: 'chrome'}]
+  }, () => {})
+  it('test', {
+    baseUrl: 'www.foobar.com',
+    browser: 'firefox'
+  }, () => {})
+  it('test', {
+    browser: {foo: 'bar'} // $ExpectError
+  }, () => {})
+
+  it.skip('test', {}, () => {})
+  it.only('test', {}, () => {})
+  xit('test', {}, () => {})
+
+  specify('test', {}, () => {})
+  specify.only('test', {}, () => {})
+  specify.skip('test', {}, () => {})
+  xspecify('test', {}, () => {})
+
+  // set config on a per-suite basis
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+  }, () => {})
+
+  context('suite', {}, () => {})
+
+  describe('suite', {
+    browser: {family: 'firefox'},
+    baseUrl: 'www.example.com'
+    foo: 'foo' // $ExpectError
+  }, () => {})
+
+  describe.only('suite', {}, () => {})
+  describe.skip('suite', {}, () => {})
+  xdescribe('suite', {}, () => {})
+}
+
+namespace CypressShadowTests {
+  cy
+  .get('.foo')
+  .shadow()
+  .find('.bar')
+  .click()
+
+  cy.get('.foo', { ignoreShadowBoundaries: true }).click()
+
+  cy
+  .get('.foo')
+  .find('.bar', {ignoreShadowBoundaries: true})
 }

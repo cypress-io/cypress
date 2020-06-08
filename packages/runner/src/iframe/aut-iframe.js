@@ -56,12 +56,12 @@ export default class AutIframe {
 
     if (!Cypress) return
 
-    return Cypress.detachDom(this._contents())
+    return Cypress.cy.detachDom(this._contents())
   }
 
   restoreDom = (snapshot) => {
     const Cypress = eventManager.getCypress()
-    const { headStyles, bodyStyles } = Cypress ? Cypress.getStyles(snapshot) : {}
+    const { headStyles, bodyStyles } = Cypress ? Cypress.cy.getStyles(snapshot) : {}
     const { body, htmlAttrs } = snapshot
     const contents = this._contents()
     const $html = contents.find('html')

@@ -2,7 +2,7 @@ const $window = require('./window')
 const $elements = require('./elements')
 
 const getElementAtPointFromViewport = (doc, x, y) => {
-  return doc.elementFromPoint(x, y)
+  return $elements.elementFromPoint(doc, x, y)
 }
 
 const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
@@ -24,12 +24,15 @@ const getElementPositioning = ($el) => {
   // elements that span multiple lines. Which would cause us to click
   // click in the center and thus miss...
   //
+  // sometimes the first client rect has no height or width, which also causes a miss
+  // so a simple loop is used to find the first with non-zero dimensions
+  //
   // however we have a fallback to getBoundingClientRect() such as
   // when the element is hidden or detached from the DOM. getClientRects()
   // returns a zero length DOMRectList in that case, which becomes undefined.
   // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
   // with all properties 0'd out
-  const rect = el.getClientRects()[0] || el.getBoundingClientRect()
+  const rect = [...el.getClientRects()].find((e) => e.width && e.height) || el.getBoundingClientRect()
 
   // we want to return the coordinates from the autWindow to the element
   // which handles a situation in which the element is inside of a nested

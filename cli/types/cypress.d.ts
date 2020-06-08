@@ -75,6 +75,8 @@ declare namespace Cypress {
     clear: (keys?: string[]) => void
   }
 
+  type IsBrowserMatcher = BrowserName | Partial<Browser> | Array<BrowserName | Partial<Browser>>
+
   interface ViewportPosition extends WindowPosition {
     right: number
     bottom: number
@@ -229,6 +231,11 @@ declare namespace Cypress {
     LocalStorage: LocalStorage
 
     /**
+     * Fire automation:request event for internal use.
+     */
+    automation(eventName: string, ...args: any[]): Promise<any>
+
+    /**
      * Promise wrapper for certain internal tasks.
      */
     backend: Backend
@@ -327,12 +334,15 @@ declare namespace Cypress {
     isCy(obj: any): obj is Chainable
 
     /**
-     * Returns true if currently running the supplied browser name or matcher object.
+     * Returns true if currently running the supplied browser name or matcher object. Also accepts an array of matchers.
      * @example isBrowser('chrome') will be true for the browser 'chrome:canary' and 'chrome:stable'
      * @example isBrowser({ name: 'firefox', channel: 'dev' }) will be true only for the browser 'firefox:dev' (Firefox Developer Edition)
+     * @example isBrowser(['firefox', 'edge']) will be true only for the browsers 'firefox' and 'edge'
+     * @example isBrowser('!firefox') will be true for every browser other than 'firefox'
+     * @example isBrowser({ family: '!chromium'}) will be true for every browser not matching { family: 'chromium' }
      * @param matcher browser name or matcher object to check.
      */
-    isBrowser(name: BrowserName | Partial<Browser>): boolean
+    isBrowser(name: IsBrowserMatcher): boolean
 
     /**
      * Internal options for "cy.log" used in custom commands.
@@ -921,7 +931,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
-    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Finds the descendent DOM elements with the given selector.
      *
@@ -930,7 +940,7 @@ declare namespace Cypress {
      *    // Find the li’s within the nav
      *    cy.get('.left-nav>.nav').find('>li')
      */
-    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Shadow>): Chainable<JQuery<E>>
 
     /**
      * Get the first DOM element within a set of DOM elements.
@@ -984,7 +994,7 @@ declare namespace Cypress {
      *    cy.get('input').should('be.disabled')
      *    cy.get('button').should('be.visible')
      */
-    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
@@ -994,7 +1004,7 @@ declare namespace Cypress {
      *    cy.get('ul li:first').should('have.class', 'active')
      *    cy.get('.dropdown-menu').click()
      */
-    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<E>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
     /**
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
@@ -1005,7 +1015,7 @@ declare namespace Cypress {
      *    //later retrieve the todos
      *    cy.get('@todos')
      */
-    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<S>
+    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
      * Get a browser cookie by its name.
@@ -1057,13 +1067,13 @@ declare namespace Cypress {
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
 
-     /**
-     * Invoke a function on the previously yielded subject by a property path.
-     * Property path invocation cannot be strongly-typed.
-     * Invoking by a property path will always result in any.
-     *
-     * @see https://on.cypress.io/invoke
-     */
+    /**
+   * Invoke a function on the previously yielded subject by a property path.
+   * Property path invocation cannot be strongly-typed.
+   * Invoking by a property path will always result in any.
+   *
+   * @see https://on.cypress.io/invoke
+   */
     invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
@@ -1542,6 +1552,21 @@ declare namespace Cypress {
      * @see https://on.cypress.io/setcookie
      */
     setCookie(name: string, value: string, options?: Partial<SetCookieOptions>): Chainable<Cookie>
+
+    /**
+     * Traverse into an element's shadow root.
+     * Requires `experimentalShadowDomSupport: true` config option
+     *
+    @example
+    ```js
+    cy.get('.top-level > my-component')
+      .shadow()
+      .find('.my-button')
+      .click()
+    ```
+     * @see https://on.cypress.io/experimental
+     */
+    shadow(): Chainable<Subject>
 
     /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
@@ -2144,6 +2169,18 @@ declare namespace Cypress {
   }
 
   /**
+   * Element traversal options for dealing with Shadow DOM
+   */
+  interface Shadow {
+    /**
+     * Ignore shadow boundary and continue searching
+     *
+     * @default: false
+     */
+    ignoreShadowBoundaries: boolean
+  }
+
+  /**
    * Options that control how a command is logged in the Reporter
    */
   interface Loggable {
@@ -2297,6 +2334,11 @@ declare namespace Cypress {
      */
     responseTimeout: number
     /**
+     * Time, in milliseconds, to wait for a task to finish executing during a cy.task() command
+     * @default 60000
+     */
+    taskTimeout: number
+    /**
      * Path to folder where application files will attempt to be served from
      * @default root project folder
      */
@@ -2410,6 +2452,16 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Enables shadow DOM support. Adds the `cy.shadow()` command and
+     * the `ignoreShadowBoundaries` option to some DOM commands.
+     */
+    experimentalShadowDomSupport: boolean
+  }
+
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
+    // retries?: number
+    browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
   /**
@@ -2502,8 +2554,22 @@ declare namespace Cypress {
     disableTimersAndAnimations: boolean
     padding: Padding
     scale: boolean
-    beforeScreenshot(doc: Document): void
-    afterScreenshot(doc: Document): void
+    onBeforeScreenshot: ($el: JQuery) => void
+    onAfterScreenshot: ($el: JQuery, props: {
+      path: string,
+      size: number,
+      dimensions: {
+        width: number,
+        height: number
+      },
+      multipart: boolean,
+      pixelRatio: number,
+      takenAt: string,
+      name: string,
+      blackout: string[],
+      duration: number,
+      testAttemptIndex: number
+    }) => void
   }
 
   interface ScreenshotDefaultsOptions extends ScreenshotOptions {
@@ -4709,7 +4775,7 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
-    message: any[]
+    message: any
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike
   }
@@ -4790,4 +4856,66 @@ declare namespace Cypress {
   ```
    */
   interface cy extends Chainable<undefined> {}
+}
+
+declare namespace Mocha {
+  interface TestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+  interface ExclusiveTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+  interface PendingTestFunction {
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
+
+        /**
+         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * as a thunk.
+         */
+        (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
+  }
+
+  interface SuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+  }
+
+  interface ExclusiveSuiteFunction {
+    /**
+     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * nested suites. Indicates this suite should be executed exclusively.
+     */
+    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
+  }
+
+  interface PendingSuiteFunction {
+    (title: string,  config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+  }
 }

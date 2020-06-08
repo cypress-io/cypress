@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser'
-import e2e from '../support/helpers/e2e'
-const Fixtures = require('../support/helpers/fixtures')
+import e2e, { expect } from '../support/helpers/e2e'
+import Fixtures from '../support/helpers/fixtures'
 
 const WEBPACK_PREPROCESSOR_PROJECTS = [
   'webpack-preprocessor',
@@ -15,7 +15,7 @@ const onServer = function (app) {
   return app.get('/response', (req, res) => res.json({ ok: true }))
 }
 
-const VARIOUS_FAILURES_EXPECTED_FAILURES = 61
+const VARIOUS_FAILURES_EXPECTED_FAILURES = 63
 
 const verifyPassedAndFailedAreSame = (expectedFailures) => {
   return ({ stdout }) => {

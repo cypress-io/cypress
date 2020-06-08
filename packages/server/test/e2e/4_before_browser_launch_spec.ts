@@ -1,6 +1,6 @@
-const browserUtils = require('../../lib/browsers/utils')
-const e2e = require('../support/helpers/e2e')
-const Fixtures = require('../support/helpers/fixtures')
+import e2e from '../support/helpers/e2e'
+import Fixtures from '../support/helpers/fixtures'
+import browserUtils from '../../lib/browsers/utils'
 
 const browser = {
   name: 'chrome',
