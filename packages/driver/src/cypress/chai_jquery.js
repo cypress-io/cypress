@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const $ = require('jquery')
 const $dom = require('../dom')
+const $elements = require('../dom/elements')
 
 const selectors = {
   visible: 'visible',
@@ -179,9 +180,10 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
 
   chai.Assertion.addMethod('value', function (value) {
     const $el = wrap(this)
-    const tagName = $el.prop('tagName')
 
-    if (tagName !== 'PROGRESS' && tagName !== 'METER' && tagName !== 'LI') {
+    // some elements return a number for the .value property
+    // in this case, we don't want to cast the expected value to a string
+    if (!$elements.isValueNumberTypeElement($el[0])) {
       value = maybeCastNumberToString(value)
     }
 
