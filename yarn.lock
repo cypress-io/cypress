@@ -8102,10 +8102,10 @@ chrome-har-capturer@0.13.4:
     chrome-remote-interface "^0.25.7"
     commander "2.x.x"
 
-chrome-remote-interface@0.28.1:
-  version "0.28.1"
-  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.1.tgz#45b5c2cc3ac652d476367f39e01e1a9a48191201"
-  integrity sha512-OnVjEOuZtPDImShaWSQPKPZMNnUnoZfLKhayeXUWOyqir3MT1OTqMzUDEnIVx1itPnsW7CiKgyNLLgvgdniJgQ==
+chrome-remote-interface@0.28.2:
+  version "0.28.2"
+  resolved "https://registry.yarnpkg.com/chrome-remote-interface/-/chrome-remote-interface-0.28.2.tgz#6be3554d2c227ff07eb74baa7e5d4911da12a5a6"
+  integrity sha512-F7mjof7rWvRNsJqhVXuiFU/HWySCxTA9tzpLxUJxVfdLkljwFJ1aMp08AnwXRmmP7r12/doTDOMwaNhFCJsacw==
   dependencies:
     commander "2.11.x"
     ws "^7.2.0"
