@@ -4,7 +4,7 @@ import fs from 'fs-extra'
 
 import e2e from '../support/helpers/e2e'
 import Bluebird from 'bluebird'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 const e2ePath = Fixtures.projectPath('e2e')
 const outputPath = path.join(e2ePath, 'output.json')

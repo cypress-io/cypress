@@ -1,5 +1,4 @@
-import helper from '../../spec_helper.coffee'
-const { expect, root } = helper as {expect: Chai.ExpectStatic, root: string}
+import { expect, root } from '../../spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -206,7 +205,6 @@ const startServer = function (obj) {
 
   return new Bluebird((resolve) => {
     return srv.listen(port, () => {
-      // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
