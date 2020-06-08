@@ -101,8 +101,25 @@ module.exports = (Commands, Cypress, cy) => {
         })
       }
 
-      if (!Cypress.config('experimentalShadowDomSupport')) {
-        options.includeShadowDom = false
+      const getEl = () => {
+        const shadowDomSupportEnabled = Cypress.config('experimentalShadowDomSupport')
+        const optInShadowTraversal = optInShadowTraversals[traversal]
+        const autoShadowTraversal = autoShadowTraversals[traversal]
+
+        if (shadowDomSupportEnabled && options.includeShadowDom && optInShadowTraversal) {
+          // if we're told explicitly to ignore shadow boundaries,
+          // use the replacement traversal function if one exists
+          // so we can cross boundaries
+          return optInShadowTraversal(cy, subject, arg1, arg2)
+        }
+
+        if (shadowDomSupportEnabled && autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
+          // if we detect the element is within a shadow root and we're using
+          // .closest() or .parents(), automatically cross shadow boundaries
+          return autoShadowTraversal(cy, subject, arg1, arg2)
+        }
+
+        return subject[traversal].call(subject, arg1, arg2)
       }
 
       const setEl = ($el) => {
@@ -120,23 +137,7 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          const optInShadowTraversal = optInShadowTraversals[traversal]
-          const isWithinShadowRoot = $dom.isWithinShadowRoot(subject[0])
-          const autoShadowTraversal = autoShadowTraversals[traversal]
-
-          if (options.includeShadowDom && optInShadowTraversal) {
-            // if we're told explicitly to ignore shadow boundaries,
-            // use the replacement traversal function if one exists
-            // so we can cross boundaries
-            $el = optInShadowTraversal(cy, subject, arg1, arg2)
-          } else if (isWithinShadowRoot && autoShadowTraversal) {
-            // if we detect the element is within a shadow root and we're using
-            // .closest() or .parents(), automatically cross shadow boundaries
-            $el = autoShadowTraversal(cy, subject, arg1, arg2)
-          } else {
-            // otherwise, use the standard traversal method
-            $el = subject[traversal].call(subject, arg1, arg2)
-          }
+          $el = getEl()
 
           // normalize the selector since jQuery won't have it
           // or completely borks it
