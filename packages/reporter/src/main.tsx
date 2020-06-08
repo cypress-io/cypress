@@ -28,7 +28,7 @@ export interface ReporterProps {
   statsStore: StatsStore
   events: Events
   error?: Error
-  specPath: string
+  spec: Cypress.Cypress['spec']
 }
 
 @observer
@@ -67,7 +67,7 @@ class Reporter extends Component<ReporterProps> {
           error={this.props.error}
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
-          specPath={this.props.specPath}
+          spec={this.props.spec}
         />
         <ForcedGcWarning
           appState={appState}
@@ -109,9 +109,11 @@ declare global {
   }
 }
 
+// NOTE: this is for testing Cyress-in-Cypress
 if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
+    // @ts-ignore
     render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
   }
 }

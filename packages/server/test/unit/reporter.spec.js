@@ -1,4 +1,5 @@
 // process.env.SNAPSHOT_UPDATE = 1
+require('../spec_helper')
 const _ = require('lodash')
 const sinon = require('sinon')
 const Debug = require('debug')
@@ -10,7 +11,6 @@ const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep
 const events = require('../../../runner/test/__snapshots__/runner.spec.js.snapshot')
 const { EventSnapshots } = require('../../../runner/test/cypress/support/eventSnapshots')
 
-require('../spec_helper.coffee')
 registerInMocha()
 
 const debug = Debug('spec:retries')

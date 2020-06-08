@@ -55,7 +55,7 @@ const registerInCypress = () => {
       const prev = Cypress.env('SNAPSHOT_UPDATE')
 
       Cypress.env('SNAPSHOT_UPDATE', !prev)
-      const btnIcon = this.children().first()
+      const btnIcon = $(this).children().first()
 
       return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
       .css({ 'font-size': '10px', 'line-height': '0.9' })

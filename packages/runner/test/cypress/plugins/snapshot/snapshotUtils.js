@@ -68,7 +68,7 @@ function addPluginButton ($, name, faClass, fn) {
   container.prepend(btn)
 
   btn.on('click', fn)
-  fn.apply(btn)
+  fn.apply(btn[0])
 
   return btn
 }
