@@ -76,7 +76,7 @@
     "cypress-axe": "0.8.1",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.3",
-    "cypress-react-selector": "0.1.6",
+    "cypress-react-selector": "0.1.7",
     "date-fns": "2.13.0",
     "happo-cypress": "0.2.0",
     "happo.io": "5.4.0",
