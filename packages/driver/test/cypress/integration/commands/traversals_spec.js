@@ -362,4 +362,110 @@ describe('src/cy/commands/traversals', () => {
       cy.get('#dom').find('#button').should('be.visible')
     })
   })
+
+  describe('shadow dom', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
+    describe('find', () => {
+      it('retrieves a matching element beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+        const parent = cy.$$('#parent-of-shadow-container-0')
+
+        cy
+        .get(parent)
+        .find('p', { includeShadowDom: true })
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
+        })
+      })
+
+      it('retrieves a matching element when no shadow roots', () => {
+        const el = cy.$$('#shadow-element-3')[0]
+        const parent = cy.$$('#parent-of-shadow-container-0')
+
+        cy
+        .get(parent)
+        .find('#shadow-element-3', { includeShadowDom: true })
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
+        })
+      })
+
+      it('allows traversal when already within a shadow root', () => {
+        const parent = cy.$$('#shadow-element-3')[0].shadowRoot
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+        cy
+        .get(parent)
+        .find('p')
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
+        })
+      })
+    })
+
+    describe('closest', () => {
+      it('retrieves the closest element beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+        cy
+        .get(el)
+        .closest('#parent-of-shadow-container-0')
+        .then(($parent) => {
+          expect($parent.length).to.eq(1)
+          expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+        })
+      })
+
+      it('retrieves closest elements normally when no shadow roots', () => {
+        const el = cy.$$('#shadow-element-3')
+
+        cy
+        .get(el)
+        .closest('#parent-of-shadow-container-0')
+        .then(($parent) => {
+          expect($parent.length).to.eq(1)
+          expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+        })
+      })
+    })
+
+    describe('parents', () => {
+      it('retrieves all parents, including those beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+        cy
+        .get(el)
+        .parents()
+        .then(($parents) => {
+          expect($parents.length).to.eq(5)
+          expect($parents[0].id).to.eq('shadow-element-3')
+          expect($parents[1].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[2].id).to.eq('parent-of-shadow-container-0')
+          expect($parents[3].nodeName).to.eq('BODY')
+          expect($parents[4].nodeName).to.eq('HTML')
+        })
+      })
+
+      it('retrieves parents normally when no shadow roots exist', () => {
+        const el = cy.$$('#shadow-element-3')
+
+        cy
+        .get(el)
+        .parents()
+        .then(($parents) => {
+          expect($parents.length).to.eq(4)
+          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[1].id).to.eq('parent-of-shadow-container-0')
+          expect($parents[2].nodeName).to.eq('BODY')
+          expect($parents[3].nodeName).to.eq('HTML')
+        })
+      })
+    })
+  })
 })

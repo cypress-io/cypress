@@ -2,7 +2,7 @@ const $window = require('./window')
 const $elements = require('./elements')
 
 const getElementAtPointFromViewport = (doc, x, y) => {
-  return doc.elementFromPoint(x, y)
+  return $elements.elementFromPoint(doc, x, y)
 }
 
 const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')

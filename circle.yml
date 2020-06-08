@@ -215,7 +215,7 @@ commands:
         description: Name of the repo like "cypress-example-kitchensink"
         type: string
       browser:
-        description: Name of the browser to use
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
         enum: ["", "electron", "chrome", "firefox"]
         default: ""
@@ -258,7 +258,7 @@ commands:
                 command: |
                   git fetch origin pull/<< parameters.pull_request_id >>/head:pr-<< parameters.pull_request_id >>
                   git checkout pr-<< parameters.pull_request_id >>
-                  git log
+                  git log -n 2
       - run:
           command: npm install
           working_directory: /tmp/<<parameters.repo>>
@@ -291,15 +291,19 @@ commands:
             - when:
                 condition: << parameters.browser >>
                 steps:
-                - run:
-                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
-                    command: <<parameters.command>> -- --browser <<parameters.browser>>
+                  - run:
+                      name: Run tests using browser "<< parameters.browser >>"
+                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
                 condition: << parameters.browser >>
                 steps:
-                - run:
-                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
-                    command: <<parameters.command>>
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      command: <<parameters.command>>
+
             - store_artifacts:
                 name: screenshots
                 path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/screenshots
@@ -309,9 +313,20 @@ commands:
       - unless:
           condition: << parameters.folder >>
           steps:
-          - run:
-              working_directory: /tmp/<<parameters.repo>>
-              command: <<parameters.command>> -- --browser <<parameters.browser>>
+          - when:
+              condition: << parameters.browser >>
+              steps:
+                - run:
+                    name: Run tests using browser "<< parameters.browser >>"
+                    working_directory: /tmp/<<parameters.repo>>
+                    command: <<parameters.command>> -- --browser <<parameters.browser>>
+          - unless:
+              condition: << parameters.browser >>
+              steps:
+                - run:
+                    name: Run tests using command
+                    working_directory: /tmp/<<parameters.repo>>
+                    command: <<parameters.command>>
           - store_artifacts:
               name: screenshots
               path: /tmp/<<parameters.repo>>/cypress/screenshots
@@ -1295,8 +1310,9 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci
-          pull_request_id: 492
-          folder: examples/testing-dom__form-interactions
+          # https://github.com/cypress-io/cypress-example-recipes/pull/501
+          pull_request_id: 501
+          folder: examples/unit-testing__lit-element
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1618,11 +1634,11 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-recipe-pull-request:
-        name: Test jQuery update recipe
+        name: Shadow DOM recipe
         filters:
           branches:
             only:
-              - test-recipe-pr
+              - pull/7469
         requires:
           - build-binary
           - build-npm-package

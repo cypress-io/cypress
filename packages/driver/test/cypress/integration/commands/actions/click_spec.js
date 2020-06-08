@@ -3666,6 +3666,48 @@ describe('src/cy/commands/actions/click', () => {
   })
 })
 
+describe('composed events', () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/shadow-dom.html')
+  })
+
+  it('should compose click events', (done) => {
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+    cy.$$('#parent-of-shadow-container-0').on('click', () => {
+      done()
+    })
+
+    cy
+    .get(el)
+    .click()
+  })
+
+  it('should compose dblclick events', (done) => {
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+    cy.$$('#parent-of-shadow-container-0').on('dblclick', () => {
+      done()
+    })
+
+    cy
+    .get(el)
+    .dblclick()
+  })
+
+  it('should compose right click events', (done) => {
+    const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
+    cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
+      done()
+    })
+
+    cy
+    .get(el)
+    .rightclick()
+  })
+})
+
 describe('mouse state', () => {
   describe('mouse/pointer events', () => {
     beforeEach(() => {
