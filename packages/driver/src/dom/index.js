@@ -9,7 +9,7 @@ const { isWindow, getWindowByElement } = $window
 const { isDocument, getDocumentFromElement } = $document
 const { wrap, unwrap, isJquery, query } = $jquery
 const { isVisible, isHidden, getReasonIsHidden } = $visibility
-const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots } = $elements
+const { isInputType, isFocusable, isElement, isScrollable, isFocused, stringify, getElements, getContainsSelector, getFirstDeepestElement, isDetached, isAttached, isTextLike, isSelector, isDescendent, getFirstFixedOrStickyPositionParent, getFirstStickyPositionParent, getFirstScrollableParent, isUndefinedOrHTMLBodyDoc, elementFromPoint, getParent, findAllShadowRoots, findShadowRoots, isWithinShadowRoot } = $elements
 const { getCoordsByPosition, getElementPositioning, getElementCoordinatesByPosition, getElementAtPointFromViewport, getElementCoordinatesByPositionRelativeToXY } = $coordinates
 const { getHostContenteditable, getSelectionBounds } = require('./selection')
 const isDom = (obj) => {
@@ -46,6 +46,7 @@ module.exports = {
   stringify,
   findAllShadowRoots,
   findShadowRoots,
+  isWithinShadowRoot,
   getElements,
   getContainsSelector,
   getFirstDeepestElement,

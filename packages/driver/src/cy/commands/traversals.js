@@ -4,7 +4,7 @@ const $dom = require('../../dom')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
-const shadowTraversals = {
+const optInShadowTraversals = {
   find: (cy, el, arg1, arg2) => {
     const roots = []
 
@@ -21,6 +21,9 @@ const shadowTraversals = {
     // query the entire set of [selection + shadow roots]
     return elementsWithShadow.find(arg1, arg2)
   },
+}
+
+const autoShadowTraversals = {
   parents: (cy, el, arg1) => {
     let parents = []
 
@@ -117,14 +120,21 @@ module.exports = (Commands, Cypress, cy) => {
         let $el
 
         try {
-          const shadowTraversal = shadowTraversals[traversal]
+          const optInShadowTraversal = optInShadowTraversals[traversal]
+          const isWithinShadowRoot = $dom.isWithinShadowRoot(subject[0])
+          const autoShadowTraversal = autoShadowTraversals[traversal]
 
-          // if we're told explicitly to ignore shadow boundaries,
-          // use the replacement traversal function if one exists
-          // so we can cross boundaries.
-          if (options.ignoreShadowBoundaries && shadowTraversal) {
-            $el = shadowTraversal(cy, subject, arg1, arg2)
+          if (options.ignoreShadowBoundaries && optInShadowTraversal) {
+            // if we're told explicitly to ignore shadow boundaries,
+            // use the replacement traversal function if one exists
+            // so we can cross boundaries
+            $el = optInShadowTraversal(cy, subject, arg1, arg2)
+          } else if (isWithinShadowRoot && autoShadowTraversal) {
+            // if we detect the element is within a shadow root and we're using
+            // .closest() or .parents(), automatically cross shadow boundaries
+            $el = autoShadowTraversal(cy, subject, arg1, arg2)
           } else {
+            // otherwise, use the standard traversal method
             $el = subject[traversal].call(subject, arg1, arg2)
           }
 

@@ -588,6 +588,14 @@ const getFirstCommonAncestor = (el1, el2) => {
   return el2
 }
 
+const isWithinShadowRoot = (node: HTMLElement) => {
+  const win = $window.getWindowByElement(node)
+
+  if (!win) return false
+
+  return node.getRootNode() instanceof win.ShadowRoot
+}
+
 const getParent = (el) => {
   // if the element has a direct parent element,
   // simply return it.
@@ -596,11 +604,10 @@ const getParent = (el) => {
   }
 
   const root = el.getRootNode()
-  const win = $window.getWindowByElement(el)
 
   // if the element is inside a shadow root,
   // return the host of the root.
-  if (root && root instanceof win.ShadowRoot) {
+  if (root && isWithinShadowRoot(el)) {
     return root.host
   }
 
@@ -1313,6 +1320,7 @@ export {
   findParent,
   findAllShadowRoots,
   findShadowRoots,
+  isWithinShadowRoot,
   getElements,
   getFirstFocusableEl,
   getActiveElByDocument,
