@@ -2,14 +2,14 @@
 
 const { _ } = Cypress
 const debug = require('debug')('spec')
-const snapshotPlugin = require('../plugins/snapshot/snapshotCommand')
+const snapshotCommand = require('../plugins/snapshot/snapshotCommand')
 
 /**
  * @type {sinon.SinonMatch}
  */
 const match = Cypress.sinon.match
 
-const { stringifyShort } = snapshotPlugin
+const { stringifyShort } = snapshotCommand
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
@@ -75,7 +75,7 @@ function createCypress () {
     expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, name.mocha)
   }
 
-  snapshotPlugin.registerInCypress()
+  snapshotCommand.registerInCypress()
 
   const backupCy = window.cy
   const backupCypress = window.Cypress
