@@ -277,7 +277,7 @@ commands:
                 condition: << parameters.browser >>
                 steps:
                   - run:
-                      name: Run test using Electron
+                      name: Run tests using command
                       working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
                       command: <<parameters.command>>
 
