@@ -19,6 +19,7 @@ describe('src/cy/commands/screenshot', () => {
       takenAt: new Date().toISOString(),
       name: 'name',
       blackout: ['.foo'],
+      testAttemptIndex: 0,
       duration: 100,
     }
 
@@ -49,7 +50,7 @@ describe('src/cy/commands/screenshot', () => {
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
       .then(() => {
-        expect(Cypress.action).not.to.be.calledWith('cy:test:set:state')
+        expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
       })
       .finally(() => {
@@ -68,7 +69,7 @@ describe('src/cy/commands/screenshot', () => {
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
       .then(() => {
-        expect(Cypress.action).not.to.be.calledWith('cy:test:set:state')
+        expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
       })
     })
@@ -89,7 +90,7 @@ describe('src/cy/commands/screenshot', () => {
 
       Cypress.action('runner:runnable:after:run:async', test, runnable)
       .then(() => {
-        expect(Cypress.action).not.to.be.calledWith('cy:test:set:state')
+        expect(Cypress.action).not.to.be.calledWith('test:set:state')
         expect(Cypress.automation).not.to.be.called
       })
     })
@@ -118,6 +119,7 @@ describe('src/cy/commands/screenshot', () => {
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
+          testAttemptIndex: 0,
         })
 
         expect(Cypress.action).to.be.calledWith('cy:after:screenshot', {
@@ -128,6 +130,7 @@ describe('src/cy/commands/screenshot', () => {
           waitForCommandSynchronization: true,
           disableTimersAndAnimations: true,
           blackout: [],
+          testAttemptIndex: 0,
         })
       })
     })
@@ -164,6 +167,7 @@ describe('src/cy/commands/screenshot', () => {
           testFailure: true,
           blackout: [],
           scaled: true,
+          testAttemptIndex: 0,
         })
       })
     })
@@ -206,6 +210,7 @@ describe('src/cy/commands/screenshot', () => {
             simple: false,
             scaled: true,
             blackout: [],
+            testAttemptIndex: 0,
           })
         })
       })
@@ -245,6 +250,7 @@ describe('src/cy/commands/screenshot', () => {
           testFailure: true,
           scaled: true,
           blackout: [],
+          testAttemptIndex: 0,
         })
       })
     })
@@ -387,6 +393,7 @@ describe('src/cy/commands/screenshot', () => {
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
+            testAttemptIndex: 0,
           })
         })
       })
@@ -406,6 +413,7 @@ describe('src/cy/commands/screenshot', () => {
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
+            testAttemptIndex: 0,
           })
         })
       })
@@ -427,6 +435,7 @@ describe('src/cy/commands/screenshot', () => {
             waitForCommandSynchronization: true,
             disableTimersAndAnimations: true,
             blackout: [],
+            testAttemptIndex: 0,
           })
         })
       })
@@ -447,6 +456,7 @@ describe('src/cy/commands/screenshot', () => {
             waitForCommandSynchronization: false,
             disableTimersAndAnimations: true,
             blackout: ['.foo'],
+            testAttemptIndex: 0,
           })
         })
       })

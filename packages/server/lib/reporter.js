@@ -6,6 +6,7 @@ const path = require('path')
 const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
 const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
+const mochaColor = mochaReporters.Base.color
 
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
@@ -99,6 +100,10 @@ const createRunnable = function (obj, parent) {
   runnable.sync = obj.sync
   runnable.duration = obj.duration
   runnable.state = obj.state != null ? obj.state : 'skipped' // skipped by default
+  runnable._retries = obj._retries
+  // shouldn't need to set _currentRetry, but we'll do it anyways
+  runnable._currentRetry = obj._currentRetry
+
   if (runnable.body == null) {
     runnable.body = body
   }
@@ -110,9 +115,41 @@ const createRunnable = function (obj, parent) {
   return runnable
 }
 
+const mochaProps = {
+  'currentRetry': '_currentRetry',
+  'retries': '_retries',
+}
+
+const toMochaProps = (testProps) => {
+  return _.each(mochaProps, (val, key) => {
+    if (testProps.hasOwnProperty(key)) {
+      testProps[val] = testProps[key]
+
+      return delete testProps[key]
+    }
+  })
+}
+
 const mergeRunnable = (eventName) => {
   return (function (testProps, runnables) {
+    toMochaProps(testProps)
+
     const runnable = runnables[testProps.id]
+
+    if (eventName === 'test:before:run') {
+      if (testProps._currentRetry > runnable._currentRetry) {
+        debug('test retried:', testProps.title)
+        const prevAttempts = runnable.prevAttempts || []
+
+        delete runnable.prevAttempts
+        const prevAttempt = _.cloneDeep(runnable)
+
+        delete runnable.failedFromHookId
+        delete runnable.err
+        delete runnable.hookName
+        testProps.prevAttempts = prevAttempts.concat([prevAttempt])
+      }
+    }
 
     return _.extend(runnable, testProps)
   })
@@ -180,11 +217,13 @@ const events = {
   'test': mergeRunnable('test'),
   'test end': mergeRunnable('test end'),
   'hook': safelyMergeRunnable,
+  'retry': true,
   'hook end': safelyMergeRunnable,
   'pass': mergeRunnable('pass'),
   'pending': mergeRunnable('pending'),
   'fail': mergeErr,
   'test:after:run': mergeRunnable('test:after:run'), // our own custom event
+  'test:before:run': mergeRunnable('test:before:run'), // our own custom event
 }
 
 const reporters = {
@@ -218,6 +257,18 @@ class Reporter {
     this.mocha.suite = rootRunnable
     this.runner = new Mocha.Runner(rootRunnable)
     mochaCreateStatsCollector(this.runner)
+
+    if (this.reporterName === 'spec') {
+      this.runner.on('retry', (test) => {
+        const runnable = this.runnables[test.id]
+        const padding = '  '.repeat(runnable.titlePath().length)
+        const retryMessage = mochaColor('medium', `(Attempt ${test.currentRetry + 1} of ${test.retries + 1})`)
+
+        // Log: `(Attempt 1 of 2) test title` when a test retries
+        // eslint-disable-next-line no-console
+        return console.log(`${padding}${retryMessage} ${test.title}`)
+      })
+    }
 
     this.reporter = new this.mocha._reporter(this.runner, {
       reporterOptions: this.reporterOptions,
@@ -260,7 +311,7 @@ class Reporter {
     args = this.parseArgs(event, args)
 
     if (args) {
-      return (this.runner != null ? this.runner.emit.apply(this.runner, args) : undefined)
+      return this.runner && this.runner.emit.apply(this.runner, args)
     }
   }
 
@@ -291,27 +342,25 @@ class Reporter {
     }
   }
 
-  normalizeTest (test = {}) {
+  normalizeTest (test) {
     let wcs
-    const get = (prop) => {
+
+    if (test == null) {
+      test = {}
+    }
+
+    const get = function (prop) {
       return _.get(test, prop, null)
     }
 
-    // use this or null
     wcs = get('wallClockStartedAt')
-
     if (wcs) {
-      // convert to actual date object
       wcs = new Date(wcs)
     }
 
-    // wallClockDuration:
-    // this is the 'real' duration of wall clock time that the
-    // user 'felt' when the test run. it includes everything
-    // from hooks, to the test itself, to lifecycle, and event
-    // async browser compute time. this number is likely higher
-    // than summing the durations of the timings.
-    //
+    const _prevAttempts = get('prevAttempts')
+    const prevAttempts = _prevAttempts && _prevAttempts.map(this.normalizePrevAttemptTest)
+
     return {
       testId: get('id'),
       title: getParentTitle(test),
@@ -323,8 +372,17 @@ class Reporter {
       failedFromHookId: get('failedFromHookId'),
       wallClockStartedAt: wcs,
       wallClockDuration: get('wallClockDuration'),
-      videoTimestamp: null, // always start this as null
+      videoTimestamp: null,
+      prevAttempts,
     }
+  }
+
+  normalizePrevAttemptTest (test) {
+    if (test == null) {
+      test = {}
+    }
+
+    return _.omit(this.normalizeTest(test), ['testId', 'title', 'body', 'prevAttempts'])
   }
 
   end () {

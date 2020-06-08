@@ -79,7 +79,8 @@ videoUploadOnPasses
 watchForFileChanges
 waitForAnimations               resolvedNodeVersion
 nodeVersion                     resolvedNodePath
-firefoxGcInterval\
+firefoxGcInterval
+retries
 `)
 
 // NOTE: If you add a config value, make sure to update the following
@@ -170,6 +171,7 @@ const CONFIG_DEFAULTS = {
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
   experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
+  retries: null,
 }
 
 const validationRules = {
@@ -216,6 +218,7 @@ const validationRules = {
   // experimental flag validation below
   experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
+  retries: v.isValidRetriesConfig,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {

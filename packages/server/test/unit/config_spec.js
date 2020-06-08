@@ -1136,6 +1136,8 @@ describe('lib/config', () => {
             nodeVersion: { value: 'default', from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
+            retries: { value: null, from: 'default' },
+
           })
         })
       })
@@ -1211,6 +1213,7 @@ describe('lib/config', () => {
             nodeVersion: { value: 'default', from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
+            retries: { value: null, from: 'default' },
             env: {
               foo: {
                 value: 'foo',

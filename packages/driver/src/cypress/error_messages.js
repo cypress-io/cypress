@@ -866,6 +866,25 @@ module.exports = {
         {{error}}`,
       docsUrl: 'https://on.cypress.io/returning-promise-and-invoking-done-callback',
     },
+    manually_set_retries_test: stripIndent`\
+    Cannot set number of test retries at test run-time.
+      use
+      > \`Cypress.config('retries', n)\`
+      instead.
+    
+    
+    https://on.cypress.io/test-retries
+    `,
+    manually_set_retries_suite: stripIndent`\
+    Cannot set number of test retries directly on the mocha Suite.
+      use
+      > \`Cypress.config('retries', n)\`
+      instead.
+    
+    
+    https://on.cypress.io/test-retries
+    `,
+
   },
 
   navigation: {

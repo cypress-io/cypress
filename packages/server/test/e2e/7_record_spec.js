@@ -192,7 +192,7 @@ const defaultRoutes = [
   }, {
     method: 'put',
     url: '/instances/:id',
-    req: 'putInstanceRequest@2.0.0',
+    req: 'putInstanceRequest@2.1.0',
     resSchema: 'putInstanceResponse@2.0.0',
     res: sendUploadUrls,
   }, {
@@ -338,7 +338,7 @@ describe('e2e record', () => {
 
         expect(secondInstancePut.body.error).to.be.null
         expect(secondInstancePut.body.tests).to.have.length(2)
-        expect(secondInstancePut.body.hooks).to.have.length(2)
+        expect(secondInstancePut.body.hooks).to.have.length(1)
         expect(secondInstancePut.body.screenshots).to.have.length(1)
         expect(secondInstancePut.body.stats.tests).to.eq(2)
         expect(secondInstancePut.body.stats.failures).to.eq(1)
@@ -362,7 +362,7 @@ describe('e2e record', () => {
 
         expect(thirdInstancePut.body.error).to.be.null
         expect(thirdInstancePut.body.tests).to.have.length(2)
-        expect(thirdInstancePut.body.hooks).to.have.length(1)
+        expect(thirdInstancePut.body.hooks).to.have.length(0)
         expect(thirdInstancePut.body.screenshots).to.have.length(1)
         expect(thirdInstancePut.body.stats.tests).to.eq(2)
         expect(thirdInstancePut.body.stats.passes).to.eq(1)
@@ -387,7 +387,7 @@ describe('e2e record', () => {
 
         expect(fourthInstancePut.body.error).to.be.null
         expect(fourthInstancePut.body.tests).to.have.length(1)
-        expect(fourthInstancePut.body.hooks).to.have.length(1)
+        expect(fourthInstancePut.body.hooks).to.have.length(0)
         expect(fourthInstancePut.body.screenshots).to.have.length(1)
         expect(fourthInstancePut.body.stats.tests).to.eq(1)
         expect(fourthInstancePut.body.stats.failures).to.eq(1)
@@ -869,7 +869,7 @@ describe('e2e record', () => {
       routes[2] = {
         method: 'put',
         url: '/instances/:id',
-        req: 'putInstanceRequest@2.0.0',
+        req: 'putInstanceRequest@2.1.0',
         res (req, res) {
           return res.sendStatus(500)
         },
@@ -1169,7 +1169,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@2.1.0',
           res (req, res) {
             return res.sendStatus(500)
           },
@@ -1216,7 +1216,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@2.1.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
@@ -1287,7 +1287,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@2.1.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
