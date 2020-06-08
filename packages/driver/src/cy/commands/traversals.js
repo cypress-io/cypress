@@ -102,7 +102,7 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       if (!Cypress.config('experimentalShadowDomSupport')) {
-        options.ignoreShadowBoundaries = false
+        options.includeShadowDom = false
       }
 
       const setEl = ($el) => {
@@ -124,7 +124,7 @@ module.exports = (Commands, Cypress, cy) => {
           const isWithinShadowRoot = $dom.isWithinShadowRoot(subject[0])
           const autoShadowTraversal = autoShadowTraversals[traversal]
 
-          if (options.ignoreShadowBoundaries && optInShadowTraversal) {
+          if (options.includeShadowDom && optInShadowTraversal) {
             // if we're told explicitly to ignore shadow boundaries,
             // use the replacement traversal function if one exists
             // so we can cross boundaries

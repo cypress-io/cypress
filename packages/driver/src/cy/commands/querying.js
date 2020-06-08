@@ -87,7 +87,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       })
 
       if (!Cypress.config('experimentalShadowDomSupport')) {
-        options.ignoreShadowBoundaries = false
+        options.includeShadowDom = false
       }
 
       let aliasObj
@@ -284,7 +284,7 @@ module.exports = (Commands, Cypress, cy, state) => {
           // only support shadow traversal if we're not searching
           // within a subject and have been explicitly told to ignore
           // boundaries.
-          if (!options.ignoreShadowBoundaries) {
+          if (!options.includeShadowDom) {
             $el = cy.$$(selector, options.withinSubject)
           } else {
             const root = options.withinSubject || cy.state('document')

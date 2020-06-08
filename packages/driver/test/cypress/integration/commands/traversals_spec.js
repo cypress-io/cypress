@@ -375,7 +375,7 @@ describe('src/cy/commands/traversals', () => {
 
         cy
         .get(parent)
-        .find('p', { ignoreShadowBoundaries: true })
+        .find('p', { includeShadowDom: true })
         .then(($element) => {
           expect($element.length).to.eq(1)
           expect($element[0]).to.eq(el)
@@ -388,7 +388,7 @@ describe('src/cy/commands/traversals', () => {
 
         cy
         .get(parent)
-        .find('#shadow-element-3', { ignoreShadowBoundaries: true })
+        .find('#shadow-element-3', { includeShadowDom: true })
         .then(($element) => {
           expect($element.length).to.eq(1)
           expect($element[0]).to.eq(el)
