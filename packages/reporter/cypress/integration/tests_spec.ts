@@ -111,11 +111,11 @@ describe('controls', function () {
 
     describe('header', function () {
       it('displays', function () {
-        cy.get('.runnable-header').find('a').should('have.text', 'cypress/integration/tests_spec.ts')
+        cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
       })
 
       itHandlesFileOpening('.runnable-header', {
-        file: '/foo/bar',
+        file: '/absolute/path/to/foo.js',
         line: 0,
         column: 0,
       })
