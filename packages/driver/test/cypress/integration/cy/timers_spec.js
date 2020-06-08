@@ -2,6 +2,10 @@ const startingIndex = Cypress.isBrowser('firefox') ? 1 : 0
 
 const timerNumber = (n) => n + startingIndex
 
+// NOTE: basically the same as a cy.wait(...) but uses setTimeout instead of Promise.delay
+// since firefox will sometimes have `Promise.delay(10)` fire faster than a `setTimeout(..., 1)`
+const cyWaitTimeout = (n) => cy.wrap(new Promise((resolve) => window.setTimeout(resolve, n)))
+
 describe('driver/src/cy/timers', () => {
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
@@ -226,8 +230,7 @@ describe('driver/src/cy/timers', () => {
 
       expect(id1).to.eq(timerNumber(1))
 
-      cy
-      .wait(100)
+      cyWaitTimeout(1)
       .log('setTimeout should NOT have fired when paused')
       .window().its('bar').should('be.null')
       .log('setTimeout should now fire when unpaused')
@@ -252,7 +255,8 @@ describe('driver/src/cy/timers', () => {
 
         cy.pauseTimers(false)
       })
-      .wait(100)
+
+      cyWaitTimeout(1)
       .window().its('bar').should('eq', 'foo')
     })
   })
@@ -276,9 +280,9 @@ describe('driver/src/cy/timers', () => {
 
       cy.pauseTimers(true)
 
-      cy
-      .wait(100)
-      .window().its('bar').should('be.null')
+      cyWaitTimeout(10)
+
+      cy.window().its('bar').should('be.null')
       .log('setTimeout should be immediately flushed after unpausing')
       .then(() => {
         cy.pauseTimers(false)
@@ -312,8 +316,7 @@ describe('driver/src/cy/timers', () => {
 
         win.setTimeout('this.stub()', 1)
 
-        cy
-        .wait(10)
+        cyWaitTimeout(1)
         .then(() => {
           expect(win.stub).to.be.called
         })
@@ -336,8 +339,7 @@ describe('driver/src/cy/timers', () => {
           win.eval = cy.stub()
           win.setTimeout(value, 1)
 
-          cy
-          .wait(10)
+          cyWaitTimeout(1)
           .then(() => {
             expect(win.eval).to.be.called
           })

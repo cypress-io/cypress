@@ -2,14 +2,14 @@
 
 const { _ } = Cypress
 const debug = require('debug')('spec')
-const snapshotPlugin = require('../plugins/snapshot/command')
+const snapshotCommand = require('../plugins/snapshot/snapshotCommand')
 
 /**
  * @type {sinon.SinonMatch}
  */
 const match = Cypress.sinon.match
 
-const { stringifyShort } = snapshotPlugin
+const { stringifyShort } = snapshotCommand
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
@@ -75,7 +75,7 @@ function createCypress () {
     expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, name.mocha)
   }
 
-  snapshotPlugin.registerInCypress()
+  snapshotCommand.registerInCypress()
 
   const backupCy = window.cy
   const backupCypress = window.Cypress
@@ -443,14 +443,14 @@ const getRunState = (Cypress) => {
 
   const s = {
     currentId,
-    tests: Cypress.getTestsState(),
-    startTime: Cypress.getStartTime(),
-    emissions: Cypress.getEmissions(),
+    tests: Cypress.runner.getTestsState(),
+    startTime: Cypress.runner.getStartTime(),
+    emissions: Cypress.runner.getEmissions(),
   }
 
-  s.passed = Cypress.countByTestState(s.tests, 'passed')
-  s.failed = Cypress.countByTestState(s.tests, 'failed')
-  s.pending = Cypress.countByTestState(s.tests, 'pending')
+  s.passed = Cypress.runner.countByTestState(s.tests, 'passed')
+  s.failed = Cypress.runner.countByTestState(s.tests, 'failed')
+  s.pending = Cypress.runner.countByTestState(s.tests, 'pending')
   s.numLogs = Cypress.Log.countLogsByTests(s.tests)
 
   return _.cloneDeep(s)

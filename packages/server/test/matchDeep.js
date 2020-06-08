@@ -1,10 +1,8 @@
-const { matchDeep } = require('../../runner/test/cypress/plugins/snapshot/command')
-const { getSnapshot, saveSnapshot } = require('../../runner/test/cypress/plugins/snapshot')
-const chai = require('chai')
 const _ = require('lodash')
+const chai = require('chai')
 const sinon = require('sinon')
-// const Debug = require('debug')
-// const debug = Debug('plugin:snapshot')
+const { matchDeep, stringifyShort, parseMatcherFromString } = require('../../runner/test/cypress/plugins/snapshot/snapshotCommand')
+const { getSnapshot, saveSnapshot } = require('../../runner/test/cypress/plugins/snapshot/snapshotPlugin')
 
 /** @type {Mocha.ITest} */
 let currentTest
@@ -19,6 +17,7 @@ const registerInMocha = () => {
     }
   })
 
+  // chai assertion 'matchSnapshot
   const matchSnapshot = function (m, snapshotName) {
     const ctx = this
     const testName = currentTest.fullTitle()
@@ -53,6 +52,7 @@ const registerInMocha = () => {
     }
   }
 
+  // chai assertion 'matchDeep'
   const matchDeepMocha = function (...args) {
     let ret
     let act
@@ -79,65 +79,26 @@ const registerInMocha = () => {
   chai.Assertion.addMethod('matchSnapshot', matchSnapshot)
   chai.Assertion.addMethod('matchDeep', matchDeepMocha)
 
+  // print debug messages if `expect(...).debug.to.matchDeep(..)`
   chai.Assertion.addProperty('debug', function () {
     this.__flags.debug = true
-    // debug(this)
   })
 }
 
-const stringifyShort = (obj) => {
-  const constructorName = _.get(obj, 'constructor.name')
-
-  if (constructorName && !_.includes(['Object'], constructorName)) {
-    return `{${constructorName}}`
-  }
-
-  if (_.isArray(obj)) {
-    return `[Array ${obj.length}]`
-  }
-
-  if (_.isObject(obj)) {
-    return `{Object ${Object.keys(obj).length}}`
-  }
-
-  return obj
-}
-const parseMatcher = (matcher) => {
-  const regex = /match\.(.*)/
-
-  if (_.isString(matcher)) {
-    const parsed = regex.exec(matcher)
-
-    if (parsed) {
-      return parsed[1]
-    }
-  }
-}
-
 const parseSnapshot = (s) => {
-  s = _.cloneDeep(s)
-  const recurse = (_obj) => {
-    _.each(_obj, (value, key) => {
-      const matcherType = parseMatcher(value)
+  return _.cloneDeepWith(s, (value) => {
+    const matcherType = parseMatcherFromString(value)
 
-      if (matcherType) {
-        const replacement = getFake(matcherType)
+    if (matcherType) {
+      const replacement = getFake(matcherType)
 
-        _obj[key] = replacement
-
-        return
-      }
-
-      if (_.isObjectLike(value)) {
-        return recurse(value)
-      }
-    })
-  }
-
-  recurse(s)
-
-  return s
+      return replacement
+    }
+  })
 }
+
+// returns deterministic fake data based on stored snapshot matcher type
+// TODO: maybe make this data more interesting
 const getFake = (matcherType) => {
   if (matcherType === 'number') {
     return 1
@@ -160,5 +121,4 @@ module.exports = {
   registerInMocha,
   stringifyShort,
   parseSnapshot,
-
 }

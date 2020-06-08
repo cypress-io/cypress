@@ -5,7 +5,6 @@ const Promise = require('bluebird')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
-const $selection = require('../dom/selection')
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
 const $Chai = require('../cy/chai')
@@ -26,9 +25,11 @@ const $Timers = require('../cy/timers')
 const $Timeouts = require('../cy/timeouts')
 const $Retries = require('../cy/retries')
 const $Stability = require('../cy/stability')
+const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
+const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -103,8 +104,12 @@ const setTopOnError = function (cy) {
   })
 }
 
+// NOTE: this makes the cy object an instance
+// TODO: refactor the 'create' method below into this class
+class $Cy {}
+
 const create = function (specWindow, Cypress, Cookies, state, config, log) {
-  let cy = {}
+  let cy = new $Cy()
   let stopped = false
   const commandFns = {}
 
@@ -156,6 +161,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
+  const testConfigOverrides = $TestConfigOverrides.create()
 
   const isCy = (val) => {
     return (val === cy) || $utils.isInstanceOf(val, $Chainer)
@@ -336,7 +342,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('nestedIndex', state('index'))
 
       return command.get('args')
-    }).all()
+    })
 
     .then((args) => {
       // store this if we enqueue new commands
@@ -758,6 +764,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       throw err
     }
 
+    // this means the error came from a 'fail' handler, so don't send
+    // 'cy:fail' action again, just finish up
+    if (err.isCyFailErr) {
+      delete err.isCyFailErr
+
+      return finish(err)
+    }
+
     // if we have a "fail" handler
     // 1. catch any errors it throws and fail the test
     // 2. otherwise swallow any errors
@@ -773,9 +787,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       rets = Cypress.action('cy:fail', err, state('runnable'))
     } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
-      cyFailErr.stack = $stackUtils.normalizedStack(cyFailErr)
+      cyFailErr.isCyFailErr = true
 
-      return finish(cyFailErr)
+      return fail(cyFailErr)
     }
 
     // bail if we had callbacks attached
@@ -951,7 +965,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return doneEarly()
     },
 
-    reset () {
+    reset (attrs, test) {
       stopped = false
 
       const s = state()
@@ -970,6 +984,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       queue.reset()
       timers.reset()
+      testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
       return cy.removeAllListeners()
     },

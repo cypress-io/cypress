@@ -1,7 +1,7 @@
-const e2e = require('../support/helpers/e2e')
-const Fixtures = require('../support/helpers/fixtures')
+import snapshot from 'snap-shot-it'
 
-const snapshot = require('snap-shot-it')
+import e2e from '../support/helpers/e2e'
+import Fixtures from '../support/helpers/fixtures'
 
 describe('e2e typescript', function () {
   e2e.setup()

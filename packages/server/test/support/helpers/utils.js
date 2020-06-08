@@ -1,9 +1,10 @@
 /* eslint-disable prefer-rest-params */
-const _write = process.stdout.write
 const _ = require('lodash')
-const stripAnsi = require('strip-ansi')
-const debug = require('debug')('utils')
 const chalk = require('chalk')
+const debug = require('debug')('utils')
+const stripAnsi = require('strip-ansi')
+
+const _write = process.stdout.write
 
 const spyStdout = (obj, props) => {
   return spyOn(obj, props, () => stdout.capture(), (ret) => {

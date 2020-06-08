@@ -9,6 +9,10 @@ export type RewriteRequest = {
   isHtml?: boolean
   source: string
   /**
+   * If true, terminate the worker.
+   */
+  shutdown?: true
+  /**
    * If true, return the sourcemap and not the generated source.
    */
   sourceMap?: true

@@ -119,10 +119,26 @@ export function createInitialWorkers () {
   _.times(INITIAL_WORKER_THREADS, createWorker)
 }
 
+// try to cleanly shut down worker threads to avoid SIGABRT in Electron
+// @see https://github.com/electron/electron/issues/23366
+export function shutdownWorker (workerInfo: WorkerInfo) {
+  const { thread } = workerInfo
+
+  return new Bluebird((resolve) => {
+    thread.once('exit', resolve)
+    thread.once('error', resolve)
+    thread.postMessage({ shutdown: true })
+  })
+  .timeout(100)
+  .catch((err) => {
+    debug('error cleanly shutting down worker, terminating from parent %o', { err, workerInfo: _debugWorker(workerInfo) })
+
+    return thread.terminate()
+  })
+}
+
 export function terminateAllWorkers () {
-  return Bluebird.all([
-    workers.map((worker) => worker.thread.terminate()),
-  ])
+  return Bluebird.map(workers, shutdownWorker)
 }
 
 async function sendRewrite (worker: WorkerInfo, opts: RewriteOpts): Promise<string> {

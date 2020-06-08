@@ -1,4 +1,4 @@
-const $ = Cypress.$.bind(Cypress)
+const { $ } = Cypress
 
 describe('src/cy/commands/actions/hover', () => {
   before(() => {

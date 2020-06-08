@@ -193,8 +193,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "currentRetry": 0,
-      "retries": -1
+      "originalTitle": "\"after all\" hook"
     },
     {
       "message": "[error message]",
@@ -208,37 +207,13 @@ exports['FAIL_IN_AFTER.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "suite end",
     {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "hookName": "after all",
-      "err": "{Object 6}",
-      "state": "failed",
-      "failedFromHookId": "h1",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "final": true,
-      "currentRetry": 0,
-      "retries": -1
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -274,18 +249,6 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],
@@ -447,8 +410,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "currentRetry": 0,
-      "retries": -1
+      "originalTitle": "\"after each\" hook"
     },
     {
       "message": "[error message]",
@@ -462,37 +424,13 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "suite end",
     {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "hookName": "after each",
-      "err": "{Object 6}",
-      "state": "failed",
-      "failedFromHookId": "h1",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "final": true,
-      "currentRetry": 0,
-      "retries": -1
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -528,18 +466,6 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],
@@ -678,8 +604,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "currentRetry": 0,
-      "retries": -1
+      "originalTitle": "\"before all\" hook"
     },
     {
       "message": "[error message]",
@@ -693,33 +618,13 @@ exports['FAIL_IN_BEFORE.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "suite end",
     {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "hookName": "before all",
-      "err": "{Object 6}",
-      "state": "failed",
-      "failedFromHookId": "h1",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "final": true,
-      "currentRetry": 0,
-      "retries": -1
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -751,18 +656,6 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],
@@ -915,8 +808,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "currentRetry": 0,
-      "retries": -1
+      "originalTitle": "\"before each\" hook"
     },
     {
       "message": "[error message]",
@@ -930,33 +822,13 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
   ],
   [
     "mocha",
-    "test end",
+    "suite end",
     {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "hookName": "before each",
-      "err": "{Object 6}",
-      "state": "failed",
-      "failedFromHookId": "h1",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "final": true,
-      "currentRetry": 0,
-      "retries": -1
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
     }
   ],
   [
@@ -988,18 +860,6 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],
@@ -2145,6 +2005,17 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
   ],
   [
     "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r3",
@@ -2166,18 +2037,6 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],
@@ -2991,6 +2850,17 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
   ],
   [
     "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r5",
@@ -3033,18 +2903,6 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
       "retries": -1
     }
   ],

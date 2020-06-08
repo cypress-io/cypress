@@ -75,9 +75,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -113,10 +113,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 50,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -246,9 +246,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -284,10 +284,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -474,12 +474,11 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('can set cookies with sameSite', () => {
+    it('can set cookies with sameSite', {
+      experimentalGetCookiesSameSite: true,
+    }, () => {
       Cypress.automation.restore()
       Cypress.utils.addTwentyYears.restore()
-
-      Cypress.sinon.stub(Cypress, 'config').callThrough()
-      .withArgs('experimentalGetCookiesSameSite').returns(true)
 
       cy.setCookie('one', 'bar', { sameSite: 'none', secure: true })
       cy.getCookie('one').should('include', { sameSite: 'no_restriction' })
@@ -504,9 +503,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -542,10 +541,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -752,9 +751,9 @@ describe('src/cy/commands/cookies', () => {
     })
 
     describe('timeout', () => {
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves(null)
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -790,10 +789,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {
@@ -1021,9 +1020,9 @@ describe('src/cy/commands/cookies', () => {
         .resolves({})
       })
 
-      it('sets timeout to Cypress.config(responseTimeout)', () => {
-        Cypress.config('responseTimeout', 2500)
-
+      it('sets timeout to Cypress.config(responseTimeout)', {
+        responseTimeout: 2500,
+      }, () => {
         Cypress.automation.resolves([])
 
         const timeout = cy.spy(Promise.prototype, 'timeout')
@@ -1058,10 +1057,10 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    describe('errors', () => {
+    describe('errors', {
+      defaultCommandTimeout: 100,
+    }, () => {
       beforeEach(function () {
-        Cypress.config('defaultCommandTimeout', 50)
-
         this.logs = []
 
         cy.on('log:added', (attrs, log) => {

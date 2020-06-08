@@ -14,7 +14,9 @@ const fetchScript = (scriptWindow, script) => {
 const extractSourceMap = ([script, contents]) => {
   script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`
 
-  return $sourceMapUtils.extractSourceMap(script, contents)
+  const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
+
+  return $sourceMapUtils.initializeSourceMapConsumer(script, sourceMap)
   .return([script, contents])
 }
 

@@ -1,20 +1,20 @@
-const $dom = Cypress.dom
+const { $, dom } = Cypress
+
+export {}
 
 describe('src/cypress/dom/visibility', () => {
-  const $ = Cypress.$.bind(Cypress)
-
   beforeEach(() => {
     cy.visit('/fixtures/generic.html')
   })
 
   context('isHidden', () => {
     it('exposes isHidden', () => {
-      expect($dom.isHidden).to.be.a('function')
+      expect(dom.isHidden).to.be.a('function')
     })
 
     it('throws when not passed a DOM element', () => {
       const fn = () => {
-        $dom.isHidden(null!)
+        dom.isHidden(null!)
       }
 
       expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
@@ -23,13 +23,13 @@ describe('src/cypress/dom/visibility', () => {
 
   context('isVisible', () => {
     it('exposes isVisible', () => {
-      expect($dom.isVisible).to.be.a('function')
+      expect(dom.isVisible).to.be.a('function')
     })
 
     it('throws when not passed a DOM element', () => {
       const fn = () => {
         // @ts-ignore
-        $dom.isVisible('form')
+        dom.isVisible('form')
       }
 
       expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
@@ -48,7 +48,7 @@ describe('src/cypress/dom/visibility', () => {
       const win = cy.state('window')
 
       const fn = () => {
-        return $dom.isScrollable(win)
+        return dom.isScrollable(win)
       }
 
       expect(fn()).to.be.true
@@ -60,7 +60,7 @@ describe('src/cypress/dom/visibility', () => {
       const win = cy.state('window')
 
       const fn = () => {
-        return $dom.isScrollable(win)
+        return dom.isScrollable(win)
       }
 
       expect(fn()).to.be.false
@@ -74,7 +74,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       const fn = () => {
-        return $dom.isScrollable(noScroll)
+        return dom.isScrollable(noScroll)
       }
 
       expect(fn()).to.be.false
@@ -90,7 +90,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       const fn = () => {
-        return $dom.isScrollable(noOverflow)
+        return dom.isScrollable(noOverflow)
       }
 
       expect(fn()).to.be.false
@@ -104,7 +104,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       const fn = () => {
-        return $dom.isScrollable(vertScrollable)
+        return dom.isScrollable(vertScrollable)
       }
 
       expect(fn()).to.be.true
@@ -118,7 +118,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       const fn = () => {
-        return $dom.isScrollable(horizScrollable)
+        return dom.isScrollable(horizScrollable)
       }
 
       expect(fn()).to.be.true
@@ -132,7 +132,7 @@ describe('src/cypress/dom/visibility', () => {
 `)
 
       const fn = () => {
-        return $dom.isScrollable(forcedScroll)
+        return dom.isScrollable(forcedScroll)
       }
 
       expect(fn()).to.be.true
@@ -988,7 +988,7 @@ describe('src/cypress/dom/visibility', () => {
     describe('#getReasonIsHidden', () => {
       beforeEach(function () {
         this.reasonIs = ($el, str) => {
-          expect($dom.getReasonIsHidden($el)).to.eq(str)
+          expect(dom.getReasonIsHidden($el)).to.eq(str)
         }
       })
 

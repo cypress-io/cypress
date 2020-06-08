@@ -1,12 +1,8 @@
-declare namespace Cypress {
-  interface cy {
-    state(key: 'window'): Window
-  }
-}
+const { $ } = Cypress
+
+export {}
 
 describe('src/dom/elements', () => {
-  const $ = Cypress.$.bind(Cypress)
-
   context('.isAttached', () => {
     beforeEach(() => {
       cy.visit('/fixtures/iframe-outer.html')

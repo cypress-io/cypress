@@ -1,4 +1,4 @@
-const { getSnapshot, saveSnapshot } = require('./snapshot')
+const { getSnapshot, saveSnapshot } = require('./snapshot/snapshotPlugin')
 
 /**
  * @type {Cypress.PluginConfig}
