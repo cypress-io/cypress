@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import e2e from '../support/helpers/e2e'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 describe('e2e readonly fs', function () {
   e2e.setup()

@@ -222,27 +222,3 @@
     }
   }
 }
-
-.editor-picker-modal {
-  max-width: 40em;
-
-  .editor-picker {
-    margin-bottom: 1em;
-  }
-
-  .controls {
-    > span:first-child {
-      order: 1;
-    }
-
-    button.is-disabled,
-    button.is-disabled:hover,
-    button.is-disabled:focus {
-      background: $pass !important;
-      cursor: default !important;
-      opacity: 0.5;
-    }
-
-    padding: 1em 1em 1em;
-  }
-}

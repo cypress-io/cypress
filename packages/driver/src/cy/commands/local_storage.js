@@ -50,7 +50,6 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (options.log) {
         Cypress.log({
-          name: 'clear ls',
           snapshot: true,
           end: true,
         })

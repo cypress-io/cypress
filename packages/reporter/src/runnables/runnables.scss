@@ -239,4 +239,28 @@
       display: none;
     }
   }
+
+  .runnable-header {
+    background: #f2f2f2;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 24px;
+    overflow-wrap: break-word;
+    padding: 5px 10px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+
+    a:before,
+    span:before {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-file;
+      color: #bdbdbd;
+      display: inline;
+      margin-right: 5px;
+    }
+  }
 }
