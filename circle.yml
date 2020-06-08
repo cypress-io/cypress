@@ -192,7 +192,7 @@ commands:
         description: Name of the repo like "cypress-example-kitchensink"
         type: string
       browser:
-        description: Name of the browser to use
+        description: Name of the browser to use, like "electron", "chrome", "firefox"
         type: enum
         enum: ["", "electron", "chrome", "firefox"]
         default: ""
@@ -268,15 +268,19 @@ commands:
             - when:
                 condition: << parameters.browser >>
                 steps:
-                - run:
-                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
-                    command: <<parameters.command>> -- --browser <<parameters.browser>>
+                  - run:
+                      name: Run tests using browser "<< parameters.browser >>"
+                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      command: |
+                        <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
                 condition: << parameters.browser >>
                 steps:
-                - run:
-                    working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
-                    command: <<parameters.command>>
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      command: <<parameters.command>>
+
             - store_artifacts:
                 name: screenshots
                 path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/screenshots
@@ -286,9 +290,20 @@ commands:
       - unless:
           condition: << parameters.folder >>
           steps:
-          - run:
-              working_directory: /tmp/<<parameters.repo>>
-              command: <<parameters.command>> -- --browser <<parameters.browser>>
+          - when:
+              condition: << parameters.browser >>
+              steps:
+                - run:
+                    name: Run tests using browser "<< parameters.browser >>"
+                    working_directory: /tmp/<<parameters.repo>>
+                    command: <<parameters.command>> -- --browser <<parameters.browser>>
+          - unless:
+              condition: << parameters.browser >>
+              steps:
+                - run:
+                    name: Run tests using command
+                    working_directory: /tmp/<<parameters.repo>>
+                    command: <<parameters.command>>
           - store_artifacts:
               name: screenshots
               path: /tmp/<<parameters.repo>>/cypress/screenshots
