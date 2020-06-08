@@ -395,7 +395,6 @@ describe('Proxy Performance', function () {
         debug(`Done in ${Math.round((new Date() / 1000) - start)}s`)
         process.stdout.write('Note: All times are in milliseconds.\n')
 
-        // eslint-disable-next-line no-console
         console.table(testCases)
 
         return Promise.map(testCases, (testCase) => {

@@ -1,6 +1,6 @@
 import bodyParser from 'body-parser'
 import e2e, { expect } from '../support/helpers/e2e'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 const WEBPACK_PREPROCESSOR_PROJECTS = [
   'webpack-preprocessor',

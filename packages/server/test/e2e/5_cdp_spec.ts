@@ -1,6 +1,6 @@
 import mockedEnv from 'mocked-env'
 import e2e from '../support/helpers/e2e'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 describe('e2e cdp', function () {
   e2e.setup()

@@ -409,11 +409,11 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 When you edit files, you can quickly fix all changed files before you commit using
 
 ```bash
-$ yarn lint-changed-fix
+$ yarn lint-changed --fix
 ```
 
 When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
-If this command fails, you may need to run `yarn lint-changed-fix` and commit those changes.
+If this command fails, you may need to run `yarn lint-changed --fix` and commit those changes.
 
 We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
 

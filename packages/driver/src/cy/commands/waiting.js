@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
 const { waitForRoute } = require('@packages/net-stubbing/driver')
+const ordinal = require('ordinal')
 
 const $errUtils = require('../../cypress/error_utils')
 
@@ -15,7 +16,7 @@ const getNumRequests = (state, alias) => {
 
   state('aliasRequests', requests)
 
-  return [index, _.ordinalize(requests[alias])]
+  return [index, ordinal(requests[alias])]
 }
 
 const throwErr = (arg) => {
