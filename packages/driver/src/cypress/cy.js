@@ -31,7 +31,7 @@ const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
 const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
-const fetchPolyfill = require('unfetch').default
+const { registerFetch } = require('unfetch')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -263,8 +263,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // drop "fetch" polyfill that replaces it with XMLHttpRequest
       // from the app iframe that we wrap for network stubbing
-      // This works because the fetchPolyfill relies on `this.XMLHttpRequest`
-      contentWindow.fetch = fetchPolyfill.bind(contentWindow)
+      contentWindow.fetch = registerFetch(contentWindow)
     } catch (error) {} // eslint-disable-line no-empty
   }
 
