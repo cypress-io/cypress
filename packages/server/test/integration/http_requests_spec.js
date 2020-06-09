@@ -3727,7 +3727,7 @@ describe('Routes', () => {
       })
     })
 
-    context('blacklisted hosts', () => {
+    context('blocklisted hosts', () => {
       beforeEach(function () {
         return this.setup({
           config: {
@@ -3744,7 +3744,7 @@ describe('Routes', () => {
 
       it('returns 503 and custom headers for all hosts', function () {
         const expectedHeader = (res, val) => {
-          expect(res.headers['x-cypress-matched-blacklisted-host']).to.eq(val)
+          expect(res.headers['x-cypress-matched-blocklisted-host']).to.eq(val)
         }
 
         return Promise.all([

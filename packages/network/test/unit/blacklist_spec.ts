@@ -1,4 +1,4 @@
-import { blacklist } from '../..'
+import { blocklist } from '../..'
 import { expect } from 'chai'
 
 const hosts = [
@@ -10,22 +10,22 @@ const hosts = [
 ]
 
 const matchesStr = function (url, host, val) {
-  const m = blacklist.matches(url, host)
+  const m = blocklist.matches(url, host)
 
   expect(!!m).to.eq(val, `url: '${url}' did not pass`)
 }
 
 const matchesArray = function (url, val) {
-  const m = blacklist.matches(url, hosts)
+  const m = blocklist.matches(url, hosts)
 
   expect(!!m).to.eq(val, `url: '${url}' did not pass`)
 }
 
 const matchesHost = (url, host) => {
-  expect(blacklist.matches(url, hosts)).to.eq(host)
+  expect(blocklist.matches(url, hosts)).to.eq(host)
 }
 
-describe('lib/blacklist', () => {
+describe('lib/blocklist', () => {
   it('handles hosts, ports, wildcards', () => {
     matchesArray('https://mail.google.com/foo', true)
     matchesArray('https://shop.apple.com/bar', true)

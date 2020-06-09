@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import debugModule from 'debug'
-import { blacklist, cors } from '@packages/network'
+import { blocklist, cors } from '@packages/network'
 import { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
@@ -50,11 +50,11 @@ const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   const { blocklistHosts } = this.config
 
   if (blocklistHosts) {
-    const matches = blacklist.matches(this.req.proxiedUrl, blocklistHosts)
+    const matches = blocklist.matches(this.req.proxiedUrl, blocklistHosts)
 
     if (matches) {
-      this.res.set('x-cypress-matched-blacklisted-host', matches)
-      debug('blacklisting request %o', {
+      this.res.set('x-cypress-matched-blocklisted-host', matches)
+      debug('blocklisting request %o', {
         url: this.req.proxiedUrl,
         matches,
       })

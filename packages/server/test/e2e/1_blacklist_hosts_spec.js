@@ -14,7 +14,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e blacklist', () => {
+describe('e2e blocklist', () => {
   e2e.setup({
     servers: [{
       port: 3131,
@@ -31,7 +31,7 @@ describe('e2e blacklist', () => {
 
   it('passes', function () {
     return e2e.exec(this, {
-      spec: 'blacklist_hosts_spec.coffee',
+      spec: 'blocklist_hosts_spec.coffee',
       snapshot: true,
     })
   })

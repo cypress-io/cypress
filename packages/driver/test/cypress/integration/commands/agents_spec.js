@@ -352,11 +352,11 @@ describe('src/cy/commands/agents', () => {
             }).to.throw('`cy.as()` cannot be passed an empty string.')
           })
 
-          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blacklist) => {
-            it(`throws on a blacklisted word: ${blacklist}`, () => {
+          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blocklist) => {
+            it(`throws on a blocklisted word: ${blocklist}`, () => {
               expect(() => {
-                cy.stub().as(blacklist)
-              }).to.throw(`\`cy.as()\` cannot be aliased as: \`${blacklist}\`. This word is reserved.`)
+                cy.stub().as(blocklist)
+              }).to.throw(`\`cy.as()\` cannot be aliased as: \`${blocklist}\`. This word is reserved.`)
             })
           })
         })
@@ -433,11 +433,11 @@ describe('src/cy/commands/agents', () => {
             }).to.throw('`cy.as()` cannot be passed an empty string.')
           })
 
-          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blacklist) => {
-            it(`throws on a blacklisted word: ${blacklist}`, () => {
+          _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blocklist) => {
+            it(`throws on a blocklisted word: ${blocklist}`, () => {
               expect(() => {
-                cy.stub().as(blacklist)
-              }).to.throw(`\`cy.as()\` cannot be aliased as: \`${blacklist}\`. This word is reserved.`)
+                cy.stub().as(blocklist)
+              }).to.throw(`\`cy.as()\` cannot be aliased as: \`${blocklist}\`. This word is reserved.`)
             })
           })
         })

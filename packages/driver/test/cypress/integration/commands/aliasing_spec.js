@@ -232,16 +232,16 @@ describe('src/cy/commands/aliasing', () => {
         cy.get('@my@Alias')
       })
 
-      _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blacklist) => {
-        it(`throws on a blacklisted word: ${blacklist}`, (done) => {
+      _.each(['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect'], (blocklist) => {
+        it(`throws on a blocklisted word: ${blocklist}`, (done) => {
           cy.on('fail', (err) => {
-            expect(err.message).to.eq(`\`cy.as()\` cannot be aliased as: \`${blacklist}\`. This word is reserved.`)
+            expect(err.message).to.eq(`\`cy.as()\` cannot be aliased as: \`${blocklist}\`. This word is reserved.`)
             expect(err.docsUrl).to.eq('https://on.cypress.io/as')
 
             done()
           })
 
-          cy.get('div:first').as(blacklist)
+          cy.get('div:first').as(blocklist)
         })
       })
     })
