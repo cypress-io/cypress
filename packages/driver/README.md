@@ -47,7 +47,7 @@ localStorage.debug = "cypress:driver"
 ## Patches
 
 - `sinon`
-- `unfetch` to polyfill `fetch`. Added `this` and changed function to arrow function to be able to load `fetch` in the spec window, but point the polyfill at the `window.XMLHttpRequest` in the application under test window.
+- `unfetch` to polyfill `fetch`. Added constructor function to point XMLHttpRequest to the application under test window.
 
 Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
 
