@@ -114,7 +114,7 @@ commands:
               yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
             else
               # external PR
-              TESTFILES=$(circleci tests glob "test/cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
@@ -290,28 +290,27 @@ commands:
       - unless:
           condition: << parameters.folder >>
           steps:
-          - when:
-              condition: << parameters.browser >>
-              steps:
-                - run:
-                    name: Run tests using browser "<< parameters.browser >>"
-                    working_directory: /tmp/<<parameters.repo>>
-                    command: <<parameters.command>> -- --browser <<parameters.browser>>
-          - unless:
-              condition: << parameters.browser >>
-              steps:
-                - run:
-                    name: Run tests using command
-                    working_directory: /tmp/<<parameters.repo>>
-                    command: <<parameters.command>>
-          - store_artifacts:
-              name: screenshots
-              path: /tmp/<<parameters.repo>>/cypress/screenshots
-          - store_artifacts:
-              name: videos
-              path: /tmp/<<parameters.repo>>/cypress/videos
+            - when:
+                condition: << parameters.browser >>
+                steps:
+                  - run:
+                      name: Run tests using browser "<< parameters.browser >>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: << parameters.browser >>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
-
 
 jobs:
   ## code checkout and yarn installs
@@ -482,8 +481,8 @@ jobs:
       - store-npm-logs
 
   "server-performance-tests":
-      <<: *defaults
-      steps:
+    <<: *defaults
+    steps:
       - attach_workspace:
           at: ~/
       - run:
@@ -1188,7 +1187,7 @@ jobs:
           name: Scaffold and test examples 🏗
           working_directory: << parameters.wd >>
           environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1'
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             echo '{}' > cypress.json
             npx cypress run
