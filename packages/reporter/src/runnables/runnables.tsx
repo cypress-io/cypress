@@ -10,7 +10,7 @@ import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 
-const noTestsError = (specPath: string | null) => ({
+const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',
   link: 'https://on.cypress.io/no-tests-found-in-your-file',
   callout: specPath,
@@ -29,7 +29,7 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string | null, error?: Error) {
+function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
   if (!isReady) return null
 
   // show error if there are no tests, but only if there
