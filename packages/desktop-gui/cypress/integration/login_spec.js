@@ -54,7 +54,7 @@ describe('Login', function () {
 
     it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
       cy.contains('Cypress Dashboard').click().then(function () {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/log-in-nav')
       })
     })
 
@@ -210,7 +210,7 @@ describe('Login', function () {
       it('opens link to Dashboard Service on click', function () {
         cy.contains('a', 'Cypress Dashboard Service')
         .click().then(function () {
-          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/dashboard')
+          expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/log-in-nav')
         })
       })
     })

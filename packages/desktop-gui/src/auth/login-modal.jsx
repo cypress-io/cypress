@@ -116,7 +116,7 @@ class LoginContent extends Component {
   }
 
   _openDashboard () {
-    ipc.externalOpen('https://on.cypress.io/dashboard')
+    ipc.externalOpen('https://on.cypress.io/log-in-nav')
   }
 
   _openAPIHelp () {
