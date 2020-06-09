@@ -26,7 +26,7 @@ function getMatchDeepMessage ({ act, exp }) {
 }
 
 function saveSnapshot (ctx, exactSpecName, file, exp, act) {
-  ctx.assert(true, `snapshot updated: **${exactSpecName}**`, 'dsf', exp, act)
+  ctx.assert(true, `snapshot updated: **${exactSpecName}**`, '', exp, act)
 
   return cy.task('saveSnapshot', {
     file,
@@ -51,15 +51,21 @@ const registerInCypress = () => {
   })
 
   before(() => {
-    addPluginButton($, 'toggle-snapshot-update', '', function () {
-      const prev = Cypress.env('SNAPSHOT_UPDATE')
+    addPluginButton($, 'toggle-snapshot-update', '', {
+      render () {
+        const btnIcon = $(this).children().first()
 
-      Cypress.env('SNAPSHOT_UPDATE', !prev)
-      const btnIcon = $(this).children().first()
+        return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
+        .css({ 'font-size': '10px', 'line-height': '0.9' })
+        .html(btnIcon.html().replace(/\n/g, '<br/>'))
+      },
+      click () {
+        const prev = Cypress.env('SNAPSHOT_UPDATE')
 
-      return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
-      .css({ 'font-size': '10px', 'line-height': '0.9' })
-      .html(btnIcon.html().replace(/\n/g, '<br/>'))
+        Cypress.env('SNAPSHOT_UPDATE', !prev)
+      },
+
+    }, function () {
     })
   })
 

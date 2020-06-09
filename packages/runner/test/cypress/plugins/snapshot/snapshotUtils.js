@@ -56,7 +56,7 @@ function isObject (obj) {
   return typeof obj === 'object' && obj && getType(obj) !== 'RegExp'
 }
 
-function addPluginButton ($, name, faClass, fn) {
+function addPluginButton ($, name, faClass, { render, click }) {
   $(`#${name}`, window.top.document).remove()
 
   const btn = $(`<span id="${name}"><button><i class="fa ${faClass}"></i></button></span>`, window.top.document)
@@ -67,8 +67,12 @@ function addPluginButton ($, name, faClass, fn) {
 
   container.prepend(btn)
 
-  btn.on('click', fn)
-  fn.apply(btn[0])
+  btn.on('click', () => {
+    click.apply(btn[0])
+    render.apply(btn[0])
+  })
+
+  render.apply(btn[0])
 
   return btn
 }

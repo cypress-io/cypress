@@ -254,7 +254,13 @@ function createCypress () {
         .withArgs('automation:request')
         .yieldsAsync({ response: {} })
 
-        const c = _.extend({}, Cypress.config(), { isTextTerminal: true }, opts.config)
+        const c = _.extend({}, Cypress.config(), {
+          isTextTerminal: true,
+          spec: {
+            relative: 'relative/path/to/spec.js',
+            absolute: '/absolute/path/to/spec.js',
+          },
+        }, opts.config)
 
         c.state = {}
         // c.state = opts.state
