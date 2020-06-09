@@ -10,6 +10,7 @@ const snapshotCommand = require('../plugins/snapshot/snapshotCommand')
 const match = Cypress.sinon.match
 
 const { stringifyShort } = snapshotCommand
+
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
@@ -88,7 +89,6 @@ function createCypress () {
   let onInitializedListeners = []
 
   const onInitialized = function (fn) {
-    console.log(fn)
     onInitializedListeners.push(fn)
   }
 
