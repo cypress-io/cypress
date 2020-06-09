@@ -144,6 +144,7 @@ describe('uncaught errors', () => {
     cy.visit('/fixtures/global-error.html')
   })
 
+  // https://github.com/cypress-io/cypress/issues/7590
   it('creates error object from error that is just a string', (done) => {
     cy.once('uncaught:exception', (err) => {
       expect(err).not.to.be.a('string')
