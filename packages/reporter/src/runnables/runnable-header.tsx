@@ -1,27 +1,34 @@
-import React, { Component } from 'react'
+import React, { Component, ReactElement } from 'react'
 
 import FileOpener from '../opener/file-opener'
 
+const renderRunnableHeader = (children:ReactElement) => <div className="runnable-header">{children}</div>
+
 interface RunnableHeaderProps {
-  specPath: string
+  spec: Cypress.Cypress['spec']
 }
 
 class RunnableHeader extends Component<RunnableHeaderProps> {
   render () {
-    const { specPath } = this.props
-    const relativeSpecPath = window.Cypress?.spec.relative
+    const { spec } = this.props
+    const relativeSpecPath = spec.relative
+
+    if (spec.relative === '__all') {
+      return renderRunnableHeader(
+        <span>All Specs</span>,
+      )
+    }
+
     const fileDetails = {
-      absoluteFile: specPath,
+      absoluteFile: spec.absolute,
       column: 0,
       line: 0,
       originalFile: relativeSpecPath,
       relativeFile: relativeSpecPath,
     }
 
-    return (
-      <div className="runnable-header">
-        { relativeSpecPath === '__all' ? <span>All Specs</span> : <FileOpener fileDetails={fileDetails} /> }
-      </div>
+    return renderRunnableHeader(
+      <FileOpener fileDetails={fileDetails} />,
     )
   }
 }

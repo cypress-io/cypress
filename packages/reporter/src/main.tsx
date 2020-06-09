@@ -28,7 +28,7 @@ export interface ReporterProps {
   statsStore: StatsStore
   events: Events
   error?: Error
-  specPath: string
+  spec: Cypress.Cypress['spec']
 }
 
 @observer
@@ -45,7 +45,11 @@ class Reporter extends Component<ReporterProps> {
       emit: PropTypes.func.isRequired,
       on: PropTypes.func.isRequired,
     }).isRequired,
-    specPath: PropTypes.string.isRequired,
+    spec: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      relative: PropTypes.string.isRequired,
+      absolute: PropTypes.string.isRequired,
+    }),
   }
 
   static defaultProps = {
@@ -67,7 +71,7 @@ class Reporter extends Component<ReporterProps> {
           error={this.props.error}
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
-          specPath={this.props.specPath}
+          spec={this.props.spec}
         />
         <ForcedGcWarning
           appState={appState}
