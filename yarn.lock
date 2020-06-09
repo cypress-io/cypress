@@ -9405,10 +9405,10 @@ cyclist@^1.0.1:
   resolved "https://registry.yarnpkg.com/cyclist/-/cyclist-1.0.1.tgz#596e9698fd0c80e12038c2b82d6eb1b35b6224d9"
   integrity sha1-WW6WmP0MgOEgOMK4LW6xs1tiJNk=
 
-cypress-example-kitchensink@1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.11.0.tgz#27c441be35ab4848803bfe5982ec4009e94939d8"
-  integrity sha512-D5E9H0Dys2Zgt385eDfVPaI7F/unT4VWqriYCgkKwB3rJ7g+1X/i94m12rGxTs5KZ/w/Q4SwARip8iHoS/VR6A==
+cypress-example-kitchensink@1.11.1:
+  version "1.11.1"
+  resolved "https://registry.yarnpkg.com/cypress-example-kitchensink/-/cypress-example-kitchensink-1.11.1.tgz#2320d5c1010edcaac0dcc8a2ebaa2158e92aa42c"
+  integrity sha512-6Y85bIGOwxVGeMEio2bTn783MlIku3TYQSdqJ3LZUNp6lTkKwRZWk1EluMLBTo5BYVP7w5hHO3K785/1LBC8eA==
   dependencies:
     npm-run-all "^4.1.2"
     serve "11.3.0"
