@@ -5,7 +5,6 @@
     "lib/*.ts",
     "lib/**/*.ts"
   ],
-  "references": ["mocha"],
   "files": [
     "./../ts/index.d.ts"
   ]

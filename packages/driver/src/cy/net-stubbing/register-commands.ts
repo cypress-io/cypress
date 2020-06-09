@@ -20,11 +20,11 @@ import {
   AnnotatedStringMatcher,
   NetEventFrames,
   StringMatcher,
-} from '../types'
-import '@packages/driver/index.d.ts'
+  BackendStaticResponse,
+  FixtureOpts,
+  NumberMatcher,
+} from '@packages/net-stubbing/lib/types'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
-import { BackendStaticResponse, FixtureOpts } from '../internal-types'
-import { NumberMatcher } from '../external-types'
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -201,9 +201,9 @@ function _getBackendStaticResponse (staticResponse: StaticResponse): BackendStat
 }
 
 export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State /* config */) {
-  function _emit (eventName: string, ...args: any[]) {
+  function _emit (eventName: string, frame: any) {
     // all messages from driver to server are wrapped in backend:request
-    return Cypress.backend('net', eventName, ...args)
+    return Cypress.backend('net', eventName, frame)
   }
 
   function _getRoute (routeHandlerId: string) {

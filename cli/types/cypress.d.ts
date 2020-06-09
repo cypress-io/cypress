@@ -26,6 +26,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
+    (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string

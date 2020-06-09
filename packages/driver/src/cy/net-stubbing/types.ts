@@ -3,7 +3,7 @@ import {
   RouteHandler,
   RouteMatcherOptions,
   HttpResponseInterceptor,
-} from '../types'
+} from '@packages/net-stubbing/lib/types'
 
 export interface Route {
   alias?: string

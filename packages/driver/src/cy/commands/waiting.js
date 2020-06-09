@@ -1,6 +1,6 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
-const { waitForRoute } = require('@packages/net-stubbing/driver')
+const { waitForRoute } = require('../net-stubbing')
 const ordinal = require('ordinal')
 
 const $errUtils = require('../../cypress/error_utils')

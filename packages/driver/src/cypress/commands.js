@@ -37,7 +37,7 @@ const builtInCommands = [
   require('../cy/commands/waiting'),
   require('../cy/commands/window'),
   require('../cy/commands/xhr'),
-  require('@packages/net-stubbing/driver').registerCommands,
+  require('../cy/net-stubbing').registerCommands,
 ]
 
 const getTypeByPrevSubject = (prevSubject) => {
