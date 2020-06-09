@@ -176,7 +176,9 @@ module.exports = {
 
         This can sometimes happen if a previous assertion changed the subject.`
     },
-    no_plain_object: 'Expected value should not be an object',
+    no_plain_object (obj) {
+      return `TypeError: expected ${obj.actual} to be a string`
+    },
   },
 
   check_uncheck: {
