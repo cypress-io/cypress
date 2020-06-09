@@ -1589,19 +1589,11 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-recipe-pull-request:
-<<<<<<< HEAD
         name: Test fetch polyfill
         filters:
           branches:
             only:
               - polyfill-fetch
-=======
-        name: Shadow DOM recipe
-        filters:
-          branches:
-            only:
-              - pull/7469
->>>>>>> develop
         requires:
           - build-binary
           - build-npm-package
