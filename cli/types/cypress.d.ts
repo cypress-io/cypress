@@ -217,8 +217,8 @@ declare namespace Cypress {
      */
     spec: {
       name: string // "config_passing_spec.coffee"
-      relative: string | null // "cypress/integration/config_passing_spec.coffee"
-      absolute: string | null
+      relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
+      absolute: string
     }
 
     /**
@@ -356,9 +356,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => void): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
-      overwrite(name: string, fn: (...args: any[]) => void): void
+      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
+      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
     }
 
     /**
@@ -491,6 +491,8 @@ declare namespace Cypress {
      */
     off: Actions
   }
+
+  type CanReturnChainable = void | Chainable
 
   /**
    * Chainable interface for non-array Subjects

@@ -1700,6 +1700,27 @@ describe('src/cy/commands/assertions', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/7603
+      describe('when the type of value attr must be number', () => {
+        it('<progress>', () => {
+          cy.$$('<progress id="progress" value="0.72">72%</progress>').appendTo(cy.$$('body'))
+          cy.get('#progress').should('have.value', 0.72)
+          cy.get('#progress').should('not.have.value', '0.72')
+        })
+
+        it('<meter>', () => {
+          cy.$$('<meter id="meter" min="0" max="100" low="33" high="66" optimum="80" value="50">at 50/100</meter>').appendTo(cy.$$('body'))
+          cy.get('#meter').should('have.value', 50)
+          cy.get('#meter').should('not.have.value', '50')
+        })
+
+        it('<li>', () => {
+          cy.$$('<li id="li" value="3">Cypress</li>').appendTo(cy.$$('body'))
+          cy.get('#li').should('have.value', 3)
+          cy.get('#li').should('not.have.value', '3')
+        })
+      })
+
       it('throws when obj is not DOM', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)

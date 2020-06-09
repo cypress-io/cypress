@@ -113,7 +113,11 @@ describe('test errors', function () {
     cy.visit('cypress/support/index.html').then((win) => {
       win.render({
         runner: this.runner,
-        specPath: '/foo/bar',
+        spec: {
+          name: 'foo.js',
+          relative: 'relative/path/to/foo.js',
+          absolute: '/absolute/path/to/foo.js',
+        },
         config: {
           projectRoot: '/root',
         },

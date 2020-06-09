@@ -1,0 +1,9 @@
+{
+  "parserOptions": {
+    "parser": "@typescript-eslint/parser",
+    "project": "packages/server/test/support/fixtures/projects/ts-proj-with-own-tsconfig/tsconfig.json"
+  },
+  "rules": {
+    "@typescript-eslint/no-misused-promises": "error"
+  }
+}
