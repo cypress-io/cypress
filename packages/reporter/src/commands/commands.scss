@@ -576,6 +576,30 @@
     }
   }
 
+  .command-progress {
+    background: lighten($pending, 40%);
+    border-left: 2px solid $pending;
+    height: 2px;
+
+    > span {
+      animation-name: progress-bar;
+      animation-timing-function: linear;
+      background: #7eb0db;
+      display: block;
+      float: right;
+      height: 100%;
+    }
+
+    @keyframes progress-bar {
+      0% {
+        width: 100%;
+      }
+      100% {
+        width: 0;
+      }
+    }
+  }
+
   .no-commands {
     background-color: #f5f5f5;
     border: 1px solid #e3e3e3;
