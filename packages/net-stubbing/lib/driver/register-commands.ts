@@ -24,12 +24,14 @@ import {
 import '@packages/driver/index.d.ts'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
 import { BackendStaticResponse, FixtureOpts } from '../internal-types'
+import { NumberMatcher } from '../external-types'
 
 /**
- * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
+ * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
+ * DICT_STRING_MATCHER_FIELDS objects
  */
-function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
-  const stringMatcherFields = STRING_MATCHER_FIELDS
+function _getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
+  return STRING_MATCHER_FIELDS
   .concat(
     // add the nested DictStringMatcher values to the list of fields to annotate
     _.flatten(
@@ -48,10 +50,15 @@ function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
       ),
     ),
   )
+}
 
+/**
+ * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
+ */
+function _annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
   const ret: AnnotatedRouteMatcherOptions = {}
 
-  stringMatcherFields.forEach((field) => {
+  _getAllStringMatcherFields(options).forEach((field) => {
     const value = _.get(options, field)
 
     if (value) {
@@ -79,6 +86,14 @@ function _isHttpRequestInterceptor (obj): obj is HttpRequestInterceptor {
 
 function _isRegExp (obj): obj is RegExp {
   return obj && (obj instanceof RegExp || obj.__proto__ === RegExp.prototype || obj.__proto__.constructor.name === 'RegExp')
+}
+
+function _isStringMatcher (obj): obj is StringMatcher {
+  return _isRegExp(obj) || _.isString(obj)
+}
+
+function _isNumberMatcher (obj): obj is NumberMatcher {
+  return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
 function _parseStaticResponseShorthand (statusCodeOrBody: number | string | any, bodyOrHeaders: string | { [key: string]: string }, maybeHeaders?: { [key: string]: string }) {
@@ -113,6 +128,28 @@ function _parseStaticResponseShorthand (statusCodeOrBody: number | string | any,
   }
 
   return
+}
+
+function _validateRouteMatcher (routeMatcher: RouteMatcherOptions): void {
+  if (_.isEmpty(routeMatcher)) {
+    throw new Error('The RouteMatcher does not contain any keys. You must pass something to match on.')
+  }
+
+  _getAllStringMatcherFields(routeMatcher).forEach((path) => {
+    const v = _.get(routeMatcher, path)
+
+    if (_.has(routeMatcher, path) && !_isStringMatcher(v)) {
+      throw new Error(`\`${path}\` must be a string or a regular expression.`)
+    }
+  })
+
+  if (_.has(routeMatcher, 'https') && !_.isBoolean(routeMatcher.https)) {
+    throw new Error('`https` must be a boolean.')
+  }
+
+  if (_.has(routeMatcher, 'port') && !_isNumberMatcher(routeMatcher.port)) {
+    throw new Error('`port` must be a number or a list of numbers.')
+  }
 }
 
 function _validateStaticResponse (staticResponse: StaticResponse): void {
@@ -326,7 +363,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     function _getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && (_isRegExp(handler) || typeof handler === 'string') && arg2) {
+      if (_.isString(matcher) && _isStringMatcher(handler) && arg2) {
         // method, url, handler
         const url = handler as StringMatcher
 
@@ -338,7 +375,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         }
       }
 
-      if (_isRegExp(matcher) || typeof matcher === 'string') {
+      if (_isStringMatcher(matcher)) {
         // url, handler
         return {
           url: matcher,
@@ -348,7 +385,15 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       return matcher
     }
 
-    return _addRoute(_getMatcherOptions(), handler as RouteHandler)
+    const routeMatcherOptions = _getMatcherOptions()
+
+    try {
+      _validateRouteMatcher(routeMatcherOptions)
+    } catch (err) {
+      $errUtils.throwErrByPath('net_stubbing.invalid_route_matcher', { args: { err, matcher: routeMatcherOptions } })
+    }
+
+    return _addRoute(routeMatcherOptions, handler as RouteHandler)
     .then(() => null)
   }
 

@@ -1799,7 +1799,6 @@ describe('src/cy/commands/net_stubbing', function () {
               cy.route2({
                 url: /foo/,
                 response: {},
-                delay: 50,
               }).as('getFoo').window().then(function (w) {
                 w.$.getJSON('foo')
                 w.$.getJSON('foo')
@@ -1838,7 +1837,6 @@ describe('src/cy/commands/net_stubbing', function () {
               cy.route2({
                 url: /foo/,
                 response: {},
-                delay: 50,
               }).as('getFoo').window().then(function (win) {
                 let xhr1
 
@@ -2148,7 +2146,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
         describe('errors', function () {
           beforeEach(function () {
-            Cypress.config('defaultCommandTimeout', 50)
+            Cypress.config('defaultCommandTimeout', 500)
             this.logs = []
             cy.on('log:added', (attrs, log) => {
               this.lastLog = log
@@ -2161,53 +2159,19 @@ describe('src/cy/commands/net_stubbing', function () {
 
           it('url must be a string or regexp', function (done) {
             cy.on('fail', function (err) {
-              expect(err.message).to.include('cy.route2() was called with an invalid url. Url must be either a string or regular expression.')
+              expect(err.message).to.include('`url` must be a string or a regular expression')
 
               done()
             })
 
+            // @ts-ignore: should fail
             cy.route2({
-              // @ts-ignore: should fail
               url: {},
             })
           })
 
-          it('url must be a string or regexp when a function', function (done) {
-            let getUrl
-
-            cy.on('fail', function (err) {
-              expect(err.message).to.include('cy.route2() was called with an invalid url. Url must be either a string or regular expression.')
-
-              done()
-            })
-
-            getUrl = function () {
-              return Promise.resolve({
-                url: {},
-              })
-            }
-
-            cy.route2(getUrl)
-          })
-
-          it('fails when functions reject', function (done) {
-            let error; let getUrl
-
-            error = new Error
-            cy.on('fail', function (err) {
-              expect(err).to.eq(error)
-
-              done()
-            })
-
-            getUrl = function () {
-              return Promise.reject(error)
-            }
-
-            cy.route2(getUrl)
-          })
-
-          it('fails when method is invalid', function (done) {
+          // TODO: not currently implemented
+          it.skip('fails when method is invalid', function (done) {
             cy.on('fail', function (err) {
               expect(err.message).to.include('cy.route2() was called with an invalid method: \'POSTS\'.')
 
@@ -2219,7 +2183,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           it('requires a url when given a response', function (done) {
             cy.on('fail', function (err) {
-              expect(err.message).to.include('cy.route2() must be called with a url. It can be a string or regular expression.')
+              expect(err.message).to.include('The RouteMatcher does not contain any keys. You must pass something to match on.')
 
               done()
             })
@@ -2227,35 +2191,9 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.route2({})
           })
 
-          _.each([null, void 0], function (val) {
-            it(`throws if response options was explicitly set to ${val}`, function (done) {
-              cy.on('fail', function (err) {
-                expect(err.message).to.include('cy.route2() cannot accept an undefined or null response. It must be set to something, even an empty string will work.')
-
-                done()
-              })
-
-              cy.route2({
-                url: /foo/,
-                response: val,
-              })
-            })
-
-            it(`throws if response argument was explicitly set to ${val}`, function (done) {
-              cy.on('fail', function (err) {
-                expect(err.message).to.include('cy.route2() cannot accept an undefined or null response. It must be set to something, even an empty string will work.')
-
-                done()
-              })
-
-              // @ts-ignore: types are incorrectly inferred when val is invalid
-              cy.route2(/foo/, val)
-            })
-          })
-
           it('requires arguments', function (done) {
             cy.on('fail', function (err) {
-              expect(err.message).to.include('cy.route2() was not provided any arguments. You must provide valid arguments.')
+              expect(err.message).to.include('An invalid RouteMatcher was supplied to `cy.route2()`. The RouteMatcher does not contain any keys. You must pass something to match on.')
 
               done()
             })
@@ -2264,47 +2202,25 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.route2()
           })
 
-          it('sets err on log when caused by the XHR response', function (done) {
-            this.route2.restore()
-            cy.on('fail', (err) => {
-              let lastLog
+          // TODO: using aliases as responses not yet implemented
+          // it('explodes if response alias cannot be found', function (done) {
+          //   cy.on('fail', (err) => {
+          //     let lastLog
 
-              lastLog = this.lastLog
-              // route + window + xhr log === 3
-              expect(this.logs.length).to.eq(3)
-              expect(lastLog.get('name')).to.eq('xhr')
-              expect(lastLog.get('error')).to.eq(err)
+          //     lastLog = this.lastLog
+          //     expect(this.logs.length).to.eq(2)
+          //     expect(err.message).to.eq('cy.route2() could not find a registered alias for: \'@bar\'.\nAvailable aliases are: \'foo\'.')
+          //     expect(lastLog.get('name')).to.eq('route')
+          //     expect(lastLog.get('error')).to.eq(err)
+          //     expect(lastLog.get('message')).to.eq('/foo/, @bar')
 
-              done()
-            })
+          //     done()
+          //   })
 
-            cy.route2(/foo/, {}).as('getFoo').window().then(function (win) {
-              return win.$.get('foo_bar').done(function () {
-                // @ts-ignore - should err
-                // eslint-disable-next-line no-undef
-                return foo.bar()
-              })
-            })
-          })
-
-          it('explodes if response alias cannot be found', function (done) {
-            cy.on('fail', (err) => {
-              let lastLog
-
-              lastLog = this.lastLog
-              expect(this.logs.length).to.eq(2)
-              expect(err.message).to.eq('cy.route2() could not find a registered alias for: \'@bar\'.\nAvailable aliases are: \'foo\'.')
-              expect(lastLog.get('name')).to.eq('route')
-              expect(lastLog.get('error')).to.eq(err)
-              expect(lastLog.get('message')).to.eq('/foo/, @bar')
-
-              done()
-            })
-
-            cy.wrap({
-              foo: 'bar',
-            }).as('foo').route2(/foo/, '@bar')
-          })
+          //   cy.wrap({
+          //     foo: 'bar',
+          //   }).as('foo').route2(/foo/, '@bar')
+          // })
         })
 
         describe('.log', function () {
@@ -2341,7 +2257,8 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           })
 
-          it('#consoleProps', function () {
+          // TODO: implement log niceties
+          it.skip('#consoleProps', function () {
             cy.route2('*', {
               foo: 'bar',
             }).as('foo').then(function () {
@@ -2391,7 +2308,8 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      context('consoleProps logs', function () {
+      // TODO: implement log niceties
+      context.skip('consoleProps logs', function () {
         beforeEach(function () {
           this.logs = []
           cy.on('log:added', (attrs, log) => {
@@ -2569,7 +2487,8 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           })
 
-          it('sends correct message', function () {
+          // TODO: implement log niceties
+          it.skip('sends correct message', function () {
             cy.then(function () {
               expect(this.lastLog.invoke('renderProps').message).to.equal('GET 200 /foo')
             })
@@ -2585,7 +2504,8 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           })
 
-          it('sends correct indicator', function () {
+          // TODO: this is now flaky
+          it.skip('sends correct indicator', function () {
             cy.then(function () {
               expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
             })
@@ -2596,7 +2516,6 @@ describe('src/cy/commands/net_stubbing', function () {
           beforeEach(function () {
             cy.route2({
               url: '/foo',
-              delay: 500,
               response: {},
             }).window().then(function (win) {
               win.$.get('/foo')
@@ -2630,7 +2549,8 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           })
 
-          it('sends correct indicator', function () {
+          // TODO: determine what this should do
+          it.skip('sends correct indicator', function () {
             cy.then(function () {
               expect(this.lastLog.invoke('renderProps').indicator).to.equal('bad')
             })
@@ -2782,37 +2702,16 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      context('Cypress.on(window:unload)', function () {
-        it('cancels all open XHR\'s', function () {
-          let xhrs
-
-          xhrs = []
-
-          cy.window().then(function (win) {
-            return _.times(2, function () {
-              let xhr
-
-              xhr = new win.XMLHttpRequest
-              xhr.open('GET', '/timeout?ms=200')
-              xhr.send()
-
-              return xhrs.push(xhr)
-            })
-          }).reload().then(function () {
-            return _.each(xhrs, function (xhr) {
-              expect(xhr.canceled).to.be.true
-            })
-          })
-        })
-      })
-
       context('Cypress.on(window:before:load)', function () {
         it('reapplies server + route automatically before window:load', function () {
           // this tests that the server + routes are automatically reapplied
           // after the 2nd visit - which is an example of the remote iframe
           // causing an onBeforeLoad event
           cy.route2(/foo/, {
-            foo: 'bar',
+            body: JSON.stringify({ foo: 'bar' }),
+            headers: {
+              'content-type': 'application/json',
+            },
           }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
             return new Promise(function (resolve) {
               let xhr
@@ -2823,7 +2722,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
+          }).wait('@getFoo').its('req.url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
             return new Promise(function (resolve) {
               let xhr
 
@@ -2833,7 +2732,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('url').should('include', '/foo')
+          }).wait('@getFoo').its('req.url').should('include', '/foo')
         })
 
         it('reapplies server + route automatically during page transitions', function () {
@@ -2841,7 +2740,10 @@ describe('src/cy/commands/net_stubbing', function () {
           // after the 2nd visit - which is an example of the remote iframe
           // causing an onBeforeLoad event
           cy.route2(/foo/, {
-            foo: 'bar',
+            body: JSON.stringify({ foo: 'bar' }),
+            headers: {
+              'content-type': 'application/json',
+            },
           }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
             let $a; let url
 
@@ -2860,7 +2762,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('url').should('include', '/foo')
+          }).wait('@getFoo').its('req.url').should('include', '/foo')
         })
       })
     })

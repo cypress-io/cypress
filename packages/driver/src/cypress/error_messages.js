@@ -909,10 +909,13 @@ module.exports = {
   net_stubbing: {
     route2_needs_experimental: `${cmd('route2')} requires experimental network mocking to be enabled.\n\nSet the \`experimentalNetworkMocking\` config value to \`true\` to access this command.\n\nRead more: https://on.cypress.io/experiments`,
     invalid_handler: ({ handler }) => {
-      return `${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, HttpController function, or WebSocketController.\n\nYou passed: ${format(handler)}`
+      return `${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.\n\nYou passed: ${format(handler)}`
     },
     invalid_static_response: ({ err, staticResponse }) => {
       return `An invalid StaticResponse was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(staticResponse)}`
+    },
+    invalid_route_matcher: ({ err, matcher }) => {
+      return `An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(matcher)}`
     },
     warn_multiple_next_calls: ({ route, req }) => {
       return `next() was called multiple times in a request handler, but the request can only be passed on once, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
@@ -1827,9 +1830,9 @@ module.exports = {
     timed_out: {
       message: stripIndent`
       ${cmd('wrap')} timed out waiting \`{{timeout}}ms\` to complete.
-      
+
       You called \`cy.wrap()\` with a promise that never resolved.
-      
+
       To increase the timeout, use \`{ timeout: number }\`
       `,
       docsUrl: 'https://on.cypress.io/wrap',

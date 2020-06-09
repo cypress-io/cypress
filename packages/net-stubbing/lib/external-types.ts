@@ -163,7 +163,6 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    * Match based on full request URL.
    */
   url?: S
-  webSocket?: boolean
 }
 
 export type RouteHandlerController = HttpRequestInterceptor
