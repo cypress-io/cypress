@@ -44,7 +44,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
 interface RunnablesProps {
   error?: Error
   runnablesStore: RunnablesStore
-  specPath: string
+  spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
 }
@@ -52,12 +52,12 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader specPath={specPath} />
-        {content(runnablesStore, specPath, error)}
+        <RunnableHeader spec={spec} />
+        {content(runnablesStore, spec.relative, error)}
       </div>
     )
   }

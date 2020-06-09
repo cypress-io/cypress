@@ -41,8 +41,8 @@ const serverOptions: Partial<Cypress.ServerOptions> = {
 cy.server(serverOptions)
 
 Cypress.spec.name // $ExpectType string
-Cypress.spec.relative // $ExpectType string | null
-Cypress.spec.absolute // $ExpectType string | null
+Cypress.spec.relative // $ExpectType string
+Cypress.spec.absolute // $ExpectType string
 
 Cypress.browser // $ExpectType Browser
 
