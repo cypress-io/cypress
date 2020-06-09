@@ -1575,85 +1575,7 @@ describe('src/cy/commands/net_stubbing', function () {
           })
         })
 
-        describe('#onResponse', function () {
-          // NOTE: not ported from XHR-based stubbing - XHR-specific
-          it('calls onResponse callback with cy context + proxy xhr', function (done) {
-            cy.route2({
-              url: /foo/,
-              response: {
-                foo: 'bar',
-              },
-              onResponse (xhr) {
-                expect(this).to.eq(cy)
-                // @ts-ignore
-                expect(xhr.responseBody).to.deep.eq({
-                  foo: 'bar',
-                })
-
-                done()
-              },
-            }).window().then(function (win) {
-              win.$.get('/foo')
-
-              return null
-            })
-          })
-        })
-
-        describe('#onAbort', function () {
-          it('calls onAbort callback with cy context + proxy xhr', function (done) {
-            cy.route2({
-              url: /foo/,
-              response: {},
-              onAbort (xhr) {
-                expect(this).to.eq(cy)
-                expect(xhr.aborted).to.be.true
-
-                done()
-              },
-            }).window().then(function (win) {
-              let xhr
-
-              xhr = new win.XMLHttpRequest
-              xhr.open('GET', '/foo')
-              xhr.send()
-              xhr.abort()
-
-              return null
-            })
-          })
-        })
-
         describe('request parsing', function () {
-          // NOTE: not ported from XHR-based stubbing - XHR-specific
-          it.skip('adds parses requestBody into JSON', function (done) {
-            cy.route2({
-              method: 'POST',
-              url: /foo/,
-              response: {},
-              onRequest (xhr) {
-                expect(this).to.eq(cy)
-                // @ts-ignore
-                expect(xhr.requestBody).to.deep.eq({
-                  foo: 'bar',
-                })
-
-                done()
-              },
-            }).window().then(function (win) {
-              win.$.ajax({
-                type: 'POST',
-                url: '/foo',
-                data: JSON.stringify({
-                  foo: 'bar',
-                }),
-                dataType: 'json',
-              })
-
-              return null
-            })
-          })
-
           // https://github.com/cypress-io/cypress/issues/65
           it('provides the correct requestBody on multiple requests', function () {
             let post
@@ -1717,8 +1639,9 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.route2({
               method: 'GET',
               url: /answers/,
-              status: 503,
-              response: {},
+            }, {
+              statusCode: 503,
+              body: '',
             }).route2(/forms/, []).as('getForm').window().then(function (win) {
               win.$.getJSON('/forms')
 
@@ -2538,8 +2461,8 @@ describe('src/cy/commands/net_stubbing', function () {
           beforeEach(function () {
             cy.route2({
               url: '/foo',
-              status: 500,
-              response: {},
+            }, {
+              statusCode: 500,
             }).window().then(function (win) {
               return new Promise(function (resolve) {
                 return win.$.get('/foo').fail(function () {

@@ -167,7 +167,7 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
 
 export type RouteHandlerController = HttpRequestInterceptor
 
-export type RouteHandler = string | StaticResponse | RouteHandlerController
+export type RouteHandler = string | StaticResponse | RouteHandlerController | any
 
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
