@@ -1,6 +1,6 @@
 import debugModule from 'debug'
 import { HttpMiddleware } from '.'
-import { InterceptError } from '@packages/net-stubbing/server'
+import { InterceptError } from '@packages/net-stubbing'
 import { Readable } from 'stream'
 import { Request } from '@cypress/request'
 

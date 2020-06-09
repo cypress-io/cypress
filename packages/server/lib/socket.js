@@ -14,7 +14,7 @@ const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
-const netStubbing = require('@packages/net-stubbing/server')
+const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
 
 const runnerEvents = [

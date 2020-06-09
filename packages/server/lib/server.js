@@ -21,7 +21,7 @@ const {
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
-const { netStubbingState } = require('@packages/net-stubbing/server')
+const { netStubbingState } = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')

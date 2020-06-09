@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import CyServer from '@packages/server'
 import { blacklist, cors } from '@packages/network'
-import { InterceptRequest } from '@packages/net-stubbing/server'
+import { InterceptRequest } from '@packages/net-stubbing'
 import debugModule from 'debug'
 import { HttpMiddleware } from './'
 
