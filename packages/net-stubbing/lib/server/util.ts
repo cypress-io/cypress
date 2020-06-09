@@ -2,15 +2,16 @@ import _ from 'lodash'
 import debugModule from 'debug'
 import isHtml from 'is-html'
 import { ServerResponse, IncomingMessage } from 'http'
-import { StaticResponse } from '../external-types'
 import {
   RouteMatcherOptionsGeneric,
   STRING_MATCHER_FIELDS,
   DICT_STRING_MATCHER_FIELDS,
+  BackendStaticResponse,
 } from '../types'
 import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
+import { GetFixtureFn } from './types'
 
 const debug = debugModule('cypress:net-stubbing:server:util')
 
@@ -35,12 +36,18 @@ export function getAllStringMatcherFields (options: RouteMatcherOptionsGeneric<a
           }
 
           return ''
-        })
-      )
-    )
+        }),
+      ),
+    ),
   )
 }
 
+/**
+ * Generate a "response object" that looks like a real Node HTTP response.
+ * Instead of directly manipulating the response by using `res.status`, `res.setHeader`, etc.,
+ * generating an IncomingMessage allows us to treat the response the same as any other "real"
+ * HTTP response, which means the proxy layer can apply response middleware to it.
+ */
 function _getFakeClientResponse (opts: {
   statusCode: number
   headers: {
@@ -60,7 +67,24 @@ function _getFakeClientResponse (opts: {
   return clientResponse
 }
 
-export function sendStaticResponse (res: ServerResponse, staticResponse: StaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void, resStream?: Readable) {
+export function getStaticResponseFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
+  const { fixture } = staticResponse
+
+  if (!fixture) {
+    throw new Error('Missing fixture on staticResponse')
+  }
+
+  return getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
+}
+
+/**
+ * Using an existing response object, send a response shaped by a StaticResponse object.
+ * @param res Response object.
+ * @param staticResponse BackendStaticResponse object.
+ * @param onResponse Will be called with the response metadata + body stream
+ * @param resStream Optionally, provide a Readable stream to be used as the response body (overrides staticResponse.body)
+ */
+export function sendStaticResponse (res: ServerResponse, staticResponse: BackendStaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void, resStream?: Readable) {
   if (staticResponse.destroySocket) {
     res.connection.destroy()
     res.destroy()

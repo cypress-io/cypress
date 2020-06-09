@@ -1,9 +1,16 @@
 import * as _ from 'lodash'
 import {
   RouteMatcherOptionsGeneric,
-  StaticResponse,
   CyHttpMessages,
+  GenericStaticResponse,
 } from './external-types'
+
+export type FixtureOpts = {
+  encoding: string
+  filePath: string
+}
+
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',
@@ -41,7 +48,7 @@ export type AnnotatedRouteMatcherOptions = RouteMatcherOptionsGeneric<AnnotatedS
 export declare namespace NetEventFrames {
   export interface AddRoute {
     routeMatcher: AnnotatedRouteMatcherOptions
-    staticResponse?: StaticResponse
+    staticResponse?: BackendStaticResponse
     handlerId?: string
   }
 
@@ -62,7 +69,7 @@ export declare namespace NetEventFrames {
   // fired when driver is done modifying request and wishes to pass control back to the proxy
   export interface HttpRequestContinue extends BaseHttp {
     req: CyHttpMessages.IncomingRequest
-    staticResponse?: StaticResponse
+    staticResponse?: BackendStaticResponse
     hasResponseHandler?: boolean
     tryNextRoute?: boolean
   }
@@ -76,7 +83,7 @@ export declare namespace NetEventFrames {
   // passes control back to proxy
   export interface HttpResponseContinue extends BaseHttp {
     res?: CyHttpMessages.IncomingResponse
-    staticResponse?: StaticResponse
+    staticResponse?: BackendStaticResponse
     // Millisecond timestamp for when the response should continue
     continueResponseAt?: number
     throttleKbps?: number

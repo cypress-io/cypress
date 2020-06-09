@@ -171,11 +171,17 @@ export type RouteHandlerController = HttpRequestInterceptor
 export type RouteHandler = string | StaticResponse | RouteHandlerController
 
 /**
- * Describes a response that will be sent back to the client.
+ * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export interface StaticResponse {
+export type StaticResponse = GenericStaticResponse<string>
+
+export interface GenericStaticResponse<F> {
   /**
-   * @default ""
+   * If set, serve a fixture as the response body.
+   */
+  fixture?: F
+  /**
+   * If set, serve a static string as the response body.
    */
   body?: string
   /**

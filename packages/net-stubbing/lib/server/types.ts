@@ -1,19 +1,20 @@
 import { IncomingMessage } from 'http'
 import { Readable } from 'stream'
-
 import {
   CypressIncomingRequest,
   CypressOutgoingResponse,
 } from '@packages/proxy'
 import {
   RouteMatcherOptions,
-  StaticResponse,
+  BackendStaticResponse,
 } from '../types'
+
+export type GetFixtureFn = (path: string, opts?: { encoding?: string }) => Promise<any>
 
 export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
   handlerId?: string
-  staticResponse?: StaticResponse
+  staticResponse?: BackendStaticResponse
 }
 
 export interface BackendRequest {

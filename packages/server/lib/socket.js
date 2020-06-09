@@ -196,6 +196,8 @@ class Socket {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
+    const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
+
     return this.io.on('connection', (socket) => {
       debug('socket connected')
 
@@ -388,13 +390,20 @@ class Socket {
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
             case 'get:fixture':
-              return fixture.get(config.fixturesFolder, args[0], args[1])
+              return getFixture(args[0], args[1])
             case 'read:file':
               return files.readFile(config.projectRoot, args[0], args[1])
             case 'write:file':
               return files.writeFile(config.projectRoot, args[0], args[1], args[2])
             case 'net':
-              return netStubbing.onNetEvent(options.netStubbingState, this, ...args)
+              return netStubbing.onNetEvent({
+                eventName: args[0],
+                frame: args[1],
+                state: options.netStubbingState,
+                socket: this,
+                getFixture,
+                args,
+              })
             case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':

@@ -23,6 +23,7 @@ import {
 } from '../types'
 import '@packages/driver/index.d.ts'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
+import { BackendStaticResponse, FixtureOpts } from '../internal-types'
 
 /**
  * Annotate non-primitive types so that they can be passed to the backend and re-hydrated.
@@ -115,23 +116,51 @@ function _parseStaticResponseShorthand (statusCodeOrBody: number | string | any,
 }
 
 function _validateStaticResponse (staticResponse: StaticResponse): void {
-  const { body, statusCode, headers, destroySocket } = staticResponse
+  const { body, fixture, statusCode, headers, destroySocket } = staticResponse
 
   if (destroySocket && (body || statusCode || headers)) {
     throw new Error('`destroySocket`, if passed, must be the only option in the StaticResponse.')
+  }
+
+  if (body && fixture) {
+    throw new Error('`body` and `fixture` cannot both be set, pick one.')
+  }
+
+  if (fixture && !_.isString(fixture)) {
+    throw new Error('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii").')
   }
 
   if (body && !_.isString(body)) {
     throw new Error('`body` must be a string.')
   }
 
-  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 0, 999))) {
-    throw new Error('`statusCode` must be a number between 0 and 999.')
+  // statusCode must be a three-digit integer
+  // @see https://tools.ietf.org/html/rfc2616#section-6.1.1
+  if (statusCode && !(_.isNumber(statusCode) && _.inRange(statusCode, 100, 999))) {
+    throw new Error('`statusCode` must be a number between 100 and 999 (inclusive).')
   }
 
-  if (headers && _.keys(_.omitBy(headers, _.isString))) {
+  if (headers && _.keys(_.omitBy(headers, _.isString)).length) {
     throw new Error('`headers` must be a map of strings to strings.')
   }
+}
+
+function _getFixtureOpts (fixture: string): FixtureOpts {
+  const [filePath, encoding] = fixture.split(',')
+
+  return { filePath, encoding }
+}
+
+function _getBackendStaticResponse (staticResponse: StaticResponse): BackendStaticResponse {
+  if (staticResponse.fixture) {
+    return {
+      ...staticResponse,
+      fixture: _getFixtureOpts(staticResponse.fixture),
+    }
+  }
+
+  // no modification required, just coerce the type
+  return staticResponse as unknown as BackendStaticResponse
 }
 
 export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State /* config */) {
@@ -244,6 +273,8 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       routeMatcher: _annotateMatcherOptionsTypes(matcher),
     }
 
+    let staticResponse: StaticResponse | undefined = undefined
+
     switch (true) {
       case _isHttpRequestInterceptor(handler):
         break
@@ -251,7 +282,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         // TODO: handle this, for when users just want to alias/wait on route
         break
       case _.isString(handler):
-        frame.staticResponse = { body: <string>handler }
+        staticResponse = { body: <string>handler }
         break
       case _.isObjectLike(handler):
         try {
@@ -262,7 +293,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
           return Promise.resolve()
         }
 
-        frame.staticResponse = <StaticResponse>handler
+        staticResponse = handler as StaticResponse
         break
       default:
         $errUtils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
@@ -270,8 +301,12 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         return Promise.resolve()
     }
 
+    if (staticResponse) {
+      frame.staticResponse = _getBackendStaticResponse(staticResponse)
+    }
+
     state('routes')[handlerId] = {
-      log: _getNewRouteLog(matcher, !!handler, alias, frame.staticResponse),
+      log: _getNewRouteLog(matcher, !!handler, alias, staticResponse),
       options: matcher,
       handler,
       hitCount: 0,
@@ -406,7 +441,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
         if (!_.isUndefined(responseHandler)) {
           // `replyHandler` is a StaticResponse
-          continueFrame.staticResponse = <StaticResponse>responseHandler
+          continueFrame.staticResponse = _getBackendStaticResponse(responseHandler as StaticResponse)
         }
 
         if (!continueSent) {

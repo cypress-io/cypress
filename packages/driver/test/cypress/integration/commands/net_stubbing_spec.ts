@@ -2113,17 +2113,33 @@ describe('src/cy/commands/net_stubbing', function () {
             cy.route2({
               method: 'POST',
               url: '/test-xhr',
-              response: 'fixture:valid.json',
+            }, {
+              fixture: 'valid.json',
             }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
             cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+          })
+
+          it('works with content-type override', function () {
+            cy.route2({
+              method: 'POST',
+              url: '/test-xhr',
+            }, {
+              headers: {
+                'content-type': 'text/plain',
+              },
+              fixture: 'valid.json',
+            }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+
+            cy.contains('#result', '"{\\"foo\\":1,\\"bar\\":{\\"baz\\":\\"cypress\\"}}"').should('be.visible')
           })
 
           it('works if the JSON file has null content', function () {
             cy.route2({
               method: 'POST',
               url: '/test-xhr',
-              response: 'fixture:null.json',
+            }, {
+              fixture: 'null.json',
             }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
             cy.contains('#result', '""').should('be.visible')

@@ -187,9 +187,8 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
 
   if (route.staticResponse) {
     emitReceived()
-    sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
 
-    return // don't call cb since we've satisfied the response here
+    return sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
   }
 
   // if we already have a body, just emit
@@ -252,9 +251,7 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
   }
 
   if (frame.staticResponse) {
-    sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
-
-    return
+    return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
   }
 
   backendRequest.continueRequest()
