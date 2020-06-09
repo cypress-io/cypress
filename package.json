@@ -186,8 +186,7 @@
     "through": "2.3.8",
     "ts-node": "8.3.0",
     "typescript": "3.7.4",
-    "vinyl-paths": "2.1.0",
-    "wait-on": "3.3.0"
+    "vinyl-paths": "2.1.0"
   },
   "engines": {
     "node": ">=12.8.1",
