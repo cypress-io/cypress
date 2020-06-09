@@ -671,7 +671,7 @@ describe('src/cy/commands/net_stubbing', function () {
           xhr.send()
 
           xhr.onload = () => {
-            expect(Date.now() - this.start).to.be.closeTo(1000, 100)
+            expect(Date.now() - this.start).to.be.closeTo(1100, 100)
             expect(xhr.responseText).to.eq('delay worked')
 
             done()
