@@ -216,8 +216,8 @@ declare namespace Cypress {
      */
     spec: {
       name: string // "config_passing_spec.coffee"
-      relative: string | null // "cypress/integration/config_passing_spec.coffee"
-      absolute: string | null
+      relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
+      absolute: string
     }
 
     /**
