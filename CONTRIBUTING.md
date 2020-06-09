@@ -36,6 +36,11 @@ Thanks for taking the time to contribute! :smile:
   - [Pull Requests](#pull-requests)
   - [Testing](#testing)
   - [Dependencies](#dependencies)
+- [Reviewing Code](#reviewing-code)
+  - [Some rules about Code Review](#Some-rules-about-Code-Review)
+  - [Steps to take during Code Review](#Steps-to-take-during-Code-Review)
+  - [Code Review Checklist](#Code-Review-Checklist)
+  - [Code Review of Dependency Updates](#Code-Review-of-Dependency-Updates)
 - [Deployment](#deployment)
 
 ## CI status
@@ -518,23 +523,6 @@ The repository is setup with two main (protected) branches.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
 
-### Pull Request Reviews
-
-After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
-
-**Some rules about Pull Requests Reviews:**
-
-1. The contributor opening the pull request may not approve their own PR.
-2. The PR will not be merged if some reviewers have voted "Needs changes".
-
-If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will re-review once those changes are addressed.
-
-**During a Pull Request Review, the following should be done:**
-
-- Run the code and use it as the end user would. Double check issue and PR description to ensure it is meeting requirements.
-- Read through every line of changed code (Yes, we know this could be a LOT).
-- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
-
 ### Testing
 
 This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
@@ -546,6 +534,75 @@ To run local tests, consult the `README.md` of each package.
 We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our dependencies. The bot uses the settings in [renovate.json](renovate.json) to maintain our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue and open PRs. You can manually select a package to open a PR from our [Update Dependencies](https://github.com/cypress-io/cypress/issues/3777) issue.
 
 After a PR has been opened for a dependency update, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review the dependency update. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
+
+## Reviewing Code
+
+### Some rules about Code Review
+
+1. The contributor opening the pull request may not approve their own PR.
+2. The PR will not be merged if some reviewers have requested changes.
+
+If any of the Pull Request Review guidelines can't be met, a comment should be left by the reviewer with 'Request changes'. The original contributor is responsible for making any updates and request re-review once those changes are addressed.
+
+### Steps to take during Code Review
+
+- Run the code and use it as the end user would.
+- Double check the issue and PR description to ensure it is meeting the original requirements.
+- Read through every line of changed code (Yes, we know this could be a LOT).
+- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
+
+### Code Review Checklist
+
+Below are guidelines to help during code review. If any of the following requirements can't be met, leave a comment in the review selecting 'Request changes', otherwise 'Approve'.
+
+#### User Experience
+
+- [ ] The feature/bugfix is self-documenting from within the product.
+- [ ] The change provides the end user with a way to fix their problem (no dead ends).
+- [ ] If a breaking change or a change to a commonly used API, the proposed changes have been discussed and agreed upon in the weekly team meeting (or a separate meeting if a larger change).
+
+#### Functionality
+
+- [ ] The code works and performs its intended function with the correct logic.
+- [ ] Performance has been factored in (for example, the code cleans up after itself to not cause memory leaks).
+- [ ] The code guards against edge cases and invalid input and has tests to cover it.
+
+#### Maintainability
+
+- [ ] The code is readable (too many nested 'if's are a bad sign).
+- [ ] Names used for variables, methods, etc, clearly describe their function.
+- [ ] The code is easy to understood and there are relevant comments explaining.
+- [ ] New algorithms are documented in the code with link(s) to external docs (flowcharts, w3c, chrome, firefox).
+- [ ] There are comments containing link(s) to the addressed issue (in tests and code).
+
+#### Quality
+
+- [ ] The change does not reimplement code.
+- [ ] There's not a module from the ecosystem that should be used instead.
+- [ ] There is no redundant or duplicate code.
+- [ ] There are no irrelevant comments left in the code.
+- [ ] Tests are testing the code’s intended functionality in the best way possible.
+
+#### Internal
+
+- [ ] The original issue has been tagged with a release in ZenHub.
+
+### Code Review of Dependency Updates
+
+Below are some guidelines Cypress uses when reviewing dependency updates.
+
+#### Dependency Update Instructions
+
+- Read through the entire changelog of the dependency's changes. If a changelog is not available, check every commit made to the dependency. **NOTE** - do not rely on semver to indicate breaking changes - every product does not follow this standard.
+- Add a PR review comment noting any relevant changes in the dependency.
+- If any of the following requirements cannot be met, leave a comment in the review selecting 'Request changes', otherwise 'Approve'.
+
+#### Dependency Updates Checklist
+
+- [ ] Code using the dependency has been updated to accommodate any breaking changes
+- [ ] The dependency still supports the version of Node that the package requires.
+- [ ] The PR been tagged with a release in ZenHub.
+- [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
 
 ## Deployment
 
