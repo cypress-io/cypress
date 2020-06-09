@@ -328,17 +328,19 @@ namespace CypressFilterTests {
     })
 }
 
-cy.screenshot('example-name')
-cy.screenshot('example', {log: false})
-cy.screenshot({log: false})
-cy.screenshot({
-  log: true,
-  blackout: []
-})
-cy.screenshot('example', {
-  log: true,
-  blackout: []
-})
+namespace CypressScreenshotTests {
+  cy.screenshot('example-name')
+  cy.screenshot('example', { log: false })
+  cy.screenshot({ log: false })
+  cy.screenshot({
+    log: true,
+    blackout: []
+  })
+  cy.screenshot('example', {
+    log: true,
+    blackout: []
+  })
+}
 
 namespace CypressTriggerTests {
   cy.get('something')
@@ -509,4 +511,18 @@ namespace CypressTestConfigOverridesTests {
   describe.only('suite', {}, () => {})
   describe.skip('suite', {}, () => {})
   xdescribe('suite', {}, () => {})
+}
+
+namespace CypressShadowTests {
+  cy
+  .get('.foo')
+  .shadow()
+  .find('.bar')
+  .click()
+
+  cy.get('.foo', { ignoreShadowBoundaries: true }).click()
+
+  cy
+  .get('.foo')
+  .find('.bar', {ignoreShadowBoundaries: true})
 }

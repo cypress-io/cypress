@@ -57,7 +57,6 @@ function track (type, data) {
     })
   })
   .catch((err) => {
-    /* eslint-disable no-console */
     console.error('Track error for type %s %s', type, err.message)
   })
 }

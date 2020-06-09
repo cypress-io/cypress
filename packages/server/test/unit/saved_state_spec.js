@@ -81,7 +81,6 @@ describe('lib/saved_state', () => {
       .then((state) => {
         return state.set({ foo: 'bar', baz: 'qux' })
       }).then(() => {
-        // eslint-disable-next-line no-console
         expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-whitelisted key(s): foo, baz. All keys must be whitelisted in server/lib/saved_state.js')
       })
     })
