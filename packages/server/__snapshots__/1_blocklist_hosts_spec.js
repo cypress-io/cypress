@@ -1,4 +1,4 @@
-exports['e2e blacklist passes 1'] = `
+exports['e2e blocklist passes 1'] = `
 
 ====================================================================================================
 
@@ -7,18 +7,18 @@ exports['e2e blacklist passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (blacklist_hosts_spec.coffee)                                              │
-  │ Searched:   cypress/integration/blacklist_hosts_spec.coffee                                    │
+  │ Specs:      1 found (blocklist_hosts_spec.coffee)                                              │
+  │ Searched:   cypress/integration/blocklist_hosts_spec.coffee                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  blacklist_hosts_spec.coffee                                                     (1 of 1)
+  Running:  blocklist_hosts_spec.coffee                                                     (1 of 1)
 
 
-  blacklist
-    ✓ forces blacklisted hosts to return 503
+  blocklist
+    ✓ forces blocklisted hosts to return 503
 
 
   1 passing
@@ -35,14 +35,14 @@ exports['e2e blacklist passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     blacklist_hosts_spec.coffee                                                      │
+  │ Spec Ran:     blocklist_hosts_spec.coffee                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/blacklist_hosts_spec.coffee.mp4     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/blocklist_hosts_spec.coffee.mp4     (X second)
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ exports['e2e blacklist passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  blacklist_hosts_spec.coffee              XX:XX        1        1        -        -        - │
+  │ ✔  blocklist_hosts_spec.coffee              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
