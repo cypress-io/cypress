@@ -33,7 +33,7 @@ Since this is slow, it's better to drive your development with tests.
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-yarn lerna run build-prod --scope @packages/server --stream
+yarn workspace @packages/server build-prod
 ```
 
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)

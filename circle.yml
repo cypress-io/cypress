@@ -143,7 +143,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>"
+          command: yarn workspace @packages/server test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -437,7 +437,7 @@ jobs:
           working_directory: cli/types
       - run:
           name: "Lint types 🧹"
-          command: yarn lerna exec --scope cypress "yarn dtslint"
+          command: yarn workspace cypress dtslint
       - run:
           name: "TypeScript check 🧩"
           command: yarn type-check --ignore-progress
@@ -486,7 +486,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test-performance"
+          command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -950,7 +950,7 @@ jobs:
           working_directory: cli/build
       - run:
           name: list NPM package contents
-          command: yarn lerna run --scope cypress size
+          command: yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
