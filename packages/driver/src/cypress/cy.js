@@ -264,7 +264,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // drop "fetch" polyfill that replaces it with XMLHttpRequest
       // from the app iframe that we wrap for network stubbing
       // This works because the fetchPolyfill relies on `this.XMLHttpRequest`
-      contentWindow.fetch = fetchPolyfill
+      contentWindow.fetch = fetchPolyfill.bind(contentWindow)
     } catch (error) {} // eslint-disable-line no-empty
   }
 
