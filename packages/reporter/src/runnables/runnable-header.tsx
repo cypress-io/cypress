@@ -13,14 +13,14 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     const { spec } = this.props
     const relativeSpecPath = spec.relative
 
-    if (relativeSpecPath === null) {
+    if (spec.relative === '__all') {
       return renderRunnableHeader(
         <span>All Specs</span>,
       )
     }
 
     const fileDetails = {
-      absoluteFile: spec.absolute!,
+      absoluteFile: spec.absolute,
       column: 0,
       line: 0,
       originalFile: relativeSpecPath,

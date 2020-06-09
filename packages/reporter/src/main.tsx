@@ -45,7 +45,11 @@ class Reporter extends Component<ReporterProps> {
       emit: PropTypes.func.isRequired,
       on: PropTypes.func.isRequired,
     }).isRequired,
-    specPath: PropTypes.string.isRequired,
+    spec: PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      relative: PropTypes.string.isRequired,
+      absolute: PropTypes.string.isRequired,
+    }),
   }
 
   static defaultProps = {

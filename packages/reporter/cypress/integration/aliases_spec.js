@@ -27,7 +27,11 @@ describe('aliases', () => {
       cy.visit('dist').then((win) => {
         return win.render({
           runner: this.runner,
-          specPath: '/foo/bar',
+          spec: {
+            name: 'foo',
+            absolute: '/foo/bar',
+            relative: 'foo/bar',
+          },
         })
       })
 
@@ -286,7 +290,11 @@ describe('aliases', () => {
       cy.visit('cypress/support/index.html').then((win) => {
         return win.render({
           runner: this.runner,
-          specPath: '/foo/bar',
+          spec: {
+            name: 'foo',
+            absolute: '/foo/bar',
+            relative: 'foo/bar',
+          },
         })
       })
 
