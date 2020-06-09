@@ -72,7 +72,7 @@
     "check-code-coverage": "1.9.2",
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
-    "cypress": "4.7.0",
+    "cypress": "4.8.0",
     "cypress-axe": "0.8.1",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.3",
