@@ -55,9 +55,9 @@ Run Cypress tests found in `cypress/integration`.
 yarn workspace @packages/reporter cypress:open
 ```
 
-You'll want to run `yarn workspace @packages/reporter watch
+You'll want to run `yarn workspace @packages/reporter watch` to iterate on the reporter under test while testing.
 
-You'll want to run `yarn workspace @packages/runner watch
+You'll want to run `yarn workspace @packages/runner watch` to get changes to the main Cypress reporter while testing.
 
 ### Enzyme
 
