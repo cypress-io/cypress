@@ -355,9 +355,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => void): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
-      overwrite(name: string, fn: (...args: any[]) => void): void
+      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
+      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
     }
 
     /**
@@ -490,6 +490,8 @@ declare namespace Cypress {
      */
     off: Actions
   }
+
+  type CanReturnChainable = void | Chainable
 
   /**
    * Chainable interface for non-array Subjects

@@ -3,7 +3,6 @@ const pkg = require('./package.json')
 const gulp = require('gulp')
 const rimraf = require('rimraf')
 const source = require('vinyl-source-stream')
-const coffeeify = require('coffeeify')
 const browserify = require('browserify')
 const cypressIcons = require('@cypress/icons')
 
@@ -33,7 +32,6 @@ const manifest = (done) => {
 const background = () => {
   return browserify({
     entries: 'app/init.js',
-    transform: coffeeify,
   })
   .bundle()
   .pipe(source('background.js'))

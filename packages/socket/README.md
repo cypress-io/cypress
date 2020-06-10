@@ -40,5 +40,5 @@ socket.getPathToClientSource()
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/socket --stream
+yarn workspace @packages/socket test
 ```

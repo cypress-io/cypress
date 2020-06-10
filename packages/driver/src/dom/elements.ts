@@ -40,6 +40,7 @@ const focusableWhenNotDisabledSelectors = [
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+const valueIsNumberTypeRe = /progress|meter|li/
 
 declare global {
   interface Window {
@@ -323,6 +324,14 @@ const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, val) {
   }
 
   return retProp
+}
+
+interface HTMLValueIsNumberTypeElement extends HTMLElement {
+  value: number
+}
+
+const isValueNumberTypeElement = (el: HTMLElement): el is HTMLValueIsNumberTypeElement => {
+  return valueIsNumberTypeRe.test(getTagName(el))
 }
 
 export interface HTMLSingleValueChangeInputElement extends HTMLInputElement {
@@ -1310,6 +1319,7 @@ export {
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,
+  isValueNumberTypeElement,
   isNeedSingleValueChangeInputElement,
   canSetSelectionRangeElement,
   stringify,

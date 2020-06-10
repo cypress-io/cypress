@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const $ = require('jquery')
 const $dom = require('../dom')
+const $elements = require('../dom/elements')
 
 const selectors = {
   visible: 'visible',
@@ -178,7 +179,13 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   chai.Assertion.addMethod('value', function (value) {
-    value = maybeCastNumberToString(value)
+    const $el = wrap(this)
+
+    // some elements return a number for the .value property
+    // in this case, we don't want to cast the expected value to a string
+    if (!$elements.isValueNumberTypeElement($el[0])) {
+      value = maybeCastNumberToString(value)
+    }
 
     assertDom(
       this,
@@ -188,7 +195,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       value,
     )
 
-    const actual = wrap(this).val()
+    const actual = $el.val()
 
     return assertPartial(
       this,
