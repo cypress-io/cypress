@@ -16,7 +16,6 @@
     "@cypress/sinon-chai": "1.1.0",
     "@cypress/unique-selector": "0.4.2",
     "@cypress/what-is-circular": "1.0.1",
-    "@packages/coffee": "*",
     "@packages/network": "*",
     "@packages/runner": "*",
     "@packages/ts": "*",

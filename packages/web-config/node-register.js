@@ -1,5 +1,3 @@
-require('@packages/coffee/register')
-
 require('@babel/register')({
   'plugins': [
     // "istanbul",
