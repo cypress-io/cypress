@@ -987,20 +987,19 @@ describe('src/cy/commands/net_stubbing', function () {
         .wait('@foo.bar.request', { timeout: 100 })
       })
 
-      // TODO: the ordinals here are off
-      it.skip('can wait for things that do not make sense but are technically true', function () {
-        cy.route2('/foo')
-        .as('foo.bar')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@foo.bar.1')
-        .wait('@foo.bar.1') // still only asserting on the 1st response
-        .wait('@foo.bar.request') // now waiting for the next request
-      })
-
       // NOTE: was undocumented in cy.route2, may not continue to support
       context.skip('indexed aliases', function () {
+        it('can wait for things that do not make sense but are technically true', function () {
+          cy.route2('/foo')
+          .as('foo.bar')
+          .then(() => {
+            $.get('/foo')
+          })
+          .wait('@foo.bar.1')
+          .wait('@foo.bar.1') // still only asserting on the 1st response
+          .wait('@foo.bar.request') // now waiting for the next request
+        })
+
         it('can wait on the 3rd request using "alias.3"', function () {
           cy.route2('/foo')
           .as('foo.bar')
