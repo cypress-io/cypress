@@ -1,5 +1,5 @@
-const $stackUtils = require('../../../../src/cypress/stack_utils')
-const $sourceMapUtils = require('../../../../src/cypress/source_map_utils')
+const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
+const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
 
 describe('driver/src/cypress/stack_utils', () => {
   context('.replacedStack', () => {
