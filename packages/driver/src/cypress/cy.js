@@ -261,9 +261,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
 
-      // drop "fetch" polyfill that replaces it with XMLHttpRequest
-      // from the app iframe that we wrap for network stubbing
-      contentWindow.fetch = registerFetch(contentWindow)
+      if (config('experimentalFetchPolyfill')) {
+        // drop "fetch" polyfill that replaces it with XMLHttpRequest
+        // from the app iframe that we wrap for network stubbing
+        contentWindow.fetch = registerFetch(contentWindow)
+      }
     } catch (error) {} // eslint-disable-line no-empty
   }
 
