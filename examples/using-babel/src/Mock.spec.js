@@ -6,7 +6,7 @@ import * as calc from './calc'
 
 describe('Mocking', () => {
   // https://github.com/bahmutov/cypress-react-unit-test/issues/266
-  it.skip('mocks import used by the Post', () => {
+  it('mocks import used by the Post', () => {
     cy.stub(calc, 'getRandomNumber')
       .as('lucky')
       .returns(777)

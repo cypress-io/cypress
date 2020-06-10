@@ -59,6 +59,7 @@ module.exports = config => {
 
   const wpPreprocessorOptions = webpackPreprocessor.defaultOptions
   enableBabelrc(wpPreprocessorOptions.webpackOptions)
+  debug('webpack options %o', wpPreprocessorOptions.webpackOptions)
 
   addImageRedirect(wpPreprocessorOptions.webpackOptions)
 

@@ -121,7 +121,7 @@
     "url": "https://github.com/bahmutov/cypress-react-unit-test.git"
   },
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.7.5",
+    "@babel/plugin-transform-modules-commonjs": "7.10.1",
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-preprocessor": "5.4.1",
     "babel-plugin-istanbul": "6.0.0",
