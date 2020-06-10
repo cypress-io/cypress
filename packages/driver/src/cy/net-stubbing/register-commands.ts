@@ -551,7 +551,8 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       nextCalled = true
 
       continueFrame.tryNextRoute = true
-      sendContinueFrame()
+
+      return sendContinueFrame()
     }
 
     // rely on handler to call next()
@@ -669,7 +670,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       handler(frame)
     } catch (err) {
       // errors have to be manually propagated here
-      //@ts-ignore
+      // @ts-ignore
       Cypress.action('cy:fail', err, state('runnable'))
     }
   })

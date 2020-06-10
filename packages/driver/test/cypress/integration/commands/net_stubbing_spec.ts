@@ -1,15 +1,5 @@
-import '@packages/net-stubbing/lib/external-types'
-
-declare global {
-  interface Window {
-    $: any
-  }
-}
-
-const { $, _ } = Cypress
-
 describe('src/cy/commands/net_stubbing', function () {
-  const { sinon, state } = Cypress
+  const { $, _, sinon, state } = Cypress
 
   beforeEach(function () {
     Cypress.config('experimentalNetworkMocking', true)
