@@ -2013,7 +2013,7 @@ describe('src/cy/commands/net_stubbing', function () {
               let log
 
               log = cy.queue.logs({
-                displayName: 'stubbed route',
+                displayName: 'req',
               })[0]
 
               expect(log.get('alias')).to.eq('getFoo')

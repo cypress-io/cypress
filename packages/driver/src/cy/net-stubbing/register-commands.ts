@@ -133,7 +133,7 @@ function _parseStaticResponseShorthand (statusCodeOrBody: number | string | any,
   return
 }
 
-function _validateRouteMatcher (routeMatcher: RouteMatcherOptions): void {
+function _validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): void {
   if (_.isEmpty(routeMatcher)) {
     throw new Error('The RouteMatcher does not contain any keys. You must pass something to match on.')
   }
@@ -280,7 +280,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
   function _getRequestLog (route: Route, request: Omit<Request, 'log'>) {
     return Cypress.log({
       name: 'xhr',
-      displayName: 'stubbed route',
+      displayName: 'req',
       alias: route.alias,
       aliasType: 'route',
       type: 'parent',
@@ -401,7 +401,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     const routeMatcherOptions = _getMatcherOptions()
 
     try {
-      _validateRouteMatcher(routeMatcherOptions)
+      _validateRouteMatcherOptions(routeMatcherOptions)
     } catch (err) {
       $errUtils.throwErrByPath('net_stubbing.invalid_route_matcher', { args: { err, matcher: routeMatcherOptions } })
     }
