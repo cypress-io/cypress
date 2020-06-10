@@ -25,7 +25,6 @@ try {
   })
 
   // do we need to prevent any other TypeScript hooks?
-  // like @packages/coffee/register.js does?
 } catch (e) {
   // continue running without TypeScript require hook
   log('Running without ts-node hook in environment "%s"', process.env.CYPRESS_INTERNAL_ENV)

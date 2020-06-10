@@ -250,7 +250,6 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [coffee](./packages/coffee)           | `@packages/coffee`      | A centralized version of CoffeeScript used for other packages.               |
  | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
