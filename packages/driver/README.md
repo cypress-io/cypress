@@ -7,8 +7,8 @@ This is the core JavaScript library that is loaded inside the browser that is re
 The driver is actually consumed by the [`runner`](../runner) like any other npm module. To develop the driver and see changes reflected you need to run the `watch` task inside of the runner.
 
 ```bash
-yarn workspace @packages/runner watch     
-```                                                         ```
+yarn workspace @packages/runner watch
+```
 
 ## Developing
 
