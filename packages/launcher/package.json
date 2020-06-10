@@ -22,7 +22,6 @@
     "ramda": "0.24.1"
   },
   "devDependencies": {
-    "@packages/coffee": "*",
     "@packages/ts": "*",
     "chai": "3.5.0",
     "chai-as-promised": "7.1.1",

@@ -47,7 +47,7 @@ describe('lib/plugins/child/run_plugins', () => {
     // path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute(
       'plugins-file',
-      Fixtures.path('server/throws_error.coffee'),
+      Fixtures.path('server/throws_error.js'),
     )
 
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
@@ -60,13 +60,13 @@ describe('lib/plugins/child/run_plugins', () => {
     // path for substitute is relative to lib/plugins/child/plugins_child.js
     mockery.registerSubstitute(
       'plugins-file',
-      Fixtures.path('server/syntax_error.coffee'),
+      Fixtures.path('server/syntax_error.js'),
     )
 
     runPlugins(this.ipc, 'plugins-file', 'proj-root')
     expect(this.ipc.send).to.be.calledWith('load:error', 'PLUGINS_FILE_ERROR', 'plugins-file')
 
-    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3])))
+    return snapshot(withoutColorCodes(withoutPath(this.ipc.send.lastCall.args[3].replace(/( +at[^$]+$)+/g, '[stack trace]'))))
   })
 
   it('sends error message if pluginsFile does not export a function', function () {
