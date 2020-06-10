@@ -44,7 +44,7 @@ const getCommonConfig = () => {
       module: 'empty',
     },
     resolve: {
-      extensions: ['.ts', '.js', '.jsx', '.tsx', '.coffee', '.scss', '.json'],
+      extensions: ['.ts', '.js', '.jsx', '.tsx', '.scss', '.json'],
     },
 
     stats: {
@@ -62,13 +62,6 @@ const getCommonConfig = () => {
 
     module: {
       rules: [
-        {
-          test: /\.coffee/,
-          exclude: /node_modules/,
-          use: {
-            loader: require.resolve('coffee-loader'),
-          },
-        },
         {
           test: /\.(ts|js|jsx|tsx)$/,
           exclude: /node_modules/,
