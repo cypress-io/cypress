@@ -9,6 +9,7 @@ it('renders user data', () => {
     address: '123, Charming Avenue',
   }
 
+  // window.fetch
   cy.window().then(win => {
     // Cypress cleans up stubs automatically after each test
     // https://on.cypress.io/stub
