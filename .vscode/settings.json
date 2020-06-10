@@ -2,7 +2,6 @@
   "eslint.alwaysShowStatus": true,
   "eslint.validate": ["json", "coffeescript"],
   "eslint.enable": true,
-  "typescript.tsdk": "node_modules/typescript/lib",
   // this project does not use Prettier
   // thus set all settings to disable accidentally running Prettier
   "prettier.requireConfig": true,
