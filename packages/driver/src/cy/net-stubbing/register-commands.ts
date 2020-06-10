@@ -338,17 +338,13 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         try {
           _validateStaticResponse(<StaticResponse>handler)
         } catch (err) {
-          $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
-
-          return Promise.resolve()
+          return $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
         }
 
         staticResponse = handler as StaticResponse
         break
       default:
-        $errUtils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
-
-        return Promise.resolve()
+        return $errUtils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
     }
 
     if (staticResponse) {
@@ -521,13 +517,21 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     const handler = route.handler as Function
 
+    const tryHandler = (...args) => {
+      try {
+        handler(...args)
+      } catch (err) {
+        $errUtils.throwErrByPath('net_stubbing.req_cb_failed', { args: { err, req, route: route.options } })
+      }
+    }
+
     if (!_.isFunction(handler)) {
       return sendContinueFrame()
     }
 
     if (handler.length === 1) {
       // did not consume next(), so continue synchronously
-      handler(userReq)
+      tryHandler(userReq)
 
       return sendContinueFrame()
     }
@@ -549,7 +553,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     // rely on handler to call next()
-    handler(userReq, next)
+    tryHandler(userReq, next)
   }
 
   function _onResponseReceived (frame: NetEventFrames.HttpResponseReceived) {
@@ -620,7 +624,18 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       return sendContinueFrame()
     }
 
-    request.responseHandler(userRes)
+    try {
+      request.responseHandler(userRes)
+    } catch (err) {
+      $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
+        args: {
+          err,
+          req: request.req,
+          route: _getRoute(routeHandlerId).options,
+          res,
+        },
+      })
+    }
   }
 
   function _onRequestComplete (frame: NetEventFrames.HttpRequestComplete) {
@@ -639,26 +654,21 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     state('routes', {})
   })
 
+  const netEventHandlers = {
+    'http:request:received': _onRequestReceived,
+    'http:response:received': _onResponseReceived,
+    'http:request:complete': _onRequestComplete,
+  }
+
   Cypress.on('net:event', (eventName, frame: any /** TODO: interfaceof NetEventFrames */) => {
-    switch (eventName) {
-      case 'http:request:received':
-        _onRequestReceived(<NetEventFrames.HttpRequestReceived>frame)
-        break
-      case 'http:response:received':
-        _onResponseReceived(<NetEventFrames.HttpResponseReceived>frame)
-        break
-      case 'http:request:complete':
-        _onRequestComplete(<NetEventFrames.HttpRequestComplete>frame)
-        break
-      case 'ws:connect':
-        break
-      case 'ws:disconnect':
-        break
-      case 'ws:frame:outgoing':
-        break
-      case 'ws:frame:incoming':
-        break
-      default:
+    try {
+      const handler = netEventHandlers[eventName]
+
+      handler(frame)
+    } catch (err) {
+      // errors have to be manually propagated here
+      //@ts-ignore
+      Cypress.action('cy:fail', err, state('runnable'))
     }
   })
 

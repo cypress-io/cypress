@@ -917,6 +917,12 @@ module.exports = {
     invalid_route_matcher: ({ err, matcher }) => {
       return `An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(matcher)}`
     },
+    req_cb_failed: ({ err, req, route }) => {
+      return `A request callback passed to ${cmd('route2')} threw an error while intercepting a request:\n\n${err.stack}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    },
+    res_cb_failed: ({ err, req, res, route }) => {
+      return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${err.stack}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
+    },
     warn_multiple_next_calls: ({ route, req }) => {
       return `next() was called multiple times in a request handler, but the request can only be passed on once, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },

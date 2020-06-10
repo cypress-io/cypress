@@ -1,4 +1,4 @@
-import 'cypress/types/net-stubbing'
+import '@packages/net-stubbing/lib/external-types'
 
 declare global {
   interface Window {
@@ -613,6 +613,24 @@ describe('src/cy/commands/net_stubbing', function () {
             }
           })
         })
+
+        it('fails test if an exception is thrown in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+            .and.contain(err.message)
+
+            done()
+          })
+
+          const err = new Error('bar')
+
+          cy.route2('/foo', () => {
+            throw err
+          })
+          .then(() => {
+            $.get('/foo')
+          })
+        })
       })
     })
 
@@ -800,6 +818,26 @@ describe('src/cy/commands/net_stubbing', function () {
             .and.calledWithMatch('res.send() was called multiple times in a response handler')
 
             done()
+          })
+        })
+
+        it('fails test if an exception is thrown in res handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+            .and.contain(err.message)
+
+            done()
+          })
+
+          const err = new Error('bar')
+
+          cy.route2('/foo', (req) => {
+            req.reply(() => {
+              throw err
+            })
+          })
+          .then(() => {
+            $.get('/foo')
           })
         })
       })
