@@ -1,4 +1,4 @@
-import { createIntervalGetter, install } from '../../../../src/util/firefox_forced_gc'
+import { createIntervalGetter, install } from '../../../src/util/firefox_forced_gc'
 
 describe('driver/src/util/firefox_forced_gc', () => {
   describe('#createIntervalGetter returns a function that', () => {
