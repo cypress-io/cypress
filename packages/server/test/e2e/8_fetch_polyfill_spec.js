@@ -138,5 +138,8 @@ describe('e2e fetch polyfill', () => {
   e2e.it('passes', {
     spec: 'fetch_spec.coffee',
     snapshot: false,
+    config: {
+      experimentalFetchPolyfill: true,
+    },
   })
 })
