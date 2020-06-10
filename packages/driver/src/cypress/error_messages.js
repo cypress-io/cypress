@@ -923,20 +923,20 @@ module.exports = {
     res_cb_failed: ({ err, req, res, route }) => {
       return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${err.stack}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
     },
-    warn_multiple_next_calls: ({ route, req }) => {
-      return `next() was called multiple times in a request handler, but the request can only be passed on once, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    multiple_next_calls: ({ route, req }) => {
+      return `\`next()\` was called multiple times in a request handler, but the request can only be passed on once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
-    warn_multiple_reply_calls: ({ route, req }) => {
-      return `req.reply() was called multiple times in a request handler, but a request can only be replied to once, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    multiple_reply_calls: ({ route, req }) => {
+      return `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
-    warn_multiple_send_calls: ({ res }) => {
-      return `res.send() was called multiple times in a response handler, but the response can only be sent once, so this call was ignored.\n\nResponse: ${format(res)}`
+    multiple_send_calls: ({ res }) => {
+      return `\`res.send()\` was called multiple times in a response handler, but the response can only be sent once.\n\nResponse: ${format(res)}`
     },
-    warn_next_called_after_reply: ({ route, req }) => {
-      return `next() was called after req.reply() in a request handler, but next() can not be called after the response has been started, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    next_called_after_reply: ({ route, req }) => {
+      return `\`next()\` was called after \`req.reply()\` in a request handler, but \`next()\` can not be called after the response has been started.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
-    warn_reply_called_after_next: ({ route, req }) => {
-      return `req.reply() was called after next() in a request handler, but req.reply() can not be called after the request has been passed on, so this call was ignored.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    reply_called_after_next: ({ route, req }) => {
+      return `\`req.reply()\` was called after \`next()\` in a request handler, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
   },
 

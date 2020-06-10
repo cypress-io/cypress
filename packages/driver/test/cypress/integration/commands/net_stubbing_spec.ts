@@ -540,83 +540,62 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      context('errors + warnings', function () {
-        it('warns if req.reply is called twice in req handler', function (done) {
+      context('errors', function () {
+        it('fails test if req.reply is called twice in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`req.reply()` was called multiple times in a request handler, but the request can only be replied to once')
+            done()
+          })
+
           cy.route2('/dump-method', function (req) {
             req.reply()
 
             req.reply()
-          }).visit('/dump-method').then(() => {
-            expect(Cypress.utils.warning).to.be.calledOnce
-            .and.calledWithMatch('req.reply() was called multiple times in a request handler')
+          }).visit('/dump-method')
+        })
 
+        it('fails test if next is called twice in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`next()` was called multiple times in a request handler, but the request can only be passed on once')
             done()
           })
-        })
 
-        it('warns if next is called twice in req handler', function (done) {
           cy.route2('/dump-method', function (req, next) {
             next()
 
             next()
-          }).then(() => {
-            const xhr = new XMLHttpRequest
-
-            xhr.open('GET', '/dump-method')
-            xhr.send()
-
-            xhr.onload = () => {
-              expect(Cypress.utils.warning).to.be.calledOnce
-              .and.calledWithMatch('next() was called multiple times in a request handler')
-
-              done()
-            }
-          })
+          }).visit('/dump-method')
         })
 
-        it('warns if next is called after req.reply in req handler', function (done) {
+        it('fails test if next is called after req.reply in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`next()` was called multiple times in a request handler, but the request can only be passed on once')
+            done()
+          })
+
           cy.route2('/dump-method', function (req, next) {
             req.reply()
 
             next()
-          }).then(() => {
-            const xhr = new XMLHttpRequest
-
-            xhr.open('GET', '/dump-method')
-            xhr.send()
-
-            xhr.onload = () => {
-              expect(Cypress.utils.warning).to.be.calledOnce
-              .and.calledWithMatch('next() was called after req.reply() in a request handler')
-
-              done()
-            }
-          })
+          }).visit('/dump-method')
         })
 
-        it('warns if req.reply is called after next in req handler', function (done) {
+        it('fails test if req.reply is called after next in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`next()` was called after `req.reply()` in a request handler, but `next()` can not be called after the response has been started.')
+            done()
+          })
+
           cy.route2('/dump-method', function (req, next) {
             next()
 
             req.reply()
-          }).then(() => {
-            const xhr = new XMLHttpRequest
-
-            xhr.open('GET', '/dump-method')
-            xhr.send()
-
-            xhr.onload = () => {
-              expect(Cypress.utils.warning).to.be.calledOnce
-              .and.calledWithMatch('req.reply() was called after next() in a request handler')
-
-              done()
-            }
-          })
+          }).visit('/dump-method')
         })
 
         it('fails test if an exception is thrown in req handler', function (done) {
-          cy.on('fail', (err) => {
-            expect(err.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+          cy.on('fail', (err2) => {
+            expect(err2.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
             .and.contain(err.message)
 
             done()
@@ -626,10 +605,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           cy.route2('/foo', () => {
             throw err
-          })
-          .then(() => {
-            $.get('/foo')
-          })
+          }).visit('/foo')
         })
       })
     })
@@ -805,20 +781,20 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      context('errors + warnings', function () {
-        it('warns if res.send is called twice in req handler', function (done) {
+      context('errors', function () {
+        it('fails test if res.send is called twice in req handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('`res.send()` was called multiple times in a response handler, but the response can only be sent once.')
+            done()
+          })
+
           cy.route2('/dump-method', function (req) {
             req.reply(function (res) {
               res.send()
 
               res.send()
             })
-          }).visit('/dump-method').then(() => {
-            expect(Cypress.utils.warning).to.be.calledOnce
-            .and.calledWithMatch('res.send() was called multiple times in a response handler')
-
-            done()
-          })
+          }).visit('/dump-method')
         })
 
         it('fails test if an exception is thrown in res handler', function (done) {

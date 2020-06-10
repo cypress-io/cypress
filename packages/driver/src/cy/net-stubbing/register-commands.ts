@@ -467,11 +467,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       ...req,
       reply (responseHandler, maybeBody?, maybeHeaders?) {
         if (nextCalled) {
-          return $errUtils.warnByPath('net_stubbing.warn_reply_called_after_next', { args: { route: route.options, req } })
+          return $errUtils.throwErrByPath('net_stubbing.reply_called_after_next', { args: { route: route.options, req } })
         }
 
         if (replyCalled) {
-          return $errUtils.warnByPath('net_stubbing.warn_multiple_reply_calls', { args: { route: route.options, req } })
+          return $errUtils.throwErrByPath('net_stubbing.multiple_reply_calls', { args: { route: route.options, req } })
         }
 
         replyCalled = true
@@ -501,6 +501,8 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         if (!continueSent) {
           sendContinueFrame()
         }
+
+        return
       },
       redirect (location, statusCode = 302) {
         userReq.reply({
@@ -539,11 +541,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     // next() can be called to pass this to the next route
     const next = () => {
       if (replyCalled) {
-        return $errUtils.warnByPath('net_stubbing.warn_next_called_after_reply', { args: { route: route.options, req } })
+        return $errUtils.throwErrByPath('net_stubbing.next_called_after_reply', { args: { route: route.options, req } })
       }
 
       if (nextCalled) {
-        return $errUtils.warnByPath('net_stubbing.warn_multiple_next_calls', { args: { route: route.options, req } })
+        return $errUtils.throwErrByPath('net_stubbing.multiple_next_calls', { args: { route: route.options, req } })
       }
 
       nextCalled = true
@@ -585,7 +587,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       ...res,
       send (staticResponse?, maybeBody?, maybeHeaders?) {
         if (sendCalled) {
-          return $errUtils.warnByPath('net_stubbing.warn_multiple_send_calls', { args: { res } })
+          return $errUtils.throwErrByPath('net_stubbing.multiple_send_calls', { args: { res } })
         }
 
         sendCalled = true
