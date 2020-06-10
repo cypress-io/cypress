@@ -1,24 +1,27 @@
 {
+  "sourceType": "unambiguous",
   "presets": [
     "@babel/preset-env",
     "@babel/preset-react",
-    {
-      "plugins": ["@babel/plugin-proposal-class-properties"]
-    },
+    // {
+    //   "plugins": ["@babel/plugin-proposal-class-properties"]
+    // },
     "@emotion/babel-preset-css-prop"
   ],
+  "plugins": ["@babel/plugin-proposal-class-properties"],
   "env": {
     // TODO switch this to "development" name
-    "test": {
+    "development": {
       "plugins": [
         // during Cypress tests we want to instrument source code
         // to get code coverage from tests
-        "babel-plugin-istanbul",
+        // "babel-plugin-istanbul"
         // we also want to export ES6 modules as objects
         // to allow mocking named imports
         [
           "@babel/plugin-transform-modules-commonjs",
           {
+            "allowCommonJSExports": true,
             "loose": true
           }
         ]
