@@ -1,4 +1,9 @@
 describe "fetch works", ->
+  it "sets polyfilled state", ->
+    cy.visit("http://localhost:1818/first")
+      .then ->
+        expect(cy.state("fetchPolyfilled")).to.be.true
+
   it "spies on fetch requests", ->
     cy.server()
     cy.route("/get-json").as("get-json")

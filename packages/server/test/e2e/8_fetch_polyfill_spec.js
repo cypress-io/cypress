@@ -143,3 +143,20 @@ describe('e2e fetch polyfill', () => {
     },
   })
 })
+
+describe('e2e no fetch polyfill', () => {
+  e2e.setup({
+    servers: {
+      port: 1818,
+      onServer,
+    },
+  })
+
+  e2e.it('passes', {
+    spec: 'fetch_no_polyfill_spec.coffee',
+    snapshot: false,
+    config: {
+      experimentalFetchPolyfill: false,
+    },
+  })
+})
