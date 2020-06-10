@@ -15,7 +15,7 @@ After [releasing a new version](https://github.com/cypress-io/cypress-example-ki
 
 1. Bump the `cypress-example-kitchensink` `devDependency` within this package's [`package.json`](https://github.com/cypress-io/cypress/blob/develop/packages/example/package.json).
 
-2. Run `yarn` and `yarn workspace @packages/example` build
+2. Run `yarn` and `yarn workspace @packages/example` to build the app and spec files.
 CONTRIBUTING
 3. Create a new pull-request following this repo's [pull request instructions](CONTRIBUTING.md#pull-requests).
 
