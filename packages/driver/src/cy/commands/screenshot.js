@@ -67,6 +67,7 @@ const automateScreenshot = (state, options = {}) => {
   // need to remove the current timeout
   // because we're handling timeouts ourselves
   cy.clearTimeout('take:screenshot')
+  options.log.timeout = timeout
 
   return automate()
   .timeout(timeout)
