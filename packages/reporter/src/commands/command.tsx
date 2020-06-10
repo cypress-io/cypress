@@ -198,7 +198,7 @@ class Command extends Component<Props> {
             </span>
           </div>
         </FlashOnClick>
-        { model.state === 'pending' && <div className='command-progress'><span style={{ animationDuration: `${window.Cypress.cy.timeout()}ms` }} /></div> }
+        { model.state === 'pending' && <div className='command-progress'><span style={{ animationDuration: `${model.timeout}ms` }} /></div> }
         {this._duplicates()}
       </li>
     )
