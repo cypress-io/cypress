@@ -8,8 +8,8 @@ const snapshot = require('snap-shot-it')
 const Reporter = require(`../../lib/reporter`)
 const { spyOn, stdout } = require('../support/helpers/utils')
 const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep')
-const events = require('../../../runner/test/__snapshots__/runner.spec.js.snapshot')
-const { EventSnapshots } = require('../../../runner/test/cypress/support/eventSnapshots')
+const events = require('@packages/runner/__snapshots__/runner.spec.js.snapshot')
+const { EventSnapshots } = require('@packages/runner/cypress/support/eventSnapshots')
 
 registerInMocha()
 
