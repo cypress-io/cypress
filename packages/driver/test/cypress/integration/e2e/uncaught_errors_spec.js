@@ -89,7 +89,7 @@ describe('uncaught errors', () => {
       done()
     })
 
-    return cy
+    cy
     .visit('/fixtures/jquery.html')
     .window().then((win) => {
       return win.$('button:first').on('click', () => {
@@ -122,7 +122,7 @@ describe('uncaught errors', () => {
       done()
     })
 
-    return cy
+    cy
     .visit('/fixtures/jquery.html')
     .window().then((win) => {
       return win.$('<a href=\'/fixtures/visit_error.html\'>visit</a>')
@@ -142,5 +142,25 @@ describe('uncaught errors', () => {
     })
 
     cy.visit('/fixtures/global-error.html')
+  })
+
+  // https://github.com/cypress-io/cypress/issues/7590
+  it('creates error object from error that is just a string', (done) => {
+    cy.once('uncaught:exception', (err) => {
+      expect(err).not.to.be.a('string')
+      expect(err.message).to.include('string error')
+
+      done()
+
+      return false
+    })
+
+    cy
+    .visit('/fixtures/jquery.html')
+    .window().then((win) => {
+      return win.$('button:first').on('click', () => {
+        throw 'string error'
+      })
+    }).get('button:first').click()
   })
 })
