@@ -2,12 +2,21 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 
+import * as calc from './calc'
 import SideBySide from './SideBySide'
 import Post from './Post'
 import { SkeletonTheme } from 'react-loading-skeleton'
 
-// matches Post.story.js
 describe('Post skeletons', () => {
+  it('mocks the es6 import', () => {
+    cy.stub(calc, 'getRandomNumber')
+      .as('lucky')
+      .returns(777)
+
+    mount(<Post />)
+    cy.contains('.random', '777')
+  })
+
   it('default', () => {
     mount(
       <SideBySide>

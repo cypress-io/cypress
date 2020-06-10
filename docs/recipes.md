@@ -49,7 +49,7 @@ See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/J
 
 ## Your `.babelrc` file
 
-If you are using Babel without Webpack to transpile, you can use the plugin that tells Babel loader to use your configuration file.
+If you are using Babel without Webpack to transpile, you can use the plugin that tells Babel loader to use your `.babelrc` configuration file.
 
 ```js
 // cypress/plugins/index.js
@@ -62,24 +62,46 @@ module.exports = (on, config) => {
 }
 ```
 
-**Bonus:** in order to enable code instrumentation, add the `babel-plugin-istanbul` (included in this plugin) to your `.babelrc` setup. You can place it under `test` environment to avoid instrumenting production code. Example `.babelrc` config file that you can execute with `BABEL_ENV=test npx cypress open`
+### Add Babel plugins
+
+If you want to use code instrumentation, add the [babel-plugin-istanbul](https://github.com/istanbuljs/babel-plugin-istanbul) to your `.babelrc` setup. You do not even need to install it separately, as it is already included in `cypress-react-unit-test` as a dependency.
+
+If you want to use ES6 import mocking, add the [@babel/plugin-transform-modules-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-modules-commonjs) to the list of plugins. This module is also included in `cypress-react-unit-test` as a dependency.
 
 ```json
 {
-  "presets": [
-    "@babel/preset-env",
-    "@babel/preset-react",
-    {
-      "plugins": ["@babel/plugin-proposal-class-properties"]
-    },
-    "@emotion/babel-preset-css-prop"
-  ],
+  "presets": ["@babel/preset-env", "@babel/preset-react"],
+  "plugins": [
+    "babel-plugin-istanbul",
+    [
+      "@babel/plugin-transform-modules-commonjs",
+      {
+        "loose": true
+      }
+    ]
+  ]
+}
+```
+
+When loading your `.babelrc` settings, `cypress-react-unit-test` sets `BABEL_ENV` and `NODE_ENV` to `test` if they are not set already. Thus you can move the above plugins into the `test` environment to exclude them from being used in production bundle.
+
+```json
+{
+  "presets": ["@babel/preset-env", "@babel/preset-react"],
   "env": {
     "test": {
-      "plugins": ["babel-plugin-istanbul"]
+      "plugins": [
+        "babel-plugin-istanbul",
+        [
+          "@babel/plugin-transform-modules-commonjs",
+          {
+            "loose": true
+          }
+        ]
+      ]
     }
   }
 }
 ```
 
-See [bahmutov/react-loading-skeleton](https://github.com/bahmutov/react-loading-skeleton) example
+See [examples/using-babel](examples/using-babel) folder for full example.
