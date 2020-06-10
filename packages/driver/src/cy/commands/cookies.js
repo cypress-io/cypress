@@ -157,6 +157,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: name,
+          timeout: options.timeout,
           consoleProps () {
             let c
             const obj = {}
@@ -203,6 +204,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
           consoleProps () {
             let c
             const obj = {}
@@ -251,6 +253,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: [name, value],
+          timeout: options.timeout,
           consoleProps () {
             let c
             const obj = {}
@@ -316,6 +319,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: name,
+          timeout: options.timeout,
           consoleProps () {
             let c
             const obj = {}
@@ -363,6 +367,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       if (options.log) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
           consoleProps () {
             let c
             const obj = {}
