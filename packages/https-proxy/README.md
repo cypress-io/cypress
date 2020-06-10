@@ -7,7 +7,7 @@ This package enables Cypress to inspect and modify bytes coming in and out of th
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/https-proxy --stream
-yarn lerna run test-watch --scope @packages/https-proxy --stream
-yarn lerna run test-debug --scope @packages/https-proxy --stream
+yarn workspace @packages/https-proxy test
+yarn workspace @packages/https-proxy test-watch
+yarn workspace @packages/https-proxy test-debug
 ```
