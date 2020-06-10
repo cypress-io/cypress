@@ -4,8 +4,9 @@ import { mount } from 'cypress-react-unit-test'
 import Post from './Post'
 import * as calc from './calc'
 
+// confirm the Post component that imports and calls the "getRandomNumber"
+// renders the mock value because the test stubs it
 describe('Mocking', () => {
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/266
   it('mocks import used by the Post', () => {
     cy.stub(calc, 'getRandomNumber')
       .as('lucky')
