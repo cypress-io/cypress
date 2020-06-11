@@ -1,6 +1,8 @@
 const snapshotCore = require('snap-shot-core')
 const _ = require('lodash')
 
+// TODO: prune snapshots
+
 /**
  *
  * @param {{what: any, file: string, exactSpecName: string, store?: Function compare?: Function}}
@@ -8,8 +10,10 @@ const _ = require('lodash')
 const getSnapshot = (opts) => {
   let result = null
 
+  // HACK: in order to read the snapshot from disk using snap-shot-core
+  // we have to 'fake save' a snapshot, and intercept the stored value via custom compare fn
   opts = _.defaults(opts, {
-    what: 'aaaaa',
+    what: '[placeholder]',
   })
 
   opts = _.assign(opts, {

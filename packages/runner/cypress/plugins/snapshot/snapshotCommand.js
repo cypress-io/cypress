@@ -26,7 +26,9 @@ function getMatchDeepMessage ({ act, exp }) {
 }
 
 function saveSnapshot (ctx, exactSpecName, file, exp, act) {
-  ctx.assert(true, `snapshot updated: **${exactSpecName}**`, '', exp, act)
+  const message = !exp ? 'new snapshot saved' : 'snapshot updated'
+
+  ctx.assert(true, `📸 ${message}: **${exactSpecName}**`, '', exp, act)
 
   return cy.task('saveSnapshot', {
     file,
@@ -123,7 +125,8 @@ const registerInCypress = () => {
             throw e
           }
 
-          if (Cypress.env('SNAPSHOT_UPDATE') && !e.failedMatcher && e.act) {
+          // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
+          if ((Cypress.env('SNAPSHOT_UPDATE') || !exp) && !e.failedMatcher && e.act) {
             return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
           }
 

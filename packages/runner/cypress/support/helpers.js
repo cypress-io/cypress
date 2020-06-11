@@ -92,7 +92,12 @@ function createCypress () {
     onInitializedListeners.push(fn)
   }
 
-  const visit = (mochaTests, opts = {}) => {
+  /**
+   * Spawns an isolated Cypress runner as the AUT, with provided spec/fixture and optional state/config
+   * @param {()=>void | {[key:string]: any}} mochaTests
+   * @param {{state?: any, config?: any}} opts
+   */
+  const runCypress = (mochaTests, opts = {}) => {
     _.defaultsDeep(opts, {
       state: {},
       config: { video: false },
@@ -273,7 +278,7 @@ function createCypress () {
   }
 
   return {
-    visit,
+    runCypress,
     snapshotEvents,
     onInitialized,
     getAutCypress,
@@ -403,6 +408,12 @@ const createSuites = (win, suites = {}) => {
 }
 
 const generateMochaTestsForWin = (win, obj) => {
+  if (typeof obj === 'function') {
+    win.eval(`( ${obj.toString()})()`)
+
+    return
+  }
+
   createHooks(win, obj.hooks)
   createTests(win, obj.tests)
   createSuites(win, obj.suites)

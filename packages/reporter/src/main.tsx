@@ -113,7 +113,7 @@ declare global {
   }
 }
 
-// NOTE: this is for testing Cyress-in-Cypress
+// NOTE: this is for testing Cypress-in-Cypress
 if (window.Cypress) {
   window.state = appState
   window.render = (props) => {

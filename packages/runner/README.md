@@ -47,20 +47,12 @@ yarn workspace @packages/runner test
 
 ### Cypress Tests
 
-You'll need to start the server from the [`driver`](../driver) package in order to get Cypress running.
-
+You can run Cypress tests found in [`cypress/integration`](./cypress/integration):
 ```bash
-yarn lerna run start --scope @packages/driver --stream
+yarn workspace @packages/runner cypress:open
 ```
 
-Then you can run Cypress tests found in [`test/cypress/integration`](./test/cypress/integration).
-
+To watch and reload changes to the runner while testing you'll want to run:
 ```bash
-yarn lerna run cypress:open --scope @packages/runner --stream
-```
-
-To see changes to the reporter while testing you'll want to run:
-
-```bash
-yarn lerna run watch --scope @packages/runner --stream
+yarn workspace @packages/runner watch
 ```
