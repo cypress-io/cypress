@@ -143,7 +143,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>"
+          command: yarn workspace @packages/server test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -290,28 +290,27 @@ commands:
       - unless:
           condition: << parameters.folder >>
           steps:
-          - when:
-              condition: << parameters.browser >>
-              steps:
-                - run:
-                    name: Run tests using browser "<< parameters.browser >>"
-                    working_directory: /tmp/<<parameters.repo>>
-                    command: <<parameters.command>> -- --browser <<parameters.browser>>
-          - unless:
-              condition: << parameters.browser >>
-              steps:
-                - run:
-                    name: Run tests using command
-                    working_directory: /tmp/<<parameters.repo>>
-                    command: <<parameters.command>>
-          - store_artifacts:
-              name: screenshots
-              path: /tmp/<<parameters.repo>>/cypress/screenshots
-          - store_artifacts:
-              name: videos
-              path: /tmp/<<parameters.repo>>/cypress/videos
+            - when:
+                condition: << parameters.browser >>
+                steps:
+                  - run:
+                      name: Run tests using browser "<< parameters.browser >>"
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>> -- --browser <<parameters.browser>>
+            - unless:
+                condition: << parameters.browser >>
+                steps:
+                  - run:
+                      name: Run tests using command
+                      working_directory: /tmp/<<parameters.repo>>
+                      command: <<parameters.command>>
+            - store_artifacts:
+                name: screenshots
+                path: /tmp/<<parameters.repo>>/cypress/screenshots
+            - store_artifacts:
+                name: videos
+                path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
-
 
 jobs:
   ## code checkout and yarn installs
@@ -438,7 +437,7 @@ jobs:
           working_directory: cli/types
       - run:
           name: "Lint types 🧹"
-          command: yarn lerna exec --scope cypress "yarn dtslint"
+          command: yarn workspace cypress dtslint
       - run:
           name: "TypeScript check 🧩"
           command: yarn type-check --ignore-progress
@@ -482,12 +481,12 @@ jobs:
       - store-npm-logs
 
   "server-performance-tests":
-      <<: *defaults
-      steps:
+    <<: *defaults
+    steps:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn lerna exec --scope @packages/server "yarn test-performance"
+          command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
           expectedResultCount: 1
       - store_test_results:
@@ -951,7 +950,7 @@ jobs:
           working_directory: cli/build
       - run:
           name: list NPM package contents
-          command: yarn lerna run --scope cypress size
+          command: yarn workspace cypress size
       - run:
           name: pack NPM package
           working_directory: cli/build
@@ -1188,7 +1187,7 @@ jobs:
           name: Scaffold and test examples 🏗
           working_directory: << parameters.wd >>
           environment:
-            CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1'
+            CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
             echo '{}' > cypress.json
             npx cypress run
