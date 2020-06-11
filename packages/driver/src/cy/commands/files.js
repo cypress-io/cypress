@@ -98,7 +98,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: fileName,
-          timeout: options.timeout,
+          timeout: 0,
           consoleProps () {
             return consoleProps
           },

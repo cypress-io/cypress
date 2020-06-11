@@ -79,7 +79,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     // need to remove the current timeout
     // because we're handling timeouts ourselves
     cy.clearTimeout(event)
-    log.timeout = timeout
 
     return automate()
     .timeout(timeout)
