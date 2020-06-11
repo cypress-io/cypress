@@ -19,5 +19,6 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "noErrorTruncation": true
-  }
+  },
+  "exclude": ["dist"]
 }
