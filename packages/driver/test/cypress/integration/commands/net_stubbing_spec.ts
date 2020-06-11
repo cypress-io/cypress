@@ -2,21 +2,18 @@ describe('src/cy/commands/net_stubbing', function () {
   const { $, _, sinon, state } = Cypress
 
   beforeEach(function () {
-    Cypress.config('experimentalNetworkMocking', true)
-
     cy.spy(Cypress.utils, 'warning')
-  })
-
-  afterEach(function () {
-    Cypress.config('experimentalNetworkMocking', false)
   })
 
   context('#route2', function () {
     it('throws an error if experimentalNetworkMocking is falsy', function (done) {
-      Cypress.config('experimentalNetworkMocking', false)
+      sinon.stub(Cypress, 'config').callThrough()
+      // @ts-ignore
+      .withArgs('experimentalNetworkMocking').returns(false)
 
       cy.on('fail', (err) => {
         expect(err.message).to.contain('`cy.route2()` requires experimental network mocking to be enabled.')
+        sinon.restore()
         done()
       })
 
