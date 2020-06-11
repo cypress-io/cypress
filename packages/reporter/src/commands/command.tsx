@@ -199,7 +199,7 @@ class Command extends Component<Props> {
             </span>
           </div>
         </FlashOnClick>
-        { model.state === 'pending' && timeRemaining && <div className='command-progress'><span style={{ animationDuration: `${timeRemaining}ms` }} /></div> }
+        { model.state === 'pending' && !!timeRemaining && <div className='command-progress'><span style={{ animationDuration: `${timeRemaining}ms`, width: `${timeRemaining / model.timeout * 100}%` }} /></div> }
         {this._duplicates()}
       </li>
     )
