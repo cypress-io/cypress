@@ -2514,7 +2514,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7353
-      it('throws when the type of the expected value is object', (done) => {
+      it('throws when the type of the expected value is not string', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('TypeError: expected {} to be a string')
 
@@ -2643,7 +2643,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7353
-      it('throws when the type of the expected value is object', (done) => {
+      it('throws when the type of the expected value is not string', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('TypeError: expected {} to be a string')
 
@@ -2726,7 +2726,7 @@ describe('src/cy/commands/assertions', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7353
-      it('throws when the type of the expected value is object', (done) => {
+      it('throws when the type of the expected value is not string', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('TypeError: expected {} to be a string')
 

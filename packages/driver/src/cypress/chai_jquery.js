@@ -285,7 +285,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
 
       // when we only have 1 argument dont worry about val
       if (arguments.length === 1) {
-        if (_.isPlainObject(name)) {
+        if (!_.isString(name)) {
           $errUtils.throwErrByPath('chai.no_plain_object', {
             args: {
               actual: $utils.stringifyActualObj(name),
