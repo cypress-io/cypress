@@ -126,6 +126,7 @@ class Server {
     this._fileServer = null
     this._httpsProxy = null
     this._urlResolver = null
+    this._resolveUrlOptions = {}
   }
 
   createExpressApp (config) {
@@ -213,6 +214,15 @@ class Server {
 
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
+      }
+
+      if (config.experimentalNetworkStubbing) {
+        // TODO: this is being used to force cy.visits to be interceptable by network stubbing
+        // however, network errors will be obsfucated by the proxying so this is not a good solution
+        this._resolveUrlOptions = {
+          proxy: `http://127.0.0.1:${this._port()}`,
+          agent: null,
+        }
       }
 
       this.createHosts(config.hosts)
@@ -649,9 +659,6 @@ class Server {
       }
 
       _.assign(options, {
-        // send all cy.visits thru proxy layer
-        proxy: `http://127.0.0.1:${this._port()}`,
-        agent: null,
         // turn off gzip since we need to eventually
         // rewrite these contents
         gzip: false,
@@ -672,7 +679,7 @@ class Server {
 
           return true
         },
-      })
+      }, this._resolveUrlOptions)
 
       debug('sending request with options %o', options)
 
