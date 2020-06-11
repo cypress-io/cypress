@@ -134,7 +134,7 @@ class Command extends Component<Props> {
   render () {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
-    const timeRemaining = model.timeout - ((new Date()).getTime() - model.wallClockStartedAt.getTime())
+    const timeRemaining = model.timeout ? model.timeout - ((new Date()).getTime() - model.wallClockStartedAt.getTime()) : 0
 
     return (
       <li
@@ -199,7 +199,7 @@ class Command extends Component<Props> {
             </span>
           </div>
         </FlashOnClick>
-        { model.state === 'pending' && model.timeout && <div className='command-progress'><span style={{ animationDuration: `${timeRemaining}ms` }} /></div> }
+        { model.state === 'pending' && timeRemaining && <div className='command-progress'><span style={{ animationDuration: `${timeRemaining}ms` }} /></div> }
         {this._duplicates()}
       </li>
     )
