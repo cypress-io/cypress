@@ -25,7 +25,7 @@
     "@cypress/xvfb": "1.2.4",
     "@types/sinonjs__fake-timers": "6.0.1",
     "@types/sizzle": "2.3.2",
-    "arch": "2.1.1",
+    "arch": "2.1.2",
     "bluebird": "3.7.2",
     "cachedir": "2.3.0",
     "chalk": "2.4.2",
