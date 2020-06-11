@@ -582,6 +582,7 @@
     height: 2px;
 
     > span {
+      animation-iteration-count: 1;
       animation-name: progress-bar;
       animation-timing-function: linear;
       background: #7eb0db;
