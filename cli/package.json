@@ -35,7 +35,7 @@
     "common-tags": "1.8.0",
     "debug": "4.1.1",
     "eventemitter2": "4.1.2",
-    "execa": "1.0.0",
+    "execa": "4.0.2",
     "executable": "4.1.1",
     "extract-zip": "1.7.0",
     "fs-extra": "8.1.0",
