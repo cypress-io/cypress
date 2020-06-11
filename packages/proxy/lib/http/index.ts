@@ -99,10 +99,6 @@ export function _runStage (type: HttpStages, ctx: any) {
       let ended = false
 
       function copyChangedCtx () {
-        if (ended) {
-          return
-        }
-
         _.chain(fullCtx)
         .omit(READONLY_MIDDLEWARE_KEYS)
         .forEach((value, key) => {
