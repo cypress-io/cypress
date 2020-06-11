@@ -23,23 +23,6 @@ import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 
 const debug = debugModule('cypress:net-stubbing:server:driver-events')
 
-export function onBeforeTestRun (state: NetStubbingState) {
-  debug('resetting net_stubbing state')
-
-  // clean up requests that are still pending
-  for (const requestId in state.requests) {
-    const request = state.requests[requestId]
-
-    // TODO: try/catch?
-    request.res.removeAllListeners('finish')
-    request.res.removeAllListeners('error')
-    request.res.on('error', _.noop)
-    request.res.destroy()
-  }
-
-  state.reset()
-}
-
 const caseInsensitiveGet = function (obj, lowercaseProperty) {
   for (let key of Object.keys(obj)) {
     if (key.toLowerCase() === lowercaseProperty) {

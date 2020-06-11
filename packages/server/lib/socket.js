@@ -452,10 +452,6 @@ class Socket {
         return require('electron').shell.openExternal(url)
       })
 
-      socket.on('test:before:run:async', () => {
-        netStubbing.onBeforeTestRun(options.netStubbingState)
-      })
-
       socket.on('get:user:editor', (cb) => {
         editors.getUserEditor(false)
         .then(cb)

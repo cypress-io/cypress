@@ -194,7 +194,7 @@ export class Http {
     this.middleware = opts.middleware
     this.netStubbingState = opts.netStubbingState
     this.socket = opts.socket
-    _.assign(this, opts)
+    this.request = opts.request
 
     if (typeof opts.middleware === 'undefined') {
       this.middleware = {
@@ -252,6 +252,7 @@ export class Http {
 
   reset () {
     this.buffers.reset()
+    this.netStubbingState.reset()
   }
 
   setBuffer (buffer) {

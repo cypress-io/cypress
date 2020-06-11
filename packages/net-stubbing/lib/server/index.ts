@@ -1,7 +1,4 @@
-export {
-  onBeforeTestRun,
-  onNetEvent,
-} from './driver-events'
+export { onNetEvent } from './driver-events'
 
 export { InterceptError } from './intercept-error'
 

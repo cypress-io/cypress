@@ -44,23 +44,6 @@ const RedirectToClientRouteIfUnloaded: RequestMiddleware = function () {
   this.next()
 }
 
-// // TODO: is this necessary? it seems to be for requesting Cypress w/o the proxy,
-// // which isn't currently supported
-// const RedirectToClientRouteIfNotProxied : RequestMiddleware = function () {
-//   // when you access cypress from a browser which has not had its proxy setup then
-//   // req.url will match req.proxiedUrl and we'll know to instantly redirect them
-//   // to the correct client route
-//   if (this.req.url === this.req.proxiedUrl && !this.getRemoteState().visiting) {
-//     // if we dont have a remoteState.origin that means we're initially requesting
-//     // the cypress app and we need to redirect to the root path that serves the app
-//     this.res.redirect(this.config.clientRoute)
-
-//     return this.end()
-//   }
-
-//   this.next()
-// }
-
 const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
   const { blacklistHosts } = this.config
 
@@ -125,6 +108,8 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     url: this.req.proxiedUrl,
   }
 
+  const requestBodyBuffered = !!this.req.body
+
   const { strategy, origin, fileServer } = this.getRemoteState()
 
   if (strategy === 'file' && requestOptions.url.startsWith(origin)) {
@@ -133,8 +118,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     requestOptions.url = requestOptions.url.replace(origin, fileServer)
   }
 
-  // if the request has been buffered, can't stream body
-  if (this.req.body) {
+  if (requestBodyBuffered) {
     _.assign(requestOptions, _.pick(this.req, 'method', 'body', 'headers'))
   }
 
@@ -147,7 +131,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
     req.abort()
   })
 
-  if (!this.req.body) {
+  if (!requestBodyBuffered) {
     // pipe incoming request body, headers to new request
     this.req.pipe(req)
   }
@@ -160,7 +144,6 @@ export default {
   MaybeEndRequestWithBufferedResponse,
   InterceptRequest,
   RedirectToClientRouteIfUnloaded,
-  // RedirectToClientRouteIfNotProxied,
   EndRequestsToBlacklistedHosts,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,

@@ -893,7 +893,7 @@ class Server {
     options.netStubbingState = this._netStubbingState
 
     options.onResetServerState = () => {
-      return this._networkProxy.reset()
+      this._networkProxy.reset()
     }
 
     this._socket.startListening(this._server, automation, config, options)

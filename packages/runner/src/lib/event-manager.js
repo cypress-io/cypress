@@ -24,7 +24,7 @@ ws.on('connect', () => {
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
 const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
-const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame test:before:run:async'.split(' ')
+const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
@@ -79,7 +79,6 @@ const eventManager = {
 
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
-        // TODO: will this cause a loop?
         Cypress.emit(event, ...args)
       })
     })
