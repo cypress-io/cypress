@@ -453,7 +453,7 @@ const e2e = {
       throw new Error(`
       passing { exit: false } to e2e options is no longer supported
       Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --no-exit"
       `)
     }
 

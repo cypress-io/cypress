@@ -105,7 +105,7 @@ browsers\
 // Know experimental flags / values
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
-const experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting', 'experimentalComponentTesting']
+const experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting', 'experimentalComponentTesting', 'experimentalShadowDomSupport']
 
 const CONFIG_DEFAULTS = {
   port: null,
@@ -171,6 +171,7 @@ const CONFIG_DEFAULTS = {
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
   experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
+  experimentalShadowDomSupport: false,
   retries: null,
 }
 
@@ -218,6 +219,7 @@ const validationRules = {
   // experimental flag validation below
   experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
+  experimentalShadowDomSupport: v.isBoolean,
   retries: v.isValidRetriesConfig,
 }
 

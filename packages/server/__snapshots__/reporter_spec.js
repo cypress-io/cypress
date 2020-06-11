@@ -1,4 +1,4 @@
-exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
+exports['lib/reporter unit #stats has reporterName stats, reporterStats, etc 1'] = {
   "stats": {
     "suites": 2,
     "tests": 2,

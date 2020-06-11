@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const chai = require('chai')
 const sinon = require('sinon')
-const { matchDeep, stringifyShort, parseMatcherFromString } = require('../../runner/test/cypress/plugins/snapshot/snapshotCommand')
-const { getSnapshot, saveSnapshot } = require('../../runner/test/cypress/plugins/snapshot/snapshotPlugin')
+const { matchDeep, stringifyShort, parseMatcherFromString } = require('@packages/runner/cypress/plugins/snapshot/snapshotCommand')
+const { getSnapshot, saveSnapshot } = require('@packages/runner/cypress/plugins/snapshot/snapshotPlugin')
 
 /** @type {Mocha.ITest} */
 let currentTest

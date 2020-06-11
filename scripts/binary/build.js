@@ -4,14 +4,9 @@ const os = require('os')
 const del = require('del')
 const path = require('path')
 const cp = require('child_process')
-const gulp = require('gulp')
 const chalk = require('chalk')
 const Promise = require('bluebird')
-const gulpDebug = require('gulp-debug')
-const gulpCoffee = require('gulp-coffee')
 const pluralize = require('pluralize')
-const vinylPaths = require('vinyl-paths')
-const coffee = require('@packages/coffee')
 const execa = require('execa')
 const electron = require('@packages/electron')
 const debug = require('debug')('cypress:binary')
@@ -242,29 +237,6 @@ require('./packages/server')\
     return packages.runAllCleanJs()
   }
 
-  const convertCoffeeToJs = function () {
-    log('#convertCoffeeToJs')
-
-    // grab everything in src
-    // convert to js
-    return new Promise((resolve, reject) => {
-      return gulp.src([
-        // include coffee files of packages
-        distDir('**', '*.coffee'),
-
-        // except those in node_modules
-        `!${distDir('**', 'node_modules', '**', '*.coffee')}`,
-      ], { sourcemaps: true })
-      .pipe(vinylPaths(del))
-      .pipe(gulpDebug())
-      .pipe(gulpCoffee({
-        coffee,
-      })).pipe(gulp.dest(distDir()))
-      .on('end', resolve)
-      .on('error', reject)
-    })
-  }
-
   const getIconFilename = function (platform) {
     const filenames = {
       darwin: 'cypress.icns',
@@ -451,7 +423,6 @@ require('./packages/server')\
   .then(copyPackages)
   .then(npmInstallPackages)
   .then(createRootPackage)
-  .then(convertCoffeeToJs)
   .then(removeTypeScript)
   .then(cleanJs)
   .then(transformSymlinkRequires)
