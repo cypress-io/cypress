@@ -252,7 +252,6 @@ export class Http {
 
   reset () {
     this.buffers.reset()
-    this.netStubbingState.reset()
   }
 
   setBuffer (buffer) {

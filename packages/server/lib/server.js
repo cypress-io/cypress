@@ -126,7 +126,6 @@ class Server {
     this._fileServer = null
     this._httpsProxy = null
     this._urlResolver = null
-    this._resolveUrlOptions = {}
   }
 
   createExpressApp (config) {
@@ -334,15 +333,6 @@ class Server {
 
       return this._listen(port, onError)
       .then((port) => {
-        if (config.experimentalNetworkMocking) {
-        // TODO: this is being used to force cy.visits to be interceptable by network stubbing
-        // however, network errors will be obsfucated by the proxying so this is not a good solution
-          this._resolveUrlOptions = {
-            proxy: `http://127.0.0.1:${port}`,
-            agent: null,
-          }
-        }
-
         return Promise.all([
           httpsProxy.create(appData.path('proxy'), port, {
             onRequest: callListeners,
@@ -679,7 +669,16 @@ class Server {
 
           return true
         },
-      }, this._resolveUrlOptions)
+      })
+
+      if (options.selfProxy) {
+        // TODO: this is being used to force cy.visits to be interceptable by network stubbing
+        // however, network errors will be obsfucated by the proxying so this is not an ideal solution
+        _.assign(options, {
+          proxy: `http://127.0.0.1:${this._port()}`,
+          agent: null,
+        })
+      }
 
       debug('sending request with options %o', options)
 
@@ -894,6 +893,7 @@ class Server {
 
     options.onResetServerState = () => {
       this._networkProxy.reset()
+      this._netStubbingState.reset()
     }
 
     this._socket.startListening(this._server, automation, config, options)
