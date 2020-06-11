@@ -19,6 +19,11 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
   // 1. Get route with this alias.
   const route: Route = _.find(state('routes'), { alias })
 
+  if (!route) {
+    // TODO: once XHR stubbing is removed, this should throw
+    return null
+  }
+
   // 2. Find the first request without responseWaited/requestWaited/with the correct index
   let i = 0
   const request = _.find(route.requests, (request) => {
