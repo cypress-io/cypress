@@ -19,6 +19,7 @@ export interface CommandProps extends InstrumentProps {
   renderProps?: RenderProps
   timeout: number
   visible?: boolean
+  wallClockStartedAt: Date
   hookName: string
 }
 
@@ -31,6 +32,7 @@ export default class Command extends Instrument {
   @observable numElements: number
   @observable timeout: number
   @observable visible?: boolean = true
+  @observable wallClockStartedAt: Date
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
 
@@ -60,6 +62,7 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     this.timeout = props.timeout
     this.visible = props.visible
+    this.wallClockStartedAt = props.wallClockStartedAt
 
     this._checkLongRunning()
   }
