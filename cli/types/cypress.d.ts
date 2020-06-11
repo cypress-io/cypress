@@ -1942,7 +1942,7 @@ declare namespace Cypress {
      * @example
      *    cy.wait(1000) // wait for 1 second
      */
-    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Wait for a specific XHR to respond.
      *
