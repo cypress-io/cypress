@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "clean-deps": "rm -rf node_modules",
-    "cypress:open": "node ../../scripts/cypress open --project ./test",
-    "cypress:run": "node ../../scripts/cypress run --project ./test",
+    "cypress:open": "node ../../scripts/cypress open",
+    "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "patch-package",
-    "start": "node test/support/server.js"
+    "start": "node -e 'console.log(require(`chalk`).red(`\nError:\n\tRunning \\`yarn start\\` is no longer needed for driver/cypress tests.\n\tWe now automatically spawn the server in the pluginsFile.\n\tChanges to the server will be watched and reloaded automatically.`))'"
   },
   "dependencies": {},
   "devDependencies": {

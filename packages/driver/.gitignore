@@ -1,2 +1,2 @@
-test/cypress/videos
-test/cypress/screenshots
+cypress/videos
+cypress/screenshots

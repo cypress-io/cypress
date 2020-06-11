@@ -739,17 +739,19 @@ describe('src/cy/commands/xhr', () => {
       it('handles arraybuffer', () => {
         cy
         .server()
-        .route('GET', /buffer/).as('getBuffer')
+        .route('GET', /arraybuffer/).as('getBuffer')
         .window().then((win) => {
           const xhr = new win.XMLHttpRequest
 
           xhr.responseType = 'arraybuffer'
-          xhr.open('GET', '/buffer')
+          xhr.open('GET', '/arraybuffer')
           xhr.send()
 
           return null
         })
         .wait('@getBuffer').then((xhr) => {
+          expect(xhr.status).eq(200)
+          expect(xhr.responseBody.byteLength).gt(0)
           expect(xhr.responseBody.toString()).to.eq('[object ArrayBuffer]')
         })
       })

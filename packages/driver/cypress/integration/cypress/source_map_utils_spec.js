@@ -4,7 +4,7 @@ import {
   getSourceContents,
   getSourcePosition,
   initializeSourceMapConsumer,
-} from '../../../../src/cypress/source_map_utils'
+} from '@packages/driver/src/cypress/source_map_utils'
 
 const _ = Cypress._
 const { encodeBase64Unicode } = Cypress.utils

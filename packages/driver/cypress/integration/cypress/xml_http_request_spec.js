@@ -1,4 +1,4 @@
-import $XHR from '../../../../src/cypress/xml_http_request'
+import $XHR from '@packages/driver/src/cypress/xml_http_request'
 
 describe('src/cypress/xml_http_request', () => {
   let xhr
