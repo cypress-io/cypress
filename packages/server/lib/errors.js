@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 const _ = require('lodash')
-const { stripIndent } = require('common-tags')
+const { stripIndent, html } = require('common-tags')
 const strip = require('strip-ansi')
 const chalk = require('chalk')
 const AU = require('ansi_up')
@@ -78,45 +78,34 @@ const isCypressErr = (err) => {
   return Boolean(err.isCypressErr)
 }
 
-// If a function returns multi-line string inside a template string,
-// It breaks indent in the template, and stripIndent() cannot strip indents correctly.
-// It adds indents to prevent the problem.
-const indent = (str, indentSize) => {
-  return str.split('\n').map((line, i) => {
-    // first line should not be indented
-    // because it is indented by template.
-    return i === 0 ? line : `${' '.repeat(indentSize)}${line}`
-  }).join('\n')
-}
-
 const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
   // NOTE: declarations in case blocks are forbidden so we declare them up front
   let filePath; let err; let msg; let str
 
   switch (type) {
     case 'CANNOT_TRASH_ASSETS':
-      return stripIndent`\
+      return html`\
         Warning: We failed to trash the existing run results.
 
         This error will not alter the exit code.
 
         ${arg1}`
     case 'CANNOT_REMOVE_OLD_BROWSER_PROFILES':
-      return stripIndent`\
+      return html`\
         Warning: We failed to remove old browser profiles from previous runs.
 
         This error will not alter the exit code.
 
         ${arg1}`
     case 'VIDEO_RECORDING_FAILED':
-      return stripIndent`\
+      return html`\
         Warning: We failed to record the video.
 
         This error will not alter the exit code.
 
         ${arg1}`
     case 'VIDEO_POST_PROCESSING_FAILED':
-      return stripIndent`\
+      return html`\
         Warning: We failed processing this video.
 
         This error will not alter the exit code.
@@ -128,7 +117,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         This option will not have an effect in ${_.capitalize(arg1)}. Tests that rely on web security being disabled will not run as expected.`
     case 'BROWSER_NOT_FOUND_BY_NAME':
-      str = stripIndent`\
+      str = html`\
         Can't run because you've entered an invalid browser name.
 
         Browser: '${arg1}' was not found on your system or is not supported by Cypress.
@@ -182,31 +171,31 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     /* Because of displayFlags() and listItems() */
     /* eslint-disable indent */
     case 'DASHBOARD_CANNOT_PROCEED_IN_PARALLEL':
-      return stripIndent`\
+      return html`\
         We encountered an unexpected error talking to our servers.
 
         Because you passed the --parallel flag, this run cannot proceed because it requires a valid response from our servers.
 
-        ${indent(displayFlags(arg1.flags, {
+        ${displayFlags(arg1.flags, {
           group: '--group',
           ciBuildId: '--ciBuildId',
-        }), 8)}
+        })}
 
         The server's response was:
 
         ${arg1.response}`
     case 'DASHBOARD_UNKNOWN_INVALID_REQUEST':
-      return stripIndent`\
+      return html`\
         We encountered an unexpected error talking to our servers.
 
         There is likely something wrong with the request.
 
-        ${indent(displayFlags(arg1.flags, {
+        ${displayFlags(arg1.flags, {
             tags: '--tag',
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         The server's response was:
 
@@ -218,70 +207,70 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Details:
         ${JSON.stringify(arg1.props, null, 2)}`
     case 'DASHBOARD_STALE_RUN':
-      return stripIndent`\
+      return html`\
         You are attempting to pass the --parallel flag to a run that was completed over 24 hours ago.
 
         The existing run is: ${arg1.runUrl}
 
         You cannot parallelize a run that has been complete for that long.
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             tags: '--tag',
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         https://on.cypress.io/stale-run`
     case 'DASHBOARD_ALREADY_COMPLETE':
-      return stripIndent`\
+      return html`\
         The run you are attempting to access is already complete and will not accept new groups.
 
         The existing run is: ${arg1.runUrl}
 
         When a run finishes all of its groups, it waits for a configurable set of time before finally completing. You must add more groups during that time period.
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             tags: '--tag',
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         https://on.cypress.io/already-complete`
     case 'DASHBOARD_PARALLEL_REQUIRED':
-      return stripIndent`\
+      return html`\
         You did not pass the --parallel flag, but this run's group was originally created with the --parallel flag.
 
         The existing run is: ${arg1.runUrl}
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             tags: '--tag',
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         You must use the --parallel flag with this group.
 
         https://on.cypress.io/parallel-required`
     case 'DASHBOARD_PARALLEL_DISALLOWED':
-      return stripIndent`\
+      return html`\
         You passed the --parallel flag, but this run group was originally created without the --parallel flag.
 
         The existing run is: ${arg1.runUrl}
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         You can not use the --parallel flag with this group.
 
         https://on.cypress.io/parallel-disallowed`
     case 'DASHBOARD_PARALLEL_GROUP_PARAMS_MISMATCH':
-      return stripIndent`\
+      return html`\
         You passed the --parallel flag, but we do not parallelize tests across different environments.
 
         This machine is sending different environment parameters than the first machine that started this parallel run.
@@ -290,13 +279,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         In order to run in parallel mode each machine must send identical environment parameters such as:
 
-        ${indent(listItems([
+        ${listItems([
             'specs',
             'osName',
             'osVersion',
             'browserName',
             'browserVersion (major)',
-          ]), 8)}
+          ])}
 
         This machine sent the following parameters:
 
@@ -304,61 +293,61 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/parallel-group-params-mismatch`
     case 'DASHBOARD_RUN_GROUP_NAME_NOT_UNIQUE':
-      return stripIndent`\
+      return html`\
         You passed the --group flag, but this group name has already been used for this run.
 
         The existing run is: ${arg1.runUrl}
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             group: '--group',
             parallel: '--parallel',
             ciBuildId: '--ciBuildId',
-          }), 8)}
+          })}
 
         If you are trying to parallelize this run, then also pass the --parallel flag, else pass a different group name.
 
-        ${indent(warnIfExplicitCiBuildId(arg1.ciBuildId), 8)}
+        ${warnIfExplicitCiBuildId(arg1.ciBuildId)}
 
         https://on.cypress.io/run-group-name-not-unique`
     case 'INDETERMINATE_CI_BUILD_ID':
-      return stripIndent`\
+      return html`\
         You passed the --group or --parallel flag but we could not automatically determine or generate a ciBuildId.
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             group: '--group',
             parallel: '--parallel',
-          }), 8)}
+          })}
 
         In order to use either of these features a ciBuildId must be determined.
 
         The ciBuildId is automatically detected if you are running Cypress in any of the these CI providers:
 
-        ${indent(listItems(arg2), 8)}
+        ${listItems(arg2)}
 
         Because the ciBuildId could not be auto-detected you must pass the --ci-build-id flag manually.
 
         https://on.cypress.io/indeterminate-ci-build-id`
     case 'RECORD_PARAMS_WITHOUT_RECORDING':
-      return stripIndent`\
+      return html`\
         You passed the --ci-build-id, --group, --tag, or --parallel flag without also passing the --record flag.
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             ciBuildId: '--ci-build-id',
             tags: '--tag',
             group: '--group',
             parallel: '--parallel',
-          }), 8)}
+          })}
 
         These flags can only be used when recording to the Cypress Dashboard service.
 
         https://on.cypress.io/record-params-without-recording`
     case 'INCORRECT_CI_BUILD_ID_USAGE':
-      return stripIndent`\
+      return html`\
         You passed the --ci-build-id flag but did not provide either a --group or --parallel flag.
 
-        ${indent(displayFlags(arg1, {
+        ${displayFlags(arg1, {
             ciBuildId: '--ci-build-id',
-          }), 8)}
+          })}
 
         The --ci-build-id flag is used to either group or parallelize multiple runs together.
 
@@ -426,18 +415,18 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/cypress-ci-deprecated`
     case 'DASHBOARD_INVALID_RUN_REQUEST':
-      return stripIndent`\
+      return html`\
         Recording this run failed because the request was invalid.
 
         ${arg1.message}
 
         Errors:
 
-        ${indent(JSON.stringify(arg1.errors, null, 2), 8)}
+        ${JSON.stringify(arg1.errors, null, 2)}
 
         Request Sent:
 
-        ${indent(JSON.stringify(arg1.object, null, 2), 8)}`
+        ${JSON.stringify(arg1.object, null, 2)}`
     case 'RECORDING_FROM_FORK_PR':
       return stripIndent`\
         Warning: It looks like you are trying to record this run from a forked PR.
@@ -448,7 +437,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         This error will not alter the exit code.`
     case 'DASHBOARD_CANNOT_UPLOAD_RESULTS':
-      return stripIndent`\
+      return html`\
         Warning: We encountered an error while uploading results from your run.
 
         These results will not be recorded.
@@ -457,7 +446,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1}`
     case 'DASHBOARD_CANNOT_CREATE_RUN_OR_INSTANCE':
-      return stripIndent`\
+      return html`\
         Warning: We encountered an error talking to our servers.
 
         This run will not be recorded.
@@ -618,7 +607,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     case 'BUNDLE_ERROR':
       // IF YOU MODIFY THIS MAKE SURE TO UPDATE
       // THE ERROR MESSAGE IN THE RUNNER TOO
-      return stripIndent`\
+      return html`\
         Oops...we found an error preparing this test file:
 
           ${chalk.blue(arg1)}
@@ -707,7 +696,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
           return `${displayRetriesRemaining(arg1.remaining)}`
       }
     case 'INVALID_REPORTER_NAME':
-      return stripIndent`\
+      return html`\
         Could not load reporter by name: ${chalk.yellow(arg1.name)}
 
         We searched for the reporter in these paths:
@@ -827,12 +816,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     case 'AUTH_BROWSER_LAUNCHED':
       return `Check your browser to continue logging in.`
     case 'BAD_POLICY_WARNING':
-      return stripIndent`\
+      return html`\
         Cypress detected policy settings on your computer that may cause issues.
 
         The following policies were detected that may prevent Cypress from automating Chrome:
 
-        > ${arg1.join('\n > ')}
+        ${arg1.map((line) => ` > ${line}`)}
 
         For more information, see https://on.cypress.io/bad-browser-policy`
     case 'BAD_POLICY_WARNING_TOOLTIP':
@@ -863,7 +852,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
     case 'CDP_VERSION_TOO_OLD':
       return `A minimum CDP version of v${arg1} is required, but the current browser has ${arg2.major !== 0 ? `v${arg2.major}.${arg2.minor}` : 'an older version'}.`
     case 'CDP_COULD_NOT_CONNECT':
-      return stripIndent`\
+      return html`\
         Cypress failed to make a connection to the Chrome DevTools Protocol after retrying for 50 seconds.
 
         This usually indicates there was a problem opening the Chrome browser.
@@ -883,7 +872,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         ${arg1.stack}`
     case 'CDP_COULD_NOT_RECONNECT':
-      return stripIndent`\
+      return html`\
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
         ${arg1.stack}`
@@ -899,14 +888,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         This code will not work in a future version of Cypress. Please see the upgrade guide: ${chalk.yellow('https://on.cypress.io/deprecated-before-browser-launch-args')}`
     case 'UNEXPECTED_BEFORE_BROWSER_LAUNCH_PROPERTIES':
-      return stripIndent`\
+      return html`\
         The \`launchOptions\` object returned by your plugin's \`before:browser:launch\` handler contained unexpected properties:
 
-        ${indent(listItems(arg1), 8)}
+        ${listItems(arg1)}
 
         \`launchOptions\` may only contain the properties:
 
-        ${indent(listItems(arg2), 8)}
+        ${listItems(arg2)}
 
         https://on.cypress.io/browser-launch-api`
     case 'COULD_NOT_PARSE_ARGUMENTS':
