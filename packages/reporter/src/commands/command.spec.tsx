@@ -301,8 +301,7 @@ describe('<Command />', () => {
     it('displays the timeout progress indicator', () => {
       const component = shallow(<Command model={model({ state: 'pending' })} aliasesWithDuplicates={null} />)
 
-      expect(component.find('.command-progress').first().find('span')).to.have.css('animation-duration')
-      expect(component.find('.command-progress').first().find('span')).to.have.css('width')
+      expect(component.find('.command-progress').first().find('span')).to.exist
     })
   })
 
