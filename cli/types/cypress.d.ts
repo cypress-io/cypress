@@ -3074,6 +3074,22 @@ declare namespace Cypress {
      */
     (chainer: 'equal', value: any): Chainable<Subject>
     /**
+   * Causes all `.key` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+   * @example
+   *    cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
+   * @see http://chaijs.com/api/bdd/#method_all
+   * @see https://on.cypress.io/assertions
+   */
+    (chainer: 'have.all.key', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.key` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.any.key', ...value: string[]): Chainable<Subject>
+    /**
      * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example
      *    cy.wrap({ a: 1, b: 2 }).should('have.all.keys', 'a', 'b')
