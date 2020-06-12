@@ -1,4 +1,4 @@
-const browserProps = require('../../../../src/cypress/browser')
+const browserProps = require('@packages/driver/src/cypress/browser')
 
 describe('src/cypress/browser', () => {
   beforeEach(function () {

@@ -96,12 +96,6 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn start
-          background: true
-          working_directory: packages/driver
-      - run:
-          command: yarn wait-on http://localhost:3500
-      - run:
           environment:
             CYPRESS_KONFIG_ENV: production
           command: |
@@ -114,7 +108,7 @@ commands:
               yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
             else
               # external PR
-              TESTFILES=$(circleci tests glob "test/cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
+              TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
               echo "Test files for this machine are $TESTFILES"
 
               if [[ -z "$TESTFILES" ]]; then
@@ -200,10 +194,6 @@ commands:
         description: Test command to run to start Cypress tests
         type: string
         default: "npm run e2e"
-      wait-on:
-        description: Url to wait-on before starting tests
-        type: string
-        default: ""
       # if the repo to clone and test is a monorepo, you can
       # run tests inside a specific subfolder
       folder:
@@ -256,12 +246,6 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: npm start --if-present
           background: true
-      - when:
-          condition: <<parameters.wait-on>>
-          steps:
-            - run:
-                name: Wait-on <<parameters.wait-on>>
-                command: npx wait-on <<parameters.wait-on>> --timeout 120000
       - when:
           condition: << parameters.folder >>
           steps:
@@ -1318,7 +1302,6 @@ jobs:
           repo: cypress-documentation
           browser: firefox
           command: "npm run cypress:run"
-          wait-on: "http://localhost:2222"
 
   "test-binary-against-realworld-firefox":
     <<: *defaults
@@ -1327,7 +1310,6 @@ jobs:
           repo: cypress-example-realworld
           browser: firefox
           command: "npm run cypress:run"
-          wait-on: "http://localhost:4100"
 
   "test-binary-against-api-testing-firefox":
     <<: *defaults
@@ -1336,7 +1318,6 @@ jobs:
           repo: cypress-example-api-testing
           browser: firefox
           command: "npm run cy:run"
-          wait-on: "http://localhost:3000"
 
   "test-binary-against-piechopper-firefox":
     <<: *defaults
@@ -1345,7 +1326,6 @@ jobs:
           repo: cypress-example-piechopper
           browser: firefox
           command: "npm run cypress:run"
-          wait-on: "http://localhost:8080"
 
   test-binary-as-specific-user:
     <<: *defaults

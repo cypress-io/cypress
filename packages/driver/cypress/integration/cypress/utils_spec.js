@@ -1,4 +1,4 @@
-const LimitedMap = require('../../../../src/util/limited_map')
+const LimitedMap = require('@packages/driver/src/util/limited_map')
 const $utils = Cypress.utils
 
 describe('driver/src/cypress/utils', () => {
