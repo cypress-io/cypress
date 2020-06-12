@@ -130,6 +130,16 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
 /**
  * Removes any mounted component
+ * @see https://github.com/bahmutov/cypress-react-unit-test/tree/master/cypress/component/basic/unmount
+ * @example
+  ```
+  import { mount, unmount } from 'cypress-react-unit-test'
+  it('works', () => {
+    mount(...)
+    // whenever you want to unmount
+    cy.then(unmount)
+  })
+  ```
  */
 export const unmount = () => {
   checkMountModeEnabled()
