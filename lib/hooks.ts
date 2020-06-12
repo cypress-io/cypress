@@ -1,6 +1,21 @@
 // @ts-ignore
 const isComponentSpec = () => Cypress.spec.specType === 'component'
 
+// When running component specs, we cannot allow "cy.visit"
+// because it will wipe out our preparation work, and does not make much sense
+// thus we overwrite "cy.visit" to throw an error
+Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
+  if (isComponentSpec()) {
+    throw new Error(
+      'cy.visit from a component spec is not allowed\n' +
+        'see https://github.com/bahmutov/cypress-react-unit-test/issues/286',
+    )
+  } else {
+    // allow regular visit to proceed
+    return visit(...args)
+  }
+})
+
 /** Initialize an empty document with root element */
 function renderTestingPlatform() {
   // Let's mount components under a new div with this id
