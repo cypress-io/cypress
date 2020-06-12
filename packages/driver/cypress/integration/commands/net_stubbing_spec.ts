@@ -598,7 +598,7 @@ describe('src/cy/commands/net_stubbing', function () {
         it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
           cy.on('fail', (err2) => {
             expect(err2.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
-            .and.contain('Error: statusCode must be a number between 100 and 999 (inclusive).')
+            .and.contain('must be a number between 100 and 999 (inclusive).')
 
             done()
           })
@@ -820,7 +820,7 @@ describe('src/cy/commands/net_stubbing', function () {
         it('fails test if res.send is called with an invalid StaticResponse', function (done) {
           cy.on('fail', (err2) => {
             expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
-            .and.contain('Error: `statusCode` must be a number between 100 and 999 (inclusive).')
+            .and.contain('must be a number between 100 and 999 (inclusive).')
 
             done()
           })
