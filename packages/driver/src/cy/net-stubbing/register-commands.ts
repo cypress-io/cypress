@@ -1,7 +1,6 @@
 import _ from 'lodash'
 
 import {
-  RequestState,
   Route,
   Request,
 } from './types'
@@ -209,16 +208,18 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     return Cypress.backend('net', eventName, frame)
   }
 
-  function _getRoute (routeHandlerId: string) {
+  function _getRoute (routeHandlerId: string): Route | undefined {
     return state('routes')[routeHandlerId]
   }
 
-  function _getRequest (routeHandlerId: string, requestId: string) {
+  function _getRequest (routeHandlerId: string, requestId: string): Request | undefined {
     const route = _getRoute(routeHandlerId)
 
     if (route) {
       return route.requests[requestId]
     }
+
+    return
   }
 
   function _getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
@@ -296,8 +297,8 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       },
       renderProps: () => {
         return {
-          indicator: request.state === RequestState.Completed ? 'successful' : 'pending',
-          message: `${request.req.url} ${RequestState[request.state]}`,
+          indicator: request.state === 'Complete' ? 'successful' : 'pending',
+          message: `${request.req.url} ${request.state}`,
         }
       },
     })
@@ -414,7 +415,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       continueSent = true
 
       if (request) {
-        request.state = RequestState.Intercepted
+        request.state = 'Intercepted'
       }
 
       if (continueFrame) {
@@ -438,14 +439,14 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     const request: Partial<Request> = {
       req,
-      state: RequestState.Received,
+      state: 'Received',
     }
 
     request.log = _getRequestLog(route, request as Omit<Request, 'log'>)
     request.log.snapshot('request')
 
     // TODO: this misnomer is a holdover from XHR, should be numRequests
-    route.log.set('numResponses', route.log.get('numResponses') + 1)
+    route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
     route.requests[requestId] = request as Request
 
     if (frame.notificationOnly) {
@@ -565,7 +566,9 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
     let sendCalled = false
 
-    request.state = RequestState.ResponseReceived
+    if (request) {
+      request.state = 'ResponseReceived'
+    }
 
     const continueFrame: NetEventFrames.HttpResponseContinue = {
       routeHandlerId,
@@ -579,7 +582,9 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
       }
 
-      request.state = RequestState.ResponseIntercepted
+      if (request) {
+        request.state = 'ResponseIntercepted'
+      }
 
       _emit('http:response:continue', continueFrame)
     }
@@ -620,21 +625,17 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     if (!request) {
-      // TODO: remove this logging once we're done
-      // eslint-disable-next-line no-console
-      console.log('no handler for HttpResponseReceived', { frame })
-
       return sendContinueFrame()
     }
 
     try {
-      request.responseHandler(userRes)
+      request.responseHandler!(userRes)
     } catch (err) {
       $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
         args: {
           err,
           req: request.req,
-          route: _getRoute(routeHandlerId).options,
+          route: _getRoute(routeHandlerId)?.options,
           res,
         },
       })
@@ -648,7 +649,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       return
     }
 
-    request.state = RequestState.Completed
+    request.state = 'Complete'
     request.log.snapshot('response').end()
   }
 

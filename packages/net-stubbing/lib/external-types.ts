@@ -89,13 +89,12 @@ export interface Request {
   log: any // TODO: Cypress.Log
 }
 
-export enum RequestState {
-  Received,
-  Intercepted,
-  ResponseReceived,
-  ResponseIntercepted,
-  Completed
-}
+export type RequestState =
+  'Received' |
+  'Intercepted' |
+  'ResponseReceived' |
+  'ResponseIntercepted' |
+  'Complete'
 
 export interface Route {
   alias?: string

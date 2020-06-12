@@ -3,7 +3,10 @@ import {
   RouteHandler,
   RouteMatcherOptions,
   HttpResponseInterceptor,
+  RequestState,
 } from '@packages/net-stubbing/lib/types'
+
+export { RequestState }
 
 export interface Route {
   alias?: string
@@ -23,12 +26,4 @@ export interface Request {
   log: Cypress.Log
   requestWaited: boolean
   responseWaited: boolean
-}
-
-export enum RequestState {
-  Received,
-  Intercepted,
-  ResponseReceived,
-  ResponseIntercepted,
-  Completed
 }

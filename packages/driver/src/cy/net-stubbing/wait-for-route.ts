@@ -1,9 +1,11 @@
 import _ from 'lodash'
 import {
-  RequestState,
   Request,
   Route,
+  RequestState,
 } from './types'
+
+const RESPONSE_WAITED_STATES: RequestState[] = ['ResponseIntercepted', 'Complete']
 
 export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Request | null {
   // if they didn't specify what to wait on, they want to wait on a response
@@ -43,14 +45,12 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
   }
 
   // 3. Determine if it's ready based on the specifier
-  if (request.state >= RequestState.Received) {
-    request.requestWaited = true
-    if (specifier === 'request') {
-      return request
-    }
+  request.requestWaited = true
+  if (specifier === 'request') {
+    return request
   }
 
-  if (request.state >= RequestState.ResponseIntercepted) {
+  if (RESPONSE_WAITED_STATES.includes(request.state)) {
     request.responseWaited = true
 
     return request
