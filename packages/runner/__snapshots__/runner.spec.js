@@ -336,7 +336,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -410,7 +410,9 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"after each\" hook"
+      "originalTitle": "\"after each\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -424,13 +426,49 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "after each",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -477,7 +515,7 @@ exports['FAIL_IN_AFTEREACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -498,7 +536,7 @@ exports['FAIL_IN_AFTEREACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -734,7 +772,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -808,7 +846,9 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"before each\" hook"
+      "originalTitle": "\"before each\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -822,13 +862,45 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before each",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -871,7 +943,7 @@ exports['FAIL_IN_BEFOREEACH.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -892,7 +964,7 @@ exports['FAIL_IN_BEFOREEACH.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -938,7 +1010,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -1076,66 +1148,9 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "fail",
-    {
-      "id": "r5",
-      "title": "test 2",
-      "err": "{Object 9}",
-      "state": "failed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    },
-    {
-      "message": "[error message]",
-      "name": "AssertionError",
-      "stack": "match.string",
-      "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "actual": null,
-      "showDiff": false
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1194,6 +1209,8 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "message": "[error message]",
       "name": "AssertionError",
       "stack": "match.string",
+      "sourceMappedStack": "match.string",
+      "parsedStack": "match.array",
       "actual": null,
       "showDiff": false
     }
@@ -1267,7 +1284,7 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "id": "r5",
       "order": 2,
       "title": "test 2",
-      "err": "{Object 6}",
+      "err": "{Object 9}",
       "state": "failed",
       "body": "[body]",
       "type": "test",
@@ -1311,6 +1328,18 @@ exports['FAIL_WITH_ONLY.mocha'] = [
       "file": null,
       "final": true,
       "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r4",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null,
       "retries": -1
     }
   ],
@@ -1373,23 +1402,11 @@ exports['FAIL_WITH_ONLY.mocha'] = [
     "mocha",
     "suite end",
     {
-      "id": "r4",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
       "id": "r1",
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -1410,7 +1427,7 @@ exports['FAIL_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -1456,7 +1473,7 @@ exports['PASS_WITH_ONLY.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -1769,6 +1786,18 @@ exports['PASS_WITH_ONLY.mocha'] = [
   ],
   [
     "mocha",
+    "suite end",
+    {
+      "id": "r4",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "test:after:run",
     {
       "id": "r5",
@@ -1825,23 +1854,11 @@ exports['PASS_WITH_ONLY.mocha'] = [
     "mocha",
     "suite end",
     {
-      "id": "r4",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null,
-      "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
       "id": "r1",
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -1862,7 +1879,7 @@ exports['PASS_WITH_ONLY.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -1908,7 +1925,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -2011,7 +2028,8 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -2048,7 +2066,7 @@ exports['SIMPLE_SINGLE_TEST.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -2069,7 +2087,7 @@ exports['SIMPLE_SINGLE_TEST.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -2115,7 +2133,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -2856,7 +2874,8 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -2914,7 +2933,7 @@ exports['THREE_TESTS_WITH_HOOKS.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -2935,7 +2954,7 @@ exports['THREE_TESTS_WITH_HOOKS.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
