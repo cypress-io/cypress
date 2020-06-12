@@ -21,6 +21,7 @@ const getSnapshot = (opts) => {
       result = expected
       throw new Error('bail')
     },
+    ext: '.js',
     opts: {
       update: false,
       ci: true,
@@ -28,12 +29,7 @@ const getSnapshot = (opts) => {
   })
 
   try {
-    snapshotCore.core(
-      _.extend(
-        {},
-        opts,
-      ),
-    )
+    snapshotCore.core({ ...opts })
   } catch (e) {
     null
   }
@@ -48,6 +44,7 @@ const saveSnapshot = (opts) => {
   return snapshotCore.core(_.extend({},
     opts,
     {
+      ext: '.js',
       opts: {
         update: true,
       },

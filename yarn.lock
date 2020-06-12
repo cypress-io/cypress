@@ -5105,12 +5105,7 @@ aproba@^2.0.0:
   resolved "https://registry.yarnpkg.com/aproba/-/aproba-2.0.0.tgz#52520b8ae5b569215b354efc0caa3fe1e45a8adc"
   integrity sha512-lYe4Gx7QT+MKGbDsA+Z+he/Wtef0BiwDOlK/XkBrdfsh9J/jPPXbX0tE9x9cl27Tmu5gg3QUbUrQYa/y+KOHPQ==
 
-arch@2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/arch/-/arch-2.1.1.tgz#8f5c2731aa35a30929221bb0640eed65175ec84e"
-  integrity sha512-BLM56aPo9vLLFVa8+/+pJLnrZ7QGGTVHWsCwieAWT9o9K8UeGaQbzZbGoabWLOo2ksBCztoXdqBZBplqLDDCSg==
-
-arch@^2.1.0:
+arch@2.1.2, arch@^2.1.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/arch/-/arch-2.1.2.tgz#0c52bbe7344bb4fa260c443d2cbad9c00ff2f0bf"
   integrity sha512-NTBIIbAfkJeIletyABbVtdPgeKfDafR+1mZV/AyyfC1UkVkp9iUjV+wwmqtUgphHYajbI86jejBJp5e+jkGTiQ==
@@ -17467,7 +17462,7 @@ mkdirp-promise@^5.0.1:
   dependencies:
     mkdirp "*"
 
-mkdirp@*:
+mkdirp@*, mkdirp@1.0.4:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-1.0.4.tgz#3eb5ed62622756d79a5f0e2a221dfebad75c2f7e"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
@@ -19827,11 +19822,6 @@ plur@^3.0.0:
   integrity sha512-t1Ax8KUvV3FFII8ltczPn2tJdjqbd1sIzu6t4JL7nQ3EyeL/lTrj5PWKb06ic5/6XYDr65rQ4uzQEGN70/6X5w==
   dependencies:
     irregular-plurals "^2.0.0"
-
-pluralize@7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-7.0.0.tgz#298b89df8b93b0221dbf421ad2b1b1ea23fc6777"
-  integrity sha512-ARhBOdzS3e41FbkW/XWrTEtukqqLoK5+Z/4UeDaLuSW+39JPeFgs4gCGqsrJHVZX0fUrx//4OF0K1CUGwlIFow==
 
 pluralize@8.0.0:
   version "8.0.0"
@@ -22718,10 +22708,10 @@ snap-shot-core@10.2.0:
     quote "0.4.0"
     ramda "0.26.1"
 
-snap-shot-core@7.4.0:
-  version "7.4.0"
-  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-7.4.0.tgz#b3215fbb3e3bbc734706a56feff175040bb06254"
-  integrity sha512-rSRDbrfvYFp7dwtSJhFw+SUT4tS1tKSty7RsW9f9erP2fFyn7VIfYe9cgmseZytSMovB0I9WxATwKhGAsbYBCQ==
+snap-shot-core@10.2.1:
+  version "10.2.1"
+  resolved "https://registry.yarnpkg.com/snap-shot-core/-/snap-shot-core-10.2.1.tgz#2926c8692acf984095c274b97068456d1a540db7"
+  integrity sha512-fApr6/GQi7kfLyperpF70SxG9mp9L3gQgb3czXH97iuix1QrfThS9kATx43r3wIl0Ik5sWmWvor/Xcb3+2cteQ==
   dependencies:
     arg "4.1.0"
     check-more-types "2.24.0"
@@ -22732,8 +22722,8 @@ snap-shot-core@7.4.0:
     is-ci "2.0.0"
     jsesc "2.5.2"
     lazy-ass "1.6.0"
-    mkdirp "0.5.1"
-    pluralize "7.0.0"
+    mkdirp "1.0.4"
+    pluralize "8.0.0"
     quote "0.4.0"
     ramda "0.26.1"
 
