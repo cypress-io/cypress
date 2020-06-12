@@ -25,7 +25,7 @@ const model = (props?: Partial<CommandModel>) => {
     state: 'passed',
     type: 'parent',
     timeout: 4000,
-    wallClockStartedAt: new Date(),
+    wallClockStartedAt: new Date().toJSON(),
     hasDuplicates: false,
     duplicates: [],
   }, props)
@@ -324,7 +324,7 @@ describe('<Command />', () => {
         const component = mount(<Progress
           model={
             model({
-              wallClockStartedAt: initialDate,
+              wallClockStartedAt: initialDate.toJSON(),
               timeout,
             })}
         />)
