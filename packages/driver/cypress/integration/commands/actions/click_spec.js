@@ -3666,12 +3666,12 @@ describe('src/cy/commands/actions/click', () => {
   })
 })
 
-describe('composed events', () => {
+describe('shadow dom', () => {
   beforeEach(() => {
     cy.visit('/fixtures/shadow-dom.html')
   })
 
-  it('should compose click events', (done) => {
+  it('composes click events', (done) => {
     const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('click', () => {
@@ -3683,7 +3683,7 @@ describe('composed events', () => {
     .click()
   })
 
-  it('should compose dblclick events', (done) => {
+  it('composes dblclick events', (done) => {
     const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('dblclick', () => {
@@ -3695,7 +3695,7 @@ describe('composed events', () => {
     .dblclick()
   })
 
-  it('should compose right click events', (done) => {
+  it('composes right click events', (done) => {
     const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
     cy.$$('#parent-of-shadow-container-0').on('contextmenu', () => {
@@ -3705,6 +3705,15 @@ describe('composed events', () => {
     cy
     .get(el)
     .rightclick()
+  })
+
+  // https://github.com/cypress-io/cypress/issues/7679
+  it('does not hang when experimentalShadowDomSupport is false and clicking on custom element', () => {
+    Cypress.config('experimentalShadowDomSupport', false)
+    // needs some size or it's considered invisible and click will fail its prerequisites
+    cy.$$('#shadow-element-1').css({ padding: 2 })
+
+    cy.get('#shadow-element-1').click()
   })
 })
 

@@ -524,9 +524,9 @@ namespace CypressShadowTests {
   .find('.bar')
   .click()
 
-  cy.get('.foo', { ignoreShadowBoundaries: true }).click()
+  cy.get('.foo', { includeShadowDom: true }).click()
 
   cy
   .get('.foo')
-  .find('.bar', {ignoreShadowBoundaries: true})
+  .find('.bar', {includeShadowDom: true})
 }
