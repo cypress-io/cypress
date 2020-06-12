@@ -6,6 +6,7 @@ const http = require('http')
 const path = require('path')
 const Promise = require('bluebird')
 
+const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
 const ports = [3500, 3501]
 
 ports.forEach((port) => {
@@ -15,8 +16,6 @@ ports.forEach((port) => {
   app.set('port', port)
 
   app.set('view engine', 'html')
-
-  app.use(require('morgan')({ format: 'dev' }))
 
   app.use(require('cors')())
   app.use(require('compression')())
@@ -46,8 +45,12 @@ ports.forEach((port) => {
     return res.type('xml').send('<foo>bar</foo>')
   })
 
-  app.get('/buffer', (req, res) => {
-    return fs.readFile(path.join(__dirname, '../cypress/fixtures/sample.pdf'), (err, bytes) => {
+  app.get('/arraybuffer', (req, res) => {
+    return fs.readFile(path.join(PATH_TO_SERVER_PKG, 'test/support/fixtures/sample.pdf'), (err, bytes) => {
+      if (err) {
+        return res.status(500).send(err.stack)
+      }
+
       res.type('pdf')
 
       return res.send(bytes)
@@ -108,7 +111,7 @@ ports.forEach((port) => {
     .send('<html><body>server error</body></html>')
   })
 
-  app.use(express.static(path.join(__dirname, '..', 'cypress')))
+  app.use(express.static(path.join(__dirname, '..')))
 
   app.use(require('errorhandler')())
 

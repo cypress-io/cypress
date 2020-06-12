@@ -1,6 +1,6 @@
-const $errUtils = require('../../../../src/cypress/error_utils')
-const $stackUtils = require('../../../../src/cypress/stack_utils')
-const $errorMessages = require('../../../../src/cypress/error_messages')
+const $errUtils = require('@packages/driver/src/cypress/error_utils')
+const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
+const $errorMessages = require('@packages/driver/src/cypress/error_messages')
 
 describe('driver/src/cypress/error_utils', () => {
   context('.modifyErrMsg', () => {

@@ -4,9 +4,9 @@
   "hosts": {
     "*.foobar.com": "127.0.0.1"
   },
-  "reporter": "../../../node_modules/cypress-multi-reporters/index.js",
+  "reporter": "cypress-multi-reporters",
   "reporterOptions": {
-    "configFile": "../../../mocha-reporter-config.json"
+    "configFile": "../../mocha-reporter-config.json"
   },
   "experimentalShadowDomSupport": true
 }

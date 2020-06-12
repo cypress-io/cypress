@@ -1,6 +1,6 @@
-const $scriptUtils = require('../../../../src/cypress/script_utils')
-const $networkUtils = require('../../../../src/cypress/network_utils')
-const $sourceMapUtils = require('../../../../src/cypress/source_map_utils')
+const $scriptUtils = require('@packages/driver/src/cypress/script_utils')
+const $networkUtils = require('@packages/driver/src/cypress/network_utils')
+const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
 
 describe('src/cypress/script_utils', () => {
   context('#runScripts', () => {

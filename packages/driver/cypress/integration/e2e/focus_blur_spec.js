@@ -1,4 +1,3 @@
-/// <reference path="../../../../../../cli/types/index.d.ts" />
 /* eslint arrow-body-style:'off' */
 
 /**
