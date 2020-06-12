@@ -3,12 +3,11 @@ require('../spec_helper')
 const _ = require('lodash')
 const sinon = require('sinon')
 const Debug = require('debug')
-const snapshot = require('snap-shot-it')
 
 const Reporter = require(`../../lib/reporter`)
 const { spyOn, stdout } = require('../support/helpers/utils')
 const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep')
-const events = require('@packages/runner/__snapshots__/runner.spec.js.snapshot')
+const events = require('@packages/runner/__snapshots__/runner.spec')
 const { EventSnapshots } = require('@packages/runner/cypress/support/eventSnapshots')
 
 registerInMocha()
@@ -206,20 +205,6 @@ describe('lib/reporter', () => {
         const title = 'TodoMVC - React When page is initially opened should focus on the todo input field'
 
         expect(args[1].fullTitle()).to.eq(title)
-      })
-    })
-
-    context('#stats', () => {
-      it('has reporterName stats, reporterStats, etc', function () {
-        sinon.stub(Date, 'now').returns(1234)
-
-        reporter.emit('test', testObj)
-        reporter.emit('fail', testObj)
-        reporter.emit('test end', testObj)
-
-        reporter.reporterName = 'foo'
-
-        return snapshot(reporter.results())
       })
     })
 
