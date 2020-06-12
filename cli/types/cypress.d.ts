@@ -2176,11 +2176,11 @@ declare namespace Cypress {
    */
   interface Shadow {
     /**
-     * Ignore shadow boundary and continue searching
+     * Include shadow DOM in search
      *
      * @default: false
      */
-    ignoreShadowBoundaries: boolean
+    includeShadowDom: boolean
   }
 
   /**
@@ -2462,7 +2462,7 @@ declare namespace Cypress {
     experimentalNetworkMocking: boolean
     /**
      * Enables shadow DOM support. Adds the `cy.shadow()` command and
-     * the `ignoreShadowBoundaries` option to some DOM commands.
+     * the `includeShadowDom` option to some DOM commands.
      * @default false
      */
     experimentalShadowDomSupport: boolean
