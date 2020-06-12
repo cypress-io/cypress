@@ -3,7 +3,7 @@ import _ from 'lodash'
 import React from 'react'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
 
-import Command, { Message } from './command'
+import Command, { Message, Progress } from './command'
 import CommandModel from './command-model'
 import { AppState } from '../lib/app-state'
 import { Events } from '../lib/events'
@@ -301,7 +301,7 @@ describe('<Command />', () => {
     it('displays the timeout progress indicator', () => {
       const component = shallow(<Command model={model({ state: 'pending' })} aliasesWithDuplicates={null} />)
 
-      expect(component.find('.command-progress').first().find('span')).to.exist
+      expect(component.find(Progress).first()).to.exist
     })
   })
 

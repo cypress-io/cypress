@@ -322,6 +322,6 @@ class Command extends Component<Props> {
   }
 }
 
-export { Aliases, AliasesReferences, Message }
+export { Aliases, AliasesReferences, Message, Progress }
 
 export default Command
