@@ -29,18 +29,20 @@ const injectStyles = (options: MountOptions) => () => {
 /**
  * Mount a React component in a blank document; register it as an alias
  * To access: use an alias or original component reference
- *  @function   cy.mount
- *  @param      {React.ReactElement}  jsx - component to mount
- *  @param      {string}  [Component] - alias to use later
- *  @example
+ * @function   mount
+ * @param      {React.ReactElement}  jsx - component to mount
+ * @param      {MountOptions}  [options] - options, like alias, styles
+ * @see https://github.com/bahmutov/cypress-react-unit-test
+ * @see https://glebbahmutov.com/blog/my-vision-for-component-tests/
+ * @example
  ```
- import Hello from './hello.jsx'
- // mount and access by alias
- cy.mount(<Hello />, 'Hello')
- // using default alias
- cy.get('@Component')
- // using original component
- cy.get(Hello)
+  import Hello from './hello.jsx'
+  import {mount} from 'cypress-react-unit-test'
+  it('works', () => {
+    mount(<Hello onClick={cy.stub()} />)
+    // use Cypress commands
+    cy.contains('Hello').click()
+  })
  ```
  **/
 export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
@@ -48,7 +50,11 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
-  const displayName = getDisplayName(jsx.type, options.alias)
+  const componentName = getDisplayName(jsx.type, options.alias)
+  const displayName = options.alias || componentName
+  const message = options.alias
+    ? `<${componentName} ... /> as "${options.alias}"`
+    : `<${componentName} ... />`
   let logInstance: Cypress.Log
 
   return cy
@@ -56,7 +62,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       if (options.log !== false) {
         logInstance = Cypress.log({
           name: 'mount',
-          message: [`<${displayName} ... />`],
+          message: [message],
         })
       }
     })
@@ -85,7 +91,11 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       }
 
       const reactComponent = React.createElement(React.Fragment, props, jsx)
-      const CypressTestComponent = reactDomToUse.render(reactComponent, el)
+      // since we always surround the component with a fragment
+      // let's get back the original component
+      // @ts-ignore
+      const userComponent = reactComponent.props.children
+      reactDomToUse.render(reactComponent, el)
 
       if (logInstance) {
         const logConsoleProps = {
@@ -109,8 +119,8 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 
       return (
         cy
-          .wrap(CypressTestComponent, { log: false })
-          .as(options.alias || displayName)
+          .wrap(userComponent, { log: false })
+          .as(displayName)
           // by waiting, we give the component's hook a chance to run
           // https://github.com/bahmutov/cypress-react-unit-test/issues/200
           .wait(1, { log: false })
@@ -129,7 +139,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 }
 
 /**
- * Removes any mounted component
+ * Removes the mounted component
  * @see https://github.com/bahmutov/cypress-react-unit-test/tree/master/cypress/component/basic/unmount
  * @example
   ```
