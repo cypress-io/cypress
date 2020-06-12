@@ -17,27 +17,19 @@ export const setup = ({ verifyStackLineIsSpecFile, idePath }) => {
   if (idePath) openInIdePath = idePath
 }
 
-// NOTE: use { defaultCommandTimeout: 0 } once per-test configuration is
-// implemented (https://github.com/cypress-io/cypress/pull/5346)
-export const fail = (ctx, test) => {
+export const fail = (ctx, test, { timeout = 0 } = {}) => {
   const title = `${count++}) ✗ FAIL - ${getTitle(ctx)}`
   const withDone = test.length > 0
 
-  if (withDone) {
-    it(title, (done) => {
-      cy.timeout(0) // speed up failures to not retry since we know they should fail
+  const testConfig = { defaultCommandTimeout: timeout }
 
-      return test(done)
-    })
+  if (withDone) {
+    it(title, testConfig, test)
 
     return
   }
 
-  it(title, () => {
-    cy.timeout(0) // speed up failures to not retry since we know they should fail
-
-    return test()
-  })
+  it(title, testConfig, test)
 }
 
 export const verify = (ctx, options) => {
