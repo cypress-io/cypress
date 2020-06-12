@@ -39,7 +39,7 @@
     "executable": "4.1.1",
     "extract-zip": "1.7.0",
     "fs-extra": "8.1.0",
-    "getos": "3.1.4",
+    "getos": "3.2.1",
     "is-ci": "2.0.0",
     "is-installed-globally": "0.1.0",
     "lazy-ass": "1.6.0",
