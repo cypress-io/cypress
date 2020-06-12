@@ -24,6 +24,8 @@ const model = (props?: Partial<CommandModel>) => {
     renderProps: {},
     state: 'passed',
     type: 'parent',
+    timeout: 4000,
+    wallClockStartedAt: new Date(),
     hasDuplicates: false,
     duplicates: [],
   }, props)
@@ -294,6 +296,13 @@ describe('<Command />', () => {
       const component = shallow(<Command model={model()} aliasesWithDuplicates={null} />)
 
       expect(component.find('.command-number')).to.have.text('1')
+    })
+
+    it('displays the timeout progress indicator', () => {
+      const component = shallow(<Command model={model({ state: 'pending' })} aliasesWithDuplicates={null} />)
+
+      expect(component.find('.command-progress').first().find('span')).to.have.css('animation-duration')
+      expect(component.find('.command-progress').first().find('span')).to.have.css('width')
     })
   })
 
