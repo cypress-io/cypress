@@ -13,11 +13,6 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
     specifier = 'response'
   }
 
-  if (!/\d+|request|response/.test(specifier)) {
-    throw new Error('bad specifier')
-    // TODO: throw good error
-  }
-
   // 1. Get route with this alias.
   const route: Route = _.find(state('routes'), { alias })
 

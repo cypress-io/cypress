@@ -5,10 +5,8 @@ import { Request, Response } from 'express'
  * An incoming request to the Cypress web server.
  */
 export type CypressIncomingRequest = Request & {
-  // TODO: what's this difference from req.url? is it only for non-proxied requests?
   proxiedUrl: string
-  abort: () => void // TODO: is this in the right place?
-  webSocket: boolean // TODO: populate
+  abort: () => void
   requestId: string
   body?: string
 }

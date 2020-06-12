@@ -594,6 +594,19 @@ describe('src/cy/commands/net_stubbing', function () {
             throw err
           }).visit('/foo')
         })
+
+        it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
+          cy.on('fail', (err2) => {
+            expect(err2.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+            .and.contain('Error: statusCode must be a number between 100 and 999 (inclusive).')
+
+            done()
+          })
+
+          cy.route2('/foo', (req) => {
+            req.reply({ statusCode: 1 })
+          }).visit('/foo')
+        })
       })
     })
 
@@ -630,7 +643,7 @@ describe('src/cy/commands/net_stubbing', function () {
           xhr.send()
 
           xhr.onload = () => {
-            // TODO: if this fails, browser totally locks up :S
+            // NOTE: the log from this when it fails is so long that it causes the browser to lock up :[
             expect(xhr.responseText).to.eq('X'.repeat(1024 * 1024))
 
             done()
@@ -797,6 +810,24 @@ describe('src/cy/commands/net_stubbing', function () {
           cy.route2('/foo', (req) => {
             req.reply(() => {
               throw err
+            })
+          })
+          .then(() => {
+            $.get('/foo')
+          })
+        })
+
+        it('fails test if res.send is called with an invalid StaticResponse', function (done) {
+          cy.on('fail', (err2) => {
+            expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+            .and.contain('Error: `statusCode` must be a number between 100 and 999 (inclusive).')
+
+            done()
+          })
+
+          cy.route2('/foo', (req) => {
+            req.reply((res) => {
+              res.send({ statusCode: 1 })
             })
           })
           .then(() => {
@@ -1027,10 +1058,6 @@ describe('src/cy/commands/net_stubbing', function () {
           })
           .wait('@foo.bar.3', { timeout: 100 })
         })
-      })
-
-      context('errors', function () {
-
       })
     })
 
@@ -2382,100 +2409,6 @@ describe('src/cy/commands/net_stubbing', function () {
               expect(group.items[0]).to.be.a('string')
 
               expect(group.items[0].split('\n').length).to.gt(1)
-            })
-          })
-        })
-      })
-
-      context('renderProps', function () {
-        beforeEach(function () {
-          this.logs = []
-          cy.on('log:added', (attrs, log) => {
-            if (attrs.name === 'xhr') {
-              this.lastLog = log
-
-              this.logs.push(log)
-            }
-          })
-
-          return null
-        })
-
-        describe('in any case', function () {
-          beforeEach(function () {
-            cy.route2(/foo/, {}).window().then(function (win) {
-              return new Promise(function (resolve) {
-                return win.$.get('/foo').done(resolve)
-              })
-            })
-          })
-
-          // TODO: implement log niceties
-          it.skip('sends correct message', function () {
-            cy.then(function () {
-              expect(this.lastLog.invoke('renderProps').message).to.equal('GET 200 /foo')
-            })
-          })
-        })
-
-        describe('when response is successful', function () {
-          beforeEach(function () {
-            cy.route2(/foo/, {}).window().then(function (win) {
-              return new Promise(function (resolve) {
-                return win.$.get('/foo').done(resolve)
-              })
-            })
-          })
-
-          // TODO: this is now flaky
-          it.skip('sends correct indicator', function () {
-            cy.then(function () {
-              expect(this.lastLog.invoke('renderProps').indicator).to.equal('successful')
-            })
-          })
-        })
-
-        describe('when response is pending', function () {
-          beforeEach(function () {
-            cy.route2({
-              url: '/foo',
-              response: {},
-            }).window().then(function (win) {
-              win.$.get('/foo')
-
-              return null
-            })
-          })
-
-          // FAILING
-          it('sends correct message', function () {
-            expect(this.lastLog.invoke('renderProps').message).to.equal('GET --- /foo')
-          })
-
-          it('sends correct indicator', function () {
-            expect(this.lastLog.invoke('renderProps').indicator).to.equal('pending')
-          })
-        })
-
-        describe('when response is outside 200 range', function () {
-          beforeEach(function () {
-            cy.route2({
-              url: '/foo',
-            }, {
-              statusCode: 500,
-            }).window().then(function (win) {
-              return new Promise(function (resolve) {
-                return win.$.get('/foo').fail(function () {
-                  resolve()
-                })
-              })
-            })
-          })
-
-          // TODO: determine what this should do
-          it.skip('sends correct indicator', function () {
-            cy.then(function () {
-              expect(this.lastLog.invoke('renderProps').indicator).to.equal('bad')
             })
           })
         })

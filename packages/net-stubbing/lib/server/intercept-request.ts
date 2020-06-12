@@ -207,8 +207,9 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
   const backendRequest = state.requests[frame.requestId]
 
   if (!backendRequest) {
+    debug('onRequestContinue received but no backendRequest exists %o', { frame })
+
     return
-    // TODO
   }
 
   // modify the original paused request object using what the client returned
@@ -223,7 +224,6 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
     backendRequest.req.headers['content-length'] = frame.req.body.length
   }
 
-  // TODO: see if we should implement a way to override this
   // prevent cached responses from being received
   delete backendRequest.req.headers['if-none-match']
 
@@ -246,7 +246,6 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
       return backendRequest.continueRequest()
     }
 
-    // TODO: kind of an awkward API, might want to change
     return _interceptRequest(backendRequest, nextRoute, socket)
   }
 

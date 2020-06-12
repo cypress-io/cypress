@@ -304,7 +304,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     })
   }
 
-  function _addRoute (matcher: RouteMatcherOptions, handler: RouteHandler) {
+  function _addRoute (matcher: RouteMatcherOptions, handler?: RouteHandler) {
     const handlerId = _getUniqueId()
 
     const alias = cy.getNextAlias()
@@ -320,7 +320,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
       case _isHttpRequestInterceptor(handler):
         break
       case _.isUndefined(handler):
-        // TODO: handle this, for when users just want to alias/wait on route
+        // user is doing something like cy.route2('foo').as('foo') to wait on a URL
         break
       case _.isString(handler):
         staticResponse = { body: <string>handler }
@@ -367,7 +367,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     return _emit('route:added', frame)
   }
 
-  function route2 (matcher: RouteMatcher, handler: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+  function route2 (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     if (!Cypress.config('experimentalNetworkMocking')) {
       return $errUtils.throwErrByPath('net_stubbing.route2_needs_experimental')
     }
@@ -430,10 +430,6 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     }
 
     if (!route) {
-      // TODO: remove this logging once we're done
-      // eslint-disable-next-line no-console
-      console.log('no handler for HttpRequestReceived', { frame })
-
       return sendContinueFrame()
     }
 
@@ -480,7 +476,6 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         const staticResponse = _parseStaticResponseShorthand(responseHandler, maybeBody, maybeHeaders)
 
         if (staticResponse) {
-          // TODO: _validateStaticResponse - but where does the error go?
           responseHandler = staticResponse
         }
 
@@ -496,6 +491,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
         if (!_.isUndefined(responseHandler)) {
           // `replyHandler` is a StaticResponse
+          _validateStaticResponse(responseHandler)
           continueFrame.staticResponse = _getBackendStaticResponse(responseHandler as StaticResponse)
         }
 
@@ -601,11 +597,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         const shorthand = _parseStaticResponseShorthand(staticResponse, maybeBody, maybeHeaders)
 
         if (shorthand) {
-          // TODO: _validateStaticResponse - but where does the error go?
           staticResponse = shorthand
         }
 
         if (staticResponse) {
+          _validateStaticResponse(staticResponse)
           continueFrame.staticResponse = staticResponse
         }
 
@@ -635,7 +631,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         args: {
           err,
           req: request.req,
-          route: _getRoute(routeHandlerId)?.options,
+          route: _.get(_getRoute(routeHandlerId), 'options'),
           res,
         },
       })
@@ -664,7 +660,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     'http:request:complete': _onRequestComplete,
   }
 
-  Cypress.on('net:event', (eventName, frame: any /** TODO: interfaceof NetEventFrames */) => {
+  Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {
     try {
       const handler = netEventHandlers[eventName]
 

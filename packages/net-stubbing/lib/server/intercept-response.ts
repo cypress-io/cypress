@@ -102,11 +102,9 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
     }
 
     if (frame.staticResponse) {
-      if (frame.throttleKbps) {
-        return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!, throttleify(frame.staticResponse.body))
-      }
+      const bodyStream = frame.throttleKbps ? throttleify(frame.staticResponse.body) : undefined
 
-      return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!)
+      return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!, bodyStream)
     }
 
     // merge the changed response attributes with our response and continue

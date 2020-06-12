@@ -86,7 +86,7 @@ export interface Request {
    */
   requestWaited: boolean
   state: RequestState
-  log: any // TODO: Cypress.Log
+  log: any
 }
 
 export type RequestState =
@@ -98,7 +98,7 @@ export type RequestState =
 
 export interface Route {
   alias?: string
-  log: any // TODO: Cypress.Log
+  log: any
   options: RouteMatcherOptions
   handler: RouteHandler
   hitCount: number

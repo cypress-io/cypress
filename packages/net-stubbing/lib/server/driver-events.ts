@@ -18,7 +18,7 @@ import { onRequestContinue } from './intercept-request'
 import { onResponseContinue } from './intercept-response'
 import CyServer from '@packages/server'
 
-// TODO: move this into net-stubbing
+// TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 
 const debug = debugModule('cypress:net-stubbing:server:driver-events')
