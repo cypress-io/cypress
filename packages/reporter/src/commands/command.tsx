@@ -112,6 +112,24 @@ const Message = observer(({ model }: MessageProps) => (
   </span>
 ))
 
+interface ProgressProps {
+  model: CommandModel
+}
+
+const Progress = observer(({ model }: ProgressProps) => {
+  if (model.state !== 'pending' || !model.timeout) return null
+
+  const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
+  const timeRemaining = model.timeout - timeElapsed
+  const percentageRemaining = timeRemaining / model.timeout * 100
+
+  return (
+    <div className='command-progress'>
+      <span style={{ animationDuration: `${timeRemaining}ms`, width: `${percentageRemaining}%` }} />
+    </div>
+  )
+})
+
 interface Props {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
@@ -134,7 +152,6 @@ class Command extends Component<Props> {
   render () {
     const { model, aliasesWithDuplicates } = this.props
     const message = model.displayMessage
-    const timeRemaining = model.timeout ? model.timeout - ((new Date()).getTime() - model.wallClockStartedAt.getTime()) : 0
 
     return (
       <li
@@ -199,7 +216,7 @@ class Command extends Component<Props> {
             </span>
           </div>
         </FlashOnClick>
-        { model.state === 'pending' && !!timeRemaining && <div className='command-progress'><span style={{ animationDuration: `${timeRemaining}ms`, width: `${timeRemaining / model.timeout * 100}%` }} /></div> }
+        <Progress model={model} />
         {this._duplicates()}
       </li>
     )

@@ -181,7 +181,7 @@ const defaults = function (state, config, obj) {
     aliasType: undefined,
     message: undefined,
     timeout: undefined,
-    wallClockStartedAt: new Date(),
+    wallClockStartedAt: new Date().toJSON(),
     renderProps () {
       return {}
     },
