@@ -2349,7 +2349,7 @@ declare namespace Cypress {
      * Path to folder containing fixture files (Pass false to disable)
      * @default "cypress/fixtures"
      */
-    fixturesFolder: string
+    fixturesFolder: string | false
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
@@ -2364,7 +2364,7 @@ declare namespace Cypress {
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
-    pluginsFile: string
+    pluginsFile: string | false
     /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
@@ -2379,12 +2379,12 @@ declare namespace Cypress {
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
      */
-    screenshotsFolder: string
+    screenshotsFolder: string | false
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
      * @default "cypress/support/index.js"
      */
-    supportFile: string
+    supportFile: string | false
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -2399,7 +2399,7 @@ declare namespace Cypress {
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
      */
-    videoCompression: number
+    videoCompression: number | false
     /**
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
