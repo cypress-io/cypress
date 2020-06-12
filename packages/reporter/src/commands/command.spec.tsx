@@ -1,4 +1,4 @@
-import { shallow, ShallowWrapper } from 'enzyme'
+import { mount, shallow, ShallowWrapper } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
@@ -298,10 +298,43 @@ describe('<Command />', () => {
       expect(component.find('.command-number')).to.have.text('1')
     })
 
-    it('displays the timeout progress indicator', () => {
-      const component = shallow(<Command model={model({ state: 'pending' })} aliasesWithDuplicates={null} />)
+    context('progress indicator', () => {
+      let clock : SinonFakeTimers
 
-      expect(component.find(Progress).first()).to.exist
+      beforeEach(() => {
+        clock = sinon.useFakeTimers()
+      })
+
+      afterEach(() => {
+        clock.restore()
+      })
+
+      it('renders the progress indicator', () => {
+        const component = shallow(<Command model={model({ state: 'pending' })} aliasesWithDuplicates={null} />)
+
+        expect(component.find(Progress)).to.exist
+      })
+
+      it('modifies the timer width based on time elapsed', () => {
+        const initialDate = new Date(Date.now())
+        const timeout = 1000
+
+        clock.tick(timeout / 2)
+
+        const component = mount(<Progress
+          model={
+            model({
+              wallClockStartedAt: initialDate,
+              timeout,
+            })}
+        />)
+
+        // @ts-ignore
+        const rootNode = component.getDOMNode()[0]
+        const timerSpan = rootNode.children[0]
+
+        expect(timerSpan.style).to.have.property('width', '50%') // because we ticked half of the timeout
+      })
     })
   })
 
