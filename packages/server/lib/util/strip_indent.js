@@ -1,5 +1,5 @@
-export const stripIndent = (strings: TemplateStringsArray, ...args: any[]) => {
-  const parts: string[] = []
+const stripIndent = (strings, ...args) => {
+  const parts = []
 
   for (let i = 0; i < strings.length; i++) {
     parts.push(strings[i])
@@ -31,4 +31,8 @@ export const stripIndent = (strings: TemplateStringsArray, ...args: any[]) => {
   })
 
   return result
+}
+
+module.exports = {
+  stripIndent,
 }
