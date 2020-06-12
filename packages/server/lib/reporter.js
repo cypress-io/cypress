@@ -240,6 +240,8 @@ class Reporter {
     this.reporterName = reporterName
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
+    this.normalizeTest = this.normalizeTest.bind(this)
+    this.normalizePrevAttemptTest = this.normalizePrevAttemptTest.bind(this)
   }
 
   setRunnables (rootRunnable) {
@@ -359,6 +361,7 @@ class Reporter {
     }
 
     const _prevAttempts = get('prevAttempts')
+
     const prevAttempts = _prevAttempts && _prevAttempts.map(this.normalizePrevAttemptTest)
 
     return {

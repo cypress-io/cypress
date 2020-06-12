@@ -8,7 +8,7 @@ const snapshot = require('snap-shot-it')
 const Reporter = require(`../../lib/reporter`)
 const { spyOn, stdout } = require('../support/helpers/utils')
 const { registerInMocha, parseSnapshot, stringifyShort } = require('../matchDeep')
-const events = require('@packages/runner/__snapshots__/runner.spec.js.snapshot')
+const events = [require('@packages/runner/__snapshots__/runner.spec.js.snapshot'), require('@packages/runner/__snapshots__/retries.spec.js.snapshot')]
 const { EventSnapshots } = require('@packages/runner/cypress/support/eventSnapshots')
 
 registerInMocha()
@@ -21,15 +21,19 @@ const runnerEmitCleanseMap = {
   parent: stringifyShort,
 }
 
-/** @param {typeof EventSnapshots.FAIL_IN_AFTER} snapshotName */
+const getSnapshot = (v) => {
+  const snapfile = events.find((e) => e[v])
+
+  if (!snapfile) throw new Error(`failed to get snapshot: ${v}`)
+
+  const esnapshot = snapfile[v]
+
+  return parseSnapshot(esnapshot)
+}
+
+/** @param {keyof typeof EventSnapshots} snapshotName */
 function createReporterFromSnapshot (snapshotName) {
-  const getSnapshot = (snapshotName) => {
-    return _.mapValues(snapshotName, (v) => parseSnapshot(events[v]))
-  }
-
-  const { setRunnables, mocha } = getSnapshot(snapshotName)
-
-  const stdoutStub = stdout.capture()
+  const { setRunnables, mocha } = _.mapValues(EventSnapshots[snapshotName], (v) => getSnapshot(v))
 
   const reporter = new Reporter()
 
@@ -46,6 +50,8 @@ function createReporterFromSnapshot (snapshotName) {
 
   stubs.reporterEmit = spyOn(reporter, 'emit', debug.extend('reporter:emit'))
   stubs.runnerEmit = spyOn(reporter.runner, 'emit', debug.extend('runner:emit'))
+
+  const stdoutStub = stdout.capture()
 
   _.each(mochaEvents, (event) => {
     reporter.emit(...event.slice(1, 3))
@@ -129,21 +135,36 @@ function createReporter () {
 describe('lib/reporter', () => {
   describe('integration from snapshots', () => {
     it('simple single test', () => {
-      const { snapshot } = createReporterFromSnapshot(EventSnapshots.SIMPLE_SINGLE_TEST)
+      const { snapshot } = createReporterFromSnapshot('SIMPLE_SINGLE_TEST')
 
       snapshot('simple_single_test')
     })
 
     it('fail [afterEach]', () => {
-      const { snapshot } = createReporterFromSnapshot(EventSnapshots.FAIL_IN_AFTEREACH)
+      const { snapshot } = createReporterFromSnapshot('FAIL_IN_AFTEREACH')
 
       snapshot('fail in [afterEach]')
     })
 
     it('fail [beforeEach]', () => {
-      const { snapshot } = createReporterFromSnapshot(EventSnapshots.FAIL_IN_BEFOREEACH)
+      const { snapshot } = createReporterFromSnapshot('FAIL_IN_BEFOREEACH')
 
       snapshot('fail in [beforeEach]')
+    })
+
+    describe('retries', () => {
+      it('print attempt info in yellow', () => {
+        const { reporter, snapshot } = createReporterFromSnapshot('RETRY_PASS_IN_TEST')
+
+        const results = reporter.results()
+
+        const prevAttempts = expect(results.tests).property('0').property('prevAttempts')
+
+        prevAttempts.is.an('array')
+        prevAttempts.property('0').not.property('title')
+
+        snapshot('retry before passing in test')
+      })
     })
   })
 
