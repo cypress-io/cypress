@@ -875,8 +875,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         There was an error reconnecting to the Chrome DevTools protocol. Please restart the browser.
 
-        ${arg1.stack}
-        `
+        ${arg1.stack}`
     case 'CDP_RETRYING_CONNECTION':
       return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':
