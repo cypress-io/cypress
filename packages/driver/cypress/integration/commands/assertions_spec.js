@@ -2417,6 +2417,14 @@ describe('src/cy/commands/assertions', () => {
         this.$a.attr = function () {
           throw new Error('attr called')
         }
+
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            this.logs.push(log)
+          }
+        })
       })
 
       it('attr, not attr', function () {
@@ -2524,6 +2532,16 @@ describe('src/cy/commands/assertions', () => {
         expect(this.$div).not.to.have.attr({ foo: 'buzz', fizz: 'bar' })
         expect(this.$div).not.to.have.attr({ bar: 'foo' })
       })
+
+      it('logs the correct amount of times when passed an object', function () {
+        cy.$$('body').append(this.$div)
+
+        cy.get('div').last().should('have.attr', { foo: 'bar' })
+        cy.get('div').last().should('have.attr', { fizz: 'buzz' })
+        cy.get('div').last().should('have.attr', { foo: 'bar', fizz: 'buzz' }).then(() => {
+          expect(this.logs.length).to.eq(4)
+        })
+      })
     })
 
     context('prop', () => {
@@ -2538,6 +2556,14 @@ describe('src/cy/commands/assertions', () => {
         this.$a.prop = function () {
           throw new Error('prop called')
         }
+
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            this.logs.push(log)
+          }
+        })
       })
 
       it('prop, not prop', function () {
@@ -2652,6 +2678,16 @@ describe('src/cy/commands/assertions', () => {
         expect(this.$input).not.to.have.prop({ checked: false, type: 'text' })
         expect(this.$input).not.to.have.prop({ foo: 'bar' })
       })
+
+      it('logs the correct amount of times when passed an object', function () {
+        cy.$$('body').append(this.$input)
+
+        cy.get('input').last().should('have.prop', { checked: true })
+        cy.get('input').last().should('have.prop', { type: 'checkbox' })
+        cy.get('input').last().should('have.prop', { checked: true, type: 'checkbox' }).then(() => {
+          expect(this.logs.length).to.eq(4)
+        })
+      })
     })
 
     context('css', () => {
@@ -2660,6 +2696,14 @@ describe('src/cy/commands/assertions', () => {
         this.$div.css = function () {
           throw new Error('css called')
         }
+
+        this.logs = []
+
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            this.logs.push(log)
+          }
+        })
       })
 
       it('css, not css', function () {
@@ -2733,6 +2777,16 @@ describe('src/cy/commands/assertions', () => {
         expect(this.$div).not.to.have.css({ position: 'fixed' })
         expect(this.$div).not.to.have.css({ display: 'inline', position: 'fixed' })
         expect(this.$div).not.to.have.css({ foo: 'bar' })
+      })
+
+      it('logs the correct amount of times when passed an object', function () {
+        cy.$$('body').append(this.$div)
+
+        cy.get('div').last().should('have.css', { display: 'none' })
+        cy.get('div').last().should('have.css', { position: 'absolute' })
+        cy.get('div').last().should('have.css', { display: 'none', position: 'absolute' }).then(() => {
+          expect(this.logs.length).to.eq(4)
+        })
       })
     })
   })
