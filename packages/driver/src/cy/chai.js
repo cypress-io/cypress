@@ -1,5 +1,5 @@
 /* eslint-disable prefer-rest-params */
-// tests in driver/test/cypress/integration/commands/assertions_spec.js
+// tests in driver/cypress/integration/commands/assertions_spec.js
 
 const _ = require('lodash')
 const $ = require('jquery')

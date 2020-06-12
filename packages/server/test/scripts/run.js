@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
@@ -48,7 +46,7 @@ if (!run || !run.length) {
 
     It should look something like this:
 
-      $ yarn test ./test/unit/api_spec.coffee
+      $ yarn test ./test/unit/api_spec.js
 
     If you want to run all a specific group of tests:
 
@@ -112,11 +110,11 @@ commandAndArguments.args.push(
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
   '-r @packages/ts/register',
-  '-r @packages/coffee/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  '--extension=js,ts',
   // restore mocha 2.x behavior to force end process after spec run
   '--exit',
 )

@@ -119,14 +119,14 @@ exports['e2e plugins can modify config from plugins 1'] = `
 `
 
 exports['e2e plugins catches invalid browsers list returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
 
 Expected at least one browser
 
 `
 
 exports['e2e plugins catches invalid browser returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
 
 Found an error while validating the \`browsers\` list. Expected \`displayName\` to be a non-empty string. Instead the value was: \`{"name":"browser name","family":"chromium"}\`
 
@@ -135,9 +135,19 @@ Found an error while validating the \`browsers\` list. Expected \`displayName\` 
 exports['e2e plugins can filter browsers from config 1'] = `
 Can't run because you've entered an invalid browser name.
 
-Browser: 'chrome' was not found on your system.
+Browser: 'chrome' was not found on your system or is not supported by Cypress.
 
-Available browsers found are: electron
+Cypress supports the following browsers:
+- chrome
+- chromium
+- edge
+- electron
+- firefox (Cypress support in beta)
+
+You can also use a custom browser: https://on.cypress.io/customize-browsers
+
+Available browsers found on your system are:
+- electron
 
 `
 
@@ -338,7 +348,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
 `
 
 exports['e2e plugins catches invalid viewportWidth returned from plugins 1'] = `
-An invalid configuration value returned from the plugins file: \`cypress/plugins/index.coffee\`
+An invalid configuration value returned from the plugins file: \`cypress/plugins/index.js\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 

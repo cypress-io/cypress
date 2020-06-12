@@ -1,6 +1,6 @@
 const path = require('path')
 
-const e2e = require('../support/helpers/e2e')
+const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
 const e2eProject = Fixtures.projectPath('e2e')

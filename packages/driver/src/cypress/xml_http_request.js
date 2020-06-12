@@ -93,10 +93,9 @@ class XMLHttpRequest {
   }
 
   _getFixtureError () {
-    const body = this.response && this.response.body
-    const err = body.__error
+    const err = this.response?.body?.__error
 
-    if (body && err) {
+    if (err) {
       return err
     }
   }

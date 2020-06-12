@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
+import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
@@ -43,7 +44,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
 interface RunnablesProps {
   error?: Error
   runnablesStore: RunnablesStore
-  specPath: string
+  spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
 }
@@ -51,11 +52,12 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
-        {content(runnablesStore, specPath, error)}
+        <RunnableHeader spec={spec} />
+        {content(runnablesStore, spec.relative, error)}
       </div>
     )
   }

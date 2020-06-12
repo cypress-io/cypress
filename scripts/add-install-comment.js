@@ -1,8 +1,6 @@
 // this build utility script posts on the commit in the default branch "develop"
 // telling the user how they can install pre-release build of the Test Runner
 
-require('@packages/coffee/register')
-
 const la = require('lazy-ass')
 const is = require('check-more-types')
 const os = require('os')

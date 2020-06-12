@@ -26,7 +26,11 @@ describe('controls', function () {
     cy.visit('/dist').then((win) => {
       win.render({
         runner,
-        specPath: '/foo/bar',
+        spec: {
+          name: 'foo.js',
+          relative: 'relative/path/to/foo.js',
+          absolute: '/absolute/path/to/foo.js',
+        },
       })
     })
 
@@ -44,6 +48,18 @@ describe('controls', function () {
 
       cy.get('body').type('s').then(() => {
         expect(runner.emit).to.have.been.calledWith('runner:stop')
+      })
+    })
+
+    it('does not stop tests when paused', () => {
+      cy.get('body').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
+      })
+
+      runner.on.withArgs('paused').callArgWith(1, 'next command')
+
+      cy.get('body').type('s').then(() => {
+        expect(runner.emit).not.to.have.been.calledWith('runner:stop')
       })
     })
 

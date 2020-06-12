@@ -224,7 +224,7 @@ const toUnitVector = (v: Vector3): Vector3 => {
 
 // This function checks 2 things that can happen: scale and rotate to 0 in width or height.
 const elIsTransformedToZero = (list: TransformInfo[]) => {
-  if (list[1].transformStyle === 'preserve-3d') {
+  if (list.some((info) => info.transformStyle === 'preserve-3d')) {
     const normal = finalNormal(0, list)
 
     return isElementOrthogonalWithView(normal)
