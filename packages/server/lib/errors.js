@@ -821,7 +821,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         The following policies were detected that may prevent Cypress from automating Chrome:
 
-        ${arg1.map((line) => ` > ${line}`)}
+        ${arg1.map((line) => ` > ${line}`).join('\n')}
 
         For more information, see https://on.cypress.io/bad-browser-policy`
     case 'BAD_POLICY_WARNING_TOOLTIP':
