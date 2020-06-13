@@ -5,8 +5,8 @@
   "scripts": {
     "test": "../../node_modules/.bin/cypress run",
     "cy:open": "../../node_modules/.bin/cypress open",
-    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js",
-    "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js"
+    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js cypress/fixtures/add.js",
+    "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js cypress/fixtures/add.js"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."

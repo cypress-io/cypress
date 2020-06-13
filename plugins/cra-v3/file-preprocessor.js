@@ -33,10 +33,17 @@ module.exports = config => {
     config && config.env && config.env.coverage === false
   debug('coverage is disabled? %o', { coverageIsDisabled })
   debug('component test folder: %s', config.componentFolder)
+  debug('fixtures folder', config.fixturesFolder)
+
+  const additionalFolders = [config.componentFolder]
+  // user can disable fixtures folder, so check first
+  if (config.fixturesFolder) {
+    additionalFolders.push(config.fixturesFolder)
+  }
 
   const opts = {
     reactScripts: true,
-    addFolderToTranspile: config.componentFolder,
+    addFolderToTranspile: additionalFolders,
     coverage: !coverageIsDisabled,
     // insert Babel plugin to mock named imports
     looseModules: true,

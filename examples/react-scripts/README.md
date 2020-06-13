@@ -2,9 +2,10 @@
 
 A typical project using `react-scripts` with components and matching component tests residing in the [src](src) folder.
 
-Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+Note: run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
 
 ```shell
+npm install
 npm run cy:open
 # or just run headless tests
 npm test
