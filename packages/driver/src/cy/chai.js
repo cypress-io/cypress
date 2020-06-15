@@ -12,6 +12,7 @@ const $errUtils = require('../cypress/error_utils')
 const $stackUtils = require('../cypress/stack_utils')
 const $chaiJquery = require('../cypress/chai_jquery')
 const chaiInspect = require('./chai/inspect')
+const { replaceToBigValueTags } = require('./big_object')
 
 // all words between single quotes
 const allPropertyWordsBetweenSingleQuotes = /('.*?')/g
@@ -28,7 +29,6 @@ const leadingWhitespaces = /\*\*'\s*/g
 const trailingWhitespaces = /\s*'\*\*/g
 const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
-const expectedVal = /#\{this\}/g
 
 let assertProto = null
 let matchProto = null
@@ -134,8 +134,10 @@ chai.use((chai, u) => {
     })
   }
 
-  const replaceArgMessages = (args, str) => {
-    return _.reduce(args, (memo, value, index) => {
+  const replaceArgMessages = (args, values) => {
+    args = replaceToBigValueTags(args, values)
+
+    return _.reduce(args, (memo, value) => {
       if (_.isString(value)) {
         value = value
         .replace(allWordsBetweenCurlyBraces, '**$1**')
@@ -153,62 +155,6 @@ chai.use((chai, u) => {
       return memo
     }
     , [])
-  }
-
-  const summarizeBigObjects = (value, args) => {
-    // Summerize big arrays
-    if (Array.isArray(value) && value.length > LOGGED_ARRAY_SIZE) {
-      const first10 = value.slice(0, LOGGED_ARRAY_SIZE)
-
-      let first10str = ''
-
-      first10.forEach((item) => {
-        const val = typeof item === 'string' ? `"${item}"` : item
-
-        first10str += `${val}, `
-      })
-
-      let expected = `[${first10str}...more]`
-
-      args[1] = args[1].replace(expectedVal, expected)
-      args[2] = args[2].replace(expectedVal, expected)
-
-      return args
-    }
-
-    // Summarize big objects
-    if (_.isObject(value) &&
-    !($dom.isJquery(value) || $dom.isElement(value)) &&
-    (typeof args[1] === 'string' && typeof args[2] === 'string')) {
-      const keys = Object.keys(value)
-
-      if (keys.length > LOGGED_OBJ_SIZE) {
-        let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
-        const first10Keys = keys.sort(collator.compare).slice(0, LOGGED_OBJ_SIZE)
-        const summaryObj = {}
-
-        first10Keys.forEach((key) => {
-          summaryObj[key] = value[key]
-        })
-
-        let summaryStr = ''
-
-        first10Keys.forEach((key) => {
-          const val = typeof value[key] === 'string' ? `"${value[key]}"` : value[key]
-
-          summaryStr += `${key}: ${val}, `
-        })
-
-        let expected = `{${summaryStr}...more}`
-
-        args[1] = args[1].replace(expectedVal, expected)
-        args[2] = args[2].replace(expectedVal, expected)
-
-        return args
-      }
-    }
-
-    return args
   }
 
   const restoreAsserts = function () {
@@ -504,9 +450,11 @@ chai.use((chai, u) => {
       const value = chaiUtils.flag(this, 'object')
       const expected = args[3]
 
-      let customArgs = replaceArgMessages(args, this._obj)
-
-      customArgs = summarizeBigObjects(value, customArgs)
+      const customArgs = replaceArgMessages(args, {
+        subject: value,
+        expected,
+        actual: chaiUtils.getActual(this, args),
+      })
 
       let message = chaiUtils.getMessage(this, customArgs)
       const actual = chaiUtils.getActual(this, customArgs)

@@ -4,7 +4,7 @@ import cs from 'classnames'
 import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent } from 'react'
+import React, { Component, MouseEvent, ReactNode } from 'react'
 import 'regenerator-runtime/runtime'
 import { ObjectInspector, chromeLight } from 'react-inspector'
 // @ts-ignore
@@ -60,6 +60,23 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
+
+const inspectorTheme = (base: string, name: string) => ({
+  ...chromeLight,
+  ...({
+    BASE_BACKGROUND_COLOR: 'inherit',
+    BASE_COLOR: base,
+    OBJECT_NAME_COLOR: name,
+    OBJECT_VALUE_NULL_COLOR: base,
+    OBJECT_VALUE_UNDEFINED_COLOR: base,
+    OBJECT_VALUE_REGEXP_COLOR: base,
+    OBJECT_VALUE_STRING_COLOR: base,
+    OBJECT_VALUE_SYMBOL_COLOR: base,
+    OBJECT_VALUE_NUMBER_COLOR: base,
+    OBJECT_VALUE_BOOLEAN_COLOR: base,
+    OBJECT_VALUE_FUNCTION_PREFIX_COLOR: base,
+  }),
+})
 
 interface AliasReferenceProps {
   aliasObj: AliasObject
@@ -122,39 +139,29 @@ const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
   )
 })
 
-interface MessageProps {
-  model: CommandModel
-}
-
-const Message = observer(({ model }: MessageProps) => (
+const Message = observer(({ model, toggleSubject, toggleExpected, toggleActual }) => (
   <span>
     <span className='command-message-text-wrap'>
       <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
-      <span
-        className='command-message-text'
-        dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
-      />
+      {
+        (!model.subject && !model.expected && !model.actual)
+          ? <span
+            className='command-message-text'
+            dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+          />
+          : <SummarizedMessage
+            model={model}
+            toggleSubject={toggleSubject}
+            toggleExpected={toggleExpected}
+            toggleActual={toggleActual}
+          />
+      }
     </span>
     { model.options && Object.keys(model.options).length > 0
       ?
       <span className="command-message-options" onClick={(e) => e.stopPropagation()}>
         <ObjectInspector
-          theme={{
-            ...chromeLight,
-            ...({
-              BASE_BACKGROUND_COLOR: 'inherit',
-              BASE_COLOR: '#999',
-              OBJECT_NAME_COLOR: '#777',
-              OBJECT_VALUE_NULL_COLOR: '#999',
-              OBJECT_VALUE_UNDEFINED_COLOR: '#999',
-              OBJECT_VALUE_REGEXP_COLOR: '#999',
-              OBJECT_VALUE_STRING_COLOR: '#999',
-              OBJECT_VALUE_SYMBOL_COLOR: '#999',
-              OBJECT_VALUE_NUMBER_COLOR: '#999',
-              OBJECT_VALUE_BOOLEAN_COLOR: '#999',
-              OBJECT_VALUE_FUNCTION_PREFIX_COLOR: '#999',
-            }),
-          }}
+          theme={inspectorTheme('#999', '#777')}
           data={model.options}
           // 10 below is an arbitrary big number
           // @ts-ignore
@@ -165,6 +172,96 @@ const Message = observer(({ model }: MessageProps) => (
     }
   </span>
 ))
+
+interface SummarizedMessageProps {
+  model: CommandModel
+  toggleSubject: (e: MouseEvent) => void
+  toggleExpected: (e: MouseEvent) => void
+  toggleActual: (e: MouseEvent) => void
+}
+
+const SummarizedMessage = ({ model, toggleSubject, toggleExpected, toggleActual }: SummarizedMessageProps) => {
+  const tags: string[] = []
+
+  const decodeTag = (i: number) => {
+    const tag = tags[i]
+
+    if (tag === 'this' && model.subject) {
+      const summary = model.subject.summary
+
+      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleSubject} />
+    }
+
+    if (tag === 'exp' && model.expected) {
+      const summary = model.expected.summary
+
+      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleExpected} />
+    }
+
+    if (tag === 'act' && model.actual) {
+      const summary = model.actual.summary
+
+      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleActual} />
+    }
+
+    return <span key={`normal-${i}`}>{`%{${tag}}`}</span>
+  }
+
+  return (
+    <span className="command-message-text">
+      {
+        (model.displayMessage || '')
+        .replace(/%{(.*?)}/g, (_m: string, m0: string) => {
+          tags.push(m0)
+
+          return '<<tag>>'
+        })
+        .split('<<tag>>')
+        .reduce((prev: ReactNode[], curr: string, i: number) => {
+          return prev.concat(
+            <span key={`text-${i}`} dangerouslySetInnerHTML={{ __html: formattedMessage(curr) }} />,
+            tags[i] ? decodeTag(i) : undefined,
+          )
+        }, [])
+      }
+    </span>
+  )
+}
+
+interface SummmaryButtonProps {
+  summary: string
+  toggle: (e: MouseEvent) => void
+}
+
+const SummaryButton = ({ summary, toggle }: SummmaryButtonProps) => {
+  return (
+    <strong>
+      <a className="command-message-summarized-text" onClick={toggle}>
+        {summary}
+      </a>
+    </strong>
+  )
+}
+
+interface DetailViewerProps {
+  name: string
+  value: any
+}
+
+const DetailViewer = ({ name, value }: DetailViewerProps) => {
+  return (
+    <div className="command-detail-viewer">
+      <div className="command-detail-viewer-title">{name} details</div>
+      <div className="command-detail-viewer-content">
+        {
+          typeof (value) === 'string'
+            ? value
+            : <ObjectInspector theme={inspectorTheme('#555', '#555')} data={value} expandLevel={1} />
+        }
+      </div>
+    </div>
+  )
+}
 
 interface Props {
   model: CommandModel
@@ -177,6 +274,9 @@ interface Props {
 @observer
 class Command extends Component<Props> {
   @observable isOpen = false
+  @observable showSubject = false
+  @observable showExpected = false
+  @observable showActual = false
   private _showTimeout?: TimeoutID
 
   static defaultProps = {
@@ -234,7 +334,11 @@ class Command extends Component<Props> {
               <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
             </span>
             <span className='command-message'>
-              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+              {
+                model.referencesAlias
+                  ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  : <Message model={model} toggleSubject={this._toggleSubject} toggleExpected={this._toggleExpected} toggleActual={this._toggleActual} />
+              }
             </span>
             <span className='command-controls'>
               <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
@@ -252,6 +356,21 @@ class Command extends Component<Props> {
             </span>
           </div>
         </FlashOnClick>
+        {
+          this.showSubject
+            ? <DetailViewer name='subject' value={model.subject && model.subject.value} />
+            : null
+        }
+        {
+          this.showExpected
+            ? <DetailViewer name='expected' value={model.expected && model.expected.value} />
+            : null
+        }
+        {
+          this.showActual
+            ? <DetailViewer name='actual' value={model.actual && model.actual.value} />
+            : null
+        }
         {this._duplicates()}
       </li>
     )
@@ -296,6 +415,24 @@ class Command extends Component<Props> {
     e.stopPropagation()
 
     this.isOpen = !this.isOpen
+  }
+
+  @action _toggleSubject = (e: MouseEvent) => {
+    e.stopPropagation()
+
+    this.showSubject = !this.showSubject
+  }
+
+  @action _toggleExpected = (e: MouseEvent) => {
+    e.stopPropagation()
+
+    this.showExpected = !this.showExpected
+  }
+
+  @action _toggleActual = (e: MouseEvent) => {
+    e.stopPropagation()
+
+    this.showActual = !this.showActual
   }
 
   @action _onClick = () => {

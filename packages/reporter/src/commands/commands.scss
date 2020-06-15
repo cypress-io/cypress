@@ -1,4 +1,6 @@
 .reporter {
+  $command-background: #eef1f4;
+
   .hooks-container {
     margin: 5px 0 5px 5px;
     padding-left: 10px;
@@ -54,7 +56,7 @@
   }
 
   .commands-container {
-    background-color: #eef1f4;
+    background-color: $command-background;
     font-family: $monospace;
     min-width: $reporter-contents-min-width;
     padding: 0;
@@ -275,6 +277,15 @@
     flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .command-message-summarized-text {
+    font-weight: bold;
+    color: inherit;
+
+    &:hover {
+      color: inherit
+    }
   }
 
   .command-message-options {
@@ -588,6 +599,25 @@
 
     .command-pin {
       color: $pinned;
+    }
+  }
+
+  .command-detail-viewer {
+    padding: 0 8px;
+    border-top: 1px solid darken($command-background, 10%);
+    border-bottom: 1px solid darken($command-background, 10%);
+    background: darken($command-background, 5%);
+    max-height: 700px;
+
+    .command-detail-viewer-title {
+      font-weight: bold;
+      color: #444;
+      padding: 3px 0;
+      border-bottom: 1px solid darken($command-background, 20%);
+    }
+
+    .command-detail-viewer-content {
+      padding: 8px 0;
     }
   }
 

@@ -1,0 +1,117 @@
+import _ from 'lodash'
+import $dom from '../dom'
+
+const LOGGED_ARRAY_SIZE = 10
+const LOGGED_OBJ_SIZE = 10
+const LONG_STRING_LENGTH = 100
+
+interface Values {
+  subject: any
+  expected: any
+  actual: any
+}
+
+interface Args {
+  0: boolean
+  1?: string
+  2?: string
+}
+
+export const replaceToBigValueTags = (args: Args, { subject, expected, actual }: Values) => {
+  if (typeof args[1] !== 'string' || typeof args[2] !== 'string') {
+    return args
+  }
+
+  if (isBigValue(subject)) {
+    args = replaceArgs(args, /#{this}/g, '%{this}')
+  }
+
+  if (isBigValue(expected)) {
+    args = replaceArgs(args, /#{exp}/g, '%{exp}')
+  }
+
+  if (isBigValue(actual)) {
+    args = replaceArgs(args, /#{act}/g, '%{act}')
+  }
+
+  return args
+}
+
+export const logBigValue = (value: any) => {
+  return isBigValue(value)
+    ? {
+      summary: summarizeValue(value),
+      value,
+    }
+    : value
+}
+
+const isBigValue = (value: any) => {
+  return value && isLongString(value as string) ||
+  isBigArray(value as any[]) ||
+  isBigObject(value as object)
+}
+
+const isLongString = (value: string) => {
+  return typeof (value) === 'string' && value.length > LONG_STRING_LENGTH
+}
+
+const isBigArray = (value: any[]) => {
+  return (Array.isArray(value) && value.length > LOGGED_ARRAY_SIZE)
+}
+
+const isBigObject = (value: object) => {
+  return (_.isObject(value) &&
+  !($dom.isJquery(value) || $dom.isElement(value)) &&
+  Object.keys(value).length > LOGGED_OBJ_SIZE)
+}
+
+const replaceArgs = (args: Args, target: RegExp, tag: string) => {
+  args[1] = args[1]!.replace(target, tag)
+  args[2] = args[2]!.replace(target, tag)
+
+  return args
+}
+
+const summarizeValue = (value: any) => {
+  if (isLongString(value)) {
+    return `${(value as string).substring(0, LONG_STRING_LENGTH)} [...more]`
+  }
+
+  if (isBigArray(value)) {
+    const first10 = value.slice(0, LOGGED_ARRAY_SIZE)
+
+    let first10str = ''
+
+    first10.forEach((item) => {
+      const val = typeof item === 'string' ? `"${item}"` : item
+
+      first10str += `${val}, `
+    })
+
+    return `[${first10str}...more]`
+  }
+
+  if (isBigObject(value)) {
+    const keys = Object.keys(value)
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+    const first10Keys = keys.sort(collator.compare).slice(0, LOGGED_OBJ_SIZE)
+    const summaryObj = {}
+
+    first10Keys.forEach((key) => {
+      summaryObj[key] = value[key]
+    })
+
+    let summaryStr = ''
+
+    first10Keys.forEach((key) => {
+      const val = typeof value[key] === 'string' ? `"${value[key]}"` : value[key]
+
+      summaryStr += `${key}: ${val}, `
+    })
+
+    return `{${summaryStr}...more}`
+  }
+
+  throw new Error(`${value} is not big.`)
+}

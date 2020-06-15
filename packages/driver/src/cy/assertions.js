@@ -6,6 +6,7 @@ const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
 const { LOGGED_ARRAY_SIZE } = require('./chai')
 const { LOGGED_OBJ_SIZE } = require('./chai')
+const { logBigValue } = require('./big_object')
 
 // TODO
 // bTagOpen + bTagClosed
@@ -480,6 +481,9 @@ const create = function (state, queue, retryFn) {
 
     _.extend(obj, {
       name: 'assert',
+      subject: logBigValue(value),
+      expected: logBigValue(expected),
+      actual: logBigValue(actual),
       // end:      true
       // snapshot: true
       message,

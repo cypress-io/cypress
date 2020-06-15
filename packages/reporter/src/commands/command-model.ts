@@ -11,6 +11,11 @@ interface RenderProps {
   indicator?: string
 }
 
+type TestedValue = {
+  summary: string
+  value: string | object | any[]
+} | null
+
 export interface CommandProps extends InstrumentProps {
   err?: Err
   event?: boolean
@@ -20,6 +25,9 @@ export interface CommandProps extends InstrumentProps {
   visible?: boolean
   options?: Record<string, any>
   hookName: string
+  subject: TestedValue
+  expected: TestedValue
+  actual: TestedValue
 }
 
 export default class Command extends Instrument {
@@ -33,6 +41,9 @@ export default class Command extends Instrument {
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
   @observable options?: Record<string, any> = {}
+  @observable subject: TestedValue
+  @observable expected: TestedValue
+  @observable actual: TestedValue
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -60,6 +71,9 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
     this.options = props.options
+    this.subject = props.subject
+    this.expected = props.expected
+    this.actual = props.actual
 
     this._checkLongRunning()
   }
