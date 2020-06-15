@@ -19,6 +19,7 @@ let authState
 let openExternalAttempted = false
 let authRedirectReached = false
 let server
+let utm
 
 const _buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
@@ -45,6 +46,16 @@ const _buildFullLoginUrl = (baseLoginUrl, server) => {
       platform: os.platform(),
     }
 
+    if (utm) {
+      authUrl.query = {
+        utm_source: 'Test Runner',
+        utm_medium: 'Login Button',
+        utm_campaign: 'TR-Dashboard',
+        utm_content: utm,
+        ...authUrl.query,
+      }
+    }
+
     return authUrl.format()
   })
 }
@@ -58,7 +69,7 @@ const _getOriginFromUrl = (originalUrl) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage) => {
+const start = (onMessage, utm_code) => {
   function sendMessage (type, name, arg1) {
     onMessage({
       type,
@@ -68,6 +79,7 @@ const start = (onMessage) => {
     })
   }
 
+  utm = utm_code
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
