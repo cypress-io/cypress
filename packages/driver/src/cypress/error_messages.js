@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
+const { normalizedStack } = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -918,10 +919,10 @@ module.exports = {
       return `An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(matcher)}`
     },
     req_cb_failed: ({ err, req, route }) => {
-      return `A request callback passed to ${cmd('route2')} threw an error while intercepting a request:\n\n${err.stack}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+      return `A request callback passed to ${cmd('route2')} threw an error while intercepting a request:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
     res_cb_failed: ({ err, req, res, route }) => {
-      return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${err.stack}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
+      return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
     },
     multiple_next_calls: ({ route, req }) => {
       return `\`next()\` was called multiple times in a request handler, but the request can only be passed on once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
