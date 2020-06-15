@@ -90,7 +90,7 @@
     "@types/enzyme": "3.9.1",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/execa": "0.9.0",
-    "@types/fs-extra": "^8.0.1",
+    "@types/fs-extra": "8.1.1",
     "@types/glob": "7.1.1",
     "@types/lodash": "4.14.149",
     "@types/markdown-it": "0.0.9",
@@ -187,8 +187,8 @@
     "typescript": "3.7.4"
   },
   "engines": {
-    "node": ">=12.8.1",
-    "yarn": ">=1.17.3"
+    "node": "14.4.0",
+    "yarn": "1.22.4"
   },
   "productName": "Cypress",
   "license": "MIT",
