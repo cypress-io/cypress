@@ -19,7 +19,22 @@
         {
           "id": "r4",
           "title": "test 2",
-          "state": "failed"
+          "state": "failed",
+          "commands": [
+            {
+              "hookName": "test",
+              "id": "c1",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r4",
+              "options": {
+                "foo": "bar"
+              },
+              "type": "parent"
+            }
+          ]
         }
       ],
       "suites": [

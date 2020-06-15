@@ -120,5 +120,11 @@ describe('controls', function () {
         column: 0,
       })
     })
+
+    describe('options', () => {
+      it('shows option', () => {
+        cy.get('.command-name-visit .command-message-options').contains('{foo:bar}')
+      })
+    })
   })
 })
