@@ -813,7 +813,7 @@ module.exports = {
     console.log('')
   },
 
-  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
+  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -822,6 +822,10 @@ module.exports = {
     // or we've been told not to upload the video
     if (videoCompression === false || shouldUploadVideo === false) {
       return
+    }
+
+    if (quiet === true) {
+      return videoCapture.process(name, cname, videoCompression)
     }
 
     console.log('')
@@ -1061,7 +1065,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1095,10 +1099,11 @@ module.exports = {
         return obj
       }
 
-      this.displayResults(obj, estimated)
-
-      if (screenshots && screenshots.length) {
-        this.displayScreenshots(screenshots)
+      if (quiet !== true) {
+        this.displayResults(obj, estimated)
+        if (screenshots && screenshots.length) {
+          this.displayScreenshots(screenshots)
+        }
       }
 
       const { tests, stats } = obj
@@ -1137,6 +1142,7 @@ module.exports = {
           compressedVideoName,
           videoCompression,
           suv,
+          quiet,
         )
         .catch(warnVideoRecordingFailed)
       }
@@ -1191,19 +1197,23 @@ module.exports = {
       config,
     }
 
-    displayRunStarting({
-      config,
-      specs,
-      group,
-      tag,
-      runUrl,
-      browser,
-      parallel,
-      specPattern,
-    })
+    if (config.quiet !== true) {
+      displayRunStarting({
+        config,
+        specs,
+        group,
+        tag,
+        runUrl,
+        browser,
+        parallel,
+        specPattern,
+      })
+    }
 
     const runEachSpec = (spec, index, length, estimated) => {
-      displaySpecHeader(spec.name, index + 1, length, estimated)
+      if (config.quiet !== true) {
+        displaySpecHeader(spec.name, index + 1, length, estimated)
+      }
 
       return this.runSpec(spec, options, estimated)
       .get('results')
@@ -1282,6 +1292,7 @@ module.exports = {
           exit: options.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
+          quiet: options.config.quiet,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1388,7 +1399,7 @@ module.exports = {
           }
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
-            return this.runSpecs({
+            let runSpecs = this.runSpecs({
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
@@ -1412,7 +1423,12 @@ module.exports = {
               headed: options.headed,
               outputPath: options.outputPath,
             })
-            .tap(renderSummaryTable(runUrl))
+
+            if (config.quiet !== true) {
+              return runSpecs.tap(renderSummaryTable(runUrl))
+            }
+
+            return runSpecs
           }
 
           if (record) {

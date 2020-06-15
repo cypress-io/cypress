@@ -65,6 +65,7 @@ hosts                           screenshotsFolder
 numTestsKeptInMemory            supportFile
 port                            supportFolder
 projectId                       videosFolder
+quiet
 reporter
 reporterOptions
 ignoreTestFiles
@@ -123,6 +124,7 @@ const CONFIG_DEFAULTS = {
   projectId: null,
   userAgent: null,
   isTextTerminal: false,
+  quiet: false,
   reporter: 'spec',
   reporterOptions: null,
   blacklistHosts: null,
@@ -200,6 +202,7 @@ const validationRules = {
   pageLoadTimeout: v.isNumber,
   pluginsFile: v.isStringOrFalse,
   port: v.isNumber,
+  quiet: v.isBoolean,
   reporter: v.isString,
   requestTimeout: v.isNumber,
   responseTimeout: v.isNumber,

@@ -32,6 +32,11 @@
       "default": null,
       "description": "Port used to host Cypress. Normally this is a randomly generated port"
     },
+    "quiet": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether CYpress will run quietly, using only the configured reporter"
+    },
     "reporter": {
       "type": "string",
       "default": "spec",
