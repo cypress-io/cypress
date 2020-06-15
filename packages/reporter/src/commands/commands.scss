@@ -260,9 +260,14 @@
     white-space: nowrap;
 
     > span {
-      align-items: center;
       display: flex;
+      flex-direction: column;
     }
+  }
+
+  .command-message-text-wrap {
+    align-items: center;
+    display: flex;
   }
 
   .command-message-text {
@@ -270,6 +275,13 @@
     flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .command-message-options {
+    display: block;
+    font-size: 0.8em;
+    opacity: 0.8;
+    white-space: initial;
   }
 
   .command-wrapper .fa-circle {

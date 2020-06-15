@@ -18,6 +18,7 @@ export interface CommandProps extends InstrumentProps {
   numElements: number
   renderProps?: RenderProps
   visible?: boolean
+  options?: Record<string, any>
   hookName: string
 }
 
@@ -31,6 +32,7 @@ export default class Command extends Instrument {
   @observable visible?: boolean = true
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
+  @observable options?: Record<string, any> = {}
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -57,6 +59,7 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
+    this.options = props.options
 
     this._checkLongRunning()
   }

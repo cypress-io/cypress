@@ -21,6 +21,9 @@ const md = new Markdown()
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
+const formatOptions = (options: Record<string, any>) => {
+  return JSON.stringify(options).replace(/"/g, '')
+}
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
 
@@ -104,11 +107,17 @@ interface MessageProps {
 
 const Message = observer(({ model }: MessageProps) => (
   <span>
-    <i className={`fas fa-circle ${model.renderProps.indicator}`} />
-    <span
-      className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
-    />
+    <span className='command-message-text-wrap'>
+      <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
+      <span
+        className='command-message-text'
+        dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+      />
+    </span>
+    { model.options
+      ? <span className='command-message-options'>{formatOptions(model.options)}</span>
+      : null
+    }
   </span>
 ))
 

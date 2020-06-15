@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible options'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -152,9 +152,17 @@ const defaults = function (state, config, obj) {
       },
     })
 
-    // if obj.isCurrent
-    // stringify the obj.message (if it exists) or current.get("args")
-    obj.message = $utils.stringify(obj.message != null ? obj.message : (current != null ? current.get('args') : undefined))
+    let args = current != null ? current.get('args') : undefined
+
+    if (args) {
+      const last = args[args.length - 1]
+
+      if (_.isObject(last)) {
+        args = args.slice(0, args.length - 1)
+      }
+    }
+
+    obj.message = $utils.stringify(obj.message != null ? obj.message : args)
 
     // allow type to by a dynamic function
     // so it can conditionally return either
@@ -179,6 +187,7 @@ const defaults = function (state, config, obj) {
     alias: undefined,
     aliasType: undefined,
     message: undefined,
+    options: null,
     renderProps () {
       return {}
     },
