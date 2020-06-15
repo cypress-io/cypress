@@ -11112,10 +11112,10 @@ event-stream@=3.3.4:
     stream-combiner "~0.0.4"
     through "~2.3.1"
 
-eventemitter2@4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-4.1.2.tgz#0e1a8477af821a6ef3995b311bf74c23a5247f15"
-  integrity sha1-DhqEd6+CGm7zmVsxG/dMI6UkfxU=
+eventemitter2@6.4.2:
+  version "6.4.2"
+  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-6.4.2.tgz#f31f8b99d45245f0edbc5b00797830ff3b388970"
+  integrity sha512-r/Pwupa5RIzxIHbEKCkNXqpEQIIT4uQDxmP4G/Lug/NokVUWj0joz/WzWl3OxRpC5kDrH/WdiUJoR+IrwvXJEw==
 
 eventemitter3@^3.1.0:
   version "3.1.2"
@@ -14538,21 +14538,21 @@ is-html@2.0.0:
   dependencies:
     html-tags "^3.0.0"
 
-is-installed-globally@0.1.0, is-installed-globally@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/is-installed-globally/-/is-installed-globally-0.1.0.tgz#0dfd98f5a9111716dd535dda6492f67bf3d25a80"
-  integrity sha1-Df2Y9akRFxbdU13aZJL2e/PSWoA=
-  dependencies:
-    global-dirs "^0.1.0"
-    is-path-inside "^1.0.0"
-
-is-installed-globally@^0.3.1:
+is-installed-globally@0.3.2, is-installed-globally@^0.3.1:
   version "0.3.2"
   resolved "https://registry.yarnpkg.com/is-installed-globally/-/is-installed-globally-0.3.2.tgz#fd3efa79ee670d1187233182d5b0a1dd00313141"
   integrity sha512-wZ8x1js7Ia0kecP/CHM/3ABkAmujX7WPvQk6uu3Fly/Mk44pySulQpnHG46OMjHGXApINnV4QhY3SWnECO2z5g==
   dependencies:
     global-dirs "^2.0.1"
     is-path-inside "^3.0.1"
+
+is-installed-globally@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/is-installed-globally/-/is-installed-globally-0.1.0.tgz#0dfd98f5a9111716dd535dda6492f67bf3d25a80"
+  integrity sha1-Df2Y9akRFxbdU13aZJL2e/PSWoA=
+  dependencies:
+    global-dirs "^0.1.0"
+    is-path-inside "^1.0.0"
 
 is-integer@^1.0.4:
   version "1.0.7"
@@ -24630,6 +24630,11 @@ undertaker@^1.2.1:
     object.defaults "^1.0.0"
     object.reduce "^1.0.0"
     undertaker-registry "^1.0.0"
+
+unfetch@4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/unfetch/-/unfetch-4.1.0.tgz#6ec2dd0de887e58a4dee83a050ded80ffc4137db"
+  integrity sha512-crP/n3eAPUJxZXM9T80/yv0YhkTEx2K1D3h7D1AJM6fzsWZrxdyRuLN0JH/dkZh1LNH8LxCnBzoPFCPbb2iGpg==
 
 unicode-canonical-property-names-ecmascript@^1.0.4:
   version "1.0.4"
