@@ -124,7 +124,6 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blacklistHosts: null,
   blocklistHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
