@@ -214,7 +214,10 @@ describe('issue #678', () => {
       })
 
       cy.get('form').scrollIntoView({
-        offset: { top: 20 },
+        offset: { top: 20, left: 30, right: 20, bottom: 40 },
+        log: true,
+        timeout: 3000,
+        duration: 0,
       })
 
       cy.scrollTo(0, 500, {
@@ -291,9 +294,9 @@ describe('issue #678', () => {
         timeout: 1000,
       })
 
-      cy.writeFile('./cypress/fixtures/test.txt', 'test', {
+      cy.writeFile('./cypress/_test-output/test.txt', 'test', {
         timeout: 3000,
-      }).exec('rm ./cypress/fixtures/test.txt')
+      }).exec('rm ./cypress/_test-output/test.txt')
     })
   })
 
@@ -581,8 +584,8 @@ describe('issue #678', () => {
       })
 
       testOptions('writeFile', { timeout: 3000 }, 0, (options) => {
-        cy.writeFile('./cypress/fixtures/test.txt', 'test', options)
-        .exec('rm ./cypress/fixtures/test.txt')//*/
+        cy.writeFile('./cypress/_test-output/test.txt', 'test', options)
+        .exec('rm ./cypress/_test-output/test.txt')//*/
       })
     })
   })
