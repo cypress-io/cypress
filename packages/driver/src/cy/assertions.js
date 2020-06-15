@@ -55,6 +55,7 @@ const isDomSubjectAndMatchesValue = (value, subject) => {
 // 1. always remove value
 // 2. if value is a jquery object set a subject
 // 3. if actual is undefined or its not expected remove both actual + expected
+// 4. if value is no a jquery object but it is big, set a subject
 const parseValueActualAndExpected = (value, actual, expected) => {
   const obj = { actual, expected }
 
@@ -64,6 +65,10 @@ const parseValueActualAndExpected = (value, actual, expected) => {
     if (_.isUndefined(actual) || (actual !== expected)) {
       delete obj.actual
       delete obj.expected
+    } else {
+      if ((Array.isArray(value) && value.length > 10) || (_.isObject(value) && Object.keys(value).length > 10)) {
+        obj.subject = value
+      }
     }
   }
 

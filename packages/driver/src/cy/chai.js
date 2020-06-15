@@ -28,6 +28,7 @@ const leadingWhitespaces = /\*\*'\s*/g
 const trailingWhitespaces = /\s*'\*\*/g
 const whitespace = /\s/g
 const valueHasLeadingOrTrailingWhitespaces = /\*\*'\s+|\s+'\*\*/g
+const expectedVal = /#\{this\}/g
 
 let assertProto = null
 let matchProto = null
@@ -149,6 +150,66 @@ chai.use((chai, u) => {
       return memo
     }
     , [])
+  }
+
+  const summarizeBigObjects = (value, args) => {
+    // Summerize big arrays
+    const LOGGED_ARRAY_SIZE = 10
+
+    if (Array.isArray(value) && value.length > LOGGED_ARRAY_SIZE) {
+      const first10 = value.slice(0, LOGGED_ARRAY_SIZE)
+
+      let first10str = ''
+
+      first10.forEach((item) => {
+        const val = typeof item === 'string' ? `"${item}"` : item
+
+        first10str += `${val}, `
+      })
+
+      let expected = `[${first10str}...more]`
+
+      args[1] = args[1].replace(expectedVal, expected)
+      args[2] = args[2].replace(expectedVal, expected)
+
+      return args
+    }
+
+    // Summarize big objects
+    const LOGGED_OBJ_SIZE = 10
+
+    if (_.isObject(value) &&
+    !($dom.isJquery(value) || $dom.isElement(value)) &&
+    (typeof args[1] === 'string' && typeof args[2] === 'string')) {
+      const keys = Object.keys(value)
+
+      if (keys.length > LOGGED_OBJ_SIZE) {
+        let collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+        const first10Keys = keys.sort(collator.compare).slice(0, LOGGED_OBJ_SIZE)
+        const summaryObj = {}
+
+        first10Keys.forEach((key) => {
+          summaryObj[key] = value[key]
+        })
+
+        let summaryStr = ''
+
+        first10Keys.forEach((key) => {
+          const val = typeof value[key] === 'string' ? `"${value[key]}"` : value[key]
+
+          summaryStr += `${key}: ${val}, `
+        })
+
+        let expected = `{${summaryStr}...more}`
+
+        args[1] = args[1].replace(expectedVal, expected)
+        args[2] = args[2].replace(expectedVal, expected)
+
+        return args
+      }
+    }
+
+    return args
   }
 
   const restoreAsserts = function () {
@@ -444,7 +505,9 @@ chai.use((chai, u) => {
       const value = chaiUtils.flag(this, 'object')
       const expected = args[3]
 
-      const customArgs = replaceArgMessages(args, this._obj)
+      let customArgs = replaceArgMessages(args, this._obj)
+
+      customArgs = summarizeBigObjects(value, customArgs)
 
       let message = chaiUtils.getMessage(this, customArgs)
       const actual = chaiUtils.getActual(this, customArgs)

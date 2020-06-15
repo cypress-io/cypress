@@ -127,6 +127,68 @@ describe('src/cy/commands/assertions', () => {
       }).should('deep.eq', { foo: 'baz' })
     })
 
+    describe('big objects/arrays', () => {
+      describe('object', () => {
+        it('shows correct expected message', () => {
+          const arr = new Uint8ClampedArray(2560000)
+
+          cy.wrap(arr)
+          .should('have.length', 2560000)
+          .then(function () {
+            expect(this.logs[1].get('message')).to.eq(
+              'expected **{0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, ...more}** to have a length of **2560000**',
+            )
+          })
+        })
+
+        it('shows value as a subject in consoleprop', () => {
+          const arr = new Uint8ClampedArray(20)
+
+          cy.wrap(arr)
+          .should('have.property', '12')
+          .then(function () {
+            expect(this.logs[1].invoke('consoleProps')).to.deep.eq({
+              Command: 'assert',
+              expected: undefined,
+              actual: arr,
+              subject: arr,
+              Message: `expected {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, ...more} to have a property '12'`,
+            })
+          })
+        })
+      })
+
+      describe('array', () => {
+        it('shows correct expected message', () => {
+          const arr = Array.from({ length: 2560000 }, () => 1)
+
+          cy.wrap(arr)
+          .should('have.length', 2560000)
+          .then(function () {
+            expect(this.logs[1].get('message')).to.eq(
+              'expected **[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...more]** to have a length of **2560000**',
+            )
+          })
+        })
+
+        it('shows value as a subject in consoleprop', () => {
+          const arr = Array.from({ length: 20 }, () => 1)
+
+          cy.wrap(arr)
+          .should('include', 1)
+          .then(function () {
+            expect(this.logs[1].invoke('consoleProps')).to.deep.eq({
+              Command: 'assert',
+              expected: undefined,
+              actual: arr,
+              subject: arr,
+              Message: `expected [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...more] to include 1`,
+            })
+          })
+        })
+      })
+    })
+
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
