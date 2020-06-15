@@ -1,12 +1,9 @@
-/* global Cypress */
 import _ from 'lodash'
 import cs from 'classnames'
-import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent, ReactNode } from 'react'
+import React, { Component, MouseEvent } from 'react'
 import 'regenerator-runtime/runtime'
-import { ObjectInspector, chromeLight } from 'react-inspector'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -18,33 +15,10 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
-
-const md = new Markdown()
+import { Message, DetailViewer } from './message'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
-const formatOptions = (options: Record<string, any>) => {
-  let obj = Object.assign({}, options)
-
-  Object.keys(obj).forEach((k) => {
-    if (obj[k] === undefined) {
-      obj[k] = 'undefined'
-    }
-
-    if (typeof obj[k] === 'string' && obj[k].match(/[ ,:]/)) {
-      obj[k] = `__QUOTE__${obj[k].replace(/:/g, '__COLON__').replace(/,/g, '__COMMA__')}__QUOTE__`
-    }
-  })
-
-  return JSON.stringify(obj)
-  .replace(/"/g, '')
-  .replace(/:/g, ': ')
-  .replace(/,/g, ', ')
-  .replace(/__COLON__/g, ':')
-  .replace(/__COMMA__/g, ',')
-  .replace(/__QUOTE__/g, `"`)
-}
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
 
@@ -60,23 +34,6 @@ const shouldShowCount = (aliasesWithDuplicates: Array<Alias> | null, aliasName: 
 
   return _.includes(aliasesWithDuplicates, aliasName)
 }
-
-const inspectorTheme = (base: string, name: string) => ({
-  ...chromeLight,
-  ...({
-    BASE_BACKGROUND_COLOR: 'inherit',
-    BASE_COLOR: base,
-    OBJECT_NAME_COLOR: name,
-    OBJECT_VALUE_NULL_COLOR: base,
-    OBJECT_VALUE_UNDEFINED_COLOR: base,
-    OBJECT_VALUE_REGEXP_COLOR: base,
-    OBJECT_VALUE_STRING_COLOR: base,
-    OBJECT_VALUE_SYMBOL_COLOR: base,
-    OBJECT_VALUE_NUMBER_COLOR: base,
-    OBJECT_VALUE_BOOLEAN_COLOR: base,
-    OBJECT_VALUE_FUNCTION_PREFIX_COLOR: base,
-  }),
-})
 
 interface AliasReferenceProps {
   aliasObj: AliasObject
@@ -138,130 +95,6 @@ const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
     </span>
   )
 })
-
-const Message = observer(({ model, toggleSubject, toggleExpected, toggleActual }) => (
-  <span>
-    <span className='command-message-text-wrap'>
-      <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
-      {
-        (!model.subject && !model.expected && !model.actual)
-          ? <span
-            className='command-message-text'
-            dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
-          />
-          : <SummarizedMessage
-            model={model}
-            toggleSubject={toggleSubject}
-            toggleExpected={toggleExpected}
-            toggleActual={toggleActual}
-          />
-      }
-    </span>
-    { model.options && Object.keys(model.options).length > 0
-      ?
-      <span className="command-message-options" onClick={(e) => e.stopPropagation()}>
-        <ObjectInspector
-          theme={inspectorTheme('#999', '#777')}
-          data={model.options}
-          // 10 below is an arbitrary big number
-          // @ts-ignore
-          expandLevel={Cypress.config('isInteractive') ? 0 : 10}
-        />
-      </span>
-      : null
-    }
-  </span>
-))
-
-interface SummarizedMessageProps {
-  model: CommandModel
-  toggleSubject: (e: MouseEvent) => void
-  toggleExpected: (e: MouseEvent) => void
-  toggleActual: (e: MouseEvent) => void
-}
-
-const SummarizedMessage = ({ model, toggleSubject, toggleExpected, toggleActual }: SummarizedMessageProps) => {
-  const tags: string[] = []
-
-  const decodeTag = (i: number) => {
-    const tag = tags[i]
-
-    if (tag === 'this' && model.subject) {
-      const summary = model.subject.summary
-
-      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleSubject} />
-    }
-
-    if (tag === 'exp' && model.expected) {
-      const summary = model.expected.summary
-
-      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleExpected} />
-    }
-
-    if (tag === 'act' && model.actual) {
-      const summary = model.actual.summary
-
-      return <SummaryButton key={`button-${i}`} summary={summary} toggle={toggleActual} />
-    }
-
-    return <span key={`normal-${i}`}>{`%{${tag}}`}</span>
-  }
-
-  return (
-    <span className="command-message-text">
-      {
-        (model.displayMessage || '')
-        .replace(/%{(.*?)}/g, (_m: string, m0: string) => {
-          tags.push(m0)
-
-          return '<<tag>>'
-        })
-        .split('<<tag>>')
-        .reduce((prev: ReactNode[], curr: string, i: number) => {
-          return prev.concat(
-            <span key={`text-${i}`} dangerouslySetInnerHTML={{ __html: formattedMessage(curr) }} />,
-            tags[i] ? decodeTag(i) : undefined,
-          )
-        }, [])
-      }
-    </span>
-  )
-}
-
-interface SummmaryButtonProps {
-  summary: string
-  toggle: (e: MouseEvent) => void
-}
-
-const SummaryButton = ({ summary, toggle }: SummmaryButtonProps) => {
-  return (
-    <strong>
-      <a className="command-message-summarized-text" onClick={toggle}>
-        {summary}
-      </a>
-    </strong>
-  )
-}
-
-interface DetailViewerProps {
-  name: string
-  value: any
-}
-
-const DetailViewer = ({ name, value }: DetailViewerProps) => {
-  return (
-    <div className="command-detail-viewer">
-      <div className="command-detail-viewer-title">{name} details</div>
-      <div className="command-detail-viewer-content">
-        {
-          typeof (value) === 'string'
-            ? value
-            : <ObjectInspector theme={inspectorTheme('#555', '#555')} data={value} expandLevel={1} />
-        }
-      </div>
-    </div>
-  )
-}
 
 interface Props {
   model: CommandModel

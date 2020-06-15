@@ -75,16 +75,16 @@ const replaceArgs = (args: Args, target: RegExp, tag: string) => {
 
 const summarizeValue = (value: any) => {
   if (isLongString(value)) {
-    return `${(value as string).substring(0, LONG_STRING_LENGTH)} [...more]`
+    return `${partialString(value, LONG_STRING_LENGTH)} [...more]`
   }
 
   if (isBigArray(value)) {
-    const first10 = value.slice(0, LOGGED_ARRAY_SIZE)
+    const first10 = partialArray(value, LOGGED_ARRAY_SIZE)
 
     let first10str = ''
 
     first10.forEach((item) => {
-      const val = typeof item === 'string' ? `"${item}"` : item
+      const val = stringifyValue(item)
 
       first10str += `${val}, `
     })
@@ -93,19 +93,11 @@ const summarizeValue = (value: any) => {
   }
 
   if (isBigObject(value)) {
-    const keys = Object.keys(value)
-    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
-    const first10Keys = keys.sort(collator.compare).slice(0, LOGGED_OBJ_SIZE)
-    const summaryObj = {}
-
-    first10Keys.forEach((key) => {
-      summaryObj[key] = value[key]
-    })
-
+    const summaryObj = partialObject(value, LOGGED_OBJ_SIZE)
     let summaryStr = ''
 
-    first10Keys.forEach((key) => {
-      const val = typeof value[key] === 'string' ? `"${value[key]}"` : value[key]
+    Object.keys(summaryObj).forEach((key) => {
+      const val = stringifyValue(value)
 
       summaryStr += `${key}: ${val}, `
     })
@@ -114,4 +106,41 @@ const summarizeValue = (value: any) => {
   }
 
   throw new Error(`${value} is not big.`)
+}
+
+const stringifyValue = (value: any) => {
+  if (Array.isArray(value)) {
+    return `Array(${value.length})`
+  }
+
+  if (typeof (value) === 'object') {
+    return '{object}'
+  }
+
+  if (typeof (value) === 'string') {
+    return `"${value}"`
+  }
+
+  return value
+}
+
+const partialString = (value: string, size: number) => {
+  return (value).substring(0, size)
+}
+
+const partialArray = (value: any[], size: number) => {
+  return value.slice(0, size)
+}
+
+const partialObject = (value: object, size: number) => {
+  const keys = Object.keys(value)
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+  const first10Keys = keys.sort(collator.compare).slice(0, LOGGED_OBJ_SIZE)
+  const obj = {}
+
+  first10Keys.forEach((key) => {
+    obj[key] = value[key]
+  })
+
+  return obj
 }

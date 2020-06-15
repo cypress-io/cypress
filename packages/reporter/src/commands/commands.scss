@@ -608,6 +608,7 @@
     border-bottom: 1px solid darken($command-background, 10%);
     background: darken($command-background, 5%);
     max-height: 700px;
+    overflow: auto;
 
     .command-detail-viewer-title {
       font-weight: bold;
