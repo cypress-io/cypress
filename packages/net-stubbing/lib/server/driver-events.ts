@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import debugModule from 'debug'
+import Debug from 'debug'
 import {
   NetStubbingState,
   GetFixtureFn,
@@ -21,7 +21,7 @@ import CyServer from '@packages/server'
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 
-const debug = debugModule('cypress:net-stubbing:server:driver-events')
+const debug = Debug('cypress:net-stubbing:server:driver-events')
 
 const caseInsensitiveGet = function (obj, lowercaseProperty) {
   for (let key of Object.keys(obj)) {
@@ -33,9 +33,6 @@ const caseInsensitiveGet = function (obj, lowercaseProperty) {
 
 async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
-
-  debug('adding route %o', { routeMatcher, options })
-
   const { staticResponse } = options
 
   if (staticResponse && staticResponse.fixture) {
@@ -60,8 +57,6 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
 
       return fixture
     })
-
-    debug('body now %o', staticResponse)
   }
 
   const route: BackendRoute = {

@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import concatStream from 'concat-stream'
-import debugModule from 'debug'
+import Debug from 'debug'
 import minimatch from 'minimatch'
 import url from 'url'
 
@@ -22,7 +22,7 @@ import {
 import { getAllStringMatcherFields, sendStaticResponse, emit } from './util'
 import CyServer from '@packages/server'
 
-const debug = debugModule('cypress:net-stubbing:server:intercept-request')
+const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
@@ -84,8 +84,6 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     match = match && (matcher === value)
   })
 
-  debug('does route match? %o', { match, routeMatcher, req: _.pick(matchable, _.concat(stringMatcherFields, booleanFields, numberFields)) })
-
   return match
 }
 
@@ -143,6 +141,8 @@ export const InterceptRequest: RequestMiddleware = function () {
   }
 
   const requestId = _.uniqueId('interceptedRequest')
+
+  debug('intercepting request %o', { requestId, route, req: _.pick(this.req, 'url') })
 
   const request: BackendRequest = {
     requestId,

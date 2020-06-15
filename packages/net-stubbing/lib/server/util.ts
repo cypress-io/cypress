@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import debugModule from 'debug'
+import Debug from 'debug'
 import isHtml from 'is-html'
 import { ServerResponse, IncomingMessage } from 'http'
 import {
@@ -13,7 +13,7 @@ import CyServer from '@packages/server'
 import { Socket } from 'net'
 import { GetFixtureFn } from './types'
 
-const debug = debugModule('cypress:net-stubbing:server:util')
+const debug = Debug('cypress:net-stubbing:server:util')
 
 export function emit (socket: CyServer.Socket, eventName: string, data: object) {
   debug('sending event to driver %o', { eventName, data })

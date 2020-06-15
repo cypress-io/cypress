@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import concatStream from 'concat-stream'
-import debugModule from 'debug'
+import Debug from 'debug'
 import { PassThrough, Readable } from 'stream'
 import ThrottleStream from 'throttle'
 
@@ -20,12 +20,12 @@ import {
   sendStaticResponse,
 } from './util'
 
-const debug = debugModule('cypress:net-stubbing:server:intercept-response')
+const debug = Debug('cypress:net-stubbing:server:intercept-response')
 
 export const InterceptResponse: ResponseMiddleware = function () {
   const backendRequest = this.netStubbingState.requests[this.req.requestId]
 
-  debug('InterceptResponse %o', { req: this.req, backendRequest })
+  debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), backendRequest })
 
   if (!backendRequest || !backendRequest.sendResponseToDriver) {
     // either the original request was not intercepted, or there's nothing for the driver to do with this response
@@ -84,11 +84,6 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
 
-  debug({
-    // 'first 10 chars of backendRequest.res.body': backendRequest.res.body.slice(0, 10),
-    'first 10 chars of frame.res.body': _.get(frame, 'res.body', '').slice(0, 10),
-  })
-
   function continueResponse () {
     let newResStream: Optional<Readable>
 
@@ -135,8 +130,6 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
   if (typeof frame.continueResponseAt === 'number') {
     const delayMs = frame.continueResponseAt - Date.now()
-
-    debug('pausing before continuing %o', { delayMs })
 
     if (delayMs > 0) {
       return setTimeout(continueResponse, delayMs)
