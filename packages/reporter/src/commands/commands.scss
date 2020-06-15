@@ -279,11 +279,12 @@
 
   .command-message-options {
     display: block;
-    font-size: 0.8em;
-    opacity: 0.8;
     white-space: initial;
-    max-height: 90px;
-    overflow-y: auto;
+
+    & > ol > li > div {
+      white-space: nowrap;
+      overflow-x: hidden;
+    }
   }
 
   .command-wrapper .fa-circle {

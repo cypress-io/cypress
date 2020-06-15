@@ -60,6 +60,16 @@
               },
               "testId": "r4",
               "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c4",
+              "instrument": "command",
+              "message": "value",
+              "name": "set cookie",
+              "state": "passed",
+              "testId": "r4",
+              "type": "parent"
             }
           ]
         }

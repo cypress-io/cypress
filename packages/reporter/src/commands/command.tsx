@@ -4,6 +4,8 @@ import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
+import 'regenerator-runtime/runtime'
+import { ObjectInspector, chromeLight } from 'react-inspector'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -129,11 +131,32 @@ const Message = observer(({ model }: MessageProps) => (
       <i className={`fa fa-circle ${model.renderProps.indicator}`}></i>
       <span
         className='command-message-text'
-        dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage) }}
+        dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
       />
     </span>
     { model.options && Object.keys(model.options).length > 0
-      ? <span className='command-message-options'>{formatOptions(model.options)}</span>
+      ?
+      <span className="command-message-options" onClick={(e) => e.stopPropagation()}>
+        <ObjectInspector
+          theme={{
+            ...chromeLight,
+            ...({
+              BASE_BACKGROUND_COLOR: 'inherit',
+              BASE_COLOR: '#999',
+              OBJECT_NAME_COLOR: '#777',
+              OBJECT_VALUE_NULL_COLOR: '#999',
+              OBJECT_VALUE_UNDEFINED_COLOR: '#999',
+              OBJECT_VALUE_REGEXP_COLOR: '#999',
+              OBJECT_VALUE_STRING_COLOR: '#999',
+              OBJECT_VALUE_SYMBOL_COLOR: '#999',
+              OBJECT_VALUE_NUMBER_COLOR: '#999',
+              OBJECT_VALUE_BOOLEAN_COLOR: '#999',
+              OBJECT_VALUE_FUNCTION_PREFIX_COLOR: '#999',
+            }),
+          }}
+          data={model.options}
+        />
+      </span>
       : null
     }
   </span>
