@@ -67,12 +67,14 @@ const autoShadowTraversals = {
 module.exports = (Commands, Cypress, cy) => {
   _.each(traversals, (traversal) => {
     Commands.add(traversal, { prevSubject: ['element', 'document'] }, (subject, arg1, arg2, options) => {
-      if (_.isObject(arg1) && !_.isFunction(arg1)) {
-        options = arg1
-      }
+      if (!traversal.endsWith('Until')) {
+        if (_.isObject(arg1) && !_.isFunction(arg1)) {
+          options = arg1
+        }
 
-      if (_.isObject(arg2) && !_.isFunction(arg2)) {
-        options = arg2
+        if (_.isObject(arg2) && !_.isFunction(arg2)) {
+          options = arg2
+        }
       }
 
       const userOptions = options || {}

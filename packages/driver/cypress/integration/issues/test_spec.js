@@ -67,7 +67,7 @@ describe('last arg can be an object, but not an option', () => {
   it('nextUntil', () => {
     cy.on('log:added', () => {
       cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.eq(null)
+      expect(this.logs[0].get('options')).to.deep.eq({})
     })
 
     cy.get('div').nextUntil(cy.$$('.warning'))
@@ -76,7 +76,7 @@ describe('last arg can be an object, but not an option', () => {
   it('parentsUntil', () => {
     cy.on('log:added', () => {
       cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.eq(null)
+      expect(this.logs[0].get('options')).to.deep.eq({})
     })
 
     cy.get('div').parentsUntil(cy.$$('.warning'))
@@ -85,7 +85,7 @@ describe('last arg can be an object, but not an option', () => {
   it('prevsUntil', () => {
     cy.on('log:added', () => {
       cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.eq(null)
+      expect(this.logs[0].get('options')).to.deep.eq({})
     })
 
     cy.get('div').prevUntil(cy.$$('.warning'))
