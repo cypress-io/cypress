@@ -62,14 +62,14 @@ First, start local http server
 
 ```bash
 ## from repo root
-yarn lerna run start --scope @packages/desktop-gui
+yarn workspace @packages/desktop-gui start
 ```
 
 Then run Cypress with
 
 ```bash
 ## from repo root
-yarn lerna run cypress:run --scope @packages/desktop-gui --stream
+yarn workspace @packages/desktop-gui cypress:run
 ```
 
 ## Testing
@@ -82,12 +82,12 @@ First, start local http server
 
 ```bash
 ## from repo root
-yarn lerna run start --scope @packages/desktop-gui
+yarn workspace @packages/desktop-gui start
 ```
 
 Then open Cypress with
 
 ```bash
 ## from repo root
-yarn lerna run cypress:open --scope @packages/desktop-gui --stream
+yarn workspace @packages/desktop-gui cypress:open
 ```

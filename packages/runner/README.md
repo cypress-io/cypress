@@ -20,7 +20,7 @@ This watches and compiles all changes as you make them.
 - Additionally it compiles both the [`reporter`](../reporter) and [`driver`](../driver)
 
 ```bash
-yarn lerna run watch --scope @packages/runner --stream
+yarn workspace @packages/runner watch
 ```
 
 ## Building
@@ -28,17 +28,17 @@ yarn lerna run watch --scope @packages/runner --stream
 ### For development
 
 ```bash
-yarn lerna run build --scope @packages/runner --stream
+yarn workspace @packages/runner build
 ```
 
 ### For production
 
 ```bash
-yarn lerna run build-prod --scope @packages/runner --stream
+yarn workspace @packages/runner build-prod
 ```
 
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/runner --stream
+yarn workspace @packages/runner test
 ```

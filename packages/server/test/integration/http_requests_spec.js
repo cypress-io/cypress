@@ -712,7 +712,7 @@ describe('Routes', () => {
       })
 
       it('serves error javascript file when there\'s a syntax error', function () {
-        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.coffee')
+        return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/syntax_error.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
