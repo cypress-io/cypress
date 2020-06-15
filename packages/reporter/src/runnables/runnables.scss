@@ -280,38 +280,38 @@
         width: 40px;
       }
 
-      div:nth-child(1){
+      div:nth-child(1) {
         animation-delay:0.1s;
         background: #56b790;
       }
 
-      div:nth-child(2){
+      div:nth-child(2) {
         animation-delay:0.2s;
         background: #4a88cc;
       }
 
-      div:nth-child(3){
+      div:nth-child(3) {
         animation-delay:0.3s;
         background: #b96162;
       }
 
-      div:nth-child(4){
+      div:nth-child(4) {
         animation-delay:0.4s;
         background: #e3b065;
       }
 
-      div:nth-child(5){
+      div:nth-child(5) {
         animation-delay:0.5s;
         background: #a9abad;
       }
 
-      @keyframes scaling{
-        0%, 20%, 80%, 100%{
+      @keyframes scaling {
+        0%, 20%, 80%, 100% {
           opacity: 100%;
           transform: scale(0.5);
         }
 
-        50%{
+        50% {
           opacity: 50%;
           transform: scale(1);
         }
