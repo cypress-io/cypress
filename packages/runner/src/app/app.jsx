@@ -39,6 +39,7 @@ class App extends Component {
           <Reporter
             runner={this.props.eventManager.reporterBus}
             spec={spec}
+            isInteractive={this.props.config.isInteractive}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}

@@ -22,6 +22,7 @@ import Runnables from './runnables/runnables'
 export interface ReporterProps {
   appState: AppState
   autoScrollingEnabled?: boolean
+  isInteractive: boolean
   runnablesStore: RunnablesStore
   runner: Runner
   scroller: Scroller
@@ -35,6 +36,7 @@ export interface ReporterProps {
 class Reporter extends Component<ReporterProps> {
   static propTypes = {
     autoScrollingEnabled: PropTypes.bool,
+    isInteractive: PropTypes.bool.isRequired,
     error: PropTypes.shape({
       title: PropTypes.string.isRequired,
       link: PropTypes.string,
@@ -58,6 +60,24 @@ class Reporter extends Component<ReporterProps> {
     runnablesStore,
     scroller,
     statsStore,
+  }
+
+  componentWillMount () {
+    const { appState, autoScrollingEnabled, isInteractive, runnablesStore, runner, scroller, statsStore } = this.props
+
+    action('set:config:values', () => {
+      appState.setAutoScrolling(autoScrollingEnabled)
+      appState.setIsInteractive(isInteractive)
+    })()
+
+    this.props.events.init({
+      appState,
+      runnablesStore,
+      scroller,
+      statsStore,
+    })
+
+    this.props.events.listen(runner)
   }
 
   render () {

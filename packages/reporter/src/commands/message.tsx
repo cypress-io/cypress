@@ -6,6 +6,7 @@ import Markdown from 'markdown-it'
 // @ts-ignore
 import { ObjectInspector, chromeLight, ObjectRootLabel, ObjectLabel, InspectorProps } from 'react-inspector'
 
+import appState from '../lib/app-state'
 import CommandModel, { TestedValueObject } from './command-model'
 
 const md = new Markdown()
@@ -59,8 +60,7 @@ export const Message = observer(({ model, toggleSubject, toggleExpected, toggleA
           <ObjectInspector
             theme={inspectorTheme('#999', '#777')}
             data={model.options}
-            // @ts-ignore
-            expandLevel={Cypress && Cypress.config('isInteractive') ? 0 : 10} // 10 here is an arbitrary big number
+            expandLevel={appState.isInteractive ? 0 : 10} // 10 here is an arbitrary big number
           />
         </span>
         : null
