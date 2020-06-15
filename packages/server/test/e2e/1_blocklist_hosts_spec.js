@@ -26,6 +26,7 @@ describe('e2e blacklist (deprecated)', () => {
     settings: {
       baseUrl: 'http://localhost:3232',
       blacklistHosts: 'localhost:3131',
+      video: false,
     },
   })
 
@@ -49,6 +50,7 @@ describe('e2e blocklist', () => {
     settings: {
       baseUrl: 'http://localhost:3232',
       blocklistHosts: 'localhost:3131',
+      video: false,
     },
   })
 
