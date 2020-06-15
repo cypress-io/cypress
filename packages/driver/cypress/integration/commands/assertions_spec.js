@@ -219,7 +219,7 @@ describe('src/cy/commands/assertions', () => {
               expected: undefined,
               actual: arr,
               subject: arr,
-              Message: `expected %{this} to have a property '12'`,
+              Message: `expected %{this} to have property '12'`,
             })
           })
         })
