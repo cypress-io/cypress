@@ -63,7 +63,7 @@ export default class ProjectNotSetup extends Component {
 
   _visitDashboard = (e) => {
     e.preventDefault()
-    ipc.externalOpen('https://on.cypress.io/log-in-runs')
+    ipc.externalOpen('https://on.cypress.io/dashboard')
   }
 
   _invalidProject () {
