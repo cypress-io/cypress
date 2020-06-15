@@ -1220,8 +1220,10 @@ const elementFromPoint = (doc, x, y) => {
   // if the node has a shadow root, we must behave like
   // the browser and find the inner element of the shadow
   // root at that same point.
-  while (node?.shadowRoot) {
-    node = node.shadowRoot.elementFromPoint(x, y)
+  if (Cypress.config('experimentalShadowDomSupport')) {
+    while (node?.shadowRoot) {
+      node = node.shadowRoot.elementFromPoint(x, y)
+    }
   }
 
   // if we never found an inner/deep element, use the

@@ -7,21 +7,21 @@ This is the WebExtension responsible for automating the browser
 ### Watching
 
 ```bash
-yarn lerna run watch --scope @packages/extension --stream
+yarn workspace @packages/extension watch
 ```
 
 ## Building
 
 ```bash
-yarn lerna run build --scope @packages/extension --stream
+yarn workspace @packages/extension build
 ```
 
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/extension --stream
-yarn lerna run test-watch --scope @packages/extension --stream
-yarn lerna run test-debug --scope @packages/extension --stream
+yarn workspace @packages/extension test
+yarn workspace @packages/extension test-watch
+yarn workspace @packages/extension test-debug
 ```
 
 ## Debugging
