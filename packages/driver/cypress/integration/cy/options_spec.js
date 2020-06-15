@@ -2,12 +2,6 @@ beforeEach(() => {
   cy.visit('/fixtures/command-log.html')
 })
 
-// it('test 2', () => {
-//   cy.wrap('a').then({ timeout: 1 }, () => {
-//     expect(1).to.eql(1)
-//   })
-// })
-
 describe('last arg can be an object, but not an option', () => {
   beforeEach(() => {
     this.logs = []
