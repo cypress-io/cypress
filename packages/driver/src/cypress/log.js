@@ -153,7 +153,7 @@ const defaults = function (state, config, obj) {
       },
     })
 
-    if (obj.message) {
+    if (obj.message || obj.message === '') {
       obj.message = $utils.stringify(obj.message)
     } else {
       let args = current != null ? current.get('args') : undefined
@@ -162,9 +162,7 @@ const defaults = function (state, config, obj) {
         const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
 
         if (optionsIndex !== -1 && optionsIndex < args.length) {
-          args = _.remove(args, (v, i) => {
-            return i === optionsIndex
-          })
+          args = args.filter((v, i) => i !== optionsIndex)
         }
       }
 

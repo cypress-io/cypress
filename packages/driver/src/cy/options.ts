@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 export const getIndexOfUserOptions = (name: string, args: any[] | undefined): number => {
-  if (!args) return -1
+  if (!args || args.length === 0) return -1
 
   const lastIndex = args.length - 1
   const lastArg = args[lastIndex]
@@ -21,6 +21,14 @@ export const getIndexOfUserOptions = (name: string, args: any[] | undefined): nu
 
   if (name === 'wait') {
     return args.length === 2 ? 1 : -1
+  }
+
+  if (name === 'nextUntil' || name === 'prevUntil' || name === 'parentsUntil') {
+    if (args.length === 2 && _.isObject(args[1])) {
+      return 1
+    }
+
+    return args.length === 3 ? 2 : -1
   }
 
   // Handle most common case
