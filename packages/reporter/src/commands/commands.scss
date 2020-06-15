@@ -282,6 +282,8 @@
     font-size: 0.8em;
     opacity: 0.8;
     white-space: initial;
+    max-height: 90px;
+    overflow-y: auto;
   }
 
   .command-wrapper .fa-circle {

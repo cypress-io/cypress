@@ -34,6 +34,32 @@
                 "timeout": 4000
               },
               "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c2",
+              "instrument": "command",
+              "message": "good",
+              "name": "scrollIntoView",
+              "state": "passed",
+              "testId": "r4",
+              "options": {
+                "foo": "Long text. Old good lorem ipsum. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec urna risus, laoreet eu elit in, efficitur convallis diam. Suspendisse aliquam tristique commodo. Fusce vel vestibulum ligula. Morbi ut sodales ex, vitae elementum mi."
+              },
+              "type": "parent"
+            },
+            {
+              "hookName": "test",
+              "id": "c3",
+              "instrument": "command",
+              "message": "",
+              "name": "clearCookies",
+              "state": "passed",
+              "options": {
+                "hi": "hello"
+              },
+              "testId": "r4",
+              "type": "parent"
             }
           ]
         }

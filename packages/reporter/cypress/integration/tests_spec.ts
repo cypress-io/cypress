@@ -125,6 +125,13 @@ describe('controls', function () {
       it('shows option', () => {
         cy.get('.command-name-visit .command-message-options').contains('{foo: "bar, baz:dev", timeout: 4000}')
       })
+
+      it('options max-height 90px', () => {
+        cy
+        .get('.command-name-scroll-into-view .command-message-options')
+        .should('have.css', 'height', '90px')
+        .should('have.css', 'overflow-y', 'auto')
+      })
     })
   })
 })
