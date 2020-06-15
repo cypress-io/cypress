@@ -272,7 +272,7 @@
       width: 160px;
 
       div {
-        animation: scaling 1.65s linear infinite;
+        animation: scaling 1.65s ease-in-out infinite;
         border-radius: 50%;
         height: 40px;
         margin: 0 -5px;
