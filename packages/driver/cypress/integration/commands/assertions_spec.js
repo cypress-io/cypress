@@ -227,13 +227,13 @@ describe('src/cy/commands/assertions', () => {
 
       describe('array', () => {
         it('shows correct expected message', () => {
-          const arr = Array.from({ length: 2560000 }, () => 1)
+          const arr = Array.from({ length: 1000000 }, () => 1)
 
           cy.wrap(arr)
-          .should('have.length', 2560000)
+          .should('have.length', 1000000)
           .then(function () {
             expect(this.logs[1].get('message')).to.eq(
-              'expected %{this} to have a length of **2560000**',
+              'expected %{this} to have a length of **1000000**',
             )
           })
         })
