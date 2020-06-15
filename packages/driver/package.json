@@ -65,6 +65,7 @@
     "text-mask-addons": "3.8.0",
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
+    "unfetch": "4.1.0",
     "url-parse": "1.4.7",
     "vanilla-text-mask": "5.1.1",
     "webpack": "4.41.2",
