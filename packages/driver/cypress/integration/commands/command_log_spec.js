@@ -1,6 +1,6 @@
-describe('issue #678', () => {
+describe('command log', () => {
   beforeEach(() => {
-    cy.visit('/fixtures/issue-678.html', {
+    cy.visit('/fixtures/command-log.html', {
       timeout: 20000,
       method: 'GET',
       qs: {
@@ -187,7 +187,7 @@ describe('issue #678', () => {
     })
 
     it('Q-Z', () => {
-      cy.readFile('./cypress/fixtures/issue-678.html', {
+      cy.readFile('./cypress/fixtures/command-log.html', {
         timeout: 3000,
       })
 
@@ -196,7 +196,7 @@ describe('issue #678', () => {
       })
 
       cy.request({
-        url: '/fixtures/issue-678.html',
+        url: '/fixtures/command-log.html',
       })
 
       cy.get('button').rightclick({
@@ -482,14 +482,14 @@ describe('issue #678', () => {
 
     describe('Q-Z', () => {
       testOptions('readFile', { timeout: 3000 }, 0, (options) => {
-        cy.readFile('./cypress/fixtures/issue-678.html', options)
+        cy.readFile('./cypress/fixtures/command-log.html', options)
       })
 
       testOptions('reload', { timeout: 2000 }, 0, (options) => {
         cy.reload(true, options)
       })
 
-      testOptions('request', { url: '/fixtures/issue-678.html' }, 0, (options) => {
+      testOptions('request', { url: '/fixtures/command-log.html' }, 0, (options) => {
         cy.request(options)
       })
 
