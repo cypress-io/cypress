@@ -46,11 +46,12 @@ const RedirectToClientRouteIfNotProxied: RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlacklistedHosts: RequestMiddleware = function () {
-  const { blocklistHosts } = this.config
+const EndRequestsToBlocklistedHosts: RequestMiddleware = function () {
+  // blacklistHosts is deprecated, but still should work
+  const key = this.config.blocklistHosts ? 'blocklistHosts' : 'blacklistHosts'
 
-  if (blocklistHosts) {
-    const matches = blocklist.matches(this.req.proxiedUrl, blocklistHosts)
+  if (this.config[key]) {
+    const matches = blocklist.matches(this.req.proxiedUrl, this.config[key])
 
     if (matches) {
       this.res.set('x-cypress-matched-blocklisted-host', matches)
@@ -150,7 +151,7 @@ export default {
   LogRequest,
   RedirectToClientRouteIfUnloaded,
   RedirectToClientRouteIfNotProxied,
-  EndRequestsToBlacklistedHosts,
+  EndRequestsToBlocklistedHosts,
   MaybeEndRequestWithBufferedResponse,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,

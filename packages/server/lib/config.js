@@ -89,7 +89,12 @@ firefoxGcInterval\
 // experimentalComponentTesting
 configKeys.push('componentFolder')
 
-// Deprecated and retired public configuration properties
+// Deprecated configuration properties, will only warn
+const deprecatedConfigKeys = toWords(`\
+blacklistHosts\
+`)
+
+// Breaking public configuration properties, will error
 const breakingConfigKeys = toWords(`\
 videoRecording
 screenshotOnHeadlessFailure
@@ -119,6 +124,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
+  blacklistHosts: null,
   blocklistHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
@@ -176,6 +182,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
+  blacklistHosts: v.isStringOrArrayOfStrings,
   blocklistHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
@@ -231,6 +238,18 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
     return memo
   }
   , {})
+}
+
+const warnDeprecatedConfig = (cfg) => {
+  return _.each(deprecatedConfigKeys, (key) => {
+    if (_.has(cfg, key)) {
+      switch (key) {
+        case 'blacklistHosts':
+          return errors.warning('DEPRECATED_RENAMED_CONFIG_OPTION', key, 'blocklistHosts')
+        default:
+      }
+    }
+  })
 }
 
 const validateNoBreakingConfig = (cfg) => {
@@ -366,6 +385,7 @@ module.exports = {
   whitelist (obj = {}) {
     const propertyNames = configKeys
     .concat(breakingConfigKeys)
+    .concat(deprecatedConfigKeys)
     .concat(systemConfigKeys)
     .concat(experimentalConfigKeys)
 
@@ -477,6 +497,7 @@ module.exports = {
     })
 
     validateNoBreakingConfig(config)
+    warnDeprecatedConfig(config)
 
     return this.setSupportFileAndFolder(config)
     .then(this.setPluginsFile)

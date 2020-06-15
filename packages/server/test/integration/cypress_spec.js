@@ -745,6 +745,17 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('logs warning when using deprecated configuration option: blacklistHosts', function () {
+      return cypress.start([
+        `--run-project=${this.todosPath}`,
+        '--config=blacklistHosts=""',
+      ])
+      .then(() => {
+        expect(errors.warning).to.be.calledWith('DEPRECATED_RENAMED_CONFIG_OPTION', 'blacklistHosts', 'blocklistHosts')
+        expect(console.log).to.be.calledWithMatch('The blacklistHosts configuration option you have supplied has been renamed.')
+      })
+    })
+
     it('does not log warning when no projectId', function () {
       return cypress.start([`--run-project=${this.pristinePath}`, '--key=asdf'])
       .then(() => {

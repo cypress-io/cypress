@@ -3727,6 +3727,50 @@ describe('Routes', () => {
       })
     })
 
+    context('blacklisted hosts (deprecated)', () => {
+      beforeEach(function () {
+        return this.setup({
+          config: {
+            blacklistHosts: [
+              '*.google.com',
+              'shop.apple.com',
+              'cypress.io',
+              'localhost:6666',
+              '*adwords.com',
+            ],
+          },
+        })
+      })
+
+      it('returns 503 and custom headers for all hosts', function () {
+        const expectedHeader = (res, val) => {
+          expect(res.headers['x-cypress-matched-blocklisted-host']).to.eq(val)
+        }
+
+        return Promise.all([
+          this.rp('https://mail.google.com/f'),
+          this.rp('http://shop.apple.com/o'),
+          this.rp('https://cypress.io'),
+          this.rp('https://localhost:6666/o'),
+          this.rp('https://some.adwords.com'),
+        ])
+        .spread((...responses) => {
+          _.every(responses, (res) => {
+            expect(res.statusCode).to.eq(503)
+
+            expect(res.body).to.be.empty
+          })
+
+          expectedHeader(responses[0], '*.google.com')
+          expectedHeader(responses[1], 'shop.apple.com')
+          expectedHeader(responses[2], 'cypress.io')
+          expectedHeader(responses[3], 'localhost:6666')
+
+          return expectedHeader(responses[4], '*adwords.com')
+        })
+      })
+    })
+
     context('blocklisted hosts', () => {
       beforeEach(function () {
         return this.setup({
