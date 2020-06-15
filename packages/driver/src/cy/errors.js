@@ -1,3 +1,5 @@
+const _ = require('lodash')
+
 const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
 
@@ -33,13 +35,12 @@ const create = (state, config, log) => {
   }
 
   const createUncaughtException = (type, args) => {
-    let [msg, source, lineno, colno, err] = args // eslint-disable-line no-unused-vars
-    let message
+    let [message, source, lineno, colno, err] = args // eslint-disable-line no-unused-vars
     let docsUrl
 
-    // reset the msg on a cross origin script error
+    // reset the message on a cross origin script error
     // since no details are accessible
-    if (crossOriginScriptRe.test(msg)) {
+    if (crossOriginScriptRe.test(message)) {
       const crossOriginErr = $errUtils.errByPath('uncaught.cross_origin_script')
 
       message = crossOriginErr.message
@@ -48,8 +49,15 @@ const create = (state, config, log) => {
 
     // if we have the 5th argument it means we're in a modern browser with an
     // error object already provided. otherwise, we create one
-    err = err ?? $errUtils.errByPath('uncaught.error', {
-      message, source, lineno,
+    // it's possible the error was thrown as a string (throw 'some error')
+    // so create it in the case it's not already an object
+    err = _.isObject(err) ? err : $errUtils.errByPath('uncaught.error', {
+      source,
+      lineno,
+      // if the error was thrown as a string (throw 'some error'), `err` is
+      // the message ('some error') and message is some browser-created
+      // variant (e.g. 'Uncaught some error')
+      message: _.isString(err) ? err : message,
     })
 
     err.docsUrl = docsUrl

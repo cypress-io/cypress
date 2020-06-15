@@ -63,8 +63,8 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
     // the changes to the path don't bubble up correctly. this only happens
     // in the Cypress test and not when running the actual app
     it.skip('updates "Other" path when typed into', function () {
-      cy.contains('Other').find('input[type="text"]').type('/path/to/editor')
-      .should('have.value', '/path/to/editor')
+      cy.contains('Other').find('input[type="text"]').type('/absolute/path/to/foo.js')
+      .should('have.value', '/absolute/path/to/foo.js')
     })
 
     describe('when editor is not selected', function () {

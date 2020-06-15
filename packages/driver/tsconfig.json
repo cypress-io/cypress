@@ -18,6 +18,10 @@
     "allowSyntheticDefaultImports": true,
     "outDir": "dist",
     "esModuleInterop": true,
-    "noErrorTruncation": true
-  }
+    "noErrorTruncation": true,
+    "types": []
+  },
+  "exclude": [
+    "dist"
+  ]
 }

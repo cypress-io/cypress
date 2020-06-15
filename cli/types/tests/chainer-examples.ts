@@ -88,6 +88,10 @@ cy.wrap({ a: 1, b: 2 }).should('have.all.keys', 'a', 'b')
 
 cy.wrap({ a: 1, b: 2 }).should('have.any.keys', 'a')
 
+cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
+
+cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
+
 cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
 
 cy.wrap([1, 2, 3]).should('have.length', 3)

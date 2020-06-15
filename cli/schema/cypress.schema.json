@@ -237,7 +237,7 @@
     "experimentalShadowDomSupport": {
       "type": "boolean",
       "default": false,
-      "description": "Enables shadow DOM support. Adds the `cy.shadow()` command and the `ignoreShadowBoundaries` option to some DOM commands."
+      "description": "Enables shadow DOM support. Adds the `cy.shadow()` command and the `includeShadowDom` option to some DOM commands."
     }
   }
 }
