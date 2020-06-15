@@ -2,6 +2,7 @@ const _ = require('lodash')
 
 const $dom = require('../dom')
 const $errUtils = require('../cypress/error_utils')
+const { getUserOptions } = require('./options')
 
 const crossOriginScriptRe = /^script error/i
 
@@ -10,11 +11,7 @@ const create = (state, config, log) => {
     const current = state('current')
 
     const args = current.get('args')
-    let options = null
-
-    if (_.isObject(args[args.length - 1])) {
-      options = args[args.length - 1]
-    }
+    const options = getUserOptions(current.get('name'), args)
 
     return log({
       end: true,

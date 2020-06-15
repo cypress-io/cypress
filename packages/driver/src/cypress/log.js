@@ -7,6 +7,7 @@ const $Events = require('./events')
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const { getIndexOfUserOptions } = require('../cy/options')
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
@@ -155,10 +156,12 @@ const defaults = function (state, config, obj) {
     let args = current != null ? current.get('args') : undefined
 
     if (args) {
-      const last = _.last(args)
+      const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
 
-      if (_.isObject(last)) {
-        args = args.slice(0, args.length - 1)
+      if (optionsIndex !== -1) {
+        args = _.remove(args, (v, i) => {
+          return i === optionsIndex
+        })
       }
     }
 

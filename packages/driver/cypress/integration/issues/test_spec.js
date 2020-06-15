@@ -32,7 +32,7 @@ describe('last arg can be an object, but not an option', () => {
   it('clearLocalStorage', () => {
     cy.on('log:added', () => {
       cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('message')).to.eq('app-')
+      expect(this.logs[0].get('message')).to.eq('/app-/')
     })
 
     cy.clearLocalStorage(/app-/)
