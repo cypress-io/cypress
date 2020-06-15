@@ -128,6 +128,73 @@ describe('src/cy/commands/assertions', () => {
     })
 
     describe('big objects/arrays', () => {
+      describe('message', () => {
+        it('simple array', () => {
+          const arr = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+
+          cy.wrap(arr)
+          .should('have.length', arr.length)
+          .then(function () {
+            expect(this.logs[1].get('subject')).to.deep.eq({
+              value: arr,
+              summary: '[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...more]',
+            })
+          })
+        })
+
+        it('simple object', () => {
+          const obj = { 1: '1', 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11 }
+
+          cy.wrap(obj)
+          .should('have.property', 11)
+          .then(function () {
+            expect(this.logs[1].get('subject')).to.deep.eq({
+              value: obj,
+              summary: '{1: "1", 2: 2, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, ...more}',
+            })
+          })
+        })
+
+        it('object in array', () => {
+          const arr = [1, 1, { cypress: true }, 1, 1, 1, 1, 1, 1, 1, 1]
+
+          cy.wrap(arr)
+          .should('have.length', arr.length)
+          .then(function () {
+            expect(this.logs[1].get('subject')).to.deep.eq({
+              value: arr,
+              summary: '[1, 1, {object}, 1, 1, 1, 1, 1, 1, 1, ...more]',
+            })
+          })
+        })
+
+        it('array in object', () => {
+          const obj = { 1: '1', 2: 2, 3: [1, 2, 3], 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, 11: 11 }
+
+          cy.wrap(obj)
+          .should('have.property', 11)
+          .then(function () {
+            expect(this.logs[1].get('subject')).to.deep.eq({
+              value: obj,
+              summary: '{1: "1", 2: 2, 3: Array(3), 4: 4, 5: 5, 6: 6, 7: 7, 8: 8, 9: 9, 10: 10, ...more}',
+            })
+          })
+        })
+
+        it('long string', () => {
+          const str = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porta massa orci, id consectetur velit convallis vel. In augue nisi, imperdiet in congue congue, porttitor ut enim. In lacinia porta nunc eleifend lobortis. Fusce eu gravida felis.'
+
+          cy.wrap(str)
+          .should('have.length', str.length)
+          .then(function () {
+            expect(this.logs[1].get('subject')).to.deep.eq({
+              value: str,
+              summary: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent porta massa orci, id consectetur v [...more]',
+            })
+          })
+        })
+      })
+
       describe('object', () => {
         it('shows correct expected message', () => {
           const arr = new Uint8ClampedArray(2560000)
