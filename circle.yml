@@ -1256,9 +1256,8 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci
-          # https://github.com/cypress-io/cypress-example-recipes/pull/501
-          pull_request_id: 501
-          folder: examples/unit-testing__lit-element
+          pull_request_id: 503
+          folder: examples/stubbing-spying__window-fetch
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1569,11 +1568,11 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-recipe-pull-request:
-        name: Shadow DOM recipe
+        name: Test fetch polyfill
         filters:
           branches:
             only:
-              - pull/7469
+              - polyfill-fetch
         requires:
           - build-binary
           - build-npm-package

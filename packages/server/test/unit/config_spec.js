@@ -1138,6 +1138,7 @@ describe('lib/config', () => {
             componentFolder: { value: 'cypress/component', from: 'default' },
             experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalNetworkMocking: { value: false, from: 'default' },
+            experimentalFetchPolyfill: { value: false, from: 'default' },
           })
         })
       })
@@ -1215,6 +1216,7 @@ describe('lib/config', () => {
             componentFolder: { value: 'cypress/component', from: 'default' },
             experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalNetworkMocking: { value: false, from: 'default' },
+            experimentalFetchPolyfill: { value: false, from: 'default' },
             env: {
               foo: {
                 value: 'foo',

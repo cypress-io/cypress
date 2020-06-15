@@ -104,7 +104,14 @@ browsers\
 // Know experimental flags / values
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
-const experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting', 'experimentalComponentTesting', 'experimentalShadowDomSupport', 'experimentalNetworkMocking']
+const experimentalConfigKeys = [
+  'experimentalGetCookiesSameSite',
+  'experimentalSourceRewriting',
+  'experimentalComponentTesting',
+  'experimentalShadowDomSupport',
+  'experimentalFetchPolyfill',
+  'experimentalNetworkMocking',
+]
 
 const CONFIG_DEFAULTS = {
   port: null,
@@ -170,6 +177,7 @@ const CONFIG_DEFAULTS = {
   experimentalSourceRewriting: false,
   experimentalNetworkMocking: false,
   experimentalShadowDomSupport: false,
+  experimentalFetchPolyfill: false,
 }
 
 const validationRules = {
@@ -216,6 +224,7 @@ const validationRules = {
   experimentalSourceRewriting: v.isBoolean,
   experimentalNetworkMocking: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
+  experimentalFetchPolyfill: v.isBoolean,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
