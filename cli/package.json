@@ -34,7 +34,7 @@
     "commander": "4.1.1",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
-    "eventemitter2": "5.0.1",
+    "eventemitter2": "6.4.2",
     "execa": "1.0.0",
     "executable": "4.1.1",
     "extract-zip": "1.7.0",
