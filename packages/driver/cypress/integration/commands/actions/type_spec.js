@@ -2851,7 +2851,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { delay: 20 }).then(function () {
         const { lastLog } = this
 
-        expect(lastLog.get('message')).to.eq('foo, {delay: 20}')
+        expect(lastLog.get('message')).to.eq('foo')
+        expect(lastLog.get('options')).to.deep.eq({ delay: 20 })
       })
     })
 
@@ -2959,7 +2960,8 @@ describe('src/cy/commands/actions/type - #type', () => {
       cy.get(':text:first').type('foo', { force: true, timeout: 1000 }).then(function () {
         const { lastLog } = this
 
-        expect(lastLog.get('message')).to.eq('foo, {force: true, timeout: 1000}')
+        expect(lastLog.get('message')).to.eq('foo')
+        expect(lastLog.get('options')).to.deep.eq({ force: true, timeout: 1000 })
 
         expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
       })

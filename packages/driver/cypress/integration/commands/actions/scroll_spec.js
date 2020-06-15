@@ -559,7 +559,8 @@ describe('src/cy/commands/actions/scroll', () => {
         cy.get('#scroll-to-both').scrollTo(25, { duration: 1 }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('25, 0, {duration: 1}')
+          expect(lastLog.get('message')).to.eq('25, 0')
+          expect(lastLog.get('options')).to.deep.eq({ duration: 1 })
         })
       })
 
@@ -567,7 +568,8 @@ describe('src/cy/commands/actions/scroll', () => {
         cy.get('#scroll-to-both').scrollTo(25, { easing: 'linear' }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('25, 0, {easing: linear}')
+          expect(lastLog.get('message')).to.eq('25, 0')
+          expect(lastLog.get('options')).to.deep.eq({ easing: 'linear' })
         })
       })
 
@@ -937,7 +939,8 @@ describe('src/cy/commands/actions/scroll', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView({ duration: '1' }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{duration: 1}')
+          expect(lastLog.get('message')).to.eq('')
+          expect(lastLog.get('options')).to.deep.eq({ duration: '1' })
         })
       })
 
@@ -945,7 +948,8 @@ describe('src/cy/commands/actions/scroll', () => {
         cy.get('#scroll-into-view-both h5').scrollIntoView({ easing: 'linear' }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{easing: linear}')
+          expect(lastLog.get('message')).to.eq('')
+          expect(lastLog.get('options')).to.deep.eq({ easing: 'linear' })
         })
       })
 

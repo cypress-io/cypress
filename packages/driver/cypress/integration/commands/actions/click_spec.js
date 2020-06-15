@@ -2284,7 +2284,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
@@ -2759,7 +2759,7 @@ describe('src/cy/commands/actions/click', () => {
         .then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })

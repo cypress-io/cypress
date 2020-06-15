@@ -9,10 +9,18 @@ const create = (state, config, log) => {
   const commandErr = (err) => {
     const current = state('current')
 
+    const args = current.get('args')
+    let options = null
+
+    if (_.isObject(args[args.length - 1])) {
+      options = args[args.length - 1]
+    }
+
     return log({
       end: true,
       snapshot: true,
       error: err,
+      options,
       consoleProps () {
         const obj = {}
         const prev = current.get('prev')

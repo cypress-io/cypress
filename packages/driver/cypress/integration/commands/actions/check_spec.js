@@ -654,7 +654,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get('[name=colors][value=blue]').check({ force: true, timeout: 1000 }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('Show options.')
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
@@ -1147,7 +1147,7 @@ describe('src/cy/commands/actions/check', () => {
         cy.get('[name=colors][value=blue]').check().uncheck({ force: true, timeout: 1000 }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('')
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })
       })
