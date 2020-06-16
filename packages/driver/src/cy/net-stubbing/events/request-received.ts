@@ -46,6 +46,10 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   const { req, requestId, routeHandlerId } = frame
 
   const sendContinueFrame = () => {
+    if (continueSent) {
+      throw new Error('sendContinueFrame called twice in handler')
+    }
+
     continueSent = true
 
     if (request) {
@@ -129,11 +133,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         continueFrame.staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
       }
 
-      if (!continueSent) {
-        sendContinueFrame()
-      }
-
-      return
+      return sendContinueFrame()
     },
     redirect (location, statusCode = 302) {
       userReq.reply({

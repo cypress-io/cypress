@@ -13,16 +13,14 @@ import {
   NetEventFrames,
   StringMatcher,
   NumberMatcher,
-  GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
+  hasStaticResponseKeys,
 } from './static-response-utils'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
-
-const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'destroySocket']
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -197,13 +195,11 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         staticResponse = { body: <string>handler }
         break
       case _.isObjectLike(handler):
-        if (!_.intersection(_.keys(handler), STATIC_RESPONSE_KEYS).length && !_.isEmpty(handler)) {
+        if (!hasStaticResponseKeys(handler)) {
           // the user has not supplied any of the StaticResponse keys, assume it's a JSON object
+          // that should become the body property
           handler = {
-            body: JSON.stringify(handler),
-            headers: {
-              'content-type': 'application/json',
-            },
+            body: handler,
           }
         }
 

@@ -4,7 +4,10 @@ import {
   StaticResponse,
   BackendStaticResponse,
   FixtureOpts,
+  GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
+
+const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'destroySocket']
 
 export function validateStaticResponse (staticResponse: StaticResponse): void {
   const { body, fixture, statusCode, headers, destroySocket } = staticResponse
@@ -19,10 +22,6 @@ export function validateStaticResponse (staticResponse: StaticResponse): void {
 
   if (fixture && !_.isString(fixture)) {
     throw new Error('`fixture` must be a string containing a path and, optionally, an encoding separated by a comma (for example, "foo.txt,ascii").')
-  }
-
-  if (body && !_.isString(body)) {
-    throw new Error('`body` must be a string.')
   }
 
   // statusCode must be a three-digit integer
@@ -54,8 +53,7 @@ export function parseStaticResponseShorthand (statusCodeOrBody: number | string 
     return staticResponse
   }
 
-  if (_.isString(statusCodeOrBody) && !maybeHeaders) {
-    // statusCodeOrBody is body
+  if ((_.isString(statusCodeOrBody) || !hasStaticResponseKeys(statusCodeOrBody)) && !maybeHeaders) {
     const staticResponse: StaticResponse = {
       body: statusCodeOrBody,
     }
@@ -84,6 +82,15 @@ export function getBackendStaticResponse (staticResponse: StaticResponse): Backe
     }
   }
 
+  if (staticResponse.body && !_.isString(staticResponse.body)) {
+    staticResponse.body = JSON.stringify(staticResponse.body)
+    _.set(staticResponse, 'headers.content-type', 'application/json')
+  }
+
   // no modification required, just coerce the type
   return staticResponse as unknown as BackendStaticResponse
+}
+
+export function hasStaticResponseKeys (obj: any) {
+  return _.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj)
 }

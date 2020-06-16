@@ -43,10 +43,11 @@ export namespace CyHttpMessages {
   export type IncomingRequest = BaseMessage
 
   export interface IncomingHttpRequest extends IncomingRequest {
-    destroy: () => void
-    // if `responseOrInterceptor` is undefined, just forward the modified request to the destination
-    reply: (responseOrInterceptor?: StaticResponse | HttpResponseInterceptor) => void
-    redirect: (location: string, statusCode: 301 | 302 | 303 | 307 | number) => void
+    destroy (): void
+    reply(interceptor?: StaticResponse | HttpResponseInterceptor): void
+    reply(body: string | number | object, headers?: { [key: string]: string })
+    reply(status: number, body: string | number | object, headers?: { [key: string]: string })
+    redirect(location: string, statusCode: number): void
   }
 }
 
@@ -174,9 +175,9 @@ export interface GenericStaticResponse<F> {
    */
   fixture?: F
   /**
-   * If set, serve a static string as the response body.
+   * If set, serve a static string/JSON object as the response body.
    */
-  body?: string
+  body?: string | object
   /**
    * @default {}
    */
