@@ -33,11 +33,7 @@ export function needsOptions (): boolean {
 function getCurrentInspectFlag (): string | undefined {
   const flag = process.execArgv.find((v) => v.startsWith('--inspect'))
 
-  if (flag) {
-    return flag.split('=')[0]
-  }
-
-  return
+  return flag ? flag.split('=')[0] : undefined
 }
 
 /**

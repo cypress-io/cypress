@@ -17,6 +17,19 @@ const noTestsError = (specPath: string) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
+const Loading = () => (
+  <div className="runnable-loading">
+    <div className="runnable-loading-animation">
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+    </div>
+    <div className="runnable-loading-title">Your tests are loading...</div>
+  </div>
+)
+
 interface RunnablesListProps {
   runnables: RunnableArray
 }
@@ -30,7 +43,9 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
 ))
 
 function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
-  if (!isReady) return null
+  if (!isReady) {
+    return <Loading />
+  }
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
