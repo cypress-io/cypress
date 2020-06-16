@@ -117,6 +117,7 @@ const startXhrServer = (cy, state, config) => {
         aliasType: 'route',
         type: 'parent',
         event: true,
+        timeout: 0,
         consoleProps: () => {
           const consoleObj = {
             Alias: alias,

@@ -1942,7 +1942,7 @@ declare namespace Cypress {
      * @example
      *    cy.wait(1000) // wait for 1 second
      */
-    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Wait for a specific XHR to respond.
      *
@@ -2175,11 +2175,11 @@ declare namespace Cypress {
    */
   interface Shadow {
     /**
-     * Ignore shadow boundary and continue searching
+     * Include shadow DOM in search
      *
      * @default: false
      */
-    ignoreShadowBoundaries: boolean
+    includeShadowDom: boolean
   }
 
   /**
@@ -2456,7 +2456,7 @@ declare namespace Cypress {
     experimentalSourceRewriting: boolean
     /**
      * Enables shadow DOM support. Adds the `cy.shadow()` command and
-     * the `ignoreShadowBoundaries` option to some DOM commands.
+     * the `includeShadowDom` option to some DOM commands.
      */
     experimentalShadowDomSupport: boolean
   }
@@ -3073,6 +3073,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'equal', value: any): Chainable<Subject>
+    /**
+   * Causes all `.key` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+   * @example
+   *    cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
+   * @see http://chaijs.com/api/bdd/#method_all
+   * @see https://on.cypress.io/assertions
+   */
+    (chainer: 'have.all.key', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.key` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.any.key', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example
