@@ -429,7 +429,7 @@ const create = function (Cypress, cy) {
     .catch(onFailFn)
   }
 
-  const assertFn = (passed, message, value, actual, expected, error, verifying = false) => {
+  const assertFn = (passed, message, value, actual, expected, error, assertionId, verifying = false) => {
     // slice off everything after a ', but' or ' but ' for passing assertions, because
     // otherwise it doesn't make sense:
     // "expected <div> to have a an attribute 'href', but it was 'href'"
@@ -501,7 +501,18 @@ const create = function (Cypress, cy) {
       error.onFail = (err) => { }
     }
 
-    Cypress.log(obj)
+    const currentAssertionId = cy.state('currentAssertionId')
+
+    if (currentAssertionId !== assertionId) {
+      const log = Cypress.log(obj)
+
+      cy.state('currentAssertionLog', log)
+      cy.state('currentAssertionId', assertionId)
+    } else {
+      const currentAssertionLog = cy.state('currentAssertionLog')
+
+      currentAssertionLog.set(obj)
+    }
 
     return null
   }
@@ -509,6 +520,7 @@ const create = function (Cypress, cy) {
   const assert = function (...args) {
     // if we've temporarily overriden assertions
     // then just bail early with this function
+    // TODO: i think we can get rid of overrideAssert
     const fn = cy.state('overrideAssert') || assertFn
 
     return fn.apply(this, args)

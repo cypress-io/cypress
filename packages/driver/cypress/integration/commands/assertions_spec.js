@@ -2778,9 +2778,17 @@ describe('src/cy/commands/assertions', () => {
       it('logs the correct amount of times when passed an object', function () {
         cy.$$('body').append(this.$div)
 
-        cy.get('div').last().should('have.css', { display: 'none', position: 'absolute' }).then(() => {
-          expect(this.logs.length).to.eq(2)
-        })
+        expect({ foo: 'bar' }).to.have.property('foo', 'bar')
+
+        // cy.wrap({foo: 'bar'}).then((obj) => {
+        // expect(obj).to.have.property('foo', 'baz')
+        // })
+        // cy.wrap({foo: 'bar'}).should('have.property', 'quux', 'baz')
+
+        // cy.get('div').last().should('have.property', 'innerText', 'foo')
+        // cy.get('div').last().should('have.css', { display: 'none', position: 'absolute' }).then(() => {
+        // expect(this.logs.length).to.eq(2)
+        // })
       })
     })
   })

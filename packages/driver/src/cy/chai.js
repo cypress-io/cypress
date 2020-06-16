@@ -439,6 +439,14 @@ chai.use((chai, u) => {
 
   const createPatchedAssert = (specWindow, state, assertFn) => {
     return (function (...args) {
+      let assertionId = chaiUtils.flag(this, 'assertionId')
+
+      if (!assertionId) {
+        assertionId = _.uniqueId('assertionId')
+
+        chaiUtils.flag(this, 'assertionId', assertionId)
+      }
+
       let err
       const passed = chaiUtils.test(this, args)
       const value = chaiUtils.flag(this, 'object')
@@ -457,7 +465,7 @@ chai.use((chai, u) => {
         err = e
       }
 
-      assertFn(passed, message, value, actual, expected, err)
+      assertFn(passed, message, value, actual, expected, err, assertionId)
 
       if (!err) return
 
