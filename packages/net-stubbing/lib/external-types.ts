@@ -43,10 +43,10 @@ export namespace CyHttpMessages {
   export type IncomingRequest = BaseMessage
 
   export interface IncomingHttpRequest extends IncomingRequest {
-    destroy (): void
+    destroy(): void
     reply(interceptor?: StaticResponse | HttpResponseInterceptor): void
-    reply(body: string | number | object, headers?: { [key: string]: string })
-    reply(status: number, body: string | number | object, headers?: { [key: string]: string })
+    reply(body: string | number | object, headers?: { [key: string]: string }): void
+    reply(status: number, body: string | number | object, headers?: { [key: string]: string }): void
     redirect(location: string, statusCode: number): void
   }
 }
