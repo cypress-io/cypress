@@ -2536,10 +2536,8 @@ describe('src/cy/commands/assertions', () => {
       it('logs the correct amount of times when passed an object', function () {
         cy.$$('body').append(this.$div)
 
-        cy.get('div').last().should('have.attr', { foo: 'bar' })
-        cy.get('div').last().should('have.attr', { fizz: 'buzz' })
         cy.get('div').last().should('have.attr', { foo: 'bar', fizz: 'buzz' }).then(() => {
-          expect(this.logs.length).to.eq(4)
+          expect(this.logs.length).to.eq(2)
         })
       })
     })
@@ -2682,10 +2680,8 @@ describe('src/cy/commands/assertions', () => {
       it('logs the correct amount of times when passed an object', function () {
         cy.$$('body').append(this.$input)
 
-        cy.get('input').last().should('have.prop', { checked: true })
-        cy.get('input').last().should('have.prop', { type: 'checkbox' })
         cy.get('input').last().should('have.prop', { checked: true, type: 'checkbox' }).then(() => {
-          expect(this.logs.length).to.eq(4)
+          expect(this.logs.length).to.eq(2)
         })
       })
     })
@@ -2782,10 +2778,8 @@ describe('src/cy/commands/assertions', () => {
       it('logs the correct amount of times when passed an object', function () {
         cy.$$('body').append(this.$div)
 
-        cy.get('div').last().should('have.css', { display: 'none' })
-        cy.get('div').last().should('have.css', { position: 'absolute' })
         cy.get('div').last().should('have.css', { display: 'none', position: 'absolute' }).then(() => {
-          expect(this.logs.length).to.eq(4)
+          expect(this.logs.length).to.eq(2)
         })
       })
     })
