@@ -28,6 +28,15 @@ export function needsOptions (): boolean {
 }
 
 /**
+ * Retrieve the current inspect flag, if the process was launched with one.
+ */
+function getCurrentInspectFlag (): string | undefined {
+  const flag = process.execArgv.find((v) => v.startsWith('--inspect'))
+
+  return flag ? flag.split('=')[0] : undefined
+}
+
+/**
  * Fork the current process using the good NODE_OPTIONS and pipe stdio
  * through the current process. On exit, copy the error code too.
  */
@@ -41,9 +50,16 @@ export function forkWithCorrectOptions (): void {
     ORIGINAL_NODE_OPTIONS: process.env.ORIGINAL_NODE_OPTIONS,
   })
 
+  const launchArgs = process.argv.slice(1)
+  const inspectFlag = getCurrentInspectFlag()
+
+  if (inspectFlag) {
+    launchArgs.unshift(`${inspectFlag}=${process.debugPort + 1}`)
+  }
+
   cp.spawn(
     process.execPath,
-    process.argv.slice(1),
+    launchArgs,
     { stdio: 'inherit' },
   )
   .on('error', () => {})
