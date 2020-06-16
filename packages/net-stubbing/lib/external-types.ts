@@ -167,17 +167,17 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string>
+export type StaticResponse = GenericStaticResponse<string, string | object>
 
-export interface GenericStaticResponse<F> {
+export interface GenericStaticResponse<Fixture, Body> {
   /**
    * If set, serve a fixture as the response body.
    */
-  fixture?: F
+  fixture?: Fixture
   /**
    * If set, serve a static string/JSON object as the response body.
    */
-  body?: string | object
+  body?: Body
   /**
    * @default {}
    */

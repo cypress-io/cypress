@@ -12,51 +12,20 @@ import {
 } from '../types'
 import {
   getAllStringMatcherFields,
-  getStaticResponseFixture,
+  setBodyFromFixture,
 } from './util'
 import { onRequestContinue } from './intercept-request'
 import { onResponseContinue } from './intercept-response'
 import CyServer from '@packages/server'
 
-// TODO: move this into net-stubbing once cy.route is removed
-import { parseContentType } from '@packages/server/lib/controllers/xhrs'
-
 const debug = Debug('cypress:net-stubbing:server:driver-events')
-
-const caseInsensitiveGet = function (obj, lowercaseProperty) {
-  for (let key of Object.keys(obj)) {
-    if (key.toLowerCase() === lowercaseProperty) {
-      return obj[key]
-    }
-  }
-}
 
 async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn, options: NetEventFrames.AddRoute) {
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
   if (staticResponse && staticResponse.fixture) {
-    // validate that the fixture exists too, this will reject if not
-    staticResponse.body = await getStaticResponseFixture(getFixture, staticResponse)
-    .then((fixture) => {
-      const { headers } = staticResponse
-
-      if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
-        _.set(staticResponse, 'headers.content-type', parseContentType(fixture))
-      }
-
-      // NOTE: for backwards compatibility with cy.route
-      if (fixture === null) {
-        return ''
-      }
-
-      if (!_.isBuffer(fixture) && !_.isString(fixture)) {
-        // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
-        return JSON.stringify(fixture)
-      }
-
-      return fixture
-    })
+    await setBodyFromFixture(getFixture, staticResponse)
   }
 
   const route: BackendRoute = {

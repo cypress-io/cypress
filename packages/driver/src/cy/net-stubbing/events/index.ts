@@ -10,6 +10,12 @@ export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
 }) => void | Promise<void>
 
+const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
+  'http:request:received': onRequestReceived,
+  'http:response:received': onResponseReceived,
+  'http:request:complete': onRequestComplete,
+}
+
 export function registerEvents (Cypress: Cypress.Cypress) {
   const { state } = Cypress
 
@@ -37,15 +43,9 @@ export function registerEvents (Cypress: Cypress.Cypress) {
     state('routes', {})
   })
 
-  const netEventHandlers = {
-    'http:request:received': onRequestReceived,
-    'http:response:received': onResponseReceived,
-    'http:request:complete': onRequestComplete,
-  }
-
   Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {
     try {
-      const handler: HandlerFn<any> = netEventHandlers[eventName]
+      const handler = netEventHandlers[eventName]
 
       handler(Cypress, frame, {
         getRoute,
@@ -53,7 +53,8 @@ export function registerEvents (Cypress: Cypress.Cypress) {
         emitNetEvent,
       })
     } catch (err) {
-      // errors have to be manually propagated here
+      // errors have to be manually propagated to the test here
+      // or else they disappear 👻
       // @ts-ignore
       Cypress.action('cy:fail', err, state('runnable'))
     }

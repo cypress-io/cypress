@@ -10,7 +10,7 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts>
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',

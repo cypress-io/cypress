@@ -13,6 +13,9 @@ import CyServer from '@packages/server'
 import { Socket } from 'net'
 import { GetFixtureFn } from './types'
 
+// TODO: move this into net-stubbing once cy.route is removed
+import { parseContentType } from '@packages/server/lib/controllers/xhrs'
+
 const debug = Debug('cypress:net-stubbing:server:util')
 
 export function emit (socket: CyServer.Socket, eventName: string, data: object) {
@@ -67,14 +70,44 @@ function _getFakeClientResponse (opts: {
   return clientResponse
 }
 
-export function getStaticResponseFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
-  const { fixture } = staticResponse
+const caseInsensitiveGet = function (obj, lowercaseProperty) {
+  for (let key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      return obj[key]
+    }
+  }
+}
 
-  if (!fixture) {
-    throw new Error('Missing fixture on staticResponse')
+export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
+  const { body, fixture } = staticResponse
+
+  if (!fixture || body) {
+    return
   }
 
-  return getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
+  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
+
+  const { headers } = staticResponse
+
+  if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
+    _.set(staticResponse, 'headers.content-type', parseContentType(data))
+  }
+
+  function getBody (): string {
+  // NOTE: for backwards compatibility with cy.route
+    if (data === null) {
+      return ''
+    }
+
+    if (!_.isBuffer(data) && !_.isString(data)) {
+    // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
+      return JSON.stringify(data)
+    }
+
+    return data
+  }
+
+  staticResponse.body = getBody()
 }
 
 /**
