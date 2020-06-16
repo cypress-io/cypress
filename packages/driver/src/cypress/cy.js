@@ -80,9 +80,17 @@ const setTopOnError = function (cy) {
 
   curCy = cy
 
+  // prevent overriding top.onerror twice when loading more than one
+  // instance of test runner.
+  if (top.onerror && top.onerror.isCypressHandler) {
+    return
+  }
+
   const onTopError = function () {
     return curCy.onUncaughtException.apply(curCy, arguments)
   }
+
+  onTopError.isCypressHandler = true
 
   top.onerror = onTopError
 
@@ -98,7 +106,12 @@ const setTopOnError = function (cy) {
   })
 }
 
+// NOTE: this makes the cy object an instance
+// TODO: refactor the 'create' method below into this class
+class $Cy {}
+
 const create = function (specWindow, Cypress, Cookies, state, config, log) {
+  let cy = new $Cy()
   let stopped = false
   const commandFns = {}
 
@@ -132,7 +145,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
-  const assertions = $Assertions.create(state, queue, retries.retry)
+  const assertions = $Assertions.create(Cypress, cy)
 
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
@@ -144,7 +157,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
-  const aliases = $Aliases.create(state)
+  const aliases = $Aliases.create(cy)
 
   const errors = $Errors.create(state, config, log)
   const ensures = $Ensures.create(state, expect)
@@ -798,7 +811,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return finish(err)
   }
 
-  const cy = {
+  _.extend(cy, {
     id: _.uniqueId('cy'),
 
     // synchrounous querying
@@ -1387,7 +1400,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         }
       }
     },
-  }
+  })
 
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {

@@ -1,4 +1,3 @@
-/* globals cy */
 const _ = require('lodash')
 
 const $errUtils = require('../cypress/error_utils')
@@ -44,14 +43,14 @@ const validateAlias = (alias) => {
   }
 }
 
-const create = (state) => {
+const create = (cy) => {
   const addAlias = (ctx, aliasObj) => {
     const { alias, subject } = aliasObj
 
-    const aliases = state('aliases') || {}
+    const aliases = cy.state('aliases') || {}
 
     aliases[alias] = aliasObj
-    state('aliases', aliases)
+    cy.state('aliases', aliases)
 
     const remoteSubject = cy.getRemotejQueryInstance(subject)
 
@@ -59,7 +58,7 @@ const create = (state) => {
   }
 
   const getNextAlias = () => {
-    const next = state('current').get('next')
+    const next = cy.state('current').get('next')
 
     if (next && (next.get('name') === 'as')) {
       return next.get('args')[0]
@@ -67,7 +66,7 @@ const create = (state) => {
   }
 
   const getAlias = (name, cmd, log) => {
-    const aliases = state('aliases') || {}
+    const aliases = cy.state('aliases') || {}
 
     // bail if the name doesnt reference an alias
     if (!aliasRe.test(name)) {
@@ -85,7 +84,7 @@ const create = (state) => {
   }
 
   const getAvailableAliases = () => {
-    const aliases = state('aliases')
+    const aliases = cy.state('aliases')
 
     if (!aliases) {
       return []
@@ -108,7 +107,7 @@ const create = (state) => {
       })
     }
 
-    cmd = cmd ?? ((log && log.get('name')) || state('current').get('name'))
+    cmd = cmd ?? ((log && log.get('name')) || cy.state('current').get('name'))
     displayName = aliasDisplayName(name)
 
     const errPath = availableAliases.length
