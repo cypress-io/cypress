@@ -12,3 +12,5 @@ npm test
 ```
 
 ![App test](images/app-test.png)
+
+The spec [src/Logo.cy-spec.js](src/Logo.cy-spec.js) directly imports SVG into React spec file. The spec [src/resources.cy-spec.js](src/resources.cy-spec.js) confirm that static resources like SVG and fonts load correctly.
