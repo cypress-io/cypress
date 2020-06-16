@@ -69,7 +69,7 @@ const _getOriginFromUrl = (originalUrl) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage, utm_code) => {
+const start = (onMessage, utmCode) => {
   function sendMessage (type, name, arg1) {
     onMessage({
       type,
@@ -79,7 +79,7 @@ const start = (onMessage, utm_code) => {
     })
   }
 
-  utm = utm_code
+  utm = utmCode
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
