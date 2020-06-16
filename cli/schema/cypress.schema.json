@@ -35,7 +35,7 @@
     "quiet": {
       "type": "boolean",
       "default": false,
-      "description": "Whether CYpress will run quietly, using only the configured reporter"
+      "description": "Whether Cypress will run quietly, using only the configured reporter"
     },
     "reporter": {
       "type": "string",
