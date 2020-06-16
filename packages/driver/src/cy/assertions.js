@@ -477,6 +477,7 @@ const create = function (state, queue, retryFn) {
       message,
       passed,
       selector: value ? value.selector : undefined,
+      timeout: 0,
       type (current, subject) {
         // if our current command has arguments assume
         // we are an assertion that's involving the current

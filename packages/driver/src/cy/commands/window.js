@@ -76,8 +76,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({
-        })
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const resolveTitle = () => {
@@ -99,7 +98,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const getWindow = () => {
@@ -141,7 +140,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const getDocument = () => {
@@ -197,6 +196,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         const isPreset = typeof presetOrWidth === 'string'
 
         options._log = Cypress.log({
+          timeout: options.timeout,
           consoleProps () {
             const obj = {}
 
