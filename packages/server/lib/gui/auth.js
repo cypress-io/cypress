@@ -27,7 +27,7 @@ const _buildLoginRedirectUrl = (server) => {
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const _buildFullLoginUrl = (baseLoginUrl, server) => {
+const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
   const { port } = server.address()
 
   if (!authState) {
@@ -46,12 +46,12 @@ const _buildFullLoginUrl = (baseLoginUrl, server) => {
       platform: os.platform(),
     }
 
-    if (utm) {
+    if (utmCode) {
       authUrl.query = {
         utm_source: 'Test Runner',
         utm_medium: 'Login Button',
         utm_campaign: 'TR-Dashboard',
-        utm_content: utm,
+        utm_content: utmCode,
         ...authUrl.query,
       }
     }
@@ -122,7 +122,7 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      _buildFullLoginUrl(baseLoginUrl, server)
+      _buildFullLoginUrl(baseLoginUrl, server, utm)
       .then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
