@@ -16,8 +16,6 @@ const ws = client.connect({
   parser: circularParser,
 })
 
-window.runnerWs = ws
-
 ws.on('connect', () => {
   ws.emit('runner:connected')
 })
@@ -32,10 +30,13 @@ const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+window.runnerWs = ws
+
+// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+// unless Cypress has been loaded into the AUT frame
 if (window.Cypress) {
-  window.channel = ws
-  window.reporterBus = reporterBus
-  window.localBus = localBus
+  window.eventManager = { reporterBus, localBus }
 }
 
 /**

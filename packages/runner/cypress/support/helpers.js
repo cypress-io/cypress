@@ -36,8 +36,6 @@ const mochaEventCleanseMap = {
   end: match.date,
 }
 
-const setRunnablesCleanseMap = { ...eventCleanseMap, tests: _.identity }
-
 const spyOn = (obj, prop, fn) => {
   const _fn = obj[prop]
 
@@ -72,8 +70,7 @@ function createCypress () {
 
   const getAutCypress = () => autCypress
 
-  const snapshotEvents = (name) => {
-    expect(setRunnablesStub.args).to.matchSnapshot(setRunnablesCleanseMap, name.setRunnables)
+  const snapshotMochaEvents = () => {
     expect(mochaStubs.args).to.matchSnapshot(mochaEventCleanseMap, name.mocha)
   }
 
@@ -98,7 +95,7 @@ function createCypress () {
    * @param {()=>void | {[key:string]: any}} mochaTests
    * @param {{state?: any, config?: any}} opts
    */
-  const runCypress = (mochaTests, opts = {}) => {
+  const runIsolatedCypress = (mochaTests, opts = {}) => {
     _.defaultsDeep(opts, {
       state: {},
       config: { video: false },
@@ -106,14 +103,14 @@ function createCypress () {
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
     .then({ timeout: 60000 }, (win) => {
-      win.channel.destroy()
+      win.runnerWs.destroy()
 
       allStubs = cy.stub().snapshot(enableStubSnapshots).log(enableStubLogs)
       mochaStubs = cy.stub().snapshot(enableStubSnapshots).log(enableStubLogs)
       setRunnablesStub = cy.stub().snapshot(enableStubSnapshots).log(enableStubLogs)
 
       return new Promise((resolve) => {
-        const runCypress = () => {
+        const runIsolatedCypress = () => {
           autCypress.run.restore()
 
           const emit = autCypress.emit
@@ -201,10 +198,10 @@ function createCypress () {
           })
         }
 
-        cy.spy(win.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus').log(enableStubLogs)
-        cy.spy(win.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus').log(enableStubLogs)
+        cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus').log(enableStubLogs)
+        cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus').log(enableStubLogs)
 
-        cy.stub(win.channel, 'emit').snapshot(enableStubSnapshots).log(enableStubLogs)
+        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots).log(enableStubLogs)
         .withArgs('watch:test:file')
         .callsFake(() => {
           autCypress = win.Cypress
@@ -228,7 +225,7 @@ function createCypress () {
             specWindow.describe = () => {}
           })
 
-          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(enableStubLogs).callsFake(runCypress)
+          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(enableStubLogs).callsFake(runIsolatedCypress)
         })
         .withArgs('is:automation:client:connected')
         .yieldsAsync(true)
@@ -269,9 +266,8 @@ function createCypress () {
         }, opts.config)
 
         c.state = {}
-        // c.state = opts.state
 
-        cy.stub(win.channel, 'on').snapshot(enableStubSnapshots).log(enableStubLogs)
+        cy.stub(win.runnerWs, 'on').snapshot(enableStubSnapshots).log(enableStubLogs)
 
         win.Runner.start(win.document.getElementById('app'), window.btoa(JSON.stringify(c)))
       })
@@ -279,8 +275,8 @@ function createCypress () {
   }
 
   return {
-    runCypress,
-    snapshotEvents,
+    runIsolatedCypress,
+    snapshotMochaEvents,
     onInitialized,
     getAutCypress,
 

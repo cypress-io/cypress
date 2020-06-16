@@ -57,17 +57,13 @@ const registerInCypress = () => {
       render () {
         const btnIcon = $(this).children().first()
 
-        return btnIcon.text(Cypress.env('SNAPSHOT_UPDATE') ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
+        return btnIcon.text(top.SNAPSHOT_UPDATE ? 'snapshot\nupdate\non' : 'snapshot\nupdate\noff')
         .css({ 'font-size': '10px', 'line-height': '0.9' })
         .html(btnIcon.html().replace(/\n/g, '<br/>'))
       },
       click () {
-        const prev = Cypress.env('SNAPSHOT_UPDATE')
-
-        Cypress.env('SNAPSHOT_UPDATE', !prev)
+        top.SNAPSHOT_UPDATE = !top.SNAPSHOT_UPDATE
       },
-
-    }, function () {
     })
   })
 
@@ -126,7 +122,7 @@ const registerInCypress = () => {
           }
 
           // save snapshot if env var or no previously saved snapshot (and no failed matcher assertions)
-          if ((Cypress.env('SNAPSHOT_UPDATE') || !exp) && !e.failedMatcher && e.act) {
+          if ((top.SNAPSHOT_UPDATE || !exp) && !e.failedMatcher && e.act) {
             return saveSnapshot(ctx, exactSpecName, file, exp, e.act)
           }
 
