@@ -47,6 +47,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       if (options.log) {
         options._log = Cypress.log({
           $el: subject,
+          timeout: options.timeout,
           consoleProps () {
             return {
               'Yielded': subject,

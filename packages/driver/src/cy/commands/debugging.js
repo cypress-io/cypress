@@ -58,6 +58,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           snapshot: true,
           autoEnd: false,
+          timeout: 0,
         })
       }
 
@@ -112,6 +113,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           snapshot: true,
           end: true,
+          timeout: 0,
         })
       }
 

@@ -36,7 +36,21 @@
             {
               "id": "r7",
               "title": "test 2",
-              "state": "active"
+              "state": "active",
+              "commands": [
+                {
+                  "hookName": "test",
+                  "id": "c1",
+                  "instrument": "command",
+                  "message": "http://localhost:3000",
+                  "name": "visit",
+                  "state": "pending",
+                  "testId": "r7",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+                }
+              ]
             }
           ]
         }

@@ -28,6 +28,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: deltaOptions,
           $el: options.$el,
+          timeout: options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
             return _.extend({}, consoleProps, {
