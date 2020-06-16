@@ -22,6 +22,7 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
+  font-family: 'MyFont';
 }
 
 .App-link {
@@ -35,4 +36,9 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+@font-face {
+  font-family: 'MyFont';
+  src: local('MyFont'), url(./Inter-Regular.woff) format('woff');
 }
