@@ -774,7 +774,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       const parentTitle = runnable.parent.title
 
       hookName = getHookName(runnable)
-      const test = getTestFromHook(runnable, getTestById)
+      const test = getTest() || getTestFromHookOrFindTest(runnable)
 
       // append a friendly message to the error indicating
       // we're skipping the remaining tests in this suite

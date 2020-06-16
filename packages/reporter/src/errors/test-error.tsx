@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import _ from 'lodash'
 import React, { MouseEvent } from 'react'
 import { observer } from 'mobx-react'
@@ -58,8 +57,6 @@ const TestError = observer((props: TestErrorProps) => {
   const { codeFrame } = err
 
   if (!err.displayMessage) return null
-
-  if (props.isTestError) return null
 
   return (
     <div className='runnable-err-wrapper'>

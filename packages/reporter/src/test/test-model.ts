@@ -69,6 +69,7 @@ export default class Test extends Runnable {
     if (this._isOpen === null) {
       return this.state === 'failed'
       || this.isLongRunning
+      || this.isActive && this.hasMultipleAttempts
       || this.store && this.store.hasSingleTest
     }
 
@@ -134,20 +135,16 @@ export default class Test extends Runnable {
     this._isOpen = !this.isOpen
   }
 
-  @action update (props: UpdatableTestProps, cb?: UpdateTestCallback) {
+  @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
     this._withAttempt(props.currentRetry, (attempt) => {
       attempt.update(props)
     })
 
     if (props.isOpen != null && (this.isOpen !== props.isOpen)) {
       this.setIsOpen(props.isOpen, cb)
-
-      return
     }
 
     cb()
-
-    return
   }
 
   // this is called to sync up the command log UI for the sake of

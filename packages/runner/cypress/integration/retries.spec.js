@@ -23,7 +23,7 @@ const threeTestsWithRetry = {
  */
 const match = Cypress.sinon.match
 
-const { visit, snapshotEvents, onInitialized, getAutCypress } = helpers.createCypress()
+const { runCypress, snapshotEvents, onInitialized, getAutCypress } = helpers.createCypress()
 
 describe('src/cypress/runner', () => {
   describe('isolated test runner', () => {
@@ -31,7 +31,7 @@ describe('src/cypress/runner', () => {
       // NOTE: for test-retries
       describe('retries', () => {
         it('can set retry config', () => {
-          visit({}, { config: { retries: 1 } })
+          runCypress({}, { config: { retries: 1 } })
           .then(({ autCypress }) => {
             expect(autCypress.config()).to.has.property('retries', 1)
           })
@@ -39,7 +39,7 @@ describe('src/cypress/runner', () => {
 
         describe('retry ui', () => {
           beforeEach(() => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1': {
                   tests: [
@@ -49,7 +49,7 @@ describe('src/cypress/runner', () => {
                   ],
                 },
               },
-            }, { config: { retries: 1, isTextTerminal: false } })
+            }, { config: { retries: 1 } })
             .then(shouldHaveTestResults(2, 1))
           })
 
@@ -78,7 +78,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('simple retry', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 tests: [
@@ -93,8 +93,39 @@ describe('src/cypress/runner', () => {
           .then(() => snapshotEvents(snapshots.RETRY_PASS_IN_TEST))
         })
 
+        // TODO: fix this test
+        it.skip('takes screenshots properly on every attempt failure', () => {
+          onInitialized((autCypress) => {
+            let count = 0
+
+            autCypress.Screenshot.onAfterScreenshot = cy.stub().callsFake(() => {
+              cy.wrap(null).then(() => {
+                count++
+                expect(cy.$$(`.attempt:contains(Attempt ${count}).runnable-err`)).be.visible
+              })
+            })
+          })
+
+          runCypress({
+            suites: {
+              'suite 1': {
+                tests: [
+                  'foo',
+                  { name: 'test 1',
+                    fail: 3,
+                  },
+                ],
+              },
+            },
+          }, { config: { retries: 3, isTextTerminal: true } })
+          // .then(shouldHaveTestResults(1, 0))
+          // .then(() => {
+
+          // })
+        })
+
         it('test retry with hooks', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
@@ -110,7 +141,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('test retry with [only]', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: ['before', 'beforeEach', 'afterEach', 'after'],
@@ -126,7 +157,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('test retry with many hooks', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: [
@@ -147,7 +178,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('can retry from [beforeEach]', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: [
@@ -174,7 +205,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('can retry from [afterEach]', () => {
-          visit({
+          runCypress({
             hooks: [{ type: 'afterEach', fail: 1 }],
             suites: {
               'suite 1': {
@@ -195,7 +226,7 @@ describe('src/cypress/runner', () => {
                 tests: ['test 1'],
               },
             },
-          }, { config: { retries: 2 } })
+          }, { config: { retries: 2, isTextTerminal: true } })
           .then(shouldHaveTestResults(5, 0))
           .then(() => {
             cy.contains('test 1')
@@ -209,7 +240,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('cant retry from [before]', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: [
@@ -234,7 +265,7 @@ describe('src/cypress/runner', () => {
         })
 
         it('cant retry from [after]', () => {
-          visit({
+          runCypress({
             suites: {
               'suite 1': {
                 hooks: [
@@ -248,7 +279,7 @@ describe('src/cypress/runner', () => {
                 tests: [{ name: 'test 1' }],
               },
             },
-          }, { config: { retries: 1, isTextTerminal: false } })
+          }, { config: { retries: 1 } })
           .then(shouldHaveTestResults(0, 1))
           .then(() => {
             cy.contains('Although you have test retries')
@@ -264,7 +295,7 @@ describe('src/cypress/runner', () => {
           }
 
           it('via config value', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1': () => {
                   Cypress.config('retries', 0)
@@ -306,7 +337,7 @@ describe('src/cypress/runner', () => {
           })
 
           it('throws when set via this.retries in test', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1' () {
                   it('test 1', function () {
@@ -322,7 +353,7 @@ describe('src/cypress/runner', () => {
           })
 
           it('throws when set via this.retries in hook', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1' () {
                   beforeEach(function () {
@@ -340,7 +371,7 @@ describe('src/cypress/runner', () => {
           })
 
           it('throws when set via this.retries in suite', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1' () {
                   this.retries(0)
@@ -426,7 +457,7 @@ describe('src/cypress/runner', () => {
           ]
 
           it('serialize state', () => {
-            visit(...cypressConfig)
+            runCypress(...cypressConfig)
             .then(shouldHaveTestResults(4, 0))
             .then(() => {
               expect(realState).to.matchSnapshot(cleanseRunStateMap, 'serialize state - retries')
@@ -435,7 +466,7 @@ describe('src/cypress/runner', () => {
 
           it('load state', () => {
             loadStateFromSnapshot(cypressConfig, 'serialize state - retries')
-            visit(...cypressConfig)
+            runCypress(...cypressConfig)
             .then(shouldHaveTestResults(4, 0))
             .then(() => {
               expect(stub1).to.calledOnce
@@ -455,7 +486,7 @@ describe('src/cypress/runner', () => {
               suites: {
                 'beforeEach hooks': {
                   hooks: [{ type: 'beforeEach', fail: true }],
-                  tests: ['never gets here'],
+                  tests: ['fails in beforeEach'],
                 },
                 'pending': {
                   tests: [{ name: 'is pending', pending: true }],
@@ -474,31 +505,39 @@ describe('src/cypress/runner', () => {
           },
         }
 
-        visit(mochaTests)
+        runCypress(mochaTests, { config: { retries: 1 } })
         .then(shouldHaveTestResults(1, 3))
         .then(() => {
-          cy.contains('.test', 'never gets here').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: beforeEach').scrollIntoView().should('be.visible')
+          cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
+          .within(() => {
+            cy.contains('.command', 'after').should('have.class', 'command-state-failed')
+            cy.contains('.runnable-err', 'AssertionError').should('be.visible')
+          })
+
+          cy.contains('.test', 'fails in beforeEach').should('have.class', 'runnable-failed')
+          .within(() => {
+            cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
+
+            // make sure Attempt 1 is collapsed
+            cy.get('.attempt-item').first().find('.commands-container').should('not.exist')
+          })
 
           cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
 
           cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: afterEach').should('be.visible')
+          .within(() => {
+            cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
+            cy.contains('.runnable-err', 'AssertionError').should('be.visible')
+          })
 
           cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
 
           cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
-
-          cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
-          cy.contains('.command', 'after').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError: after').should('be.visible')
         })
       })
 
       it('async timeout spec', () => {
-        visit({
+        runCypress({
           suites: {
             'async': {
               tests: [
@@ -520,7 +559,7 @@ describe('src/cypress/runner', () => {
       })
 
       it('mocha suite:end fire before test:pass event', () => {
-        visit({
+        runCypress({
           suites: {
             'suite 1': {
               suites: {
@@ -558,7 +597,7 @@ describe('src/cypress/runner', () => {
         // NOTE: for test-retries
         describe('retries', () => {
           it('retry screenshot in test body', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1': {
                   tests: [
@@ -593,7 +632,7 @@ describe('src/cypress/runner', () => {
           })
 
           it('retry screenshot in hook', () => {
-            visit({
+            runCypress({
               suites: {
                 'suite 1': {
                   hooks: [
@@ -633,7 +672,7 @@ describe('src/cypress/runner', () => {
 
     describe('mocha events', () => {
       it('three tests with retry', () => {
-        visit(threeTestsWithRetry, { config: {
+        runCypress(threeTestsWithRetry, { config: {
           retries: 2,
         } })
         .then(() => {

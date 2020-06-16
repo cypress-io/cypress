@@ -94,7 +94,7 @@
     }
 
     &.test.runnable-retried > .runnable-wrapper {
-      border-left: 10px solid $retried;
+      border-left: 5px solid $retried;
     }
 
     &.runnable-skipped > .runnable-wrapper .runnable-content-region {

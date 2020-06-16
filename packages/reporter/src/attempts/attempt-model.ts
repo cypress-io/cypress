@@ -21,6 +21,8 @@ export default class AttemptModel {
   @observable _isOpenWhenLast: boolean | null = null
   @observable _state: TestState|null = null
 
+  _callbackAfterUpdate: Function | null = null
+
   testId: string
   @observable id: number
   test: TestModel
@@ -63,11 +65,13 @@ export default class AttemptModel {
 
   @computed get isOpen () {
     if (this._isOpen === null) {
-      if (this._isOpenWhenLast === null) {
-        return this.isLongRunning || this.isLast
-      }
+      // if (this._isOpenWhenLast === null) {
+      return this.isLast
 
-      return this._isOpenWhenLast && this.isLast
+      // return this.isLast
+      // }
+
+      // return this._isOpenWhenLast && this.isLast
     }
 
     return this._isOpen
@@ -144,34 +148,34 @@ export default class AttemptModel {
     this._isOpen = !this.isOpen
   }
 
-  // @action setIsOpen (isOpen, cb) {
-  //   // if isOpen is not changing at all, callback immediately
-  //   // because there won't be a re-render to trigger it
+  @action setIsOpen (isOpen: boolean, cb: Function) {
+    // if isOpen is not changing at all, callback immediately
+    // because there won't be a re-render to trigger it
 
-  //   if (!this.test.isOpen && !isOpen) {
-  //     cb()
+    if (!isOpen && !this.test.isOpen) {
+      cb()
 
-  //     return
-  //   }
+      return
+    }
 
-  //   if (this.test.isOpen && this.isOpen && isOpen) {
-  //     cb()
+    if (isOpen && this.test.isOpen && this.isOpen) {
+      cb()
 
-  //     return
-  //   }
+      return
+    }
 
-  //   // changing isOpen will trigger a re-render and the callback will
-  //   // be called by attempts.jsx Attempt#componentDidUpdate
-  //   this._callbackAfterUpdate = cb
-  //   this._isOpen = isOpen
-  // }
+    // changing isOpen will trigger a re-render and the callback will
+    // be called by attempts.jsx Attempt#componentDidUpdate
+    this._callbackAfterUpdate = cb
+    this._isOpen = isOpen
+  }
 
-  // callbackAfterUpdate () {
-  //   if (this._callbackAfterUpdate) {
-  //     this._callbackAfterUpdate()
-  //     this._callbackAfterUpdate = null
-  //   }
-  // }
+  callbackAfterUpdate () {
+    if (this._callbackAfterUpdate) {
+      this._callbackAfterUpdate()
+      this._callbackAfterUpdate = null
+    }
+  }
 
   @action finish (props) {
     this.update(props)

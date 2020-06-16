@@ -14,7 +14,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -193,7 +193,9 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"after all\" hook"
+      "originalTitle": "\"after all\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -207,13 +209,49 @@ exports['FAIL_IN_AFTER.mocha'] = [
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "hookName": "after all",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -260,7 +298,7 @@ exports['FAIL_IN_AFTER.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -281,7 +319,7 @@ exports['FAIL_IN_AFTER.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [
@@ -582,7 +620,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -642,7 +680,9 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"before all\" hook"
+      "originalTitle": "\"before all\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -662,7 +702,39 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before all",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -705,7 +777,7 @@ exports['FAIL_IN_BEFORE.mocha'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1
     }
   ],
@@ -726,7 +798,7 @@ exports['FAIL_IN_BEFORE.setRunnables'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "cypress/integration/runner.spec.js",
+      "file": "relative/path/to/spec.js",
       "retries": -1,
       "tests": [],
       "suites": [

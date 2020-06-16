@@ -19,6 +19,10 @@ describe('src/cypress/runner', () => {
     it('simple 1 test', () => {
       runCypress(simpleSingleTest)
       .then(shouldHaveTestResults(1, 0))
+      .then(() => {
+        // Attempt tag should always be hidden with retries=0
+        cy.contains('Attempt 1').should('not.be.visible')
+      })
     })
 
     it('simple 1 global test', () => {

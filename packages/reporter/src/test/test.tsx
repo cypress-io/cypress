@@ -9,7 +9,7 @@ import appState, { AppState } from '../lib/app-state'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
-import scroller, { Scroller } from '../lib/scroller'
+import scroller from '../lib/scroller'
 
 import Attempts from '../attempts/attempts'
 
@@ -17,6 +17,7 @@ interface Props {
   events: Events
   appState: AppState
   runnablesStore: RunnablesStore
+  scroller: Scroller
   model: TestModel
 }
 
@@ -35,7 +36,6 @@ class Test extends Component<Props> {
 
   componentDidUpdate () {
     this._scrollIntoView()
-
     this.props.model.callbackAfterUpdate()
   }
 
@@ -43,7 +43,7 @@ class Test extends Component<Props> {
     const { appState, model, scroller } = this.props
     const { isActive, shouldRender } = model
 
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive === true) {
+    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
       scroller.scrollIntoView(this.refs.container as HTMLElement)
     }
   }
@@ -84,7 +84,7 @@ class Test extends Component<Props> {
     )
   }
 
-  _contents () {
+  _contents (this: Test) {
     // performance optimization - don't render contents if not open
     if (!this.props.model.isOpen) return null
 

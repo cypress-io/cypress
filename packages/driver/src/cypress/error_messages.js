@@ -1591,6 +1591,10 @@ module.exports = {
         msg += 'all of the remaining tests.'
       }
 
+      if ((obj.hookName === 'after all' || obj.hookName === 'before all') && obj.retries > 0) {
+        msg += `\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks`
+      }
+
       return msg
     },
     error (obj) {

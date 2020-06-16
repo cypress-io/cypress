@@ -1,10 +1,10 @@
 .reporter {
   .attempts {
-    .attempt-item > .collapsible > .collapsible-header {
+    .attempt-item > .collapsible > .collapsible-header-wrapper {
       display: none;
     }
 
-    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header {
+    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header-wrapper {
       display: flex;
     }
   }
@@ -14,7 +14,11 @@
 
     > .collapsible {
       position: relative;
-
+      margin-right: 20px;
+      .collapsible-header-inner {
+        outline: none;
+      }
+      
       &:before {
         border-left: 1px solid #dcdcdc;
         content: '';
@@ -77,7 +81,6 @@
       box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.20);
       display: flex;
       font-size: 11px;
-      margin-right: 20px;
       padding: 2px 5px;
       position: relative;
       background-color: #fff;
