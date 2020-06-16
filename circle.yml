@@ -248,7 +248,7 @@ workflows:
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-testing-with-happo
-          command: npm test
+          command: npm run test:happo
           store_artifacts: true
 
       - cypress/run:
