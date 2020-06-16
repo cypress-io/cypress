@@ -40,7 +40,24 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "hookId": "h1",
       "body": "[body]",
       "type": "hook",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -57,7 +74,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"before all\" hook"
+      "originalTitle": "\"before all\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -77,7 +96,39 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before all",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -120,7 +171,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -148,7 +200,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -159,7 +212,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -171,7 +225,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -191,6 +247,21 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
   ],
   [
     "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "fail",
     {
       "id": "r3",
@@ -203,7 +274,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"before each\" hook"
+      "originalTitle": "\"before each\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -219,10 +292,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "hookName": "after all",
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before each",
       "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
@@ -232,11 +305,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
+        "before each": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -564,155 +633,6 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "test 1",
       "body": "[body]",
       "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        }
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        }
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        }
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "body": "[body]",
-      "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r4",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h1",
-      "body": "[body]",
-      "type": "hook",
       "file": null,
       "currentRetry": 0,
       "retries": -1
@@ -735,6 +655,126 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
   ],
   [
     "mocha",
+    "pass",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:after:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r4",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h1",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "fail",
     {
       "id": "r4",
@@ -747,7 +787,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "originalTitle": "\"after all\" hook"
+      "originalTitle": "\"after all\" hook",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -763,10 +805,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
     "mocha",
     "test end",
     {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "hookName": "before each",
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "hookName": "after all",
       "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
@@ -776,7 +818,11 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after all": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -1671,18 +1717,10 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
           }
         ]
       },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r4",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1693,7 +1731,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1753,7 +1792,11 @@ exports['serialize state - hooks'] = {
           }
         ]
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1,
+      "prevAttempts": []
     },
     "r5": {
       "id": "r5",
@@ -1772,7 +1815,11 @@ exports['serialize state - hooks'] = {
           "afterFnDuration": 1
         }
       },
-      "file": null
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1,
+      "prevAttempts": []
     }
   },
   "startTime": "1970-01-01T00:00:00.000Z",
@@ -1806,6 +1853,7 @@ exports['src/cypress/runner other specs screenshots screenshot after failed test
         "test 1"
       ],
       "testId": "r3",
+      "testAttemptIndex": 0,
       "simple": true,
       "testFailure": true,
       "capture": "runner",
@@ -1827,6 +1875,769 @@ exports['src/cypress/runner other specs screenshots screenshot after failed test
 ]
 
 exports['src/cypress/runner mocha events simple single test #1'] = [
+  [
+    "mocha",
+    "start",
+    {
+      "start": "match.date"
+    }
+  ],
+  [
+    "mocha",
+    "suite",
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "type": "suite",
+      "file": "relative/path/to/spec.js",
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "suite",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:after:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        }
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "suite end",
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "type": "suite",
+      "file": "relative/path/to/spec.js",
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "end",
+    {
+      "end": "match.date"
+    }
+  ]
+]
+
+exports['src/cypress/runner mocha events simple three tests #1'] = [
+  [
+    "mocha",
+    "start",
+    {
+      "start": "match.date"
+    }
+  ],
+  [
+    "mocha",
+    "suite",
+    {
+      "id": "r1",
+      "title": "",
+      "root": true,
+      "type": "suite",
+      "file": "relative/path/to/spec.js",
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "suite",
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"before all\" hook",
+      "hookName": "before all",
+      "hookId": "h1",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"before all\" hook",
+      "hookName": "before all",
+      "hookId": "h1",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:after:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r4",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r4",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "pass",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:after:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "state": "passed",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "wallClockDuration": "match.number",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h2",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ],
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h3",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "final": true,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "body": "[body]",
+      "type": "test",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"before each\" hook",
+      "hookName": "before each",
+      "hookId": "h2",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
   [
     "mocha",
     "hook",
@@ -2051,731 +2862,6 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "type": "suite",
       "file": "relative/path/to/spec.js",
       "retries": -1
-    }
-  ],
-  [
-    "mocha",
-    "end",
-    {
-      "end": "match.date"
-    }
-  ]
-]
-
-exports['src/cypress/runner mocha events simple three tests #1'] = [
-  [
-    "mocha",
-    "start",
-    {
-      "start": "match.date"
-    }
-  ],
-  [
-    "mocha",
-    "suite",
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
-    }
-  ],
-  [
-    "mocha",
-    "suite",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"before all\" hook",
-      "hookName": "before all",
-      "hookId": "h1",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"before all\" hook",
-      "hookName": "before all",
-      "hookId": "h1",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "body": "[body]",
-      "type": "test",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test:after:run",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "wallClockDuration": "match.number",
-      "timings": {
-        "lifecycle": "match.number",
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "body": "[body]",
-      "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r4",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r4",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "fail",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "err": "{Object 6}",
-      "state": "failed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    },
-    {
-      "message": "[error message]",
-      "name": "AssertionError",
-      "stack": "match.string",
-      "actual": null,
-      "showDiff": false
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "err": "{Object 6}",
-      "state": "failed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test:after:run",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "err": "{Object 6}",
-      "state": "failed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "wallClockDuration": "match.number",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "body": "[body]",
-      "type": "test",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"before each\" hook",
-      "hookName": "before each",
-      "hookId": "h2",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "pass",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "test:after:run",
-    {
-      "id": "r5",
-      "order": 3,
-      "title": "test 3",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "wallClockDuration": "match.number",
-      "timings": {
-        "lifecycle": "match.number",
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h3",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h4",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r2",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r1",
-      "title": "",
-      "root": true,
-      "type": "suite",
-      "file": "cypress/integration/cypress/runner.spec.js"
     }
   ],
   [
