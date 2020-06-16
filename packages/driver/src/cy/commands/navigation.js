@@ -263,6 +263,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     name: 'page load',
     message: '--waiting for new page to load--',
     event: true,
+    timeout: options.timeout,
     consoleProps () {
       return {
         Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
@@ -484,7 +485,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           if (options.log) {
-            options._log = Cypress.log({})
+            options._log = Cypress.log({ timeout: options.timeout })
 
             options._log.snapshot('before', { next: 'after' })
           }
@@ -526,7 +527,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const win = state('window')
@@ -697,6 +698,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         options._log = Cypress.log({
           message,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },

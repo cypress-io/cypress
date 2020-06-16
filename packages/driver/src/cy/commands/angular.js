@@ -104,7 +104,9 @@ module.exports = (Commands, Cypress, cy, state) => {
       options = _.defaults({}, userOptions, { log: true })
 
       if (options.log) {
-        options._log = Cypress.log()
+        options._log = Cypress.log({
+          timeout: options.timeout,
+        })
       }
 
       switch (type) {
