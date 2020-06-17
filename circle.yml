@@ -280,7 +280,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - main
           # we need newer Node for semantic release
           executor: cypress/base-12
           requires:

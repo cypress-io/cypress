@@ -1,4 +1,4 @@
-# cypress-react-unit-test [![CircleCI](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/master.svg?style=svg)](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/master) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
+# cypress-react-unit-test [![CircleCI](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/main.svg?style=svg)](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/main) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
@@ -350,7 +350,7 @@ DEBUG=cypress-react-unit-test,find-webpack
 
 ### From v3 to v4
 
-The old v3 `master` branch is available as branch [v3](https://github.com/bahmutov/cypress-react-unit-test/tree/v3)
+The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/cypress-react-unit-test/tree/v3)
 
 - the `cy.mount` is now simply `import { mount } from 'cypress-react-unit-test'`
 - the support file is simply `require('cypress-react-unit-test/support')`
