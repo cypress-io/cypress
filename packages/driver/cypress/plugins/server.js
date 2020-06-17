@@ -35,6 +35,9 @@ ports.forEach((port) => {
     })
   })
 
+  // allows us to serve the testrunner into an iframe for testing
+  app.use('/isolated-runner', express.static(path.join(__dirname, '../../../runner/dist')))
+
   app.get('/node_modules/*', (req, res) => {
     return res.sendFile(path.join('node_modules', req.params[0]), {
       root: path.join(__dirname, '../..'),

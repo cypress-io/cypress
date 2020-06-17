@@ -76,6 +76,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           message: deltaOptions,
           $el,
+          timeout: options.timeout,
         })
 
         options._log.snapshot('before', { next: 'after' })

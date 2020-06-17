@@ -112,6 +112,22 @@ const Message = observer(({ model }: MessageProps) => (
   </span>
 ))
 
+interface ProgressProps {
+  model: CommandModel
+}
+
+const Progress = observer(({ model }: ProgressProps) => {
+  const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
+  const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
+  const percentageRemaining = timeRemaining / model.timeout * 100 || 0
+
+  return (
+    <div className='command-progress'>
+      <span style={{ animationDuration: `${timeRemaining}ms`, width: `${percentageRemaining}%` }} />
+    </div>
+  )
+})
+
 interface Props {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
@@ -166,36 +182,39 @@ class Command extends Component<Props> {
           shouldShowMessage={this._shouldShowClickMessage}
         >
           <div className='command-wrapper'>
-            <span className='command-number'>
-              <i className='fas fa-spinner fa-spin' />
-              <span>{model.number || ''}</span>
-            </span>
-            <span className='command-pin'>
-              <i className='fas fa-thumbtack' />
-            </span>
-            <span className='command-expander' onClick={this._toggleOpen}>
-              <i className='fas' />
-            </span>
-            <span className='command-method'>
-              <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
-            </span>
-            <span className='command-message'>
-              {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
-            </span>
-            <span className='command-controls'>
-              <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                <i className='command-invisible far fa-eye-slash' />
-              </Tooltip>
-              <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                <span className='num-elements'>{model.numElements}</span>
-              </Tooltip>
-              <span className='alias-container'>
-                <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                  <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
-                </Tooltip>
+            <div className='command-wrapper-text'>
+              <span className='command-number'>
+                <i className='fas fa-spinner fa-spin' />
+                <span>{model.number || ''}</span>
               </span>
-            </span>
+              <span className='command-pin'>
+                <i className='fas fa-thumbtack' />
+              </span>
+              <span className='command-expander' onClick={this._toggleOpen}>
+                <i className='fas' />
+              </span>
+              <span className='command-method'>
+                <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
+              </span>
+              <span className='command-message'>
+                {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+              </span>
+              <span className='command-controls'>
+                <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
+                  <i className='command-invisible far fa-eye-slash' />
+                </Tooltip>
+                <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                  <span className='num-elements'>{model.numElements}</span>
+                </Tooltip>
+                <span className='alias-container'>
+                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                  <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
+                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                  </Tooltip>
+                </span>
+              </span>
+            </div>
+            <Progress model={model} />
           </div>
         </FlashOnClick>
         {this._duplicates()}
@@ -303,6 +322,6 @@ class Command extends Component<Props> {
   }
 }
 
-export { Aliases, AliasesReferences, Message }
+export { Aliases, AliasesReferences, Message, Progress }
 
 export default Command

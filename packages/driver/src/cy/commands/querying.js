@@ -15,8 +15,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({
-        })
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const log = ($el) => {
@@ -102,6 +101,7 @@ module.exports = (Commands, Cypress, cy, state) => {
             message: selector,
             referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
             aliasType,
+            timeout: options.timeout,
             consoleProps: () => {
               return consoleProps
             },
@@ -369,6 +369,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -475,6 +476,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log = Cypress.log({
           message: _.compact([filter, text]),
           type: subject ? 'child' : 'parent',
+          timeout: options.timeout,
           consoleProps: () => {
             return consoleProps
           },
@@ -554,6 +556,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log = Cypress.log({
           $el: subject,
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -635,6 +638,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (options.log !== false) {
         options._log = Cypress.log({
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },

@@ -107,7 +107,7 @@ const specifyFileByRelativePath = (url, log) => {
   })
 }
 
-const aboutBlank = (win) => {
+const aboutBlank = (cy, win) => {
   return new Promise((resolve) => {
     cy.once('window:load', resolve)
 
@@ -198,7 +198,7 @@ const formSubmitted = (Cypress, e) => {
   })
 }
 
-const pageLoading = (bool, state) => {
+const pageLoading = (bool, Cypress, state) => {
   if (state('pageLoading') === bool) {
     return
   }
@@ -215,7 +215,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       // if we're currently visiting about blank
       // and becoming unstable for the first time
       // notifiy that we're page loading
-      pageLoading(true, state)
+      pageLoading(true, Cypress, state)
 
       return
     }
@@ -226,7 +226,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   // let the world know that the app is page:loading
-  pageLoading(!stable, state)
+  pageLoading(!stable, Cypress, state)
 
   // if we aren't becoming unstable
   // then just return now
@@ -263,6 +263,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
     name: 'page load',
     message: '--waiting for new page to load--',
     event: true,
+    timeout: options.timeout,
     consoleProps () {
       return {
         Note: 'This event initially fires when your application fires its \'beforeunload\' event and completes when your application fires its \'load\' event after the next page loads.',
@@ -484,7 +485,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           if (options.log) {
-            options._log = Cypress.log({})
+            options._log = Cypress.log({ timeout: options.timeout })
 
             options._log.snapshot('before', { next: 'after' })
           }
@@ -526,7 +527,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({})
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const win = state('window')
@@ -697,6 +698,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
         options._log = Cypress.log({
           message,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -1026,7 +1028,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
-          return aboutBlank(win)
+          return aboutBlank(cy, win)
           .then(() => {
             currentlyVisitingAboutBlank = false
 

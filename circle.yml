@@ -124,6 +124,25 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-runner-integration-tests:
+    parameters:
+      browser:
+        description: browser shortname to target
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<< parameters.browser >> --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
+
   run-e2e-tests:
     parameters:
       browser:
@@ -652,6 +671,20 @@ jobs:
       - run-e2e-tests:
           browser: firefox
           chunk: "8"
+
+  "runner-integration-tests-chrome":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - run-runner-integration-tests:
+          browser: chrome
+
+  "runner-integration-tests-firefox":
+    <<: *defaults
+    parallelism: 2
+    steps:
+      - run-runner-integration-tests:
+          browser: firefox
 
   "driver-integration-tests-chrome":
     <<: *defaults
@@ -1485,6 +1518,13 @@ linux-workflow: &linux-workflow
     - driver-integration-tests-firefox:
         requires:
           - build
+    - runner-integration-tests-chrome:
+        requires:
+          - build
+    - runner-integration-tests-firefox:
+        requires:
+          - build
+
     ## TODO: add these back in when flaky tests are fixed
     # - driver-integration-tests-electron:
     #     requires:
