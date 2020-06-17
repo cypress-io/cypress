@@ -2650,7 +2650,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('req.url').should('include', '/foo')
+          }).wait('@getFoo').its('url').should('include', '/foo')
         })
 
         it('reapplies server + route automatically during page transitions', function () {
@@ -2680,7 +2680,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('req.url').should('include', '/foo')
+          }).wait('@getFoo').its('url').should('include', '/foo')
         })
       })
     })

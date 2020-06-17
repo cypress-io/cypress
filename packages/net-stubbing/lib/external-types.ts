@@ -75,19 +75,31 @@ export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse,
  */
 export type NumberMatcher = number | number[]
 
+/**
+ * Request/response cycle.
+ */
 export interface Request {
-  req: CyHttpMessages.IncomingRequest
+  id: string
+  method: string
+  /* @internal */
+  log: any
+  request: CyHttpMessages.IncomingRequest
+  /**
+   * Was `cy.wait()` used to wait on this request?
+   * @internal
+   */
+  requestWaited: boolean
+  response?: CyHttpMessages.IncomingResponse
+  /* @internal */
   responseHandler?: HttpResponseInterceptor
   /**
    * Was `cy.wait()` used to wait on the response to this request?
+   * @internal
    */
   responseWaited: boolean
-    /**
-   * Was `cy.wait()` used to wait on this request?
-   */
-  requestWaited: boolean
+  /* @internal */
   state: RequestState
-  log: any
+  url: string
 }
 
 export type RequestState =

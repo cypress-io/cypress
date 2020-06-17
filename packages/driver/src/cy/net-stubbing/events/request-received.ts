@@ -28,8 +28,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       consoleProps: () => {
         return {
           Alias: route.alias,
-          Method: request.req.method,
-          URL: request.req.url,
+          Method: request.request.method,
+          URL: request.request.url,
           Matched: route.options,
           Handler: route.handler,
         }
@@ -37,7 +37,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       renderProps: () => {
         return {
           indicator: request.state === 'Complete' ? 'successful' : 'pending',
-          message: `${request.req.url} ${request.state}`,
+          message: `${request.request.url} ${request.state}`,
         }
       },
     })
@@ -73,7 +73,10 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   }
 
   const request: Partial<Request> = {
-    req,
+    id: requestId,
+    method: req.method,
+    url: req.url,
+    request: req,
     state: 'Received',
   }
 

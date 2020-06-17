@@ -30,7 +30,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   const sendContinueFrame = () => {
     // copy changeable attributes of userReq to req in frame
     // @ts-ignore
-    continueFrame.res = {
+    request.response = continueFrame.res = {
       ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
     }
 
@@ -86,7 +86,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
       args: {
         err,
-        req: request.req,
+        req: request.request,
         route: _.get(getRoute(routeHandlerId), 'options'),
         res,
       },
