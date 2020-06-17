@@ -288,8 +288,6 @@ module.exports = (Commands, Cypress, cy, state) => {
             scope = elementsWithShadow.concat(root)
           }
 
-          // attempt to query for the elements by withinSubject context
-          // and catch any sizzle errors!
           $el = cy.$$(selector, scope)
 
           // jQuery v3 has removed its deprecated properties like ".selector"
@@ -299,16 +297,17 @@ module.exports = (Commands, Cypress, cy, state) => {
           if ($el.selector == null) {
             $el.selector = selector
           }
-        } catch (e) {
-          e.onFail = () => {
+        } catch (err) {
+          // this is usually a sizzle error (invalid selector)
+          err.onFail = () => {
             if (options.log === false) {
-              return e
+              return err
             }
 
-            options._log.error(e)
+            options._log.error(err)
           }
 
-          throw e
+          throw err
         }
 
         // if that didnt find anything and we have a within subject
