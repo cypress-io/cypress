@@ -34,12 +34,20 @@ module.exports = config => {
   debug('coverage is disabled? %o', { coverageIsDisabled })
   debug('component test folder: %s', config.componentFolder)
   debug('fixtures folder', config.fixturesFolder)
+  debug('integration test folder: %s', config.integrationFolder)
 
-  const additionalFolders = [config.componentFolder]
-  // user can disable fixtures folder, so check first
+  const additionalFolders = []
+  // user can disable folders, so check first
+  if (config.componentFolder) {
+    additionalFolders.push(config.componentFolder)
+  }
   if (config.fixturesFolder) {
     additionalFolders.push(config.fixturesFolder)
   }
+  if (config.integrationFolder) {
+    additionalFolders.push(config.integrationFolder)
+  }
+  debug('additional folders: %o', additionalFolders)
 
   const opts = {
     reactScripts: true,
