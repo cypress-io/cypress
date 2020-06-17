@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import { observer, PropTypes as MobxPropTypes } from 'mobx-react'
 import React from 'react'
 
-import { Select, SelectItem } from './select'
+import { Select, SelectItem } from '../select'
 
 const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPath }) => {
   const editorOptions = _.reject(editors, { isOther: true })
