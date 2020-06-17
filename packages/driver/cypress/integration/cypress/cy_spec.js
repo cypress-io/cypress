@@ -476,4 +476,23 @@ describe('driver/src/cypress/cy', () => {
       })
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/7731
+  context('closing commands', () => {
+    beforeEach(function () {
+      this.logs = []
+
+      cy.on('log:added', (attrs, log) => {
+        this.logs.push(log)
+      })
+
+      return null
+    })
+
+    it('properly closes commands', function () {
+      expect(true).to.be.true
+      expect(this.logs.length).to.be.equal(1)
+      expect(this.logs[0].toJSON()).to.have.property('type', 'parent')
+    })
+  })
 })
