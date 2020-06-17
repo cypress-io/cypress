@@ -131,7 +131,7 @@
   },
   "release": {
     "branches": [
-      "master",
+      "main",
       {
         "name": "feature/cypress-mount-mode",
         "prerelease": "cypress-mount-mode"
