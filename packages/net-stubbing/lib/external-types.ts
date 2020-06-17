@@ -106,6 +106,8 @@ export interface Route {
   requests: { [key: string]: Request }
 }
 
+export type RouteMap = { [key: string]: Route }
+
 /**
  * A `RouteMatcher` describes a filter for HTTP requests.
  */

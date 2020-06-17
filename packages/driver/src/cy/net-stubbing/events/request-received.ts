@@ -1,12 +1,13 @@
 import _ from 'lodash'
 
-import { Route, Request } from '../types'
 import {
+  Route,
+  Request,
   CyHttpMessages,
   StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
-} from '@packages/net-stubbing/lib/types'
+} from '../types'
 import {
   validateStaticResponse,
   getBackendStaticResponse,

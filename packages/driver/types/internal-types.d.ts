@@ -50,7 +50,7 @@ declare namespace Cypress {
     url?: string
     status?: number
     numResponses?: number
-    response?: string
+    response?: string | object
     renderProps?: () => {
       indicator?: 'aborted' | 'pending' | 'successful' | 'bad'
       message?: string
