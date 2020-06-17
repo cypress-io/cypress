@@ -29,13 +29,17 @@ const setUserEditor = (editor: Editor) => {
 }
 
 const FileOpener = observer((props: Props) => {
+  const { originalFile, line, column } = props.fileDetails
+
   return (
     <Opener
       openFile={openFile}
       getUserEditor={getUserEditor}
       setUserEditor={setUserEditor}
       {...props}
-    />
+    >
+      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
+    </Opener>
   )
 })
 

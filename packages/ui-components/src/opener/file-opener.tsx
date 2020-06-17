@@ -1,12 +1,13 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, ReactNode } from 'react'
 
 import EditorPickerModal from './editor-picker-modal'
 import { GetUserEditorResult, Editor, FileDetails } from './file-model'
 
 interface Props {
+  children: ReactNode
   fileDetails: FileDetails
   openFile: (where: Editor, absoluteFile: FileDetails) => any
   getUserEditor: (callback: (result: GetUserEditorResult) => void) => any
@@ -14,7 +15,7 @@ interface Props {
   className?: string
 }
 
-const FileOpener = observer(({ fileDetails, openFile, getUserEditor, setUserEditor, className }: Props) => {
+const FileOpener = observer(({ children, fileDetails, openFile, getUserEditor, setUserEditor, className }: Props) => {
   const state = useLocalStore(() => ({
     editors: [] as Editor[],
     chosenEditor: {} as Editor,
@@ -62,11 +63,9 @@ const FileOpener = observer(({ fileDetails, openFile, getUserEditor, setUserEdit
     openFile(editor, fileDetails)
   }
 
-  const { originalFile, line, column } = fileDetails
-
   return (
     <a className={className} onClick={attemptOpenFile} href='#'>
-      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
+      {children}
       <EditorPickerModal
         chosenEditor={state.chosenEditor}
         editors={state.editors}
