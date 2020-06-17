@@ -313,9 +313,20 @@ describe('src/cy/commands/net_stubbing', function () {
           }
         })
       })
+
+      it('can stub a response with a JSON object', function () {
+        cy.route2({
+          method: 'POST',
+          url: '/test-xhr',
+        }, {
+          fixture: 'valid.json',
+        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+
+        cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      })
     })
 
-    context('stubbing with dynamic response', function () {
+    context('intercepting request', function () {
       it('receives the original request in handler', function (done) {
         cy.route2('/def456', function (req) {
           req.reply({
@@ -337,9 +348,7 @@ describe('src/cy/commands/net_stubbing', function () {
           xhr.send()
         })
       })
-    })
 
-    context('intercepting request', function () {
       it('receives the original request body in handler', function (done) {
         cy.route2('/aaa', function (req) {
           expect(req.body).to.eq('foo-bar-baz')
@@ -482,6 +491,80 @@ describe('src/cy/commands/net_stubbing', function () {
 
             done()
           }
+        })
+      })
+
+      context('with StaticResponse shorthand', function () {
+        it('req.reply(body)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply('baz')
+          })
+          .then(() => $.get('/foo'))
+          .should('eq', 'baz')
+        })
+
+        it('req.reply(json)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply({ baz: 'quux' })
+          })
+          .then(() => $.getJSON('/foo'))
+          .should('deep.eq', { baz: 'quux' })
+        })
+
+        it('req.reply(status)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply(777)
+          })
+          .then(() => {
+            return new Promise((resolve) => {
+              $.get('/foo').fail((x) => resolve(x.status))
+            })
+          })
+          .should('eq', 777)
+        })
+
+        it('req.reply(status, body)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply(777, 'bar')
+          })
+          .then(() => {
+            return new Promise((resolve) => {
+              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseText')))
+            })
+          }).should('include', {
+            status: 777,
+            responseText: 'bar',
+          })
+        })
+
+        it('req.reply(status, json)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply(777, { bar: 'baz' })
+          })
+          .then(() => {
+            return new Promise((resolve) => {
+              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON')))
+            })
+          }).should('deep.include', {
+            status: 777,
+            responseJSON: { bar: 'baz' },
+          })
+        })
+
+        it('req.reply(status, json, headers)', function () {
+          cy.route2('/foo', function (req) {
+            req.reply(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
+          })
+          .then(() => {
+            return new Promise((resolve) => {
+              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON', 'getAllResponseHeaders')))
+            })
+          }).should('deep.include', {
+            status: 777,
+            responseJSON: { bar: 'baz' },
+          }).invoke('getAllResponseHeaders')
+          .should('include', 'x-quux: quuz')
+          .and('include', 'content-type: application/json')
         })
       })
 
@@ -772,80 +855,6 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      context('with StaticResponse shorthand', function () {
-        it('req.reply(body)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply('baz')
-          })
-          .then(() => $.get('/foo'))
-          .should('eq', 'baz')
-        })
-
-        it('req.reply(json)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply({ baz: 'quux' })
-          })
-          .then(() => $.getJSON('/foo'))
-          .should('deep.eq', { baz: 'quux' })
-        })
-
-        it('req.reply(status)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply(777)
-          })
-          .then(() => {
-            return new Promise((resolve) => {
-              $.get('/foo').fail((x) => resolve(x.status))
-            })
-          })
-          .should('eq', 777)
-        })
-
-        it('req.reply(status, body)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply(777, 'bar')
-          })
-          .then(() => {
-            return new Promise((resolve) => {
-              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseText')))
-            })
-          }).should('include', {
-            status: 777,
-            responseText: 'bar',
-          })
-        })
-
-        it('req.reply(status, json)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply(777, { bar: 'baz' })
-          })
-          .then(() => {
-            return new Promise((resolve) => {
-              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON')))
-            })
-          }).should('deep.include', {
-            status: 777,
-            responseJSON: { bar: 'baz' },
-          })
-        })
-
-        it('req.reply(status, json, headers)', function () {
-          cy.route2('/foo', function (req) {
-            req.reply(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
-          })
-          .then(() => {
-            return new Promise((resolve) => {
-              $.get('/foo').fail((xhr) => resolve(_.pick(xhr, 'status', 'responseJSON', 'getAllResponseHeaders')))
-            })
-          }).should('deep.include', {
-            status: 777,
-            responseJSON: { bar: 'baz' },
-          }).invoke('getAllResponseHeaders')
-          .should('include', 'x-quux: quuz')
-          .and('include', 'content-type: application/json')
-        })
-      })
-
       context('errors', function () {
         it('fails test if res.send is called twice in req handler', function (done) {
           cy.on('fail', (err) => {
@@ -1126,7 +1135,6 @@ describe('src/cy/commands/net_stubbing', function () {
       })
     })
 
-    // TODO: establish compatibility with old xhr api
     context('old xhr spec', function () {
       before(function () {
         cy.visit('/fixtures/jquery.html').then(function (win) {
@@ -2122,17 +2130,6 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         describe('response fixtures', function () {
-          it('works if the JSON file has an object', function () {
-            cy.route2({
-              method: 'POST',
-              url: '/test-xhr',
-            }, {
-              fixture: 'valid.json',
-            }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
-
-            cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
-          })
-
           it('works with content-type override', function () {
             cy.route2({
               method: 'POST',

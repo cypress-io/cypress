@@ -7,7 +7,7 @@ import {
   GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
 
-const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'destroySocket']
+const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'destroySocket']
 
 export function validateStaticResponse (staticResponse: StaticResponse): void {
   const { body, fixture, statusCode, headers, destroySocket } = staticResponse
@@ -74,21 +74,23 @@ function getFixtureOpts (fixture: string): FixtureOpts {
   return { filePath, encoding }
 }
 
-export function getBackendStaticResponse (staticResponse: StaticResponse): BackendStaticResponse {
+export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
+  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture')
+
   if (staticResponse.fixture) {
-    return {
-      ...staticResponse,
-      fixture: getFixtureOpts(staticResponse.fixture),
+    backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
+  }
+
+  if (staticResponse.body) {
+    if (_.isString(staticResponse.body)) {
+      backendStaticResponse.body = staticResponse.body
+    } else {
+      backendStaticResponse.body = JSON.stringify(staticResponse.body)
+      _.set(backendStaticResponse, 'headers.content-type', 'application/json')
     }
   }
 
-  if (staticResponse.body && !_.isString(staticResponse.body)) {
-    staticResponse.body = JSON.stringify(staticResponse.body)
-    _.set(staticResponse, 'headers.content-type', 'application/json')
-  }
-
-  // no modification required, just coerce the type
-  return staticResponse as unknown as BackendStaticResponse
+  return backendStaticResponse
 }
 
 export function hasStaticResponseKeys (obj: any) {
