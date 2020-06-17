@@ -118,7 +118,7 @@ export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResp
  * @param resStream Optionally, provide a Readable stream to be used as the response body (overrides staticResponse.body)
  */
 export function sendStaticResponse (res: ServerResponse, staticResponse: BackendStaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void, resStream?: Readable) {
-  if (staticResponse.destroySocket) {
+  if (staticResponse.forceNetworkError) {
     res.connection.destroy()
     res.destroy()
 

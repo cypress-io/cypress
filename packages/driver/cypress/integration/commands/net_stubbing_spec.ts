@@ -214,9 +214,9 @@ describe('src/cy/commands/net_stubbing', function () {
         context('with invalid StaticResponse', function () {
           [
             [
-              'destroySocket set but not alone',
+              'forceNetworkError set but not alone',
               {
-                destroySocket: true,
+                forceNetworkError: true,
                 body: 'aaa',
               },
               'must be the only option',
@@ -298,7 +298,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
       it('can stub a response with a network error', function (done) {
         cy.route2('/', {
-          destroySocket: true,
+          forceNetworkError: true,
         }).then(() => {
           const xhr = new XMLHttpRequest
 

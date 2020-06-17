@@ -145,7 +145,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     },
     destroy () {
       userReq.reply({
-        destroySocket: true,
+        forceNetworkError: true,
       })
     },
   }

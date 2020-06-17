@@ -7,13 +7,13 @@ import {
   GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
 
-const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'destroySocket']
+const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError']
 
 export function validateStaticResponse (staticResponse: StaticResponse): void {
-  const { body, fixture, statusCode, headers, destroySocket } = staticResponse
+  const { body, fixture, statusCode, headers, forceNetworkError } = staticResponse
 
-  if (destroySocket && (body || statusCode || headers)) {
-    throw new Error('`destroySocket`, if passed, must be the only option in the StaticResponse.')
+  if (forceNetworkError && (body || statusCode || headers)) {
+    throw new Error('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
   }
 
   if (body && fixture) {
