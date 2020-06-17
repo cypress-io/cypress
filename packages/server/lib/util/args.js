@@ -51,7 +51,10 @@ const normalizeBackslashes = (options) => {
     if (typeof options[property] === 'string') {
       options[property] = normalizeBackslash(options[property])
     } else {
-      delete options[property]
+      // configFile is a special case that can be set to false
+      if (property !== 'configFile') {
+        delete options[property]
+      }
     }
   })
 
