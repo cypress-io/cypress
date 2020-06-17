@@ -89,11 +89,7 @@ module.exports = {
 
     return _.reduce(props, (memo, prop) => {
       if (_.has(obj, prop) || obj[prop] !== undefined) {
-        if (typeof obj[prop] === 'function') {
-          memo[prop] = obj[prop]()
-        } else {
-          memo[prop] = obj[prop]
-        }
+        memo[prop] = _.result(obj, prop)
       }
 
       return memo

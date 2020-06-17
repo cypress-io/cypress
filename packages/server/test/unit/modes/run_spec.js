@@ -661,7 +661,7 @@ describe('lib/modes/run', () => {
 
       sinon.stub(browsers, 'ensureAndGetByNameOrPath').resolves(browser)
 
-      expect(runMode.run({ browser: 'opera' }))
+      return expect(runMode.run({ browser: 'opera' }))
       .to.be.rejectedWith(/invalid browser family in/)
     })
 

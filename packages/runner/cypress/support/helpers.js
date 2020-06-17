@@ -48,7 +48,7 @@ const spyOn = (obj, prop, fn) => {
   }
 }
 
-function createCypress () {
+function createCypress (defaultOptions = {}) {
   /**
    * @type {sinon.SinonStub}
    */
@@ -95,7 +95,7 @@ function createCypress () {
    * @param {{state?: any, config?: any}} opts
    */
   const runIsolatedCypress = (mochaTests, opts = {}) => {
-    _.defaultsDeep(opts, {
+    _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
     })
@@ -288,7 +288,7 @@ const createHooks = (win, hooks = []) => {
       hook = { type: hook }
     }
 
-    let { type, fail, fn } = hook
+    let { type, fail, fn, agents } = hook
 
     if (fn) {
       if (hook.eval) {
@@ -309,6 +309,10 @@ const createHooks = (win, hooks = []) => {
       const numFailures = fail
 
       return win[type](() => {
+        if (agents) {
+          registerAgents(win)
+        }
+
         if (_.isNumber(fail) && fail-- <= 0) {
           debug(`hook pass after (${numFailures}) failures: ${type}`)
           win.assert(true, type)
@@ -316,11 +320,15 @@ const createHooks = (win, hooks = []) => {
           return
         }
 
-        debug(`hook fail: ${type}`)
+        if (agents) {
+          failCypressCommand(win, type)
+        } else {
+          debug(`hook fail: ${type}`)
 
-        win.assert(false, type)
+          win.assert(false, type)
 
-        throw new Error(`hook failed: ${type}`)
+          throw new Error(`hook failed: ${type}`)
+        }
       })
     }
 
@@ -337,7 +345,7 @@ const createTests = (win, tests = []) => {
       test = { name: test }
     }
 
-    let { name, pending, fail, fn, only } = test
+    let { name, pending, fail, fn, only, agents } = test
 
     let it = win.it
 
@@ -366,6 +374,10 @@ const createTests = (win, tests = []) => {
 
     if (fail) {
       return it(name, () => {
+        if (agents) {
+          registerAgents(win)
+        }
+
         if (_.isNumber(fail) && fail-- === 0) {
           debug(`test pass after retry: ${name}`)
           win.assert(true, name)
@@ -373,10 +385,14 @@ const createTests = (win, tests = []) => {
           return
         }
 
-        debug(`test fail: ${name}`)
-        win.assert(false, name)
+        if (agents) {
+          failCypressCommand(win, name)
+        } else {
+          debug(`test fail: ${name}`)
+          win.assert(false, name)
 
-        throw new Error(`test fail: ${name}`)
+          throw new Error(`test fail: ${name}`)
+        }
       })
     }
 
@@ -385,6 +401,16 @@ const createTests = (win, tests = []) => {
       win.assert(true, name)
     })
   })
+}
+
+const failCypressCommand = (win, name) => win.cy.wrap(name).then(() => win.assert(false, name))
+const registerAgents = (win) => {
+  const obj = { foo: 'bar' }
+
+  win.cy.stub(obj, 'foo')
+  win.cy.wrap(obj).should('exist')
+  win.cy.server()
+  win.cy.route('https://example.com')
 }
 
 const createSuites = (win, suites = {}) => {

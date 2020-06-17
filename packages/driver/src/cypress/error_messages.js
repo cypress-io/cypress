@@ -869,7 +869,11 @@ module.exports = {
     manually_set_retries_test: stripIndent`\
     Cannot set number of test retries at test run-time.
       use
-      > \`Cypress.config('retries', n)\`
+      \`\`\`
+      it('test', {
+        retries: n
+       }, () => {...})
+      \`\`\`
       instead.
     
     
@@ -878,7 +882,11 @@ module.exports = {
     manually_set_retries_suite: stripIndent`\
     Cannot set number of test retries directly on the mocha Suite.
       use
-      > \`Cypress.config('retries', n)\`
+      \`\`\`
+      describe('test', {
+        retries: n
+       }, () => {...})
+      \`\`\`
       instead.
     
     

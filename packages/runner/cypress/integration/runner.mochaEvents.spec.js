@@ -239,6 +239,23 @@ describe('src/cypress/runner', () => {
       })
     })
 
+    it('buffer mocha pass event when fail in afterEach hooks', () => {
+      runIsolatedCypress({
+        suites: {
+          'suite 1': {
+            suites: {
+              'suite 1-1': {
+                hooks: [{ type: 'afterEach', fail: true }],
+                tests: ['test 1'],
+              },
+            },
+          },
+        },
+      }).then(({ mochaStubs }) => {
+        expect(_.find(mochaStubs.args, { 1: 'pass' })).not.exist
+      })
+    })
+
     describe('screenshots', () => {
       let onAfterScreenshotListener
 
