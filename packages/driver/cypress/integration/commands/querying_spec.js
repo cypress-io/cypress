@@ -946,6 +946,12 @@ describe('src/cy/commands/querying', () => {
         cy.get('.in-and-out', { includeShadowDom: true })
         .should('have.length', 2)
       })
+
+      // https://github.com/cypress-io/cypress/issues/7676
+      it('does not error when querySelectorAll is wrapped and snapshots are off', () => {
+        cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
+        cy.get('.shadow-1', { includeShadowDom: true })
+      })
     })
 
     describe('.log', () => {
