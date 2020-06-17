@@ -79,7 +79,7 @@ const FileOpener = observer(({ fileDetails, className }: Props) => {
   const { originalFile, line, column } = fileDetails
 
   return (
-    <Tooltip title={'Open File in IDE'} wrapperClassName={className} className='cy-tooltip'>
+    <Tooltip title={'Open spec in IDE'} wrapperClassName={className} className='cy-tooltip'>
       <a onClick={attemptOpenFile} href='#'>
         {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
         <EditorPickerModal
