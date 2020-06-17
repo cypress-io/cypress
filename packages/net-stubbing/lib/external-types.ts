@@ -80,7 +80,6 @@ export type NumberMatcher = number | number[]
  */
 export interface Request {
   id: string
-  method: string
   /* @internal */
   log: any
   request: CyHttpMessages.IncomingRequest
@@ -99,7 +98,6 @@ export interface Request {
   responseWaited: boolean
   /* @internal */
   state: RequestState
-  url: string
 }
 
 export type RequestState =

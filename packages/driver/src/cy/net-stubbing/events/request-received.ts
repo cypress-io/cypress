@@ -74,8 +74,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   const request: Partial<Request> = {
     id: requestId,
-    method: req.method,
-    url: req.url,
     request: req,
     state: 'Received',
   }

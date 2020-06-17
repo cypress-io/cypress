@@ -1769,7 +1769,7 @@ describe('src/cy/commands/net_stubbing', function () {
               win.$.getJSON('/folders/123/activities?foo=bar')
 
               return null
-            }).wait('@getFoldersWithSearch').its('url').should('contain', '?foo=bar')
+            }).wait('@getFoldersWithSearch').its('request.url').should('contain', '?foo=bar')
           })
         })
 
@@ -2640,7 +2640,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('req.url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
+          }).wait('@getFoo').its('request.url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
             return new Promise(function (resolve) {
               let xhr
 
@@ -2650,7 +2650,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('url').should('include', '/foo')
+          }).wait('@getFoo').its('request.url').should('include', '/foo')
         })
 
         it('reapplies server + route automatically during page transitions', function () {
@@ -2680,7 +2680,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
               return xhr.onload = resolve
             })
-          }).wait('@getFoo').its('url').should('include', '/foo')
+          }).wait('@getFoo').its('request.url').should('include', '/foo')
         })
       })
     })
