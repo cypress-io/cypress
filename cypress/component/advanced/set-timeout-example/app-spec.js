@@ -4,7 +4,7 @@ import { mount } from 'cypress-react-unit-test'
 import App from './App'
 
 // compare to test in
-// https://github.com/bruceharris/react-unit-testing-example/blob/master/src/App.test.js
+// https://github.com/bruceharris/react-unit-testing-example/blob/main/src/App.test.js
 
 it('renders without crashing', () => {
   cy.viewport(800, 800)

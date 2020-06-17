@@ -4,7 +4,7 @@ import { mount } from 'cypress-react-unit-test'
 import LoadingIndicator from './LoadingIndicator'
 
 // compare these tests to Jest + Enzyme tests in
-// https://github.com/bruceharris/react-unit-testing-example/blob/master/src/components/LoadingIndicator.test.js
+// https://github.com/bruceharris/react-unit-testing-example/blob/main/src/components/LoadingIndicator.test.js
 
 describe('LoadingIndicator', () => {
   describe('when isLoading is false', () => {
