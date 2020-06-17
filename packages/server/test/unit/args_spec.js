@@ -24,12 +24,42 @@ describe('lib/util/args', () => {
     })
   })
 
+  context('normalizeBackslashes', () => {
+    it('sets non-string properties to undefined', () => {
+      const input = {
+        // string properties
+        project: true,
+        appPath: '/foo/bar',
+        // unknown properties will be preserved
+        somethingElse: 42,
+      }
+      const output = argsUtil.normalizeBackslashes(input)
+
+      expect(output).to.deep.equal({
+        appPath: '/foo/bar',
+        somethingElse: 42,
+      })
+    })
+  })
+
   context('--project', () => {
     it('sets projectRoot', function () {
       const projectRoot = path.resolve(cwd, './foo/bar')
       const options = this.setup('--project', './foo/bar')
 
       expect(options.projectRoot).to.eq(projectRoot)
+    })
+
+    it('is undefined if not specified', function () {
+      const options = this.setup()
+
+      expect(options.projectRoot).to.eq(undefined)
+    })
+
+    it('handles bool project parameter', function () {
+      const options = this.setup('--project', true)
+
+      expect(options.projectRoot).to.eq(undefined)
     })
   })
 
