@@ -824,7 +824,7 @@ module.exports = {
       return
     }
 
-    if (quiet === true) {
+    if (quiet) {
       return videoCapture.process(name, cname, videoCompression)
     }
 
@@ -1099,7 +1099,7 @@ module.exports = {
         return obj
       }
 
-      if (quiet !== true) {
+      if (!quiet) {
         this.displayResults(obj, estimated)
         if (screenshots && screenshots.length) {
           this.displayScreenshots(screenshots)
@@ -1197,7 +1197,7 @@ module.exports = {
       config,
     }
 
-    if (config.quiet !== true) {
+    if (!config.quiet) {
       displayRunStarting({
         config,
         specs,
@@ -1211,7 +1211,7 @@ module.exports = {
     }
 
     const runEachSpec = (spec, index, length, estimated) => {
-      if (config.quiet !== true) {
+      if (!config.quiet) {
         displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
@@ -1399,7 +1399,7 @@ module.exports = {
           }
 
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
-            let runSpecs = this.runSpecs({
+            return this.runSpecs({
               beforeSpecRun,
               afterSpecRun,
               projectRoot,
@@ -1423,12 +1423,11 @@ module.exports = {
               headed: options.headed,
               outputPath: options.outputPath,
             })
-
-            if (config.quiet !== true) {
-              return runSpecs.tap(renderSummaryTable(runUrl))
-            }
-
-            return runSpecs
+			.tap((runSpecs) => {
+			  if (!config.quiet) {
+			  	renderSummaryTable(runUrl)(runSpecs)
+			  }
+            })
           }
 
           if (record) {
