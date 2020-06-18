@@ -425,6 +425,23 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return
     }
 
+    // if a user-loaded script redefines document.querySelectorAll and
+    // numTestsKeptInMemory is 0 (no snapshotting), jQuery thinks
+    // that document.querySelectorAll is not available (it tests to see that
+    // it's the native definition for some reason) and doesn't use it,
+    // which can fail with a weird error if querying shadow dom.
+    // this ensures that jQuery determines support for document.querySelectorAll
+    // before user scripts are executed.
+    // (when snapshotting is enabled, it can achieve the same thing if an XHR
+    // causes it to snapshot before the user script is executed, but that's
+    // not guaranteed to happen.)
+    // https://github.com/cypress-io/cypress/issues/7676
+    // this shouldn't error, but we wrap it to ignore potential errors
+    // out of an abundance of caution
+    try {
+      cy.$$('body', contentWindow.document)
+    } catch (e) {} // eslint-disable-line no-empty
+
     const options = _.last(current.get('args'))
 
     return options?.onBeforeLoad?.call(runnable.ctx, contentWindow)
