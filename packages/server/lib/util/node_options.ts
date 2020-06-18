@@ -63,8 +63,9 @@ export function forkWithCorrectOptions (): void {
     { stdio: 'inherit' },
   )
   .on('error', () => {})
-  .on('exit', (code) => {
-    process.exit(code)
+  .on('exit', (code, signal) => {
+    debug('child exited %o', { code, signal })
+    process.exit(code === null ? 1 : code)
   })
 }
 
