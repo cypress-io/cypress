@@ -37,9 +37,9 @@
       }
 
       if (window.location.search.includes('wrap-qsa')) {
-        const qsa = document.querySelectorAll;
+        const realQuerySelectorAll = document.querySelectorAll;
         document.querySelectorAll = function (...args) {
-          return qsa.apply(document, args);
+          return realQuerySelectorAll.apply(document, args);
         };
       }
     </script>
