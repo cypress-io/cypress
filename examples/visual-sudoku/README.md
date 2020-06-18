@@ -42,4 +42,4 @@ See [cypress-image-snapshot docs](https://github.com/palmerhq/cypress-image-snap
 
 ## Full example
 
-For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository.
+For a larger Do-It-Yourself example with an hour long list of explanation videos, see [bahmutov/sudoku](https://github.com/bahmutov/sudoku) repository, read the blog post [Visual testing for React components using open source tools](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/) and flip through slides [I See What is Going On](https://slides.com/bahmutov/i-see-what-is-going-on).
