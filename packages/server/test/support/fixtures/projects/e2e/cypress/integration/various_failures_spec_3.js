@@ -129,8 +129,10 @@ context('cy.server', () => {
 context('cy.readFile', function () {
   describe('existence failure', function () {
     fail(this, () => {
-      cy.readFile('does-not-exist', { timeout: 0 })
-    }, { timeout: 10 })
+      cy.readFile('does-not-exist')
+      // give server time to determine file does not exist and return ENOENT
+      // otherwise, the command times out driver-side
+    }, { timeout: 8000 })
 
     verify(this, {
       column: 10,
