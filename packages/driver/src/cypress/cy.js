@@ -459,6 +459,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // also reset recentlyReady back to null
       state('recentlyReady', null)
 
+      // we're finished with the current command
+      // so set it back to null
+      state('current', null)
+
       state('subject', subject)
 
       return subject
