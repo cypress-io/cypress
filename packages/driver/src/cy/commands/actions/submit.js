@@ -25,6 +25,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           $el: options.$el,
+          timeout: options.timeout,
           consoleProps () {
             return {
               'Applied To': $dom.getElements(options.$el),

@@ -215,6 +215,10 @@ cy.wait(['@foo', '@bar'])
     first // $ExpectType WaitXHR
   })
 
+cy.wait(1234) // $ExpectType Chainable<undefined>
+
+cy.wrap('foo').wait(1234) // $ExpectType Chainable<string>
+
 cy.wrap([{ foo: 'bar' }, { foo: 'baz' }])
   .then(subject => {
     subject // $ExpectType { foo: string; }[]
@@ -520,9 +524,9 @@ namespace CypressShadowTests {
   .find('.bar')
   .click()
 
-  cy.get('.foo', { ignoreShadowBoundaries: true }).click()
+  cy.get('.foo', { includeShadowDom: true }).click()
 
   cy
   .get('.foo')
-  .find('.bar', {ignoreShadowBoundaries: true})
+  .find('.bar', {includeShadowDom: true})
 }

@@ -44,6 +44,13 @@ In the browser
 localStorage.debug = "cypress:driver"
 ```
 
+## Patches
+
+- `sinon`
+- `unfetch` to polyfill `fetch`. Added constructor function to point XMLHttpRequest to the application under test window.
+
+Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
+
 <!-- ## Catalog of Events
 
 TODO: this data is accurate but also somewhat out of date.

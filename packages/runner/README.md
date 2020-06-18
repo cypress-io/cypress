@@ -39,6 +39,20 @@ yarn workspace @packages/runner build-prod
 
 ## Testing
 
+### Node Unit Tests
+
 ```bash
 yarn workspace @packages/runner test
+```
+
+### Cypress Tests
+
+You can run Cypress tests found in [`cypress/integration`](./cypress/integration):
+```bash
+yarn workspace @packages/runner cypress:open
+```
+
+To watch and reload changes to the runner while testing you'll want to run:
+```bash
+yarn workspace @packages/runner watch
 ```

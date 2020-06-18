@@ -209,12 +209,11 @@ const updateInstanceStdout = (options = {}) => {
 }
 
 const updateInstance = (options = {}) => {
-  const { instanceId, results, captured, group, parallel, ciBuildId } = options
+  const { instanceId, results, group, parallel, ciBuildId } = options
   let { stats, tests, hooks, video, screenshots, reporterStats, error } = results
 
   video = Boolean(video)
   const cypressConfig = options.config
-  const stdout = captured.toString()
 
   // get rid of the path property
   screenshots = _.map(screenshots, (screenshot) => {
@@ -228,7 +227,7 @@ const updateInstance = (options = {}) => {
       error,
       video,
       hooks,
-      stdout,
+      stdout: null, // don't send stdout with the instance payload to prevent requests that are too large. stdout will later get uploaded separately anyway.
       instanceId,
       screenshots,
       reporterStats,
@@ -696,7 +695,6 @@ const createRunAndRecordSpecs = (options = {}) => {
           group,
           config,
           results,
-          captured,
           parallel,
           ciBuildId,
           instanceId,
