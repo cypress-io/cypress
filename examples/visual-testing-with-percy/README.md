@@ -1,8 +1,33 @@
 # example: visual-testing [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/bahmutov/cypress-react-unit-test)
 
-Uses [@percy/cypress](https://github.com/percy/percy-cypress) to run visual tests for a demo of Material UI date pickers from https://material-ui.com/components/pickers/. Every pull request shows the visual diff (if any) and allows us to confirm that styles and layouts have not changed.
+> Uses [@percy/cypress](https://github.com/percy/percy-cypress) to run visual tests for a demo of Material UI date pickers from https://material-ui.com/components/pickers/. Every pull request shows the visual diff (if any) and allows us to confirm that styles and layouts have not changed.
 
-Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+## Usage
+
+1. Make sure the root project has been built .
+
+```bash
+# in the root of the project
+npm install
+npm run build
+```
+
+2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+
+```bash
+# in this folder
+npm install
+```
+
+3. Start Cypress
+
+```bash
+npm run cy:open
+# or just run headless tests
+npm test
+```
+
+## Notes
 
 The project was set up using Percy documentation (see support and plugins files). The example spec [src/DatePicker.cy-spec.js](src/DatePicker.cy-spec.js) runs `cy.percySnapshot` after confirming the DOM has updated.
 

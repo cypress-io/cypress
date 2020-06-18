@@ -1,12 +1,37 @@
 # example: visual testing using Applitools
 
-Shows how to use Applitools to visually check React charts made with [Victory](https://formidable.com/open-source/victory/) library.
+> An example using Applitools to visually check React charts made with the [Victory](https://formidable.com/open-source/victory/) library.
 
 ![Screenshot](images/eyes.png)
 
 See [src/Chart.spec.js](src/Chart.spec.js)
 
-Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+## Usage
+
+1. Make sure the root project has been built .
+
+```bash
+# in the root of the project
+npm install
+npm run build
+```
+
+2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+
+```bash
+# in this folder
+npm install
+```
+
+3. Start Cypress
+
+```bash
+npm run cy:open
+# or just run headless tests
+npm test
+```
+
+## Notes
 
 The `cy.eyes*` commands are ignored during local interactive run. On CI, the `cy.eyes*` send the snapshots to Applitools servers to be analyzed and compared against the baseline images.
 
