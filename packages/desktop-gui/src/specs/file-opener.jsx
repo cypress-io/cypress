@@ -6,8 +6,13 @@ import ipc from '../lib/ipc'
 
 import { FileOpener as Opener } from '@packages/ui-components'
 
-const openFile = (where, { file, line, column }) => {
-  // TODO: implement
+const openFile = (where, { absoluteFile: file, line, column }) => {
+  ipc.openFile({
+    where,
+    file,
+    line,
+    column,
+  })
 }
 
 const getUserEditor = (callback) => {
@@ -29,7 +34,7 @@ const FileOpener = observer((props) => {
       setUserEditor={ipc.setUserEditor}
       className={props.className}
     >
-      <span><i className="fas fa-external-link-alt" /> Open in IDE</span>
+      <span><i className="fas fa-external-link-alt fa-sm" /> Open in IDE</span>
     </Opener>
   )
 })
