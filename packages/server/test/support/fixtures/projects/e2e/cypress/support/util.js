@@ -66,7 +66,7 @@ export const verify = (ctx, options) => {
     }
   }
 
-  it(`✓ VERIFY`, function () {
+  it(`✓ VERIFY - ${getTitle(ctx)}`, function () {
     const currTest = this.test
     const currTestIndex = Cypress._.findIndex(ctx.tests, (test) => {
       return test === currTest
