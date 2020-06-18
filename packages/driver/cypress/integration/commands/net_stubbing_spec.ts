@@ -670,8 +670,8 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
-          cy.on('fail', (err2) => {
-            expect(err2.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
             .and.contain('must be a number between 100 and 999 (inclusive).')
 
             done()
@@ -872,8 +872,8 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         it('fails test if an exception is thrown in res handler', function (done) {
-          cy.on('fail', (err) => {
-            expect(err.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          cy.on('fail', (err2) => {
+            expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
             .and.contain(err.message)
 
             done()
@@ -889,11 +889,12 @@ describe('src/cy/commands/net_stubbing', function () {
           .then(() => {
             $.get('/foo')
           })
+          .wait(1000)
         })
 
         it('fails test if res.send is called with an invalid StaticResponse', function (done) {
-          cy.on('fail', (err2) => {
-            expect(err2.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('A response callback passed to `req.reply()` threw an error while intercepting a response')
             .and.contain('must be a number between 100 and 999 (inclusive).')
 
             done()
@@ -908,58 +909,48 @@ describe('src/cy/commands/net_stubbing', function () {
             $.get('/foo')
           })
         })
-      })
-    })
 
-    context('intercepting response errors', function () {
-      it('sends an error object to handler if host DNE', function (done) {
-        cy.route2('/should-err', function (req) {
-          req.reply(function (res) {
-            expect(res.error).to.include({
-              code: 'ECONNREFUSED',
-              port: 3333,
-            })
-
-            expect(res.url).to.eq('http://localhost:3333/should-err')
+        it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message)
+            .to.contain('req.reply() was provided a callback to intercept the upstream response, but a network error occurred while making the request:')
+            .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
 
             done()
           })
-        }).then(function () {
-          const xhr = new XMLHttpRequest()
 
-          xhr.open('GET', 'http://localhost:3333/should-err')
-
-          xhr.send()
+          cy.route2('/should-err', function (req) {
+            req.reply(() => {})
+          }).then(function () {
+            $.get('http://localhost:3333/should-err')
+          })
         })
-      })
 
-      // TODO: fix once certain about API design
-      it.skip('can send a successful response even if an error occurs', function (done) {
-        cy.route2('/should-err', function (req) {
-          req.reply(function (res) {
-            // TODO: better API for this?
-            expect(res.error).to.exist
+        it('doesn\'t fail test if network error occurs retrieving response and response is not intercepted', function (done) {
+          cy.on('fail', (err) => {
+            // the test should have failed due to cy.wait, as opposed to because of a network error
+            expect(err.message).to.contain('Timed out retrying')
+            done()
+          })
 
-            res.send({
-              statusCode: 200,
-              headers: {
-                'access-control-allow-origin': '*',
-              },
-              body: 'everything is fine',
+          cy.route2('/should-err', function (req) {
+            req.reply()
+          })
+          .as('err')
+          .then(function () {
+            return new Promise((resolve) => {
+              $.get('http://localhost:3333/should-err')
+              .fail((xhr) => {
+                expect(xhr).to.include({
+                  status: 0,
+                  statusText: 'error',
+                })
+
+                resolve()
+              })
             })
           })
-        }).then(function () {
-          const xhr = new XMLHttpRequest()
-
-          xhr.open('GET', 'http://localhost:3333/should-err')
-          xhr.send()
-
-          xhr.onload = () => {
-            expect(xhr.responseText).to.eq('everything is fine')
-            expect(xhr.status).to.eq(200)
-
-            done()
-          }
+          .wait('@err', { timeout: 50 })
         })
       })
     })

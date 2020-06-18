@@ -8,6 +8,7 @@ export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress
   getRequest: (routeHandlerId: string, requestId: string) => Request | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
+  failCurrentTest: (err: Error) => void
 }) => void | Promise<void>
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
@@ -38,6 +39,11 @@ export function registerEvents (Cypress: Cypress.Cypress) {
     return Cypress.backend('net', eventName, frame)
   }
 
+  function failCurrentTest (err: Error) {
+    // @ts-ignore
+    Cypress.action('cy:fail', err, state('runnable'))
+  }
+
   Cypress.on('test:before:run', () => {
     // wipe out callbacks, requests, and routes when tests start
     state('routes', {})
@@ -51,12 +57,10 @@ export function registerEvents (Cypress: Cypress.Cypress) {
         getRoute,
         getRequest,
         emitNetEvent,
+        failCurrentTest,
       })
     } catch (err) {
-      // errors have to be manually propagated to the test here
-      // or else they disappear 👻
-      // @ts-ignore
-      Cypress.action('cy:fail', err, state('runnable'))
+      failCurrentTest(err)
     }
   })
 

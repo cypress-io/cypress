@@ -91,6 +91,6 @@ export declare namespace NetEventFrames {
 
   // fired when a response has been sent completely by the server to an intercepted request
   export interface HttpRequestComplete extends BaseHttp {
-
+    error?: Error
   }
 }

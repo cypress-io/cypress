@@ -12,18 +12,17 @@ export namespace CyHttpMessages {
   }
 
   export type IncomingResponse = BaseMessage & {
-    error?: Error
-    statusCode?: number
-    statusMessage?: string
+    statusCode: number
+    statusMessage: string
   }
 
   export type IncomingHttpResponse = IncomingResponse & {
     /**
-     * Send a response with the supplied body and headers.
+     * Continue the HTTP response, merging the real body and headers with the real response.
      */
     send(body: string, headers?: object): void
     /**
-     * Sends the supplied `StaticResponse`.
+     * Continue the HTTP response, merging the `staticResponse` with the real response.
      */
     send(staticResponse: StaticResponse): void
     /**
@@ -105,7 +104,8 @@ export type RequestState =
   'Intercepted' |
   'ResponseReceived' |
   'ResponseIntercepted' |
-  'Complete'
+  'Complete' |
+  'Errored'
 
 export interface Route {
   alias?: string

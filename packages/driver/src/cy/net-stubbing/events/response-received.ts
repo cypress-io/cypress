@@ -81,7 +81,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   }
 
   try {
-      request.responseHandler!(userRes)
+    request.responseHandler!(userRes)
   } catch (err) {
     $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
       args: {

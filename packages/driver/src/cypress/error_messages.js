@@ -939,6 +939,9 @@ module.exports = {
     reply_called_after_next: ({ route, req }) => {
       return `\`req.reply()\` was called after \`next()\` in a request handler, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
+    reply_request_error: ({ error, req, route }) => {
+      return `\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:\n\n${normalizedStack(error)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    },
   },
 
   ng: {
