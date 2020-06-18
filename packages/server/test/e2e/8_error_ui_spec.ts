@@ -53,6 +53,7 @@ describe('e2e error ui', function () {
       spec: `various_failures_spec_${testNum}.js`,
       expectedExitCode: null,
       noTypeScript: true,
+      config: { firefoxGcInterval: null },
       onRun (exec) {
         return exec().then(verifyPassesAndFailures)
       },
@@ -62,6 +63,7 @@ describe('e2e error ui', function () {
       spec: `various_failures_custom_commands_spec_${testNum}.js`,
       expectedExitCode: null,
       noTypeScript: true,
+      config: { firefoxGcInterval: null },
       onRun (exec) {
         return exec().then(verifyPassesAndFailures)
       },
