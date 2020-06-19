@@ -178,18 +178,8 @@ $max-nesting-level: 14;
       background-color: #F5FBF7;
 
       > .file-name-wrapper {
-        color: #4c4e63;
+        color: #4c4e63 !important;
         text-decoration: none;
-      }
-
-      &:hover {
-        pointer-events: none;
-        background-color: rgba(186, 186, 186, 0.2);
-
-        > .file-name-wrapper {
-          color: #4c4e63;
-          text-decoration: none;
-        }
       }
     }
 
