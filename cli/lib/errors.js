@@ -15,7 +15,18 @@ const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
 
 const hr = '----------'
 
+const genericErrorSolution = stripIndent`
+  Search for an existing issue or open a GitHub issue at
+
+    ${chalk.blue(util.issuesUrl)}
+`
+
 // common errors Cypress application can encounter
+const unknownError = {
+  description: 'Unknown Cypress CLI error',
+  solution: genericErrorSolution,
+}
+
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
   solution: stripIndent`
@@ -26,11 +37,7 @@ const failedDownload = {
 
 const failedUnzip = {
   description: 'The Cypress App could not be unzipped.',
-  solution: stripIndent`
-    Search for an existing issue or open a GitHub issue at
-
-      ${chalk.blue(util.issuesUrl)}
-  `,
+  solution: genericErrorSolution,
 }
 
 const missingApp = (binaryDir) => {
@@ -390,6 +397,7 @@ module.exports = {
   getError,
   hr,
   errors: {
+    unknownError,
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
