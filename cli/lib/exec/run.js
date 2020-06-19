@@ -25,6 +25,24 @@ const throwInvalidOptionError = (details) => {
 }
 
 /**
+ * Typically a user passes a string path to the project.
+ * But "cypress open" allows using `false` to open in global mode,
+ * and the user can accidentally execute `cypress run --project false`
+ * which should be invalid.
+ */
+const isValidProject = (v) => {
+  if (typeof v === 'boolean') {
+    return false
+  }
+
+  if (v === '' || v === 'false' || v === 'true') {
+    return false
+  }
+
+  return true
+}
+
+/**
  * Maps options collected by the CLI
  * and forms list of CLI arguments to the server.
  *
@@ -36,7 +54,7 @@ const throwInvalidOptionError = (details) => {
 const processRunOptions = (options = {}) => {
   debug('processing run options %o', options)
 
-  if (typeof options.project === 'boolean' || options.project === '') {
+  if (!isValidProject(options.project)) {
     debug('invalid project option %o', { project: options.project })
 
     return throwInvalidOptionError(errors.invalidRunProjectPath)

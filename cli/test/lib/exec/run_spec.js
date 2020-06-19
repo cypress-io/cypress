@@ -32,6 +32,11 @@ describe('exec run', function () {
       expect(() => run.processRunOptions({ project: true })).to.throw()
     })
 
+    it('throws an error for --project "false" or "true"', () => {
+      expect(() => run.processRunOptions({ project: 'false' })).to.throw()
+      expect(() => run.processRunOptions({ project: 'true' })).to.throw()
+    })
+
     it('passes --browser option', () => {
       const args = run.processRunOptions({
         browser: 'test browser',
