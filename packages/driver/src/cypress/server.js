@@ -66,8 +66,16 @@ const warnOnForce404Default = (obj) => {
 }
 
 const whitelist = (xhr) => {
+  const url = new URL(xhr.url)
+
+  // https://github.com/cypress-io/cypress/issues/7280
+  // we want to strip the xhr's URL of any hash and query params before
+  // checking the REGEX for matching file extensions
+  url.search = ''
+  url.hash = ''
+
   // whitelist if we're GET + looks like we're fetching regular resources
-  return xhr.method === 'GET' && regularResourcesRe.test(xhr.url)
+  return xhr.method === 'GET' && regularResourcesRe.test(url.href)
 }
 
 const serverDefaults = {
