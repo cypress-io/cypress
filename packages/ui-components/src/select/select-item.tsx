@@ -11,7 +11,7 @@ interface Props {
   selectItem?: boolean
 }
 
-const SelectItem = ({ value, children, selectItem = true, ...rest }: Props) => {
+const SelectItem = ({ value, children, selectItem, ...rest }: Props) => {
   const { name, handleChange, handleKeyDown, isSelected } = useSelect()
   const liRef = useRef(null)
   const inputRef = useRef(null)
@@ -51,6 +51,10 @@ const SelectItem = ({ value, children, selectItem = true, ...rest }: Props) => {
       {children}
     </label>
   </li>)
+}
+
+SelectItem.defaultProps = {
+  selectItem: true,
 }
 
 export default SelectItem

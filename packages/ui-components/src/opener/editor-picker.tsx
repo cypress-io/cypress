@@ -3,11 +3,10 @@ import { observer } from 'mobx-react'
 import React from 'react'
 
 import { Editor } from './file-model'
-// @ts-ignore
 import { Select, SelectItem } from '../select'
 
 interface Props {
-  chosen: Editor
+  chosen?: Editor
   editors: Editor[]
   onSelect: (editor?: Editor) => any
   onUpdateOtherPath: (path: string) => any
@@ -44,12 +43,16 @@ const EditorPicker = observer(({ chosen, editors, onSelect, onUpdateOtherPath }:
           {editor.name}
         </SelectItem>
       ))}
-      <SelectItem value={otherOption?.id}>
-        {otherOption?.name}: {otherInput}
+      <SelectItem value={otherOption.id}>
+        {otherOption.name}: {otherInput}
         {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
       </SelectItem>
     </Select>
   )
 })
+
+EditorPicker.defaultProps = {
+  chosen: {},
+}
 
 export default EditorPicker
