@@ -3,5 +3,6 @@
 @import 'styles/vendor';
 @import 'styles/components/*';
 @import '!(styles)*/**/*';
+@import '../../../node_modules/@reach/dialog/styles.css';
 @import '../../ui-components/src/dropdown';
 @import '../../ui-components/src/opener/opener';
