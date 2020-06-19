@@ -8,6 +8,8 @@ import {
 import {
   validateStaticResponse,
   parseStaticResponseShorthand,
+  STATIC_RESPONSE_KEYS,
+  getBackendStaticResponse,
 } from '../static-response-utils'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
 import { HandlerFn } from './'
@@ -58,7 +60,10 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
       if (staticResponse) {
         validateStaticResponse(staticResponse)
-        continueFrame.staticResponse = staticResponse
+        continueFrame.staticResponse = getBackendStaticResponse(
+          // arguments to res.send() are merged with the existing response
+          _.defaultsDeep({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS)),
+        )
       }
 
       return sendContinueFrame()

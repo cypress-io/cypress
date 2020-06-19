@@ -35,6 +35,11 @@ ports.forEach((port) => {
     })
   })
 
+  app.get('/custom-headers', (req, res) => {
+    return res.set('x-foo', 'bar')
+    .send('<html><body>hello there</body></html>')
+  })
+
   // allows us to serve the testrunner into an iframe for testing
   app.use('/isolated-runner', express.static(path.join(__dirname, '../../../runner/dist')))
 

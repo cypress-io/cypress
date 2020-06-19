@@ -18,12 +18,10 @@ export namespace CyHttpMessages {
 
   export type IncomingHttpResponse = IncomingResponse & {
     /**
-     * Continue the HTTP response, merging the real body and headers with the real response.
+     * Continue the HTTP response, merging the supplied values with the real response.
      */
-    send(body: string, headers?: object): void
-    /**
-     * Continue the HTTP response, merging the `staticResponse` with the real response.
-     */
+    send(status: number, body?: string | number | object, headers?: { [key: string]: string }): void
+    send(body: string | object, headers?: { [key: string]: string }): void
     send(staticResponse: StaticResponse): void
     /**
      * Continue the HTTP response to the browser, including any modifications made to `res`.
@@ -44,8 +42,8 @@ export namespace CyHttpMessages {
   export interface IncomingHttpRequest extends IncomingRequest {
     destroy(): void
     reply(interceptor?: StaticResponse | HttpResponseInterceptor): void
-    reply(body: string | number | object, headers?: { [key: string]: string }): void
-    reply(status: number, body: string | number | object, headers?: { [key: string]: string }): void
+    reply(body: string | object, headers?: { [key: string]: string }): void
+    reply(status: number, body?: string | object, headers?: { [key: string]: string }): void
     redirect(location: string, statusCode: number): void
   }
 }

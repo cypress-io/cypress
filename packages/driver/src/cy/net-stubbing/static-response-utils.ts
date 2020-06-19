@@ -7,7 +7,7 @@ import {
   GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
 
-const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError']
+export const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError']
 
 export function validateStaticResponse (staticResponse: StaticResponse): void {
   const { body, fixture, statusCode, headers, forceNetworkError } = staticResponse

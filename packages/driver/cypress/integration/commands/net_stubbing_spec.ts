@@ -740,7 +740,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
           xhr.onload = () => {
             expect(Date.now() - this.start).to.be.closeTo(1100, 100)
-            expect(xhr.responseText).to.eq('delay worked')
+            expect(xhr.responseText).to.include('delay worked')
 
             done()
           }
@@ -852,6 +852,124 @@ describe('src/cy/commands/net_stubbing', function () {
 
             done()
           }
+        })
+      })
+
+      context('with StaticResponse shorthand', function () {
+        it('res.send(body)', function () {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send('baz')
+            })
+          })
+          .then(() => {
+            return $.get('/custom-headers')
+            .then((_a, _b, xhr) => {
+              expect(xhr.status).to.eq(200)
+              expect(xhr.responseText).to.eq('baz')
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar')
+            })
+          })
+        })
+
+        it('res.send(json)', function () {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send({ baz: 'quux' })
+            })
+          })
+          .then(() => {
+            return $.getJSON('/custom-headers')
+            .then((data, _b, xhr) => {
+              expect(xhr.status).to.eq(200)
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar')
+              .and.include('content-type: application/json')
+
+              expect(data).to.deep.eq({ baz: 'quux' })
+            })
+          })
+        })
+
+        it('res.send(status)', function (done) {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send(777)
+            })
+          })
+          .then(() => {
+            $.getJSON('/custom-headers')
+            .fail((xhr) => {
+              expect(xhr.status).to.eq(777)
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar')
+
+              expect(xhr.responseText).to.include('hello there')
+
+              done()
+            })
+          })
+        })
+
+        it('res.send(status, body)', function (done) {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send(777, 'bar')
+            })
+          })
+          .then(() => {
+            $.get('/custom-headers')
+            .fail((xhr) => {
+              expect(xhr.status).to.eq(777)
+              expect(xhr.responseText).to.eq('bar')
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar')
+
+              done()
+            })
+          })
+        })
+
+        it('res.send(status, json)', function (done) {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send(777, { bar: 'baz' })
+            })
+          })
+          .then(() => {
+            $.getJSON('/custom-headers')
+            .fail((xhr) => {
+              expect(xhr.status).to.eq(777)
+              expect(xhr.responseJSON).to.deep.eq({ bar: 'baz' })
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar')
+              .and.include('content-type: application/json')
+
+              done()
+            })
+          })
+        })
+
+        it('res.send(status, json, headers)', function (done) {
+          cy.route2('/custom-headers', function (req) {
+            req.reply((res) => {
+              res.send(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
+            })
+          })
+          .then(() => {
+            $.getJSON('/custom-headers')
+            .fail((xhr) => {
+              expect(xhr.status).to.eq(777)
+              expect(xhr.responseJSON).to.deep.eq({ bar: 'baz' })
+              expect(xhr.getAllResponseHeaders())
+              .to.include('x-foo: bar') // headers should be merged
+              .and.include('x-quux: quuz')
+              .and.include('content-type: application/json')
+
+              done()
+            })
+          })
         })
       })
 

@@ -85,7 +85,7 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
 
   function continueResponse () {
-    let newResStream: Optional<Readable>
+    let newResStream: Readable
 
     function throttleify (body) {
       const throttleStr = new ThrottleStream(frame.throttleKbps! * 1024)
@@ -113,16 +113,12 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
         const pt = new PassThrough()
 
         pt.write(bodyBuffer)
-        // pt.on('pipe', () => pt.end())
         pt.end()
 
-        // pt.thisIsTheBody = true
         newResStream = pt
       }
 
-      // TODO: this won't quite work for onProxiedResponseError?
-      // @ts-ignore
-      backendRequest.continueResponse(newResStream)
+      backendRequest.continueResponse!(newResStream)
     }
 
     return sendBody(res.body)
