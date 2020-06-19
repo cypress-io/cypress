@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import React, { Children, KeyboardEvent, ReactNode, useCallback, useMemo } from 'react'
+import React, { Children, KeyboardEvent, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 import _ from 'lodash'
 import Context from './context'
 
@@ -11,12 +11,12 @@ const generateGroupName = (name?: string) => {
   return _.uniqueId('Select-')
 }
 
-const toValues = (children) => {
-  const withSelectItem = _.filter(children, (child) => {
+const toValues = (children: ReactNode[]) => {
+  const withSelectItem = _.filter(children, (child: ReactElement) => {
     return child.props.selectItem
   })
 
-  return _.map(withSelectItem, (child) => child.props.value)
+  return _.map<any, string>(withSelectItem, (child: ReactElement) => child.props.value)
 }
 
 const left = 13

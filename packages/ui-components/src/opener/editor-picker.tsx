@@ -1,28 +1,28 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { ChangeEvent } from 'react'
 
 import { Editor } from './file-model'
 import { Select, SelectItem } from '../select'
 
 interface Props {
-  chosen?: Editor
+  chosen?: Partial<Editor>
   editors: Editor[]
-  onSelect: (editor?: Editor) => any
+  onSelect: (editor: Editor) => any
   onUpdateOtherPath: (path: string) => any
 }
 
-const EditorPicker = observer(({ chosen, editors, onSelect, onUpdateOtherPath }: Props) => {
+const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPath }: Props) => {
   const editorOptions = _.reject(editors, { isOther: true })
   const otherOption = _.find(editors, { isOther: true })
 
-  const onChange = (id) => {
+  const onChange = (id: string) => {
     const editor = _.find(editors, { id })
 
-    onSelect(editor)
+    editor && onSelect(editor)
   }
 
-  const updateOtherPath = (event) => {
+  const updateOtherPath = (event: ChangeEvent<HTMLInputElement>) => {
     onUpdateOtherPath(_.trim(event.target.value || ''))
   }
 
@@ -37,22 +37,20 @@ const EditorPicker = observer(({ chosen, editors, onSelect, onUpdateOtherPath }:
   )
 
   return (
-    <Select value={chosen.id} className='editor-picker' name='editor-picker' onChange={onChange}>
+    <Select value={chosen.id || ''} className='editor-picker' name='editor-picker' onChange={onChange}>
       {_.map(editorOptions, (editor) => (
         <SelectItem key={editor.id} value={editor.id}>
           {editor.name}
         </SelectItem>
       ))}
-      <SelectItem value={otherOption.id}>
-        {otherOption.name}: {otherInput}
-        {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
-      </SelectItem>
+      {otherOption && (
+        <SelectItem value={otherOption.id}>
+          {otherOption.name}: {otherInput}
+          {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
+        </SelectItem>
+      )}
     </Select>
   )
 })
-
-EditorPicker.defaultProps = {
-  chosen: {},
-}
 
 export default EditorPicker

@@ -1,7 +1,11 @@
 import _ from 'lodash'
 import React from 'react'
 
-const families = {
+interface FamilyOptions {
+  [key: string]: RegExp
+}
+
+const families: FamilyOptions = {
   chrome: /^chrome/i,
   chromium: /^chromium/i,
   edge: /^edge/i,
@@ -9,7 +13,11 @@ const families = {
   firefox: /^firefox/i,
 }
 
-const logoPaths = {
+interface LogoOptions {
+  [key: string]: string
+}
+
+const logoPaths: LogoOptions = {
   canary: require('browser-logos/src/chrome-canary/chrome-canary_32x32.png'),
   chrome: require('browser-logos/src/chrome/chrome_32x32.png'),
   chromium: require('browser-logos/src/chromium/chromium_32x32.png'),

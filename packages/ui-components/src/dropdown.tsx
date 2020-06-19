@@ -3,12 +3,16 @@ import _ from 'lodash'
 import React, { Component, ReactNode } from 'react'
 import { findDOMNode } from 'react-dom'
 
+interface Indexable {
+  [key: string]: any
+}
+
 interface Props {
   className?: string
-  chosen: object
-  others: object[]
-  onSelect: (item: object) => any
-  renderItem: (item: object) => ReactNode
+  chosen: Indexable
+  others: Indexable[]
+  onSelect: (item: Indexable) => any
+  renderItem: (item: Indexable) => ReactNode
   keyProperty: string
   disabled?: boolean
   document: Document
@@ -22,7 +26,7 @@ class Dropdown extends Component<Props> {
 
   state = { open: false }
 
-  outsideClickHandler: (e: Event) => void
+  outsideClickHandler: (e: Event) => void = () => {}
 
   componentDidMount () {
     this.outsideClickHandler = (e: Event) => {
@@ -103,7 +107,7 @@ class Dropdown extends Component<Props> {
     )
   }
 
-  _onSelect (item) {
+  _onSelect (item: object) {
     this.setState({ open: false })
     this.props.onSelect(item)
   }
