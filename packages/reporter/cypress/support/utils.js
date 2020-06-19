@@ -11,7 +11,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
     }
 
     cy.get(`${containerSelector} a`).first().trigger('mouseover')
-    cy.get('.cy-tooltip').first().should('have.text', 'Open spec in IDE')
+    cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
   })
 
   describe('when user has already set opener and opens file', function () {
