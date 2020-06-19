@@ -328,6 +328,13 @@ See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/iss
 
 </details>
 
+<details id="next-not-supported">
+  <summary>Next.js projects not supported</summary>
+
+Currently, this project cannot find Webpack settings used by Next.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#155](https://github.com/bahmutov/cypress-react-unit-test/issues/155)
+
+</details>
+
 ## Development
 
 See [docs/development.md](./docs/development.md)
