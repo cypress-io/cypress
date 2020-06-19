@@ -2,12 +2,12 @@ export { default as BrowserIcon } from './browser-icon'
 
 export { default as Dropdown } from './dropdown'
 
-export { default as EditorPicker } from './opener/editor-picker'
+export { default as EditorPicker } from './file-opener/editor-picker'
 
-export { default as EditorPickerModal } from './opener/editor-picker-modal'
+export { default as EditorPickerModal } from './file-opener/editor-picker-modal'
 
-export { default as FileOpener } from './opener/file-opener'
+export { default as FileOpener } from './file-opener/file-opener'
 
-export * from './opener/file-model'
+export * from './file-opener/file-model'
 
 export * from './select'
