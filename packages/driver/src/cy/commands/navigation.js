@@ -107,7 +107,7 @@ const specifyFileByRelativePath = (url, log) => {
   })
 }
 
-const aboutBlank = (win) => {
+const aboutBlank = (cy, win) => {
   return new Promise((resolve) => {
     cy.once('window:load', resolve)
 
@@ -198,7 +198,7 @@ const formSubmitted = (Cypress, e) => {
   })
 }
 
-const pageLoading = (bool, state) => {
+const pageLoading = (bool, Cypress, state) => {
   if (state('pageLoading') === bool) {
     return
   }
@@ -215,7 +215,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
       // if we're currently visiting about blank
       // and becoming unstable for the first time
       // notifiy that we're page loading
-      pageLoading(true, state)
+      pageLoading(true, Cypress, state)
 
       return
     }
@@ -226,7 +226,7 @@ const stabilityChanged = (Cypress, state, config, stable) => {
   }
 
   // let the world know that the app is page:loading
-  pageLoading(!stable, state)
+  pageLoading(!stable, Cypress, state)
 
   // if we aren't becoming unstable
   // then just return now
@@ -424,6 +424,23 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     if (!runnable) {
       return
     }
+
+    // if a user-loaded script redefines document.querySelectorAll and
+    // numTestsKeptInMemory is 0 (no snapshotting), jQuery thinks
+    // that document.querySelectorAll is not available (it tests to see that
+    // it's the native definition for some reason) and doesn't use it,
+    // which can fail with a weird error if querying shadow dom.
+    // this ensures that jQuery determines support for document.querySelectorAll
+    // before user scripts are executed.
+    // (when snapshotting is enabled, it can achieve the same thing if an XHR
+    // causes it to snapshot before the user script is executed, but that's
+    // not guaranteed to happen.)
+    // https://github.com/cypress-io/cypress/issues/7676
+    // this shouldn't error, but we wrap it to ignore potential errors
+    // out of an abundance of caution
+    try {
+      cy.$$('body', contentWindow.document)
+    } catch (e) {} // eslint-disable-line no-empty
 
     const options = _.last(current.get('args'))
 
@@ -1023,7 +1040,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           hasVisitedAboutBlank = true
           currentlyVisitingAboutBlank = true
 
-          return aboutBlank(win)
+          return aboutBlank(cy, win)
           .then(() => {
             currentlyVisitingAboutBlank = false
 

@@ -113,9 +113,11 @@ declare global {
   }
 }
 
+// NOTE: this is for testing Cypress-in-Cypress
 if (window.Cypress) {
   window.state = appState
   window.render = (props) => {
+    // @ts-ignore
     render(<Reporter {...props as Required<ReporterProps>} />, document.getElementById('app'))
   }
 }
