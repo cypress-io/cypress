@@ -9,7 +9,7 @@ import ErrorStack from '../errors/error-stack'
 
 import events from '../lib/events'
 import { onEnterOrSpace } from '../lib/util'
-import TestModel from '../test/test-model'
+import AttemptModel from '../attempts/attempt-model'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -30,7 +30,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: TestModel
+  model: AttemptModel
   isTestError?: boolean
 }
 
@@ -67,8 +67,6 @@ const TestError = observer((props: TestErrorProps) => {
             {err.name}
           </div>
         </div>
-        {/* <div className={cs('runnable-err-message', { 'test-error': props.isTestError })}>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }}></span> */}
         <div className='runnable-err-message'>
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />

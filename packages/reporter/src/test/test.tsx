@@ -9,7 +9,7 @@ import appState, { AppState } from '../lib/app-state'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
-import scroller from '../lib/scroller'
+import scroller, { Scroller } from '../lib/scroller'
 
 import Attempts from '../attempts/attempts'
 
@@ -93,7 +93,7 @@ class Test extends Component<Props> {
         className='runnable-instruments collapsible-content'
         onClick={(e) => e.stopPropagation()}
       >
-        <Attempts test={this.props.model} />
+        <Attempts test={this.props.model} scrollIntoView={() => this._scrollIntoView()} />
       </div>
     )
   }

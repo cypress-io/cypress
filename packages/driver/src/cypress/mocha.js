@@ -2,6 +2,7 @@
 
 const _ = require('lodash')
 const $errUtils = require('./error_utils')
+const { getTestFromRunnable } = require('./utils')
 
 // in the browser mocha is coming back
 // as window
@@ -211,10 +212,10 @@ const restoreHookRetries = () => {
 
 const patchSuiteRetries = () => {
   Suite.prototype.retries = function (...args) {
-    if (args[0] != null && args[0] > -1) {
+    if (args[0] !== undefined && args[0] > -1) {
       const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {})
 
-      throw new Error(JSON.stringify({ name: err.name, message: err.message }))
+      throw err
     }
 
     return suiteRetries.apply(this, args)
@@ -223,8 +224,11 @@ const patchSuiteRetries = () => {
 
 const patchHookRetries = () => {
   Hook.prototype.retries = function (...args) {
-    if (args[0] != null && args[0] > -1) {
-      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
+    if (args[0] !== undefined && args[0] > -1) {
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {})
+
+      // so this error doesn't cause a retry
+      getTestFromRunnable(this)._retries = -1
 
       throw err
     }
@@ -286,6 +290,10 @@ function patchRunnerRunTests () {
 
     const _slice = suite.tests.slice
 
+    // HACK: we need to dynamically enqueue tests to suite.tests during a test run
+    // however Mocha calls `.slice` on this property and thus we no longer have a reference
+    // to the internal test queue. So we replace the .slice method
+    // in a way that we keep a reference to the returned array. we name it suite.testsQueue
     suite.tests.slice = function () {
       this.slice = _slice
 
@@ -317,17 +325,16 @@ function patchSuiteAddTest (Cypress) {
 
     const ret = suiteAddTest.apply(this, args)
 
-    let retries = Cypress.getTestRetries()
-
-    if (retries == null) {
-      retries = -1
-    }
+    const retries = Cypress.getTestRetries() ?? -1
 
     test._retries = retries
 
     test.retries = function (...args) {
       if (args[0] !== undefined && args[0] > -1) {
         const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
+
+        // so this error doesn't cause a retry
+        test._retries = -1
 
         throw err
       }

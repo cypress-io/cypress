@@ -18,7 +18,7 @@ export default class AttemptModel {
   @observable isActive: boolean|null = null
   @observable routes: RouteModel[] = []
   @observable _isOpen: boolean|null = null
-  @observable _isOpenWhenLast: boolean | null = null
+  @observable isOpenWhenLast: boolean | null = null
   @observable _state: TestState|null = null
 
   _callbackAfterUpdate: Function | null = null
@@ -64,17 +64,12 @@ export default class AttemptModel {
   }
 
   @computed get isOpen () {
-    if (this._isOpen === null) {
-      // if (this._isOpenWhenLast === null) {
-      return this.isLast
-
-      // return this.isLast
-      // }
-
-      // return this._isOpenWhenLast && this.isLast
+    if (this._isOpen !== null) {
+      return this._isOpen
     }
 
-    return this._isOpen
+    // prev attempts open by default while test is running, otherwise only the last is open
+    return this.test.isActive || this.isLast
   }
 
   addLog = (props: LogProps) => {
@@ -134,7 +129,7 @@ export default class AttemptModel {
     }
 
     if (props.isOpen != null) {
-      this._isOpenWhenLast = props.isOpen
+      this.isOpenWhenLast = props.isOpen
     }
   }
 
@@ -170,14 +165,7 @@ export default class AttemptModel {
     this._isOpen = isOpen
   }
 
-  callbackAfterUpdate () {
-    if (this._callbackAfterUpdate) {
-      this._callbackAfterUpdate()
-      this._callbackAfterUpdate = null
-    }
-  }
-
-  @action finish (props) {
+  @action finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false
   }

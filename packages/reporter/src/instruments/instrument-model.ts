@@ -16,7 +16,7 @@ export interface InstrumentProps {
   name?: string
   message?: string
   type?: string
-  testCurrentRetry?: number
+  testCurrentRetry: number
   state?: string | null
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
@@ -27,7 +27,7 @@ export default class Log {
   @observable.ref alias?: Alias = null
   @observable aliasType?: string | null = null
   @observable displayName?: string
-  @observable id?: number
+  @observable id?: string
   @observable name?: string
   @observable message?: string
   @observable type?: string

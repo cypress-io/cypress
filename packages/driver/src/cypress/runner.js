@@ -7,8 +7,6 @@ const Pending = require('mocha/lib/pending')
 
 const $Log = require('./log')
 const $utils = require('./utils')
-
-const defaultGrepRe = /.*/
 const $errUtils = require('./error_utils')
 const $stackUtils = require('./stack_utils')
 
@@ -56,6 +54,7 @@ const runnableAfterRunAsync = (runnable, Cypress) => {
   runnable.clearTimeout()
 
   return Promise.try(() => {
+    // NOTE: other events we do not fire more than once, but this needed to change for test-retries
     return fire('runner:runnable:after:run:async', runnable, Cypress)
   })
 }
@@ -124,9 +123,11 @@ const wrap = (runnable) => {
 }
 
 const wrapAll = (runnable) => {
-  return _.extend({},
+  return _.extend(
+    {},
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
-    $utils.reduceProps(runnable, RUNNABLE_LOGS))
+    $utils.reduceProps(runnable, RUNNABLE_LOGS),
+  )
 }
 
 const getHookName = (hook) => {
@@ -249,7 +250,8 @@ const isLastSuite = (suite, tests) => {
     }
 
     return memo
-  }, [])
+  }
+  , [])
 
   // intersect them with our parent suites and see if the last one is us
   return _
@@ -571,7 +573,7 @@ const setHookFailureProps = (test, hook, err) => {
   test.failedFromHookId = hook.hookId
 }
 
-const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => {
+const hookFailed = (hook, err, getTest, getTestFromHookOrFindTest) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
@@ -627,7 +629,6 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     const handleSuiteEnd = () => {
     // cleanup our suite + its hooks
       forceGc(suite)
-
       eachHookInSuite(suite, forceGc)
 
       if (_emissions.ended[suite.id]) {
@@ -713,6 +714,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 
     _emissions.ended[test.id] = true
 
+    // NOTE: we wait to send 'test end' until after hooks run
     // return Cypress.action('runner:test:end', wrap(test))
   })
 
@@ -811,7 +813,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName, getTest, getTestFromHookOrFindTest)
+      return hookFailed(runnable, runnable.err, getTest, getTestFromHookOrFindTest)
     }
   })
 }
@@ -970,6 +972,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   overrideRunnerHook(Cypress, _runner, getTestById, getTest, setTest, getTests)
 
+  // this forces mocha to enqueue a duplicate test in the case of test retries
   const replacePreviousAttemptWith = (test) => {
     const prevAttempt = _testsById[test.id]
 
@@ -1037,6 +1040,54 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   return {
+    onScriptError,
+
+    normalizeAll (tests) {
+      // if we have an uncaught error then slice out
+      // all of the tests and suites and just generate
+      // a single test since we received an uncaught
+      // error prior to processing any of mocha's tests
+      // which could have occurred in a separate support file
+      if (_uncaughtFn) {
+        _runner.suite.suites = []
+        _runner.suite.tests = []
+
+        // create a runnable to associate for the failure
+        mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
+      }
+
+      return normalizeAll(
+        _runner.suite,
+        tests,
+        setTestsById,
+        setTests,
+        onRunnable,
+        onLogsById,
+        getTestId,
+      )
+    },
+
+    run (fn) {
+      if (_startTime == null) {
+        _startTime = moment().toJSON()
+      }
+
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)
+
+      return _runner.run((failures) => {
+        // if we happen to make it all the way through
+        // the run, then just set _stopped to true here
+        _stopped = true
+
+        // TODO this functions is not correctly
+        // synchronized with the 'end' event that
+        // we manage because of uncaught hook errors
+        if (fn) {
+          return fn(failures, getTestResults(_tests))
+        }
+      })
+    },
+
     onRunnableRun (run, runnable, args) {
       // extract out the next(fn) which mocha uses to
       // move to the next runnable - this will be our async seam
@@ -1239,77 +1290,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
       })
     },
 
-    onScriptError,
-
-    grep (re) {
-      if (arguments.length) {
-        return _runner._grep = re
-      }
-
-      // grab grep from the mocha _runner
-      // or just set it to all in case
-      // there is a mocha regression
-      return _runner._grep != null ? _runner._grep : (_runner._grep = defaultGrepRe)
-    },
-
-    options (options = {}) {
-      // TODO
-      // need to handle
-      // ignoreLeaks, asyncOnly, globals
-
-      const re = options.grep
-
-      if (re) {
-        return this.grep(re)
-      }
-    },
-
-    normalizeAll (tests) {
-      // if we have an uncaught error then slice out
-      // all of the tests and suites and just generate
-      // a single test since we received an uncaught
-      // error prior to processing any of mocha's tests
-      // which could have occurred in a separate support file
-      if (_uncaughtFn) {
-        _runner.suite.suites = []
-        _runner.suite.tests = []
-
-        // create a runnable to associate for the failure
-        mocha.createRootTest('An uncaught error was detected outside of a test', _uncaughtFn)
-      }
-
-      return normalizeAll(
-        _runner.suite,
-        tests,
-        setTestsById,
-        setTests,
-        onRunnable,
-        onLogsById,
-        getTestId,
-      )
-    },
-
-    run (fn) {
-      if (_startTime == null) {
-        _startTime = moment().toJSON()
-      }
-
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)
-
-      return _runner.run((failures) => {
-        // if we happen to make it all the way through
-        // the run, then just set _stopped to true here
-        _stopped = true
-
-        // TODO this functions is not correctly
-        // synchronized with the 'end' event that
-        // we manage because of uncaught hook errors
-        if (fn) {
-          return fn(failures, getTestResults(_tests))
-        }
-      })
-    },
-
     getStartTime () {
       return _startTime
     },
@@ -1439,21 +1419,14 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
           delete _testsQueueById[test.id]
 
-          const runnables = _.flatten(test, test.prevAttempts)
-
-          _(RUNNABLE_LOGS)
-          _.map((logs) => {
-            _.flatMap(runnables, (r) => {
-              return r[logs]
-            })
-          })
-
-          _.each((attrs) => {
+          _.each(RUNNABLE_LOGS, (logs) => {
+            return _.each(test[logs], (attrs) => {
             // we know our attrs have been cleaned
             // now, so lets store that
-            attrs._hasBeenCleanedUp = true
+              attrs._hasBeenCleanedUp = true
 
-            return $Log.reduceMemory(attrs)
+              return $Log.reduceMemory(attrs)
+            })
           })
 
           return cleanup(queue)

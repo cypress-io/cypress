@@ -3,7 +3,6 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import events from '../lib/events'
 import Agents from '../agents/agents'
 import Collapsible from '../collapsible/collapsible'
 import Hooks from '../hooks/hooks'
@@ -45,20 +44,23 @@ function renderAttemptContent (model: AttemptModel) {
       </div>
 
       <div className='attempt-error-region'>
-        <TestError events={events} model={model} isTestError={model.isLast} displayMessage={model.err.displayMessage}/>
+        <TestError model={model} isTestError={model.isLast} />
       </div>
     </div>
   )
 }
 
 @observer
-class Attempt extends Component<{model: AttemptModel}> {
+class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}> {
   componentDidUpdate () {
-    this.props.model.callbackAfterUpdate()
+    this.props.scrollIntoView()
   }
 
   render () {
     const { model } = this.props
+
+    // HACK: causes component update when command log is added
+    model.commands.length
 
     return (
       <li
@@ -82,21 +84,21 @@ class Attempt extends Component<{model: AttemptModel}> {
   }
 }
 
-const Attempts = observer(({ test }: {test: TestModel}) => (
-  <ul className={cs('attempts', {
+const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
+  return (<ul className={cs('attempts', {
     'has-multiple-attempts': test.hasMultipleAttempts,
   })}>
     {_.map(test.attempts, (attempt) => {
       return (
         <Attempt
           key={attempt.id}
-
+          scrollIntoView={scrollIntoView}
           model={attempt}
         />
       )
     })}
-  </ul>
-))
+  </ul>)
+})
 
 export { Attempt, AttemptHeader, NoCommands }
 

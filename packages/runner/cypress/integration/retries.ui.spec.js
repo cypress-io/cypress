@@ -1,7 +1,7 @@
 const helpers = require('../support/helpers')
 
 const { shouldHaveTestResults, containText } = helpers
-const { runIsolatedCypress, onInitialized } = helpers.createCypress({ config: { retries: 2 } })
+const { runIsolatedCypress } = helpers.createCypress({ config: { retries: 2 } })
 
 const getAttemptTag = (sel) => {
   return cy.get(`.runnable-wrapper:contains(${sel}) .attempt-tag`)
@@ -71,35 +71,54 @@ describe('src/cypress/runner retries ui', () => {
     .then(shouldHaveTestResults(1, 0))
   })
 
-  // TODO: fix this test
-  it.skip('takes screenshots properly on every attempt failure', () => {
-    onInitialized((autCypress) => {
-      let count = 0
+  it('takes screenshots properly on every attempt failure', () => {
+    let stub
 
-      autCypress.Screenshot.onAfterScreenshot = cy.stub().callsFake(() => {
-        cy.wrap(null).then(() => {
-          count++
-          expect(cy.$$(`.attempt:contains(Attempt ${count}).runnable-err`)).be.visible
-        })
-      })
-    })
+    runIsolatedCypress(
+      {
+        suites: {
+          's1': {
+            tests: [
+              't1',
+              {
+                name: 't2',
+                fail: 3,
+              },
+              't3',
+            ],
+          },
+        },
+      }, { config: { retries: 3, isTextTerminal: true },
+        onInitialized (autCypress) {
+          let attempt = 0
 
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          tests: [
-            'foo',
-            { name: 'test 1',
-              fail: 3,
-            },
-          ],
+          stub = cy.stub().callsFake(() => {
+            try {
+              attempt++
+              if (attempt === 1) {
+                expect(cy.$$('.hooks-container:contains(t2) .command')).exist.and.visible
+
+                return
+              }
+
+              const $attemptCollapsible = cy.$$(`.attempt-tag:contains(Attempt ${attempt})`)
+              .parentsUntil('.collapsible').last().parent()
+
+              expect($attemptCollapsible).have.class('is-open')
+            } catch (e) {
+              cy.state('reject')(e)
+            }
+          })
+
+          autCypress.Screenshot.onAfterScreenshot = stub
         },
       },
-    }, { config: { retries: 3, isTextTerminal: true } })
-    // .then(shouldHaveTestResults(1, 0))
-    // .then(() => {
-
-    // })
+    ).then(() => {
+      expect(stub).callCount(3)
+      cy.get('.runnable-wrapper:contains(t2)').then(($el) => {
+        expect($el).not.class('is-open')
+      })
+    })
   })
 
   it('test retry with hooks', () => {
@@ -183,7 +202,7 @@ describe('src/cypress/runner retries ui', () => {
     runIsolatedCypress({
       hooks: [{ type: 'afterEach', fail: 1 }],
       suites: {
-        'suite 1': {
+        's1': {
           hooks: [
             'before',
             'beforeEach',
@@ -191,20 +210,20 @@ describe('src/cypress/runner retries ui', () => {
             'afterEach',
             'after',
           ],
-          tests: [{ name: 'test 1' }, 'test 2', 'test 3'],
+          tests: [{ name: 't1' }, 't2', 't3'],
         },
-        'suite 2': {
+        's2': {
           hooks: [{ type: 'afterEach', fail: 2 }],
-          tests: ['test 1'],
+          tests: ['t4'],
         },
-        'suite 3': {
-          tests: ['test 1'],
+        's3': {
+          tests: ['t5'],
         },
       },
-    }, { config: { retries: 2, isTextTerminal: true } })
+    }, { config: { retries: 2 } })
     .then(shouldHaveTestResults(5, 0))
     .then(() => {
-      cy.contains('test 1')
+      cy.contains('t1').click()
       cy.contains('Attempt 1').click()
       cy.get('.runnable-err-print').click()
       cy.get('@reporterBus').its('lastCall.args').should('contain', 'runner:console:error')
@@ -291,6 +310,62 @@ describe('src/cypress/runner retries ui', () => {
     })
   })
 
+  it('simple failing hook spec', () => {
+    const mochaTests = {
+      suites: {
+        'simple failing hook spec': {
+          suites: {
+            'beforeEach hooks': {
+              hooks: [{ type: 'beforeEach', fail: true }],
+              tests: ['fails in beforeEach'],
+            },
+            'pending': {
+              tests: [{ name: 'is pending', pending: true }],
+            },
+            'afterEach hooks': {
+              hooks: [{ type: 'afterEach', fail: true }],
+              tests: ['fails this', 'does not run this'],
+            },
+            'after hooks': {
+              hooks: [{ type: 'after', fail: true }]
+              , tests: ['runs this', 'fails on this'],
+            },
+          },
+        },
+
+      },
+    }
+
+    runIsolatedCypress(mochaTests, { config: { retries: 1 } })
+    .then(shouldHaveTestResults(1, 3))
+    .then(() => {
+      cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
+      .within(() => {
+        cy.contains('.command', 'after').should('have.class', 'command-state-failed')
+        cy.contains('.runnable-err', 'AssertionError').should('be.visible')
+      })
+
+      cy.contains('.test', 'fails in beforeEach').should('have.class', 'runnable-failed')
+      .within(() => {
+        cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
+        // make sure Attempt 1 is collapsed
+        cy.get('.attempt-item').first().find('.commands-container').should('not.exist')
+      })
+
+      cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
+
+      cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
+      .within(() => {
+        cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
+        cy.contains('.runnable-err', 'AssertionError').should('be.visible')
+      })
+
+      cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
+
+      cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
+    })
+  })
+
   // NOTE: for test-retries
   describe('can configure retries', () => {
     it('via config value', () => {
@@ -339,7 +414,7 @@ describe('src/cypress/runner retries ui', () => {
       runIsolatedCypress({
         suites: {
           'suite 1' () {
-            it('test 1', () => {
+            it('test 1', function () {
               this.retries(0)
             })
           },
@@ -347,7 +422,7 @@ describe('src/cypress/runner retries ui', () => {
       })
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
-        cy.get('.runnable-err').should(containText('retries'))
+        cy.get('.runnable-err').should(containText(`it('test', { retries: n }, () => {...})`))
       })
     })
 
@@ -355,7 +430,7 @@ describe('src/cypress/runner retries ui', () => {
       runIsolatedCypress({
         suites: {
           'suite 1' () {
-            beforeEach(() => {
+            beforeEach(function () {
               this.retries(0)
             })
 
@@ -365,7 +440,7 @@ describe('src/cypress/runner retries ui', () => {
       })
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
-        cy.get('.runnable-err').should(containText('retries'))
+        cy.get('.runnable-err').should(containText(`describe('suite', { retries: n }, () => {...})`))
       })
     })
 
@@ -381,64 +456,8 @@ describe('src/cypress/runner retries ui', () => {
       })
       .then(shouldHaveTestResults(0, 1))
       .then(() => {
-        cy.get('.runnable-err').should(containText('retries'))
-      })
-    })
-
-    it('simple failing hook spec', () => {
-      const mochaTests = {
-        suites: {
-          'simple failing hook spec': {
-            suites: {
-              'beforeEach hooks': {
-                hooks: [{ type: 'beforeEach', fail: true }],
-                tests: ['fails in beforeEach'],
-              },
-              'pending': {
-                tests: [{ name: 'is pending', pending: true }],
-              },
-              'afterEach hooks': {
-                hooks: [{ type: 'afterEach', fail: true }],
-                tests: ['fails this', 'does not run this'],
-              },
-              'after hooks': {
-                hooks: [{ type: 'after', fail: true }]
-                , tests: ['runs this', 'fails on this'],
-              },
-            },
-          },
-
-        },
-      }
-
-      runIsolatedCypress(mochaTests, { config: { retries: 1 } })
-      .then(shouldHaveTestResults(1, 3))
-      .then(() => {
-        cy.contains('.test', 'fails on this').should('have.class', 'runnable-failed')
-        .within(() => {
-          cy.contains('.command', 'after').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError').should('be.visible')
-        })
-
-        cy.contains('.test', 'fails in beforeEach').should('have.class', 'runnable-failed')
-        .within(() => {
-          cy.contains('.command', 'beforeEach').should('have.class', 'command-state-failed')
-
-          // make sure Attempt 1 is collapsed
-          cy.get('.attempt-item').first().find('.commands-container').should('not.exist')
-        })
-
-        cy.contains('.test', 'is pending').should('have.class', 'runnable-pending')
-
-        cy.contains('.test', 'fails this').should('have.class', 'runnable-failed')
-        .within(() => {
-          cy.contains('.command', 'afterEach').should('have.class', 'command-state-failed')
-          cy.contains('.runnable-err', 'AssertionError').should('be.visible')
-        })
-
-        cy.contains('.test', 'does not run this').should('have.class', 'runnable-processing')
-
-        cy.contains('.test', 'runs this').should('have.class', 'runnable-passed')
+        cy.get('.runnable-err')
+        .should(containText(`describe('suite', { retries: n }, () => {...})`))
       })
     })
   })

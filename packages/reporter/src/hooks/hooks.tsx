@@ -1,7 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { Component } from 'react'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel from './hook-model'
@@ -20,19 +20,30 @@ export interface HookProps {
   model: HookModel
 }
 
-const Hook = observer(({ model }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
-    <Collapsible
-      header={<HookHeader name={model.name} />}
-      headerClass='hook-name'
-      isOpen={true}
-    >
-      <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-      </ul>
-    </Collapsible>
-  </li>
-))
+@observer
+class Hook extends Component<HookProps> {
+  componentDidUpdate () {
+
+  }
+
+  render () {
+    const { model } = this.props
+
+    return (
+      <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+        <Collapsible
+          header={<HookHeader name={model.name} />}
+          headerClass='hook-name'
+          isOpen={true}
+        >
+          <ul className='commands-container'>
+            {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+          </ul>
+        </Collapsible>
+      </li>
+    )
+  }
+}
 
 export interface HooksModel {
   hooks: Array<HookModel>

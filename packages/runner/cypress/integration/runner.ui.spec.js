@@ -263,5 +263,26 @@ describe('src/cypress/runner', () => {
       })
       .then(shouldHaveTestResults(0, 1))
     })
+
+    it('scrolls each command into view', () => {
+      // HACK to assert on the dom DURING the runIsolatedCypress run
+      // we expect the last command item to be scrolled into view before
+      // the test ends
+      cy.now('get', '.command-number:contains(25)')
+      .then(($el) => {
+        expect($el).visible
+      })
+      .catch((e) => cy.state('reject')(e))
+
+      runIsolatedCypress(() => {
+        describe('s1', () => {
+          // eslint-disable-next-line
+          it('t1', (done) => {
+            cy.timeout(10)
+            Cypress._.times(25, () => expect(true).ok)
+          })
+        })
+      })
+    })
   })
 })

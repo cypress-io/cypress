@@ -4,11 +4,10 @@ import { action, computed, observable } from 'mobx'
 import AttemptModel from '../attempts/attempt-model'
 import Err from '../errors/err-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
-import Hook from '../hooks/hook-model'
-import Command, { CommandProps } from '../commands/command-model'
-import Agent, { AgentProps } from '../agents/agent-model'
-import Route, { RouteProps } from '../routes/route-model'
-import { RunnablesStore } from '../runnables/runnables-store'
+import { CommandProps } from '../commands/command-model'
+import { AgentProps } from '../agents/agent-model'
+import { RouteProps } from '../routes/route-model'
+import { RunnablesStore, LogProps } from '../runnables/runnables-store'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
@@ -21,7 +20,7 @@ export interface TestProps extends RunnableProps {
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
-  prevAttempts: Array<AttemptModel>
+  prevAttempts: Array<TestProps>
   currentRetry: number
   retries?: number
   final?: boolean
@@ -38,10 +37,10 @@ export interface UpdatableTestProps {
 }
 
 export default class Test extends Runnable {
-  @observable agents: Array<Agent> = []
-  @observable commands: Array<Command> = []
-  @observable hooks: Array<Hook> = []
-  @observable routes: Array<Route> = []
+  // @observable agents: Array<Agent> = []
+  // @observable commands: Array<Command> = []
+  // @observable hooks: Array<Hook> = []
+  // @observable routes: Array<Route> = []
   // @observable _state?: TestState | null = null
   type = 'test'
 
@@ -49,6 +48,7 @@ export default class Test extends Runnable {
 
   @observable attempts: AttemptModel[] = []
   @observable _isOpen: Boolean | null = null
+  @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
@@ -69,7 +69,7 @@ export default class Test extends Runnable {
     if (this._isOpen === null) {
       return this.state === 'failed'
       || this.isLongRunning
-      || this.isActive && this.hasMultipleAttempts
+      || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
       || this.store && this.store.hasSingleTest
     }
 
@@ -97,7 +97,7 @@ export default class Test extends Runnable {
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @computed get isActive () {
+  @computed get isActive (): boolean {
     return _.some(this.attempts, { isActive: true })
   }
 
@@ -109,19 +109,19 @@ export default class Test extends Runnable {
     return this.lastAttempt === attemptModel
   }
 
-  addLog = (props) => {
+  addLog = (props: LogProps) => {
     this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
       attempt.addLog(props)
     })
   }
 
-  updateLog (props) {
+  updateLog (props: LogProps) {
     this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
       attempt.updateLog(props)
     })
   }
 
-  @action start (props) {
+  @action start (props: TestProps) {
     let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
@@ -142,6 +142,8 @@ export default class Test extends Runnable {
 
     if (props.isOpen != null && (this.isOpen !== props.isOpen)) {
       this.setIsOpen(props.isOpen, cb)
+
+      return
     }
 
     cb()
@@ -150,8 +152,7 @@ export default class Test extends Runnable {
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
   setIsOpen (isOpen: boolean, cb: UpdateTestCallback) {
-    this.lastAttempt.toggleOpen(isOpen)
-    this._isOpen = isOpen
+    this.isOpenWhenActive = isOpen
     this._callbackAfterUpdate = cb
   }
 
@@ -162,7 +163,7 @@ export default class Test extends Runnable {
     }
   }
 
-  @action finish (props: TestProps) {
+  @action finish (props: UpdatableTestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
     this._withAttempt(props.currentRetry, (attempt: AttemptModel) => {
@@ -180,7 +181,7 @@ export default class Test extends Runnable {
     return this.lastAttempt.commandMatchingErr()
   }
 
-  _addAttempt = (props) => {
+  _addAttempt = (props: TestProps) => {
     const attempt = new AttemptModel(props, this)
 
     this.attempts.push(attempt)

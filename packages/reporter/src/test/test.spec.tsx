@@ -8,8 +8,8 @@ import TestModel from './test-model'
 const createModel = (props = {}) => {
   return {
     commands: [],
-    err: {},
-    id: 1,
+    Err: {},
+    id: '1',
     isActive: true,
     level: 1,
     state: 'passed',

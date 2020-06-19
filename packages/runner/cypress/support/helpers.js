@@ -83,12 +83,6 @@ function createCypress (defaultOptions = {}) {
     window.Cypress = backupCypress
   })
 
-  let onInitializedListeners = []
-
-  const onInitialized = function (fn) {
-    onInitializedListeners.push(fn)
-  }
-
   /**
    * Spawns an isolated Cypress runner as the AUT, with provided spec/fixture and optional state/config
    * @param {()=>void | {[key:string]: any}} mochaTests
@@ -98,15 +92,16 @@ function createCypress (defaultOptions = {}) {
     _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
+      onInitialized: () => {},
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
     .then({ timeout: 60000 }, (win) => {
       win.runnerWs.destroy()
 
-      allStubs = cy.stub().snapshot(enableStubSnapshots)
-      mochaStubs = cy.stub().snapshot(enableStubSnapshots)
-      setRunnablesStub = cy.stub().snapshot(enableStubSnapshots)
+      allStubs = cy.stub().snapshot(enableStubSnapshots).log(false)
+      mochaStubs = cy.stub().snapshot(enableStubSnapshots).log(false)
+      setRunnablesStub = cy.stub().snapshot(enableStubSnapshots).log(false)
 
       return new Promise((resolve) => {
         const runIsolatedCypress = () => {
@@ -116,7 +111,7 @@ function createCypress (defaultOptions = {}) {
           const emitMap = autCypress.emitMap
           const emitThen = autCypress.emitThen
 
-          cy.stub(autCypress, 'automation').snapshot(enableStubSnapshots)
+          cy.stub(autCypress, 'automation').log(false).snapshot(enableStubSnapshots)
           .callThrough()
           .withArgs('clear:cookies')
           .resolves({
@@ -186,26 +181,25 @@ function createCypress (defaultOptions = {}) {
             })
           })
 
-          cy.spy(cy.state('window').console, 'log').as('console_log')
-          cy.spy(cy.state('window').console, 'error').as('console_error')
+          cy.spy(cy.state('window').console, 'log').as('console_log').log(false)
+          cy.spy(cy.state('window').console, 'error').as('console_error').log(false)
 
-          onInitializedListeners.forEach((fn) => fn(autCypress))
-          onInitializedListeners = []
+          opts.onInitialized(autCypress)
 
           autCypress.run((failed) => {
             resolve({ failed, mochaStubs, autCypress })
           })
         }
 
-        cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus')
-        cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus')
+        cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).log(false).as('reporterBus')
+        cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).log(false).as('localBus')
 
-        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots)
+        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots).log(false)
         .withArgs('watch:test:file')
         .callsFake(() => {
           autCypress = win.Cypress
 
-          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
+          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
             autCypress.onSpecWindow(specWindow, [
@@ -224,7 +218,7 @@ function createCypress (defaultOptions = {}) {
             specWindow.describe = () => {}
           })
 
-          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).callsFake(runIsolatedCypress)
+          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(false).callsFake(runIsolatedCypress)
         })
         .withArgs('is:automation:client:connected')
         .yieldsAsync(true)
@@ -257,16 +251,17 @@ function createCypress (defaultOptions = {}) {
         .yieldsAsync({ response: {} })
 
         const c = _.extend({}, Cypress.config(), {
-          isTextTerminal: true,
+          isTextTerminal: false,
           spec: {
             relative: 'relative/path/to/spec.js',
             absolute: '/absolute/path/to/spec.js',
+            name: 'empty_spec.js',
           },
         }, opts.config)
 
         c.state = {}
 
-        cy.stub(win.runnerWs, 'on').snapshot(enableStubSnapshots)
+        cy.stub(win.runnerWs, 'on').snapshot(enableStubSnapshots).log(false)
 
         win.Runner.start(win.document.getElementById('app'), window.btoa(JSON.stringify(c)))
       })
@@ -276,7 +271,6 @@ function createCypress (defaultOptions = {}) {
   return {
     runIsolatedCypress,
     snapshotMochaEvents,
-    onInitialized,
     getAutCypress,
 
   }

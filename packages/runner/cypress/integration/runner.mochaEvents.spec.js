@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const helpers = require('../support/helpers')
 
 const { cleanseRunStateMap, shouldHaveTestResults, getRunState } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, onInitialized, getAutCypress } = helpers.createCypress()
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { isTextTerminal: true } })
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
@@ -257,16 +257,6 @@ describe('src/cypress/runner', () => {
     })
 
     describe('screenshots', () => {
-      let onAfterScreenshotListener
-
-      beforeEach(() => {
-        onInitialized((autCypress) => {
-          autCypress.Screenshot.onAfterScreenshot = cy.stub()
-          onAfterScreenshotListener = cy.stub()
-          autCypress.on('after:screenshot', onAfterScreenshotListener)
-        })
-      })
-
       it('screenshot after failed test', () => {
         runIsolatedCypress({
           suites: {

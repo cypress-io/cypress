@@ -870,9 +870,7 @@ module.exports = {
     Cannot set number of test retries at test run-time.
       use
       \`\`\`
-      it('test', {
-        retries: n
-       }, () => {...})
+      it('test', { retries: n }, () => {...})
       \`\`\`
       instead.
     
@@ -883,9 +881,7 @@ module.exports = {
     Cannot set number of test retries directly on the mocha Suite.
       use
       \`\`\`
-      describe('test', {
-        retries: n
-       }, () => {...})
+      describe('suite', { retries: n }, () => {...})
       \`\`\`
       instead.
     
