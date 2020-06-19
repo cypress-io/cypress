@@ -64,6 +64,7 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
 [data-reach-dialog-overlay] {
   display: flex;
+  padding: 2em 0;
   z-index: 1;
 }
 
@@ -75,7 +76,7 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
   justify-content: center;
   margin: auto;
   min-width: 30em;
-  padding: 2em 0 0;
+  padding: 1em 0 0;
   position: relative;
 
   @if variable-exists(open-sans) {
