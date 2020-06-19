@@ -3,7 +3,6 @@ import React from 'react'
 
 import events from '../lib/events'
 
-//@ts-ignore
 import { GetUserEditorResult, Editor, FileDetails, FileOpener as Opener } from '@packages/ui-components'
 
 interface Props {

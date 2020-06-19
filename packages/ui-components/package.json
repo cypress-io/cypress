@@ -2,7 +2,7 @@
   "name": "@packages/ui-components",
   "version": "0.0.0",
   "private": true,
-  "main": "src/index.jsx",
+  "main": "src/index.tsx",
   "scripts": {
     "build-for-tests": "webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",

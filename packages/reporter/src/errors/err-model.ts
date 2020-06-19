@@ -2,7 +2,6 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
-// @ts-ignore
 import { FileDetails } from '@packages/ui-components'
 
 interface ParsedStackMessageLine {
