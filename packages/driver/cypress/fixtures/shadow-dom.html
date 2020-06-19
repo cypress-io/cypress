@@ -35,6 +35,13 @@
           }
         })
       }
+
+      if (window.location.search.includes('wrap-qsa')) {
+        const realQuerySelectorAll = document.querySelectorAll;
+        document.querySelectorAll = function (...args) {
+          return realQuerySelectorAll.apply(document, args);
+        };
+      }
     </script>
   </body>
 </html>
