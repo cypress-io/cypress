@@ -566,6 +566,23 @@ describe('src/cy/commands/net_stubbing', function () {
           .should('include', 'x-quux: quuz')
           .and('include', 'content-type: application/json')
         })
+
+        it('can forceNetworkError', function (done) {
+          cy.route2('/foo', function (req) {
+            req.reply({ forceNetworkError: true })
+          })
+          .then(() => {
+            $.get('/foo').fail((xhr) => {
+              expect(xhr).to.include({
+                status: 0,
+                statusText: 'error',
+                readyState: 0,
+              })
+
+              done()
+            })
+          })
+        })
       })
 
       context('request handler chaining', function () {
@@ -966,6 +983,25 @@ describe('src/cy/commands/net_stubbing', function () {
               .to.include('x-foo: bar') // headers should be merged
               .and.include('x-quux: quuz')
               .and.include('content-type: application/json')
+
+              done()
+            })
+          })
+        })
+
+        it('can forceNetworkError', function (done) {
+          cy.route2('/foo', function (req) {
+            req.reply((res) => {
+              res.send({ forceNetworkError: true })
+            })
+          })
+          .then(() => {
+            $.get('/foo').fail((xhr) => {
+              expect(xhr).to.include({
+                status: 0,
+                statusText: 'error',
+                readyState: 0,
+              })
 
               done()
             })
