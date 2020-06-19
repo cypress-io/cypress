@@ -6,7 +6,7 @@ import webpack from 'webpack'
 const config: webpack.Configuration = {
   ...getCommonConfig(),
   entry: {
-    components: [path.resolve(__dirname, 'cypress', 'support', 'test-entry.tsx')],
+    components: [path.resolve(__dirname, 'cypress', 'support', 'test-entry.jsx')],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
