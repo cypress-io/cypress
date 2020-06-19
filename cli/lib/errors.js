@@ -9,6 +9,7 @@ const state = require('./tasks/state')
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
+const runDocumentationUrl = `${docsUrl}/command-line#cypress-run`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
@@ -25,6 +26,17 @@ const genericErrorSolution = stripIndent`
 const unknownError = {
   description: 'Unknown Cypress CLI error',
   solution: genericErrorSolution,
+}
+
+const invalidRunProjectPath = {
+  description: 'Invalid --project path',
+  solution: stripIndent`
+    Provide valid project path.
+
+    Read our documentation for ${chalk.cyan('cypress run')} command at:
+
+      ${chalk.blue(runDocumentationUrl)}
+  `,
 }
 
 const failedDownload = {
@@ -416,5 +428,6 @@ module.exports = {
     smokeTestFailure,
     childProcessKilled,
     incompatibleHeadlessFlags,
+    invalidRunProjectPath,
   },
 }

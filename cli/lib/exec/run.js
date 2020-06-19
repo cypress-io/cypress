@@ -36,6 +36,12 @@ const throwInvalidOptionError = (details) => {
 const processRunOptions = (options = {}) => {
   debug('processing run options %o', options)
 
+  if (typeof options.project === 'boolean' || options.project === '') {
+    debug('invalid project option %o', { project: options.project })
+
+    return throwInvalidOptionError(errors.invalidRunProjectPath)
+  }
+
   const args = ['--run-project', options.project]
 
   if (options.browser) {
