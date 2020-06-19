@@ -1,5 +1,9 @@
 @import '../select/select';
 
+@if not variable_exists(pass) {
+  $pass: #08c18d;
+}
+
 .editor-picker {
   label {
     align-items: start;

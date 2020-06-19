@@ -1,11 +1,19 @@
 import _ from 'lodash'
-import PropTypes from 'prop-types'
-import { observer, PropTypes as MobxPropTypes } from 'mobx-react'
+import { observer } from 'mobx-react'
 import React from 'react'
 
+import { Editor } from './file-model'
+// @ts-ignore
 import { Select, SelectItem } from '../select'
 
-const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPath }) => {
+interface Props {
+  chosen: Editor
+  editors: Editor[]
+  onSelect: (editor?: Editor) => any
+  onUpdateOtherPath: (path: string) => any
+}
+
+const EditorPicker = observer(({ chosen, editors, onSelect, onUpdateOtherPath }: Props) => {
   const editorOptions = _.reject(editors, { isOther: true })
   const otherOption = _.find(editors, { isOther: true })
 
@@ -23,7 +31,7 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
     <input
       type='text'
       className='other-input'
-      value={otherOption.openerId || ''}
+      value={otherOption?.openerId || ''}
       onFocus={_.partial(onChange, 'other')}
       onChange={updateOtherPath}
     />
@@ -36,27 +44,12 @@ const EditorPicker = observer(({ chosen = {}, editors, onSelect, onUpdateOtherPa
           {editor.name}
         </SelectItem>
       ))}
-      <SelectItem value={otherOption.id}>
-        {otherOption.name}: {otherInput}
+      <SelectItem value={otherOption?.id}>
+        {otherOption?.name}: {otherInput}
         {chosen.isOther && <span className='description'>Enter the full path to your editor's executable</span>}
       </SelectItem>
     </Select>
   )
 })
-
-const editorType = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  openerId: PropTypes.string.isRequired,
-  isOther: PropTypes.bool.isRequired,
-  description: PropTypes.string,
-})
-
-EditorPicker.propTypes = {
-  chosenEditor: editorType,
-  editors: MobxPropTypes.observableArrayOf(editorType).isRequired,
-  onSelect: PropTypes.func.isRequired,
-  onUpdateOtherPath: PropTypes.func.isRequired,
-}
 
 export default EditorPicker

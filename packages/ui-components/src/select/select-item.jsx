@@ -5,7 +5,7 @@ import VisuallyHidden from '@reach/visually-hidden'
 
 import useSelect from './use-select'
 
-const SelectItem = ({ value, children, selectItem, ...rest }) => {
+const SelectItem = ({ value, children, selectItem = true, ...rest }) => {
   const { name, handleChange, handleKeyDown, isSelected } = useSelect()
   const liRef = useRef()
   const inputRef = useRef()
@@ -45,10 +45,6 @@ const SelectItem = ({ value, children, selectItem, ...rest }) => {
       {children}
     </label>
   </li>)
-}
-
-SelectItem.defaultProps = {
-  selectItem: true,
 }
 
 export default SelectItem

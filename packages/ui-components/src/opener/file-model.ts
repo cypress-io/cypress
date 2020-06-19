@@ -11,6 +11,7 @@ export interface Editor {
   name: string
   openerId: string
   isOther: boolean
+  description?: string
 }
 
 export interface GetUserEditorResult {
