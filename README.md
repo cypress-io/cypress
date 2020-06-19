@@ -335,6 +335,13 @@ Currently, this project cannot find Webpack settings used by Next.js, thus it ca
 
 </details>
 
+<details id="gatsby-not-supported">
+  <summary>Gatsby.js projects not supported</summary>
+
+Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/cypress-react-unit-test/issues/307)
+
+</details>
+
 ## Development
 
 See [docs/development.md](./docs/development.md)
