@@ -43,6 +43,16 @@ describe('lib/util/args', () => {
         somethingElse: 42,
       })
     })
+
+    it('handles empty project path string', () => {
+      const input = {
+        project: '',
+      }
+      const output = argsUtil.normalizeBackslashes(input)
+
+      // empty project path remains
+      expect(output).to.deep.equal(input)
+    })
   })
 
   context('--project', () => {
