@@ -163,6 +163,7 @@ const processRunOptions = (options = {}) => {
 
 module.exports = {
   processRunOptions,
+  isValidProject,
   // resolves with the number of failed tests
   start (options = {}) {
     _.defaults(options, {
