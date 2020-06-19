@@ -1,8 +1,7 @@
 @import '../select/select';
 
-@if not variable_exists(pass) {
-  $pass: #08c18d;
-}
+$pass: #08c18d !default;
+$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
 
 .editor-picker {
   label {
