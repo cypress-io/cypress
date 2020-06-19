@@ -2296,6 +2296,34 @@ describe('src/cy/commands/xhr', () => {
           expect(resp).to.eq('{ \'bar\' }\n')
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/7280
+      it('ignores query params when whitelisting routes', () => {
+        cy.server()
+        cy.route(/url-with-query-param/, { foo: 'bar' }).as('getQueryParam')
+        cy.window().then((win) => {
+          win.$.get('/url-with-query-param?resource=foo.js')
+
+          return null
+        })
+
+        cy.wait('@getQueryParam').its('response.body')
+        .should('deep.equal', { foo: 'bar' })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7280
+      it('ignores hashes when whitelisting routes', () => {
+        cy.server()
+        cy.route(/url-with-hash/, { foo: 'bar' }).as('getHash')
+        cy.window().then((win) => {
+          win.$.get('/url-with-hash#foo.js')
+
+          return null
+        })
+
+        cy.wait('@getHash').its('response.body')
+        .should('deep.equal', { foo: 'bar' })
+      })
     })
 
     describe('route setup', () => {
