@@ -173,8 +173,8 @@ describe('Specs List', function () {
         })
 
         it('lists test specs', function () {
-          cy.get('.file a').last().should('contain', 'last_list_spec.coffee')
-          cy.get('.file a').last().should('not.contain', 'admin_users')
+          cy.get('.file .file-name-wrapper').last().should('contain', 'last_list_spec.coffee')
+          cy.get('.file .file-name-wrapper').last().should('not.contain', 'admin_users')
         })
       })
     })
@@ -515,7 +515,7 @@ describe('Specs List', function () {
         this.ipc.getSpecs.yields(null, this.specs)
         this.openProject.resolve(this.config)
 
-        cy.contains('.file a', 'app_spec.coffee').as('firstSpec')
+        cy.contains('.file .file-name-wrapper', 'app_spec.coffee').as('firstSpec')
       })
 
       it('closes then launches browser on click of file', () => {
@@ -533,9 +533,11 @@ describe('Specs List', function () {
       })
 
       it('adds \'active\' class on click', () => {
-        cy.get('@firstSpec')
+        cy.get('@firstSpec').parent()
         .should('not.have.class', 'active')
-        .click()
+
+        cy.get('@firstSpec').click()
+        .parent()
         .should('have.class', 'active')
       })
 
@@ -544,7 +546,7 @@ describe('Specs List', function () {
           this.ipc.getSpecs.yield(null, this.specs)
         })
 
-        cy.get('@firstSpec').should('have.class', 'active')
+        cy.get('@firstSpec').parent().should('have.class', 'active')
       })
     })
 
@@ -557,7 +559,7 @@ describe('Specs List', function () {
 
       context('choose shallow spec', function () {
         beforeEach(() => {
-          cy.get('.file a').contains('a', 'app_spec.coffee').as('firstSpec').click()
+          cy.get('.file .file-name-wrapper').contains('a', 'app_spec.coffee').as('firstSpec').click()
         })
 
         it('updates spec icon', function () {
@@ -566,13 +568,13 @@ describe('Specs List', function () {
         })
 
         it('sets spec as active', () => {
-          cy.get('@firstSpec').should('have.class', 'active')
+          cy.get('@firstSpec').parent().should('have.class', 'active')
         })
       })
 
       context('choose deeper nested spec', function () {
         beforeEach(() => {
-          cy.get('.file a').contains('a', 'last_list_spec.coffee').as('deepSpec').click()
+          cy.get('.file .file-name-wrapper').contains('a', 'last_list_spec.coffee').as('deepSpec').click()
         })
 
         it('updates spec icon', () => {
@@ -580,7 +582,7 @@ describe('Specs List', function () {
         })
 
         it('sets spec as active', () => {
-          cy.get('@deepSpec').should('have.class', 'active')
+          cy.get('@deepSpec').parent().should('have.class', 'active')
         })
       })
     })
@@ -603,8 +605,8 @@ describe('Specs List', function () {
       })
 
       it('updates active spec', function () {
-        cy.get('@firstSpec').should('not.have.class', 'active')
-        cy.get('@secondSpec').should('have.class', 'active')
+        cy.get('@firstSpec').parent().should('not.have.class', 'active')
+        cy.get('@secondSpec').parent().should('have.class', 'active')
       })
     })
   })
@@ -623,14 +625,15 @@ describe('Specs List', function () {
         this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
       })
 
-      cy.get('@firstSpec').should('have.class', 'active')
+      cy.get('@firstSpec').parent().should('have.class', 'active')
       .then(function () {
         this.ipc.onSpecChanged.yield(null, 'integration/accounts/account_new_spec.coffee')
       })
 
-      cy.get('@firstSpec').should('not.have.class', 'active')
+      cy.get('@firstSpec').parent().should('not.have.class', 'active')
 
       cy.contains('a', 'account_new_spec.coffee')
+      .parent()
       .should('have.class', 'active')
     })
   })
