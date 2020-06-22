@@ -6,10 +6,59 @@ const spawn = require('./spawn')
 const verify = require('../tasks/verify')
 const { exitWithError, errors } = require('../errors')
 
-// maps options collected by the CLI
-// and forms list of CLI arguments to the server
+/**
+ * Throws an error with "details" property from
+ * "errors" object.
+ * @param {Object} details - Error details
+ */
+const throwInvalidOptionError = (details) => {
+  if (!details) {
+    details = errors.unknownError
+  }
+
+  // throw this error synchronously, it will be caught later on and
+  // the details will be propagated to the promise chain
+  const err = new Error()
+
+  err.details = details
+  throw err
+}
+
+/**
+ * Typically a user passes a string path to the project.
+ * But "cypress open" allows using `false` to open in global mode,
+ * and the user can accidentally execute `cypress run --project false`
+ * which should be invalid.
+ */
+const isValidProject = (v) => {
+  if (typeof v === 'boolean') {
+    return false
+  }
+
+  if (v === '' || v === 'false' || v === 'true') {
+    return false
+  }
+
+  return true
+}
+
+/**
+ * Maps options collected by the CLI
+ * and forms list of CLI arguments to the server.
+ *
+ * Note: there is lightweight validation, with errors
+ * thrown synchronously.
+ *
+ * @returns {string[]} list of CLI arguments
+ */
 const processRunOptions = (options = {}) => {
   debug('processing run options %o', options)
+
+  if (!isValidProject(options.project)) {
+    debug('invalid project option %o', { project: options.project })
+
+    return throwInvalidOptionError(errors.invalidRunProjectPath)
+  }
 
   const args = ['--run-project', options.project]
 
@@ -55,12 +104,7 @@ const processRunOptions = (options = {}) => {
 
   if (options.headless) {
     if (options.headed) {
-      // throw this error synchronously, it will be caught later on and
-      // the details will be propagated to the promise chain
-      const err = new Error()
-
-      err.details = errors.incompatibleHeadlessFlags
-      throw err
+      return throwInvalidOptionError(errors.incompatibleHeadlessFlags)
     }
 
     args.push('--headed', !options.headless)
@@ -123,6 +167,7 @@ const processRunOptions = (options = {}) => {
 
 module.exports = {
   processRunOptions,
+  isValidProject,
   // resolves with the number of failed tests
   start (options = {}) {
     _.defaults(options, {
