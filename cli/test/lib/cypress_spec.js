@@ -157,7 +157,7 @@ describe('cypress', function () {
     })
 
     it('rejects if project is false', () => {
-      return expect(cypress.run({ project: true })).to.be.rejected
+      return expect(cypress.run({ project: false })).to.be.rejected
     })
   })
 })
