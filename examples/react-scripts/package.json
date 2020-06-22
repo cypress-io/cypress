@@ -3,6 +3,7 @@
   "description": "Component testing with specs inside the src folder",
   "private": true,
   "scripts": {
+    "start": "../../node_modules/.bin/react-scripts start",
     "test": "../../node_modules/.bin/cypress run",
     "cy:open": "../../node_modules/.bin/cypress open",
     "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js cypress/fixtures/add.js",
@@ -10,5 +11,17 @@
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

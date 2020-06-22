@@ -172,7 +172,7 @@ We have several subfolders in [examples](examples) folder that have complete pro
 Folder Name | Description
 --- | ---
 [a11y](examples/a11y) | Testing components' accessibility using [cypress-axe](https://github.com/avanslaars/cypress-axe)
-[react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder
+[react-scripts](examples/react-scripts) | A project using `react-scripts` with component tests in `src` folder, including the `.env` files demo.
 [react-scripts-folder](examples/react-scripts-folder) | A project using `react-scripts` with component tests in `cypress/component`
 [tailwind](examples/tailwind) | Testing styles built using [Tailwind CSS](https://tailwindcss.com/)
 [sass-and-ts](examples/sass-and-ts) | Example with Webpack, Sass and TypeScript
