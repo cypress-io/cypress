@@ -147,5 +147,17 @@ describe('cypress', function () {
         expect(args).to.deep.eq(opts)
       })
     })
+
+    it('passes quiet: true', () => {
+      const opts = {
+        quiet: true,
+      }
+
+      return cypress.run(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
+    })
   })
 })

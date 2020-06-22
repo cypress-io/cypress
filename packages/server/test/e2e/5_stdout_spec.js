@@ -28,6 +28,15 @@ describe('e2e stdout', () => {
     })
   })
 
+  it('respects quiet mode', function () {
+    return e2e.exec(this, {
+      spec: 'stdout_passing_spec.coffee',
+      timeout: 120000,
+      snapshot: true,
+      quiet: true,
+    })
+  })
+
   it('displays fullname of nested specfile', function () {
     return e2e.exec(this, {
       port: 2020,
