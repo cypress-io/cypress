@@ -63,7 +63,7 @@ describe('rect highlight', () => {
     ensureCorrectTargetPosition('#button')
   })
 
-// https://github.com/cypress-io/cypress/issues/7762
+  // https://github.com/cypress-io/cypress/issues/7762
   it('highlights above z-index elements', () => {
     cy.$$('<div id="absolute-el"></div>').css({
       position: 'absolute',
