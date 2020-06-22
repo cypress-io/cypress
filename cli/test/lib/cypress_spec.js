@@ -159,7 +159,7 @@ describe('cypress', function () {
     it('rejects if project is false', () => {
       return expect(cypress.run({ project: false })).to.be.rejected
     })
-    
+
     it('passes quiet: true', () => {
       const opts = {
         quiet: true,
