@@ -17,7 +17,7 @@ import Child from './Child'
 function App() {
   return (
     <div className="App">
-      <img src={cypressLogo} className="Cypress-log" />
+      <img src={cypressLogo} className="Cypress-log" alt="Logo" />
 
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
@@ -34,6 +34,10 @@ function App() {
         >
           Learn React
         </a>
+        <p>
+          <code>.env</code> variable is{' '}
+          <span id="env-var">{process.env.REACT_APP_NOT_SECRET_CODE}</span>
+        </p>
       </header>
     </div>
   )
