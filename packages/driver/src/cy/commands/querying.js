@@ -276,24 +276,19 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const getElements = () => {
-        // attempt to query for the elements by withinSubject context
-        // and catch any sizzle errors!
         let $el
 
         try {
-          // only support shadow traversal if we're not searching
-          // within a subject and have been explicitly told to ignore
-          // boundaries.
-          if (!options.includeShadowDom) {
-            $el = cy.$$(selector, options.withinSubject)
-          } else {
+          let scope = options.withinSubject
+
+          if (options.includeShadowDom) {
             const root = options.withinSubject || cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
-            elementsWithShadow.push(root)
-
-            $el = cy.$$(selector, elementsWithShadow)
+            scope = elementsWithShadow.concat(root)
           }
+
+          $el = cy.$$(selector, scope)
 
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
@@ -302,16 +297,17 @@ module.exports = (Commands, Cypress, cy, state) => {
           if ($el.selector == null) {
             $el.selector = selector
           }
-        } catch (e) {
-          e.onFail = () => {
+        } catch (err) {
+          // this is usually a sizzle error (invalid selector)
+          err.onFail = () => {
             if (options.log === false) {
-              return e
+              return err
             }
 
-            options._log.error(e)
+            options._log.error(err)
           }
 
-          throw e
+          throw err
         }
 
         // if that didnt find anything and we have a within subject
