@@ -148,6 +148,18 @@ describe('cypress', function () {
       })
     })
 
+    it('rejects if project is an empty string', () => {
+      return expect(cypress.run({ project: '' })).to.be.rejected
+    })
+
+    it('rejects if project is true', () => {
+      return expect(cypress.run({ project: true })).to.be.rejected
+    })
+
+    it('rejects if project is false', () => {
+      return expect(cypress.run({ project: false })).to.be.rejected
+    })
+
     it('passes quiet: true', () => {
       const opts = {
         quiet: true,

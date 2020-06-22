@@ -824,84 +824,88 @@ module.exports = {
       return
     }
 
-    const postProcessRecordingOutput = (name, videoCompression) => {
-      console.log('')
+    function continueProcessing (onProgress = undefined) {
+      return videoCapture.process(name, cname, videoCompression, onProgress)
+    }
 
-      terminal.header('Video', {
-        color: ['cyan'],
-      })
+    if (quiet) {
+      return continueProcessing()
+    }
 
-      console.log('')
+    console.log('')
 
-      const table = terminal.table({
-        colWidths: [3, 21, 76],
-        colAligns: ['left', 'left', 'left'],
-        type: 'noBorder',
-        style: {
-          'padding-right': 0,
-        },
-        chars: {
-          'left': ' ',
-          'right': '',
-        },
-      })
+    terminal.header('Video', {
+      color: ['cyan'],
+    })
 
-      table.push([
-        gray('-'),
-        gray('Started processing:'),
-        chalk.cyan(`Compressing to ${videoCompression} CRF`),
-      ])
+    console.log('')
 
-      console.log(table.toString())
+    const table = terminal.table({
+      colWidths: [3, 21, 76],
+      colAligns: ['left', 'left', 'left'],
+      type: 'noBorder',
+      style: {
+        'padding-right': 0,
+      },
+      chars: {
+        'left': ' ',
+        'right': '',
+      },
+    })
 
-      const started = Date.now()
-      let progress = Date.now()
-      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+    table.push([
+      gray('-'),
+      gray('Started processing:'),
+      chalk.cyan(`Compressing to ${videoCompression} CRF`),
+    ])
 
-      return function (float) {
-        if (float === 1) {
-          const finished = Date.now() - started
-          const dur = `(${humanTime.long(finished)})`
+    console.log(table.toString())
 
-          const table = terminal.table({
-            colWidths: [3, 21, 61, 15],
-            colAligns: ['left', 'left', 'left', 'right'],
-            type: 'noBorder',
-            style: {
-              'padding-right': 0,
-            },
-            chars: {
-              'left': ' ',
-              'right': '',
-            },
-          })
+    const started = Date.now()
+    let progress = Date.now()
+    const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
 
-          table.push([
-            gray('-'),
-            gray('Finished processing:'),
-            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-            gray(dur),
-          ])
+    const onProgress = function (float) {
+      if (float === 1) {
+        const finished = Date.now() - started
+        const dur = `(${humanTime.long(finished)})`
 
-          console.log(table.toString())
+        const table = terminal.table({
+          colWidths: [3, 21, 61, 15],
+          colAligns: ['left', 'left', 'left', 'right'],
+          type: 'noBorder',
+          style: {
+            'padding-right': 0,
+          },
+          chars: {
+            'left': ' ',
+            'right': '',
+          },
+        })
 
-          console.log('')
-        }
+        table.push([
+          gray('-'),
+          gray('Finished processing:'),
+          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+          gray(dur),
+        ])
 
-        if (Date.now() - progress > throttle) {
-          // bump up the progress so we dont
-          // continuously get notifications
-          progress += throttle
-          const percentage = `${Math.ceil(float * 100)}%`
+        console.log(table.toString())
 
-          console.log('    Compression progress: ', chalk.cyan(percentage))
-        }
+        console.log('')
+      }
+
+      if (Date.now() - progress > throttle) {
+        // bump up the progress so we dont
+        // continuously get notifications
+        progress += throttle
+        const percentage = `${Math.ceil(float * 100)}%`
+
+        console.log('    Compression progress: ', chalk.cyan(percentage))
       }
     }
 
-    const onProgress = quiet ? undefined : postProcessRecordingOutput(name, videoCompression)
-
-    return videoCapture.process(name, cname, videoCompression, onProgress)
+    return continueProcessing(onProgress)
   },
 
   launchBrowser (options = {}) {
