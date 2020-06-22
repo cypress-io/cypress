@@ -8,7 +8,7 @@ import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
 import React from 'react'
 import VisuallyHidden from '@reach/visually-hidden'
-// @ts-ignore
+
 import EditorPicker from './editor-picker'
 import { Editor } from './file-model'
 

@@ -46,6 +46,9 @@ const SelectItem = ({ value, children, selectItem, ...rest }: Props) => {
           name={name}
           type='radio'
           value={value}
+          // style required to prevent an error from being thrown
+          // when used inside of a dialog (ex. editor picker modal)
+          style={{ margin: 0 }}
         />
       </VisuallyHidden>
       {children}
