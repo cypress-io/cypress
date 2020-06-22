@@ -89,6 +89,10 @@ const processRunOptions = (options = {}) => {
     args.push('--port', options.port)
   }
 
+  if (options.quiet) {
+    args.push('--quiet')
+  }
+
   // if record is defined and we're not
   // already in ci mode, then send it up
   if (options.record != null && !options.ci) {
