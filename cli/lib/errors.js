@@ -9,7 +9,7 @@ const state = require('./tasks/state')
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
-const runDocumentationUrl = `${docsUrl}/command-line#cypress-run`
+const runDocumentationUrl = `${docsUrl}/cypress-run`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
