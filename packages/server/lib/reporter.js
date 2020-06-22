@@ -360,11 +360,7 @@ class Reporter {
       wcs = new Date(wcs)
     }
 
-    const _prevAttempts = get('prevAttempts')
-
-    const prevAttempts = _prevAttempts && _prevAttempts.map(this.normalizePrevAttemptTest)
-
-    return {
+    const normalizedTest = {
       testId: get('id'),
       title: getParentTitle(test),
       state: get('state'),
@@ -376,8 +372,14 @@ class Reporter {
       wallClockStartedAt: wcs,
       wallClockDuration: get('wallClockDuration'),
       videoTimestamp: null,
-      prevAttempts,
     }
+    const _prevAttempts = get('prevAttempts')
+
+    if (_prevAttempts) {
+      normalizedTest.prevAttempts = _prevAttempts.map(this.normalizePrevAttemptTest)
+    }
+
+    return normalizedTest
   }
 
   normalizePrevAttemptTest (test) {
