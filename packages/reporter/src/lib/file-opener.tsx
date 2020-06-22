@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import events from '../lib/events'
+import events from './events'
 
 import { GetUserEditorResult, Editor, FileDetails, FileOpener as Opener } from '@packages/ui-components'
 
