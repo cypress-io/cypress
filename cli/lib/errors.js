@@ -31,9 +31,9 @@ const unknownError = {
 const invalidRunProjectPath = {
   description: 'Invalid --project path',
   solution: stripIndent`
-    Provide valid project path.
+    Please provide a valid project path.
 
-    Read our documentation for ${chalk.cyan('cypress run')} command at:
+    Learn more about ${chalk.cyan('cypress run')} at:
 
       ${chalk.blue(runDocumentationUrl)}
   `,
