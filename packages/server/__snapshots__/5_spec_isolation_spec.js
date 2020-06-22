@@ -710,11 +710,11 @@ Although you have test retries enabled, we do not retry 'before all' or 'after a
      hook spec -- beforeEach hooks -- never gets here (failed).png                                  
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
      hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (a               
-     ttempt 1).png                                                                                  
+     ttempt 2).png                                                                                  
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
      hook spec -- afterEach hooks -- runs this -- after each hook (failed).png                      
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 1               
+     hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2               
      ).png                                                                                          
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
      hook spec -- after hooks -- fails on this -- after all hook (failed).png                       
@@ -1015,7 +1015,7 @@ exports['failing with retries enabled'] = {
           "testId": "r4",
           "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 1).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
           "height": 720,
           "width": 1280
         },
@@ -1035,7 +1035,7 @@ exports['failing with retries enabled'] = {
           "testId": "r8",
           "testAttemptIndex": 1,
           "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 1).png",
+          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
           "height": 720,
           "width": 1280
         },
