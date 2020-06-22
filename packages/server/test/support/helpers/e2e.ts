@@ -509,6 +509,10 @@ const e2e = {
       args.push('--record')
     }
 
+    if (options.quiet) {
+      args.push('--quiet')
+    }
+
     if (options.parallel) {
       args.push('--parallel')
     }

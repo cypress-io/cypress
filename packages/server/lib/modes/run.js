@@ -813,7 +813,7 @@ module.exports = {
     console.log('')
   },
 
-  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo) {
+  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -824,78 +824,82 @@ module.exports = {
       return
     }
 
-    console.log('')
+    const postProcessRecordingOutput = (name, videoCompression) => {
+      console.log('')
 
-    terminal.header('Video', {
-      color: ['cyan'],
-    })
+      terminal.header('Video', {
+        color: ['cyan'],
+      })
 
-    console.log('')
+      console.log('')
 
-    const table = terminal.table({
-      colWidths: [3, 21, 76],
-      colAligns: ['left', 'left', 'left'],
-      type: 'noBorder',
-      style: {
-        'padding-right': 0,
-      },
-      chars: {
-        'left': ' ',
-        'right': '',
-      },
-    })
+      const table = terminal.table({
+        colWidths: [3, 21, 76],
+        colAligns: ['left', 'left', 'left'],
+        type: 'noBorder',
+        style: {
+          'padding-right': 0,
+        },
+        chars: {
+          'left': ' ',
+          'right': '',
+        },
+      })
 
-    table.push([
-      gray('-'),
-      gray('Started processing:'),
-      chalk.cyan(`Compressing to ${videoCompression} CRF`),
-    ])
+      table.push([
+        gray('-'),
+        gray('Started processing:'),
+        chalk.cyan(`Compressing to ${videoCompression} CRF`),
+      ])
 
-    console.log(table.toString())
+      console.log(table.toString())
 
-    const started = Date.now()
-    let progress = Date.now()
-    const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
+      const started = Date.now()
+      let progress = Date.now()
+      const throttle = env.get('VIDEO_COMPRESSION_THROTTLE') || human('10 seconds')
 
-    const onProgress = function (float) {
-      if (float === 1) {
-        const finished = Date.now() - started
-        const dur = `(${humanTime.long(finished)})`
+      return function (float) {
+        if (float === 1) {
+          const finished = Date.now() - started
+          const dur = `(${humanTime.long(finished)})`
 
-        const table = terminal.table({
-          colWidths: [3, 21, 61, 15],
-          colAligns: ['left', 'left', 'left', 'right'],
-          type: 'noBorder',
-          style: {
-            'padding-right': 0,
-          },
-          chars: {
-            'left': ' ',
-            'right': '',
-          },
-        })
+          const table = terminal.table({
+            colWidths: [3, 21, 61, 15],
+            colAligns: ['left', 'left', 'left', 'right'],
+            type: 'noBorder',
+            style: {
+              'padding-right': 0,
+            },
+            chars: {
+              'left': ' ',
+              'right': '',
+            },
+          })
 
-        table.push([
-          gray('-'),
-          gray('Finished processing:'),
-          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
-          gray(dur),
-        ])
+          table.push([
+            gray('-'),
+            gray('Finished processing:'),
+            `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+            gray(dur),
+          ])
 
-        console.log(table.toString())
+          console.log(table.toString())
 
-        console.log('')
-      }
+          console.log('')
+        }
 
-      if (Date.now() - progress > throttle) {
-        // bump up the progress so we dont
-        // continuously get notifications
-        progress += throttle
-        const percentage = `${Math.ceil(float * 100)}%`
+        if (Date.now() - progress > throttle) {
+          // bump up the progress so we dont
+          // continuously get notifications
+          progress += throttle
+          const percentage = `${Math.ceil(float * 100)}%`
 
-        console.log('    Compression progress: ', chalk.cyan(percentage))
+          console.log('    Compression progress: ', chalk.cyan(percentage))
+        }
       }
     }
+
+    const onProgress = quiet ? undefined : postProcessRecordingOutput(name, videoCompression)
 
     return videoCapture.process(name, cname, videoCompression, onProgress)
   },
@@ -1061,7 +1065,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1095,10 +1099,11 @@ module.exports = {
         return obj
       }
 
-      this.displayResults(obj, estimated)
-
-      if (screenshots && screenshots.length) {
-        this.displayScreenshots(screenshots)
+      if (!quiet) {
+        this.displayResults(obj, estimated)
+        if (screenshots && screenshots.length) {
+          this.displayScreenshots(screenshots)
+        }
       }
 
       const { tests, stats } = obj
@@ -1137,6 +1142,7 @@ module.exports = {
           compressedVideoName,
           videoCompression,
           suv,
+          quiet,
         )
         .catch(warnVideoRecordingFailed)
       }
@@ -1191,19 +1197,23 @@ module.exports = {
       config,
     }
 
-    displayRunStarting({
-      config,
-      specs,
-      group,
-      tag,
-      runUrl,
-      browser,
-      parallel,
-      specPattern,
-    })
+    if (!options.quiet) {
+      displayRunStarting({
+        config,
+        specs,
+        group,
+        tag,
+        runUrl,
+        browser,
+        parallel,
+        specPattern,
+      })
+    }
 
     const runEachSpec = (spec, index, length, estimated) => {
-      displaySpecHeader(spec.name, index + 1, length, estimated)
+      if (!options.quiet) {
+        displaySpecHeader(spec.name, index + 1, length, estimated)
+      }
 
       return this.runSpec(spec, options, estimated)
       .get('results')
@@ -1282,6 +1292,7 @@ module.exports = {
           exit: options.exit,
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
+          quiet: options.quiet,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1322,6 +1333,7 @@ module.exports = {
     _.defaults(options, {
       isTextTerminal: true,
       browser: 'electron',
+      quiet: false,
     })
 
     const socketId = random.id()
@@ -1410,9 +1422,14 @@ module.exports = {
               videoUploadOnPasses: config.videoUploadOnPasses,
               exit: options.exit,
               headed: options.headed,
+              quiet: options.quiet,
               outputPath: options.outputPath,
             })
-            .tap(renderSummaryTable(runUrl))
+            .tap((runSpecs) => {
+              if (!options.quiet) {
+                renderSummaryTable(runUrl)(runSpecs)
+              }
+            })
           }
 
           if (record) {

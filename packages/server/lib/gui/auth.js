@@ -19,6 +19,7 @@ let authState
 let openExternalAttempted = false
 let authRedirectReached = false
 let server
+let utm
 
 const _buildLoginRedirectUrl = (server) => {
   const { port } = server.address()
@@ -26,7 +27,7 @@ const _buildLoginRedirectUrl = (server) => {
   return `http://127.0.0.1:${port}/redirect-to-auth`
 }
 
-const _buildFullLoginUrl = (baseLoginUrl, server) => {
+const _buildFullLoginUrl = (baseLoginUrl, server, utmCode) => {
   const { port } = server.address()
 
   if (!authState) {
@@ -45,6 +46,16 @@ const _buildFullLoginUrl = (baseLoginUrl, server) => {
       platform: os.platform(),
     }
 
+    if (utmCode) {
+      authUrl.query = {
+        utm_source: 'Test Runner',
+        utm_medium: 'Login Button',
+        utm_campaign: 'TR-Dashboard',
+        utm_content: utmCode,
+        ...authUrl.query,
+      }
+    }
+
     return authUrl.format()
   })
 }
@@ -58,7 +69,7 @@ const _getOriginFromUrl = (originalUrl) => {
 /**
  * @returns a promise that is resolved with a user when auth is complete or rejected when it fails
  */
-const start = (onMessage) => {
+const start = (onMessage, utmCode) => {
   function sendMessage (type, name, arg1) {
     onMessage({
       type,
@@ -68,6 +79,7 @@ const start = (onMessage) => {
     })
   }
 
+  utm = utmCode
   authRedirectReached = false
 
   return user.getBaseLoginUrl()
@@ -110,7 +122,7 @@ const _launchServer = (baseLoginUrl, sendMessage) => {
     app.get('/redirect-to-auth', (req, res) => {
       authRedirectReached = true
 
-      _buildFullLoginUrl(baseLoginUrl, server)
+      _buildFullLoginUrl(baseLoginUrl, server, utm)
       .then((fullLoginUrl) => {
         debug('Received GET to /redirect-to-auth, redirecting: %o', { fullLoginUrl })
 
