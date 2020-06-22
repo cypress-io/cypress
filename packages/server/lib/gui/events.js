@@ -156,7 +156,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return bus.emit('auth:message', msg)
       }
 
-      return auth.start(onMessage)
+      return auth.start(onMessage, arg)
       .then(send)
       .catch(sendErr)
 
