@@ -69,6 +69,12 @@ describe('Login', function () {
         })
       })
 
+      it('passes utm code when it triggers ipc \'begin:auth\'', function () {
+        cy.then(function () {
+          expect(this.ipc.beginAuth).to.be.calledWith('Nav Login Button')
+        })
+      })
+
       it('disables login button', () => {
         cy.get('@loginBtn').should('be.disabled')
       })
