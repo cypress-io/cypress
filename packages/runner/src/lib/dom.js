@@ -73,6 +73,8 @@ function addElementBoxModelLayers ($el, $body) {
   const $container = $('<div class="__cypress-highlight">')
   .css({
     opacity: 0.7,
+    position: 'absolute',
+    zIndex: 2147483647,
   })
 
   const layers = {

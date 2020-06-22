@@ -1,4 +1,5 @@
 const { clickCommandLog } = require('../../support/utils')
+const { _ } = Cypress
 
 // https://github.com/cypress-io/cypress/pull/5299/files
 describe('rect highlight', () => {
@@ -61,6 +62,24 @@ describe('rect highlight', () => {
     ensureCorrectHighlightPositions('#button')
     ensureCorrectTargetPosition('#button')
   })
+
+  // https://github.com/cypress-io/cypress/issues/7762
+  it('highlights above z-index elements', () => {
+    cy.$$('<div id="absolute-el"></div>').css({
+      position: 'absolute',
+      zIndex: 1000,
+      top: 0,
+      left: 0,
+      height: 50,
+      width: 50,
+      padding: 20,
+      margin: 20,
+      backgroundColor: 'salmon',
+    }).appendTo(cy.$$('body'))
+
+    getAndPin('#absolute-el')
+    ensureCorrectHighlightPositions('#absolute-el')
+  })
 })
 
 const ensureCorrectTargetPosition = (sel) => {
@@ -82,11 +101,19 @@ const ensureCorrectTargetPosition = (sel) => {
 
 const ensureCorrectHighlightPositions = (sel) => {
   return cy.wrap(null, { timeout: 400 }).should(() => {
-    const dims = {
-      content: cy.$$('div[data-layer=Content]')[0].getBoundingClientRect(),
-      padding: cy.$$('div[data-layer=Padding]')[0].getBoundingClientRect(),
-      border: cy.$$('div[data-layer=Border]')[0].getBoundingClientRect(),
+    const els = {
+      content: cy.$$('div[data-layer=Content]'),
+      padding: cy.$$('div[data-layer=Padding]'),
+      border: cy.$$('div[data-layer=Border]'),
     }
+
+    const dims = _.mapValues(els, ($el) => $el[0].getBoundingClientRect())
+
+    const doc = els.content[0].ownerDocument
+
+    const contentHighlightCenter = [dims.content.x + dims.content.width / 2, dims.content.y + dims.content.height / 2]
+
+    expect(doc.elementFromPoint(...contentHighlightCenter)).eq(els.content[0])
 
     expectToBeInside(dims.content, dims.padding, 'content to be inside padding')
     expectToBeInside(dims.padding, dims.border, 'padding to be inside border')
