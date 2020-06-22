@@ -341,7 +341,7 @@ const getPath = function (data, ext, screenshotsFolder) {
   }
 
   if (data.testAttemptIndex > 0) {
-    names[index] = `${names[index]} (attempt #{data.testAttemptIndex})`
+    names[index] = `${names[index]} (attempt ${data.testAttemptIndex})`
   }
 
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)

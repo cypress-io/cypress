@@ -93,7 +93,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
     // grab all the wallclock durations for all test (and retried attempts)
     // because our duration should be at least this
 
-    const attempts = _.flatMap(run.tests, () => _.compact([test].concat(test.prevAttempts)))
+    const attempts = _.flatMap(run.tests, (test) => _.compact([test].concat(test.prevAttempts)))
     const wallClocks = _.sumBy(attempts, 'wallClockDuration')
 
     // ensure each run's duration is around the sum
