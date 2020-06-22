@@ -164,4 +164,10 @@ console.log(cmd)
 
 const child = execa.shell(cmd, { env, stdio: 'inherit' })
 
-child.on('exit', process.exit)
+child.on('exit', (code, signal) => {
+  if (signal) {
+    console.error(`tests exited with signal ${signal}`)
+  }
+
+  process.exit(code === null ? 1 : code)
+})
