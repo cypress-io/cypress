@@ -76,7 +76,7 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
   justify-content: center;
   margin: auto;
   min-width: 30em;
-  padding: 1em 0 0;
+  padding: 2em 0 0;
   position: relative;
 
   @if variable-exists(open-sans) {

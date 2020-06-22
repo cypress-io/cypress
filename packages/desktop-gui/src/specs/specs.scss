@@ -234,3 +234,13 @@ $max-nesting-level: 14;
     }
   }
 }
+
+// overwrite file opener styles
+[data-reach-dialog-content] {
+  font-size: 1em;
+  padding-top: 1em;
+
+  h1 {
+    font-size: 1.75em;
+  }
+}
