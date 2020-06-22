@@ -184,7 +184,7 @@ $max-nesting-level: 14;
     }
 
     &:hover, &:focus {
-      background-color: rgba(186, 186, 186, 0.2);
+      background-color: #f8f8f8;
       cursor: pointer;
 
       > .file-open-in-ide {
