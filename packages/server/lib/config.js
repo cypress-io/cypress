@@ -105,7 +105,6 @@ browsers\
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
 const experimentalConfigKeys = toWords(`\
-experimentalGetCookiesSameSite
 experimentalSourceRewriting
 experimentalComponentTesting
 experimentalShadowDomSupport
@@ -174,7 +173,6 @@ const CONFIG_DEFAULTS = {
   componentFolder: 'cypress/component',
   // TODO: example for component testing with subkeys
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
-  experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
@@ -222,7 +220,6 @@ const validationRules = {
   // validation for component testing experiment
   componentFolder: v.isStringOrFalse,
   // experimental flag validation below
-  experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,

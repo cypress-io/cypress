@@ -194,7 +194,6 @@ describe('e2e cookies', () => {
     // we can remove this extra test case
     e2e.it('with forced SameSite strictness', {
       config: {
-        experimentalGetCookiesSameSite: true,
         baseUrl,
         env: {
           baseUrl,
@@ -248,7 +247,6 @@ describe('e2e cookies', () => {
       ) => {
         e2e.it(`passes with baseurl: ${baseUrl}`, {
           config: {
-            experimentalGetCookiesSameSite: true,
             baseUrl,
             env: {
               baseUrl,

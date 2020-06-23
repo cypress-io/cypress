@@ -474,9 +474,7 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('can set cookies with sameSite', {
-      experimentalGetCookiesSameSite: true,
-    }, () => {
+    it('can set cookies with sameSite', () => {
       Cypress.automation.restore()
       Cypress.utils.addTwentyYears.restore()
 
