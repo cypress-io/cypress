@@ -91,6 +91,18 @@ const testAfterRun = (test, Cypress) => {
   }
 }
 
+const getTestCountForHook = (test, hookName) => {
+  if (test.hookCounts == null) {
+    test.hookCounts = {}
+  }
+
+  if (test.hookCounts[hookName] == null) {
+    test.hookCounts[hookName] = 0
+  }
+
+  return ++test.hookCounts[hookName]
+}
+
 const setTestTimingsForHook = (test, hookName, obj) => {
   if (test.timings == null) {
     test.timings = {}
@@ -966,7 +978,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       }
 
       // if this isnt a hook, then the name is 'test'
-      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+      let hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
 
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
@@ -1055,6 +1067,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
           return null
         })
       }
+
+      hookName = `${hookName} (${getTestCountForHook(test, hookName)})`
 
       // our runnable is about to run, so let cy know. this enables
       // us to always have a correct runnable set even when we are
