@@ -4768,10 +4768,22 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @see https://on.cypress.io/tick
      */
     tick(time: number): void
     /**
-     * Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+     * Restore all overridden native functions.
+     * This is automatically called between tests, so should not generally be needed.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.restore()
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('restore')
      */
     restore(): void
   }
