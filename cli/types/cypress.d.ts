@@ -1800,6 +1800,17 @@ declare namespace Cypress {
      * `cy.clock()` must be called before `cy.tick()`
      *
      * @see https://on.cypress.io/clock
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // advance time by 10 minutes
+     *  cy.tick(600*1000)
+     *  // you can restore the real clock
+     *  cy.tick(1000).then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.tick(5000).invoke('restore')
      */
     tick(milliseconds: number): Chainable<Clock>
 
