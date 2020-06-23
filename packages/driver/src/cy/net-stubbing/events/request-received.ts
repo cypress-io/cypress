@@ -15,6 +15,7 @@ import {
 } from '../static-response-utils'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
 import { HandlerFn } from './'
+import Bluebird from 'bluebird'
 
 export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = (Cypress, frame, { getRoute, emitNetEvent }) => {
   function getRequestLog (route: Route, request: Omit<Request, 'log'>) {
@@ -94,7 +95,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     requestId,
   }
 
-  let nextCalled = false
+  let resolved = false
   let replyCalled = false
   let continueSent = false
 
@@ -103,8 +104,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
     reply (responseHandler, maybeBody?, maybeHeaders?) {
-      if (nextCalled) {
-        return $errUtils.throwErrByPath('net_stubbing.reply_called_after_next', { args: { route: route.options, req } })
+      if (resolved) {
+        return $errUtils.throwErrByPath('net_stubbing.reply_called_after_resolved', { args: { route: route.options, req } })
       }
 
       if (replyCalled) {
@@ -126,7 +127,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         // signals server to send a http:response:received
         continueFrame.hasResponseHandler = true
 
-        return
+        return sendContinueFrame()
       }
 
       if (!_.isUndefined(responseHandler)) {
@@ -150,44 +151,28 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     },
   }
 
+  if (!_.isFunction(route.handler)) {
+    return sendContinueFrame()
+  }
+
   const handler = route.handler as Function
 
-  const tryHandler = (...args) => {
-    try {
-      handler(...args)
-    } catch (err) {
-      $errUtils.throwErrByPath('net_stubbing.req_cb_failed', { args: { err, req, route: route.options } })
+  // if a Promise is returned, wait for it to resolve. if req.reply()
+  // has not been called, continue to the next interceptor
+  return Bluebird.try(() => {
+    return handler(userReq)
+  })
+  .finally(() => {
+    resolved = true
+  })
+  .catch((err) => {
+    $errUtils.throwErrByPath('net_stubbing.req_cb_failed', { args: { err, req, route: route.options } })
+  })
+  .then(() => {
+    if (!replyCalled) {
+      // handler function resolved without resolving request, pass on
+      continueFrame.tryNextRoute = true
+      sendContinueFrame()
     }
-  }
-
-  if (!_.isFunction(handler)) {
-    return sendContinueFrame()
-  }
-
-  if (handler.length === 1) {
-    // did not consume next(), so continue synchronously
-    tryHandler(userReq)
-
-    return sendContinueFrame()
-  }
-
-  // next() can be called to pass this to the next route
-  const next = () => {
-    if (replyCalled) {
-      return $errUtils.throwErrByPath('net_stubbing.next_called_after_reply', { args: { route: route.options, req } })
-    }
-
-    if (nextCalled) {
-      return $errUtils.throwErrByPath('net_stubbing.multiple_next_calls', { args: { route: route.options, req } })
-    }
-
-    nextCalled = true
-
-    continueFrame.tryNextRoute = true
-
-    return sendContinueFrame()
-  }
-
-  // rely on handler to call next()
-  tryHandler(userReq, next)
+  })
 }

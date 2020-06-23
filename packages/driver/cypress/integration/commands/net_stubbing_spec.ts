@@ -364,17 +364,13 @@ describe('src/cy/commands/net_stubbing', function () {
       })
 
       it('can modify original request body and have it passed to next handler', function (done) {
-        cy.route2('/post-only', function (req, next) {
+        cy.route2('/post-only', function (req) {
           expect(req.body).to.eq('foo-bar-baz')
           req.body = 'quuz'
-
-          next()
         }).then(function () {
-          cy.route2('/post-only', function (req, next) {
+          cy.route2('/post-only', function (req) {
             expect(req.body).to.eq('quuz')
             req.body = 'quux'
-
-            next()
           })
         }).then(function () {
           cy.route2('/post-only', function (req) {
@@ -586,17 +582,13 @@ describe('src/cy/commands/net_stubbing', function () {
       })
 
       context('request handler chaining', function () {
-        it('passes request through in order using next()', function () {
-          cy.route2('/dump-method', function (req, next) {
+        it('passes request through in order', function () {
+          cy.route2('/dump-method', function (req) {
             expect(req.method).to.eq('GET')
             req.method = 'POST'
-
-            next()
-          }).route2('/dump-method', function (req, next) {
+          }).route2('/dump-method', function (req) {
             expect(req.method).to.eq('POST')
             req.method = 'PATCH'
-
-            next()
           }).route2('/dump-method', function (req) {
             expect(req.method).to.eq('PATCH')
 
@@ -605,11 +597,9 @@ describe('src/cy/commands/net_stubbing', function () {
         })
 
         it('stops passing request through once req.reply called', function () {
-          cy.route2('/dump-method', function (req, next) {
+          cy.route2('/dump-method', function (req) {
             expect(req.method).to.eq('GET')
             req.method = 'POST'
-
-            next()
           }).route2('/dump-method', function (req) {
             expect(req.method).to.eq('POST')
 
@@ -621,7 +611,7 @@ describe('src/cy/commands/net_stubbing', function () {
       context('errors', function () {
         it('fails test if req.reply is called twice in req handler', function (done) {
           cy.on('fail', (err) => {
-            expect(err.message).to.contain('`req.reply()` was called multiple times in a request handler, but the request can only be replied to once')
+            expect(err.message).to.contain('`req.reply()` was called multiple times in a request handler, but a request can only be replied to once')
             done()
           })
 
@@ -632,42 +622,27 @@ describe('src/cy/commands/net_stubbing', function () {
           }).visit('/dump-method')
         })
 
-        it('fails test if next is called twice in req handler', function (done) {
+        it('fails test if req.reply is called after req handler finishes', function (done) {
           cy.on('fail', (err) => {
-            expect(err.message).to.contain('`next()` was called multiple times in a request handler, but the request can only be passed on once')
+            expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
             done()
           })
 
-          cy.route2('/dump-method', function (req, next) {
-            next()
-
-            next()
+          cy.route2('/dump-method', function (req) {
+            setTimeout(() => req.reply(), 50)
           }).visit('/dump-method')
         })
 
-        it('fails test if next is called after req.reply in req handler', function (done) {
+        it('fails test if req.reply is called after req handler resolves', function (done) {
           cy.on('fail', (err) => {
-            expect(err.message).to.contain('`next()` was called multiple times in a request handler, but the request can only be passed on once')
+            expect(err.message).to.contain('> `req.reply()` was called after the request handler finished executing')
             done()
           })
 
-          cy.route2('/dump-method', function (req, next) {
-            req.reply()
+          cy.route2('/dump-method', function (req) {
+            setTimeout(() => req.reply(), 50)
 
-            next()
-          }).visit('/dump-method')
-        })
-
-        it('fails test if req.reply is called after next in req handler', function (done) {
-          cy.on('fail', (err) => {
-            expect(err.message).to.contain('`next()` was called after `req.reply()` in a request handler, but `next()` can not be called after the response has been started.')
-            done()
-          })
-
-          cy.route2('/dump-method', function (req, next) {
-            next()
-
-            req.reply()
+            return Promise.resolve()
           }).visit('/dump-method')
         })
 
@@ -1125,7 +1100,7 @@ describe('src/cy/commands/net_stubbing', function () {
           done()
         })
 
-        cy.route2('/foo', _.noop)
+        cy.route2('/foo', () => new Promise(_.noop))
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
@@ -1148,7 +1123,7 @@ describe('src/cy/commands/net_stubbing', function () {
           done()
         })
 
-        cy.route2('/foo', _.noop)
+        cy.route2('/foo', () => new Promise(_.noop))
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
@@ -1195,7 +1170,7 @@ describe('src/cy/commands/net_stubbing', function () {
           done()
         })
 
-        cy.route2('/foo', _.noop)
+        cy.route2('/foo', () => new Promise(_.noop))
         .as('foo.bar')
         .then(() => {
           $.get('/foo')

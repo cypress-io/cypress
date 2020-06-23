@@ -48,12 +48,6 @@ export namespace CyHttpMessages {
   }
 }
 
-// tslint:disable-next-line:no-empty-interface
-export interface CyWebSocket {}
-
-// tslint:disable-next-line:no-empty-interface
-export interface CyWebSocketFrame {}
-
 export interface DictMatcher<T> {
   [key: string]: T
 }
@@ -63,7 +57,7 @@ export interface DictMatcher<T> {
  */
 export type GlobPattern = string
 
-export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest, next: () => void) => void
+export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest) => void | Promise<void>
 
 export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void
 

@@ -924,20 +924,14 @@ module.exports = {
     res_cb_failed: ({ err, req, res, route }) => {
       return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
     },
-    multiple_next_calls: ({ route, req }) => {
-      return `\`next()\` was called multiple times in a request handler, but the request can only be passed on once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
-    },
     multiple_reply_calls: ({ route, req }) => {
       return `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
     multiple_send_calls: ({ res }) => {
       return `\`res.send()\` was called multiple times in a response handler, but the response can only be sent once.\n\nResponse: ${format(res)}`
     },
-    next_called_after_reply: ({ route, req }) => {
-      return `\`next()\` was called after \`req.reply()\` in a request handler, but \`next()\` can not be called after the response has been started.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
-    },
-    reply_called_after_next: ({ route, req }) => {
-      return `\`req.reply()\` was called after \`next()\` in a request handler, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    reply_called_after_resolved: ({ route, req }) => {
+      return `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
     reply_request_error: ({ error, req, route }) => {
       return `\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:\n\n${normalizedStack(error)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`

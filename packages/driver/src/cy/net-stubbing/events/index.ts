@@ -3,13 +3,14 @@ import { NetEventFrames } from '@packages/net-stubbing/lib/types'
 import { onRequestReceived } from './request-received'
 import { onResponseReceived } from './response-received'
 import { onRequestComplete } from './request-complete'
+import Bluebird from 'bluebird'
 
 export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress.Cypress, frame: Frame, opts: {
   getRequest: (routeHandlerId: string, requestId: string) => Request | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   failCurrentTest: (err: Error) => void
-}) => void | Promise<void>
+}) => Promise<void> | void
 
 const netEventHandlers: { [eventName: string]: HandlerFn<any> } = {
   'http:request:received': onRequestReceived,
@@ -50,18 +51,17 @@ export function registerEvents (Cypress: Cypress.Cypress) {
   })
 
   Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {
-    try {
+    Bluebird.try(() => {
       const handler = netEventHandlers[eventName]
 
-      handler(Cypress, frame, {
+      return handler(Cypress, frame, {
         getRoute,
         getRequest,
         emitNetEvent,
         failCurrentTest,
       })
-    } catch (err) {
-      failCurrentTest(err)
-    }
+    })
+    .catch(failCurrentTest)
   })
 
   return { emitNetEvent }
