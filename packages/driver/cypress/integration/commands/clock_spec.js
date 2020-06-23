@@ -37,13 +37,24 @@ describe('src/cy/commands/clock', () => {
       })
     })
 
-    it('takes now arg', () => {
+    it('takes number now arg', () => {
       const now = 1111111111111
 
       cy.clock(now).then(function (clock) {
         expect(new this.window.Date().getTime()).to.equal(now)
         clock.tick(4321)
         expect(new this.window.Date().getTime()).to.equal(now + 4321)
+      })
+    })
+
+    it('takes Date now arg', () => {
+      // April 15, 2020
+      const now = new Date(2017, 3, 15)
+
+      cy.clock(now).then(function (clock) {
+        expect(new this.window.Date().getTime()).to.equal(now.getTime())
+        clock.tick(4321)
+        expect(new this.window.Date().getTime()).to.equal(now.getTime() + 4321)
       })
     })
 

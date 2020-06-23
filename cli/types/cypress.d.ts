@@ -727,7 +727,7 @@ declare namespace Cypress {
      *    // in your app code
      *    $('#date').text(new Date().toJSON())
      *    // in the spec file
-     *    // March 14, 2017 timestamp
+     *    // March 14, 2017 timestamp or Date object
      *    const now = new Date(2017, 3, 14).getTime()
      *    cy.clock(now)
      *    cy.visit('/index.html')
@@ -739,7 +739,7 @@ declare namespace Cypress {
      *    // or use this shortcut
      *    cy.clock().invoke('restore')
      */
-    clock(now: number, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
      *
@@ -748,7 +748,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
