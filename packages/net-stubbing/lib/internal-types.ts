@@ -18,6 +18,7 @@ export const SERIALIZABLE_REQ_PROPS = [
   'url',
   'method',
   'httpVersion',
+  'responseTimeout',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
@@ -91,6 +92,6 @@ export declare namespace NetEventFrames {
 
   // fired when a response has been sent completely by the server to an intercepted request
   export interface HttpRequestComplete extends BaseHttp {
-    error?: Error
+    error?: Error & { code?: string }
   }
 }

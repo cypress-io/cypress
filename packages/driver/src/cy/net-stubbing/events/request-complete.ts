@@ -10,12 +10,22 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
   }
 
   if (frame.error) {
-    const error = makeErrFromObj(frame.error)
-    const err = errByPath('net_stubbing.reply_request_error', {
-      error,
-      req: request.request,
-      route: getRoute(frame.routeHandlerId),
-    })
+    const getDescriptiveError = (): Error => {
+      const error = frame.error!
+      const errOpts = {
+        innerErr: makeErrFromObj(error),
+        req: request.request,
+        route: getRoute(frame.routeHandlerId),
+      }
+
+      if (error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(error.code)) {
+        return errByPath('net_stubbing.reply_request_timeout', errOpts)
+      }
+
+      return errByPath('net_stubbing.reply_request_error', errOpts)
+    }
+
+    const err = getDescriptiveError()
 
     request.state = 'Errored'
     request.log.snapshot('error').error(err)

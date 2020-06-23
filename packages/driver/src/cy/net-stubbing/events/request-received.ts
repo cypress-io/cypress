@@ -65,6 +65,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
         ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
       }
 
+      _.merge(request.request, continueFrame.req)
+
       emitNetEvent('http:request:continue', continueFrame)
     }
   }
@@ -126,6 +128,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
         // signals server to send a http:response:received
         continueFrame.hasResponseHandler = true
+        userReq.responseTimeout = userReq.responseTimeout || Cypress.config('responseTimeout')
 
         return sendContinueFrame()
       }
@@ -157,16 +160,22 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   const handler = route.handler as Function
 
+  const timeout = Cypress.config('defaultCommandTimeout')
+
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
   return Bluebird.try(() => {
     return handler(userReq)
   })
-  .finally(() => {
-    resolved = true
-  })
   .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.req_cb_failed', { args: { err, req, route: route.options } })
+  })
+  .timeout(timeout)
+  .catch(Bluebird.TimeoutError, (err) => {
+    $errUtils.throwErrByPath('net_stubbing.req_cb_timeout', { args: { err, timeout, req, route: route.options } })
+  })
+  .finally(() => {
+    resolved = true
   })
   .then(() => {
     if (!replyCalled) {

@@ -1,8 +1,19 @@
 describe('src/cy/commands/net_stubbing', function () {
-  const { $, _, sinon, state } = Cypress
+  const { $, _, sinon, state, Promise, config } = Cypress
+  let restoreConfig
 
   beforeEach(function () {
     cy.spy(Cypress.utils, 'warning')
+
+    const oldConfig = _.cloneDeep(config())
+
+    restoreConfig = () => {
+      config(oldConfig)
+    }
+  })
+
+  afterEach(() => {
+    restoreConfig()
   })
 
   context('#route2', function () {
@@ -673,6 +684,20 @@ describe('src/cy/commands/net_stubbing', function () {
             req.reply({ statusCode: 1 })
           }).visit('/foo')
         })
+
+        it('can timeout in request handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+
+            done()
+          })
+
+          Cypress.config('defaultCommandTimeout', 50)
+
+          cy.route2('/foo', () => {
+            return Promise.delay(200)
+          }).visit('/foo')
+        })
       })
     })
 
@@ -739,27 +764,23 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
-      it('can \'delay\' a proxy response using setTimeout', function (done) {
+      it('can \'delay\' a proxy response using Promise.delay', function (done) {
         cy.route2('/timeout', (req) => {
           req.reply((res) => {
             this.start = Date.now()
 
-            setTimeout(() => {
-              res.send('setTimeout worked')
-            }, 1000)
+            return Promise.delay(1000)
+            .then(() => {
+              res.send('Promise.delay worked')
+            })
           })
         }).then(() => {
-          const xhr = new XMLHttpRequest()
-
-          xhr.open('GET', '/timeout')
-          xhr.send()
-
-          xhr.onload = () => {
+          $.get('/timeout').then((responseText) => {
             expect(Date.now() - this.start).to.be.closeTo(1000, 100)
-            expect(xhr.responseText).to.eq('setTimeout worked')
+            expect(responseText).to.eq('Promise.delay worked')
 
             done()
-          }
+          })
         })
       })
 
@@ -1080,6 +1101,39 @@ describe('src/cy/commands/net_stubbing', function () {
             })
           })
           .wait('@err', { timeout: 50 })
+        })
+
+        it('can timeout in req.reply handler', function (done) {
+          cy.on('fail', (err) => {
+            expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+
+            done()
+          })
+
+          Cypress.config('defaultCommandTimeout', 50)
+
+          cy.route2('/timeout', (req) => {
+            req.reply(() => {
+              return Promise.delay(200)
+            })
+          }).visit('/timeout', { timeout: 500 })
+        })
+
+        it('can timeout when retrieving upstream response', function (done) {
+          cy.once('fail', (err) => {
+            expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
+            .and.contain('ESOCKETTIMEDOUT')
+
+            done()
+          })
+
+          Cypress.config('responseTimeout', 25)
+
+          cy.route2('/timeout', (req) => {
+            req.reply(_.noop)
+          }).then(() => {
+            $.get('/timeout?ms=50')
+          })
         })
       })
     })

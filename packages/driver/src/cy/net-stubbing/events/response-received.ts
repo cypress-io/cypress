@@ -13,12 +13,14 @@ import {
 } from '../static-response-utils'
 import $errUtils from '@packages/driver/src/cypress/error_utils'
 import { HandlerFn } from './'
+import Bluebird from 'bluebird'
 
 export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> = (Cypress, frame, { getRoute, getRequest, emitNetEvent }) => {
   const { res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
 
   let sendCalled = false
+  let resolved = false
 
   if (request) {
     request.state = 'ResponseReceived'
@@ -46,6 +48,10 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   const userRes: CyHttpMessages.IncomingHttpResponse = {
     ...res,
     send (staticResponse?, maybeBody?, maybeHeaders?) {
+      if (resolved) {
+        return $errUtils.throwErrByPath('net_stubbing.send_called_after_resolved', { args: { res } })
+      }
+
       if (sendCalled) {
         return $errUtils.throwErrByPath('net_stubbing.multiple_send_calls', { args: { res } })
       }
@@ -85,9 +91,12 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     return sendContinueFrame()
   }
 
-  try {
-    request.responseHandler!(userRes)
-  } catch (err) {
+  const timeout = Cypress.config('defaultCommandTimeout')
+
+  return Bluebird.try(() => {
+    return request.responseHandler!(userRes)
+  })
+  .catch((err) => {
     $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
       args: {
         err,
@@ -96,5 +105,25 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
         res,
       },
     })
-  }
+  })
+  .timeout(timeout)
+  .catch(Bluebird.TimeoutError, (err) => {
+    $errUtils.throwErrByPath('net_stubbing.res_cb_timeout', {
+      args: {
+        timeout,
+        req: request.request,
+        route: _.get(getRoute(routeHandlerId), 'options'),
+        res,
+      },
+    })
+  })
+  .finally(() => {
+    resolved = true
+  })
+  .then(() => {
+    if (!sendCalled) {
+      // user did not call send, send response
+      userRes.send()
+    }
+  })
 }

@@ -921,6 +921,15 @@ module.exports = {
     req_cb_failed: ({ err, req, route }) => {
       return `A request callback passed to ${cmd('route2')} threw an error while intercepting a request:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
+    req_cb_timeout: ({ timeout, req, route }) => {
+      return stripIndent`A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+
+      If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+      Route: ${format(route)}
+
+      Intercepted request: ${format(req)}`
+    },
     res_cb_failed: ({ err, req, res, route }) => {
       return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
     },
@@ -930,11 +939,35 @@ module.exports = {
     multiple_send_calls: ({ res }) => {
       return `\`res.send()\` was called multiple times in a response handler, but the response can only be sent once.\n\nResponse: ${format(res)}`
     },
+    send_called_after_resolved: ({ res }) => {
+      return `\`res.send()\` was called after the response handler finished executing, but \`res.send()\` can not be called after the response has been passed on.\n\nIntercepted response: ${format(res)}`
+    },
+    res_cb_timeout: ({ timeout, req, res, route }) => {
+      return stripIndent`A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+
+      If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+      Route: ${format(route)}
+
+      Intercepted request: ${format(req)}
+
+      Intercepted response: ${format(res)}
+      `
+    },
     reply_called_after_resolved: ({ route, req }) => {
       return `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
     },
-    reply_request_error: ({ error, req, route }) => {
-      return `\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:\n\n${normalizedStack(error)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    reply_request_error: ({ innerErr, req, route }) => {
+      return `\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:\n\n${normalizedStack(innerErr)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    },
+    reply_request_timeout: ({ innerErr, req, route }) => {
+      return stripIndent`\`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+
+      ${normalizedStack(innerErr)}
+
+      Route: ${format(route)}
+
+      Intercepted request: ${format(req)}`
     },
   },
 

@@ -37,7 +37,9 @@ export namespace CyHttpMessages {
     throttle: (throttleKbps: number) => IncomingHttpResponse
   }
 
-  export type IncomingRequest = BaseMessage
+  export type IncomingRequest = BaseMessage & {
+    responseTimeout?: number
+  }
 
   export interface IncomingHttpRequest extends IncomingRequest {
     destroy(): void
@@ -59,7 +61,7 @@ export type GlobPattern = string
 
 export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest) => void | Promise<void>
 
-export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void
+export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void | Promise<void>
 
 /**
  * Matches a single number or any of an array of acceptable numbers.
