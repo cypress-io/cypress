@@ -407,6 +407,12 @@ describe('src/cy/commands/traversals', () => {
           expect($element[0]).to.eq(el)
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/7676
+      it('does not error when querySelectorAll is wrapped and snapshots are off', () => {
+        cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
+        cy.get('#shadow-element-1').find('.shadow-1', { includeShadowDom: true })
+      })
     })
 
     describe('closest', () => {

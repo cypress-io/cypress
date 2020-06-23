@@ -303,6 +303,18 @@ describe('Runs List', function () {
     it('does not fetch runs', function () {
       expect(this.ipc.getRuns).not.to.be.called
     })
+
+    it('clicking Log In to Dashboard opens login', () => {
+      cy.contains('button', 'Log In to Dashboard').click().then(function () {
+        expect(this.ipc.beginAuth).to.be.calledOnce
+      })
+    })
+
+    it('clicking Log In to Dashboard passes utm code', () => {
+      cy.contains('button', 'Log In to Dashboard').click().then(function () {
+        expect(this.ipc.beginAuth).to.be.calledWith('Runs Tab Login Button')
+      })
+    })
   })
 
   context('without a project id', function () {
@@ -345,7 +357,7 @@ describe('Runs List', function () {
 
       it('clicking Log In to Dashboard opens login', () => {
         cy.contains('button', 'Log In to Dashboard').click().then(function () {
-          expect(this.ipc.beginAuth).to.be.called
+          expect(this.ipc.beginAuth).to.be.calledOnce
         })
       })
     })

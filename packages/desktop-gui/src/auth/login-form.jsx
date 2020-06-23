@@ -115,7 +115,7 @@ class LoginForm extends Component {
 
     this.setState({ isLoggingIn: true })
 
-    authApi.login()
+    authApi.login(this.props.utm)
     .then(() => {
       this.props.onSuccess()
     })
