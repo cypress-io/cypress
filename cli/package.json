@@ -82,7 +82,7 @@
     "execa-wrap": "1.4.0",
     "hasha": "5.0.0",
     "mocha": "6.2.2",
-    "mock-fs": "4.9.0",
+    "mock-fs": "4.12.0",
     "mocked-env": "1.2.4",
     "nock": "12.0.2",
     "postinstall-postinstall": "2.0.0",
