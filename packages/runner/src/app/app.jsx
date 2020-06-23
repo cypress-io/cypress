@@ -21,7 +21,10 @@ class App extends Component {
   @observable isReporterResizing = false
 
   render () {
-    const specPath = this.props.util.absoluteSpecPath(this.props.config)
+    /**
+     * @type {Cypress.Cypress['spec']}
+     */
+    const spec = this.props.config.spec
 
     return (
       <div className={cs({
@@ -35,9 +38,9 @@ class App extends Component {
         >
           <Reporter
             runner={this.props.eventManager.reporterBus}
-            specPath={specPath}
+            spec={spec}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, specPath)}
+            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
           />
         </div>

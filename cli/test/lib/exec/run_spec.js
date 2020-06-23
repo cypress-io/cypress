@@ -15,6 +15,28 @@ describe('exec run', function () {
   })
 
   context('.processRunOptions', function () {
+    it('allows string --project option', () => {
+      const args = run.processRunOptions({
+        project: '/path/to/project',
+      })
+
+      expect(args).to.deep.equal(['--run-project', '/path/to/project'])
+    })
+
+    it('throws an error for empty string --project', () => {
+      expect(() => run.processRunOptions({ project: '' })).to.throw()
+    })
+
+    it('throws an error for boolean --project', () => {
+      expect(() => run.processRunOptions({ project: false })).to.throw()
+      expect(() => run.processRunOptions({ project: true })).to.throw()
+    })
+
+    it('throws an error for --project "false" or "true"', () => {
+      expect(() => run.processRunOptions({ project: 'false' })).to.throw()
+      expect(() => run.processRunOptions({ project: 'true' })).to.throw()
+    })
+
     it('passes --browser option', () => {
       const args = run.processRunOptions({
         browser: 'test browser',

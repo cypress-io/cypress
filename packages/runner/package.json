@@ -7,6 +7,8 @@
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
+    "cypress:open": "node ../../scripts/cypress open",
+    "cypress:run": "node ../../scripts/cypress run",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -42,6 +44,7 @@
     "react-input-autosize": "2.2.2",
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0",
+    "snap-shot-core": "10.2.1",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
   },

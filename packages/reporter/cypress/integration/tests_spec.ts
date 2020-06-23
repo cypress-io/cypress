@@ -10,7 +10,11 @@ describe('controls', function () {
     cy.visit('/dist').then((win) => {
       win.render({
         runner: this.runner,
-        specPath: '/foo/bar',
+        spec: {
+          name: 'foo.js',
+          relative: 'relative/path/to/foo.js',
+          absolute: '/absolute/path/to/foo.js',
+        },
       })
     })
 
@@ -107,13 +111,29 @@ describe('controls', function () {
 
     describe('header', function () {
       it('displays', function () {
-        cy.get('.runnable-header').find('a').should('have.text', 'cypress/integration/tests_spec.ts')
+        cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
       })
 
       itHandlesFileOpening('.runnable-header', {
-        file: '/foo/bar',
+        file: '/absolute/path/to/foo.js',
         line: 0,
         column: 0,
+      })
+    })
+
+    describe('progress bar', function () {
+      it('displays', function () {
+        cy.get('.runnable-active').click()
+        cy.get('.command-progress').should('be.visible')
+      })
+
+      it('calculates correct width', function () {
+        cy.clock(1577836801500, ['Date'])
+        cy.get('.runnable-active').click()
+        cy.get('.command-progress > span').should('have.attr', 'style').should('contain', 'animation-duration: 2500ms')
+        cy.get('.command-progress > span').should('have.attr', 'style').should('contain', 'width: 62.5%')
+        // ensures that actual width hits 0 within remaining 2.5 seconds
+        cy.get('.command-progress > span', { timeout: 2500 }).should('have.css', 'width', '0px')
       })
     })
   })

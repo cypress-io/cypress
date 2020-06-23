@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -133,6 +133,7 @@ const defaults = function (state, config, obj) {
     }
 
     _.defaults(obj, {
+      timeout: config('defaultCommandTimeout'),
       event: false,
       renderProps () {
         return {}
@@ -179,6 +180,8 @@ const defaults = function (state, config, obj) {
     alias: undefined,
     aliasType: undefined,
     message: undefined,
+    timeout: undefined,
+    wallClockStartedAt: new Date().toJSON(),
     renderProps () {
       return {}
     },

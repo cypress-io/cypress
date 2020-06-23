@@ -7,7 +7,7 @@ This is the core JavaScript library that is loaded inside the browser that is re
 The driver is actually consumed by the [`runner`](../runner) like any other npm module. To develop the driver and see changes reflected you need to run the `watch` task inside of the runner.
 
 ```bash
-yarn lerna run watch --scope @packages/runner --stream
+yarn workspace @packages/runner watch
 ```
 
 ## Developing
@@ -15,7 +15,7 @@ yarn lerna run watch --scope @packages/runner --stream
 If you're developing on the driver, you'll want to run in the normal Cypress GUI mode, like you would when you're writing tests for your own Cypress projects.
 
 ```bash
-yarn lerna run cypress:open --scope @packages/driver --stream
+yarn workspace @packages/driver cypress:open
 ```
 
 Read the runner's [`README.md`](../runner/README.md) for more information.
@@ -27,13 +27,13 @@ You can also run all of the driver's tests locally. We don't really recommend th
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
 ```bash
-yarn lerna run start --scope @packages/driver --stream
+yarn workspace @packages/driver start
 
 # in separate terminal
-yarn lerna run cypress:run --scope @packages/driver --stream
+yarn workspace @packages/driver cypress:run
 
 # or for development
-yarn lerna run cypress:open --scope @packages/driver --stream
+yarn workspace @packages/driver cypress:open
 ```
 
 ## Debugging
@@ -43,6 +43,13 @@ In the browser
 ```js
 localStorage.debug = "cypress:driver"
 ```
+
+## Patches
+
+- `sinon`
+- `unfetch` to polyfill `fetch`. Added constructor function to point XMLHttpRequest to the application under test window.
+
+Note: when creating a patch, make sure there is no `package-lock.json` file! Also rename the patch to have ".dev.patch" extension.
 
 <!-- ## Catalog of Events
 
@@ -128,4 +135,4 @@ describe('parent', () => {
 The Driver would emit the following events:
 
 | Event |
-| ----- |  |>
+| ----- ||>

@@ -560,7 +560,7 @@ describe('lib/api', () => {
         screenshots: [],
         cypressConfig: {},
         reporterStats: {},
-        stdout: 'foo\nbar\nbaz',
+        stdout: null,
       }
 
       this.putProps = _.omit(this.updateProps, 'instanceId')

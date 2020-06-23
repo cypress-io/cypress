@@ -226,6 +226,7 @@ module.exports = function (Commands, Cypress, cy, state) {
       options._log = Cypress.log({
         message,
         $el: $dom.isElement(subject) ? subject : null,
+        timeout: options.timeout,
         consoleProps () {
           return { Subject: subject }
         },
