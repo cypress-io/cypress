@@ -75,16 +75,13 @@ export default class AttemptModel {
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
-        this._addCommand(props as CommandProps)
-        break
+        return this._addCommand(props as CommandProps)
       }
       case 'agent': {
-        this._addAgent(props as AgentProps)
-        break
+        return this._addAgent(props as AgentProps)
       }
       case 'route': {
-        this._addRoute(props as RouteProps)
-        break
+        return this._addRoute(props as RouteProps)
       }
       default: {
         throw new Error(`Attempted to add log for unknown instrument: ${props.instrument}`)
@@ -123,8 +120,8 @@ export default class AttemptModel {
     if (props.hookName) {
       const hook = _.find(this.hooks, { name: props.hookName })
 
-      if (hook) {
-        hook
+      if (hook && props.err) {
+        hook.failed = true
       }
     }
 
@@ -175,6 +172,8 @@ export default class AttemptModel {
 
     this._logs[props.id] = agent
     this.agents.push(agent)
+
+    return agent
   }
 
   _addRoute (props: RouteProps) {
@@ -182,6 +181,8 @@ export default class AttemptModel {
 
     this._logs[props.id] = route
     this.routes.push(route)
+
+    return route
   }
 
   _addCommand (props: CommandProps) {
@@ -191,6 +192,8 @@ export default class AttemptModel {
     this._logs[props.id] = command
     this.commands.push(command)
     hook.addCommand(command)
+
+    return command
   }
 
   _findOrCreateHook (name: string) {

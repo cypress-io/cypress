@@ -68,9 +68,7 @@ const events: Events = {
     }))
 
     runner.on('reporter:log:state:changed', action('log:update', (log: LogProps) => {
-      runnablesStore._withTest(log.testId, (test) => {
-        test.updateLog(log)
-      })
+      runnablesStore.updateLog(log)
     }))
 
     runner.on('reporter:restart:test:run', action('restart:test:run', () => {

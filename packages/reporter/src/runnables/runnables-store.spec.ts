@@ -96,9 +96,9 @@ describe('runnables store', () => {
       rootRunnable.tests![0].commands = [createCommand(1, 1)]
       rootRunnable.tests![0].routes = [createRoute(1, 1), createRoute(2, 1)]
       instance.setRunnables(rootRunnable)
-      expect((instance.runnables[0] as TestModel).agents.length).to.equal(3)
-      expect((instance.runnables[0] as TestModel).commands.length).to.equal(1)
-      expect((instance.runnables[0] as TestModel).routes.length).to.equal(2)
+      expect((instance.runnables[0] as TestModel).lastAttempt.agents.length).to.equal(3)
+      expect((instance.runnables[0] as TestModel).lastAttempt.commands.length).to.equal(1)
+      expect((instance.runnables[0] as TestModel).lastAttempt.routes.length).to.equal(2)
     })
 
     it('sets the appropriate nesting levels', () => {
@@ -181,17 +181,17 @@ describe('runnables store', () => {
   context('#runnableStarted', () => {
     it('starts the test with the given id', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
-      instance.runnableStarted({ id: 1 } as TestModel)
-      expect((instance.runnables[0] as TestModel).isActive).to.be.true
+      instance.runnableStarted({ id: 1 })
+      expect((instance.runnables[0]).isActive).to.be.true
     })
   })
 
   context('#runnableFinished', () => {
     it('finishes the test with the given id', () => {
       instance.setRunnables({ tests: [createTest(1)], suites: [] })
-      instance.runnableStarted({ id: 1 } as TestModel)
-      instance.runnableFinished({ id: 1 } as TestModel)
-      expect((instance.runnables[0] as TestModel).isActive).to.be.false
+      instance.runnableStarted({ id: 1 })
+      instance.runnableFinished({ id: 1 })
+      expect((instance.runnables[0]).isActive).to.be.false
     })
   })
 
@@ -207,7 +207,7 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [createTest(1)] })
       instance.addLog(createCommand(1, 1))
       instance.updateLog({ id: 1, testId: 1, name: 'new name' } as LogProps)
-      expect(instance.testById(1).commands[0].name).to.equal('new name')
+      expect(instance.testById(1).lastAttempt.commands[0].name).to.equal('new name')
     })
   })
 

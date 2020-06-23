@@ -37,11 +37,6 @@ export interface UpdatableTestProps {
 }
 
 export default class Test extends Runnable {
-  // @observable agents: Array<Agent> = []
-  // @observable commands: Array<Command> = []
-  // @observable hooks: Array<Hook> = []
-  // @observable routes: Array<Route> = []
-  // @observable _state?: TestState | null = null
   type = 'test'
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
@@ -70,7 +65,7 @@ export default class Test extends Runnable {
       return this.state === 'failed'
       || this.isLongRunning
       || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
-      || this.store && this.store.hasSingleTest
+      || this.store.hasSingleTest
     }
 
     return this._isOpen
@@ -110,8 +105,8 @@ export default class Test extends Runnable {
   }
 
   addLog = (props: LogProps) => {
-    this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
-      attempt.addLog(props)
+    return this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
+      return attempt.addLog(props)
     })
   }
 
@@ -189,9 +184,11 @@ export default class Test extends Runnable {
     return attempt
   }
 
-  _withAttempt (attemptIndex: number, cb: (attempt: AttemptModel) => void) {
+  _withAttempt<T> (attemptIndex: number, cb: (attempt: AttemptModel) => T) {
     const attempt = this.getAttemptByIndex(attemptIndex)
 
-    if (attempt) cb(attempt)
+    if (attempt) return cb(attempt)
+
+    return null
   }
 }
