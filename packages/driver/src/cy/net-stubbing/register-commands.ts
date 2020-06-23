@@ -206,13 +206,13 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
         try {
           validateStaticResponse(<StaticResponse>handler)
         } catch (err) {
-          return $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { err, staticResponse: handler } })
+          return $errUtils.throwErrByPath('net_stubbing.route2.invalid_static_response', { args: { err, staticResponse: handler } })
         }
 
         staticResponse = handler as StaticResponse
         break
       default:
-        return $errUtils.throwErrByPath('net_stubbing.invalid_handler', { args: { handler } })
+        return $errUtils.throwErrByPath('net_stubbing.route2.invalid_handler', { args: { handler } })
     }
 
     if (staticResponse) {
@@ -236,7 +236,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
 
   function route2 (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     if (!Cypress.config('experimentalNetworkMocking')) {
-      return $errUtils.throwErrByPath('net_stubbing.route2_needs_experimental')
+      return $errUtils.throwErrByPath('net_stubbing.route2.needs_experimental')
     }
 
     function getMatcherOptions (): RouteMatcherOptions {
@@ -267,7 +267,7 @@ export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypres
     try {
       validateRouteMatcherOptions(routeMatcherOptions)
     } catch (err) {
-      $errUtils.throwErrByPath('net_stubbing.invalid_route_matcher', { args: { err, matcher: routeMatcherOptions } })
+      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { err, matcher: routeMatcherOptions } })
     }
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)

@@ -49,11 +49,11 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     ...res,
     send (staticResponse?, maybeBody?, maybeHeaders?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.send_called_after_resolved', { args: { res } })
+        return $errUtils.throwErrByPath('net_stubbing.response_handling.send_called_after_resolved', { args: { res } })
       }
 
       if (sendCalled) {
-        return $errUtils.throwErrByPath('net_stubbing.multiple_send_calls', { args: { res } })
+        return $errUtils.throwErrByPath('net_stubbing.response_handling.multiple_send_calls', { args: { res } })
       }
 
       sendCalled = true
@@ -97,7 +97,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     return request.responseHandler!(userRes)
   })
   .catch((err) => {
-    $errUtils.throwErrByPath('net_stubbing.res_cb_failed', {
+    $errUtils.throwErrByPath('net_stubbing.response_handling.cb_failed', {
       args: {
         err,
         req: request.request,
@@ -108,7 +108,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
-    $errUtils.throwErrByPath('net_stubbing.res_cb_timeout', {
+    $errUtils.throwErrByPath('net_stubbing.response_handling.cb_timeout', {
       args: {
         timeout,
         req: request.request,

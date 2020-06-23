@@ -908,66 +908,129 @@ module.exports = {
   },
 
   net_stubbing: {
-    route2_needs_experimental: `${cmd('route2')} requires experimental network mocking to be enabled.\n\nSet the \`experimentalNetworkMocking\` config value to \`true\` to access this command.\n\nRead more: https://on.cypress.io/experiments`,
-    invalid_handler: ({ handler }) => {
-      return `${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.\n\nYou passed: ${format(handler)}`
-    },
-    invalid_static_response: ({ err, staticResponse }) => {
-      return `An invalid StaticResponse was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(staticResponse)}`
-    },
-    invalid_route_matcher: ({ err, matcher }) => {
-      return `An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}\n\nYou passed: ${format(matcher)}`
-    },
-    req_cb_failed: ({ err, req, route }) => {
-      return `A request callback passed to ${cmd('route2')} threw an error while intercepting a request:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
-    },
-    req_cb_timeout: ({ timeout, req, route }) => {
-      return stripIndent`A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+    route2: {
+      needs_experimental: stripIndent`\
+        ${cmd('route2')} requires experimental network mocking to be enabled.
 
-      If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+        Set the \`experimentalNetworkMocking\` config value to \`true\` to access this command.
 
-      Route: ${format(route)}
+        Read more: https://on.cypress.io/experiments`,
+      invalid_handler: ({ handler }) => {
+        return stripIndent`\
+          ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
-      Intercepted request: ${format(req)}`
+          You passed: ${format(handler)}`
+      },
+      invalid_static_response: ({ err, staticResponse }) => {
+        return stripIndent`\
+          An invalid StaticResponse was supplied to ${cmd('route2')}. ${err.message}
+
+          You passed: ${format(staticResponse)}`
+      },
+      invalid_route_matcher: ({ err, matcher }) => {
+        return stripIndent`\
+          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}
+
+          You passed: ${format(matcher)}`
+      },
     },
-    res_cb_failed: ({ err, req, res, route }) => {
-      return `A response callback passed to \`req.reply()\` threw an error while intercepting a response:\n\n${normalizedStack(err)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}\n\nIntercepted response: ${format(res)}`
-    },
-    multiple_reply_calls: ({ route, req }) => {
-      return `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
-    },
-    multiple_send_calls: ({ res }) => {
-      return `\`res.send()\` was called multiple times in a response handler, but the response can only be sent once.\n\nResponse: ${format(res)}`
-    },
-    send_called_after_resolved: ({ res }) => {
-      return `\`res.send()\` was called after the response handler finished executing, but \`res.send()\` can not be called after the response has been passed on.\n\nIntercepted response: ${format(res)}`
-    },
-    res_cb_timeout: ({ timeout, req, res, route }) => {
-      return stripIndent`A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+    request_handling: {
+      cb_failed: ({ err, req, route }) => {
+        return stripIndent`\
+          A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
 
-      If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+          ${normalizedStack(err)}
 
-      Route: ${format(route)}
+          Route: ${format(route)}
 
-      Intercepted request: ${format(req)}
+          Intercepted request: ${format(req)}`
+      },
+      cb_timeout: ({ timeout, req, route }) => {
+        return stripIndent`\
+          A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
-      Intercepted response: ${format(res)}
-      `
+          If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`
+      },
+      multiple_reply_calls: ({ route, req }) => {
+        return stripIndent`\
+          \`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`
+      },
+      reply_called_after_resolved: ({ route, req }) => {
+        return stripIndent`\
+          \`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`
+      },
     },
-    reply_called_after_resolved: ({ route, req }) => {
-      return `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
+    request_error: {
+      network_error: ({ innerErr, req, route }) => {
+        return stripIndent`\
+          \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
+
+          ${normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`
+      },
+      timeout: ({ innerErr, req, route }) => {
+        return stripIndent`\
+          \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+
+          ${normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`
+      },
     },
-    reply_request_error: ({ innerErr, req, route }) => {
-      return `\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:\n\n${normalizedStack(innerErr)}\n\nRoute: ${format(route)}\n\nIntercepted request: ${format(req)}`
-    },
-    reply_request_timeout: ({ innerErr, req, route }) => {
-      return stripIndent`\`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+    response_handling: {
+      cb_failed: ({ err, req, res, route }) => {
+        return stripIndent`\
+          A response callback passed to \`req.reply()\` threw an error while intercepting a response:
 
-      ${normalizedStack(innerErr)}
+          ${normalizedStack(err)}
 
-      Route: ${format(route)}
+          Route: ${format(route)}
 
-      Intercepted request: ${format(req)}`
+          Intercepted request: ${format(req)}
+
+          Intercepted response: ${format(res)}`
+      },
+      cb_timeout: ({ timeout, req, res, route }) => {
+        return stripIndent`\
+          A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+
+          If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}
+
+          Intercepted response: ${format(res)}`
+      },
+      multiple_send_calls: ({ res }) => {
+        return stripIndent`\
+          \`res.send()\` was called multiple times in a response handler, but the response can only be sent once.
+
+          Response: ${format(res)}`
+      },
+      send_called_after_resolved: ({ res }) => {
+        return stripIndent`\
+          \`res.send()\` was called after the response handler finished executing, but \`res.send()\` can not be called after the response has been passed on.
+
+          Intercepted response: ${format(res)}`
+      },
     },
   },
 

@@ -19,10 +19,10 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
       }
 
       if (error.code && ['ESOCKETTIMEDOUT', 'ETIMEDOUT'].includes(error.code)) {
-        return errByPath('net_stubbing.reply_request_timeout', errOpts)
+        return errByPath('net_stubbing.request_error.timeout', errOpts)
       }
 
-      return errByPath('net_stubbing.reply_request_error', errOpts)
+      return errByPath('net_stubbing.request_error.network_error', errOpts)
     }
 
     const err = getDescriptiveError()
