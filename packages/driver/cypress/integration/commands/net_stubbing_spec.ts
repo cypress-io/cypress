@@ -501,6 +501,19 @@ describe('src/cy/commands/net_stubbing', function () {
         })
       })
 
+      it('can reply with a JSON fixture', function () {
+        cy.route2({
+          method: 'POST',
+          url: '/test-xhr',
+        }, (req) => {
+          req.reply({
+            fixture: 'valid.json',
+          })
+        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+
+        cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      })
+
       context('with StaticResponse shorthand', function () {
         it('req.reply(body)', function () {
           cy.route2('/foo', function (req) {
@@ -866,6 +879,26 @@ describe('src/cy/commands/net_stubbing', function () {
             done()
           }
         })
+      })
+
+      it('can reply with a JSON fixture', function () {
+        cy.route2({
+          method: 'POST',
+          url: '/test-xhr',
+        }, (req) => {
+          req.url = '/timeout'
+          req.method = 'GET'
+          req.reply((res) => {
+            res.send({
+              headers: {
+                'content-type': 'application/json',
+              },
+              fixture: 'valid.json',
+            })
+          })
+        }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
+
+        cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
       })
 
       context('with StaticResponse shorthand', function () {

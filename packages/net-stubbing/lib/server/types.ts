@@ -15,6 +15,7 @@ export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
   handlerId?: string
   staticResponse?: BackendStaticResponse
+  getFixture: GetFixtureFn
 }
 
 export interface BackendRequest {

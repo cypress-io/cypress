@@ -24,12 +24,13 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   const routeMatcher = _restoreMatcherOptionsTypes(options.routeMatcher)
   const { staticResponse } = options
 
-  if (staticResponse && staticResponse.fixture) {
+  if (staticResponse) {
     await setBodyFromFixture(getFixture, staticResponse)
   }
 
   const route: BackendRoute = {
     routeMatcher,
+    getFixture,
     ..._.omit(options, 'routeMatcher'),
   }
 

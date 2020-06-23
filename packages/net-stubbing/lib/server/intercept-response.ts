@@ -18,6 +18,7 @@ import {
 import {
   emit,
   sendStaticResponse,
+  setBodyFromFixture,
 } from './util'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-response')
@@ -84,7 +85,7 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
 
   debug('_onResponseContinue %o', { backendRequest: _.omit(backendRequest, 'res.body'), frame: _.omit(frame, 'res.body') })
 
-  function continueResponse () {
+  async function continueResponse () {
     let newResStream: Readable
 
     function throttleify (body) {
@@ -97,6 +98,7 @@ export function onResponseContinue (state: NetStubbingState, frame: NetEventFram
     }
 
     if (frame.staticResponse) {
+      await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
       const bodyStream = frame.throttleKbps ? throttleify(frame.staticResponse.body) : undefined
 
       return sendStaticResponse(res, frame.staticResponse, backendRequest.onResponse!, bodyStream)

@@ -19,7 +19,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getAllStringMatcherFields, sendStaticResponse, emit } from './util'
+import { getAllStringMatcherFields, sendStaticResponse, emit, setBodyFromFixture } from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -203,7 +203,7 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
   }))
 }
 
-export function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
+export async function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
   const backendRequest = state.requests[frame.requestId]
 
   if (!backendRequest) {
@@ -211,6 +211,8 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
 
     return
   }
+
+  frame.req.url = url.resolve(backendRequest.req.proxiedUrl, frame.req.url)
 
   // modify the original paused request object using what the client returned
   _.assign(backendRequest.req, _.pick(frame.req, SERIALIZABLE_REQ_PROPS))
@@ -250,6 +252,8 @@ export function onRequestContinue (state: NetStubbingState, frame: NetEventFrame
   }
 
   if (frame.staticResponse) {
+    await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
+
     return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
   }
 

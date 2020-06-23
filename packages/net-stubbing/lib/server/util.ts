@@ -79,9 +79,9 @@ const caseInsensitiveGet = function (obj, lowercaseProperty) {
 }
 
 export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
-  const { body, fixture } = staticResponse
+  const { fixture } = staticResponse
 
-  if (!fixture || body) {
+  if (!fixture) {
     return
   }
 
