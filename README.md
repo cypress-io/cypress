@@ -47,6 +47,8 @@ Code coverage | ✅ | ✅
 - [Unit Testing React components with Cypress](https://itnext.io/unit-testing-react-components-with-cypress-4d4cf8cd59a0)
 - [Test React Component with cypress-react-unit-test Example](https://dev.to/bahmutov/test-react-component-with-cypress-react-unit-test-example-4d99)
 - [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
+- [Using .env and .env.test from React component tests](https://medium.com/@bahmutov/using-env-and-env-test-from-react-component-tests-c11aa2040bc8)
+- [Visual testing for React components using open source tools](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/)
 
 ## Known problems
 
@@ -218,6 +220,7 @@ Repo | Description
 [ejected-react-scripts-example](https://github.com/bahmutov/ejected-react-scripts-example) | Using component testing after ejecting `react-scripts`
 [tic-tac-toe](https://github.com/bahmutov/react-tic-tac-toe-example) | Component and unit tests for Tic-Tac-Toe, read [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
 [react-hooks-file-upload](https://github.com/bahmutov/react-hooks-file-upload) | Upload a file from the component while stubbing the server
+[react-query-example](https://github.com/bahmutov/react-query-example) | Quick test example for components that use `react-query` with mock clock control
 <!-- prettier-ignore-end -->
 
 To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
