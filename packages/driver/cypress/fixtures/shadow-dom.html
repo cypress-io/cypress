@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shadow DOM Fixture</title>
+  </head>
+  <body>
+    <div id="non-shadow-element" class="in-and-out">Non Shadow</div>
+    <cy-test-element id="shadow-element-1" innerClass="shadow-1" content="Shadow Content 1"></cy-test-element>
+    <cy-test-element id="shadow-element-2" innerClass="shadow-2" content="Shadow Content 2"></cy-test-element>
+    <div id="parent-of-shadow-container-0">
+      <div id="parent-of-shadow-container-1">
+        <cy-test-element id="shadow-element-3" innerClass="shadow-3" content="Shadow Content 3"></cy-test-element>
+      </div>
+    </div>
+    <cy-test-element innerClass="shadow-4" content="Shadow Content 4">
+      <cy-test-element innerClass="shadow-5" content="Shadow Content 5"></cy-test-element>
+    </cy-test-element>
+    <cy-test-element innerClass="shadow-6" content="Shadow Content 6">
+      <div class="in-shadow-slot">In Shadow Slot</div>
+    </cy-test-element>
+    <cy-test-element id="shadow-element-7" innerClass="in-and-out" content="Shadow Content 7"></cy-test-element>
+
+    <script type="text/javascript">
+      if (window.customElements) {
+        window.customElements.define('cy-test-element', class extends HTMLElement {
+          constructor () {
+            super()
+
+            const root = this.attachShadow({ mode: 'open' })
+            const para = document.createElement('p')
+            const content = this.getAttribute('content')
+            const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
+
+            root.innerHTML = `<p class="${className}">${content}</p><slot></slot>`
+          }
+        })
+      }
+
+      if (window.location.search.includes('wrap-qsa')) {
+        const realQuerySelectorAll = document.querySelectorAll;
+        document.querySelectorAll = function (...args) {
+          return realQuerySelectorAll.apply(document, args);
+        };
+      }
+    </script>
+  </body>
+</html>

@@ -15,7 +15,7 @@ CA_PATH=../../../ca
 rm -rf $CA_PATH
 
 # ensure regular root CA exists
-node -r "@packages/coffee/register" -e "require('@packages/https-proxy/lib/ca').create('$CA_PATH')"
+node -e "require('@packages/https-proxy/lib/ca').create('$CA_PATH')"
 
 echo "remove and relink test CA pems"
 for f in ca client server

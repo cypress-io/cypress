@@ -13,6 +13,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -39,6 +40,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -83,6 +85,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: key != null ? key : '',
+          timeout: options.timeout,
         })
       }
 

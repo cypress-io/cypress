@@ -15,8 +15,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({
-        })
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const log = ($el) => {
@@ -102,6 +101,7 @@ module.exports = (Commands, Cypress, cy, state) => {
             message: selector,
             referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
             aliasType,
+            timeout: options.timeout,
             consoleProps: () => {
               return consoleProps
             },
@@ -276,24 +276,19 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const getElements = () => {
-        // attempt to query for the elements by withinSubject context
-        // and catch any sizzle errors!
         let $el
 
         try {
-          // only support shadow traversal if we're not searching
-          // within a subject and have been explicitly told to ignore
-          // boundaries.
-          if (!options.includeShadowDom) {
-            $el = cy.$$(selector, options.withinSubject)
-          } else {
+          let scope = options.withinSubject
+
+          if (options.includeShadowDom) {
             const root = options.withinSubject || cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
-            elementsWithShadow.push(root)
-
-            $el = cy.$$(selector, elementsWithShadow)
+            scope = elementsWithShadow.concat(root)
           }
+
+          $el = cy.$$(selector, scope)
 
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
@@ -302,16 +297,17 @@ module.exports = (Commands, Cypress, cy, state) => {
           if ($el.selector == null) {
             $el.selector = selector
           }
-        } catch (e) {
-          e.onFail = () => {
+        } catch (err) {
+          // this is usually a sizzle error (invalid selector)
+          err.onFail = () => {
             if (options.log === false) {
-              return e
+              return err
             }
 
-            options._log.error(e)
+            options._log.error(err)
           }
 
-          throw e
+          throw err
         }
 
         // if that didnt find anything and we have a within subject
@@ -369,6 +365,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -475,6 +472,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log = Cypress.log({
           message: _.compact([filter, text]),
           type: subject ? 'child' : 'parent',
+          timeout: options.timeout,
           consoleProps: () => {
             return consoleProps
           },
@@ -554,6 +552,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log = Cypress.log({
           $el: subject,
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -635,6 +634,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (options.log !== false) {
         options._log = Cypress.log({
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },

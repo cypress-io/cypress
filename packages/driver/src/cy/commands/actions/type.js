@@ -85,6 +85,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log = Cypress.log({
         message: [chars, deltaOptions],
         $el: options.$el,
+        timeout: options.timeout,
         consoleProps () {
           return {
             'Typed': chars,
@@ -476,6 +477,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: deltaOptions,
           $el,
+          timeout: options.timeout,
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),

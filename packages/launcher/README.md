@@ -21,7 +21,7 @@ node index.js /bin/bash /usr/bin/chromium-browser
 ## Testing
 
 ```bash
-yarn lerna run test --scope @packages/launcher --stream
+yarn workspace @packages/launcher test
 ```
 
 ## Debugging
@@ -30,6 +30,6 @@ Uses [debug](https://github.com/visionmedia/debug#readme)
 to output debug log messages. To turn on, use
 
 ```sh
-DEBUG=cypress:launcher yarn lerna run test --scope @packages/launcher --stream
+DEBUG=cypress:launcher yarn workspace @packages/launcher test
 ```
 
