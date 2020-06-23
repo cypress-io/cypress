@@ -703,6 +703,18 @@ declare namespace Cypress {
      * This means that when you instantiate new Date in your application,
      * it will have a time of January 1st, 1970.
      *
+     * To restore the real clock call `.restore()`
+     *
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // restore the application clock
+     *  cy.clock().then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.clock().invoke('restore')
+     *
      * @see https://on.cypress.io/clock
      */
     clock(): Chainable<Clock>
@@ -712,13 +724,20 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clock
      * @example
-     *    // your app code
+     *    // in your app code
      *    $('#date').text(new Date().toJSON())
-     *    // from spec file
-     *    const now = new Date(2017, 3, 14).getTime() // March 14, 2017 timestamp
+     *    // in the spec file
+     *    // March 14, 2017 timestamp
+     *    const now = new Date(2017, 3, 14).getTime()
      *    cy.clock(now)
      *    cy.visit('/index.html')
      *    cy.get('#date').contains('2017-03-14')
+     *    // to restore the real clock
+     *    cy.clock().then(clock => {
+     *      clock.restore()
+     *    })
+     *    // or use this shortcut
+     *    cy.clock().invoke('restore')
      */
     clock(now: number, options?: Loggable): Chainable<Clock>
     /**
