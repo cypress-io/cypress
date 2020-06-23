@@ -17,7 +17,7 @@ const $Cookies = (namespace, domain) => {
     return _.startsWith(name, namespace)
   }
 
-  const isWhitelisted = (cookie) => {
+  const isAllowed = (cookie) => {
     const w = defaults.whitelist
 
     if (w) {
@@ -76,7 +76,7 @@ const $Cookies = (namespace, domain) => {
 
     getClearableCookies (cookies = []) {
       return _.filter(cookies, (cookie) => {
-        return !isWhitelisted(cookie) && !removePreserved(cookie.name)
+        return !isAllowed(cookie) && !removePreserved(cookie.name)
       })
     },
 

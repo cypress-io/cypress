@@ -28,7 +28,7 @@ const appData = require('./util/app_data')
 const statusCode = require('./util/status_code')
 const headersUtil = require('./util/headers')
 const allowDestroy = require('./util/server_destroy')
-const { SocketWhitelist } = require('./util/socket_whitelist')
+const { SocketAllowed } = require('./util/socket_allowed')
 const errors = require('./errors')
 const logger = require('./logger')
 const Socket = require('./socket')
@@ -59,7 +59,7 @@ const _forceProxyMiddleware = function (clientRoute) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
-      // this request is non-proxied and non-whitelisted, redirect to the runner error page
+      // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
 
@@ -115,7 +115,7 @@ class Server {
       return new Server()
     }
 
-    this._socketWhitelist = new SocketWhitelist()
+    this._socketAllowed = new SocketAllowed()
     this._request = null
     this._middleware = null
     this._server = null
@@ -278,7 +278,7 @@ class Server {
       this._server.on('connect', (req, socket, head) => {
         debug('Got CONNECT request from %s', req.url)
 
-        socket.once('upstream-connected', this._socketWhitelist.add)
+        socket.once('upstream-connected', this._socketAllowed.add)
 
         return this._httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) => {
@@ -761,7 +761,7 @@ class Server {
     let host; let remoteOrigin
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this._socketWhitelist.isRequestWhitelisted(req)) {
+      if (!this._socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }

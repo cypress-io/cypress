@@ -2285,8 +2285,8 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('whitelisting', () => {
-      it('does not send back 404s on whitelisted routes', () => {
+    describe('allowed routes', () => {
+      it('does not send back 404s on allowed routes', () => {
         cy
         .server()
         .window().then((win) => {
@@ -2298,7 +2298,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7280
-      it('ignores query params when whitelisting routes', () => {
+      it('ignores query params when filtering routes', () => {
         cy.server()
         cy.route(/url-with-query-param/, { foo: 'bar' }).as('getQueryParam')
         cy.window().then((win) => {
@@ -2312,7 +2312,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7280
-      it('ignores hashes when whitelisting routes', () => {
+      it('ignores hashes when filtering routes', () => {
         cy.server()
         cy.route(/url-with-hash/, { foo: 'bar' }).as('getHash')
         cy.window().then((win) => {

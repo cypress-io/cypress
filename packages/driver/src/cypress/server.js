@@ -74,7 +74,7 @@ const whitelist = (xhr) => {
   url.search = ''
   url.hash = ''
 
-  // whitelist if we're GET + looks like we're fetching regular resources
+  // allow if we're GET + looks like we're fetching regular resources
   return xhr.method === 'GET' && regularResourcesRe.test(url.href)
 }
 
@@ -209,7 +209,7 @@ const create = (options = {}) => {
       return routes
     },
 
-    isWhitelisted (xhr) {
+    isAllowed (xhr) {
       return options.whitelist(xhr)
     },
 
@@ -257,9 +257,9 @@ const create = (options = {}) => {
       // return the 404 stub if we dont have any stubs
       // but we are stubbed - meaning we havent added any routes
       // but have started the server
-      // and this request shouldnt be whitelisted
+      // and this request shouldnt be allowed
       if (!routes.length && hasEnabledStubs &&
-          options.force404 !== false && !server.isWhitelisted(xhr)) {
+          options.force404 !== false && !server.isAllowed(xhr)) {
         return get404Route()
       }
 
@@ -268,8 +268,8 @@ const create = (options = {}) => {
         return nope()
       }
 
-      // bail if this xhr matches our whitelist
-      if (server.isWhitelisted(xhr)) {
+      // bail if this xhr matches our allowed list
+      if (server.isAllowed(xhr)) {
         return nope()
       }
 
@@ -648,8 +648,8 @@ const create = (options = {}) => {
         proxy._setRequestBody(requestBody)
 
         // log this out now since it's being sent officially
-        // unless its been whitelisted
-        if (!server.isWhitelisted(this)) {
+        // unless its been allowed
+        if (!server.isAllowed(this)) {
           options.onSend(proxy, sendStack, route)
         }
 
