@@ -193,11 +193,20 @@ describe('redirects + requests', () => {
     .should('eq', 'text/html')
   })
 
-  it('issue #375: does not duplicate request cookies on 302 redirect', () => {
+  // @see https://github.com/cypress-io/cypress/issues/375
+  it('does not duplicate request cookies on 302 redirect', () => {
     cy
     .request('http://localhost:2295/login')
     .request('POST', 'http://localhost:2295/login')
     .its('body.cookie')
     .should('eq', 'session=2')
+  })
+
+  // @see https://github.com/cypress-io/cypress/issues/6426
+  it('can make requests that take more than `responseTimeout` to complete', () => {
+    return Cypress.$.get(`http://localhost:2290/timeout?ms=${Cypress.config('responseTimeout') * 2}`)
+    .then((data) => {
+      expect(data).to.contain('it worked')
+    })
   })
 })
