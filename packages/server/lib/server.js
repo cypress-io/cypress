@@ -240,7 +240,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Promise((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, blocklistHosts } = config
 
       this._server = http.createServer(app)
 
@@ -300,11 +300,8 @@ class Server {
             // we cannot allow it to make a direct
             // connection
 
-            // blacklistHosts is deprecated, still need to support
-            const blocklistKey = config.blocklistHosts ? 'blocklistHosts' : 'blacklistHosts'
-
-            if (config[blocklistKey] && !isMatching) {
-              isMatching = blocklist.matches(urlToCheck, config[blocklistKey])
+            if (blocklistHosts && !isMatching) {
+              isMatching = blocklist.matches(urlToCheck, blocklistHosts)
 
               debug(`HTTPS request ${urlToCheck} matches blocklist?`, isMatching)
             }

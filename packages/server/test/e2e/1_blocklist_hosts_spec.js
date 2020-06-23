@@ -14,30 +14,6 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e blacklist (deprecated)', () => {
-  e2e.setup({
-    servers: [{
-      port: 3131,
-      onServer,
-    }, {
-      port: 3232,
-      onServer,
-    }],
-    settings: {
-      baseUrl: 'http://localhost:3232',
-      blacklistHosts: 'localhost:3131',
-      video: false,
-    },
-  })
-
-  it('passes', function () {
-    return e2e.exec(this, {
-      spec: 'blocklist_hosts_spec.coffee',
-      snapshot: true,
-    })
-  })
-})
-
 describe('e2e blocklist', () => {
   e2e.setup({
     servers: [{

@@ -649,41 +649,30 @@ describe('lib/config', () => {
         })
       })
 
-      // blacklistHosts is deprecated, should be supported
-      const blocklistKeys = ['blocklistHosts', 'blacklistHosts']
+      context('blocklistHosts', () => {
+        it('passes if a string', function () {
+          this.setup({ blocklistHosts: 'google.com' })
 
-      blocklistKeys.forEach((blocklistKey) => {
-        context(`${blocklistKey}`, () => {
-          const config = {}
+          return this.expectValidationPasses()
+        })
 
-          it('passes if a string', function () {
-            config[blocklistKey] = 'google.com'
-            this.setup(config)
+        it('passes if an array of strings', function () {
+          this.setup({ blocklistHosts: ['google.com'] })
 
-            return this.expectValidationPasses()
-          })
+          return this.expectValidationPasses()
+        })
 
-          it('passes if an array of strings', function () {
-            config[blocklistKey] = ['google.com']
-            this.setup(config)
+        it('fails if not a string or array', function () {
+          this.setup({ blocklistHosts: 5 })
 
-            return this.expectValidationPasses()
-          })
+          return this.expectValidationFails('be a string or an array of strings')
+        })
 
-          it('fails if not a string or array', function () {
-            config[blocklistKey] = 5
-            this.setup(config)
+        it('fails if not an array of strings', function () {
+          this.setup({ blocklistHosts: [5] })
+          this.expectValidationFails('be a string or an array of strings')
 
-            return this.expectValidationFails('be a string or an array of strings')
-          })
-
-          it('fails if not an array of strings', function () {
-            config[blocklistKey] = [5]
-            this.setup(config)
-            this.expectValidationFails('be a string or an array of strings')
-
-            return this.expectValidationFails('the value was: `[5]`')
-          })
+          return this.expectValidationFails('the value was: `[5]`')
         })
       })
 

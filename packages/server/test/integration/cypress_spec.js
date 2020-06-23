@@ -745,18 +745,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs warning when using deprecated configuration option: blacklistHosts', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=blacklistHosts=""',
-      ])
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('DEPRECATED_RENAMED_CONFIG_OPTION', 'blacklistHosts', 'blocklistHosts')
-        expect(console.log).to.be.calledWithMatch('configuration option you have supplied has been renamed.')
-        expect(console.log).to.be.calledWithMatch('This configuration option will be removed and is not recommended for use')
-      })
-    })
-
     it('does not log warning when no projectId', function () {
       return cypress.start([`--run-project=${this.pristinePath}`, '--key=asdf'])
       .then(() => {
@@ -901,25 +889,31 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when using an old configuration option: trashAssetsBeforeHeadlessRuns', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=trashAssetsBeforeHeadlessRuns=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeHeadlessRuns')
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeRuns')
-      })
-    })
+    const renamedConfigs = [
+      {
+        old: 'trashAssetsBeforeHeadlessRuns',
+        new: 'trashAssetsBeforeRuns',
+      },
+      {
+        old: 'videoRecording',
+        new: 'video',
+      },
+      {
+        old: 'blacklistHosts',
+        new: 'blocklistHosts',
+      },
+    ]
 
-    it('logs error and exits when using an old configuration option: videoRecording', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=videoRecording=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'videoRecording')
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'video')
+    renamedConfigs.forEach(function (config) {
+      it(`logs error and exits when using an old configuration option: ${config.old}`, function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          `--config=${config.old}=''`,
+        ])
+        .then(() => {
+          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
+          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
+        })
       })
     })
 

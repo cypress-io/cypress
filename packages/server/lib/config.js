@@ -89,13 +89,9 @@ firefoxGcInterval\
 // experimentalComponentTesting
 configKeys.push('componentFolder')
 
-// Deprecated configuration properties, will only warn
-const deprecatedConfigKeys = toWords(`\
-blacklistHosts\
-`)
-
 // Breaking public configuration properties, will error
 const breakingConfigKeys = toWords(`\
+blacklistHosts
 videoRecording
 screenshotOnHeadlessFailure
 trashAssetsBeforeHeadlessRuns\
@@ -181,7 +177,6 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blacklistHosts: v.isStringOrArrayOfStrings,
   blocklistHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
@@ -239,18 +234,6 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
   , {})
 }
 
-const warnDeprecatedConfig = (cfg) => {
-  return _.each(deprecatedConfigKeys, (key) => {
-    if (_.has(cfg, key)) {
-      switch (key) {
-        case 'blacklistHosts':
-          return errors.warning('DEPRECATED_RENAMED_CONFIG_OPTION', key, 'blocklistHosts')
-        default:
-      }
-    }
-  })
-}
-
 const validateNoBreakingConfig = (cfg) => {
   return _.each(breakingConfigKeys, (key) => {
     if (_.has(cfg, key)) {
@@ -261,6 +244,8 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'blacklistHosts':
+          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blocklistHosts')
         default:
       }
     }
@@ -384,7 +369,6 @@ module.exports = {
   whitelist (obj = {}) {
     const propertyNames = configKeys
     .concat(breakingConfigKeys)
-    .concat(deprecatedConfigKeys)
     .concat(systemConfigKeys)
     .concat(experimentalConfigKeys)
 
@@ -496,7 +480,6 @@ module.exports = {
     })
 
     validateNoBreakingConfig(config)
-    warnDeprecatedConfig(config)
 
     return this.setSupportFileAndFolder(config)
     .then(this.setPluginsFile)

@@ -175,17 +175,6 @@
       "default": null,
       "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See User-Agent MDN Documentation for example user agent values here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
     },
-    "blacklistHosts": {
-      "type": [
-        "string",
-        "array"
-      ],
-      "items": {
-        "type": "string"
-      },
-      "default": null,
-      "description": "Deprecated: Please rename to 'blocklistHosts'. A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blocklistHosts"
-    },
     "blocklistHosts": {
       "type": [
         "string",
