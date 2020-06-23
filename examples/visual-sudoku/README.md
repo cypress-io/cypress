@@ -1,10 +1,35 @@
 # example: visual tests for Sudoku
 
-This React Sudoku app was cloned from [raravi/sudoku](https://github.com/raravi/sudoku).
+> This React Sudoku app was cloned from [raravi/sudoku](https://github.com/raravi/sudoku).
 
 Visual testing uses open source [palmerhq/cypress-image-snapshot](https://github.com/palmerhq/cypress-image-snapshot) plugin.
 
-Note: run `npm install` in this folder to symlink `cypress-react-unit-test` dependency.
+## Usage
+
+1. Make sure the root project has been built .
+
+```bash
+# in the root of the project
+npm install
+npm run build
+```
+
+2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+
+```bash
+# in this folder
+npm install
+```
+
+3. Start Cypress
+
+```bash
+npm run cy:open
+# or just run headless tests
+npm test
+```
+
+## Running Tests
 
 Example failing test [src/App.cy-spec.js](src/App.cy-spec.js)
 

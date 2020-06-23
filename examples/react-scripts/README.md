@@ -1,15 +1,33 @@
 # example: react-scripts
 
-A typical project using `react-scripts` with components and matching component tests residing in the [src](src) folder.
+> A typical project using `react-scripts` with components and matching component tests residing in the [src](src) folder.
 
-Note: run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+## Usage
 
-```shell
+1. Make sure the root project has been built .
+
+```bash
+# in the root of the project
 npm install
+npm run build
+```
+
+2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+
+```bash
+# in this folder
+npm install
+```
+
+3. Start Cypress
+
+```bash
 npm run cy:open
 # or just run headless tests
 npm test
 ```
+
+## Notes
 
 ![App test](images/app-test.png)
 
