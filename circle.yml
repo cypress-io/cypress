@@ -771,7 +771,11 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn build-prod
+          # builds JS and CSS, and we need the app CSS
+          # to correctly apply component styles
+          command: |
+            yarn build-prod
+            ls -la dist
           working_directory: packages/desktop-gui
       # for now, because we have baseUrl in cypress.json
       # we must start it, even if we don't use it for component tests
