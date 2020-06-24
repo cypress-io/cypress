@@ -750,9 +750,15 @@ jobs:
           background: true
       - run:
           # will use PERCY_TOKEN environment variable if available
+          # to tie Percy builds together, use environment variables
+          # https://docs.percy.io/docs/parallel-test-suites
+          # we can use workflow id and list number of jobs with Percy screenshots
           command: |
             CYPRESS_KONFIG_ENV=production \
-            yarn percy exec -- yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=2 \
+            yarn percy exec -- \
+            yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js
           working_directory: packages/desktop-gui
       - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
@@ -779,7 +785,10 @@ jobs:
           # will use PERCY_TOKEN environment variable if available
           command: |
             CYPRESS_KONFIG_ENV=production \
-            yarn percy exec -- yarn cypress:run --spec 'src/**/*_spec.jsx'
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=2 \
+            yarn percy exec -- \
+            yarn cypress:run --spec 'src/**/*_spec.jsx'
           working_directory: packages/desktop-gui
       - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
