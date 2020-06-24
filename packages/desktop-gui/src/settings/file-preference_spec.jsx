@@ -15,6 +15,12 @@ describe('FilePreference', () => {
     { id: 'other', name: 'Other', isOther: true, openerId: '' },
   ]
 
+  const findResource = (name) => {
+    return window.performance
+    .getEntriesByType('resource')
+    .find((item) => item.name.endsWith(name))
+  }
+
   it('shows editor choice', () => {
     const editorsAfterDelay = Cypress.Promise.resolve({ availableEditors, preferredOpener: availableEditors[3] }).delay(2000)
 
@@ -42,6 +48,14 @@ describe('FilePreference', () => {
     cy.log('**Editors loaded**')
     cy.get('.loading-editors').should('not.be.visible')
     cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
+
+    cy.log('**app.css has loaded**')
+    // use wrap + .should() to retry the callback function
+    cy.wrap().should(() => {
+      const foundResource = findResource('app.css')
+
+      expect(foundResource).to.have.property('initiatorType', 'link')
+    })
 
     cy.percySnapshot()
   })
