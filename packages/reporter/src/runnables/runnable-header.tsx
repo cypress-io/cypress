@@ -1,6 +1,6 @@
 import React, { Component, ReactElement } from 'react'
 
-import FileOpener from '../opener/file-opener'
+import FileOpener from '../lib/file-opener'
 
 const renderRunnableHeader = (children:ReactElement) => <div className="runnable-header">{children}</div>
 
