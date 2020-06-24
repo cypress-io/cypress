@@ -7,7 +7,6 @@ const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
 const mockfs = require('mock-fs')
-const { expect } = require('chai')
 
 const fs = require(`${lib}/fs`)
 const open = require(`${lib}/exec/open`)
