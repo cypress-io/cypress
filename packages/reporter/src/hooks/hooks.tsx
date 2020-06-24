@@ -50,9 +50,9 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => {
   const hooksCount: { [key: string]: number } = {
-    'before': 0,
+    'before all': 0,
     'before each': 0,
-    'after': 0,
+    'after all': 0,
     'after each': 0,
   }
 

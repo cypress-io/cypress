@@ -12,7 +12,7 @@ const commandModel = () => {
 const hookModel = (props?: Partial<HookModel>) => {
   return _.extend<HookModel>({
     id: _.uniqueId('h'),
-    name: 'before',
+    name: 'before each',
     failed: false,
     commands: [commandModel(), commandModel()],
   }, props)
@@ -38,7 +38,7 @@ describe('<Hooks />', () => {
   })
 
   it('properly hides hook index', () => {
-    const component = shallow(<Hooks model={_.extend<HooksModel>({ hooks: [hookModel({ name: 'before each' }), hookModel()] })} />)
+    const component = shallow(<Hooks model={_.extend<HooksModel>({ hooks: [hookModel({ name: 'before all' }), hookModel()] })} />)
 
     expect(component.find(Hook).first().prop('showCount')).to.equal(false)
   })
