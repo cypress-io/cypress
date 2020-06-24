@@ -80,14 +80,14 @@ exports['e2e spec isolation fails'] = {
           "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
           "timings": {
             "lifecycle": 100,
-            "before all": [
+            "before all (1)": [
               {
                 "hookId": "h1",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ],
-            "before each": [
+            "before each (1)": [
               {
                 "hookId": "h2",
                 "fnDuration": 400,
@@ -134,7 +134,7 @@ exports['e2e spec isolation fails'] = {
               "fnDuration": 400,
               "afterFnDuration": 200
             },
-            "after each": [
+            "after each (1)": [
               {
                 "hookId": "h3",
                 "fnDuration": 400,
@@ -204,7 +204,7 @@ exports['e2e spec isolation fails'] = {
               "fnDuration": 400,
               "afterFnDuration": 200
             },
-            "after all": [
+            "after all (1)": [
               {
                 "hookId": "h4",
                 "fnDuration": 400,
@@ -303,7 +303,7 @@ exports['e2e spec isolation fails'] = {
           "error": "Timed out retrying: expected true to be false",
           "timings": {
             "lifecycle": 100,
-            "before all": [
+            "before all (1)": [
               {
                 "hookId": "h1",
                 "fnDuration": 400,
@@ -451,19 +451,21 @@ exports['e2e spec isolation fails'] = {
           "error": null,
           "timings": {
             "lifecycle": 100,
-            "before all": [
+            "before all (1)": [
               {
                 "hookId": "h1",
                 "fnDuration": 400,
                 "afterFnDuration": 200
-              },
+              }
+            ],
+            "before all (2)": [
               {
                 "hookId": "h2",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ],
-            "before each": [
+            "before each (1)": [
               {
                 "hookId": "h3",
                 "fnDuration": 400,
@@ -474,7 +476,7 @@ exports['e2e spec isolation fails'] = {
               "fnDuration": 400,
               "afterFnDuration": 200
             },
-            "after each": [
+            "after each (1)": [
               {
                 "hookId": "h4",
                 "fnDuration": 400,
@@ -499,7 +501,7 @@ exports['e2e spec isolation fails'] = {
           "error": null,
           "timings": {
             "lifecycle": 100,
-            "before each": [
+            "before each (1)": [
               {
                 "hookId": "h3",
                 "fnDuration": 400,
@@ -510,7 +512,7 @@ exports['e2e spec isolation fails'] = {
               "fnDuration": 400,
               "afterFnDuration": 200
             },
-            "after each": [
+            "after each (1)": [
               {
                 "hookId": "h4",
                 "fnDuration": 400,
@@ -535,7 +537,7 @@ exports['e2e spec isolation fails'] = {
           "error": null,
           "timings": {
             "lifecycle": 100,
-            "before each": [
+            "before each (1)": [
               {
                 "hookId": "h3",
                 "fnDuration": 400,
@@ -546,14 +548,14 @@ exports['e2e spec isolation fails'] = {
               "fnDuration": 400,
               "afterFnDuration": 200
             },
-            "after each": [
+            "after each (1)": [
               {
                 "hookId": "h4",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ],
-            "after all": [
+            "after all (1)": [
               {
                 "hookId": "h5",
                 "fnDuration": 400,
@@ -632,14 +634,14 @@ exports['e2e spec isolation fails'] = {
           "error": null,
           "timings": {
             "lifecycle": 100,
-            "before all": [
+            "before all (1)": [
               {
                 "hookId": "h1",
                 "fnDuration": 400,
                 "afterFnDuration": 200
               }
             ],
-            "before each": [
+            "before each (1)": [
               {
                 "hookId": "h2",
                 "fnDuration": 400,
