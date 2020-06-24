@@ -1,5 +1,7 @@
 import { observer } from 'mobx-react'
 import React from 'react'
+// @ts-ignore
+import Tooltip from '@cypress/react-tooltip'
 
 import events from './events'
 
@@ -31,14 +33,18 @@ const FileOpener = observer((props: Props) => {
   const { originalFile, line, column } = props.fileDetails
 
   return (
-    <Opener
-      openFile={openFile}
-      getUserEditor={getUserEditor}
-      setUserEditor={setUserEditor}
-      {...props}
-    >
-      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
-    </Opener>
+    <Tooltip title={'Open in IDE'} wrapperClassName={props.className} className='cy-tooltip'>
+      <span>
+        <Opener
+          openFile={openFile}
+          getUserEditor={getUserEditor}
+          setUserEditor={setUserEditor}
+          fileDetails={props.fileDetails}
+        >
+          {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
+        </Opener>
+      </span>
+    </Tooltip>
   )
 })
 
