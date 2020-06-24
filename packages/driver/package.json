@@ -19,7 +19,7 @@
     "@packages/network": "*",
     "@packages/runner": "*",
     "@packages/ts": "*",
-    "angular": "1.7.9",
+    "angular": "1.8.0",
     "backbone": "1.4.0",
     "basic-auth": "2.0.1",
     "blob-util": "1.3.0",

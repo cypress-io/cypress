@@ -142,6 +142,11 @@ describe('test errors', function () {
       })
     })
 
+    it('shows popup confirming output was printed', () => {
+      cy.get('.runnable-err-print').click()
+      cy.contains('Printed output to your console')
+    })
+
     it('does not collapse test when clicking', () => {
       cy.get('.runnable-err-print').click()
       cy.get('.command-wrapper').should('be.visible')
