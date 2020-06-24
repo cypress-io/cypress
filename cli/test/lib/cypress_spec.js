@@ -7,6 +7,7 @@ const snapshot = require('../support/snapshot')
 const Promise = require('bluebird')
 const tmp = Promise.promisifyAll(require('tmp'))
 const mockfs = require('mock-fs')
+const { expect } = require('chai')
 
 const fs = require(`${lib}/fs`)
 const open = require(`${lib}/exec/open`)
@@ -169,6 +170,32 @@ describe('cypress', function () {
       .then(getStartArgs)
       .then((args) => {
         expect(args).to.deep.eq(opts)
+      })
+    })
+  })
+
+  context('cli', function () {
+    describe('.parseRunArguments', function () {
+      it('parses CLI cypress run arguments', async () => {
+        const args = 'cypress run --browser chrome --spec "my/test/spec.js"'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // TODO remove quotes around specs and other string arguments
+        expect(options).to.deep.equal({
+          browser: 'chrome',
+          spec: '"my/test/spec.js"',
+        })
+      })
+
+      it('parses CLI cypress run shorthand arguments', async () => {
+        const args = 'cypress run -b firefox -p 5005'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // ? should we cast the arguments to proper types
+        expect(options).to.deep.equal({
+          browser: 'firefox',
+          port: '5005',
+        })
       })
     })
   })

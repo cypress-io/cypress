@@ -162,7 +162,86 @@ function showVersions () {
   .catch(util.logErrorExit1)
 }
 
+const createProgram = () => {
+  const program = new commander.Command()
+
+  // bug in commander not printing name
+  // in usage help docs
+  program._name = 'cypress'
+
+  program.usage('<command> [options]')
+
+  return program
+}
+
+const addCypressRunCommand = (program) => {
+  return program
+  .command('run')
+  .usage('[options]')
+  .description('Runs Cypress tests from the CLI without the GUI')
+  .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
+  .option('--ci-build-id <id>', text('ciBuildId'))
+  .option('-c, --config <config>', text('config'))
+  .option('-C, --config-file <config-file>', text('configFile'))
+  .option('-e, --env <env>', text('env'))
+  .option('--group <name>', text('group'))
+  .option('-k, --key <record-key>', text('key'))
+  .option('--headed', text('headed'))
+  .option('--headless', text('headless'))
+  .option('--no-exit', text('exit'))
+  .option('--parallel', text('parallel'))
+  .option('-p, --port <port>', text('port'))
+  .option('-P, --project <project-path>', text('project'))
+  .option('-q, --quiet', text('quiet'))
+  .option('--record [bool]', text('record'), coerceFalse)
+  .option('-r, --reporter <reporter>', text('reporter'))
+  .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
+  .option('-s, --spec <spec>', text('spec'))
+  .option('-t, --tag <tag>', text('tag'))
+  .option('--dev', text('dev'), coerceFalse)
+}
+
 module.exports = {
+  /**
+   * Parses Cypress RUN command line array into an object
+   * with options that you can feed into "cypress.run()" module call.
+   * @example
+   *  const options = parseRunCommand(['cypress', 'run', '--browser', 'chrome'])
+   *  // options is {browser: 'chrome'}
+   */
+  parseRunCommand (args) {
+    return new Promise((resolve, reject) => {
+      if (!Array.isArray(args)) {
+        return reject(new Error('Expected array of arguments'))
+      }
+
+      // make a copy of the input arguments array
+      // and add placeholders where "node ..." would usually be
+      // also remove "cypress" keyword at the start if present
+      const cliArgs = args[0] === 'cypress' ? [...args.slice(1)] : [...args]
+
+      cliArgs.unshift(null, null)
+
+      debug('creating program parser')
+      const program = createProgram()
+
+      addCypressRunCommand(program)
+      .action((...fnArgs) => {
+        debug('parsed Cypress run %o', fnArgs)
+        const options = parseVariableOpts(fnArgs, cliArgs)
+
+        debug('parsed options %o', options)
+        resolve(options)
+      })
+
+      debug('parsing args: %o', cliArgs)
+      program.parse(cliArgs)
+    })
+  },
+
+  /**
+   * Parses the command line and kicks off Cypress process.
+   */
   init (args) {
     if (!args) {
       args = process.argv
@@ -194,13 +273,7 @@ module.exports = {
       logger.log()
     }
 
-    const program = new commander.Command()
-
-    // bug in commander not printing name
-    // in usage help docs
-    program._name = 'cypress'
-
-    program.usage('<command> [options]')
+    const program = createProgram()
 
     program
     .command('help')
@@ -215,30 +288,7 @@ module.exports = {
     .description(text('version'))
     .action(showVersions)
 
-    program
-    .command('run')
-    .usage('[options]')
-    .description('Runs Cypress tests from the CLI without the GUI')
-    .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
-    .option('--ci-build-id <id>', text('ciBuildId'))
-    .option('-c, --config <config>', text('config'))
-    .option('-C, --config-file <config-file>', text('configFile'))
-    .option('-e, --env <env>', text('env'))
-    .option('--group <name>', text('group'))
-    .option('-k, --key <record-key>', text('key'))
-    .option('--headed', text('headed'))
-    .option('--headless', text('headless'))
-    .option('--no-exit', text('exit'))
-    .option('--parallel', text('parallel'))
-    .option('-p, --port <port>', text('port'))
-    .option('-P, --project <project-path>', text('project'))
-    .option('-q, --quiet', text('quiet'))
-    .option('--record [bool]', text('record'), coerceFalse)
-    .option('-r, --reporter <reporter>', text('reporter'))
-    .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
-    .option('-s, --spec <spec>', text('spec'))
-    .option('-t, --tag <tag>', text('tag'))
-    .option('--dev', text('dev'), coerceFalse)
+    addCypressRunCommand(program)
     .action((...fnArgs) => {
       debug('running Cypress with args %o', fnArgs)
       require('./exec/run')
