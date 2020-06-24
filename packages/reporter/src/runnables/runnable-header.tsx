@@ -15,7 +15,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
 
     if (spec.relative === '__all') {
       return renderRunnableHeader(
-        <span>All Specs</span>,
+        <span><span>All Specs</span></span>,
       )
     }
 
