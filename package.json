@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "4.8.0",
+  "version": "4.9.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
