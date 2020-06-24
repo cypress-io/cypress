@@ -30,6 +30,8 @@ describe('ProjectId', () => {
     cy.get('[data-cy=project-id]').should('not.exist')
     cy.contains('Project ID').click()
     cy.get('[data-cy=project-id]').should('be.visible').wait(1000)
+    cy.percySnapshot()
+
     cy.contains('Project ID').click()
     cy.get('[data-cy=project-id]').should('not.be.visible')
   })
