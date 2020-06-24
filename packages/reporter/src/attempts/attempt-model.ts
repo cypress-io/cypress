@@ -140,28 +140,6 @@ export default class AttemptModel {
     this._isOpen = !this.isOpen
   }
 
-  @action setIsOpen (isOpen: boolean, cb: Function) {
-    // if isOpen is not changing at all, callback immediately
-    // because there won't be a re-render to trigger it
-
-    if (!isOpen && !this.test.isOpen) {
-      cb()
-
-      return
-    }
-
-    if (isOpen && this.test.isOpen && this.isOpen) {
-      cb()
-
-      return
-    }
-
-    // changing isOpen will trigger a re-render and the callback will
-    // be called by attempts.jsx Attempt#componentDidUpdate
-    this._callbackAfterUpdate = cb
-    this._isOpen = isOpen
-  }
-
   @action finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false

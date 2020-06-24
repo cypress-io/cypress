@@ -131,14 +131,14 @@ export default class Test extends Runnable {
   }
 
   @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
-    this._withAttempt(props.currentRetry, (attempt) => {
-      attempt.update(props)
-    })
+    if (props.isOpen != null) {
+      this.setIsOpenWhenActive(props.isOpen)
 
-    if (props.isOpen != null && (this.isOpen !== props.isOpen)) {
-      this.setIsOpen(props.isOpen, cb)
+      if (this.isOpen !== props.isOpen) {
+        this._callbackAfterUpdate = cb
 
-      return
+        return
+      }
     }
 
     cb()
@@ -146,9 +146,8 @@ export default class Test extends Runnable {
 
   // this is called to sync up the command log UI for the sake of
   // screenshots, so we only ever need to open the last attempt
-  setIsOpen (isOpen: boolean, cb: UpdateTestCallback) {
+  setIsOpenWhenActive (isOpen: boolean) {
     this.isOpenWhenActive = isOpen
-    this._callbackAfterUpdate = cb
   }
 
   callbackAfterUpdate () {
