@@ -16,5 +16,7 @@ describe('Settings', () => {
     })
 
     cy.contains('.settings-node', project.resolvedNodeVersion).should('be.visible')
+
+    cy.percySnapshot()
   })
 })
