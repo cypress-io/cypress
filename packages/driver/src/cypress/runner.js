@@ -966,7 +966,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       }
 
       // if this isnt a hook, then the name is 'test'
-      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test body'
 
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
