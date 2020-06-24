@@ -9,4 +9,4 @@ agent:
     # like images and fonts to avoid missing icons
     network-idle-timeout: 250 # ms
     # assets that don't change could be cached
-    cache-responses: true
+    cache-responses: false
