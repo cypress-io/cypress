@@ -5,6 +5,15 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
     cy.stub(this.runner, 'emit').callThrough()
   })
 
+  it('displays tooltip on hover', () => {
+    if (stackTrace) {
+      cy.contains('View stack trace').click()
+    }
+
+    cy.get(`${containerSelector} a`).first().trigger('mouseover')
+    cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+  })
+
   describe('when user has already set opener and opens file', function () {
     beforeEach(function () {
       this.editor = {}
@@ -79,7 +88,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
 
       it('shows validation message when hovering over submit button', function () {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Please select a preference')
+        cy.get('.cy-tooltip').last().should('have.text', 'Please select a preference')
       })
     })
 
@@ -99,7 +108,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
 
       it('shows validation message when hovering over submit button', function () {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Please enter the path for the "Other" editor')
+        cy.get('.cy-tooltip').last().should('have.text', 'Please enter the path for the "Other" editor')
       })
     })
 

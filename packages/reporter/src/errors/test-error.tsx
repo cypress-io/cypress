@@ -8,6 +8,7 @@ import ErrorCodeFrame from '../errors/error-code-frame'
 import ErrorStack from '../errors/error-stack'
 
 import events from '../lib/events'
+import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import TestModel from '../test/test-model'
 
@@ -76,15 +77,16 @@ const TestError = observer((props: TestErrorProps) => {
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
             headerExtras={
-              <div
-                className="runnable-err-print"
-                onClick={_onPrintClick}
-                onKeyPress={onEnterOrSpace(onPrint)}
-                role='button'
-                tabIndex={0}
-              >
-                <i className="fas fa-terminal" /> <span>Print to console</span>
-              </div>
+              <FlashOnClick onClick={_onPrintClick} message="Printed output to your console">
+                <div
+                  className="runnable-err-print"
+                  onKeyPress={onEnterOrSpace(onPrint)}
+                  role='button'
+                  tabIndex={0}
+                >
+                  <div tabIndex={-1}><i className="fas fa-terminal" /> <span>Print to console</span></div>
+                </div>
+              </FlashOnClick>
             }
             contentClass='runnable-err-stack-trace'
           >

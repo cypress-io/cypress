@@ -254,8 +254,8 @@
     width: 100%;
     z-index: 1;
 
-    a:before,
-    span:before {
+    span > a:before,
+    span > span:before {
       @extend .#{$fa-css-prefix};
       @extend .#{$fa-css-prefix}-file;
       color: #bdbdbd;

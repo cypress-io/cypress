@@ -2,6 +2,8 @@ import _ from 'lodash'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
 import React, { MouseEvent } from 'react'
+// @ts-ignore
+import Tooltip from '@cypress/react-tooltip'
 
 import EditorPickerModal, { Editor } from './editor-picker-modal'
 import { FileDetails } from './file-model'
@@ -77,17 +79,19 @@ const FileOpener = observer(({ fileDetails, className }: Props) => {
   const { originalFile, line, column } = fileDetails
 
   return (
-    <a className={className} onClick={attemptOpenFile} href='#'>
-      {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
-      <EditorPickerModal
-        chosenEditor={state.chosenEditor}
-        editors={state.editors}
-        isOpen={state.isModalOpen}
-        onSetEditor={setEditor}
-        onSetChosenEditor={state.setChosenEditor}
-        onClose={_.partial(state.setIsModalOpen, false)}
-      />
-    </a>
+    <Tooltip title={'Open in IDE'} wrapperClassName={className} className='cy-tooltip'>
+      <a onClick={attemptOpenFile} href='#'>
+        {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
+        <EditorPickerModal
+          chosenEditor={state.chosenEditor}
+          editors={state.editors}
+          isOpen={state.isModalOpen}
+          onSetEditor={setEditor}
+          onSetChosenEditor={state.setChosenEditor}
+          onClose={_.partial(state.setIsModalOpen, false)}
+        />
+      </a>
+    </Tooltip>
   )
 })
 
