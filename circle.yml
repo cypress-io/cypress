@@ -758,6 +758,33 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
+  desktop-gui-component-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn build-prod
+          working_directory: packages/desktop-gui
+      # for now, because we have baseUrl in cypress.json
+      # we must start it, even if we don't use it for component tests
+      # https://github.com/cypress-io/cypress/issues/7800
+      - run:
+          name: Unnecessary Desktop GUI server
+          command: yarn start
+          working_directory: packages/desktop-gui
+          background: true
+      - run:
+          # will use PERCY_TOKEN environment variable if available
+          command: |
+            CYPRESS_KONFIG_ENV=production \
+            yarn percy exec -- yarn cypress:run --spec 'src/**/*_spec.jsx'
+          working_directory: packages/desktop-gui
+      - verify-mocha-results
+      # we don't really need any artifacts - we are only interested in visual screenshots
+      - store-npm-logs
+
   "reporter-integration-tests":
     <<: *defaults
     steps:
@@ -1533,6 +1560,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - desktop-gui-visual-tests:
+        requires:
+          - build
+    - desktop-gui-component-tests:
         requires:
           - build
     - reporter-integration-tests:
