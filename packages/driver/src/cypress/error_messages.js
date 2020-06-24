@@ -301,6 +301,11 @@ module.exports = {
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
     },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
+    },
   },
 
   dom: {
