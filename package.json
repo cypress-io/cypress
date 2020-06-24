@@ -16,11 +16,14 @@
     "lint": "standard --verbose --fix *.js src cypress/integration",
     "semantic-release": "semantic-release",
     "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
-    "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet"
+    "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
+    "stop-only": "stop-only --folder cypress",
+    "warn-only": "stop-only --warn --folder cypress"
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && npm run warn-only",
+      "pre-push": "npm run stop-only"
     }
   },
   "lint-staged": {
@@ -100,6 +103,7 @@
     "react-tooltip": "4.2.6",
     "semantic-release": "17.1.0",
     "standard": "14.3.3",
+    "stop-only": "3.1.0",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",

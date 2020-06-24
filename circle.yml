@@ -27,6 +27,9 @@ workflows:
                 name: Linting code 🧹
                 command: npm run lint
             - run:
+                name: Stop exclusive tests 1️⃣
+                command: npm run stop-only
+            - run:
                 name: Check markdown links ⚓️
                 command: npm run check:links
             - run:
