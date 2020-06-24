@@ -96,7 +96,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -237,7 +237,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -328,7 +328,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -357,7 +357,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -440,7 +440,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -610,7 +610,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -639,7 +639,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -722,7 +722,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
@@ -821,14 +821,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -839,14 +839,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -898,14 +898,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -916,14 +916,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -957,14 +957,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -975,14 +975,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1062,14 +1062,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1080,14 +1080,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1197,14 +1197,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1215,14 +1215,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1273,14 +1273,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1291,14 +1291,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1322,14 +1322,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1340,14 +1340,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1426,14 +1426,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1444,14 +1444,14 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -1508,14 +1508,14 @@ exports['serialize state - hooks'] = {
       "wallClockDuration": 1,
       "timings": {
         "lifecycle": 1,
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": 1,
             "afterFnDuration": 1
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": 1,
@@ -1526,14 +1526,14 @@ exports['serialize state - hooks'] = {
           "fnDuration": 1,
           "afterFnDuration": 1
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": 1,
             "afterFnDuration": 1
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": 1,
@@ -1823,14 +1823,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1841,7 +1841,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -1893,14 +1893,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1911,7 +1911,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -1936,14 +1936,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -1954,7 +1954,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -2007,14 +2007,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before all": [
+        "before all (1)": [
           {
             "hookId": "h1",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2025,7 +2025,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -2090,7 +2090,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2101,7 +2101,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -2126,7 +2126,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2137,7 +2137,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -2191,7 +2191,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2202,7 +2202,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
@@ -2267,7 +2267,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2278,14 +2278,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -2310,7 +2310,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockStartedAt": "match.date",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2321,14 +2321,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
@@ -2420,7 +2420,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "wallClockDuration": "match.number",
       "timings": {
         "lifecycle": "match.number",
-        "before each": [
+        "before each (1)": [
           {
             "hookId": "h2",
             "fnDuration": "match.number",
@@ -2431,14 +2431,14 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
           "fnDuration": "match.number",
           "afterFnDuration": "match.number"
         },
-        "after each": [
+        "after each (1)": [
           {
             "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
-        "after all": [
+        "after all (1)": [
           {
             "hookId": "h4",
             "fnDuration": "match.number",
