@@ -24,7 +24,7 @@ class Square extends React.Component {
 }
 
 describe('Square', () => {
-  it.only('changes value on click', () => {
+  it('changes value on click', () => {
     const selector = 'button.square'
     mount(<Square value="X" />)
     // initially button is blank

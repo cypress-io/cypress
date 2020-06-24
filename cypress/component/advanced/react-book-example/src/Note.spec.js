@@ -4,7 +4,7 @@ import React from 'react'
 import Select from './Note'
 
 describe('Note', () => {
-  it.only('save text', () => {
+  it('save text', () => {
     mount(<Select />)
     cy.get('#change').type('input text')
     cy.contains('button', 'Save').click()
