@@ -14,9 +14,7 @@ const { stringifyShort } = snapshotCommand
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
-  tests: stringifyShort,
   commands: stringifyShort,
-  err: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
   lifecycle: match.number,
@@ -24,6 +22,7 @@ const eventCleanseMap = {
   duration: match.number,
   afterFnDuration: match.number,
   wallClockDuration: match.number,
+  err: stringifyShort,
   stack: match.string,
   message: '[error message]',
   sourceMappedStack: match.string,
@@ -32,8 +31,23 @@ const eventCleanseMap = {
 
 const mochaEventCleanseMap = {
   ...eventCleanseMap,
+  tests: stringifyShort,
   start: match.date,
   end: match.date,
+}
+
+const cleanseRunStateMap = {
+  ...eventCleanseMap,
+  wallClockStartedAt: new Date(0),
+  wallClockDuration: 1,
+  fnDuration: 1,
+  afterFnDuration: 1,
+  lifecycle: 1,
+  duration: 1,
+  startTime: new Date(0),
+  'err.stack': '[err stack]',
+  sourceMappedStack: match.string,
+  parsedStack: match.array,
 }
 
 const spyOn = (obj, prop, fn) => {
@@ -439,19 +453,6 @@ const evalFn = (win, fn) => {
   return function () {
     return win.eval(`(${fn.toString()})`).call(this)
   }
-}
-
-const cleanseRunStateMap = {
-  wallClockStartedAt: new Date(0),
-  wallClockDuration: 1,
-  fnDuration: 1,
-  afterFnDuration: 1,
-  lifecycle: 1,
-  duration: 1,
-  startTime: new Date(0),
-  'err.stack': '[err stack]',
-  sourceMappedStack: match.string,
-  parsedStack: match.array,
 }
 
 const shouldHaveTestResults = (expPassed, expFailed) => {

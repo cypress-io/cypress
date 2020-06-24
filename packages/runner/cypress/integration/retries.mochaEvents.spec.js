@@ -1,6 +1,6 @@
 const helpers = require('../support/helpers')
 
-const { shouldHaveTestResults, getRunState } = helpers
+const { shouldHaveTestResults, getRunState, cleanseRunStateMap } = helpers
 const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true } })
 const { sinon } = Cypress
 const match = Cypress.sinon.match
@@ -336,14 +336,3 @@ describe('src/cypress/runner retries mochaEvents', () => {
     })
   })
 })
-
-const cleanseRunStateMap = {
-  wallClockStartedAt: new Date(0),
-  wallClockDuration: 1,
-  fnDuration: 1,
-  afterFnDuration: 1,
-  lifecycle: 1,
-  duration: 1,
-  startTime: new Date(0),
-  'err.stack': '[err stack]',
-}

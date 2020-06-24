@@ -52,7 +52,7 @@ describe('src/cypress/runner retries ui', () => {
       .find('.runnable-err-print')
       .click()
 
-      cy.get('@console_log').should('be.calledWithMatch', 'Command')
+      cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
     })
   })
 
