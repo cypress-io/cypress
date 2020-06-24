@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import Promise from 'bluebird'
+import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
 import Debug from 'debug'
@@ -42,23 +42,29 @@ const setWindowProxy = function (win) {
   })
 }
 
-export function installExtension (path) {
-  // extensions can only be installed for all BrowserWindows
-  const name = BrowserWindow.addExtension(path)
-
-  debug('electron extension installed %o', { success: !!name, name, path })
-
-  if (!name) {
-    throw new Error('Extension could not be installed.')
-  }
+export function installExtension (win: BrowserWindow, path) {
+  return win.webContents.session.loadExtension(path)
+  .then((data) => {
+    debug('electron extension installed %o', { data, path })
+  })
+  .catch((err) => {
+    debug('error installing electron extension %o', { err, path })
+    throw err
+  })
 }
 
-export function removeAllExtensions () {
-  const extensions = _.keys(BrowserWindow.getExtensions())
+export function removeAllExtensions (win: BrowserWindow) {
+  let extensions
 
-  debug('removing all electron extensions %o', extensions)
+  try {
+    extensions = win.webContents.session.getAllExtensions()
 
-  return extensions.forEach(BrowserWindow.removeExtension)
+    extensions.forEach(({ id }) => {
+      win.webContents.session.removeExtension(id)
+    })
+  } catch (err) {
+    debug('error removing all extensions %o', { err, extensions })
+  }
 }
 
 export function reset () {
@@ -214,7 +220,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
   if (win) {
     win.show()
 
-    return Promise.resolve(win)
+    return Bluebird.resolve(win)
   }
 
   recentlyCreatedWindow = true
@@ -248,7 +254,7 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
 
   // enable our url to be a promise
   // and wait for this to be resolved
-  return Promise.join(
+  return Bluebird.join(
     options.url,
     setWindowProxy(win),
   )
