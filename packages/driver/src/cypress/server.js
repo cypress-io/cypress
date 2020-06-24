@@ -67,7 +67,7 @@ const warnOnForce404Default = (obj) => {
 
 const warnOnWhitelistRenamed = (obj, type) => {
   if (obj.whitelist) {
-    return $errUtils.warnByPath('server.whitelist_renamed', { args: { type } })
+    return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type } })
   }
 }
 

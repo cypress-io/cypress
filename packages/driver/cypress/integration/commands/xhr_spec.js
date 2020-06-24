@@ -1651,13 +1651,6 @@ describe('src/cy/commands/xhr', () => {
           expect(this.warn).to.be.calledWithMatch('Cypress Warning: Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.\n\nhttps://on.cypress.io/deprecated-stub-false-on-server')
         })
       })
-
-      it('logs on whitelist option', () => {
-        cy.server({ whitelist: () => { } })
-        .then(function () {
-          expect(this.warn).to.be.calledWith('Cypress Warning: The `cy.server()` `whitelist` option has been renamed to `ignore`. Please rename `whitelist` to `ignore`.')
-        })
-      })
     })
 
     describe('request response alias', () => {
@@ -1785,6 +1778,16 @@ describe('src/cy/commands/xhr', () => {
         })
 
         cy.route()
+      })
+
+      it('throws on use of whitelist option', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('The `cy.server()` `whitelist` option has been renamed to `ignore`. Please rename `whitelist` to `ignore`.')
+
+          done()
+        })
+
+        cy.server({ whitelist: () => { } })
       })
 
       it('url must be a string or regexp', (done) => {
