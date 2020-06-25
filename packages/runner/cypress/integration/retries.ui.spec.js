@@ -372,32 +372,20 @@ describe('src/cypress/runner retries ui', () => {
       runIsolatedCypress({
         suites: {
           'suite 1': () => {
-            Cypress.config('retries', 0)
-            it('[no retry]', () => assert(false))
-            Cypress.config('retries', 1)
-            it('[1 retry]', () => assert(false))
-            Cypress.config('retries', 2)
-            it('[2 retries]', () => assert(false))
-
-            // it('[test-config no retries]', { retries: 0 }, () => assert(false))
-            // it('[test-config 1 retry]', { retries: 1 }, () => assert(false))
-
-            Cypress.config('retries', { runMode: 2, openMode: 0 })
-            Cypress.config('isInteractive', true)
-            it('[open mode, no retry]', () => assert(false))
-
-            Cypress.config('retries', { runMode: 0, openMode: 2 })
-            Cypress.config('isInteractive', false)
-            it('[run mode, no retry]', () => assert(false))
-
-            Cypress.config('retries', { runMode: 0, openMode: 2 })
-            Cypress.config('isInteractive', true)
-            it('[open mode, 2 retries]', () => assert(false))
+            it('[no retry]', { retries: 0 }, () => assert(false))
+            it('[1 retry]', { retries: 1 }, () => assert(false))
+            it('[2 retries]', { retries: 2 }, () => assert(false))
+            it('[open mode, no retry]', { retries: { runMode: 2, openMode: 0 } }, () => assert(false))
+            it('[run mode, retry]', { retries: { runMode: 1, openMode: 0 }, isInteractive: false }, () => assert(false))
+            it('[open mode, 2 retries]', 2, () => assert(false))
+            describe('suite 2', { retries: 1 }, () => {
+              it('[set retries on suite]', () => assert(false))
+            })
           },
         },
       })
 
-      .then(shouldHaveTestResults(0, 6))
+      .then(shouldHaveTestResults(0, 7))
       .then(() => {
         getAttemptTag('[no retry]').should('not.be.visible')
         getAttemptTag('[1 retry]').should('have.length', 2)
@@ -405,8 +393,10 @@ describe('src/cypress/runner retries ui', () => {
         //   getAttemptTag('[test-config no retries]').should('not.be.visible')
         //   getAttemptTag('[test-config 1 retry]').should('have.length', 2)
         getAttemptTag('[open mode, no retry]').should('not.be.visible')
-        getAttemptTag('[run mode, no retry]').should('not.be.visible')
+        getAttemptTag('[run mode, retry]').should('have.length', 2)
         getAttemptTag('[open mode, 2 retries]').should('have.length', 3)
+
+        getAttemptTag('[set retries on suite]').should('have.length', 2)
       })
     })
 

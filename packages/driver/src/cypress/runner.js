@@ -1138,6 +1138,9 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        const retries = Cypress.getTestRetries() ?? -1
+
+        test._retries = retries
         fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 

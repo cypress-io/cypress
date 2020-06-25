@@ -192,7 +192,7 @@ const defaultRoutes = [
   }, {
     method: 'put',
     url: '/instances/:id',
-    req: 'putInstanceRequest@2.1.0',
+    req: 'putInstanceRequest@3.0.0',
     resSchema: 'putInstanceResponse@2.0.0',
     res: sendUploadUrls,
   }, {
@@ -239,6 +239,7 @@ describe('e2e record', () => {
       })
       .get('stdout')
       .then((stdout) => {
+        console.log(stdout)
         expect(stdout).to.include('Run URL:')
         expect(stdout).to.include(runUrl)
 
@@ -260,6 +261,7 @@ describe('e2e record', () => {
         // grab the second set of 5
         const secondInstanceSet = urls.slice(5, 10)
 
+        console.log(secondInstanceSet)
         expect(secondInstanceSet).to.have.members([
           `POST /runs/${runId}/instances`,
           `PUT /instances/${instanceId}`,
@@ -869,7 +871,7 @@ describe('e2e record', () => {
       routes[2] = {
         method: 'put',
         url: '/instances/:id',
-        req: 'putInstanceRequest@2.1.0',
+        req: 'putInstanceRequest@3.0.0',
         res (req, res) {
           return res.sendStatus(500)
         },
@@ -1169,7 +1171,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.1.0',
+          req: 'putInstanceRequest@3.0.0',
           res (req, res) {
             return res.sendStatus(500)
           },
@@ -1216,7 +1218,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.1.0',
+          req: 'putInstanceRequest@3.0.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
@@ -1287,7 +1289,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.1.0',
+          req: 'putInstanceRequest@3.0.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
