@@ -121,6 +121,12 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
 
     run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)
 
+    _.each(run.tests, (test) => {
+      if (test.displayError) {
+        test.displayError = e2e.normalizeStdout(test.displayError)
+      }
+    })
+
     // now make sure that each tests wallclock duration
     // is around the sum of all of its timings
     attempts.forEach((attempt) => {

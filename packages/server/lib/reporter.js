@@ -209,6 +209,12 @@ const setDate = function (obj, runnables, stats) {
   return null
 }
 
+const orNull = function (prop) {
+  if (prop == null) return null
+
+  return prop
+}
+
 const events = {
   'start': setDate,
   'end': setDate,
@@ -343,28 +349,21 @@ class Reporter {
     }
   }
 
-  normalizeTest (test) {
-    if (test == null) {
-      test = {}
-    }
-
-    const get = function (prop) {
-      return _.get(test, prop, null)
-    }
-
+  normalizeTest (test = {}) {
     const normalizedTest = {
-      testId: get('id'),
+      testId: orNull(test.id),
       title: getParentTitle(test),
-      state: get('state'),
-      body: get('body'),
+      state: orNull(test.state),
+      body: orNull(test.body),
+      displayError: orNull(test.err && test.err.stack),
       attempts: _.map([test].concat(test.prevAttempts || []), (attempt) => {
         return {
-          state: attempt.state,
-          error: attempt.err && _.pick(attempt.err, ['name', 'message', 'stack']),
-          timings: attempt.timings,
-          failedFromHookId: attempt.failedFromHookId,
-          wallClockStartedAt: attempt.wallClockStartedAt ? new Date(attempt.wallClockStartedAt) : null,
-          wallClockDuration: attempt.wallClockDuration,
+          state: orNull(attempt.state),
+          error: orNull(attempt.err && _.pick(attempt.err, ['name', 'message', 'stack'])),
+          timings: orNull(attempt.timings),
+          failedFromHookId: orNull(attempt.failedFromHookId),
+          wallClockStartedAt: orNull(attempt.wallClockStartedAt && new Date(attempt.wallClockStartedAt)),
+          wallClockDuration: orNull(attempt.wallClockDuration),
           videoTimestamp: null,
         }
       }),
