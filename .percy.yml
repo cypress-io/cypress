@@ -5,6 +5,10 @@ snapshot:
   min-height: 1024
 agent:
   asset-discovery:
+    # tell Percy it is ok to download CSS resources
+    # from localhost (served by the Cypress itself)
+    allowed-hostnames:
+      - *.localhost
     # let Percy wait for network to fetch static resources
     # like images and fonts to avoid missing icons
     network-idle-timeout: 250 # ms
