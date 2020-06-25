@@ -1,34 +1,21 @@
 import _ from 'lodash'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
-import React, { MouseEvent } from 'react'
-// @ts-ignore
-import Tooltip from '@cypress/react-tooltip'
+import React, { MouseEvent, ReactNode } from 'react'
 
-import EditorPickerModal, { Editor } from './editor-picker-modal'
-import { FileDetails } from './file-model'
-import events from '../lib/events'
-
-interface GetUserEditorResult {
-  preferredOpener?: Editor
-  availableEditors?: Editor[]
-}
+import EditorPickerModal from './editor-picker-modal'
+import { GetUserEditorResult, Editor, FileDetails } from './file-model'
 
 interface Props {
-  fileDetails: FileDetails,
+  children: ReactNode
+  fileDetails: FileDetails
+  openFile: (where: Editor, absoluteFile: FileDetails) => any
+  getUserEditor: (callback: (result: GetUserEditorResult) => void) => any
+  setUserEditor: (editor: Editor) => any
   className?: string
 }
 
-const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetails) => {
-  events.emit('open:file', {
-    where,
-    file,
-    line,
-    column,
-  })
-}
-
-const FileOpener = observer(({ fileDetails, className }: Props) => {
+const FileOpener = observer(({ children, fileDetails, openFile, getUserEditor, setUserEditor, className }: Props) => {
   const state = useLocalStore(() => ({
     editors: [] as Editor[],
     chosenEditor: {} as Editor,
@@ -57,7 +44,7 @@ const FileOpener = observer(({ fileDetails, className }: Props) => {
 
     // TODO: instead of the back-n-forth, send 'open:file' or similar, and if the
     // user editor isn't set, it should send back the available editors
-    events.emit('get:user:editor', (result: GetUserEditorResult) => {
+    getUserEditor((result: GetUserEditorResult) => {
       state.setIsLoadingEditor(false)
 
       if (result.preferredOpener) {
@@ -70,28 +57,24 @@ const FileOpener = observer(({ fileDetails, className }: Props) => {
   }
 
   const setEditor = (editor: Editor) => {
-    events.emit('set:user:editor', editor)
+    setUserEditor(editor)
     state.setIsModalOpen(false)
     state.setChosenEditor({} as Editor)
     openFile(editor, fileDetails)
   }
 
-  const { originalFile, line, column } = fileDetails
-
   return (
-    <Tooltip title={'Open in IDE'} wrapperClassName={className} className='cy-tooltip'>
-      <a onClick={attemptOpenFile} href='#'>
-        {originalFile}{!!line && `:${line}`}{!!column && `:${column}`}
-        <EditorPickerModal
-          chosenEditor={state.chosenEditor}
-          editors={state.editors}
-          isOpen={state.isModalOpen}
-          onSetEditor={setEditor}
-          onSetChosenEditor={state.setChosenEditor}
-          onClose={_.partial(state.setIsModalOpen, false)}
-        />
-      </a>
-    </Tooltip>
+    <a className={className} onClick={attemptOpenFile} href='#'>
+      {children}
+      <EditorPickerModal
+        chosenEditor={state.chosenEditor}
+        editors={state.editors}
+        isOpen={state.isModalOpen}
+        onSetEditor={setEditor}
+        onSetChosenEditor={state.setChosenEditor}
+        onClose={_.partial(state.setIsModalOpen, false)}
+      />
+    </a>
   )
 })
 
