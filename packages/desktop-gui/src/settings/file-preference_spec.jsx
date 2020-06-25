@@ -56,5 +56,7 @@ describe('FilePreference', () => {
 
       expect(foundResource).to.have.property('initiatorType', 'link')
     })
+
+    cy.percySnapshot()
   })
 })
