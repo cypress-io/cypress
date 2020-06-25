@@ -250,7 +250,10 @@
         "number",
         "null"
       ],
-      "default": null,
+      "default": {
+        "runMode": 2,
+        "openMode": 0
+      },
       "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
     }
   }

@@ -179,7 +179,7 @@ const CONFIG_DEFAULTS = {
   experimentalSourceRewriting: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
-  retries: null,
+  retries: { runMode: 2, openMode: 0 },
 }
 
 const validationRules = {
