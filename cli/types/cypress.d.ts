@@ -108,6 +108,11 @@ declare namespace Cypress {
   }
 
   /**
+   * The interface for user-defined properties in Window object.
+   */
+  interface ApplicationWindow {} // tslint:disable-line
+
+  /**
    * Several libraries are bundled with Cypress by default.
    *
    * @see https://on.cypress.io/api
@@ -2001,7 +2006,7 @@ declare namespace Cypress {
     })
     ```
      */
-    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window & typeof globalThis>
+    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window & typeof globalThis & ApplicationWindow>
 
     /**
      * Scopes all subsequent cy commands to within this element.
