@@ -10,7 +10,6 @@ const tsOptions = {
   transpileOnly: true,
   compilerOptions: {
     module: 'CommonJS',
-    esModuleInterop: true,
   },
 }
 
