@@ -3,7 +3,6 @@ import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Test from './test'
-import TestModel from './test-model'
 
 const createModel = (props = {}) => {
   return {
@@ -17,7 +16,7 @@ const createModel = (props = {}) => {
     shouldRender: true,
     title: 'some title',
     ...props,
-  } as Partial<TestModel>
+  } as any
 }
 
 describe('<Test />', () => {

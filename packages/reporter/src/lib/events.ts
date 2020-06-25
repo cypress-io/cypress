@@ -93,14 +93,14 @@ const events: Events = {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestModel) => {
+    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestProps) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
       if (runnable.final) {
-        statsStore.incrementCount(runnable.state)
+        statsStore.incrementCount(runnable.state!)
       }
     }))
 

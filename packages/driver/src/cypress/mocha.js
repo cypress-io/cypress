@@ -325,10 +325,6 @@ function patchSuiteAddTest (Cypress) {
 
     const ret = suiteAddTest.apply(this, args)
 
-    const retries = Cypress.getTestRetries() ?? -1
-
-    test._retries = retries
-
     test.retries = function (...args) {
       if (args[0] !== undefined && args[0] > -1) {
         const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})

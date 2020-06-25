@@ -155,7 +155,7 @@ class RunnablesStore {
   //   })
   // }
 
-  runnableStarted (props: TestModel) {
+  runnableStarted (props: TestProps) {
     this._withTest(props.id, (test) => {
       test.start(props)
     })
@@ -167,7 +167,7 @@ class RunnablesStore {
     })
   }
 
-  testById (id: number) {
+  testById (id: string) {
     return this._tests[id]
   }
 

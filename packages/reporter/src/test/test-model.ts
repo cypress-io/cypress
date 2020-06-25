@@ -14,13 +14,13 @@ export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing
 export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
-  state: TestState
+  state: TestState | null
   err?: Err
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
-  prevAttempts: Array<TestProps>
+  prevAttempts?: Array<TestProps>
   currentRetry: number
   retries?: number
   final?: boolean
@@ -32,8 +32,8 @@ export interface UpdatableTestProps {
   err?: TestProps['err']
   hookName?: string
   isOpen?: TestProps['isOpen']
-  currentRetry: TestProps['currentRetry']
-  retries: TestProps['retries']
+  currentRetry?: TestProps['currentRetry']
+  retries?: TestProps['retries']
 }
 
 export default class Test extends Runnable {
@@ -49,7 +49,7 @@ export default class Test extends Runnable {
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
 
-    _.each(props.prevAttempts, (attempt) => this._addAttempt(attempt))
+    _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
 
     this._addAttempt(props)
   }
@@ -160,7 +160,7 @@ export default class Test extends Runnable {
   @action finish (props: UpdatableTestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
-    this._withAttempt(props.currentRetry, (attempt: AttemptModel) => {
+    this._withAttempt(props.currentRetry || 0, (attempt: AttemptModel) => {
       attempt.finish(props)
     })
   }
