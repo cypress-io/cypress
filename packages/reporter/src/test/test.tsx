@@ -6,6 +6,7 @@ import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState, { AppState } from '../lib/app-state'
+import Collapsible from '../collapsible/collapsible'
 import { indent, onEnterOrSpace } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import scroller, { Scroller } from '../lib/scroller'
@@ -70,6 +71,31 @@ class Test extends Component<Props> {
 
     if (!model.shouldRender) return null
 
+    const header = (
+      <>
+        <i aria-hidden='true' className='runnable-state fas' />
+        <span className='runnable-title'>{model.title} <span className='visually-hidden'>{model.state}</span></span>
+        <span className='runnable-controls'>
+          <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+            <i className='fas fa-exclamation-triangle' />
+          </Tooltip>
+        </span>
+      </>
+    )
+
+    return (
+      <Collapsible
+        ref='container'
+        header={header}
+        headerClass='runnable-wrapper'
+        headerStyle={{ paddingLeft: indent(model.level) }}
+        contentClass='runnable-instruments'
+        isOpen={this._shouldBeOpen()}
+      >
+        {this._contents()}
+      </Collapsible>
+    )
+
     return (
       <div
         ref='container'
@@ -101,18 +127,10 @@ class Test extends Component<Props> {
   }
 
   _contents () {
-    // performance optimization - don't render contents if not open
-    if (!this._shouldBeOpen()) return null
-
     const { model } = this.props
 
     return (
-      <div
-        className='runnable-instruments collapsible-content'
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
-      >
+      <div style={{ paddingLeft: indent(model.level) }}>
         <Agents model={model} />
         <Routes model={model} />
         <div className='runnable-commands-region'>
