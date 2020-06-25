@@ -2,7 +2,7 @@
   "name": "@packages/ui-components",
   "version": "0.0.0",
   "private": true,
-  "main": "src/index.jsx",
+  "main": "src/index.tsx",
   "scripts": {
     "build-for-tests": "webpack",
     "check-deps": "node ../../scripts/check-deps.js --verbose",
@@ -20,6 +20,7 @@
     "@babel/preset-env": "7.9.0",
     "@babel/preset-react": "7.9.4",
     "@fortawesome/fontawesome-free": "5.12.1",
+    "@reach/dialog": "0.6.1",
     "@reach/visually-hidden": "0.6.2",
     "babel-loader": "8.1.0",
     "browser-logos": "github:alrra/browser-logos",

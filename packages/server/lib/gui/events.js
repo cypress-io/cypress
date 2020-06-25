@@ -21,6 +21,7 @@ const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
 const konfig = require('../konfig')
 const editors = require('../util/editors')
+const fileOpener = require('../util/file-opener')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -171,6 +172,9 @@ const handleEvent = function (options, bus, event, id, type, arg) {
 
     case 'window:close':
       return options.getWindowByWebContentsFn(event.sender).destroy()
+
+    case 'open:file':
+      return fileOpener.openFile(arg)
 
     case 'open:finder':
       return open.opn(arg)
