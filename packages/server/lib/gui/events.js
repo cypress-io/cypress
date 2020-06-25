@@ -35,6 +35,11 @@ const nullifyUnserializableValues = (obj) => {
 const handleEvent = function (options, bus, event, id, type, arg) {
   debug('got request for event: %s, %o', type, arg)
 
+  _.defaults(options, {
+    windowOpenFn: Windows.open,
+    getWindowByWebContentsFn: Windows.getByWebContents,
+  })
+
   const sendResponse = function (originalData = {}) {
     try {
       const data = nullifyUnserializableValues(originalData)
@@ -160,12 +165,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'window:open':
-      return Windows.open(options.projectRoot, arg)
+      return options.windowOpenFn(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 
     case 'window:close':
-      return Windows.getByWebContents(event.sender).destroy()
+      return options.getWindowByWebContentsFn(event.sender).destroy()
 
     case 'open:finder':
       return open.opn(arg)
