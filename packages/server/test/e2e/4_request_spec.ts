@@ -1,6 +1,6 @@
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const e2e = require('../support/helpers/e2e').default
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import e2e from '../support/helpers/e2e'
 
 let counts = null
 
