@@ -1268,18 +1268,6 @@
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
-"@benmalka/foxdriver@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.4.0.tgz#aecd158a785a09e104da036efe7611a13af4ed11"
-  integrity sha512-Uc9n5TTRV2AhfYaqkaDc5k72pfKxyd6LDVrQJyNLZ7uY4ThgEcQMjpVRkB8C7v16gKhubH4gmD0lad5pGvDUBg==
-  dependencies:
-    fs-extra "^4.0.1"
-    get-port "^3.2.0"
-    npmlog "^4.1.2"
-    safe-buffer "^5.1.1"
-    tcp-port-used "^1.0.1"
-    tmp "0.0.33"
-
 "@chromaui/localtunnel@1.10.1":
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/@chromaui/localtunnel/-/localtunnel-1.10.1.tgz#34da7dab7055a16b1b9034a9eb7e3054ebec4b98"
@@ -12253,6 +12241,18 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
+
+foxdriver@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/foxdriver/-/foxdriver-0.1.1.tgz#b66e0fb1f495b0139c7a0a5a5f31541b2adf0b23"
+  integrity sha512-ZJ6u9kzCkmDo7OVIzqF+KlMRLc+W53GCzglaLhFG1ixMliEC7o6TeucYd1XpSacpmZnPRVQE+byyR7LXC84htA==
+  dependencies:
+    fs-extra "^4.0.1"
+    get-port "^3.2.0"
+    npmlog "^4.1.2"
+    safe-buffer "^5.1.1"
+    tcp-port-used "^1.0.1"
+    tmp "0.0.33"
 
 fragment-cache@^0.2.1:
   version "0.2.1"

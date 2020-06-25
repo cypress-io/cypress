@@ -7,7 +7,7 @@ import firefoxUtil from '../../../lib/browsers/firefox-util'
 import * as firefox from '../../../lib/browsers/firefox'
 import { EventEmitter } from 'events'
 import Marionette from 'marionette-client'
-import Foxdriver from '@benmalka/foxdriver'
+import Foxdriver from 'foxdriver'
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
 const utils = require('../../../lib/browsers/utils')
