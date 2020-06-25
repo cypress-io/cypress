@@ -195,8 +195,6 @@ describe('lib/gui/events', () => {
   })
 
   context('window', () => {
-    let fakeWindows
-
     describe('window:open', () => {
       beforeEach(function () {
         this.options.projectRoot = '/path/to/my/project'
@@ -207,14 +205,6 @@ describe('lib/gui/events', () => {
           loadURL () {},
           webContents: {},
         })
-
-        this.options.windowOpenFn =
-
-        fakeWindows = {
-          create: sinon.stub(),
-        }
-
-        fakeWindows.create.withArgs(this.options.projectRoot).returns(this.win)
       })
 
       it('calls windowOpenFn with args and resolves with return', function () {
