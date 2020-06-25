@@ -1103,7 +1103,7 @@ module.exports = {
 
       const { tests, stats } = obj
 
-      const attempts = _.flatMap(tests, (test) => _.compact([test].concat(test.prevAttempts)))
+      const attempts = _.flatMap(tests, (test) => test.attempts)
 
       const hasFailingTests = _.get(stats, 'failures') > 0
 

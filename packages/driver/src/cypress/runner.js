@@ -564,6 +564,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
 }
 
 const setHookFailureProps = (test, hook, err) => {
+  err = $errUtils.wrapErr(err)
   const hookName = getHookName(hook)
 
   test.err = err
@@ -766,7 +767,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     }
   })
 
-  return _runner.on('fail', (runnable, err) => {
+  _runner.on('fail', (runnable, err) => {
     let hookName
     const isHook = runnable.type === 'hook'
 

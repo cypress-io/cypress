@@ -68,22 +68,30 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
-          "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
-          "timings": {
-            "lifecycle": 100,
-            "before each": [
-              {
-                "hookId": "h1",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h1",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
+                "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "before each": [
+                  {
+                    "hookId": "h1",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h1",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         },
         {
           "testId": "r6",
@@ -94,13 +102,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "pending",
           "body": "",
-          "stack": null,
-          "error": null,
-          "timings": null,
-          "failedFromHookId": null,
-          "wallClockStartedAt": null,
-          "wallClockDuration": null,
-          "videoTimestamp": null
+          "attempts": [
+            {
+              "state": "pending",
+              "wallClockStartedAt": null,
+              "wallClockDuration": null,
+              "videoTimestamp": null
+            }
+          ]
         },
         {
           "testId": "r8",
@@ -111,26 +120,34 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
-          "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after each": [
-              {
-                "hookId": "h2",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h2",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
+                "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after each": [
+                  {
+                    "hookId": "h2",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h2",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         },
         {
           "testId": "r9",
@@ -141,13 +158,13 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "skipped",
           "body": "function () { }",
-          "stack": null,
-          "error": null,
-          "timings": null,
-          "failedFromHookId": null,
-          "wallClockStartedAt": null,
-          "wallClockDuration": null,
-          "videoTimestamp": null
+          "attempts": [
+            {
+              "state": "skipped",
+              "wallClockStartedAt": null,
+              "videoTimestamp": null
+            }
+          ]
         },
         {
           "testId": "r11",
@@ -158,19 +175,21 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "passed",
           "body": "function () { }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
             }
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          ]
         },
         {
           "testId": "r12",
@@ -181,26 +200,34 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
-          "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after all": [
-              {
-                "hookId": "h3",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h3",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
+                "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after all": [
+                  {
+                    "hookId": "h3",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h3",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         }
       ],
       "error": null,
@@ -278,19 +305,26 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        return cy.wrap(true, {\n            timeout: 100\n        }).should(\"be.false\");\n    }",
-          "stack": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
-          "error": "Timed out retrying: expected true to be false",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "AssertionError",
+                "message": "Timed out retrying: expected true to be false",
+                "stack": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
             }
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          ]
         },
         {
           "testId": "r4",
@@ -300,19 +334,26 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        throw new Error(\"fails2\");\n    }",
-          "stack": "Error: fails2\n      [stack trace lines]",
-          "error": "fails2",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fails2",
+                "stack": "Error: fails2\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
             }
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          ]
         }
       ],
       "error": null,
@@ -413,40 +454,42 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "passed",
           "body": "function () {\n        return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n    }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "before all": [
-              {
-                "hookId": "h1",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "before each": [
-              {
-                "hookId": "h2",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after each": [
-              {
-                "hookId": "h3",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "before all": [
+                  {
+                    "hookId": "h1",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "before each": [
+                  {
+                    "hookId": "h2",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after each": [
+                  {
+                    "hookId": "h3",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         },
         {
           "testId": "r4",
@@ -456,33 +499,35 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "passed",
           "body": "function () {\n        return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n    }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "before each": [
-              {
-                "hookId": "h2",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after each": [
-              {
-                "hookId": "h3",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "before each": [
+                  {
+                    "hookId": "h2",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after each": [
+                  {
+                    "hookId": "h3",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         },
         {
           "testId": "r5",
@@ -492,40 +537,42 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "passed",
           "body": "function () {\n        return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n    }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "before each": [
-              {
-                "hookId": "h2",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after each": [
-              {
-                "hookId": "h3",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "after all": [
-              {
-                "hookId": "h4",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "before each": [
+                  {
+                    "hookId": "h2",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after each": [
+                  {
+                    "hookId": "h3",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "after all": [
+                  {
+                    "hookId": "h4",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         }
       ],
       "error": null,
@@ -581,26 +628,28 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "passed",
           "body": "function () {\n        return cy.wrap(true).should(\"be.true\");\n    }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "before each": [
-              {
-                "hookId": "h1",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ],
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "before each": [
+                  {
+                    "hookId": "h1",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ],
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
             }
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          ]
         }
       ],
       "error": null,
@@ -812,27 +861,36 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
-          "error": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
-          "timings": {
-            "lifecycle": 100,
-            "before each": [
-              {
-                "hookId": "h1",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h1",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999,
-          "prevAttempts": [
+          "attempts": [
             {
               "state": "failed",
-              "stack": "Error: fail1\n      [stack trace lines]",
-              "error": "fail1",
+              "error": {
+                "name": "Error",
+                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
+                "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "before each": [
+                  {
+                    "hookId": "h1",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h1",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            },
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail1",
+                "stack": "Error: fail1\n      [stack trace lines]"
+              },
               "timings": {
                 "lifecycle": 100,
                 "before each": [
@@ -863,13 +921,14 @@ exports['failing with retries enabled'] = {
           ],
           "state": "pending",
           "body": "",
-          "stack": null,
-          "error": null,
-          "timings": null,
-          "failedFromHookId": null,
-          "wallClockStartedAt": null,
-          "wallClockDuration": null,
-          "videoTimestamp": null
+          "attempts": [
+            {
+              "state": "pending",
+              "wallClockStartedAt": null,
+              "wallClockDuration": null,
+              "videoTimestamp": null
+            }
+          ]
         },
         {
           "testId": "r8",
@@ -880,31 +939,40 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
-          "error": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after each": [
-              {
-                "hookId": "h2",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h2",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999,
-          "prevAttempts": [
+          "attempts": [
             {
               "state": "failed",
-              "stack": null,
-              "error": null,
+              "error": {
+                "name": "Error",
+                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
+                "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after each": [
+                  {
+                    "hookId": "h2",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h2",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            },
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail2",
+                "stack": "Error: fail2\n      [stack trace lines]"
+              },
               "timings": {
                 "lifecycle": 100,
                 "test": {
@@ -935,13 +1003,13 @@ exports['failing with retries enabled'] = {
           ],
           "state": "skipped",
           "body": "function () { }",
-          "stack": null,
-          "error": null,
-          "timings": null,
-          "failedFromHookId": null,
-          "wallClockStartedAt": null,
-          "wallClockDuration": null,
-          "videoTimestamp": null
+          "attempts": [
+            {
+              "state": "skipped",
+              "wallClockStartedAt": null,
+              "videoTimestamp": null
+            }
+          ]
         },
         {
           "testId": "r11",
@@ -952,19 +1020,21 @@ exports['failing with retries enabled'] = {
           ],
           "state": "passed",
           "body": "function () { }",
-          "stack": null,
-          "error": null,
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
+          "attempts": [
+            {
+              "state": "passed",
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              },
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
             }
-          },
-          "failedFromHookId": null,
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          ]
         },
         {
           "testId": "r12",
@@ -975,26 +1045,34 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n      [stack trace lines]",
-          "error": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks",
-          "timings": {
-            "lifecycle": 100,
-            "test": {
-              "fnDuration": 400,
-              "afterFnDuration": 200
-            },
-            "after all": [
-              {
-                "hookId": "h3",
-                "fnDuration": 400,
-                "afterFnDuration": 200
-              }
-            ]
-          },
-          "failedFromHookId": "h3",
-          "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-          "wallClockDuration": 1234,
-          "videoTimestamp": 9999
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks",
+                "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n      [stack trace lines]"
+              },
+              "timings": {
+                "lifecycle": 100,
+                "test": {
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                },
+                "after all": [
+                  {
+                    "hookId": "h3",
+                    "fnDuration": 400,
+                    "afterFnDuration": 200
+                  }
+                ]
+              },
+              "failedFromHookId": "h3",
+              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+              "wallClockDuration": 1234,
+              "videoTimestamp": 9999
+            }
+          ]
         }
       ],
       "error": null,

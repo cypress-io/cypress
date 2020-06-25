@@ -22,7 +22,6 @@ const eventCleanseMap = {
   duration: match.number,
   afterFnDuration: match.number,
   wallClockDuration: match.number,
-  err: stringifyShort,
   stack: match.string,
   message: '[error message]',
   sourceMappedStack: match.string,

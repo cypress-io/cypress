@@ -93,7 +93,8 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
     // grab all the wallclock durations for all test (and retried attempts)
     // because our duration should be at least this
 
-    const attempts = _.flatMap(run.tests, (test) => _.compact([test].concat(test.prevAttempts)))
+    const attempts = _.flatMap(run.tests, (test) => test.attempts)
+
     const wallClocks = _.sumBy(attempts, 'wallClockDuration')
 
     // ensure each run's duration is around the sum
@@ -102,7 +103,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       run,
       'stats.wallClockDuration',
       wallClocks,
-      wallClocks + 200, // add 200ms to account for padding
+      wallClocks + 400, // add 400ms to account for padding
       1234,
     )
 
@@ -110,7 +111,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       run,
       'reporterStats.duration',
       wallClocks,
-      wallClocks + 200, // add 200ms to account for padding
+      wallClocks + 400, // add 400ms to account for padding
       1234,
     )
 
@@ -122,9 +123,9 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
 
     // now make sure that each tests wallclock duration
     // is around the sum of all of its timings
-    attempts.forEach((test) => {
+    attempts.forEach((attempt) => {
     // cannot sum an object, must use array of values
-      const timings = _.sumBy(_.values(test.timings), (val) => {
+      const timings = _.sumBy(_.values(attempt.timings), (val) => {
         if (_.isArray(val)) {
         // array for hooks
           return _.sumBy(val, addFnAndAfterFn)
@@ -139,7 +140,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       })
 
       expectDurationWithin(
-        test,
+        attempt,
         'wallClockDuration',
         timings,
         timings + 80, // add 80ms to account for padding
@@ -147,21 +148,21 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       )
 
       // now reset all the test timings
-      normalizeTestTimings(test, 'timings')
+      normalizeTestTimings(attempt, 'timings')
 
       // normalize stack
-      if (test.stack) {
-        test.stack = e2e.normalizeStdout(test.stack)
+      if (attempt.error) {
+        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack)
       }
 
-      if (test.wallClockStartedAt) {
-        const d = new Date(test.wallClockStartedAt)
+      if (attempt.wallClockStartedAt) {
+        const d = new Date(attempt.wallClockStartedAt)
 
-        expect(d.toJSON()).to.eq(test.wallClockStartedAt)
-        test.wallClockStartedAt = STATIC_DATE
+        expect(d.toJSON()).to.eq(attempt.wallClockStartedAt)
+        attempt.wallClockStartedAt = STATIC_DATE
 
-        expect(test.videoTimestamp).to.be.a('number')
-        test.videoTimestamp = 9999
+        expect(attempt.videoTimestamp).to.be.a('number')
+        attempt.videoTimestamp = 9999
       }
     })
 

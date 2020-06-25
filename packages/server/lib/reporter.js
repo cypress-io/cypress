@@ -241,7 +241,6 @@ class Reporter {
     this.projectRoot = projectRoot
     this.reporterOptions = reporterOptions
     this.normalizeTest = this.normalizeTest.bind(this)
-    this.normalizePrevAttemptTest = this.normalizePrevAttemptTest.bind(this)
   }
 
   setRunnables (rootRunnable) {
@@ -345,8 +344,6 @@ class Reporter {
   }
 
   normalizeTest (test) {
-    let wcs
-
     if (test == null) {
       test = {}
     }
@@ -355,39 +352,25 @@ class Reporter {
       return _.get(test, prop, null)
     }
 
-    wcs = get('wallClockStartedAt')
-    if (wcs) {
-      wcs = new Date(wcs)
-    }
-
     const normalizedTest = {
       testId: get('id'),
       title: getParentTitle(test),
       state: get('state'),
       body: get('body'),
-      stack: get('err.stack'),
-      error: get('err.message'),
-      timings: get('timings'),
-      failedFromHookId: get('failedFromHookId'),
-      wallClockStartedAt: wcs,
-      wallClockDuration: get('wallClockDuration'),
-      videoTimestamp: null,
-    }
-    const _prevAttempts = get('prevAttempts')
-
-    if (_prevAttempts) {
-      normalizedTest.prevAttempts = _prevAttempts.map(this.normalizePrevAttemptTest)
+      attempts: _.map([test].concat(test.prevAttempts || []), (attempt) => {
+        return {
+          state: attempt.state,
+          error: attempt.err && _.pick(attempt.err, ['name', 'message', 'stack']),
+          timings: attempt.timings,
+          failedFromHookId: attempt.failedFromHookId,
+          wallClockStartedAt: attempt.wallClockStartedAt ? new Date(attempt.wallClockStartedAt) : null,
+          wallClockDuration: attempt.wallClockDuration,
+          videoTimestamp: null,
+        }
+      }),
     }
 
     return normalizedTest
-  }
-
-  normalizePrevAttemptTest (test) {
-    if (test == null) {
-      test = {}
-    }
-
-    return _.omit(this.normalizeTest(test), ['testId', 'title', 'body', 'prevAttempts'])
   }
 
   end () {
