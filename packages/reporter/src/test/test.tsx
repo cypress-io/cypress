@@ -1,6 +1,6 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, createRef, RefObject } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -42,6 +42,14 @@ class Test extends Component<Props> {
 
   @observable isOpen: boolean | null = null
 
+  containerRef: RefObject<HTMLDivElement>
+
+  constructor (props: Props) {
+    super(props)
+
+    this.containerRef = createRef<HTMLDivElement>()
+  }
+
   componentDidMount () {
     this._scrollIntoView()
   }
@@ -61,7 +69,7 @@ class Test extends Component<Props> {
     const { isActive, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.refs.container as HTMLElement)
+      scroller.scrollIntoView(this.containerRef.current as HTMLElement)
     }
   }
 
@@ -72,7 +80,7 @@ class Test extends Component<Props> {
 
     return (
       <Collapsible
-        ref='container'
+        containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
         headerStyle={{ paddingLeft: indent(model.level) }}
