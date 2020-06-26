@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import debugModule from 'debug'
-import { blocklist, cors } from '@packages/network'
+import { blocked, cors } from '@packages/network'
 import { HttpMiddleware } from './'
 
 export type RequestMiddleware = HttpMiddleware<{
@@ -46,15 +46,15 @@ const RedirectToClientRouteIfNotProxied: RequestMiddleware = function () {
   this.next()
 }
 
-const EndRequestsToBlocklistedHosts: RequestMiddleware = function () {
-  const { blocklistHosts } = this.config
+const EndRequestsToBlockedHosts: RequestMiddleware = function () {
+  const { blockHosts } = this.config
 
-  if (blocklistHosts) {
-    const matches = blocklist.matches(this.req.proxiedUrl, blocklistHosts)
+  if (blockHosts) {
+    const matches = blocked.matches(this.req.proxiedUrl, blockHosts)
 
     if (matches) {
-      this.res.set('x-cypress-matched-blocklisted-host', matches)
-      debug('blocklisting request %o', {
+      this.res.set('x-cypress-matched-blocked-host', matches)
+      debug('blocking request %o', {
         url: this.req.proxiedUrl,
         matches,
       })
@@ -150,7 +150,7 @@ export default {
   LogRequest,
   RedirectToClientRouteIfUnloaded,
   RedirectToClientRouteIfNotProxied,
-  EndRequestsToBlocklistedHosts,
+  EndRequestsToBlockedHosts,
   MaybeEndRequestWithBufferedResponse,
   StripUnsupportedAcceptEncoding,
   MaybeSetBasicAuthHeaders,

@@ -2,9 +2,9 @@ import _ from 'lodash'
 import minimatch from 'minimatch'
 import { stripProtocolAndDefaultPorts } from './uri'
 
-export function matches (urlToCheck, blocklistHosts) {
+export function matches (urlToCheck, blockHosts) {
   // normalize into flat array
-  blocklistHosts = [].concat(blocklistHosts)
+  blockHosts = [].concat(blockHosts)
 
   urlToCheck = stripProtocolAndDefaultPorts(urlToCheck)
 
@@ -14,5 +14,5 @@ export function matches (urlToCheck, blocklistHosts) {
     return minimatch(urlToCheck, hostMatcher)
   }
 
-  return _.find(blocklistHosts, matchUrl)
+  return _.find(blockHosts, matchUrl)
 }

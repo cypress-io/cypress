@@ -900,7 +900,7 @@ describe('lib/cypress', () => {
       },
       {
         old: 'blacklistHosts',
-        new: 'blocklistHosts',
+        new: 'blockHosts',
       },
     ]
 

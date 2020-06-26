@@ -1,12 +1,12 @@
 import agent from './agent'
-import * as blocklist from './blocklist'
+import * as blocked from './blocked'
 import * as connect from './connect'
 import * as cors from './cors'
 import * as uri from './uri'
 
 export {
   agent,
-  blocklist,
+  blocked,
   connect,
   cors,
   uri,

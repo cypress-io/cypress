@@ -57,7 +57,7 @@ folders.push('componentFolder')
 const configKeys = toWords(`\
 animationDistanceThreshold      fileServerFolder
 baseUrl                         fixturesFolder
-blocklistHosts
+blockHosts
 chromeWebSecurity
 modifyObstructiveCode           integrationFolder
 env                             pluginsFile
@@ -120,7 +120,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blocklistHosts: null,
+  blockHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
   socketIoRoute: '/__socket.io',
@@ -177,7 +177,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blocklistHosts: v.isStringOrArrayOfStrings,
+  blockHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
   configFile: v.isStringOrFalse,
@@ -245,7 +245,7 @@ const validateNoBreakingConfig = (cfg) => {
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
         case 'blacklistHosts':
-          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blocklistHosts')
+          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blockHosts')
         default:
       }
     }

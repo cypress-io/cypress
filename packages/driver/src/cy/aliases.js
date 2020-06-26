@@ -7,7 +7,7 @@ const aliasRe = /^@.+/
 const aliasDisplayRe = /^([@]+)/
 const requestXhrRe = /\.request$/
 
-const blocklist = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
+const reserved = ['test', 'runnable', 'timeout', 'slow', 'skip', 'inspect']
 
 const aliasDisplayName = (name) => {
   return name.replace(aliasDisplayRe, '')
@@ -39,7 +39,7 @@ const validateAlias = (alias) => {
     $errUtils.throwErrByPath('as.empty_string')
   }
 
-  if (blocklist.includes(alias)) {
+  if (reserved.includes(alias)) {
     return $errUtils.throwErrByPath('as.reserved_word', { args: { alias } })
   }
 }

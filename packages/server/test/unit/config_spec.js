@@ -649,27 +649,27 @@ describe('lib/config', () => {
         })
       })
 
-      context('blocklistHosts', () => {
+      context('blockHosts', () => {
         it('passes if a string', function () {
-          this.setup({ blocklistHosts: 'google.com' })
+          this.setup({ blockHosts: 'google.com' })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ blocklistHosts: ['google.com'] })
+          this.setup({ blockHosts: ['google.com'] })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ blocklistHosts: 5 })
+          this.setup({ blockHosts: 5 })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ blocklistHosts: [5] })
+          this.setup({ blockHosts: [5] })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')
@@ -717,8 +717,8 @@ describe('lib/config', () => {
       }
     })
 
-    it('includes blocklistHosts', function () {
-      return this.includes('blocklistHosts')
+    it('includes blockHosts', function () {
+      return this.includes('blockHosts')
     })
   })
 
@@ -957,19 +957,19 @@ describe('lib/config', () => {
       return this.defaults('supportFile', false, { supportFile: false })
     })
 
-    it('blocklistHosts=null', function () {
-      return this.defaults('blocklistHosts', null)
+    it('blockHosts=null', function () {
+      return this.defaults('blockHosts', null)
     })
 
-    it('blocklistHosts=[a,b]', function () {
-      return this.defaults('blocklistHosts', ['a', 'b'], {
-        blocklistHosts: ['a', 'b'],
+    it('blockHosts=[a,b]', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
       })
     })
 
-    it('blocklistHosts=a|b', function () {
-      return this.defaults('blocklistHosts', ['a', 'b'], {
-        blocklistHosts: ['a', 'b'],
+    it('blockHosts=a|b', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
       })
     })
 
@@ -1097,7 +1097,7 @@ describe('lib/config', () => {
             projectId: { value: null, from: 'default' },
             port: { value: 1234, from: 'cli' },
             hosts: { value: null, from: 'default' },
-            blocklistHosts: { value: null, from: 'default' },
+            blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             userAgent: { value: null, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
@@ -1173,7 +1173,7 @@ describe('lib/config', () => {
             projectId: { value: 'projectId123', from: 'env' },
             port: { value: 2020, from: 'config' },
             hosts: { value: null, from: 'default' },
-            blocklistHosts: { value: null, from: 'default' },
+            blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             userAgent: { value: null, from: 'default' },
             reporter: { value: 'spec', from: 'default' },

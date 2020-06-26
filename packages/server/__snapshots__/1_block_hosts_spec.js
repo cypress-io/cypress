@@ -1,4 +1,4 @@
-exports['e2e blocklist passes 1'] = `
+exports['e2e blockHosts passes 1'] = `
 
 ====================================================================================================
 
@@ -7,18 +7,18 @@ exports['e2e blocklist passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (blocklist_hosts_spec.coffee)                                              │
-  │ Searched:   cypress/integration/blocklist_hosts_spec.coffee                                    │
+  │ Specs:      1 found (block_hosts_spec.coffee)                                                  │
+  │ Searched:   cypress/integration/block_hosts_spec.coffee                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  blocklist_hosts_spec.coffee                                                     (1 of 1)
+  Running:  block_hosts_spec.coffee                                                         (1 of 1)
 
 
-  blocklist
-    ✓ forces blocklisted hosts to return 503
+  block hosts
+    ✓ forces blocked hosts to return 503
 
 
   1 passing
@@ -35,7 +35,7 @@ exports['e2e blocklist passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     blocklist_hosts_spec.coffee                                                      │
+  │ Spec Ran:     block_hosts_spec.coffee                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -46,7 +46,7 @@ exports['e2e blocklist passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  blocklist_hosts_spec.coffee              XX:XX        1        1        -        -        - │
+  │ ✔  block_hosts_spec.coffee                  XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
