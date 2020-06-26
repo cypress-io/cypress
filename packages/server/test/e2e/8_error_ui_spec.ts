@@ -44,7 +44,7 @@ describe('e2e error ui', function () {
   e2e.it('displays correct UI for errors in custom commands', {
     spec: 'various_failures_custom_commands_spec.js',
     expectedExitCode: VARIOUS_FAILURES_EXPECTED_FAILURES,
-    timeout: 240000, // 4 minutes
+    timeout: 300000, // 5 minutes
     noTypeScript: true,
     onRun (exec) {
       return exec().then(verifyPassedAndFailedAreSame(VARIOUS_FAILURES_EXPECTED_FAILURES))
