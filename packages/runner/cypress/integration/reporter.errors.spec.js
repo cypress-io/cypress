@@ -577,7 +577,7 @@ describe('errors ui', () => {
         'The following error originated from your application code',
         'qux is not defined',
       ],
-      regex: /localhost\:\d+\/fixtures\/generic.html:\d+:\d+/,
+      regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
       hasCodeFrame: false,
       verifyOpenInIde: false,
     })
@@ -589,7 +589,7 @@ describe('errors ui', () => {
         'The following error originated from your application code',
         'qax is not defined',
       ],
-      regex: /localhost\:\d+\/fixtures\/generic.html:\d+:\d+/,
+      regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
       hasCodeFrame: false,
       verifyOpenInIde: false,
     })

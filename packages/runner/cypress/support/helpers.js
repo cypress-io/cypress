@@ -249,7 +249,7 @@ function createCypress () {
         .yieldsAsync({ response: {
           isOkStatusCode: true,
           isHtml: true,
-          url: 'http://localhost:3500/fixtures/generic.html',
+          url: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
         } })
 
         .withArgs('set:runnables')

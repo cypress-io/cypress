@@ -5,10 +5,8 @@ export const getCommandLogWithText = (text) => {
   cy.$$('.runnable-active .runnable-wrapper:not(.is-open)', top.document).click()
 
   return cy
-  .$$(`.runnable-active .command-wrapper:contains(${text})`, top.document)
-  .parentsUntil('li')
-  .last()
-  .parent()
+  .$$(`.runnable-active .command-method:contains(${text})`, top.document)
+  .closest('.command')
 }
 
 export const findReactInstance = function (dom) {
@@ -27,7 +25,6 @@ export const clickCommandLog = (sel) => {
   .then(() => {
     return withMutableReporterState(() => {
       const commandLogEl = getCommandLogWithText(sel)
-
       const reactCommandInstance = findReactInstance(commandLogEl[0])
 
       if (!reactCommandInstance) {
