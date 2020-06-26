@@ -250,8 +250,6 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
     })
   }
 
-  win.webContents.id = _.uniqueId('webContents')
-
   // enable our url to be a promise
   // and wait for this to be resolved
   return Bluebird.join(
