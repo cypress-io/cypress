@@ -158,7 +158,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
 
       // normalize stack
       if (attempt.error) {
-        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack)
+        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
       }
 
       if (attempt.wallClockStartedAt) {

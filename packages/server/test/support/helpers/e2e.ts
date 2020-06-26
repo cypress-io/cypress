@@ -54,15 +54,10 @@ const replaceStackTraceLines = (str) => {
     let post = parts[4]
 
     if (isFirefoxStack) {
-      // TODO: find a cleaner way to get a consistently padded replaced stacktrace message
-      if (parts[0] && !parts[0].endsWith('    ')) {
-        parts[0] += '    '
-      }
-
       post = post.replace(whiteSpaceBetweenNewlines, '\n')
     }
 
-    return `${parts[0]}[stack trace lines]${post}`
+    return `\n      [stack trace lines]${post}`
   })
 }
 
