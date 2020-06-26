@@ -12,11 +12,9 @@ it('calls callbacks on mount and unmount', () => {
     expect(onMount).to.have.been.calledOnce
     expect(onUnmount).to.have.not.been.called
   })
-  cy.contains('Component with')
-    .should('be.visible')
-    .then(unmount)
-    .then(() => {
-      expect(onUnmount).to.have.been.calledOnce
-    })
+  cy.contains('Component with').should('be.visible')
+  unmount().then(() => {
+    expect(onUnmount).to.have.been.calledOnce
+  })
   cy.contains('Component with').should('not.exist')
 })

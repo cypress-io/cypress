@@ -19,8 +19,9 @@ describe('Renderless component', () => {
       .trigger('mousemove')
       .then(() => {
         expect(onMoved).to.have.been.calledWith(true)
-        unmount()
       })
+
+    unmount()
 
     cy.get('@log')
       .its('callCount')
