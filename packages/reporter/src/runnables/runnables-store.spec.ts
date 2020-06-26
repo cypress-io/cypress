@@ -80,7 +80,7 @@ describe('runnables store', () => {
       expect(instance.runnables.length).to.equal(3)
       expect(instance.runnables[0].title).to.equal('test 1')
       expect((instance.runnables[1] as SuiteModel).children.length).to.equal(4)
-      expect((instance.runnables[2] as SuiteModel).children.length).to.equal('1')
+      expect((instance.runnables[2] as SuiteModel).children.length).to.equal(1)
     })
 
     it('sets the appropriate types', () => {
@@ -96,17 +96,17 @@ describe('runnables store', () => {
       rootRunnable.tests![0].commands = [createCommand('1', '1')]
       rootRunnable.tests![0].routes = [createRoute('1', '1'), createRoute('2', '1')]
       instance.setRunnables(rootRunnable)
-      expect((instance.runnables[0] as TestModel).lastAttempt.agents.length).to.equal('3')
-      expect((instance.runnables[0] as TestModel).lastAttempt.commands.length).to.equal('1')
-      expect((instance.runnables[0] as TestModel).lastAttempt.routes.length).to.equal('2')
+      expect((instance.runnables[0] as TestModel).lastAttempt.agents.length).to.equal(3)
+      expect((instance.runnables[0] as TestModel).lastAttempt.commands.length).to.equal(1)
+      expect((instance.runnables[0] as TestModel).lastAttempt.routes.length).to.equal(2)
     })
 
     it('sets the appropriate nesting levels', () => {
       instance.setRunnables(createRootRunnable())
       expect(instance.runnables[0].level).to.equal(0)
       expect(instance.runnables[1].level).to.equal(0)
-      expect((instance.runnables[1] as SuiteModel).children[0].level).to.equal('1')
-      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].level).to.equal('2')
+      expect((instance.runnables[1] as SuiteModel).children[0].level).to.equal(1)
+      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].level).to.equal(2)
     })
 
     it('sets .isReady flag', () => {
