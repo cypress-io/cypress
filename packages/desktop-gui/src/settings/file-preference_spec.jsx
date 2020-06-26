@@ -42,7 +42,5 @@ describe('FilePreference', () => {
     cy.log('**Editors loaded**')
     cy.get('.loading-editors').should('not.be.visible')
     cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
-
-    cy.percySnapshot()
   })
 })
