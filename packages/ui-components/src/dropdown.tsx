@@ -1,31 +1,36 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import PropTypes from 'prop-types'
-import React, { Component } from 'react'
+import React, { Component, ReactNode } from 'react'
 import { findDOMNode } from 'react-dom'
 
-class Dropdown extends Component {
+interface Indexable {
+  [key: string]: any
+}
+
+interface Props {
+  className?: string
+  chosen: Indexable
+  others: Indexable[]
+  onSelect: (item: Indexable) => any
+  renderItem: (item: Indexable) => ReactNode
+  keyProperty: string
+  disabled?: boolean
+  document: Document
+}
+
+class Dropdown extends Component<Props> {
   static defaultProps = {
     className: '',
     document,
   }
 
-  static propTypes = {
-    className: PropTypes.string,
-    chosen: PropTypes.object.isRequired,
-    others: PropTypes.arrayOf(PropTypes.object).isRequired,
-    onSelect: PropTypes.func.isRequired,
-    renderItem: PropTypes.func.isRequired,
-    // property for unique value on each item that can be used as its key
-    keyProperty: PropTypes.string.isRequired,
-    disabled: PropTypes.bool,
-  }
-
   state = { open: false }
 
+  outsideClickHandler: (e: Event) => void = () => {}
+
   componentDidMount () {
-    this.outsideClickHandler = (e) => {
-      if (!findDOMNode(this).contains(e.target)) {
+    this.outsideClickHandler = (e: Event) => {
+      if (!findDOMNode(this)?.contains(e.target as Node)) {
         this.setState({ open: false })
       }
     }
@@ -76,7 +81,7 @@ class Dropdown extends Component {
 
     return (
       <span className='dropdown-toggle'>
-        <span className='dropdown-caret'></span>
+        <span className='dropdown-caret' />
         <span className='sr-only'>Toggle Dropdown</span>
       </span>
     )
@@ -94,7 +99,7 @@ class Dropdown extends Component {
         {_.map(this.props.others, (item) => (
           <li
             key={item[this.props.keyProperty]}
-            tabIndex='0'
+            tabIndex={0}
             onClick={() => this._onSelect(item)}
           >{this.props.renderItem(item)}</li>
         ))}
@@ -102,7 +107,7 @@ class Dropdown extends Component {
     )
   }
 
-  _onSelect (item) {
+  _onSelect (item: object) {
     this.setState({ open: false })
     this.props.onSelect(item)
   }

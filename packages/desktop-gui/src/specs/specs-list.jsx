@@ -5,6 +5,7 @@ import { observer } from 'mobx-react'
 import Loader from 'react-loader'
 import Tooltip from '@cypress/react-tooltip'
 
+import FileOpener from './file-opener'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allSpecsSpec } from './specs-store'
@@ -28,7 +29,7 @@ class SpecsList extends Component {
             'show-clear-filter': !!specsStore.filter,
           })}>
             <label htmlFor='filter'>
-              <i className='fas fa-search'></i>
+              <i className='fas fa-search' />
             </label>
             <input
               id='filter'
@@ -49,7 +50,7 @@ class SpecsList extends Component {
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)}
             title="Run all integration specs together"
             className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
-            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`}></i>{' '}
+            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
             {allSpecsSpec.displayName}
           </a>
         </header>
@@ -140,8 +141,8 @@ class SpecsList extends Component {
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
           <div className="folder-name" onClick={this._selectSpecFolder.bind(this, spec)}>
-            <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`}></i>
-            {nestingLevel !== 0 ? <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`}></i> : null}
+            <i className={`folder-collapse-icon fas fa-fw ${isExpanded ? 'fa-caret-down' : 'fa-caret-right'}`} />
+            {nestingLevel !== 0 ? <i className={`far fa-fw ${isExpanded ? 'fa-folder-open' : 'fa-folder'}`} /> : null}
             {
               nestingLevel === 0 ?
                 <>
@@ -172,19 +173,21 @@ class SpecsList extends Component {
   }
 
   _specContent (spec, nestingLevel) {
+    const fileDetails = {
+      absoluteFile: spec.absolute,
+      originalFile: spec.relative,
+      relativeFile: spec.relative,
+    }
+
     return (
-      <li key={spec.path} className={`file level-${nestingLevel}`}>
-        <a href='#' onClick={this._selectSpec.bind(this, spec)} className={cs({ active: specsStore.isChosen(spec) })}>
-          <div>
-            <div className="file-name">
-              <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`}></i>
-              {spec.displayName}
-            </div>
-          </div>
-          <div>
-            <div></div>
+      <li key={spec.path} className={cs(`file level-${nestingLevel}`, { active: specsStore.isChosen(spec) })}>
+        <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
+          <div className="file-name">
+            <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`} />
+            {spec.displayName}
           </div>
         </a>
+        <FileOpener fileDetails={fileDetails} className="file-open-in-ide" />
       </li>
     )
   }
@@ -200,7 +203,7 @@ class SpecsList extends Component {
             </code>
           </h5>
           <a className='helper-docs-link' onClick={this._openHelp}>
-            <i className='fas fa-question-circle'></i>{' '}
+            <i className='fas fa-question-circle' />{' '}
               Need help?
           </a>
         </div>
