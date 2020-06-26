@@ -28,10 +28,12 @@
     line-height: 18px;
     padding-left: 0;
 
-    &.hover {
+    .runnable-wrapper:hover {
       background-color: #f7f8f9;
       cursor: pointer;
+    }
 
+    &.hover {
       > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
       }
@@ -138,14 +140,14 @@
       }
     }
 
-    &.runnable-passed > .runnable-wrapper {
+    &.test.runnable-passed {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
         color: $pass;
       }
     }
 
-    &.runnable-pending > .runnable-wrapper {
+    &.test.runnable-pending {
       .runnable-title {
         color: lighten($pending, 25%);
       }
@@ -176,7 +178,9 @@
   }
 
   .collapsible > .runnable-instruments {
+    float: left;
     padding-right: 15px;
+    width: 100%;
   }
 
   .runnable-title {
