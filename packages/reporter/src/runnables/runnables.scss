@@ -178,9 +178,7 @@
   }
 
   .collapsible > .runnable-instruments {
-    float: left;
     padding-right: 15px;
-    width: 100%;
   }
 
   .runnable-title {
@@ -232,8 +230,13 @@
     visibility: visible;
   }
 
-  .test .collapsible-header-inner {
-    width: 100%;
+  .test .collapsible {
+    display: flex;
+    flex-direction: column;
+
+    .collapsible-header-inner {
+      width: 100%;
+    }
   }
 
   .collapsible-header {

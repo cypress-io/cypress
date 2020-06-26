@@ -69,7 +69,9 @@ class Test extends Component<Props> {
     const { isActive, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+      window.requestAnimationFrame(() => {
+        scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+      })
     }
   }
 
