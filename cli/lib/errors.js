@@ -9,13 +9,36 @@ const state = require('./tasks/state')
 
 const docsUrl = 'https://on.cypress.io'
 const requiredDependenciesUrl = `${docsUrl}/required-dependencies`
+const runDocumentationUrl = `${docsUrl}/cypress-run`
 
 // TODO it would be nice if all error objects could be enforced via types
 // to only have description + solution properties
 
 const hr = '----------'
 
+const genericErrorSolution = stripIndent`
+  Search for an existing issue or open a GitHub issue at
+
+    ${chalk.blue(util.issuesUrl)}
+`
+
 // common errors Cypress application can encounter
+const unknownError = {
+  description: 'Unknown Cypress CLI error',
+  solution: genericErrorSolution,
+}
+
+const invalidRunProjectPath = {
+  description: 'Invalid --project path',
+  solution: stripIndent`
+    Please provide a valid project path.
+
+    Learn more about ${chalk.cyan('cypress run')} at:
+
+      ${chalk.blue(runDocumentationUrl)}
+  `,
+}
+
 const failedDownload = {
   description: 'The Cypress App could not be downloaded.',
   solution: stripIndent`
@@ -26,11 +49,7 @@ const failedDownload = {
 
 const failedUnzip = {
   description: 'The Cypress App could not be unzipped.',
-  solution: stripIndent`
-    Search for an existing issue or open a GitHub issue at
-
-      ${chalk.blue(util.issuesUrl)}
-  `,
+  solution: genericErrorSolution,
 }
 
 const missingApp = (binaryDir) => {
@@ -390,6 +409,7 @@ module.exports = {
   getError,
   hr,
   errors: {
+    unknownError,
     nonZeroExitCodeXvfb,
     missingXvfb,
     missingApp,
@@ -408,5 +428,6 @@ module.exports = {
     smokeTestFailure,
     childProcessKilled,
     incompatibleHeadlessFlags,
+    invalidRunProjectPath,
   },
 }

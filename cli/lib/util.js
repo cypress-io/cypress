@@ -214,6 +214,7 @@ const parseOpts = (opts) => {
     'parallel',
     'port',
     'project',
+    'quiet',
     'reporter',
     'reporterOptions',
     'record',

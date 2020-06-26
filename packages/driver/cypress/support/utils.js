@@ -1,6 +1,9 @@
 const { $, _, Promise } = Cypress
 
 export const getCommandLogWithText = (text) => {
+  // Open current test if not already open, so we can find the command log
+  cy.$$('.runnable-active .runnable-wrapper:not(.is-open)', top.document).click()
+
   return cy
   .$$(`.runnable-active .command-wrapper:contains(${text})`, top.document)
   .parentsUntil('li')
@@ -9,7 +12,7 @@ export const getCommandLogWithText = (text) => {
 }
 
 export const findReactInstance = function (dom) {
-  let key = Object.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
+  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null

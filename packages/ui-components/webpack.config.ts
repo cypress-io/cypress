@@ -15,7 +15,6 @@ const config: webpack.Configuration = {
   },
 }
 
-// @ts-ignore
 config.plugins = [
   // @ts-ignore
   ...config.plugins,

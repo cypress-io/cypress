@@ -109,6 +109,7 @@ const descriptions = {
   parallel: 'enables concurrent runs and automatic load balancing of specs across multiple machines or processes',
   port: 'runs Cypress on a specific port. overrides any value in cypress.json.',
   project: 'path to the project',
+  quiet: 'run quietly, using only the configured reporter',
   record: 'records the run. sends test results, screenshots and videos to your Cypress Dashboard.',
   reporter: 'runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"',
   reporterOptions: 'options for the mocha reporter. defaults to "null"',
@@ -231,6 +232,7 @@ module.exports = {
     .option('--parallel', text('parallel'))
     .option('-p, --port <port>', text('port'))
     .option('-P, --project <project-path>', text('project'))
+    .option('-q, --quiet', text('quiet'))
     .option('--record [bool]', text('record'), coerceFalse)
     .option('-r, --reporter <reporter>', text('reporter'))
     .option('-o, --reporter-options <reporter-options>', text('reporterOptions'))
