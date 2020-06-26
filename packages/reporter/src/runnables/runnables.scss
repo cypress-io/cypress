@@ -71,7 +71,7 @@
       color: #bbbcbd;
     }
 
-    &.runnable-processing > .runnable-wrapper {
+    &.test.runnable-processing {
       .runnable-state {
         @extend .far;
         line-height: 18px; // @extend .far overrides line-height, so we need to set it again
