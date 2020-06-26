@@ -1,17 +1,23 @@
 import cs from 'classnames'
-import React, { useRef } from 'react'
+import React, { KeyboardEvent, ReactNode, useRef } from 'react'
 import { partial, uniqueId } from 'lodash'
 import VisuallyHidden from '@reach/visually-hidden'
 
 import useSelect from './use-select'
 
-const SelectItem = ({ value, children, selectItem, ...rest }) => {
+interface Props {
+  value: string
+  children?: ReactNode
+  selectItem?: boolean
+}
+
+const SelectItem = ({ value, children, selectItem, ...rest }: Props) => {
   const { name, handleChange, handleKeyDown, isSelected } = useSelect()
-  const liRef = useRef()
-  const inputRef = useRef()
+  const liRef = useRef(null)
+  const inputRef = useRef(null)
   const id = uniqueId('select-item-')
 
-  const onKeyDown = (e) => {
+  const onKeyDown = (e: KeyboardEvent) => {
     // ensure it's not an element in children that's being keyed down
     if (e.target && e.target !== liRef.current && e.target !== inputRef.current) {
       return
@@ -40,6 +46,9 @@ const SelectItem = ({ value, children, selectItem, ...rest }) => {
           name={name}
           type='radio'
           value={value}
+          // style required to prevent an error from being thrown
+          // when used inside of a dialog (ex. editor picker modal)
+          style={{ margin: 0 }}
         />
       </VisuallyHidden>
       {children}
