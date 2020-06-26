@@ -1,11 +1,11 @@
 const { $, _, Promise } = Cypress
 
-export const getCommandLogWithText = (text) => {
+export const getCommandLogWithText = (command, type = 'method') => {
   // Open current test if not already open, so we can find the command log
   cy.$$('.runnable-active .runnable-wrapper:not(.is-open)', top.document).click()
 
   return cy
-  .$$(`.runnable-active .command-method:contains(${text})`, top.document)
+  .$$(`.runnable-active .command-${type}:contains(${command})`, top.document)
   .closest('.command')
 }
 
@@ -20,11 +20,11 @@ export const findReactInstance = function (dom) {
     : internalInstance.return.stateNode
 }
 
-export const clickCommandLog = (sel) => {
+export const clickCommandLog = (sel, type) => {
   return cy.wait(10)
   .then(() => {
     return withMutableReporterState(() => {
-      const commandLogEl = getCommandLogWithText(sel)
+      const commandLogEl = getCommandLogWithText(sel, type)
       const reactCommandInstance = findReactInstance(commandLogEl[0])
 
       if (!reactCommandInstance) {

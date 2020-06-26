@@ -127,7 +127,7 @@ const ensureCorrectHighlightPositions = (sel) => {
 const getAndPin = (sel) => {
   cy.get(sel)
 
-  clickCommandLog(sel)
+  clickCommandLog(sel, 'message-text')
 }
 
 const clickAndPin = (sel, ...args) => {
