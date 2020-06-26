@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const stackUtils = require('./util/stack_utils')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidently upgrading this one
 // TODO: look into upgrading this to version in driver
@@ -357,9 +358,15 @@ class Reporter {
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),
       attempts: _.map([test].concat(test.prevAttempts || []), (attempt) => {
+        const err = attempt.err && {
+          name: attempt.err.name,
+          message: attempt.err.message,
+          stack: stackUtils.stackWithoutMessage(attempt.err.stack),
+        }
+
         return {
           state: orNull(attempt.state),
-          error: orNull(attempt.err && _.pick(attempt.err, ['name', 'message', 'stack'])),
+          error: orNull(err),
           timings: orNull(attempt.timings),
           failedFromHookId: orNull(attempt.failedFromHookId),
           wallClockStartedAt: orNull(attempt.wallClockStartedAt && new Date(attempt.wallClockStartedAt)),

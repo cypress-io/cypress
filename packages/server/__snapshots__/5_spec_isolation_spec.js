@@ -68,14 +68,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
+          "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
-                "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -125,14 +125,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
+          "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
-                "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -214,14 +214,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
+          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
-                "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -320,14 +320,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        return cy.wrap(true, {\n            timeout: 100\n        }).should(\"be.false\");\n    }",
-          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying: expected true to be false\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
                 "message": "Timed out retrying: expected true to be false",
-                "stack": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -351,14 +351,14 @@ exports['e2e spec isolation fails'] = {
           ],
           "state": "failed",
           "body": "function () {\n        throw new Error(\"fails2\");\n    }",
-          "displayError": "Error: fails2\n      [stack trace lines]",
+          "displayError": "Error: fails2\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fails2",
-                "stack": "Error: fails2\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -892,14 +892,14 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
+          "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
-                "stack": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -921,7 +921,7 @@ exports['failing with retries enabled'] = {
               "error": {
                 "name": "Error",
                 "message": "fail1",
-                "stack": "Error: fail1\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -975,14 +975,14 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
+          "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
-                "stack": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -1008,7 +1008,7 @@ exports['failing with retries enabled'] = {
               "error": {
                 "name": "Error",
                 "message": "fail2",
-                "stack": "Error: fail2\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
@@ -1090,14 +1090,14 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n      [stack trace lines]",
+          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n    [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks",
-                "stack": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n      [stack trace lines]"
+                "stack": "[stack trace lines]"
               },
               "timings": {
                 "lifecycle": 100,
