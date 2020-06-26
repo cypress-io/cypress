@@ -18,11 +18,9 @@ export const verifyFailure = (options) => {
 
   regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
 
-  const testOpenInIde = (runnerWs) => {
-    expect(runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include(file)
+  const testOpenInIde = () => {
+    expect(win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include(file)
   }
-
-  const runnerWs = win.runnerWs
 
   win.runnerWs.emit.withArgs('get:user:editor')
   .yields({
@@ -61,10 +59,10 @@ export const verifyFailure = (options) => {
   .should('not.include.text', '__stackReplacementMarker')
 
   if (verifyOpenInIde) {
-    cy.contains('.runnable-err-stack-trace .runnable-err-file-path', file)
+    cy.contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
     .click()
     .should(() => {
-      testOpenInIde(runnerWs)
+      testOpenInIde()
     })
   }
 
@@ -78,11 +76,11 @@ export const verifyFailure = (options) => {
   cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
 
   if (verifyOpenInIde) {
-    cy.contains('.test-err-code-frame .runnable-err-file-path', file)
+    cy.contains('.test-err-code-frame .runnable-err-file-path a', file)
     .click()
     .should(() => {
-      expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
-      testOpenInIde(runnerWs)
+      expect(win.runnerWs.emit.withArgs('open:file')).to.be.calledTwice
+      testOpenInIde()
     })
   }
 }
