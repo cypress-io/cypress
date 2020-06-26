@@ -139,25 +139,30 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
 }
 
 /**
- * Removes the mounted component
+ * Removes the mounted component. Notice this command automatically
+ * queues up the `unmount` into Cypress chain, thus you don't need `.then`
+ * to call it.
  * @see https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/basic/unmount
  * @example
   ```
   import { mount, unmount } from 'cypress-react-unit-test'
   it('works', () => {
     mount(...)
+    // interact with the component using Cypress commands
     // whenever you want to unmount
-    cy.then(unmount)
+    unmount()
   })
   ```
  */
 export const unmount = () => {
   checkMountModeEnabled()
 
-  cy.log('unmounting...')
-  const selector = '#' + rootId
-  return cy.get(selector, { log: false }).then($el => {
-    unmountComponentAtNode($el[0])
+  return cy.then(() => {
+    cy.log('unmounting...')
+    const selector = '#' + rootId
+    return cy.get(selector, { log: false }).then($el => {
+      unmountComponentAtNode($el[0])
+    })
   })
 }
 
