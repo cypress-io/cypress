@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
@@ -7,7 +6,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import appState, { AppState } from '../lib/app-state'
 import Collapsible from '../collapsible/collapsible'
-import { indent, onEnterOrSpace } from '../lib/util'
+import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import scroller, { Scroller } from '../lib/scroller'
 
@@ -71,22 +70,10 @@ class Test extends Component<Props> {
 
     if (!model.shouldRender) return null
 
-    const header = (
-      <>
-        <i aria-hidden='true' className='runnable-state fas' />
-        <span className='runnable-title'>{model.title} <span className='visually-hidden'>{model.state}</span></span>
-        <span className='runnable-controls'>
-          <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-            <i className='fas fa-exclamation-triangle' />
-          </Tooltip>
-        </span>
-      </>
-    )
-
     return (
       <Collapsible
         ref='container'
-        header={header}
+        header={this._header()}
         headerClass='runnable-wrapper'
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
@@ -95,35 +82,20 @@ class Test extends Component<Props> {
         {this._contents()}
       </Collapsible>
     )
+  }
 
-    return (
-      <div
-        ref='container'
-        className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen() })}
-        onClick={this._toggleOpen}
-        style={{ paddingLeft: indent(model.level) }}
-      >
-        <div className='runnable-content-region'>
-          <i aria-hidden="true" className='runnable-state fas' />
-          <div
-            aria-expanded={this._shouldBeOpen() === true}
-            className='runnable-title'
-            onKeyPress={onEnterOrSpace(this._toggleOpen)}
-            role='button'
-            tabIndex={0}
-          >
-            {model.title}
-            <span className="visually-hidden">{model.state}</span>
-          </div>
-          <div className='runnable-controls'>
-            <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-              <i className='fas fa-exclamation-triangle' />
-            </Tooltip>
-          </div>
-        </div>
-        {this._contents()}
-      </div>
-    )
+  _header () {
+    const { model } = this.props
+
+    return (<>
+      <i aria-hidden='true' className='runnable-state fas' />
+      <span className='runnable-title'>{model.title} <span className='visually-hidden'>{model.state}</span></span>
+      <span className='runnable-controls'>
+        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+          <i className='fas fa-exclamation-triangle' />
+        </Tooltip>
+      </span>
+    </>)
   }
 
   _contents () {
