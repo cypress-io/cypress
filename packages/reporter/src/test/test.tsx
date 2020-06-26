@@ -78,6 +78,7 @@ class Test extends Component<Props> {
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={this._shouldBeOpen()}
+        toggleOpen={this._toggleOpen}
       >
         {this._contents()}
       </Collapsible>
@@ -99,6 +100,9 @@ class Test extends Component<Props> {
   }
 
   _contents () {
+    // performance optimization - don't render contents if not open
+    if (!this._shouldBeOpen()) return null
+
     const { model } = this.props
 
     return (

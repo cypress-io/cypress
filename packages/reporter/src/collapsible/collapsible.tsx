@@ -10,6 +10,7 @@ interface Props {
   header?: ReactNode
   headerExtras?: ReactNode
   contentClass?: string
+  toggleOpen?: (isOpen: boolean) => any
 }
 
 interface State {
@@ -66,7 +67,11 @@ class Collapsible extends Component<Props, State> {
   }
 
   _toggleOpen = () => {
-    this.setState({ isOpen: !this.state.isOpen })
+    this.setState({ isOpen: !this.state.isOpen }, () => {
+      if (this.props.toggleOpen) {
+        this.props.toggleOpen(this.state.isOpen)
+      }
+    })
   }
 
   _onClick = (e: MouseEvent) => {
