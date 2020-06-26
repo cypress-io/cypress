@@ -35,6 +35,7 @@ exports['errors individual has the following errors 1'] = [
   "incompatibleHeadlessFlags",
   "invalidCacheDirectory",
   "invalidCypressEnv",
+  "invalidRunProjectPath",
   "invalidSmokeTestDisplayError",
   "missingApp",
   "missingDependency",
@@ -44,6 +45,7 @@ exports['errors individual has the following errors 1'] = [
   "removed",
   "smokeTestFailure",
   "unexpected",
+  "unknownError",
   "versionMismatch"
 ]
 

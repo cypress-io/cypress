@@ -523,3 +523,26 @@ exports['e2e stdout / displays assertion errors'] = `
 
 
 `
+
+exports['e2e stdout respects quiet mode 1'] = `
+
+
+  stdout_passing_spec
+    file
+      ✓ visits file
+    google
+      ✓ visits google
+      ✓ google2
+    apple
+      ✓ apple1
+      ✓ visits apple
+    subdomains
+      ✓ cypress1
+      ✓ visits cypress
+      ✓ cypress3
+
+
+  8 passing
+
+
+`

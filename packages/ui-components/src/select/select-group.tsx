@@ -1,9 +1,9 @@
 import cs from 'classnames'
-import React, { Children, useCallback, useMemo } from 'react'
+import React, { Children, KeyboardEvent, ReactElement, ReactNode, useCallback, useMemo } from 'react'
 import _ from 'lodash'
 import Context from './context'
 
-const generateGroupName = (name) => {
+const generateGroupName = (name?: string) => {
   if (name) {
     return name
   }
@@ -11,12 +11,12 @@ const generateGroupName = (name) => {
   return _.uniqueId('Select-')
 }
 
-const toValues = (children) => {
-  const withSelectItem = _.filter(children, (child) => {
+const toValues = (children: ReactNode[]) => {
+  const withSelectItem = _.filter(children, (child: ReactElement) => {
     return child.props.selectItem
   })
 
-  return _.map(withSelectItem, (child) => child.props.value)
+  return _.map<any, string>(withSelectItem, (child: ReactElement) => child.props.value)
 }
 
 const left = 13
@@ -24,10 +24,18 @@ const up = 38
 const right = 39
 const down = 40
 
-const Select = ({ children, className, name, onChange, value }) => {
+interface Props {
+  children: ReactNode
+  className?: string
+  name?: string
+  onChange?: (value: string) => any
+  value: string
+}
+
+const Select = ({ children, className, name, onChange = _.noop, value }: Props) => {
   const allValues = useMemo(() => toValues(Children.toArray(children)), [children])
 
-  const handleKeyDown = useCallback(({ keyCode }) => {
+  const handleKeyDown = useCallback(({ keyCode }: KeyboardEvent) => {
     if (![left, up, right, down].includes(keyCode)) {
       return
     }
@@ -65,10 +73,6 @@ const Select = ({ children, className, name, onChange, value }) => {
       </ul>
     </Context.Provider>
   )
-}
-
-Select.defaultProps = {
-  onChange: _.noop,
 }
 
 export default Select
