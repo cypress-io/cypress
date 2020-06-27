@@ -223,7 +223,16 @@ workflows:
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-testing-with-applitools
-          command: npm test
+          # to correctly run this job, we need Applitools token
+          # external pull requests do not have environment variables set
+          # thus the job will always fail. Let's skip this job if the
+          # environment variable is missing
+          command: |
+            if [ -z "$APPLITOOLS_API_KEY" ]; then
+              echo "Skipping Applitools test job, missing environment variable APPLITOOLS_API_KEY"
+            else
+              npm test
+            fi
           store_artifacts: true
 
       - cypress/run:
