@@ -291,6 +291,8 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   ✓ cy.screenshot() - replacement
   ✓ cy.screenshot() - ignored values
   ✓ cy.screenshot() - invalid return
+  (Attempt 1 of 3) failure screenshot - rename
+  (Attempt 2 of 3) failure screenshot - rename
   1) failure screenshot - rename
 
   3 passing
@@ -311,7 +313,7 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  4                                                                                │
+  │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     after_screenshot_spec.coffee                                                     │
@@ -323,7 +325,6 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/ignored-values.png          (YxX)
   -  /XXX/XXX/XXX/cypress/screenshots/after_screenshot_spec.coffee/invalid-return.png          (YxX)
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (YxX)
 
 
   (Video)

@@ -916,7 +916,16 @@ module.exports = {
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
-          screenshots.push(this.screenshotMetadata(data, resp))
+          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
+
+          if (existingScreenshot !== -1) {
+            // NOTE: saving screenshots to the same path with overwrite the previous one
+            // so we shouldn't report more screenshots than exist on disk.
+            // this happens when cy.screenshot is used in a retried test
+            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
+          } else {
+            screenshots.push(this.screenshotMetadata(data, resp))
+          }
         }
 
         return resp
