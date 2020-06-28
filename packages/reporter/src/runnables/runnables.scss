@@ -33,7 +33,7 @@
       cursor: pointer;
     }
 
-    &.hover {
+    &.test.hover {
       > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
       }
