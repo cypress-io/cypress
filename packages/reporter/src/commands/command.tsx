@@ -134,6 +134,7 @@ interface Props {
   appState: AppState
   events: Events
   runnablesStore: RunnablesStore
+  style?: React.CSSProperties
 }
 
 @observer
@@ -148,11 +149,12 @@ class Command extends Component<Props> {
   }
 
   render () {
-    const { model, aliasesWithDuplicates } = this.props
+    const { model, aliasesWithDuplicates, style } = this.props
     const message = model.displayMessage
 
     return (
       <li
+        style={style}
         className={cs(
           'command',
           `command-name-${model.name ? nameClassName(model.name) : ''}`,
