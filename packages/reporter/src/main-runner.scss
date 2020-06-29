@@ -3,7 +3,6 @@
 @import 'lib/variables';
 @import 'lib/base';
 @import 'lib/tooltip';
-@import 'lib/modal';
 @import '../../../node_modules/@reach/dialog/styles.css';
-@import '../../ui-components/src/editor-picker';
+@import '../../ui-components/src/file-opener/file-opener';
 @import './!(lib)*/**/*';

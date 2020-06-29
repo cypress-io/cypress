@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
-import FileOpener from '../opener/file-opener'
+import FileOpener from '../lib/file-opener'
 import Err from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/

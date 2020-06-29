@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import Prism from 'prismjs'
 
 import { CodeFrame } from './err-model'
-import FileOpener from '../opener/file-opener'
+import FileOpener from '../lib/file-opener'
 
 interface Props {
   codeFrame: CodeFrame
