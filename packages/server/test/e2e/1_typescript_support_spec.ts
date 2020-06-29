@@ -44,4 +44,14 @@ describe('e2e typescript', function () {
       snapshot('typescript with tsconfig run', runSummary)
     })
   })
+
+  it('esModuleInterop: false => direct import fails', function () {
+    const projPath = Fixtures.projectPath('ts-proj-esmoduleinterop-false')
+
+    return e2e.exec(this, {
+      project: projPath,
+      snapshot: true,
+      expectedExitCode: 1,
+    })
+  })
 })

@@ -242,3 +242,16 @@ exports['typescript with tsconfig run'] = `
 
 
 `
+
+exports['e2e typescript esModuleInterop: false => direct import fails 1'] = `
+The plugins file is missing or invalid.
+
+Your \`pluginsFile\` is set to \`/foo/bar/.projects/ts-proj-esmoduleinterop-false/cypress/plugins/index.ts\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\` or \`.coffee\` file.
+
+Or you might have renamed the extension of your \`pluginsFile\` to \`.ts\`. If that's the case, restart the test runner.
+
+Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.
+
+ TypeError: Cannot read property 'add' of undefined
+      [stack trace lines]
+`
