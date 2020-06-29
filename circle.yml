@@ -726,6 +726,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -733,38 +736,6 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs
-
-  desktop-gui-visual-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          # to tie Percy builds together, use environment variables
-          # https://docs.percy.io/docs/parallel-test-suites
-          # we can use workflow id and list number of jobs with Percy screenshots
-          # if we allow Percy snapshots in more jobs, use the same
-          # PERCY_* variables in all of them
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
-            yarn percy exec -- \
-            yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   desktop-gui-component-tests:
@@ -793,7 +764,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
+            PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
             yarn cypress:run --spec 'src/**/*_spec.jsx'
           working_directory: packages/desktop-gui
@@ -851,6 +822,13 @@ jobs:
       - run:
           command: node index.js
           working_directory: packages/launcher
+
+  finalize-percy:
+    <<: *defaults
+    steps:
+      - run:
+          name: "finalizes percy builds"
+          command: npx percy finalize --all
 
   build-binary:
     <<: *defaults
@@ -1575,9 +1553,6 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
-    - desktop-gui-visual-tests:
-        requires:
-          - build
     - desktop-gui-component-tests:
         requires:
           - build
@@ -1590,6 +1565,13 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
+    - percy-finalize:
+        requires:
+          - desktop-gui-integration-tests-2x
+          - desktop-gui-component-tests
+          - cli-visual-tests
+
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
