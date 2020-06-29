@@ -220,7 +220,8 @@ describe('cypress', function () {
         const args = 'cypress run --config baseUrl=localhost,video=true'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
-        // ? should we convert the list of config values to an object
+        // we don't need to convert the config into an object
+        // since the logic inside cypress.run handles that
         expect(options).to.deep.equal({
           config: 'baseUrl=localhost,video=true',
         })
@@ -230,7 +231,8 @@ describe('cypress', function () {
         const args = 'cypress run --env MY_NUMBER=42,MY_FLAG=true'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
-        // ? should we convert the --env parameter to an object
+        // we don't need to convert the environment into an object
+        // since the logic inside cypress.run handles that
         expect(options).to.deep.equal({
           env: 'MY_NUMBER=42,MY_FLAG=true',
         })
