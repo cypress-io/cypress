@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Isolated Runner Fixture</title>
+  </head>
+  <body>
+    <div>
+      <button class="trigger-sync-error">Trigger Sync Error</button>
+      <button class="trigger-async-error">Trigger Async Error</button>
+    </div>
+
+    <script>
+      document.querySelector(".trigger-sync-error").addEventListener('click', function () {
+        syncReference.error()
+      })
+
+      document.querySelector(".trigger-async-error").addEventListener('click', function () {
+        setTimeout(function () {
+          asyncReference.error()
+        })
+      })
+    </script>
+  </body>
+</html>
