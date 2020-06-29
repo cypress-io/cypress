@@ -465,7 +465,7 @@ class Reporter {
     return _.uniq([
       path.resolve(projectRoot, reporterName),
       path.resolve(projectRoot, 'node_modules', reporterName),
-      require.resolve && require.resolve(reporterName),
+      require.resolve && require.resolve(reporterName, {paths: [projectRoot]}),
     ])
   }
 }
