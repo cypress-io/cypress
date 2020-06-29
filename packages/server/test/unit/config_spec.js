@@ -1079,6 +1079,17 @@ describe('lib/config', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/6892
+    it('warns if experimentalGetCookiesSameSite is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalGetCookiesSameSite', true, {
+        experimentalGetCookiesSameSite: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {

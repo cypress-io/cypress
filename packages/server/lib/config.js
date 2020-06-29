@@ -93,7 +93,8 @@ configKeys.push('componentFolder')
 const breakingConfigKeys = toWords(`\
 videoRecording
 screenshotOnHeadlessFailure
-trashAssetsBeforeHeadlessRuns\
+trashAssetsBeforeHeadlessRuns
+experimentalGetCookiesSameSite\
 `)
 
 // Internal configuration properties the user should be able to overwrite
@@ -248,7 +249,10 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'experimentalGetCookiesSameSite':
+          return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
         default:
+          throw new Error(`unknown breaking config key ${key}`)
       }
     }
   })
