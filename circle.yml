@@ -201,7 +201,7 @@ commands:
       Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
     parameters:
       repo:
-        description: "Name of the github repo to clone like: cypressio/cypress-example-kitchensink"
+        description: "Name of the github repo to clone like: cypress-io/cypress-example-kitchensink"
         type: string
     steps:
       - attach_workspace:
@@ -217,7 +217,7 @@ commands:
       and runs the new version of Cypress against it.
     parameters:
       repo:
-        description: Name of the repo like "cypress-example-kitchensink"
+        description: "Name of the github repo to clone like: cypress-io/cypress-example-kitchensink"
         type: string
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
@@ -1329,14 +1329,14 @@ jobs:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-recipes
+          repo: cypress-io/cypress-example-recipes
           command: npm run test:ci:firefox
 
   test-binary-against-recipe-pull-request:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-recipes
+          repo: cypress-io/cypress-example-recipes
           command: npm run test:ci
           pull_request_id: 503
           folder: examples/stubbing-spying__window-fetch
@@ -1345,42 +1345,42 @@ jobs:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-kitchensink
+          repo: cypress-io/cypress-example-kitchensink
           browser: "electron"
 
   test-binary-against-awesome-typescript-loader:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-test-awesome-typescript-loader
+          repo: cypress-io/cypress-test-awesome-typescript-loader
           browser: "electron"
 
   "test-binary-against-kitchensink-firefox":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-kitchensink
+          repo: cypress-io/cypress-example-kitchensink
           browser: firefox
 
   "test-binary-against-kitchensink-chrome":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-kitchensink
+          repo: cypress-io/cypress-example-kitchensink
           browser: chrome
 
   "test-binary-against-todomvc-firefox":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-todomvc
+          repo: cypress-io/cypress-example-todomvc
           browser: firefox
 
   "test-binary-against-documentation-firefox":
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-documentation
+          repo: cypress-io/cypress-documentation
           browser: firefox
           command: "npm run cypress:run"
 
@@ -1388,7 +1388,7 @@ jobs:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-realworld
+          repo: cypress-io/cypress-example-realworld
           browser: firefox
           command: "npm run cypress:run"
 
@@ -1396,7 +1396,7 @@ jobs:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-api-testing
+          repo: cypress-io/cypress-example-api-testing
           browser: firefox
           command: "npm run cy:run"
 
@@ -1404,7 +1404,7 @@ jobs:
     <<: *defaults
     steps:
       - test-binary-against-repo:
-          repo: cypress-example-piechopper
+          repo: cypress-io/cypress-example-piechopper
           browser: firefox
           command: "npm run cypress:run"
 
