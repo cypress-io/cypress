@@ -1,7 +1,11 @@
 import _ from 'lodash'
 import React from 'react'
 
-const families = {
+interface FamilyOptions {
+  [key: string]: RegExp
+}
+
+const families: FamilyOptions = {
   chrome: /^chrome/i,
   chromium: /^chromium/i,
   edge: /^edge/i,
@@ -9,7 +13,11 @@ const families = {
   firefox: /^firefox/i,
 }
 
-const logoPaths = {
+interface LogoOptions {
+  [key: string]: string
+}
+
+const logoPaths: LogoOptions = {
   canary: require('browser-logos/src/chrome-canary/chrome-canary_32x32.png'),
   chrome: require('browser-logos/src/chrome/chrome_32x32.png'),
   chromium: require('browser-logos/src/chromium/chromium_32x32.png'),
@@ -23,24 +31,30 @@ const logoPaths = {
   firefoxNightly: require('browser-logos/src/firefox-nightly/firefox-nightly_32x32.png'),
 }
 
-const familyFallback = (browserKey) => {
+const familyFallback = (browserKey: string) => {
   return _.reduce(families, (found, regex, family) => {
-    if (found) return found
+    if (found !== '') return found
 
     if (regex.test(browserKey)) return family
-  }, null)
+
+    return ''
+  }, '')
 }
 
-const logoPath = (browserName) => {
+const logoPath = (browserName: string) => {
   const browserKey = _.camelCase(browserName)
 
   return logoPaths[browserKey] || logoPaths[familyFallback(browserKey)]
 }
 
+interface Props {
+  browserName: string
+}
+
 // browserName should be the browser's display name
-const BrowserIcon = ({ browserName }) => {
+const BrowserIcon = ({ browserName }: Props) => {
   if (logoPath(browserName)) {
-    return <img className='browser-icon' src={logoPath(browserName)} />
+    return <img className='browser-icon' src={logoPath(browserName)} alt={browserName} />
   }
 
   return <i className='browser-icon fas fa-fw fa-globe' />
