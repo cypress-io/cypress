@@ -20,7 +20,7 @@ export interface CommandProps extends InstrumentProps {
   timeout: number
   visible?: boolean
   wallClockStartedAt: string
-  hookName: string
+  hookId: string
 }
 
 export default class Command extends Instrument {

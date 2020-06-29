@@ -980,6 +980,9 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // if this isnt a hook, then the name is 'test'
       const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
 
+      // set hook id to hook id or test id
+      const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
+
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
       // of cy - since we now have a new 'test' and all of the
@@ -1073,7 +1076,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // running lifecycle events
       // and also get back a function result handler that we use as
       // an async seam
-      cy.setRunnable(runnable, hookName)
+      cy.setRunnable(runnable, hookId)
 
       // TODO: handle promise timeouts here!
       // whenever any runnable is about to run
