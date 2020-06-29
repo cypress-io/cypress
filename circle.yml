@@ -1653,11 +1653,11 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-recipe-pull-request:
-        name: Test fetch polyfill
+        name: Test cypress run parsing
         filters:
           branches:
             only:
-              - polyfill-fetch
+              - cli-to-module-api-7760
         requires:
           - build-binary
           - build-npm-package
