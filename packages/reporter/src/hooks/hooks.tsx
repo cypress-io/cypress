@@ -23,7 +23,7 @@ export interface HookProps {
 const Hook = observer(({ model }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
-      header={<HookHeader name={model.name} />}
+      header={<HookHeader name={model.hookName} />}
       headerClass='hook-name'
       isOpen={true}
     >
@@ -44,7 +44,7 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => <Hook key={hook.id} model={hook} />)}
+    {_.map(model.hooks, (hook) => <Hook key={hook.hookId} model={hook} />)}
   </ul>
 ))
 
