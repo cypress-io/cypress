@@ -1,7 +1,7 @@
-const cors = require('cors')
-const parser = require('cookie-parser')
-const session = require('express-session')
-const e2e = require('../support/helpers/e2e').default
+import cors from 'cors'
+import parser from 'cookie-parser'
+import session from 'express-session'
+import e2e from '../support/helpers/e2e'
 
 const onServer = function (app) {
   app.use(parser())
@@ -48,7 +48,7 @@ const onServer = function (app) {
     cookie: {
       sameSite: true,
     },
-  })
+  }) as Function
 
   app.get('/htmlCookies', (req, res) => {
     const {

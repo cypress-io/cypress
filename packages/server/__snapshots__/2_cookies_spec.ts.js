@@ -5,11 +5,10 @@ exports['e2e cookies with baseurl'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (cookies_spec_baseurl.coffee)                                            │
-  │ Searched:     cypress/integration/cookies_spec_baseurl.coffee                                  │
-  │ Experiments:  experimentalGetCookiesSameSite=true                                              │
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (cookies_spec_baseurl.coffee)                                              │
+  │ Searched:   cypress/integration/cookies_spec_baseurl.coffee                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 

@@ -93,7 +93,8 @@ configKeys.push('componentFolder')
 const breakingConfigKeys = toWords(`\
 videoRecording
 screenshotOnHeadlessFailure
-trashAssetsBeforeHeadlessRuns\
+trashAssetsBeforeHeadlessRuns
+experimentalGetCookiesSameSite\
 `)
 
 // Internal configuration properties the user should be able to overwrite
@@ -105,7 +106,6 @@ browsers\
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
 const experimentalConfigKeys = toWords(`\
-experimentalGetCookiesSameSite
 experimentalSourceRewriting
 experimentalComponentTesting
 experimentalShadowDomSupport
@@ -174,7 +174,6 @@ const CONFIG_DEFAULTS = {
   componentFolder: 'cypress/component',
   // TODO: example for component testing with subkeys
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
-  experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
@@ -222,7 +221,6 @@ const validationRules = {
   // validation for component testing experiment
   componentFolder: v.isStringOrFalse,
   // experimental flag validation below
-  experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,
@@ -251,7 +249,10 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'experimentalGetCookiesSameSite':
+          return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
         default:
+          throw new Error(`unknown breaking config key ${key}`)
       }
     }
   })
