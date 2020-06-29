@@ -40,6 +40,7 @@ export default class Test extends Runnable {
   @observable isOpen = false
   @observable routes: Array<Route> = []
   @observable _state?: TestState | null = null
+  @observable _invocationCount: number = 0
   type = 'test'
 
   callbackAfterUpdate: (() => void) | null = null
@@ -51,6 +52,7 @@ export default class Test extends Runnable {
     this.err.update(props.err)
 
     this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
+    this.hooks.push(new Hook({ hookId: props.id.toString(), hookName: 'test body' }))
 
     autorun(() => {
       // if at any point, a command goes long running, set isLongRunning
@@ -92,6 +94,10 @@ export default class Test extends Runnable {
 
     if (hook) {
       hook.addCommand(command)
+
+      if (!hook.invocationOrder) {
+        hook.invocationOrder = this._invocationCount++
+      }
     }
   }
 

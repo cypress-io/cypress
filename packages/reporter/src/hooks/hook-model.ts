@@ -17,6 +17,7 @@ export default class Hook implements HookDetails {
   @observable hookId: string
   @observable hookName: string
   @observable invocationDetails?: FileDetails
+  @observable invocationOrder?: number
   @observable commands: Array<CommandModel> = []
   @observable failed = false
 

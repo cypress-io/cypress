@@ -87,7 +87,7 @@ class RunnablesStore {
   }
 
   _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookDetails>, level: number) {
-    props.hooks = _.concat(props.hooks, hooks)
+    props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
 
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }

@@ -44,7 +44,7 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => <Hook key={hook.hookId} model={hook} />)}
+    {_.map(_.sortBy(_.filter(model.hooks, 'commands.length'), 'invocationOrder'), (hook) => <Hook key={hook.hookId} model={hook} />)}
   </ul>
 ))
 

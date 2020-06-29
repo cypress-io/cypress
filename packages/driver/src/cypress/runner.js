@@ -140,8 +140,13 @@ const condenseHooks = (runnable, getHookId) => {
   ))
 
   return _.map(hooks, (hook) => {
-    hook.hookId = getHookId()
-    hook.hookName = getHookName(hook)
+    if (!hook.hookId) {
+      hook.hookId = getHookId()
+    }
+
+    if (!hook.hookName) {
+      hook.hookName = getHookName(hook)
+    }
 
     return wrap(hook)
   })
