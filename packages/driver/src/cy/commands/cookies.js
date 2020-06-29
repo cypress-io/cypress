@@ -58,12 +58,6 @@ const normalizeSameSite = (sameSite) => {
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {
-  const maybeStripSameSiteProp = (cookie) => {
-    if (cookie && !Cypress.config('experimentalGetCookiesSameSite')) {
-      delete cookie.sameSite
-    }
-  }
-
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
       return Cypress.automation(event, mergeDefaults(obj))
@@ -183,8 +177,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
       .then((resp) => {
-        maybeStripSameSiteProp(resp)
-
         options.cookie = resp
 
         return resp
@@ -222,10 +214,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
       .then((resp) => {
-        if (Array.isArray(resp)) {
-          resp.forEach(maybeStripSameSiteProp)
-        }
-
         options.cookies = resp
 
         return resp
@@ -299,8 +287,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
       .then((resp) => {
-        maybeStripSameSiteProp(resp)
-
         options.cookie = resp
 
         return resp

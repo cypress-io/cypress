@@ -1,0 +1,149 @@
+@import '../select/select';
+
+$pass: #08c18d !default;
+$font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+
+.editor-picker {
+  label {
+    align-items: start;
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .other-input {
+    border: solid 1px #7e7e7e;
+    border-radius: 3px;
+    margin-left: 0.3em;
+    padding: 0.2em 0.4em;
+  }
+
+  .is-selected .other-input {
+    flex-grow: 2;
+  }
+
+  .description {
+    color: #7e7e7e;
+    font-size: 0.9em;
+  }
+
+  i.description {
+    margin-left: 0.4em;
+    margin-top: 0.1em;
+  }
+
+  span.description {
+    display: block;
+    padding-left: 5.2em;
+    width: 100%;
+  }
+}
+
+.editor-picker-modal {
+  max-width: 40em;
+
+  .editor-picker {
+    margin-bottom: 1em;
+  }
+
+  .controls {
+    > span:first-child {
+      order: 1;
+    }
+
+    button.is-disabled,
+    button.is-disabled:hover,
+    button.is-disabled:focus {
+      background: $pass !important;
+      cursor: default !important;
+      opacity: 0.5;
+    }
+
+    padding: 1em 1em 1em;
+  }
+}
+
+[data-reach-dialog-overlay] {
+  display: flex;
+  padding: 2em 0;
+  z-index: 1;
+}
+
+[data-reach-dialog-content] {
+  align-items: center;
+  background: #f8f8f8;
+  border-radius: 10px;
+  font-size: 0.9em;
+  justify-content: center;
+  margin: auto;
+  min-width: 30em;
+  padding: 2em 0 0;
+  position: relative;
+
+  @if variable-exists(open-sans) {
+    font-family: $open-sans;
+  } @else {
+    font-family: $font-sans;
+  }
+
+  h1 {
+    font-size: 1.5em;
+    padding-bottom: 0.5em;
+  }
+
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0.6em 1em;
+    line-height: 1em;
+  }
+
+  p {
+    line-height: 1.5;
+    margin-bottom: 1em;
+    color: #444;
+  }
+
+  .content {
+    padding: 0 1.2em 0.6em;
+  }
+
+  .controls {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.6em;
+
+    button {
+      border-radius: 3px;
+    }
+
+    .submit {
+      background: $pass;
+      color: #fff;
+      margin-left: 0.6em;
+      order: 1;
+
+      &:hover,
+      &:focus {
+        background: darken($pass, 10%);
+      }
+    }
+
+    .cancel {
+      background: #e3e3e3;
+
+      &:hover,
+      &:focus {
+        background: darken(#e3e3e3, 10%);
+      }
+    }
+  }
+
+  .close-button {
+    position: absolute;
+    right: 0.1em;
+    top: 0.5em;
+  }
+}
+

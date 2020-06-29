@@ -1,3 +1,4 @@
+const _ = require('lodash')
 const $window = require('./window')
 const $elements = require('./elements')
 
@@ -6,6 +7,13 @@ const getElementAtPointFromViewport = (doc, x, y) => {
 }
 
 const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
+
+const getFirstValidSizedRect = (el) => {
+  return _.find(el.getClientRects(), (rect) => {
+    // use the first rect that has a nonzero width and height
+    return rect.width && rect.height
+  }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
+}
 
 /**
  * @param {JQuery<HTMLElement>} $el
@@ -32,7 +40,7 @@ const getElementPositioning = ($el) => {
   // returns a zero length DOMRectList in that case, which becomes undefined.
   // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
   // with all properties 0'd out
-  const rect = [...el.getClientRects()].find((e) => e.width && e.height) || el.getBoundingClientRect()
+  const rect = getFirstValidSizedRect(el)
 
   // we want to return the coordinates from the autWindow to the element
   // which handles a situation in which the element is inside of a nested

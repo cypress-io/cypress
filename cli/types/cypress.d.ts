@@ -2443,12 +2443,6 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`,
-     * `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.
-     * @default false
-     */
-    experimentalGetCookiesSameSite: boolean
-    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false

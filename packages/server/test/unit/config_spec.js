@@ -1079,6 +1079,17 @@ describe('lib/config', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/6892
+    it('warns if experimentalGetCookiesSameSite is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalGetCookiesSameSite', true, {
+        experimentalGetCookiesSameSite: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1108,7 +1119,6 @@ describe('lib/config', () => {
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalGetCookiesSameSite: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
@@ -1185,7 +1195,6 @@ describe('lib/config', () => {
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalGetCookiesSameSite: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
