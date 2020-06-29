@@ -1,4 +1,5 @@
 const _ = require('lodash')
+const R = require('ramda')
 const commander = require('commander')
 const { stripIndent } = require('common-tags')
 const logSymbols = require('log-symbols')
@@ -23,6 +24,10 @@ commander.Command.prototype.unknownOption = unknownOption
 
 const coerceFalse = (arg) => {
   return arg !== 'false'
+}
+
+const coerceInt = (arg) => {
+  return typeof arg === 'string' ? parseInt(arg) : arg
 }
 
 const spaceDelimitedArgsMsg = (flag, args) => {
@@ -201,6 +206,25 @@ const addCypressRunCommand = (program) => {
   .option('--dev', text('dev'), coerceFalse)
 }
 
+/**
+ * Casts known command line options for "cypress run" to their intended type.
+ * For example if the user passes "--port 5005" the ".port" property should be
+ * a number 5005 and not a string "5005".
+ *
+ * Returns a clone of the original object.
+ */
+const castCypressRunOptions = (opts) => {
+  // only properties that have type "string | false" in our TS definition
+  // require special handling, because CLI parsing takes care of purely
+  // boolean arguments
+  const result = R.evolve({
+    port: coerceInt,
+    configFile: coerceFalse,
+  })(opts)
+
+  return result
+}
+
 module.exports = {
   /**
    * Parses Cypress RUN command line array into an object
@@ -231,7 +255,11 @@ module.exports = {
         const options = parseVariableOpts(fnArgs, cliArgs)
 
         debug('parsed options %o', options)
-        resolve(options)
+
+        const casted = castCypressRunOptions(options)
+
+        debug('casted options %o', casted)
+        resolve(casted)
       })
 
       debug('parsing args: %o', cliArgs)

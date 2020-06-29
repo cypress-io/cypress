@@ -189,10 +189,9 @@ describe('cypress', function () {
         const args = 'cypress run -b firefox -p 5005 --headed --quiet'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
-        // ? should we cast the arguments to proper types
         expect(options).to.deep.equal({
           browser: 'firefox',
-          port: '5005',
+          port: 5005,
           headed: true,
           quiet: true,
         })
@@ -212,9 +211,8 @@ describe('cypress', function () {
         const args = 'cypress run --config-file false'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
-        // ? should we cast the arguments to proper types
         expect(options).to.deep.equal({
-          configFile: 'false',
+          configFile: false,
         })
       })
 
