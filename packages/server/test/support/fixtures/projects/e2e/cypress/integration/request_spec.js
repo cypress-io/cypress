@@ -1,15 +1,8 @@
-// TODO: This file was created by bulk-decaffeinate.
-// Sanity-check the conversion and remove this comment.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 describe('redirects + requests', () => {
   it('gets and sets cookies from cy.request', () => {
     const oneMinuteFromNow = Cypress.moment().add(1, 'minute').unix()
 
-    return cy
+    cy
     .request('http://localhost:2293/')
     .request('http://localhost:2293/cookies')
     .its('body').should('deep.eq', {
@@ -39,7 +32,7 @@ describe('redirects + requests', () => {
   })
 
   it('visits to a different superdomain will be resolved twice', () => {
-    return cy
+    cy
     .visit('http://localhost:2290')
     .url()
     .should('eq', 'http://localhost:2292/')
@@ -59,7 +52,7 @@ describe('redirects + requests', () => {
   })
 
   it('automatically follows redirects', () => {
-    return cy
+    cy
     .request('http://localhost:2294/redirect')
     .then((resp) => {
       expect(resp.status).to.eq(200)
@@ -70,7 +63,7 @@ describe('redirects + requests', () => {
 
   // https://github.com/cypress-io/cypress/issues/5654
   it('can turn off following redirects that set a cookie', () => {
-    return cy
+    cy
     .request({
       url: 'http://localhost:2294/redirectWithCookie',
       followRedirect: false,
@@ -81,7 +74,7 @@ describe('redirects + requests', () => {
   })
 
   it('can turn off automatically following redirects', () => {
-    return cy
+    cy
     .request({
       url: 'http://localhost:2294/redirect',
       followRedirect: false,
@@ -95,7 +88,7 @@ describe('redirects + requests', () => {
   })
 
   it('follows all redirects even when they change methods', () => {
-    return cy
+    cy
     .request({
       method: 'POST',
       url: 'http://localhost:2294/redirectPost',
@@ -108,7 +101,7 @@ describe('redirects + requests', () => {
   })
 
   it('can submit json body', () => {
-    return cy
+    cy
     .request({
       method: 'POST',
       url: 'http://localhost:2294/json',
@@ -125,7 +118,7 @@ describe('redirects + requests', () => {
   })
 
   it('can submit form url encoded body', () => {
-    return cy
+    cy
     .request({
       method: 'POST',
       url: 'http://localhost:2294/form',
@@ -143,7 +136,7 @@ describe('redirects + requests', () => {
   })
 
   it('can send qs query params', () => {
-    return cy
+    cy
     .request({
       url: 'http://localhost:2294/params',
       qs: {
@@ -164,7 +157,7 @@ describe('redirects + requests', () => {
   })
 
   it('passes even on non 2xx or 3xx status code', () => {
-    return cy
+    cy
     .request({
       url: 'http://localhost:2294/statusCode?code=401',
       failOnStatusCode: false,
@@ -178,7 +171,7 @@ describe('redirects + requests', () => {
   })
 
   it('sets Accept header to */* by default', () => {
-    return cy
+    cy
     .request('http://localhost:2294/headers')
     .its('body')
     .its('headers')
@@ -187,7 +180,7 @@ describe('redirects + requests', () => {
   })
 
   it('can override the accept header', () => {
-    return cy
+    cy
     .request({
       url: 'http://localhost:2294/headers',
       headers: {
@@ -201,7 +194,7 @@ describe('redirects + requests', () => {
   })
 
   it('issue #375: does not duplicate request cookies on 302 redirect', () => {
-    return cy
+    cy
     .request('http://localhost:2295/login')
     .request('POST', 'http://localhost:2295/login')
     .its('body.cookie')
