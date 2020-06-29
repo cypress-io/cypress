@@ -940,7 +940,7 @@ const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => 
   if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot($el[0])) {
     activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
   } else {
-    activeElement = getNativeProp($el[0].ownerDocument, 'activeElement')
+    activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
   }
 
   if (isFocused(activeElement)) {
