@@ -31,7 +31,7 @@
             const content = this.getAttribute('content')
             const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
 
-            root.innerHTML = `<p class="${className}">${content}</p><slot></slot>`
+            root.innerHTML = `<p class="${className}">${content}</p><input /><slot></slot>`
           }
         })
       }
