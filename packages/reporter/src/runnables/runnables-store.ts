@@ -6,6 +6,7 @@ import AgentModel, { AgentProps } from '../agents/agent-model'
 import CommandModel, { CommandProps } from '../commands/command-model'
 import RouteModel, { RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
+import { HookDetails } from '../hooks/hook-model'
 import SuiteModel, { SuiteProps } from './suite-model'
 import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
 import RunnableModel from './runnable-model'
@@ -31,6 +32,7 @@ export type RunnableArray = Array<TestModel | SuiteModel>
 type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
+  hooks?: Array<HookDetails>
   tests?: Array<TestProps>
   suites?: Array<SuiteProps>
 }
@@ -73,18 +75,20 @@ class RunnablesStore {
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
-    return this._createRunnables<TestProps>('test', runnableProps.tests || [], level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], level),
+    return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level).concat(
+      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
     )
   }
 
-  _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, level: number) {
+  _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookDetails>, level: number) {
     return _.map(runnables, (runnableProps) => {
-      return this._createRunnable(type, runnableProps, level)
+      return this._createRunnable(type, runnableProps, hooks, level)
     })
   }
 
-  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, level: number) {
+  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookDetails>, level: number) {
+    props.hooks = _.concat(props.hooks, hooks)
+
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
 

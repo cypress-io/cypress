@@ -13,18 +13,20 @@ export interface HookDetails {
   invocationDetails?: FileDetails
 }
 
-export default class Hook {
-  @observable id: string
-  @observable name: string
+export default class Hook implements HookDetails {
+  @observable hookId: string
+  @observable hookName: string
+  @observable invocationDetails?: FileDetails
   @observable commands: Array<CommandModel> = []
   @observable failed = false
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: { name: string }) {
-    this.id = _.uniqueId('h')
-    this.name = props.name
+  constructor (props: HookDetails) {
+    this.hookId = props.hookId
+    this.hookName = props.hookName
+    this.invocationDetails = props.invocationDetails
   }
 
   @computed get aliasesWithDuplicates () {

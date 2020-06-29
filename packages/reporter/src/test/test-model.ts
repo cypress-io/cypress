@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { action, autorun, computed, observable, observe } from 'mobx'
 
 import Err from '../errors/err-model'
-import Hook from '../hooks/hook-model'
+import Hook, { HookDetails } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Agent, { AgentProps } from '../agents/agent-model'
@@ -16,6 +16,7 @@ export interface TestProps extends RunnableProps {
   state: TestState
   err?: Err
   isOpen?: boolean
+  hooks: Array<HookDetails>
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
@@ -24,7 +25,7 @@ export interface TestProps extends RunnableProps {
 export interface UpdatableTestProps {
   state?: TestProps['state']
   err?: TestProps['err']
-  hookName?: string
+  hookId?: string
   isOpen?: TestProps['isOpen']
 }
 
@@ -48,6 +49,8 @@ export default class Test extends Runnable {
 
     this._state = props.state
     this.err.update(props.err)
+
+    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
 
     autorun(() => {
       // if at any point, a command goes long running, set isLongRunning
@@ -82,18 +85,21 @@ export default class Test extends Runnable {
     this.routes.push(route)
   }
 
-  addCommand (command: Command, hookName: string) {
-    const hook = this._findOrCreateHook(hookName)
+  addCommand (command: Command, hookId: string) {
+    const hook = _.find(this.hooks, { hookId })
 
     this.commands.push(command)
-    hook.addCommand(command)
+
+    if (hook) {
+      hook.addCommand(command)
+    }
   }
 
   start () {
     this.isActive = true
   }
 
-  update ({ state, err, hookName, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
+  update ({ state, err, hookId, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
     let hadChanges = false
 
     const disposer = observe(this, (change) => {
@@ -118,8 +124,8 @@ export default class Test extends Runnable {
       this.isOpen = isOpen
     }
 
-    if (hookName) {
-      const hook = _.find(this.hooks, { name: hookName })
+    if (hookId) {
+      const hook = _.find(this.hooks, { hookId })
 
       if (hook) {
         hook.failed = true
@@ -153,17 +159,5 @@ export default class Test extends Runnable {
     })
     .compact()
     .last()
-  }
-
-  _findOrCreateHook (name: string) {
-    const hook = _.find(this.hooks, { name })
-
-    if (hook) return hook
-
-    const newHook = new Hook({ name })
-
-    this.hooks.push(newHook)
-
-    return newHook
   }
 }

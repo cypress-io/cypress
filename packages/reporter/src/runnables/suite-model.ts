@@ -12,13 +12,13 @@ export interface SuiteProps extends RunnableProps {
 
 export default class Suite extends Runnable {
   @observable children: Array<TestModel | Suite> = []
-  hookDetails: Array<HookDetails> = []
+  @observable hooks: Array<HookDetails> = []
   type = 'suite'
 
   constructor (props: SuiteProps, level: number) {
     super(props, level)
 
-    this.hookDetails = props.hooks
+    this.hooks = props.hooks
   }
 
   @computed get state (): TestState {
