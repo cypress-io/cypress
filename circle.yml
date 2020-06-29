@@ -1330,9 +1330,9 @@ jobs:
     steps:
       - test-binary-against-repo:
           repo: cypress-example-recipes
-          command: npm run test:ci
-          pull_request_id: 503
-          folder: examples/stubbing-spying__window-fetch
+          command: npm test
+          pull_request_id: 513
+          folder: examples/fundamentals__module-api-wrap
 
   "test-binary-against-kitchensink":
     <<: *defaults
