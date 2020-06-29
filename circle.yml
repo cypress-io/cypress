@@ -196,6 +196,21 @@ commands:
     steps:
       - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
+  clone-repo-and-checkout-release-branch:
+    description: |
+      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like: cypressio/cypress-example-kitchensink"
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Cloning test project: <<parameters.repo>>"
+          command: |
+            git clone --depth 1 --no-single-branch https://github.com/<<parameters.repo>>.git /tmp/repo
+            git checkout ${NEXT_DEV_VERSION} || true
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
@@ -232,9 +247,8 @@ commands:
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning project <<parameters.repo>>
-          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
       - when:
           condition: <<parameters.pull_request_id>>
           steps:
@@ -925,11 +939,8 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-io/cypress-example-kitchensink
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -951,11 +962,8 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-io/cypress-example-kitchensink
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -978,11 +986,8 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-io/cypress-test-tiny
       - run:
           name: Run test project
           command: |
@@ -1303,9 +1308,8 @@ jobs:
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-io/cypress-test-tiny
       - run:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
