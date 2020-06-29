@@ -43,14 +43,14 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.13.0-chrome80-ff74
+      - image: cypress/browsers:node12.14.1-chrome83-ff77
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.13.0-chrome80-ff74
+      - image: cypress/browsers:node12.14.1-chrome83-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -60,8 +60,8 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      ## Node 12.10.0 (yarn 1.17.3)
-      xcode: "11.0.0"
+      ## Node 12.12.0 (yarn 1.19.1)
+      xcode: "11.2.1"
     environment:
       PLATFORM: mac
 
@@ -1144,6 +1144,9 @@ jobs:
       - run: mkdir test-binary
       - run: node --version
       - run: npm --version
+      # TODO: this can be removed as soon as the minimum Node version is bumped to 10
+      # see https://github.com/cypress-io/cypress-docker-images/pull/332
+      - run: apt-get update && apt-get install -y libgbm-dev
       - run:
           name: Create new NPM package
           working_directory: test-binary

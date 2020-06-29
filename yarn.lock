@@ -1427,18 +1427,6 @@
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
-"@benmalka/foxdriver@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.4.0.tgz#aecd158a785a09e104da036efe7611a13af4ed11"
-  integrity sha512-Uc9n5TTRV2AhfYaqkaDc5k72pfKxyd6LDVrQJyNLZ7uY4ThgEcQMjpVRkB8C7v16gKhubH4gmD0lad5pGvDUBg==
-  dependencies:
-    fs-extra "^4.0.1"
-    get-port "^3.2.0"
-    npmlog "^4.1.2"
-    safe-buffer "^5.1.1"
-    tcp-port-used "^1.0.1"
-    tmp "0.0.33"
-
 "@chromaui/localtunnel@1.10.1":
   version "1.10.1"
   resolved "https://registry.yarnpkg.com/@chromaui/localtunnel/-/localtunnel-1.10.1.tgz#34da7dab7055a16b1b9034a9eb7e3054ebec4b98"
@@ -10597,10 +10585,10 @@ electron-to-chromium@^1.3.413:
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.441.tgz#094f71b992dca5bc96b798cfbaf37dc76302015a"
   integrity sha512-leBfJwLuyGs1jEei2QioI+PjVMavmUIvPYidE8dCCYWLAq0uefhN3NYgDNb8WxD3uiUNnJ3ScMXg0upSlwySzQ==
 
-electron@8.3.1:
-  version "8.3.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-8.3.1.tgz#79e98c4d5b8e7c09a8a811f1aa78903f0c692721"
-  integrity sha512-VZpgLVFyD2SwFDkO9rwUcNgrAMah+g38FEtALGxli8bRVTbcHl8bt21szfa0YUWpc6hWcaf6JdZjqDS5q73Bsg==
+electron@9.0.5:
+  version "9.0.5"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-9.0.5.tgz#189ee117cc2a2777cccf40fae0766acec5faae57"
+  integrity sha512-bnL9H48LuQ250DML8xUscsKiuSu+xv5umXbpBXYJ0BfvYVmFfNbG3jCfhrsH7aP6UcQKVxOG1R/oQExd0EFneQ==
   dependencies:
     "@electron/get" "^1.0.1"
     "@types/node" "^12.0.12"
@@ -12425,6 +12413,18 @@ forwarded@~0.1.2:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/forwarded/-/forwarded-0.1.2.tgz#98c23dab1175657b8c0573e8ceccd91b0ff18c84"
   integrity sha1-mMI9qxF1ZXuMBXPozszZGw/xjIQ=
+
+foxdriver@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/foxdriver/-/foxdriver-0.1.1.tgz#b66e0fb1f495b0139c7a0a5a5f31541b2adf0b23"
+  integrity sha512-ZJ6u9kzCkmDo7OVIzqF+KlMRLc+W53GCzglaLhFG1ixMliEC7o6TeucYd1XpSacpmZnPRVQE+byyR7LXC84htA==
+  dependencies:
+    fs-extra "^4.0.1"
+    get-port "^3.2.0"
+    npmlog "^4.1.2"
+    safe-buffer "^5.1.1"
+    tcp-port-used "^1.0.1"
+    tmp "0.0.33"
 
 fragment-cache@^0.2.1:
   version "0.2.1"

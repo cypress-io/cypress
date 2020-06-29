@@ -1,13 +1,17 @@
-require('../../spec_helper')
+import '../../spec_helper'
 
-const _ = require('lodash')
-const path = require('path')
-const Promise = require('bluebird')
-const EE = require('events').EventEmitter
-const { BrowserWindow } = require('electron')
+import { expect } from 'chai'
+import 'sinon-chai'
+
+import _ from 'lodash'
+import path from 'path'
+import Promise from 'bluebird'
+import { EventEmitter } from 'events'
+import { BrowserWindow } from 'electron'
+import * as Windows from '../../../lib/gui/windows'
+import savedState from '../../../lib/saved_state'
+
 const cyDesktop = require('@packages/desktop-gui')
-const Windows = require(`${root}../lib/gui/windows`)
-const savedState = require(`${root}../lib/saved_state`)
 
 const DEFAULT_USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Cypress/0.0.0 Chrome/59.0.3071.115 Electron/1.8.2 Safari/537.36'
 
@@ -15,17 +19,15 @@ describe('lib/gui/windows', () => {
   beforeEach(function () {
     Windows.reset()
 
-    this.win = new EE()
+    this.win = new EventEmitter()
     this.win.loadURL = sinon.stub()
     this.win.destroy = sinon.stub()
     this.win.getSize = sinon.stub().returns([1, 2])
     this.win.getPosition = sinon.stub().returns([3, 4])
-    this.win.webContents = new EE()
+    this.win.webContents = new EventEmitter()
     this.win.webContents.openDevTools = sinon.stub()
     this.win.webContents.userAgent = DEFAULT_USER_AGENT
     this.win.isDestroyed = sinon.stub().returns(false)
-
-    return sinon.stub(Windows, '_newBrowserWindow').returns(this.win)
   })
 
   afterEach(() => {
@@ -33,38 +35,31 @@ describe('lib/gui/windows', () => {
   })
 
   context('.getByWebContents', () => {
-    beforeEach(() => {
-      return sinon.stub(BrowserWindow, 'fromWebContents')
-    })
-
     it('calls BrowserWindow.fromWebContents', () => {
-      BrowserWindow.fromWebContents.withArgs('foo').returns('bar')
+      sinon.stub(BrowserWindow, 'fromWebContents').withArgs('foo' as any).returns('bar' as any)
 
       expect(Windows.getByWebContents('foo')).to.eq('bar')
     })
   })
 
   context('.open', () => {
-    beforeEach(function () {
-      return sinon.stub(Windows, 'create').returns(this.win)
-    })
-
-    it('sets default options', () => {
-      const options = {
+    it('sets default options', function () {
+      const options: Windows.WindowOptions = {
         type: 'INDEX',
       }
 
-      return Windows.open('/path/to/project', options)
+      return Windows.open('/path/to/project', options, () => this.win)
       .then((win) => {
-        expect(options).to.deep.eq({
+        expect(options).to.include({
           height: 500,
           width: 600,
           type: 'INDEX',
           show: true,
           url: cyDesktop.getPathToIndex(),
-          webPreferences: {
-            preload: path.resolve('lib', 'ipc', 'ipc.js'),
-          },
+        })
+
+        expect(options.webPreferences).to.include({
+          preload: path.resolve('lib', 'ipc', 'ipc.js'),
         })
 
         expect(win.loadURL).to.be.calledWith(cyDesktop.getPathToIndex())
@@ -74,10 +69,10 @@ describe('lib/gui/windows', () => {
 
   context('.create', () => {
     it('opens dev tools if saved state is open', function () {
-      Windows.create('/foo/', { devTools: true })
+      Windows.create('/foo/', { devTools: true }, () => this.win)
       expect(this.win.webContents.openDevTools).to.be.called
 
-      Windows.create('/foo/', {})
+      Windows.create('/foo/', {}, () => this.win)
 
       expect(this.win.webContents.openDevTools).not.to.be.calledTwice
     })
