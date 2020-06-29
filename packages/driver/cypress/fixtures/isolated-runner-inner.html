@@ -4,34 +4,19 @@
     <title>Isolated Runner Fixture</title>
   </head>
   <body>
-    Some generic content
-
     <div>
-      <span class="foo">Foo</span>
-      <span class="bar">Bar</span>
-      <span class="baz">Baz</span>
-      <span class="qux">Qux</span>
-    </div>
-
-    <a href="/">link</a>
-
-    <a id="hashchange" href="#hashchange">hashchange</a>
-
-    <a id="dimensions" href="/fixtures/dimensions.html">dimensions</a>
-
-    <div>
-      <button class="sync-error">Sync Error</button>
-      <button class="async-error">Async Error</button>
+      <button class="trigger-sync-error">Trigger Sync Error</button>
+      <button class="trigger-async-error">Trigger Async Error</button>
     </div>
 
     <script>
-      document.querySelector(".sync-error").addEventListener('click', function () {
-        qux.bar()
+      document.querySelector(".trigger-sync-error").addEventListener('click', function () {
+        syncReference.error()
       })
 
-      document.querySelector(".async-error").addEventListener('click', function () {
+      document.querySelector(".trigger-async-error").addEventListener('click', function () {
         setTimeout(function () {
-          qax.bar()
+          asyncReference.error()
         })
       })
     </script>

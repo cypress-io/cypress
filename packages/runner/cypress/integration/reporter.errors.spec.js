@@ -575,7 +575,7 @@ describe('errors ui', () => {
       file,
       message: [
         'The following error originated from your application code',
-        'qux is not defined',
+        'syncReference is not defined',
       ],
       regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
       hasCodeFrame: false,
@@ -587,7 +587,7 @@ describe('errors ui', () => {
       file,
       message: [
         'The following error originated from your application code',
-        'qax is not defined',
+        'asyncReference is not defined',
       ],
       regex: /localhost\:\d+\/fixtures\/isolated-runner-inner.html:\d+:\d+/,
       hasCodeFrame: false,
