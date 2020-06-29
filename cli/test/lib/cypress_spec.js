@@ -176,24 +176,65 @@ describe('cypress', function () {
   context('cli', function () {
     describe('.parseRunArguments', function () {
       it('parses CLI cypress run arguments', async () => {
-        const args = 'cypress run --browser chrome --spec "my/test/spec.js"'.split(' ')
+        const args = 'cypress run --browser chrome --spec my/test/spec.js'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
-        // TODO remove quotes around specs and other string arguments
         expect(options).to.deep.equal({
           browser: 'chrome',
-          spec: '"my/test/spec.js"',
+          spec: 'my/test/spec.js',
         })
       })
 
       it('parses CLI cypress run shorthand arguments', async () => {
-        const args = 'cypress run -b firefox -p 5005'.split(' ')
+        const args = 'cypress run -b firefox -p 5005 --headed --quiet'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)
 
         // ? should we cast the arguments to proper types
         expect(options).to.deep.equal({
           browser: 'firefox',
           port: '5005',
+          headed: true,
+          quiet: true,
+        })
+      })
+
+      it('coerces --record and --dev', async () => {
+        const args = 'cypress run --record false --dev true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          record: false,
+          dev: true,
+        })
+      })
+
+      it('parses config file false', async () => {
+        const args = 'cypress run --config-file false'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // ? should we cast the arguments to proper types
+        expect(options).to.deep.equal({
+          configFile: 'false',
+        })
+      })
+
+      it('parses config', async () => {
+        const args = 'cypress run --config baseUrl=localhost,video=true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // ? should we convert the list of config values to an object
+        expect(options).to.deep.equal({
+          config: 'baseUrl=localhost,video=true',
+        })
+      })
+
+      it('parses env', async () => {
+        const args = 'cypress run --env MY_NUMBER=42,MY_FLAG=true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // ? should we convert the --env parameter to an object
+        expect(options).to.deep.equal({
+          env: 'MY_NUMBER=42,MY_FLAG=true',
         })
       })
     })
