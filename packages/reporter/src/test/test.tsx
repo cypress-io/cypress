@@ -100,7 +100,10 @@ class Test extends Component<Props> {
 
     return (<>
       <i aria-hidden='true' className='runnable-state fas' />
-      <span className='runnable-title'>{model.title} <span className='visually-hidden'>{model.state}</span></span>
+      <span className='runnable-title'>
+        <span>{model.title}</span>
+        <span className='visually-hidden'>{model.state}</span>
+      </span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
           <i className='fas fa-exclamation-triangle' />

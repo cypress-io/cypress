@@ -140,6 +140,19 @@
       }
     }
 
+    &.test > div > .runnable-wrapper {
+      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
+        outline: 0;
+
+        .runnable-title {
+          outline: 0;
+          > span:first-child {
+            outline: 1px dotted;
+          }
+        }
+      }
+    }
+
     &.test.runnable-passed {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
