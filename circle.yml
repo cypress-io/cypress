@@ -823,7 +823,7 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
-  finalize-percy:
+  percy-finalize:
     <<: *defaults
     steps:
       - run:
