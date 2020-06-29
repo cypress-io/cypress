@@ -1,9 +1,17 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
+import { FileDetails } from '@packages/ui-components'
+
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
+
+export interface HookDetails {
+  hookId: string
+  hookName: string
+  invocationDetails?: FileDetails
+}
 
 export default class Hook {
   @observable id: string
