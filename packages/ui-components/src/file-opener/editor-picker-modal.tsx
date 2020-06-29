@@ -8,15 +8,9 @@ import Tooltip from '@cypress/react-tooltip'
 import cs from 'classnames'
 import React from 'react'
 import VisuallyHidden from '@reach/visually-hidden'
-// @ts-ignore
-import { EditorPicker } from '@packages/ui-components'
 
-export interface Editor {
-  id: string
-  name: string
-  openerId: string
-  isOther: boolean
-}
+import EditorPicker from './editor-picker'
+import { Editor } from './file-model'
 
 interface Props {
   chosenEditor: Editor
