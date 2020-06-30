@@ -31,7 +31,7 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   const route: BackendRoute = {
     routeMatcher,
     getFixture,
-    ..._.omit(options, 'routeMatcher'),
+    ..._.omit(options, 'routeMatcher'), // skip the user's un-annotated routeMatcher
   }
 
   state.routes.push(route)
