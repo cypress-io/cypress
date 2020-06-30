@@ -1,0 +1,49 @@
+diff --git a/node_modules/@benmalka/foxdriver/build/logger.js b/node_modules/@benmalka/foxdriver/build/logger.js
+index c28401c..bfb5da4 100644
+--- a/node_modules/@benmalka/foxdriver/build/logger.js
++++ b/node_modules/@benmalka/foxdriver/build/logger.js
+@@ -5,9 +5,7 @@ Object.defineProperty(exports, "__esModule", {
+ });
+ exports.default = Logger;
+ 
+-var _npmlog = require("npmlog");
+-
+-var _npmlog2 = _interopRequireDefault(_npmlog);
++const debug = require('debug')('@benmalka/foxdriver')
+ 
+ var _package = require("../package.json");
+ 
+@@ -20,11 +18,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
+  */
+ const NPM_LEVELS = ['silly', 'verbose', 'debug', 'info', 'http', 'warn', 'error', 'chrome', 'firefox'];
+ 
+-_npmlog2.default.addLevel('debug', 1000, {
+-  fg: 'blue',
+-  bg: 'black'
+-}, 'dbug');
+-
+ function Logger(component) {
+   const wrappedLogger = {};
+   const prefix = _package2.default.name + (component ? `:${component}` : '');
+@@ -34,10 +27,8 @@ function Logger(component) {
+ 
+   Object.defineProperty(wrappedLogger, 'level', {
+     get: () => {
+-      return _npmlog2.default.level;
+     },
+     set: newValue => {
+-      _npmlog2.default.level = newValue;
+     },
+     enumerable: true,
+     configurable: true
+@@ -48,8 +39,8 @@ function Logger(component) {
+ 
+   for (let level of NPM_LEVELS) {
+     wrappedLogger[level] = (...args) => {
+-      if (!process.env.DEBUG) return;
+-      return _npmlog2.default[level](prefix, ...args);
++      // @see https://github.com/cypress-io/cypress/issues/7723
++      debug(prefix, ...args)
+     };
+   }
+ 
