@@ -3066,4 +3066,18 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
   })
+
+  describe('shadow dom', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7741
+    it('types into input', () => {
+      cy
+      .get('#shadow-element-1')
+      .find('input', { includeShadowDom: true })
+      .type('foo')
+    })
+  })
 })
