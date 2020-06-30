@@ -4,27 +4,6 @@
   "version": "0.0.0-development",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/bahmutov/cypress-vue-unit-test/issues",
-  "config": {
-    "pre-git": {
-      "commit-msg": "simple",
-      "pre-commit": [
-        "npm prune",
-        "npm run deps",
-        "npm run build",
-        "npm test",
-        "git add src/*.js",
-        "npm run ban"
-      ],
-      "pre-push": [
-        "npm run unused-deps",
-        "npm run license",
-        "npm run ban -- --all",
-        "npm run size"
-      ],
-      "post-commit": [],
-      "post-merge": []
-    }
-  },
   "engines": {
     "node": ">=8"
   },
@@ -85,7 +64,6 @@
     "git-issues": "1.3.1",
     "license-checker": "19.0.0",
     "mocha": "7.1.1",
-    "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
     "semantic-release": "^17.1.1",
     "standard": "12.0.1",
