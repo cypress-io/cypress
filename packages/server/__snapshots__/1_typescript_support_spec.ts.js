@@ -243,7 +243,7 @@ exports['typescript with tsconfig run'] = `
 
 `
 
-exports['e2e typescript esModuleInterop: false => only \'import * as\' works. 1'] = `
+exports['e2e typescript tests if esModuleInterop can be overridden 1'] = `
 
 ====================================================================================================
 
