@@ -104,6 +104,12 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
         route: _.get(getRoute(routeHandlerId), 'options'),
         res,
       },
+      errProps: {
+        appendToStack: {
+          title: 'From response callback',
+          content: err.stack,
+        },
+      },
     })
   })
   .timeout(timeout)

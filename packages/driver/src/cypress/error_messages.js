@@ -939,7 +939,7 @@ module.exports = {
         return stripIndent`\
           A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
 
-          ${normalizedStack(err)}
+          ${err.message}
 
           Route: ${format(route)}
 
@@ -999,7 +999,7 @@ module.exports = {
         return stripIndent`\
           A response callback passed to \`req.reply()\` threw an error while intercepting a response:
 
-          ${normalizedStack(err)}
+          ${err.message}
 
           Route: ${format(route)}
 

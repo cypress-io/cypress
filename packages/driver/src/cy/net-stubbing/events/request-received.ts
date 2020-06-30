@@ -168,11 +168,23 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     return handler(userReq)
   })
   .catch((err) => {
-    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_failed', { args: { err, req, route: route.options } })
+    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_failed', {
+      args: {
+        err,
+        req,
+        route: route.options,
+      },
+      errProps: {
+        appendToStack: {
+          title: 'From request callback',
+          content: err.stack,
+        },
+      },
+    })
   })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
-    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', { args: { err, timeout, req, route: route.options } })
+    $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', { args: { timeout, req, route: route.options } })
   })
   .finally(() => {
     resolved = true
