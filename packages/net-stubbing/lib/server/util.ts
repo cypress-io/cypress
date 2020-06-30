@@ -61,7 +61,7 @@ function _getFakeClientResponse (opts: {
   const clientResponse = new IncomingMessage(new Socket)
 
   // be nice and infer this content-type for the user
-  if (!_.keys(opts.headers).map(_.toLower).includes('content-type') && isHtml(opts.body)) {
+  if (!caseInsensitiveGet(opts.headers || {}, 'content-type') && isHtml(opts.body)) {
     opts.headers['content-type'] = 'text/html'
   }
 
@@ -94,13 +94,13 @@ export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResp
   }
 
   function getBody (): string {
-  // NOTE: for backwards compatibility with cy.route
+    // NOTE: for backwards compatibility with cy.route
     if (data === null) {
       return ''
     }
 
     if (!_.isBuffer(data) && !_.isString(data)) {
-    // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
+      // TODO: probably we can use another function in fixtures.js that doesn't require us to remassage the fixture
       return JSON.stringify(data)
     }
 
