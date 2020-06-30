@@ -210,7 +210,7 @@ commands:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
-            git checkout $NEXT_DEV_VERSION || true
+            cd tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
