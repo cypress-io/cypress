@@ -398,7 +398,8 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_TOKEN=$PERCY_TOKEN_CLI \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -457,7 +458,7 @@ jobs:
       # test binary build code
       - run: yarn test-scripts
 
-  "server-unit-tests":
+  server-unit-tests:
     <<: *defaults
     parallelism: 2
     steps:
@@ -470,7 +471,7 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  "server-integration-tests":
+  server-integration-tests:
     <<: *defaults
     parallelism: 2
     steps:
@@ -483,7 +484,7 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  "server-performance-tests":
+  server-performance-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -498,216 +499,216 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "server-e2e-tests-chrome-1":
+  server-e2e-tests-chrome-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "1"
 
-  "server-e2e-tests-chrome-2":
+  server-e2e-tests-chrome-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "2"
 
-  "server-e2e-tests-chrome-3":
+  server-e2e-tests-chrome-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "3"
 
-  "server-e2e-tests-chrome-4":
+  server-e2e-tests-chrome-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "4"
 
-  "server-e2e-tests-chrome-5":
+  server-e2e-tests-chrome-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "5"
 
-  "server-e2e-tests-chrome-6":
+  server-e2e-tests-chrome-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "6"
 
-  "server-e2e-tests-chrome-7":
+  server-e2e-tests-chrome-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "7"
 
-  "server-e2e-tests-chrome-8":
+  server-e2e-tests-chrome-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "8"
 
-  "server-e2e-tests-electron-1":
+  server-e2e-tests-electron-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "1"
 
-  "server-e2e-tests-electron-2":
+  server-e2e-tests-electron-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "2"
 
-  "server-e2e-tests-electron-3":
+  server-e2e-tests-electron-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "3"
 
-  "server-e2e-tests-electron-4":
+  server-e2e-tests-electron-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "4"
 
-  "server-e2e-tests-electron-5":
+  server-e2e-tests-electron-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "5"
 
-  "server-e2e-tests-electron-6":
+  server-e2e-tests-electron-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "6"
 
-  "server-e2e-tests-electron-7":
+  server-e2e-tests-electron-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "7"
 
-  "server-e2e-tests-electron-8":
+  server-e2e-tests-electron-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "8"
 
-  "server-e2e-tests-non-root":
+  server-e2e-tests-non-root:
     <<: *defaults
     steps:
       - run-e2e-tests:
           chunk: non_root
 
-  "server-e2e-tests-firefox-1":
+  server-e2e-tests-firefox-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "1"
 
-  "server-e2e-tests-firefox-2":
+  server-e2e-tests-firefox-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "2"
 
-  "server-e2e-tests-firefox-3":
+  server-e2e-tests-firefox-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "3"
 
-  "server-e2e-tests-firefox-4":
+  server-e2e-tests-firefox-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "4"
 
-  "server-e2e-tests-firefox-5":
+  server-e2e-tests-firefox-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "5"
 
-  "server-e2e-tests-firefox-6":
+  server-e2e-tests-firefox-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "6"
 
-  "server-e2e-tests-firefox-7":
+  server-e2e-tests-firefox-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "7"
 
-  "server-e2e-tests-firefox-8":
+  server-e2e-tests-firefox-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "8"
 
-  "runner-integration-tests-chrome":
+  runner-integration-tests-chrome:
     <<: *defaults
     parallelism: 2
     steps:
       - run-runner-integration-tests:
           browser: chrome
 
-  "runner-integration-tests-firefox":
+  runner-integration-tests-firefox:
     <<: *defaults
     parallelism: 2
     steps:
       - run-runner-integration-tests:
           browser: firefox
 
-  "driver-integration-tests-chrome":
+  driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: chrome
 
-  # "driver-integration-tests-electron":
+  # driver-integration-tests-electron:
   #   <<: *defaults
   #   parallelism: 5
   #   steps:
   #     - run-driver-integration-tests:
   #         browser: electron
 
-  "driver-integration-tests-firefox":
+  driver-integration-tests-firefox:
     <<: *defaults
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: firefox
 
-  "desktop-gui-integration-tests-2x":
+  desktop-gui-integration-tests-2x:
     <<: *defaults
     parallelism: 2
     steps:
@@ -725,6 +726,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -732,38 +736,6 @@ jobs:
           path: /tmp/cypress
       - store_artifacts:
           path: /tmp/artifacts
-      - store-npm-logs
-
-  desktop-gui-visual-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          # to tie Percy builds together, use environment variables
-          # https://docs.percy.io/docs/parallel-test-suites
-          # we can use workflow id and list number of jobs with Percy screenshots
-          # if we allow Percy snapshots in more jobs, use the same
-          # PERCY_* variables in all of them
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
-            yarn percy exec -- \
-            yarn cypress:run --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
   desktop-gui-component-tests:
@@ -792,7 +764,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
+            PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
             yarn cypress:run --spec 'src/**/*_spec.jsx'
           working_directory: packages/desktop-gui
@@ -800,7 +772,7 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
-  "reporter-integration-tests":
+  reporter-integration-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -821,7 +793,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "ui-components-integration-tests":
+  ui-components-integration-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -842,7 +814,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "run-launcher":
+  run-launcher:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -850,6 +822,13 @@ jobs:
       - run:
           command: node index.js
           working_directory: packages/launcher
+
+  percy-finalize:
+    <<: *defaults
+    steps:
+      - run:
+          name: "finalizes percy builds"
+          command: npx percy finalize --all
 
   build-binary:
     <<: *defaults
@@ -1134,7 +1113,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:8.0.0
+      - image: cypress/base:10.0.0
     steps:
       - attach_workspace:
           at: ~/
@@ -1577,9 +1556,6 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
-    - desktop-gui-visual-tests:
-        requires:
-          - build
     - desktop-gui-component-tests:
         requires:
           - build
@@ -1592,6 +1568,13 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
+    - percy-finalize:
+        requires:
+          - desktop-gui-integration-tests-2x
+          - desktop-gui-component-tests
+          - cli-visual-tests
+
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
