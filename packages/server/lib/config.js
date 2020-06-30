@@ -83,7 +83,7 @@ firefoxGcInterval\
 `)
 
 // NOTE: If you add a config value, make sure to update the following
-// - cli/types/index.d.ts (including whitelisted config options on TestOptions)
+// - cli/types/index.d.ts (including allowed config options on TestOptions)
 // - cypress.schema.json
 
 // experimentalComponentTesting
@@ -372,7 +372,7 @@ module.exports = {
     return _.includes(names, value)
   },
 
-  whitelist (obj = {}) {
+  allowed (obj = {}) {
     const propertyNames = configKeys
     .concat(breakingConfigKeys)
     .concat(systemConfigKeys)
@@ -427,7 +427,7 @@ module.exports = {
     debug('merged config with options, got %o', config)
 
     _
-    .chain(this.whitelist(options))
+    .chain(this.allowed(options))
     .omit('env')
     .omit('browsers')
     .each((val, key) => {

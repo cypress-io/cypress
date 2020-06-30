@@ -95,7 +95,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         return resp
       }
 
-      // iterate over all of these and ensure none are whitelisted
+      // iterate over all of these and ensure none are allowed
       // or preserved
       const cookies = Cypress.Cookies.getClearableCookies(resp)
 

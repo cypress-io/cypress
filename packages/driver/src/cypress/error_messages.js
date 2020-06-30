@@ -301,6 +301,11 @@ module.exports = {
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
     },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
+    },
   },
 
   dom: {
@@ -1286,6 +1291,7 @@ module.exports = {
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {

@@ -2130,7 +2130,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
   interface Failable {
@@ -2616,7 +2616,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(xhr: Request): void
+    ignore(xhr: Request): void
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
@@ -4806,7 +4806,7 @@ declare namespace Cypress {
 
   interface Server extends RouteOptions {
     enable: boolean
-    whitelist: (xhr: any) => boolean
+    ignore: (xhr: any) => boolean
   }
 
   interface Viewport {

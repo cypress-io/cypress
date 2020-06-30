@@ -77,14 +77,14 @@ commands:
       - run:
           name: Install latest Google Chrome (stable)
           command: |
-            if [ << parameters.browser >> == "chrome" ]; then
+            if [ <<parameters.browser>> == "chrome" ]; then
               echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
               apt-get update
               apt-get install google-chrome-stable -y
               echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
               echo "**** Google Chrome Version: "`google-chrome --version`" ****"
             else
-              echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
+              echo "**** Not updating Chrome. Running tests in '<<parameters.browser>>' ****"
             fi
 
   run-driver-integration-tests:
@@ -105,7 +105,7 @@ commands:
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-              yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -114,7 +114,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -136,7 +136,7 @@ commands:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<< parameters.browser >> --browser <<parameters.browser>>
+            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -156,7 +156,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>
+          command: yarn workspace @packages/server test ./test/e2e/<<parameters.chunk>>*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -194,15 +194,30 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results << parameters.expectedResultCount >>
+      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
 
+  clone-repo-and-checkout-release-branch:
+    description: |
+      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Cloning test project: <<parameters.repo>>"
+          command: |
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
       and runs the new version of Cypress against it.
     parameters:
       repo:
-        description: Name of the repo like "cypress-example-kitchensink"
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
@@ -232,18 +247,17 @@ commands:
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning project <<parameters.repo>>
-          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
       - when:
-          condition: << parameters.pull_request_id >>
+          condition: <<parameters.pull_request_id>>
           steps:
             - run:
-                name: Check out PR << parameters.pull_request_id >>
+                name: Check out PR <<parameters.pull_request_id>>
                 working_directory: /tmp/<<parameters.repo>>
                 command: |
-                  git fetch origin pull/<< parameters.pull_request_id >>/head:pr-<< parameters.pull_request_id >>
-                  git checkout pr-<< parameters.pull_request_id >>
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
           command: npm install
@@ -266,42 +280,42 @@ commands:
           command: npm start --if-present
           background: true
       - when:
-          condition: << parameters.folder >>
+          condition: <<parameters.folder>>
           steps:
             - when:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
-                      name: Run tests using browser "<< parameters.browser >>"
-                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
                         <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
-                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
 
             - store_artifacts:
                 name: screenshots
-                path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/screenshots
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
             - store_artifacts:
                 name: videos
-                path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/videos
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
-          condition: << parameters.folder >>
+          condition: <<parameters.folder>>
           steps:
             - when:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
-                      name: Run tests using browser "<< parameters.browser >>"
+                      name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
@@ -904,45 +918,39 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
           command: yarn --production
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
           background: true
       - run:
           name: Run Kitchensink example project
-          command: yarn cypress:run --project /tmp/repo
+          command: yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
-          path: /tmp/repo/cypress/screenshots
+          path: /tmp/cypress-example-kitchensink/cypress/screenshots
       - store_artifacts:
-          path: /tmp/repo/cypress/videos
+          path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
           command: yarn --production
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
           background: true
       - run:
           name: Run Kitchensink example project
@@ -951,24 +959,21 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             CYPRESS_video=false \
-            yarn cypress:run --project /tmp/repo --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
   "test-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-test-tiny
       - run:
           name: Run test project
           command: |
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/repo --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
   build-npm-package:
@@ -1164,16 +1169,16 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
@@ -1183,7 +1188,7 @@ jobs:
               typescript jest @types/jest enzyme @types/enzyme
       - run:
           name: Test types clash ⚔️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: |
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
@@ -1207,16 +1212,16 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
@@ -1226,7 +1231,7 @@ jobs:
               typescript jest @types/jest enzyme @types/enzyme
       - run:
           name: Scaffold and test examples 🏗
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
@@ -1250,27 +1255,27 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
             npm install /root/cypress/cypress.tgz typescript
       - run:
           name: Scaffold full TypeScript project 🏗
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
       - run:
           name: Run project tests 🗳
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npx cypress run
 
   # install NPM + binary zip and run against staging API
@@ -1282,9 +1287,8 @@ jobs:
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-test-tiny
       - run:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny

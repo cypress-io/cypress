@@ -18,12 +18,12 @@ exports['e2e cookies with baseurl'] = `
 
 
   cookies
-    with whitelist
+    with preserve
       ✓ can get all cookies
       ✓ resets cookies between tests correctly
       ✓ should be only two left now
       ✓ handles undefined cookies
-    without whitelist
+    without preserve
       ✓ sends set cookies to path
       ✓ handles expired cookies secure
       ✓ issue: #224 sets expired cookies between redirects
@@ -122,12 +122,12 @@ exports['e2e cookies with no baseurl'] = `
 
 
   cookies
-    with whitelist
+    with preserve
       ✓ can get all cookies
       ✓ resets cookies between tests correctly
       ✓ should be only two left now
       ✓ handles undefined cookies
-    without whitelist
+    without preserve
       ✓ sends cookies to localhost:2121
       ✓ handles expired cookies secure
       ✓ issue: #224 sets expired cookies between redirects

@@ -1246,4 +1246,18 @@ describe('src/cy/commands/cookies', () => {
       })
     })
   })
+
+  context('Cypress.cookies.defaults', () => {
+    it('throws error on use of renamed whitelist option', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
+
+        done()
+      })
+
+      Cypress.Cookies.defaults({
+        whitelist: 'session_id',
+      })
+    })
+  })
 })
