@@ -114,7 +114,7 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): void {
   }
 }
 
-export function registerCommands (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
+export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
   const { emitNetEvent } = registerEvents(Cypress)
 
   function getNewRouteLog (matcher: RouteMatcherOptions, isStubbed: boolean, alias: string | void, staticResponse?: StaticResponse) {
