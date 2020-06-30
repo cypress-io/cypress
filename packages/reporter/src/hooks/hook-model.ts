@@ -7,15 +7,18 @@ import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
 
+export type HookName = 'before' | 'before each' | 'after' | 'after each' | 'test body'
+
 export interface HookDetails {
   hookId: string
-  hookName: string
+  hookName: HookName
   invocationDetails?: FileDetails
 }
 
 export default class Hook implements HookDetails {
   @observable hookId: string
-  @observable hookName: string
+  @observable hookName: HookName
+  @observable hookNumber?: number
   @observable invocationDetails?: FileDetails
   @observable invocationOrder?: number
   @observable commands: Array<CommandModel> = []

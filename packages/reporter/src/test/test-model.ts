@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { action, autorun, computed, observable, observe } from 'mobx'
 
 import Err from '../errors/err-model'
-import Hook, { HookDetails } from '../hooks/hook-model'
+import Hook, { HookDetails, HookName } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Agent, { AgentProps } from '../agents/agent-model'
@@ -41,6 +41,13 @@ export default class Test extends Runnable {
   @observable routes: Array<Route> = []
   @observable _state?: TestState | null = null
   @observable _invocationCount: number = 0
+  @observable hookCount: { [name in HookName]: number } = {
+    'before': 0,
+    'before each': 0,
+    'after': 0,
+    'after each': 0,
+    'test body': 0,
+  }
   type = 'test'
 
   callbackAfterUpdate: (() => void) | null = null
@@ -88,16 +95,27 @@ export default class Test extends Runnable {
   }
 
   addCommand (command: Command, hookId: string) {
-    const hook = _.find(this.hooks, { hookId })
-
     this.commands.push(command)
 
-    if (hook) {
-      hook.addCommand(command)
+    const hookIndex = _.findIndex(this.hooks, { hookId })
 
-      if (!hook.invocationOrder) {
-        hook.invocationOrder = this._invocationCount++
+    const hook = this.hooks[hookIndex]
+
+    hook.addCommand(command)
+
+    // make sure that hooks are in order of invocation
+    if (hook.invocationOrder === undefined) {
+      hook.invocationOrder = this._invocationCount++
+
+      if (hook.invocationOrder !== hookIndex) {
+        this.hooks[hookIndex] = this.hooks[hook.invocationOrder]
+        this.hooks[hook.invocationOrder] = hook
       }
+    }
+
+    // assign number if non existent
+    if (hook.hookNumber === undefined) {
+      hook.hookNumber = ++this.hookCount[hook.hookName]
     }
   }
 

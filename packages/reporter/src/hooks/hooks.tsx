@@ -4,26 +4,28 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
-import HookModel from './hook-model'
+import HookModel, { HookName } from './hook-model'
 
 export interface HookHeaderProps {
   name: string
+  number?: number
 }
 
-const HookHeader = ({ name }: HookHeaderProps) => (
+const HookHeader = ({ name, number }: HookHeaderProps) => (
   <span>
-    {name} <span className='hook-failed-message'>(failed)</span>
+    {name} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
   </span>
 )
 
 export interface HookProps {
   model: HookModel
+  showNumber: boolean
 }
 
-const Hook = observer(({ model }: HookProps) => (
+const Hook = observer(({ model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
-      header={<HookHeader name={model.hookName} />}
+      header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-name'
       isOpen={true}
     >
@@ -36,6 +38,7 @@ const Hook = observer(({ model }: HookProps) => (
 
 export interface HooksModel {
   hooks: Array<HookModel>
+  hookCount: { [name in HookName]: number }
 }
 
 export interface HooksProps {
@@ -44,7 +47,7 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(_.sortBy(_.filter(model.hooks, 'commands.length'), 'invocationOrder'), (hook) => <Hook key={hook.hookId} model={hook} />)}
+    {_.map(model.hooks, (hook) => hook.commands.length ? <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} /> : undefined)}
   </ul>
 ))
 
