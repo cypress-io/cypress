@@ -10,7 +10,7 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples)
+**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples), [advanced](#advanced-examples)
 
 ## TLDR
 
@@ -613,6 +613,12 @@ describe('HelloWorld component', () => {
 Spec | Description
 --- | ---
 [Hello](cypress/component/basic/hello) | Testing examples from Vue2 cookbook
+
+### Advanced examples
+
+Spec | Description
+--- | ---
+[mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
 
 ## Known problems
 

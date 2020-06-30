@@ -1,0 +1,22 @@
+/// <reference types="cypress" />
+import Hello from './Hello.vue'
+import { mount } from 'cypress-vue-unit-test'
+import * as GreetingModule from './greeting'
+
+describe('Mocking ES6 imports', () => {
+  beforeEach(() => {
+    cy.viewport(300, 200)
+  })
+
+  it('shows real greeting without mocking', () => {
+    mount(Hello)
+    cy.contains('Hello, world!')
+  })
+
+  // https://github.com/bahmutov/cypress-vue-unit-test/issues/328
+  it.skip('shows mocked greeting', () => {
+    cy.stub(GreetingModule, 'greeting').returns('Cypress')
+    mount(Hello)
+    cy.contains('Hello, Cypress!')
+  })
+})
