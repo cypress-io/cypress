@@ -2,9 +2,11 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
+import FileOpener from '../lib/file-opener'
 
 export interface HookHeaderProps {
   name: string
@@ -27,6 +29,16 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
     <Collapsible
       header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-name'
+      headerExtras={
+        model.invocationDetails && <FileOpener fileDetails={model.invocationDetails}>
+          <div
+            role='button'
+            tabIndex={0}
+          >
+            <div tabIndex={-1}><i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span></div>
+          </div>
+        </FileOpener>
+      }
       isOpen={true}
     >
       <ul className='commands-container'>
