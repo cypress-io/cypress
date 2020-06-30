@@ -15,5 +15,21 @@
   "lockFileMaintenance": {
     "enabled": true
   },
-  "masterIssue": true
+  "masterIssue": true,
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "*"
+      ],
+      "excludePackagePatterns": [
+        "@cypress/webpack-preprocessor",
+        "@kazupon/vue-i18n-loader",
+        "common-tags",
+        "cypress",
+        "find-webpack",
+        "semantic-release"
+      ],
+      "enabled": false
+    }
+  ]
 }
