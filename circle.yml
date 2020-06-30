@@ -1128,9 +1128,6 @@ jobs:
       - run: mkdir test-binary
       - run: node --version
       - run: npm --version
-      # TODO: this can be removed as soon as the minimum Node version is bumped to 10
-      # see https://github.com/cypress-io/cypress-docker-images/pull/332
-      - run: apt-get update && apt-get install -y libgbm-dev
       - run:
           name: Create new NPM package
           working_directory: test-binary
