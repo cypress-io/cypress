@@ -14,9 +14,11 @@ describe('Mocking ES6 imports', () => {
   })
 
   // https://github.com/bahmutov/cypress-vue-unit-test/issues/328
-  it.skip('shows mocked greeting', () => {
-    cy.stub(GreetingModule, 'greeting').returns('Cypress')
+  it('shows mocked greeting', () => {
+    cy.stub(GreetingModule, 'greeting').returns('Cypress').as('greeting')
     mount(Hello)
     cy.contains('Hello, Cypress!')
+    // confirm the stub was called
+    cy.get('@greeting').should('have.been.calledOnce')
   })
 })

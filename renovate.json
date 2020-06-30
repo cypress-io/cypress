@@ -27,7 +27,8 @@
         "common-tags",
         "cypress",
         "find-webpack",
-        "semantic-release"
+        "semantic-release",
+        "debug"
       ],
       "enabled": false
     }

@@ -9,7 +9,7 @@ export default {
   name: "Hello",
   data() {
     return {
-      greeting
+      greeting: greeting()
     };
   }
 };

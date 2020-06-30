@@ -3,6 +3,7 @@ const webpack = require('webpack')
 // Cypress webpack bundler adaptor
 // https://github.com/cypress-io/cypress-webpack-preprocessor
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const debug = require('debug')('cypress-vue-unit-test')
 
 const fw = require('find-webpack')
 const webpackOptions = fw.getWebpackOptions()
@@ -48,9 +49,33 @@ function compileTemplate (options = {}) {
   options.resolve.alias = options.resolve.alias || {}
   options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
 }
+
+/**
+ * Warning: modifies the input object
+ */
+function insertBabelLoader(options) {
+  options.module.rules.push({
+    test: /\.js$/,
+    loader: 'babel-loader',
+    options: {
+      plugins: [
+        [
+          '@babel/plugin-transform-modules-commonjs',
+          {
+            loose: true,
+          }
+        ]
+      ]
+    },
+  })
+}
+
 inlineUrlLoadedAssets(webpackOptions)
 preventChunking(webpackOptions)
 compileTemplate(webpackOptions)
+insertBabelLoader(webpackOptions)
+
+debug('final webpack %o', webpackOptions)
 
 /**
  * Basic Cypress Vue Webpack file loader for .vue files

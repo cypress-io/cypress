@@ -718,6 +718,20 @@ npm install
 npm run cy:open
 ```
 
+### Debugging
+
+Run Cypress with environment variable
+
+```
+DEBUG=cypress-vue-unit-test
+```
+
+If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
+
+```
+DEBUG=cypress-vue-unit-test DEBUG_DEPTH=10
+```
+
 <a name="#faq"/>
 
 ## FAQ

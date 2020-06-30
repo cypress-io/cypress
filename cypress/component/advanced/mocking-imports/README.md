@@ -2,6 +2,6 @@
 
 Vue component in [Hello.vue](Hello.vue) imports a named ES6 import from [greeting.js](greeting.js). From the test [spec.js](spec.js) we can mock that import to make testing simpler.
 
-Compare no mocking
+![Test with mocking and without](images/mocking.png)
 
-![Test without mocking](images/no-mocking.png)
+The imports mocking is done using `@babel/plugin-transform-modules-commonjs` inserted as a `babel-loader` plugin automatically.
