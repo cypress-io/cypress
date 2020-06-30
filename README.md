@@ -42,7 +42,7 @@ vue add cypress-experimental
 
 ### Manual Installation
 > *Not Recommended*: All of this is done automatically with Vue CLI
- 
+
 1. Install `cypress` and `cypress-vue-unit-test`
 
 ```sh
@@ -763,8 +763,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 [npm-icon]: https://nodei.co/npm/cypress-vue-unit-test.svg?downloads=true
 [npm-url]: https://npmjs.org/package/cypress-vue-unit-test
-[ci-image]: https://travis-ci.org/bahmutov/cypress-vue-unit-test.svg?branch=master
-[ci-url]: https://travis-ci.org/bahmutov/cypress-vue-unit-test
+[ci-image]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master.svg?style=svg
+[ci-url]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg

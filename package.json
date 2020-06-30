@@ -87,7 +87,7 @@
     "mocha": "7.1.1",
     "pre-git": "3.17.1",
     "prettier-standard": "8.0.1",
-    "semantic-release": "17.0.4",
+    "semantic-release": "^17.1.1",
     "standard": "12.0.1",
     "tailwindcss": "1.1.4",
     "vue-i18n": "7.8.1",
