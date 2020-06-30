@@ -109,5 +109,32 @@ describe('intercept-request', function () {
 
       expect(matched).to.be.false
     })
+
+    it('handles querystrings as expected', function () {
+      const req = {
+        headers: {},
+        method: 'GET',
+        proxiedUrl: '/abc?foo=bar&baz=quux',
+      } as unknown as CypressIncomingRequest
+
+      expect(_doesRouteMatch({
+        query: {
+          foo: 'b*r',
+          baz: /quu[x]/,
+        },
+      }, req)).to.be.true
+
+      expect(_doesRouteMatch({
+        path: '/abc?foo=bar&baz=qu*x',
+      }, req)).to.be.true
+
+      expect(_doesRouteMatch({
+        pathname: '/abc',
+      }, req)).to.be.true
+
+      expect(_doesRouteMatch({
+        url: '*',
+      }, req)).to.be.true
+    })
   })
 })

@@ -158,28 +158,30 @@ export const InterceptRequest: RequestMiddleware = function () {
 
   this.netStubbingState.requests[requestId] = request
 
-  this.res.once('finish', () => {
-    emit(this.socket, 'http:request:complete', {
-      requestId,
-      routeHandlerId: route.handlerId!,
-    })
-
-    debug('request/response finished, cleaning up %o', { requestId })
-    delete this.netStubbingState.requests[requestId]
-  })
-
-  _interceptRequest(request, route, this.socket)
+  _interceptRequest(this.netStubbingState, request, route, this.socket)
 }
 
-function _interceptRequest (request: BackendRequest, route: BackendRoute, socket: CyServer.Socket) {
+function _interceptRequest (state: NetStubbingState, request: BackendRequest, route: BackendRoute, socket: CyServer.Socket) {
+  const notificationOnly = !route.hasInterceptor
+
   const frame: NetEventFrames.HttpRequestReceived = {
     routeHandlerId: route.handlerId!,
     requestId: request.req.requestId,
     req: _.extend(_.pick(request.req, SERIALIZABLE_REQ_PROPS), {
       url: request.req.proxiedUrl,
     }) as CyHttpMessages.IncomingRequest,
-    notificationOnly: !!route.staticResponse,
+    notificationOnly,
   }
+
+  request.res.once('finish', () => {
+    emit(socket, 'http:request:complete', {
+      requestId: request.requestId,
+      routeHandlerId: route.handlerId!,
+    })
+
+    debug('request/response finished, cleaning up %o', { requestId: request.requestId })
+    delete state.requests[request.requestId]
+  })
 
   const emitReceived = () => {
     emit(socket, 'http:request:received', frame)
@@ -189,6 +191,18 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
     emitReceived()
 
     return sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
+  }
+
+  if (notificationOnly) {
+    emitReceived()
+
+    const nextRoute = getNextRoute(state, request.req, frame.routeHandlerId)
+
+    if (!nextRoute) {
+      return request.continueRequest()
+    }
+
+    return _interceptRequest(state, request, nextRoute, socket)
   }
 
   // if we already have a body, just emit
@@ -201,6 +215,19 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
     frame.req.body = reqBody.toString()
     emitReceived()
   }))
+}
+
+/**
+ * If applicable, return the route that is next in line after `prevRouteHandlerId` to handle `req`.
+ */
+function getNextRoute (state: NetStubbingState, req: CypressIncomingRequest, prevRouteHandlerId: string): BackendRoute | undefined {
+  const prevRoute = _.find(state.routes, { handlerId: prevRouteHandlerId })
+
+  if (!prevRoute) {
+    return
+  }
+
+  return _getRouteForRequest(state.routes, req, prevRoute)
 }
 
 export async function onRequestContinue (state: NetStubbingState, frame: NetEventFrames.HttpRequestContinue, socket: CyServer.Socket) {
@@ -234,21 +261,13 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   }
 
   if (frame.tryNextRoute) {
-    // outgoing request has been modified, now pass this to the next available route handler
-    const prevRoute = _.find(state.routes, { handlerId: frame.routeHandlerId })
-
-    if (!prevRoute) {
-      // TODO: should lacking a prevRoute throw an error?
-      return backendRequest.continueRequest()
-    }
-
-    const nextRoute = _getRouteForRequest(state.routes, backendRequest.req, prevRoute)
+    const nextRoute = getNextRoute(state, backendRequest.req, frame.routeHandlerId)
 
     if (!nextRoute) {
       return backendRequest.continueRequest()
     }
 
-    return _interceptRequest(backendRequest, nextRoute, socket)
+    return _interceptRequest(state, backendRequest, nextRoute, socket)
   }
 
   if (frame.staticResponse) {

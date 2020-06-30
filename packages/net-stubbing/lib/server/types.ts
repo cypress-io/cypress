@@ -14,6 +14,7 @@ export type GetFixtureFn = (path: string, opts?: { encoding?: string }) => Promi
 export interface BackendRoute {
   routeMatcher: RouteMatcherOptions
   handlerId?: string
+  hasInterceptor: boolean
   staticResponse?: BackendStaticResponse
   getFixture: GetFixtureFn
 }

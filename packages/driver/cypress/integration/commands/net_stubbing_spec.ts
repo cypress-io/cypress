@@ -68,6 +68,7 @@ describe('src/cy/commands/net_stubbing', function () {
           staticResponse: {
             body: 'bar',
           },
+          hasInterceptor: false,
         }
 
         const expectedRoute = {
@@ -91,6 +92,7 @@ describe('src/cy/commands/net_stubbing', function () {
               value: url,
             },
           },
+          hasInterceptor: true,
         }
 
         const expectedRoute = {
@@ -185,6 +187,7 @@ describe('src/cy/commands/net_stubbing', function () {
             },
             webSocket: options.webSocket,
           },
+          hasInterceptor: true,
         }
 
         const expectedRoute = {
@@ -512,6 +515,39 @@ describe('src/cy/commands/net_stubbing', function () {
         }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
         cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      })
+
+      context('matches requests as expected', function () {
+        it('handles querystrings as expected', function () {
+          cy.route2({
+            query: {
+              foo: 'b*r',
+              baz: /quu[x]/,
+            },
+          }).as('first')
+          .route2({
+            path: '/abc?foo=bar&baz=qu*x*',
+          }).as('second')
+          .route2({
+            pathname: '/abc',
+          }).as('third')
+          .route2('*', 'it worked').as('final')
+          .then(() => {
+            return $.get('/abc?foo=bar&baz=quux')
+          })
+          .wait('@first')
+          .wait('@second')
+          .wait('@third')
+          .wait('@final')
+        })
+
+        it('doesn\'t care about trailing slashes', function () {
+
+        })
+
+        it('handles full URLs as expected', function () {
+
+        })
       })
 
       context('with StaticResponse shorthand', function () {
@@ -1176,7 +1212,7 @@ describe('src/cy/commands/net_stubbing', function () {
 
     context('waiting and aliasing', function () {
       it('can wait on a single response using "alias"', function () {
-        cy.route2('/foo')
+        cy.route2('/foo', 'bar')
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
@@ -1199,7 +1235,7 @@ describe('src/cy/commands/net_stubbing', function () {
       })
 
       it('can wait on a single response using "alias.response"', function () {
-        cy.route2('/foo')
+        cy.route2('/foo', 'bar')
         .as('foo.bar')
         .then(() => {
           $.get('/foo')
@@ -1242,7 +1278,7 @@ describe('src/cy/commands/net_stubbing', function () {
       })
 
       it('can incrementally wait on responses', function () {
-        cy.route2('/foo')
+        cy.route2('/foo', 'bar')
         .as('foo.bar')
         .then(() => {
           $.get('/foo')

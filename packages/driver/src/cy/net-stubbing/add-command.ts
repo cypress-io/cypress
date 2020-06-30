@@ -178,15 +178,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
 
     const alias = cy.getNextAlias()
 
-    const frame: NetEventFrames.AddRoute = {
-      handlerId,
-      routeMatcher: annotateMatcherOptionsTypes(matcher),
-    }
-
     let staticResponse: StaticResponse | undefined = undefined
+    let hasInterceptor = false
 
     switch (true) {
       case isHttpRequestInterceptor(handler):
+        hasInterceptor = true
         break
       case _.isUndefined(handler):
         // user is doing something like cy.route2('foo').as('foo') to wait on a URL
@@ -213,6 +210,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         break
       default:
         return $errUtils.throwErrByPath('net_stubbing.route2.invalid_handler', { args: { handler } })
+    }
+
+    const frame: NetEventFrames.AddRoute = {
+      handlerId,
+      hasInterceptor,
+      routeMatcher: annotateMatcherOptionsTypes(matcher),
     }
 
     if (staticResponse) {

@@ -50,6 +50,7 @@ export declare namespace NetEventFrames {
   export interface AddRoute {
     routeMatcher: AnnotatedRouteMatcherOptions
     staticResponse?: BackendStaticResponse
+    hasInterceptor: boolean
     handlerId?: string
   }
 
