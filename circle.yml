@@ -36,7 +36,7 @@ workflows:
           # following examples from
           # https://circleci.com/docs/2.0/parallelism-faster-jobs/
           command: |
-            TESTFILES=$(circleci tests glob "cypress/component/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=2)
+            TESTFILES=$(circleci tests glob "cypress/{component,integration}/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=2)
             echo "Test files for this machine are $TESTFILES"
             npx cypress run --spec $TESTFILES
 
