@@ -45,13 +45,13 @@ describe('e2e typescript', function () {
     })
   })
 
-  it('esModuleInterop: false => direct import fails', function () {
+  // https://github.com/cypress-io/cypress/issues/7575
+  it(`tests if esModuleInterop can be overridden`, function () {
     const projPath = Fixtures.projectPath('ts-proj-esmoduleinterop-false')
 
     return e2e.exec(this, {
       project: projPath,
       snapshot: true,
-      expectedExitCode: 1,
     })
   })
 })

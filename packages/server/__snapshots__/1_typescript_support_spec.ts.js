@@ -243,15 +243,60 @@ exports['typescript with tsconfig run'] = `
 
 `
 
-exports['e2e typescript esModuleInterop: false => direct import fails 1'] = `
-The plugins file is missing or invalid.
+exports['e2e typescript esModuleInterop: false => only \'import * as\' works. 1'] = `
 
-Your \`pluginsFile\` is set to \`/foo/bar/.projects/ts-proj-esmoduleinterop-false/cypress/plugins/index.ts\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\` or \`.coffee\` file.
+====================================================================================================
 
-Or you might have renamed the extension of your \`pluginsFile\` to \`.ts\`. If that's the case, restart the test runner.
+  (Run Starting)
 
-Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (app_spec.ts)                                                              │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
- TypeError: Cannot read property 'add' of undefined
-      [stack trace lines]
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  app_spec.ts                                                                     (1 of 1)
+
+
+  ✓ dummy
+
+  1 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     app_spec.ts                                                                      │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.ts.mp4                     (X second)
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  app_spec.ts                              XX:XX        1        1        -        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
 `
