@@ -2,6 +2,7 @@ import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
+import { FileDetails } from '@packages/ui-components'
 
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
@@ -14,9 +15,19 @@ export interface HookHeaderProps {
 }
 
 const HookHeader = ({ name, number }: HookHeaderProps) => (
-  <span>
+  <span className='hook-name'>
     {name} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
   </span>
+)
+
+export interface HookOpenInIDEProps {
+  invocationDetails: FileDetails
+}
+
+const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
+  <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
+    <i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span>
+  </FileOpener>
 )
 
 export interface HookProps {
@@ -28,17 +39,8 @@ const Hook = observer(({ model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
       header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
-      headerClass='hook-name'
-      headerExtras={
-        model.invocationDetails && <FileOpener fileDetails={model.invocationDetails}>
-          <div
-            role='button'
-            tabIndex={0}
-          >
-            <div tabIndex={-1}><i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span></div>
-          </div>
-        </FileOpener>
-      }
+      headerClass='hook-header'
+      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen={true}
     >
       <ul className='commands-container'>

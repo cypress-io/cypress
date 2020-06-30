@@ -5,8 +5,9 @@ import { GetUserEditorResult, Editor, FileDetails, FileOpener as Opener } from '
 import events from './events'
 
 interface Props {
-  fileDetails: FileDetails,
+  fileDetails: FileDetails
   children: ReactNode
+  className?: string
 }
 
 const openFile = (where: Editor, { absoluteFile: file, line, column }: FileDetails) => {
@@ -26,14 +27,15 @@ const setUserEditor = (editor: Editor) => {
   events.emit('set:user:editor', editor)
 }
 
-const FileOpener = observer((props: Props) => (
+const FileOpener = observer(({ fileDetails, children, className }: Props) => (
   <Opener
     openFile={openFile}
     getUserEditor={getUserEditor}
     setUserEditor={setUserEditor}
-    fileDetails={props.fileDetails}
+    fileDetails={fileDetails}
+    className={className}
   >
-    { props.children }
+    {children}
   </Opener>
 ))
 
