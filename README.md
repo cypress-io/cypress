@@ -10,6 +10,8 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
+**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples)
+
 ## TLDR
 
 - What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Vue components with zero effort.
@@ -570,6 +572,7 @@ it('can display mock XHR response', () => {
 Calls to `window.alert` are automatically recorded, but do not show up. Instead you can spy on them, see [AlertMessage.vue](components/AlertMessage.vue) and its test [cypress/integration/alert-spec.js](cypress/integration/alert-spec.js)
 
 
+
 ## Comparison
 
 <!-- prettier-ignore-start -->
@@ -589,6 +592,27 @@ Test against interface | if using `@testing-library/vue` | ✅ and can use `@tes
 Spying and mocking | Jest mocks | Sinon library
 Code coverage | ✅ | ✅
 <!-- prettier-ignore-end -->
+
+## Examples
+
+```js
+// components/HelloWorld.spec.js
+import { mount } from 'cypress-vue-unit-test'
+import { HelloWorld } from './HelloWorld.vue'
+describe('HelloWorld component', () => {
+  it('works', () => {
+    mount(HelloWorld)
+    // now use standard Cypress commands
+    cy.contains('Hello World!').should('be.visible')
+  })
+})
+```
+
+### Basic examples
+
+Spec | Description
+--- | ---
+[Hello](cypress/component/basic/hello) | Testing examples from Vue2 cookbook
 
 ## Known problems
 
