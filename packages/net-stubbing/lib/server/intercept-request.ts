@@ -172,10 +172,6 @@ export const InterceptRequest: RequestMiddleware = function () {
 }
 
 function _interceptRequest (request: BackendRequest, route: BackendRoute, socket: CyServer.Socket) {
-  const emitReceived = () => {
-    emit(socket, 'http:request:received', frame)
-  }
-
   const frame: NetEventFrames.HttpRequestReceived = {
     routeHandlerId: route.handlerId!,
     requestId: request.req.requestId,
@@ -183,6 +179,10 @@ function _interceptRequest (request: BackendRequest, route: BackendRoute, socket
       url: request.req.proxiedUrl,
     }) as CyHttpMessages.IncomingRequest,
     notificationOnly: !!route.staticResponse,
+  }
+
+  const emitReceived = () => {
+    emit(socket, 'http:request:received', frame)
   }
 
   if (route.staticResponse) {
