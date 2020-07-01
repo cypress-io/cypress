@@ -180,7 +180,7 @@ class RunnablesStore {
 
         this._logs[log.id] = command
         this._withTest(log.testId, (test) => {
-          return test.addCommand(command, (log as CommandProps).hookId)
+          return test.addCommand(command)
         })
 
         break

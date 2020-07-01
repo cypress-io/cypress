@@ -64,7 +64,7 @@ export default class Test extends Runnable {
 
     this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
     this.hooks.push(new Hook({
-      hookId: props.id.toString(),
+      hookId: this.id.toString(),
       hookName: 'test body',
       invocationDetails: this.invocationDetails,
     }))
@@ -102,10 +102,10 @@ export default class Test extends Runnable {
     this.routes.push(route)
   }
 
-  addCommand (command: Command, hookId: string) {
+  addCommand (command: Command) {
     this.commands.push(command)
 
-    const hookIndex = _.findIndex(this.hooks, { hookId })
+    const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
 
     const hook = this.hooks[hookIndex]
 
