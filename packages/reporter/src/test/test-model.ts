@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { action, autorun, computed, observable, observe } from 'mobx'
+import { FileDetails } from '@packages/ui-components'
 
 import Err from '../errors/err-model'
-import Hook, { HookDetails, HookName } from '../hooks/hook-model'
+import Hook, { HookName } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Agent, { AgentProps } from '../agents/agent-model'
@@ -16,10 +17,10 @@ export interface TestProps extends RunnableProps {
   state: TestState
   err?: Err
   isOpen?: boolean
-  hooks: Array<HookDetails>
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
+  invocationDetails?: FileDetails
 }
 
 export interface UpdatableTestProps {
@@ -41,6 +42,7 @@ export default class Test extends Runnable {
   @observable routes: Array<Route> = []
   @observable _state?: TestState | null = null
   @observable _invocationCount: number = 0
+  @observable invocationDetails?: FileDetails
   @observable hookCount: { [name in HookName]: number } = {
     'before': 0,
     'before each': 0,
@@ -58,8 +60,14 @@ export default class Test extends Runnable {
     this._state = props.state
     this.err.update(props.err)
 
+    this.invocationDetails = props.invocationDetails
+
     this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
-    this.hooks.push(new Hook({ hookId: props.id.toString(), hookName: 'test body' }))
+    this.hooks.push(new Hook({
+      hookId: props.id.toString(),
+      hookName: 'test body',
+      invocationDetails: this.invocationDetails,
+    }))
 
     autorun(() => {
       // if at any point, a command goes long running, set isLongRunning

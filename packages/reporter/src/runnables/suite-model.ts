@@ -1,25 +1,16 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
-import { HookDetails } from '../hooks/hook-model'
 import TestModel, { TestProps, TestState } from '../test/test-model'
 
 export interface SuiteProps extends RunnableProps {
-  hooks: Array<HookDetails>
   suites: Array<SuiteProps>
   tests: Array<TestProps>
 }
 
 export default class Suite extends Runnable {
   @observable children: Array<TestModel | Suite> = []
-  @observable hooks: Array<HookDetails> = []
   type = 'suite'
-
-  constructor (props: SuiteProps, level: number) {
-    super(props, level)
-
-    this.hooks = props.hooks
-  }
 
   @computed get state (): TestState {
     if (this._anyChildrenFailed) {

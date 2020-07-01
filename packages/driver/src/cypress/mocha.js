@@ -94,14 +94,16 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
   suite[fnName] = function (title, fn) {
     const _createHook = this._createHook
 
-    const stack = (new specWindow.Error('hook stack')).stack
+    if (specWindow.Error) {
+      const stack = (new specWindow.Error()).stack
 
-    this._createHook = function (title, fn) {
-      const hook = _createHook.call(this, title, fn)
+      this._createHook = function (title, fn) {
+        const hook = _createHook.call(this, title, fn)
 
-      hook.invocationDetails = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
+        hook.invocationDetails = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
 
-      return hook
+        return hook
+      }
     }
 
     const ret = _fn.call(this, title, fn)
@@ -109,6 +111,20 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
     this._createHook = _createHook
 
     return ret
+  }
+}
+
+function overloadMochaTest (suite, specWindow, config) {
+  const _fn = suite.addTest
+
+  suite.addTest = function (test) {
+    if (specWindow.Error) {
+      const stack = (new specWindow.Error()).stack
+
+      test.invocationDetails = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
+    }
+
+    return _fn.call(this, test)
   }
 }
 
@@ -135,10 +151,13 @@ const ui = (specWindow, _mocha, config) => {
     overloadMochaFnForConfig('describe', specWindow)
     overloadMochaFnForConfig('context', specWindow)
 
-    overloadMochaHook('before', this.suite.constructor.prototype, specWindow, config)
+    // overload tests and hooks so that we can get the stack info
+    overloadMochaHook('beforeAll', this.suite.constructor.prototype, specWindow, config)
     overloadMochaHook('beforeEach', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('after', this.suite.constructor.prototype, specWindow, config)
+    overloadMochaHook('afterAll', this.suite.constructor.prototype, specWindow, config)
     overloadMochaHook('afterEach', this.suite.constructor.prototype, specWindow, config)
+
+    overloadMochaTest(this.suite.constructor.prototype, specWindow, config)
 
     return this
   }
