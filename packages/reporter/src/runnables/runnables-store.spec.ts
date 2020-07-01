@@ -9,7 +9,7 @@ import TestModel, { TestProps } from '../test/test-model'
 import { AgentProps } from '../agents/agent-model'
 import { CommandProps } from '../commands/command-model'
 import { RouteProps } from '../routes/route-model'
-import { HookDetails } from '../hooks/hook-model'
+import { HookProps } from '../hooks/hook-model'
 
 const appStateStub = () => {
   return {
@@ -31,7 +31,7 @@ const scrollerStub = () => {
 }
 
 const createHook = (hookId: string) => {
-  return { hookId, hookName: 'before each' } as HookDetails
+  return { hookId, hookName: 'before each' } as HookProps
 }
 const createTest = (id: number) => {
   return { id, title: `test ${id}`, hooks: [], state: 'processing' } as TestProps

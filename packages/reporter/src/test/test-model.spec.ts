@@ -1,4 +1,4 @@
-import { HookDetails } from '../hooks/hook-model'
+import { HookProps } from '../hooks/hook-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Agent from '../agents/agent-model'
 import Route from '../routes/route-model'
@@ -52,7 +52,7 @@ describe('Test model', () => {
     })
 
     it('becomes long running if active and has a long running command', () => {
-      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.start()
       test.addCommand({ isLongRunning: true, hookId: 'h1' } as Command)
@@ -60,7 +60,7 @@ describe('Test model', () => {
     })
 
     it('becomes not long running if it becomes inactive', () => {
-      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.start()
       test.addCommand({ isLongRunning: true, hookId: 'h1' } as Command)
@@ -89,7 +89,7 @@ describe('Test model', () => {
 
   context('#addCommand', () => {
     it('adds the command to the commands collection', () => {
-      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.addCommand({ hookId: 'h1' } as Command)
       expect(test.commands.length).to.equal(1)
@@ -99,8 +99,8 @@ describe('Test model', () => {
       const test = new TestModel({
         id: 1,
         hooks: [
-          { hookId: 'h1' } as HookDetails,
-          { hookId: 'h2' } as HookDetails,
+          { hookId: 'h1' } as HookProps,
+          { hookId: 'h2' } as HookProps,
         ],
       } as TestProps, 0)
 
@@ -119,8 +119,8 @@ describe('Test model', () => {
       const test = new TestModel({
         id: 1,
         hooks: [
-          { hookId: 'h1' } as HookDetails,
-          { hookId: 'h2' } as HookDetails,
+          { hookId: 'h1' } as HookProps,
+          { hookId: 'h2' } as HookProps,
         ],
       } as TestProps, 0)
 
@@ -139,9 +139,9 @@ describe('Test model', () => {
       const test = new TestModel({
         id: 1,
         hooks: [
-          { hookId: 'h1', hookName: 'before each' } as HookDetails,
-          { hookId: 'h2', hookName: 'after each' } as HookDetails,
-          { hookId: 'h3', hookName: 'before each' } as HookDetails,
+          { hookId: 'h1', hookName: 'before each' } as HookProps,
+          { hookId: 'h2', hookName: 'after each' } as HookProps,
+          { hookId: 'h3', hookName: 'before each' } as HookProps,
         ],
       } as TestProps, 0)
 
@@ -199,7 +199,7 @@ describe('Test model', () => {
     })
 
     it('sets the hook to failed if it exists', () => {
-      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.addCommand({ hookId: 'h1' } as Command)
       test.finish({ hookId: 'h1' })
@@ -217,7 +217,7 @@ describe('Test model', () => {
 
   context('#commandMatchingErr', () => {
     it('returns last command matching the error', () => {
-      const test = new TestModel({ id: 1, err: { message: 'SomeError' } as Err, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, err: { message: 'SomeError' } as Err, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.addCommand(new Command({ err: { message: 'SomeError' } as Err, hookId: 'h1' } as CommandProps))
       test.addCommand(new Command({ err: {} as Err, hookId: 'h1' } as CommandProps))
@@ -228,7 +228,7 @@ describe('Test model', () => {
     })
 
     it('returns undefined if there are no commands with errors', () => {
-      const test = new TestModel({ id: 1, err: { message: 'SomeError' } as Err, hooks: [{ hookId: 'h1' } as HookDetails] } as TestProps, 0)
+      const test = new TestModel({ id: 1, err: { message: 'SomeError' } as Err, hooks: [{ hookId: 'h1' } as HookProps] } as TestProps, 0)
 
       test.addCommand(new Command({ hookId: 'h1' } as CommandProps))
       test.addCommand(new Command({ hookId: 'h1' } as CommandProps))

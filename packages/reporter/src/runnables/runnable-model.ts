@@ -1,10 +1,10 @@
 import { observable } from 'mobx'
-import { HookDetails } from '../hooks/hook-model'
+import { HookProps } from '../hooks/hook-model'
 
 export interface RunnableProps {
   id: number
   title?: string
-  hooks: Array<HookDetails>
+  hooks: Array<HookProps>
 }
 
 export default class Runnable {
@@ -12,7 +12,7 @@ export default class Runnable {
   @observable shouldRender: boolean = false
   @observable title?: string
   @observable level: number
-  @observable hooks: Array<HookDetails> = []
+  @observable hooks: Array<HookProps> = []
 
   constructor (props: RunnableProps, level: number) {
     this.id = props.id

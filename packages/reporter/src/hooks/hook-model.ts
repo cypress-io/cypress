@@ -9,13 +9,13 @@ import CommandModel from '../commands/command-model'
 
 export type HookName = 'before' | 'before each' | 'after' | 'after each' | 'test body'
 
-export interface HookDetails {
+export interface HookProps {
   hookId: string
   hookName: HookName
   invocationDetails?: FileDetails
 }
 
-export default class Hook implements HookDetails {
+export default class Hook implements HookProps {
   @observable hookId: string
   @observable hookName: HookName
   @observable hookNumber?: number
@@ -27,7 +27,7 @@ export default class Hook implements HookDetails {
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: HookDetails) {
+  constructor (props: HookProps) {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
