@@ -172,7 +172,7 @@
     "pretty-ms": "6.0.1",
     "print-arch": "1.0.0",
     "proxyquire": "2.1.0",
-    "ramda": "0.24.1",
+    "ramda": "0.27.0",
     "shelljs": "0.8.3",
     "shx": "0.3.2",
     "sinon": "7.3.2",

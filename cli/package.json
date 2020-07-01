@@ -50,7 +50,7 @@
     "moment": "2.26.0",
     "ospath": "1.2.2",
     "pretty-bytes": "5.3.0",
-    "ramda": "0.26.1",
+    "ramda": "0.27.0",
     "request-progress": "3.0.0",
     "supports-color": "7.1.0",
     "tmp": "0.1.0",

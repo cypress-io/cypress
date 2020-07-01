@@ -19,7 +19,7 @@
     "fs-extra": "8.1.0",
     "lodash": "4.17.15",
     "plist": "2.1.0",
-    "ramda": "0.24.1"
+    "ramda": "0.27.0"
   },
   "devDependencies": {
     "@packages/ts": "*",
