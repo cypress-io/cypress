@@ -22,6 +22,7 @@
         "*"
       ],
       "excludePackagePatterns": [
+        "@cypress/code-coverage",
         "@cypress/webpack-preprocessor",
         "@kazupon/vue-i18n-loader",
         "common-tags",

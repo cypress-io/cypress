@@ -71,8 +71,9 @@
     "tailwindcss": "1.1.4",
     "vue": "2.6.11",
     "vue-i18n": "7.8.1",
-    "vue-loader": "14.2.4",
+    "vue-loader": "15.9.3",
     "vue-router": "3.0.5",
+    "vue-style-loader": "4.1.2",
     "vue-template-compiler": "2.6.11",
     "vuex": "3.1.1",
     "webpack": "4.42.0"
@@ -91,8 +92,10 @@
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
+    "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-preprocessor": "5.4.1",
     "@kazupon/vue-i18n-loader": "0.5.0",
+    "babel-plugin-istanbul": "6.0.0",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
     "find-webpack": "2.0.0"

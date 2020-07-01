@@ -5,7 +5,8 @@ import VueI18n from 'vue-i18n'
 import {mountCallback} from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
-describe('VueI18n', () => {
+// https://github.com/bahmutov/cypress-vue-unit-test/issues/332
+describe.skip('VueI18n', () => {
   // need to use VueI18n as a plugin
   const extensions = {
     plugins: [VueI18n],

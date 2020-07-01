@@ -10,7 +10,7 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples), [advanced](#advanced-examples)
+**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [Code coverage](#code-coverage)
 
 ## TLDR
 
@@ -707,6 +707,20 @@ describe('Hello.vue', () => {
 })
 ```
 
+## Code coverage
+
+This plugin uses `babel-plugin-istanbul` to automatically instrument `.js` and `.vue` files and generates the code coverage report using dependency [cypress-io/code-coverage](https://github.com/cypress-io/code-coverage) (included). The output reports are saved in the folder "coverage" at the end of the test run.
+
+If you want to disable code coverage instrumentation and reporting, use `--env coverage=false` or `CYPRESS_coverage=false` or set in your `cypress.json` file
+
+```json
+{
+  "env": {
+    "coverage": false
+  }
+}
+```
+
 <a name="#development"/>
 
 ## Development
@@ -748,6 +762,25 @@ to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmuto
 - [Cypress API](https://on.cypress.io/api)
 - [Learn TDD in Vue](https://learntdd.in/vue)
 - [cypress-vue-unit-test vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
+
+## Migration guide
+
+### From v2 to v3
+
+- update `cypress/plugins/index.js` file to pass the `on, config` arguments when creating the default preprocessor. See [change](https://github.com/bahmutov/cypress-vue-unit-test/pull/331/files#diff-4bcea4966f5e62ded90298c2b0907445), in general the new way is:
+
+```js
+const { onFileDefaultPreprocessor } = require('cypress-vue-unit-test/preprocessor/webpack')
+
+module.exports = (on, config) => {
+  require('@cypress/code-coverage/task')(on, config)
+  on('file:preprocessor', onFileDefaultPreprocessor(config))
+
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
+  return config
+}
+```
 
 <a name="#other"/>
 

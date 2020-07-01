@@ -1,12 +1,12 @@
 const webpack = require('webpack')
+const util = require('util')
 
 // Cypress webpack bundler adaptor
 // https://github.com/cypress-io/cypress-webpack-preprocessor
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const debug = require('debug')('cypress-vue-unit-test')
-
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const fw = require('find-webpack')
-const webpackOptions = fw.getWebpackOptions()
 
 // Preventing chunks because we don't serve static assets
 function preventChunking (options = {}) {
@@ -24,7 +24,7 @@ function preventChunking (options = {}) {
 
 // Base 64 all the things because we don't serve static assets
 function inlineUrlLoadedAssets (options = {}) {
-  const isUrlLoader = use => use.loader.indexOf('url-loader') > -1
+  const isUrlLoader = use => use && use.loader && use.loader.indexOf('url-loader') > -1
   const mergeUrlLoaderOptions = use => {
     if (isUrlLoader(use)) {
       use.options = use.options || {}
@@ -35,7 +35,7 @@ function inlineUrlLoadedAssets (options = {}) {
 
   if (options.module && options.module.rules) {
     options.module.rules = options.module.rules.map(rule => {
-      if (rule.use) {
+      if (Array.isArray(rule.use)) {
         rule.use = rule.use.map(mergeUrlLoaderOptions)
       }
       return rule
@@ -52,35 +52,88 @@ function compileTemplate (options = {}) {
 
 /**
  * Warning: modifies the input object
+ * @param {Cypress.ConfigOptions} config
+ * @param {import('webpack/lib/Compiler').WebpackOptions} options
  */
-function insertBabelLoader(options) {
-  options.module.rules.push({
+function insertBabelLoader(config, options) {
+  const skipCodeCoverage = config && config.env && config.env.coverage === false
+
+  if (!options.devtool) {
+    options.devtool = '#eval-source-map'
+  }
+
+  const babelRule = {
     test: /\.js$/,
     loader: 'babel-loader',
+    exclude: /node_modules/,
     options: {
       plugins: [
+        // this plugin allows ES6 imports mocking
         [
           '@babel/plugin-transform-modules-commonjs',
           {
             loose: true,
           }
-        ]
+        ],
       ]
     },
-  })
+  }
+
+  if (skipCodeCoverage) {
+    debug('not adding code instrument plugin')
+  } else {
+    debug('adding code coverage plugin')
+    // this plugin instruments the loaded code
+    // which allows us to collect code coverage
+    const instrumentPlugin = [
+      'babel-plugin-istanbul',
+      {
+        // specify some options for NYC instrumentation here
+        // like tell it to instrument both JavaScript and Vue files
+        extension: [ '.js', '.vue' ]
+      }
+    ]
+    babelRule.options.plugins.push(instrumentPlugin)
+  }
+
+  options.module.rules.push(babelRule)
+  options.plugins = options.plugins || []
+
+  const pluginFound = options.plugins.some(plugin => plugin.constructor === VueLoaderPlugin)
+  if (!pluginFound) {
+    debug('inserting VueLoaderPlugin')
+    options.plugins.push(
+      new VueLoaderPlugin()
+    )
+  } else {
+    debug('found plugin VueLoaderPlugin already')
+  }
 }
 
-inlineUrlLoadedAssets(webpackOptions)
-preventChunking(webpackOptions)
-compileTemplate(webpackOptions)
-insertBabelLoader(webpackOptions)
-
-debug('final webpack %o', webpackOptions)
-
 /**
- * Basic Cypress Vue Webpack file loader for .vue files
+ * Basic Cypress Vue Webpack file loader for .vue files.
  */
-const onFileDefaultPreprocessor = webpackPreprocessor({ webpackOptions })
+const onFileDefaultPreprocessor = (config) => {
+  let webpackOptions = fw.getWebpackOptions()
+  if (!webpackOptions) {
+    debug('Could not find webpack options, starting with default')
+    webpackOptions = {}
+  }
+  webpackOptions.mode = 'development'
+
+  inlineUrlLoadedAssets(webpackOptions)
+  preventChunking(webpackOptions)
+  compileTemplate(webpackOptions)
+  insertBabelLoader(config, webpackOptions)
+
+
+  if (debug.enabled) {
+    console.error('final webpack')
+    console.error(util.inspect(webpackOptions, false, 10, true))
+  }
+
+  return webpackPreprocessor({ webpackOptions })
+}
 
 /**
  * Custom Vue loader from the client projects that already have `webpack.config.js`
