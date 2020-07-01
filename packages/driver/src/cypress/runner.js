@@ -135,7 +135,7 @@ const condenseHooks = (runnable, getHookId) => {
   const hooks = _.compact(_.concat(
     runnable._beforeAll,
     runnable._beforeEach,
-    runnable._afterEach,
+    runnable._afterAll,
     runnable._afterEach,
   ))
 
