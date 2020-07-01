@@ -16,6 +16,7 @@
     {
       "packagePatterns": ["*"],
       "excludePackagePatterns": [
+        "@babel/plugin-transform-modules-commonjs",
         "@cypress/code-coverage",
         "@cypress/webpack-preprocessor",
         "babel-plugin-istanbul",
