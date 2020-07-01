@@ -1,4 +1,4 @@
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Handling User Input', () => {
@@ -11,13 +11,13 @@ describe('Handling User Input', () => {
   `
 
   const data = {
-    message: 'Hello Vue.js!'
+    message: 'Hello Vue.js!',
   }
 
   const methods = {
     reverseMessage: function () {
       this.message = this.message.split('').reverse().join('')
-    }
+    },
   }
 
   beforeEach(mountCallback({ template, data, methods }))

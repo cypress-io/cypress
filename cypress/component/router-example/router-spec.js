@@ -1,16 +1,15 @@
 import PizzaShop from './PizzaShop'
 import router from './PizzaShop/router'
 import VueRouter from 'vue-router'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 describe('Vue Router - Pizza Shop', () => {
-
   // configure component
   const extensions = {
     plugins: [VueRouter],
     components: {
-      PizzaShop
-    }
+      PizzaShop,
+    },
   }
 
   // define component template
@@ -31,7 +30,8 @@ describe('Vue Router - Pizza Shop', () => {
 
     // order a meatlover pizza
     // to: /order/meatlover
-    cy.get('a.order-veggie').click()
+    cy.get('a.order-veggie')
+      .click()
       .then(() => {
         const { path, params } = Cypress.vue.$route
         expect(path).to.eql('/order/veggie')
@@ -41,15 +41,15 @@ describe('Vue Router - Pizza Shop', () => {
     // veggie pizza shouldn't have any meat
     // we wouldn't want a lawsuit
     for (const topping of ['chicken', 'steak', 'bacon', 'ham']) {
-      cy.get('.order-overview > ul > li')
-        .should('not.contain', topping)
+      cy.get('.order-overview > ul > li').should('not.contain', topping)
     }
   })
 
   it('order meatlover option', () => {
     // go back to home page
     // from: /order/veggie -> to: /
-    cy.get('a.home').click()
+    cy.get('a.home')
+      .click()
       .then(() => {
         const { path, query, params } = Cypress.vue.$route
         expect(path).to.eql('/')
@@ -59,7 +59,8 @@ describe('Vue Router - Pizza Shop', () => {
 
     // order a meatlover pizza
     // to: /order/meatlover
-    cy.get('a.order-meatlover').click()
+    cy.get('a.order-meatlover')
+      .click()
       .then(() => {
         const { path, params } = Cypress.vue.$route
         expect(path).to.eql('/order/meatlover')
@@ -69,12 +70,14 @@ describe('Vue Router - Pizza Shop', () => {
 
   it('order cheese option', () => {
     // directly control the router from your test
-    cy.wrap(Cypress.vue.$router)
-      .then($router => $router.push({ name: 'home' }))
+    cy.wrap(Cypress.vue.$router).then(($router) =>
+      $router.push({ name: 'home' }),
+    )
 
     // order just a cheese
     // to: /order?cheese=true
-    cy.get('a.order-cheese').click()
+    cy.get('a.order-cheese')
+      .click()
       .then(() => {
         const { path, query } = Cypress.vue.$route
         expect(path).to.eql('/order')
@@ -87,12 +90,13 @@ describe('Vue Router - Pizza Shop', () => {
 
   it('order hawaian + peppers pizza without using UI', () => {
     cy.wrap(Cypress.vue.$router)
-      .then($router => $router.push({ name: 'home' }))
-      .then($router => $router.push({
-        name: 'order',
-        params: { preset: 'hawaian' },
-        query: { peppers: true }
-      }))
+      .then(($router) => $router.push({ name: 'home' }))
+      .then(($router) =>
+        $router.push({
+          name: 'order',
+          params: { preset: 'hawaian' },
+          query: { peppers: true },
+        }),
+      )
   })
 })
-

@@ -2,7 +2,7 @@
 // http://kazupon.github.io/vue-i18n
 import TranslatedMessage from './TranslatedMessage.vue'
 import VueI18n from 'vue-i18n'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 // https://github.com/bahmutov/cypress-vue-unit-test/issues/332
@@ -11,13 +11,13 @@ describe.skip('VueI18n', () => {
   const extensions = {
     plugins: [VueI18n],
     components: {
-      TranslatedMessage
-    }
+      TranslatedMessage,
+    },
   }
 
   const template = '<translated-message />'
 
-  beforeEach(mountCallback({template}, {extensions}))
+  beforeEach(mountCallback({ template }, { extensions }))
 
   it('shows English, Japanese and Russian greeting', () => {
     cy.viewport(400, 200)

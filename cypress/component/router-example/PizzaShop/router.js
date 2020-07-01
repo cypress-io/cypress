@@ -13,8 +13,8 @@ export default new VueRouter({
       component: PizzaShop,
       children: [
         { path: '', name: 'home', component: Home },
-        { path: 'order/:preset?', name: 'order', component: Order }
-      ]
-    }
-  ]
+        { path: 'order/:preset?', name: 'order', component: Order },
+      ],
+    },
+  ],
 })

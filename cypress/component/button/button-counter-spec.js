@@ -1,5 +1,5 @@
 import ButtonCounter from './ButtonCounter.vue'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('ButtonCounter', () => {
@@ -16,8 +16,11 @@ describe('ButtonCounter', () => {
   it('emits "increment" event on click', () => {
     const spy = cy.spy()
     Cypress.vue.$on('increment', spy)
-    cy.get('button').click().click().then(() => {
-      expect(spy).to.be.calledTwice
-    })
+    cy.get('button')
+      .click()
+      .click()
+      .then(() => {
+        expect(spy).to.be.calledTwice
+      })
   })
 })

@@ -1,4 +1,4 @@
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 const template = `
     <div id="app">
@@ -7,7 +7,7 @@ const template = `
   `
 
 const data = {
-  message: 'Hello Vue!'
+  message: 'Hello Vue!',
 }
 
 describe('Mount component', () => {

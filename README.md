@@ -5,7 +5,6 @@
 [![Build status][ci-image] ][ci-url]
 [![Cypress dashboard][cypress-badge] ][cypress-dashboard]
 [![semantic-release][semantic-image] ][semantic-url]
-[![js-standard-style][standard-image]][standard-url]
 [![renovate-app badge][renovate-badge]][renovate-app]
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
@@ -28,22 +27,24 @@
   <img src="./docs/commands.gif" width="400px" alt="Terminal typing vue add cypress-experimental"/>
 </p>
 
-* Requires Cypress v4.5.0 or later
-* Requires [Node](https://nodejs.org/en/) version 8 or above
-* Only supporting webpack-based projects
-* Installation via Vue CLI recommended
+- Requires Cypress v4.5.0 or later
+- Requires [Node](https://nodejs.org/en/) version 8 or above
+- Only supporting webpack-based projects
+- Installation via Vue CLI recommended
 
 ### Vue CLI Installation
+
 > Vue CLI v3+
 
-*Recommended*: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental)
+_Recommended_: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental)
 
 ```sh
 vue add cypress-experimental
 ```
 
 ### Manual Installation
-> *Not Recommended*: All of this is done automatically with Vue CLI
+
+> _Not Recommended_: All of this is done automatically with Vue CLI
 
 1. Install `cypress` and `cypress-vue-unit-test`
 
@@ -58,7 +59,7 @@ npm install -D cypress cypress-vue-unit-test
 // Required to temporarily patch async components, chunking, and inline image loading
 import { onFileDefaultPreprocessor } from 'cypress-vue-unit-test/dist/preprocessor/webpack'
 
-module.exports = on => {
+module.exports = (on) => {
   on('file:preprocessor', onFileDefaultPreprocessor)
 }
 ```
@@ -122,7 +123,7 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-* `components` - object of 'id' and components to register globally.
+- `components` - object of 'id' and components to register globally.
 
 ```js
 // two different components, each gets "numbers" list
@@ -138,11 +139,11 @@ const data = () => ({ numbers: ['uno', 'dos'] })
 // register same component globally under different names
 const components = {
   'message-list': MessageList,
-  'a-list': MessageList
+  'a-list': MessageList,
 }
 // extend Vue with global components
 const extensions = {
-  components
+  components,
 }
 beforeEach(mountCallback({ template, data }, { extensions }))
 ```
@@ -150,13 +151,13 @@ beforeEach(mountCallback({ template, data }, { extensions }))
 See [Vue component docs](https://vuejs.org/v2/api/#Vue-component),
 [global-components-spec.js](cypress/integration/global-components-spec.js)
 
-* `use` (alias `plugins`) - list of plugins
+- `use` (alias `plugins`) - list of plugins
 
 ```js
 const use = [MyPlugin]
 // extend Vue with plugins
 const extensions = {
-  use
+  use,
 }
 beforeEach(mountCallback({}, { extensions }))
 ```
@@ -164,19 +165,19 @@ beforeEach(mountCallback({}, { extensions }))
 See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
 and [plugin-spec.js](cypress/integration/plugin-spec.js)
 
-* `mixin` (alias `mixins`) - list of global mixins
+- `mixin` (alias `mixins`) - list of global mixins
 
 ```js
 const MyMixin = {
   // we have to use original Sinon to create a spy
   // because we are outside a test function
   // and cannot use "cy.spy"
-  created: Cypress.sinon.spy()
+  created: Cypress.sinon.spy(),
 }
 const mixin = [MyMixin]
 // extend Vue with mixins
 const extensions = {
-  mixin
+  mixin,
 }
 beforeEach(mountCallback({}, { extensions }))
 
@@ -188,23 +189,21 @@ it('calls mixin "created" method', () => {
 See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
 and [mixin-spec.js](cypress/integration/mixin-spec.js)
 
-
-* `filters` - hash of global filters
+- `filters` - hash of global filters
 
 ```js
 const filters = {
-  reverse: s => s.split().reverse().join()
+  reverse: (s) => s.split().reverse().join(),
 }
 // extend Vue with global filters
 const extensions = {
-  filters
+  filters,
 }
 beforeEach(mountCallback({}, { extensions }))
 ```
 
 See [Vue global filters docs](https://vuejs.org/v2/api/#Vue-filter)
 and [filters-spec.js](cypress/integration/filters-spec.js)
-
 
 <a name="intro-example"/>
 
@@ -219,15 +218,18 @@ The code is pretty simple
   {{ message }}
 </div>
 ```
+
 ```js
 var app = new Vue({
   el: '#app',
   data: {
-    message: 'Hello Vue!'
-  }
+    message: 'Hello Vue!',
+  },
 })
 ```
+
 It shows the message when running in the browser
+
 ```
 Hello Vue!
 ```
@@ -247,7 +249,7 @@ describe('Declarative rendering', () => {
   `
 
   const data = {
-    message: 'Hello Vue!'
+    message: 'Hello Vue!',
   }
 
   // that's all you need to do
@@ -287,6 +289,7 @@ There is a list example next in the Vue docs.
   </ol>
 </div>
 ```
+
 ```js
 var app4 = new Vue({
   el: '#app-4',
@@ -294,9 +297,9 @@ var app4 = new Vue({
     todos: [
       { text: 'Learn JavaScript' },
       { text: 'Learn Vue' },
-      { text: 'Build something awesome' }
-    ]
-  }
+      { text: 'Build something awesome' },
+    ],
+  },
 })
 ```
 
@@ -319,8 +322,8 @@ describe('Declarative rendering', () => {
     todos: [
       { text: 'Learn JavaScript' },
       { text: 'Learn Vue' },
-      { text: 'Build something awesome' }
-    ]
+      { text: 'Build something awesome' },
+    ],
   }
 
   beforeEach(mountCallback({ template, data }))
@@ -350,17 +353,18 @@ The next section in the Vue docs starts with [reverse message example](https://v
   <button v-on:click="reverseMessage">Reverse Message</button>
 </div>
 ```
+
 ```js
 var app5 = new Vue({
   el: '#app-5',
   data: {
-    message: 'Hello Vue.js!'
+    message: 'Hello Vue.js!',
   },
   methods: {
     reverseMessage: function () {
       this.message = this.message.split('').reverse().join('')
-    }
-  }
+    },
+  },
 })
 ```
 
@@ -379,13 +383,13 @@ describe('Handling User Input', () => {
   `
 
   const data = {
-    message: 'Hello Vue.js!'
+    message: 'Hello Vue.js!',
   }
 
   const methods = {
     reverseMessage: function () {
       this.message = this.message.split('').reverse().join('')
-    }
+    },
   }
 
   beforeEach(mountCallback({ template, data, methods }))
@@ -399,7 +403,7 @@ describe('Handling User Input', () => {
 ```
 
 Take a look at the video of the test. When you hover over the `CLICK` step
-the test runner is showing *before* and *after* DOM snapshots. Not only that,
+the test runner is showing _before_ and _after_ DOM snapshots. Not only that,
 the application is fully functioning, you can interact with the application
 because it is really running!
 
@@ -418,11 +422,11 @@ Let us test a complex example. Let us test a [single file Vue component](https:/
 
 <script>
 export default {
-  data () {
+  data() {
     return {
-      greeting: 'Hello'
+      greeting: 'Hello',
     }
-  }
+  },
 }
 </script>
 
@@ -452,7 +456,7 @@ describe('Several components', () => {
     </div>
   `
   const components = {
-    hello: Hello
+    hello: Hello,
   }
   beforeEach(mountCallback({ template, components }))
 
@@ -474,20 +478,20 @@ Button counter component is used in several Vue doc examples
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        counter: 0
-      }
-    },
-
-    methods: {
-      incrementCounter: function () {
-        this.counter += 1
-        this.$emit('increment')
-      }
+export default {
+  data() {
+    return {
+      counter: 0,
     }
-  }
+  },
+
+  methods: {
+    incrementCounter: function () {
+      this.counter += 1
+      this.$emit('increment')
+    },
+  },
+}
 </script>
 
 <style scoped>
@@ -520,9 +524,12 @@ describe('ButtonCounter', () => {
   it('emits "increment" event on click', () => {
     const spy = cy.spy()
     Cypress.vue.$on('increment', spy)
-    cy.get('button').click().click().then(() => {
-      expect(spy).to.be.calledTwice
-    })
+    cy.get('button')
+      .click()
+      .click()
+      .then(() => {
+        expect(spy).to.be.calledTwice
+      })
   })
 })
 ```
@@ -571,8 +578,6 @@ it('can display mock XHR response', () => {
 
 Calls to `window.alert` are automatically recorded, but do not show up. Instead you can spy on them, see [AlertMessage.vue](components/AlertMessage.vue) and its test [cypress/integration/alert-spec.js](cypress/integration/alert-spec.js)
 
-
-
 ## Comparison
 
 <!-- prettier-ignore-start -->
@@ -610,15 +615,19 @@ describe('HelloWorld component', () => {
 
 ### Basic examples
 
+<!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
 [Hello](cypress/component/basic/hello) | Testing examples from Vue2 cookbook
+<!-- prettier-ignore-end -->
 
 ### Advanced examples
 
+<!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
+<!-- prettier-ignore-end -->
 
 ## Known problems
 
@@ -635,6 +644,7 @@ How do we load this Vue file into the testing code? Using webpack preprocessor. 
 ### Short way
 
 #### For Webpack Users
+
 Your project probably already has `webpack.config.js` setup to transpile
 `.vue` files. To load these files in the Cypress tests, grab the webpack
 processor included in this module, and load it from the `cypress/plugins/index.js`
@@ -642,9 +652,9 @@ file.
 
 ```js
 const {
-  onFilePreprocessor
+  onFilePreprocessor,
 } = require('cypress-vue-unit-test/preprocessor/webpack')
-module.exports = on => {
+module.exports = (on) => {
   on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
 }
 ```
@@ -667,20 +677,20 @@ const webpackOptions = {
     rules: [
       {
         test: /\.vue$/,
-        loader: 'vue-loader'
-      }
-    ]
-  }
+        loader: 'vue-loader',
+      },
+    ],
+  },
 }
 
 const options = {
   // send in the options from your webpack.config.js, so it works the same
   // as your app's code
   webpackOptions,
-  watchOptions: {}
+  watchOptions: {},
 }
 
-module.exports = on => {
+module.exports = (on) => {
   on('file:preprocessor', webpack(options))
 }
 ```
@@ -751,7 +761,7 @@ DEBUG=cypress-vue-unit-test DEBUG_DEPTH=10
 ## FAQ
 
 - If your component's static assets are not loading, you probably need
-to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
+  to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
 
 <a name="#related"/>
 
@@ -770,7 +780,9 @@ to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmuto
 - update `cypress/plugins/index.js` file to pass the `on, config` arguments when creating the default preprocessor. See [change](https://github.com/bahmutov/cypress-vue-unit-test/pull/331/files#diff-4bcea4966f5e62ded90298c2b0907445), in general the new way is:
 
 ```js
-const { onFileDefaultPreprocessor } = require('cypress-vue-unit-test/preprocessor/webpack')
+const {
+  onFileDefaultPreprocessor,
+} = require('cypress-vue-unit-test/preprocessor/webpack')
 
 module.exports = (on, config) => {
   require('@cypress/code-coverage/task')(on, config)
@@ -786,12 +798,12 @@ module.exports = (on, config) => {
 
 ## Test adapters for other frameworks
 
-* [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
-* [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
-* [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
-* [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
-* [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
-* [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
+- [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test)
+- [cypress-cycle-unit-test](https://github.com/bahmutov/cypress-cycle-unit-test)
+- [cypress-svelte-unit-test](https://github.com/bahmutov/cypress-svelte-unit-test)
+- [cypress-angular-unit-test](https://github.com/bahmutov/cypress-angular-unit-test)
+- [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
+- [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
 
 <a name="#contributors"/>
 
@@ -804,9 +816,9 @@ module.exports = (on, config) => {
 
 Author: Gleb Bahmutov &lt;gleb.bahmutov@gmail.com&gt; &copy; 2017
 
-* [@bahmutov](https://twitter.com/bahmutov)
-* [glebbahmutov.com](https://glebbahmutov.com)
-* [blog](https://glebbahmutov.com/blog)
+- [@bahmutov](https://twitter.com/bahmutov)
+- [glebbahmutov.com](https://glebbahmutov.com)
+- [blog](https://glebbahmutov.com/blog)
 
 License: MIT - do anything with the code, but don't blame me if it does not work.
 
@@ -844,8 +856,6 @@ OTHER DEALINGS IN THE SOFTWARE.
 [ci-url]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
-[standard-image]: https://img.shields.io/badge/code%20style-standard-brightgreen.svg
-[standard-url]: http://standardjs.com/
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
 [cypress-dashboard]: https://dashboard.cypress.io/#/projects/134ej7
 [renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg

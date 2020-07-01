@@ -9,23 +9,24 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const fw = require('find-webpack')
 
 // Preventing chunks because we don't serve static assets
-function preventChunking (options = {}) {
+function preventChunking(options = {}) {
   if (options && options.optimization && options.optimization.splitChunks) {
     delete options.optimization.splitChunks
   }
   options.plugins = options.plugins || []
   options.plugins.push(
     new webpack.optimize.LimitChunkCountPlugin({
-      maxChunks: 1 // no chunks from dynamic imports -- includes the entry file
-    })
+      maxChunks: 1, // no chunks from dynamic imports -- includes the entry file
+    }),
   )
   return options
 }
 
 // Base 64 all the things because we don't serve static assets
-function inlineUrlLoadedAssets (options = {}) {
-  const isUrlLoader = use => use && use.loader && use.loader.indexOf('url-loader') > -1
-  const mergeUrlLoaderOptions = use => {
+function inlineUrlLoadedAssets(options = {}) {
+  const isUrlLoader = (use) =>
+    use && use.loader && use.loader.indexOf('url-loader') > -1
+  const mergeUrlLoaderOptions = (use) => {
     if (isUrlLoader(use)) {
       use.options = use.options || {}
       use.options.limit = Number.MAX_SAFE_INTEGER
@@ -34,7 +35,7 @@ function inlineUrlLoadedAssets (options = {}) {
   }
 
   if (options.module && options.module.rules) {
-    options.module.rules = options.module.rules.map(rule => {
+    options.module.rules = options.module.rules.map((rule) => {
       if (Array.isArray(rule.use)) {
         rule.use = rule.use.map(mergeUrlLoaderOptions)
       }
@@ -44,7 +45,7 @@ function inlineUrlLoadedAssets (options = {}) {
   return options
 }
 
-function compileTemplate (options = {}) {
+function compileTemplate(options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
   options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
@@ -73,9 +74,9 @@ function insertBabelLoader(config, options) {
           '@babel/plugin-transform-modules-commonjs',
           {
             loose: true,
-          }
+          },
         ],
-      ]
+      ],
     },
   }
 
@@ -90,8 +91,8 @@ function insertBabelLoader(config, options) {
       {
         // specify some options for NYC instrumentation here
         // like tell it to instrument both JavaScript and Vue files
-        extension: [ '.js', '.vue' ]
-      }
+        extension: ['.js', '.vue'],
+      },
     ]
     babelRule.options.plugins.push(instrumentPlugin)
   }
@@ -99,12 +100,12 @@ function insertBabelLoader(config, options) {
   options.module.rules.push(babelRule)
   options.plugins = options.plugins || []
 
-  const pluginFound = options.plugins.some(plugin => plugin.constructor === VueLoaderPlugin)
+  const pluginFound = options.plugins.some(
+    (plugin) => plugin.constructor === VueLoaderPlugin,
+  )
   if (!pluginFound) {
     debug('inserting VueLoaderPlugin')
-    options.plugins.push(
-      new VueLoaderPlugin()
-    )
+    options.plugins.push(new VueLoaderPlugin())
   } else {
     debug('found plugin VueLoaderPlugin already')
   }
@@ -126,7 +127,6 @@ const onFileDefaultPreprocessor = (config) => {
   compileTemplate(webpackOptions)
   insertBabelLoader(config, webpackOptions)
 
-
   if (debug.enabled) {
     console.error('final webpack')
     console.error(util.inspect(webpackOptions, false, 10, true))
@@ -146,14 +146,14 @@ const onFileDefaultPreprocessor = (config) => {
  *      on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
  *    }
  */
-const onFilePreprocessor = webpackOptions => {
+const onFilePreprocessor = (webpackOptions) => {
   if (typeof webpackOptions === 'string') {
     // load webpack config from the given path
     webpackOptions = require(webpackOptions)
   }
 
   return webpackPreprocessor({
-    webpackOptions
+    webpackOptions,
   })
 }
 

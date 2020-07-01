@@ -14,9 +14,15 @@ const meatlover = [CHEESE, CHICKEN, STEAK, HAM, BACON]
 const hawaian = [CHEESE, PINEAPPLE, HAM]
 
 export const ALL_TOPPINGS = [
-  CHEESE, TOMATOES, MUSHROOMS, PEPPERS,
-  PINEAPPLE, CHICKEN, STEAK, HAM, BACON
+  CHEESE,
+  TOMATOES,
+  MUSHROOMS,
+  PEPPERS,
+  PINEAPPLE,
+  CHICKEN,
+  STEAK,
+  HAM,
+  BACON,
 ]
 
-export const PRESETS = {veggie, vegan, meatlover, hawaian}
-
+export const PRESETS = { veggie, vegan, meatlover, hawaian }

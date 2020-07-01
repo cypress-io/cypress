@@ -1,13 +1,13 @@
-import {mount, mountCallback} from 'cypress-vue-unit-test'
+import { mount, mountCallback } from 'cypress-vue-unit-test'
 import RedBox from './RedBox.vue'
 
 describe('RedBox 1', () => {
-  const template = '<red-box :status="true" />';
+  const template = '<red-box :status="true" />'
   const options = {
     extensions: {
       components: {
-        'red-box': RedBox
-      }
+        'red-box': RedBox,
+      },
     },
     // you can inject additional styles to be downloaded
     //
@@ -15,15 +15,15 @@ describe('RedBox 1', () => {
       // you can use external links
       // 'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css'
       // or local node_modules paths
-      '/node_modules/tailwindcss/dist/tailwind.min.css'
-    ]
+      '/node_modules/tailwindcss/dist/tailwind.min.css',
+    ],
   }
 
   it('displays red Hello RedBox', () => {
     mount({ template }, options)
 
-    cy.contains("Hello RedBox");
-    cy.get("[data-cy=box]")
+    cy.contains('Hello RedBox')
+    cy.get('[data-cy=box]')
       .should('have.css', 'background-color', 'rgb(255, 0, 0)')
       // and Tailwindcss style should have been applied
       .and('have.css', 'margin', '32px')
@@ -31,20 +31,24 @@ describe('RedBox 1', () => {
 })
 
 describe('RedBox 2', () => {
-  const template = '<red-box :status="false" />';
+  const template = '<red-box :status="false" />'
   const options = {
     extensions: {
       components: {
-        'red-box': RedBox
-      }
-    }
+        'red-box': RedBox,
+      },
+    },
   }
 
-  beforeEach(mountCallback({ template }, options));
+  beforeEach(mountCallback({ template }, options))
   it('displays Goodbye RedBox', () => {
-    cy.contains("Goodbye RedBox");
+    cy.contains('Goodbye RedBox')
   })
   it('should be Red', () => {
-    cy.get("[data-cy=box]").should('have.css', 'background-color', 'rgb(255, 0, 0)');
+    cy.get('[data-cy=box]').should(
+      'have.css',
+      'background-color',
+      'rgb(255, 0, 0)',
+    )
   })
 })

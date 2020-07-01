@@ -1,4 +1,4 @@
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Declarative rendering', () => {
@@ -10,7 +10,7 @@ describe('Declarative rendering', () => {
   `
 
   const data = {
-    message: 'Hello Vue!'
+    message: 'Hello Vue!',
   }
 
   beforeEach(mountCallback({ template, data }))

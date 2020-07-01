@@ -1,9 +1,8 @@
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 describe('Global filters', () => {
   const filters = {
-    reverse: s =>
-      s.split('').reverse().join('')
+    reverse: (s) => s.split('').reverse().join(''),
   }
 
   // use reverse filter in template
@@ -13,13 +12,13 @@ describe('Global filters', () => {
 
   // extend Vue with global filters
   const extensions = {
-    filters
+    filters,
   }
-  beforeEach(mountCallback({template}, { extensions }))
+  beforeEach(mountCallback({ template }, { extensions }))
 
   it('registers global filter', () => {
     cy.wrap(window.Vue)
-    // cy.window().its('Vue')
+      // cy.window().its('Vue')
       .invoke('filter', 'reverse')
       .should('equal', filters.reverse)
   })

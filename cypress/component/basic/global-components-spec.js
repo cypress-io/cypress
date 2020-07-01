@@ -1,5 +1,5 @@
 import MessageList from './MessageList.vue'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
@@ -19,17 +19,16 @@ describe('Global components', () => {
   // register same component globally under different names
   const components = {
     'message-list': MessageList,
-    'a-list': MessageList
+    'a-list': MessageList,
   }
   // extend Vue with global components
   const extensions = {
-    components
+    components,
   }
   beforeEach(mountCallback({ template, data }, { extensions }))
 
   it('registers global component', () => {
-    cy
-      .window()
+    cy.window()
       .its('Vue')
       .invoke('component', 'message-list')
       // returns component constructor

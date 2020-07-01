@@ -30,10 +30,10 @@
     "deps": "echo skip deps-ok && dependency-check --no-dev .",
     "issues": "git-issues",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "standard --verbose --fix src/*.js preprocessor/*.js",
+    "lint": "prettier --check 'cypress/**/*.js' 'src/**/*.js' 'preprocessor/**/*.js'",
     "prelint": "npm run pretty",
     "pretest": "npm run lint && npm run build",
-    "pretty": "prettier-standard 'src/*.js' 'preprocessor/*.js'",
+    "pretty": "prettier --write 'cypress/**/*.js' 'src/**/*.js' 'preprocessor/**/*.js'",
     "size": "npm pack --dry",
     "test": "npm run cy:run",
     "unit": "mocha src/*-spec.js",
@@ -65,9 +65,8 @@
     "git-issues": "1.3.1",
     "license-checker": "19.0.0",
     "mocha": "7.1.1",
-    "prettier-standard": "8.0.1",
+    "prettier": "2.0.5",
     "semantic-release": "^17.1.1",
-    "standard": "12.0.1",
     "tailwindcss": "1.1.4",
     "vue": "2.6.11",
     "vue-i18n": "7.8.1",
@@ -77,13 +76,6 @@
     "vue-template-compiler": "2.6.11",
     "vuex": "3.1.1",
     "webpack": "4.42.0"
-  },
-  "standard": {
-    "globals": [
-      "Cypress",
-      "cy",
-      "expect"
-    ]
   },
   "peerDependencies": {
     "vue": "2.x",

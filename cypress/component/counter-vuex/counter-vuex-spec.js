@@ -3,17 +3,16 @@
 import Counter from './Counter.vue'
 import store from './store'
 import Vuex from 'vuex'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Vuex Counter', () => {
-
   // configure component
   const extensions = {
     plugins: [Vuex],
     components: {
-      Counter
-    }
+      Counter,
+    },
   }
 
   // define component template
@@ -21,10 +20,10 @@ describe('Vuex Counter', () => {
 
   // define count get and set helpers
   const getCount = () => Cypress.vue.$store.state.count
-  const setCount = value => Cypress.vue.$store.commit('set', value)
+  const setCount = (value) => Cypress.vue.$store.commit('set', value)
 
   // initialize a fresh Vue app before each test
-  beforeEach(mountCallback({template, store}, {extensions}))
+  beforeEach(mountCallback({ template, store }, { extensions }))
 
   it('starts with zero', () => {
     cy.contains('0 times')
@@ -41,7 +40,7 @@ describe('Vuex Counter', () => {
   })
 
   it('increments the counter if count is odd', () => {
-    setCount(3)  // start with an odd number
+    setCount(3) // start with an odd number
     cy.contains('odd')
     cy.contains('button', 'Increment if odd').as('btn').click()
     cy.contains('even')
@@ -61,10 +60,9 @@ describe('Vuex Counter', () => {
     cy.get('input').type(`{selectall}{backspace}`)
     cy.contains('0 times')
   }),
-
-  it('set count via input field', () => {
-    const count = 42
-    cy.get('input').type(`{selectall}{backspace}${count}`)
-    cy.contains(`${count} times`)
-  })
+    it('set count via input field', () => {
+      const count = 42
+      cy.get('input').type(`{selectall}{backspace}${count}`)
+      cy.contains(`${count} times`)
+    })
 })

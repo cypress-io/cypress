@@ -6,18 +6,18 @@ const { stripIndent } = require('common-tags')
 // mountVue options
 const defaultOptions = ['vue', 'extensions', 'style', 'stylesheets']
 
-function checkMountModeEnabled () {
+function checkMountModeEnabled() {
   // @ts-ignore
   if (Cypress.spec.specType !== 'component') {
     throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`
+      `In order to use mount or unmount functions please place the spec in component folder`,
     )
   }
 }
 
-const deleteConstructor = comp => delete comp._Ctor
+const deleteConstructor = (comp) => delete comp._Ctor
 
-const deleteCachedConstructors = component => {
+const deleteCachedConstructors = (component) => {
   if (!component.components) {
     return
   }
@@ -36,7 +36,7 @@ const registerGlobalComponents = (Vue, options) => {
 const installFilters = (Vue, options) => {
   const filters = Cypress._.get(options, 'extensions.filters')
   if (Cypress._.isPlainObject(filters)) {
-    Object.keys(filters).forEach(name => {
+    Object.keys(filters).forEach((name) => {
       Vue.filter(name, filters[name])
     })
   }
@@ -47,7 +47,7 @@ const installPlugins = (Vue, options) => {
     Cypress._.get(options, 'extensions.use') ||
     Cypress._.get(options, 'extensions.plugins')
   if (Cypress._.isArray(plugins)) {
-    plugins.forEach(plugin => {
+    plugins.forEach((plugin) => {
       Vue.use(plugin)
     })
   }
@@ -58,18 +58,18 @@ const installMixins = (Vue, options) => {
     Cypress._.get(options, 'extensions.mixin') ||
     Cypress._.get(options, 'extensions.mixins')
   if (Cypress._.isArray(mixins)) {
-    mixins.forEach(mixin => {
+    mixins.forEach((mixin) => {
       Vue.mixin(mixin)
     })
   }
 }
 
-const isConstructor = object => object && object._compiled
+const isConstructor = (object) => object && object._compiled
 
 const hasStore = ({ store }) => store && store._vm
 
 const forEachValue = (obj, fn) =>
-  Object.keys(obj).forEach(key => fn(obj[key], key))
+  Object.keys(obj).forEach((key) => fn(obj[key], key))
 
 const resetStoreVM = (Vue, { store }) => {
   // bind store public getters
@@ -81,16 +81,16 @@ const resetStoreVM = (Vue, { store }) => {
     computed[key] = () => fn(store)
     Object.defineProperty(store.getters, key, {
       get: () => store._vm[key],
-      enumerable: true // for local getters
+      enumerable: true, // for local getters
     })
   })
 
   store._watcherVM = new Vue()
   store._vm = new Vue({
     data: {
-      $$state: store._vm._data.$$state
+      $$state: store._vm._data.$$state,
     },
-    computed
+    computed,
   })
   return store
 }
@@ -119,7 +119,7 @@ const mountVue = (component, optionsOrProps = {}) => {
     component.store = resetStoreVM(Vue, component)
   }
 
-  return cy.window({ log: false }).then(win => {
+  return cy.window({ log: false }).then((win) => {
     win.Vue = Vue
 
     const document = cy.state('document')
@@ -138,7 +138,7 @@ const mountVue = (component, optionsOrProps = {}) => {
     }
     if (Array.isArray(options.stylesheets)) {
       console.log('adding stylesheets')
-      options.stylesheets.forEach(href => {
+      options.stylesheets.forEach((href) => {
         const link = document.createElement('link')
         link.type = 'text/css'
         link.rel = 'stylesheet'

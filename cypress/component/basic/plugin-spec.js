@@ -1,5 +1,5 @@
 import { MyPlugin } from './MyPlugin'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Custom plugin MyPlugin', () => {
@@ -7,7 +7,7 @@ describe('Custom plugin MyPlugin', () => {
 
   // extend Vue with plugins
   const extensions = {
-    use
+    use,
   }
   beforeEach(mountCallback({}, { extensions }))
 

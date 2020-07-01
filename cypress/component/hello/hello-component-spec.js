@@ -1,5 +1,5 @@
 import Hello from './Hello.vue'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Hello.vue', () => {
@@ -19,7 +19,7 @@ describe('Several components', () => {
     </div>
   `
   const components = {
-    hello: Hello
+    hello: Hello,
   }
   beforeEach(mountCallback({ template, components }))
 

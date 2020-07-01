@@ -1,5 +1,5 @@
 import MessageList from './MessageList.vue'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
@@ -32,7 +32,7 @@ describe('MessageList with props', () => {
   const data = () => ({ messages: ['uno', 'dos'] })
 
   const components = {
-    MessageList
+    MessageList,
   }
 
   beforeEach(mountCallback({ template, data, components }))
@@ -52,7 +52,7 @@ describe('MessageList under message-list name', () => {
   const data = () => ({ messages: ['uno', 'dos'] })
 
   const components = {
-    'message-list': MessageList
+    'message-list': MessageList,
   }
 
   beforeEach(mountCallback({ template, data, components }))

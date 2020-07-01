@@ -1,4 +1,4 @@
-import {mount} from 'cypress-vue-unit-test'
+import { mount } from 'cypress-vue-unit-test'
 
 // example comes from https://tailwindcss.com/components/cards/#horizontal
 const html = `
@@ -29,10 +29,13 @@ const html = `
 
 it('renders card', () => {
   cy.viewport(1000, 500)
-  mount({
-    template: html
-  }, {
-    stylesheets: '/node_modules/tailwindcss/dist/tailwind.min.css'
-  })
+  mount(
+    {
+      template: html,
+    },
+    {
+      stylesheets: '/node_modules/tailwindcss/dist/tailwind.min.css',
+    },
+  )
   cy.contains('.text-xl', 'Can coffee make you a better developer?')
 })

@@ -1,4 +1,4 @@
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('Global mixin', () => {
@@ -6,12 +6,12 @@ describe('Global mixin', () => {
     // we have to use original Sinon to create a spy
     // because we are outside a test function
     // and cannot use "cy.spy"
-    created: Cypress.sinon.spy()
+    created: Cypress.sinon.spy(),
   }
   const mixin = [MyMixin]
   // extend Vue with mixins
   const extensions = {
-    mixin
+    mixin,
   }
   beforeEach(mountCallback({}, { extensions }))
 

@@ -1,5 +1,5 @@
 import Todo from './Todo.vue'
-import {mount} from 'cypress-vue-unit-test'
+import { mount } from 'cypress-vue-unit-test'
 
 // let's make sure we can show the checked Todo item using CSS
 const style = `
@@ -15,14 +15,17 @@ it('injects local style', () => {
     <Todo title="write tests" v-bind:done="false" />
   `
   const components = {
-    Todo
+    Todo,
   }
 
   mount({ template, components }, { style })
-  cy.get('input[type=checkbox]').should('not.be.checked')
-    .check().should('be.checked')
+  cy.get('input[type=checkbox]')
+    .should('not.be.checked')
+    .check()
+    .should('be.checked')
   // once the checkbox is set, there should be class "done" on the component
-  cy.get('.todo').should('have.class', 'done')
+  cy.get('.todo')
+    .should('have.class', 'done')
     // and the style was correctly applied
     .should('have.css', 'text-decoration-line', 'line-through')
   // and if we uncheck the element, the class should be gone
@@ -36,12 +39,13 @@ it('passes props via options object', () => {
   const options = {
     propsData: {
       title: 'finish test',
-      done: true
+      done: true,
     },
-    style
+    style,
   }
   mount(Todo, options)
-  cy.get('.todo').should('have.class', 'done')
+  cy.get('.todo')
+    .should('have.class', 'done')
     // and the style was correctly applied
     .should('have.css', 'text-decoration-line', 'line-through')
 })

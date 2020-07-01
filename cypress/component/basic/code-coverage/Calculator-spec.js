@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import Calculator from './Calculator.vue'
-import {mount} from 'cypress-vue-unit-test'
+import { mount } from 'cypress-vue-unit-test'
 
 describe('Calculator', () => {
   it('adds two numbers', () => {
@@ -11,16 +11,17 @@ describe('Calculator', () => {
     cy.contains('= 42')
 
     cy.log('**check coverage**')
-    cy.wrap(window).its('__coverage__')
+    cy.wrap(window)
+      .its('__coverage__')
       // and it includes information even for this file
       .then(Object.keys)
       .should('include', Cypress.spec.absolute)
-      .and(filenames => {
+      .and((filenames) => {
         // coverage should include Calculator.vue file
-        const includesVue = filenames.some(filename => filename.endsWith('Calculator.vue'))
+        const includesVue = filenames.some((filename) =>
+          filename.endsWith('Calculator.vue'),
+        )
         expect(includesVue, 'Calculator.vue is instrumented').to.be.true
       })
-
-
   })
 })

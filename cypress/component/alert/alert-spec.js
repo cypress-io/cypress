@@ -1,5 +1,5 @@
 import AlertMessage from './AlertMessage.vue'
-import {mountCallback} from 'cypress-vue-unit-test'
+import { mountCallback } from 'cypress-vue-unit-test'
 
 /* eslint-env mocha */
 describe('AlertMessage', () => {
