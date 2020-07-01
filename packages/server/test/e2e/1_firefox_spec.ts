@@ -2,7 +2,7 @@ import path from 'path'
 import util from 'util'
 import fs from 'fs-extra'
 
-import e2e from '../support/helpers/e2e'
+import e2e, { expect } from '../support/helpers/e2e'
 import Bluebird from 'bluebird'
 import Fixtures from '../support/helpers/fixtures'
 
@@ -56,5 +56,16 @@ describe('e2e firefox', function () {
     browser: 'firefox',
     project: Fixtures.projectPath('screen-size'),
     spec: 'maximized.spec.js',
+    onRun: async (exec) => {
+      const { stderr } = await exec({
+        processEnv: {
+          // trigger foxdriver's built-in debug logs
+          DEBUG: process.env.DEBUG || 'foo',
+        },
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/7723
+      expect(stderr).not.to.include('foxdriver')
+    },
   })
 })

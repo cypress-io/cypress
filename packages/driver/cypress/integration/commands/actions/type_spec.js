@@ -3051,7 +3051,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           const spyTableName = cy.spy(top.console, 'groupCollapsed')
           const spyTableData = cy.spy(top.console, 'table')
 
-          const commandLogEl = getCommandLogWithText('foo')
+          const commandLogEl = getCommandLogWithText('foo', 'message-text')
 
           const reactCommandInstance = findReactInstance(commandLogEl[0])
 
@@ -3064,6 +3064,20 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(spyTableData).calledTwice
         })
       })
+    })
+  })
+
+  describe('shadow dom', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7741
+    it('types into input', () => {
+      cy
+      .get('#shadow-element-1')
+      .find('input', { includeShadowDom: true })
+      .type('foo')
     })
   })
 })

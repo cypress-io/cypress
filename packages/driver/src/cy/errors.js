@@ -14,6 +14,8 @@ const create = (state, config, log) => {
       snapshot: true,
       error: err,
       consoleProps () {
+        if (!current) return
+
         const obj = {}
         const prev = current.get('prev')
 
