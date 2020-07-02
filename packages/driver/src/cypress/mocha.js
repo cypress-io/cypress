@@ -95,7 +95,7 @@ function getInvocationDetails (specWindow, config) {
     // firefox throws a different stack than chromium
     // which includes this file (mocha.js) and mocha/.../common.js at the top
     if (specWindow.Cypress.browser.family === 'firefox') {
-      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'common.js')
+      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'mocha/lib/interfaces/common.js')
     }
 
     return $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
