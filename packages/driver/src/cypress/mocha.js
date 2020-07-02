@@ -88,22 +88,32 @@ function overloadMochaFnForConfig (fnName, specWindow) {
   })
 }
 
+function getInvocationDetails (specWindow, config) {
+  if (specWindow.Error) {
+    let stack = (new specWindow.Error()).stack
+
+    // firefox throws a different stack than chromium
+    // which includes this file (mocha.js) and mocha/.../common.js at the top
+    if (specWindow.Cypress.browser.family === 'firefox') {
+      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'common.js')
+    }
+
+    return $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
+  }
+}
+
 function overloadMochaHook (fnName, suite, specWindow, config) {
   const _fn = suite[fnName]
 
   suite[fnName] = function (title, fn) {
     const _createHook = this._createHook
 
-    if (specWindow.Error) {
-      const stack = (new specWindow.Error()).stack
+    this._createHook = function (title, fn) {
+      const hook = _createHook.call(this, title, fn)
 
-      this._createHook = function (title, fn) {
-        const hook = _createHook.call(this, title, fn)
+      hook.invocationDetails = getInvocationDetails(specWindow, config)
 
-        hook.invocationDetails = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
-
-        return hook
-      }
+      return hook
     }
 
     const ret = _fn.call(this, title, fn)
@@ -118,11 +128,7 @@ function overloadMochaTest (suite, specWindow, config) {
   const _fn = suite.addTest
 
   suite.addTest = function (test) {
-    if (specWindow.Error) {
-      const stack = (new specWindow.Error()).stack
-
-      test.invocationDetails = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
-    }
+    test.invocationDetails = getInvocationDetails(specWindow, config)
 
     return _fn.call(this, test)
   }

@@ -61,7 +61,9 @@ describe('hooks', function () {
 
     cy.contains('Open in IDE').invoke('show').click().then(function () {
       expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include('hook_spec.js')
-      expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].column).to.be.eq(3)
+      // chrome sets the column to right before "before("
+      // while firefox sets it right after "before("
+      expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].column).to.be.eq(Cypress.browser.family === 'firefox' ? 10 : 3)
       expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].line).to.be.eq(2)
     })
   })
