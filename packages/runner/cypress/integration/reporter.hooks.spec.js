@@ -46,8 +46,8 @@ describe('hooks', function () {
     cy.contains('test body').closest('.collapsible').should('contain', 'testBody 2')
     cy.contains('after each (1)').closest('.collapsible').should('contain', 'afterEachHook 2')
     cy.contains('after each (2)').closest('.collapsible').should('contain', 'afterEachHook 1')
-    cy.contains('after (1)').closest('.collapsible').should('contain', 'afterHook 2')
-    cy.contains('after (2)').closest('.collapsible').should('contain', 'afterHook 1')
+    cy.contains('after all (1)').closest('.collapsible').should('contain', 'afterHook 2')
+    cy.contains('after all (2)').closest('.collapsible').should('contain', 'afterHook 1')
   })
 
   it('creates open in IDE button', function () {
