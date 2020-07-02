@@ -153,6 +153,13 @@ module.exports = {
     },
   },
 
+  breaking_change: {
+    blob_util2: {
+      message: 'Cypress 5+ uses `blob-util` 2.x. This function does not return `Promise` any more.',
+      docsUrl: 'https://docs.cypress.io/guides/references/migration-guide.html',
+    },
+  },
+
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
