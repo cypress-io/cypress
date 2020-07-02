@@ -22,9 +22,9 @@ const model = (props?: Partial<HooksModel>) => {
   return _.extend<HooksModel>({
     hooks: [hookModel(), hookModel(), hookModel()],
     hookCount: {
-      'before': 0,
+      'before all': 0,
       'before each': 3,
-      'after': 0,
+      'after all': 0,
       'after each': 0,
       'test body': 0,
     },
@@ -48,9 +48,9 @@ describe('<Hooks />', () => {
     const component = shallow(<Hooks model={model({
       hooks: [hookModel()],
       hookCount: {
-        'before': 0,
+        'before all': 0,
         'before each': 1,
-        'after': 0,
+        'after all': 0,
         'after each': 0,
         'test body': 0,
       },

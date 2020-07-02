@@ -44,9 +44,9 @@ export default class Test extends Runnable {
   @observable _invocationCount: number = 0
   @observable invocationDetails?: FileDetails
   @observable hookCount: { [name in HookName]: number } = {
-    'before': 0,
+    'before all': 0,
     'before each': 0,
-    'after': 0,
+    'after all': 0,
     'after each': 0,
     'test body': 0,
   }
