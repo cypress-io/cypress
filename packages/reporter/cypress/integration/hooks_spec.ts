@@ -57,6 +57,12 @@ describe('hooks', function () {
     })
 
     it('splits different hooks with the same name', function () {
+      cy.contains('before all (1)').closest('.collapsible').find('.command').should('have.length', 1)
+      cy.contains('before all (1)').closest('.collapsible').should('contain', 'before1')
+
+      cy.contains('before all (2)').closest('.collapsible').find('.command').should('have.length', 1)
+      cy.contains('before all (2)').closest('.collapsible').should('contain', 'before2')
+
       cy.contains('before each (1)').closest('.collapsible').find('.command').should('have.length', 2)
       cy.contains('before each (1)').closest('.collapsible').should('contain', 'http://localhost:3000')
       cy.contains('before each (1)').closest('.collapsible').should('contain', '.wrapper')

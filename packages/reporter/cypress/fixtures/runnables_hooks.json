@@ -95,6 +95,14 @@
           "hooks": [
             {
               "hookId": "h3",
+              "hookName": "before all"
+            },
+            {
+              "hookId": "h4",
+              "hookName": "before all"
+            },
+            {
+              "hookId": "h5",
               "hookName": "before each"
             }
           ],
@@ -104,6 +112,28 @@
               "title": "test 2",
               "state": "passed",
               "commands": [
+                {
+                  "hookId": "h3",
+                  "id": "c5",
+                  "instrument": "command",
+                  "message": "before1",
+                  "name": "log",
+                  "state": "passed",
+                  "testId": "r5",
+                  "timeout": 4000,
+                  "type": "parent"
+                },
+                {
+                  "hookId": "h4",
+                  "id": "c5",
+                  "instrument": "command",
+                  "message": "before2",
+                  "name": "log",
+                  "state": "passed",
+                  "testId": "r5",
+                  "timeout": 4000,
+                  "type": "parent"
+                },
                 {
                   "hookId": "h1",
                   "id": "c5",
@@ -127,7 +157,7 @@
                   "type": "parent"
                 },
                 {
-                  "hookId": "h3",
+                  "hookId": "h5",
                   "id": "c7",
                   "instrument": "command",
                   "message": ".header",
