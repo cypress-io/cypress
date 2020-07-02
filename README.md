@@ -9,7 +9,7 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [Code coverage](#code-coverage)
+**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [external](#external-examples), [Code coverage](#code-coverage)
 
 ## TLDR
 
@@ -21,6 +21,10 @@
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
 
+## Blog posts
+
+- [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
+
 ## Install
 
 <p align="center">
@@ -30,54 +34,19 @@
 - Requires Cypress v4.5.0 or later
 - Requires [Node](https://nodejs.org/en/) version 8 or above
 - Only supporting webpack-based projects
-- Installation via Vue CLI recommended
+- Installation via Vue CLI recommended, read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
 
 ### Vue CLI Installation
 
 > Vue CLI v3+
 
-_Recommended_: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental)
+_Recommended_: One step install to existing projects with Vue CLI via [experimental plugin](https://github.com/jessicasachs/vue-cli-plugin-cypress-experimental), read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
 
 ```sh
 vue add cypress-experimental
 ```
 
-### Manual Installation
-
-> _Not Recommended_: All of this is done automatically with Vue CLI
-
-1. Install `cypress` and `cypress-vue-unit-test`
-
-```sh
-npm install -D cypress cypress-vue-unit-test
-```
-
-2. Include this plugin `cypress/plugin/index.js`
-
-```js
-// default webpack file preprocessor is good for simple cases
-// Required to temporarily patch async components, chunking, and inline image loading
-import { onFileDefaultPreprocessor } from 'cypress-vue-unit-test/dist/preprocessor/webpack'
-
-module.exports = (on) => {
-  on('file:preprocessor', onFileDefaultPreprocessor)
-}
-```
-
-3. Include the support file `cypress/support/index.js`
-
-```js
-import 'cypress-vue-unit-test/dist/support'
-```
-
-4. ⚠️ Turn the experimental component support on in your `cypress.json`. You can also specify where component spec files are located. For exampled to have them located in `src` folder use:
-
-```json
-{
-  "experimentalComponentTesting": true,
-  "componentFolder": "src"
-}
-```
+If you want to install this package manually, follow [manual install](./docs/manual-install.md)
 
 ## Usage and Examples
 
@@ -627,6 +596,14 @@ Spec | Description
 Spec | Description
 --- | ---
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
+<!-- prettier-ignore-end -->
+
+### External examples
+
+<!-- prettier-ignore-start -->
+Repo | Description
+--- | ---
+[vue-component-test-example](https://github.com/bahmutov/vue-component-test-example) | Scaffolded Vue CLI v3 project with added component tests, read [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/).
 <!-- prettier-ignore-end -->
 
 ## Known problems
