@@ -16,7 +16,11 @@ export function wrapBlobUtil (blobUtil) {
         const val = blobUtil[key](...args)
 
         val.then = function () {
-          $errUtil.throwErrByPath('breaking_change.blob_util2')
+          $errUtil.throwErrByPath('breaking_change.blob_util2', {
+            args: {
+              functionName: key,
+            },
+          })
         }
 
         return val
