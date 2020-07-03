@@ -1,7 +1,7 @@
 describe('blob-util 2.x', () => {
   it('arrayBufferToBlob', () => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Cypress 5+ uses `blob-util` 2.x')
+      expect(err.message).to.include('no longer returns a `Promise`')
     })
 
     Cypress.Blob.arrayBufferToBlob('1234').then((blob) => {
@@ -11,7 +11,7 @@ describe('blob-util 2.x', () => {
 
   it('base64StringToBlob', () => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Cypress 5+ uses `blob-util` 2.x')
+      expect(err.message).to.include('no longer returns a `Promise`')
     })
 
     Cypress.Blob.base64StringToBlob('1234').then((blob) => {
@@ -21,7 +21,7 @@ describe('blob-util 2.x', () => {
 
   it('binaryStringToBlob', () => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Cypress 5+ uses `blob-util` 2.x')
+      expect(err.message).to.include('no longer returns a `Promise`')
     })
 
     Cypress.Blob.binaryStringToBlob('0100101').then((blob) => {
@@ -31,7 +31,7 @@ describe('blob-util 2.x', () => {
 
   it('dataURLToBlob', () => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('Cypress 5+ uses `blob-util` 2.x')
+      expect(err.message).to.include('no longer returns a `Promise`')
     })
 
     Cypress.Blob.dataURLToBlob('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==').then((blob) => {

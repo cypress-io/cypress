@@ -156,8 +156,8 @@ module.exports = {
   breaking_change: {
     blob_util2 (obj) {
       return {
-        message: `Cypress 5+ uses \`blob-util\` 2.x. \`${obj.functionName}()\` does not return \`Promise\` any more.`,
-        docsUrl: 'https://docs.cypress.io/guides/references/migration-guide.html',
+        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
+        docsUrl: 'https://on.cypress.io/migration-guide',
       }
     },
   },
