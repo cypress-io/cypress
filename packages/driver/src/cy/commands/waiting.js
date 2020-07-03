@@ -55,7 +55,6 @@ module.exports = (Commands, Cypress, cy, state) => {
 
     if (options.log !== false) {
       log = options._log = Cypress.log({
-        timeout: options.timeout,
         type: 'parent',
         aliasType: 'route',
         options: userOptions,
