@@ -28,9 +28,26 @@
     line-height: 18px;
     padding-left: 0;
 
-    .runnable-wrapper:hover {
-      background-color: #f7f8f9;
-      cursor: pointer;
+    .runnable-wrapper {
+      &:hover {
+        background-color: #f7f8f9;
+        cursor: pointer;
+      }
+
+      .collapsible-header {
+        &:focus {
+          background-color: #f7f8f9;
+          outline: 0;
+        }
+
+        &:hover:focus {
+          background-color: #f7f8f9;
+        }
+
+        .collapsible-header-inner:focus, .collapsible-header-text:focus {
+          outline: 0;
+        }
+      }
     }
 
     &.test.hover {
@@ -41,11 +58,6 @@
       .hooks-container, .runnable-err-wrapper {
         border-color: #828282;
       }
-    }
-
-    &:focus {
-      outline: 1px dotted #6c6c6c;
-      outline-offset: -1px;
     }
 
     &.runnable-active {
@@ -127,29 +139,6 @@
         color: #111;
         font-weight: 800;
         font-size: 13px;
-      }
-    }
-
-    > div > .runnable-wrapper {
-      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
-        outline: 0;
-
-        .runnable-title {
-          outline: 1px dotted;
-        }
-      }
-    }
-
-    &.test > div > .runnable-wrapper {
-      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
-        outline: 0;
-
-        .runnable-title {
-          outline: 0;
-          > span:first-child {
-            outline: 1px dotted;
-          }
-        }
       }
     }
 
