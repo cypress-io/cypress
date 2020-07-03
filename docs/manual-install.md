@@ -8,19 +8,18 @@
 npm install -D cypress cypress-vue-unit-test
 ```
 
-2. Include this plugin `cypress/plugin/index.js`
+2. Include this plugin from your project's `cypress/plugin/index.js` file
 
 ```js
-// default webpack file preprocessor is good for simple cases
-// Required to temporarily patch async components, chunking, and inline image loading
-import { onFileDefaultPreprocessor } from 'cypress-vue-unit-test/dist/preprocessor/webpack'
-
-module.exports = (on) => {
-  on('file:preprocessor', onFileDefaultPreprocessor)
+const preprocessor = require('cypress-vue-unit-test/dist/plugins/webpack')
+module.exports = (on, config) => {
+  preprocessor(on, config)
+  // IMPORTANT return the config object
+  return config
 }
 ```
 
-3. Include the support file `cypress/support/index.js`
+3. Include the support file from your project's `cypress/support/index.js` file
 
 ```js
 import 'cypress-vue-unit-test/dist/support'

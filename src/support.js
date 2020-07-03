@@ -1,9 +1,12 @@
 /* eslint-env mocha */
+require('@cypress/code-coverage/support')
+
 /** Initialize an empty document with root element */
 function renderTestingPlatform() {
   const document = cy.state('document')
   const el = document.getElementById('cypress-jsdom')
   if (el) {
+    // clean the element before each test
     while (el.hasChildNodes()) {
       el.removeChild(el.lastChild)
     }

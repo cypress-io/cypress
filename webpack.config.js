@@ -7,7 +7,8 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
-      'cypress-vue-unit-test': path.join(__dirname, 'src'),
+      // point at the built file
+      'cypress-vue-unit-test': path.join(__dirname, 'dist'),
     },
   },
   module: {

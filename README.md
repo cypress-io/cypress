@@ -9,7 +9,7 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [external](#external-examples), [Code coverage](#code-coverage)
+**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage)
 
 ## TLDR
 
@@ -596,6 +596,16 @@ Spec | Description
 Spec | Description
 --- | ---
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
+<!-- prettier-ignore-end -->
+
+### Full examples
+
+We have several subfolders in [examples](examples) folder.
+
+<!-- prettier-ignore-start -->
+Folder Name | Description
+--- | ---
+[cli](examples/cli) | An example app scaffolded using Vue CLI and the component testing added using `vue add cypress-experimental` command.
 <!-- prettier-ignore-end -->
 
 ### External examples
