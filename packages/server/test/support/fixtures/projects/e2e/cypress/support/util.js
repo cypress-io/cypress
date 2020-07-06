@@ -45,7 +45,7 @@ export const verify = (ctx, options) => {
     cy.wrap(Cypress.$(window.top.document.body))
     .find('.reporter')
     .contains(`FAIL - ${getTitle(ctx)}`)
-    .closest('.runnable-wrapper')
+    .closest('.collapsible')
     .within(() => {
       cy.contains('View stack trace').click()
 
