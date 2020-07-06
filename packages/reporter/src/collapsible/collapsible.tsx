@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import React, { Component, CSSProperties, MouseEvent, ReactNode } from 'react'
+import React, { Component, CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
 
 import { onEnterOrSpace } from '../lib/util'
 
@@ -9,8 +9,9 @@ interface Props {
   headerStyle?: CSSProperties
   header?: ReactNode
   headerExtras?: ReactNode
+  containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
-  onToggle?: Function
+  toggleOpen?: (isOpen: boolean) => any
 }
 
 interface State {
@@ -39,7 +40,7 @@ class Collapsible extends Component<Props, State> {
 
   render () {
     return (
-      <div className={cs('collapsible', { 'is-open': this.state.isOpen })}>
+      <div className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
         <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
           <div
             aria-expanded={this.state.isOpen}
@@ -67,11 +68,11 @@ class Collapsible extends Component<Props, State> {
   }
 
   _toggleOpen = () => {
-    const isOpen = !this.state.isOpen
-
-    this.setState({ isOpen })
-
-    this.props.onToggle && this.props.onToggle(isOpen)
+    this.setState({ isOpen: !this.state.isOpen }, () => {
+      if (this.props.toggleOpen) {
+        this.props.toggleOpen(this.state.isOpen)
+      }
+    })
   }
 
   _onClick = (e: MouseEvent) => {

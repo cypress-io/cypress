@@ -98,14 +98,14 @@ function createCypress (defaultOptions = {}) {
 
   /**
    * Spawns an isolated Cypress runner as the AUT, with provided spec/fixture and optional state/config
-   * @param {()=>void | {[key:string]: any}} mochaTests
+   * @param {string | ()=>void | {[key:string]: any}} mochaTestsOrFile
    * @param {{state?: any, config?: any}} opts
    */
-  const runIsolatedCypress = (mochaTests, opts = {}) => {
-    _.defaultsDeep(opts, defaultOptions, {
+  const runIsolatedCypress = (mochaTestsOrFile, opts = {}) => {
+    _.defaultsDeep(opts, {
       state: {},
       config: { video: false },
-      onInitialized: () => {},
+      onBeforeRun () {},
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -200,7 +200,7 @@ function createCypress (defaultOptions = {}) {
           opts.onInitialized(autCypress)
 
           autCypress.run((failed) => {
-            resolve({ failed, mochaStubs, autCypress })
+            resolve({ failed, mochaStubs, autCypress, win })
           })
         }
 
@@ -215,15 +215,22 @@ function createCypress (defaultOptions = {}) {
           cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
+            opts.onBeforeRun({ specWindow, win, autCypress })
+
+            const testsInOwnFile = _.isString(mochaTestsOrFile)
+            const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'
+
             autCypress.onSpecWindow(specWindow, [
               {
-                absolute: 'cypress/fixtures/empty_spec.js',
-                relative: 'cypress/fixtures/empty_spec.js',
-                relativeUrl: '/__cypress/tests?p=cypress/fixtures/empty_spec.js',
+                absolute: relativeFile,
+                relative: relativeFile,
+                relativeUrl: `/__cypress/tests?p=${relativeFile}`,
               },
             ])
 
-            generateMochaTestsForWin(specWindow, mochaTests)
+            if (testsInOwnFile) return
+
+            generateMochaTestsForWin(specWindow, mochaTestsOrFile)
             specWindow.before = () => {}
             specWindow.beforeEach = () => {}
             specWindow.afterEach = () => {}
@@ -248,7 +255,7 @@ function createCypress (defaultOptions = {}) {
         .yieldsAsync({ response: {
           isOkStatusCode: true,
           isHtml: true,
-          url: 'http://localhost:3500/fixtures/generic.html',
+          url: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
         } })
 
         .withArgs('set:runnables')
@@ -285,7 +292,6 @@ function createCypress (defaultOptions = {}) {
     runIsolatedCypress,
     snapshotMochaEvents,
     getAutCypress,
-
   }
 }
 

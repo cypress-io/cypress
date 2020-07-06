@@ -1,12 +1,12 @@
-import cs from 'classnames'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, createRef, RefObject } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
-import { indent, onEnterOrSpace } from '../lib/util'
+import Collapsible from '../collapsible/collapsible'
+import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
@@ -30,6 +30,14 @@ class Test extends Component<Props> {
     scroller,
   }
 
+  containerRef: RefObject<HTMLDivElement>
+
+  constructor (props: Props) {
+    super(props)
+
+    this.containerRef = createRef<HTMLDivElement>()
+  }
+
   componentDidMount () {
     this._scrollIntoView()
   }
@@ -44,7 +52,9 @@ class Test extends Component<Props> {
     const { state, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
-      scroller.scrollIntoView(this.refs.container as HTMLElement)
+      window.requestAnimationFrame(() => {
+        scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+      })
     }
   }
 
@@ -54,34 +64,35 @@ class Test extends Component<Props> {
     if (!model.shouldRender) return null
 
     return (
-      <div
-        ref='container'
-        className={cs('runnable-wrapper', { 'is-open': model.isOpen })}
-        data-testid={model.id}
-        onClick={model.toggleOpen}
-        style={{ paddingLeft: indent(model.level) }}
+      <Collapsible
+        containerRef={this.containerRef}
+        header={this._header()}
+        headerClass='runnable-wrapper'
+        headerStyle={{ paddingLeft: indent(model.level) }}
+        contentClass='runnable-instruments'
+        isOpen={model.isOpen}
+        toggleOpen={model.toggleOpen}
       >
-        <div className='runnable-content-region'>
-          <i aria-hidden="true" className='runnable-state fas'></i>
-          <span
-            aria-expanded={!!model.isOpen}
-            className='runnable-title'
-            onKeyPress={onEnterOrSpace(model.toggleOpen)}
-            role='button'
-            tabIndex={0}
-          >
-            {model.title}
-            <span className="visually-hidden">{model.state}</span>
-          </span>
-          <div className='runnable-controls'>
-            <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-              <i className='fas fa-exclamation-triangle' />
-            </Tooltip>
-          </div>
-        </div>
         {this._contents()}
-      </div>
+      </Collapsible>
     )
+  }
+
+  _header () {
+    const { model } = this.props
+
+    return (<>
+      <i aria-hidden='true' className='runnable-state fas' />
+      <span className='runnable-title'>
+        <span>{model.title}</span>
+        <span className='visually-hidden'>{model.state}</span>
+      </span>
+      <span className='runnable-controls'>
+        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+          <i className='fas fa-exclamation-triangle' />
+        </Tooltip>
+      </span>
+    </>)
   }
 
   _contents (this: Test) {

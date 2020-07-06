@@ -6,7 +6,7 @@ import { RouteProps } from '../routes/route-model'
 import { RunnablesStore } from '../runnables/runnables-store'
 import { AgentProps } from '../agents/agent-model'
 
-const createTest = (props: Partial<TestProps> = {}) => {
+const createTest = (props: Partial<TestProps> = {}, store = {}) => {
   const defaults = {
     currentRetry: 0,
     id: 'r3',
@@ -14,7 +14,7 @@ const createTest = (props: Partial<TestProps> = {}) => {
     state: null,
   } as TestProps
 
-  return new TestModel(_.defaults(props, defaults), 0, {} as RunnablesStore)
+  return new TestModel(_.defaults(props, defaults), 0, store as RunnablesStore)
 }
 const createCommand = (props: Partial<CommandProps> = {}) => {
   const defaults = {
@@ -213,6 +213,46 @@ describe('Test model', () => {
       test.addLog(createCommand({ hookName: 'someHook' }))
       test.addLog(createCommand({ hookName: 'anotherHook' }))
       expect(test.commandMatchingErr()).to.be.undefined
+    })
+  })
+
+  context('#isOpen', () => {
+    it('false by default', () => {
+      const test = createTest()
+
+      test.start({} as TestProps)
+
+      expect(test.isOpen).eq(false)
+    })
+
+    it('true when the model is long running', () => {
+      const test = createTest()
+
+      test.start({} as TestProps)
+      const command = test.addLog(createCommand()) as CommandModel
+
+      command.isLongRunning = true
+      expect(test.isOpen).eq(true)
+    })
+
+    it('true when there is only one test', () => {
+      const test = createTest({}, { hasSingleTest: true })
+
+      expect(test.isOpen).eq(true)
+    })
+
+    it('false when toggled from true', () => {
+      const test = createTest({}, { hasSingleTest: true })
+
+      test.toggleOpen()
+
+      expect(test.isOpen).eq(false)
+    })
+
+    it('true when toggled from false', () => {
+      const test = createTest()
+
+      expect(test.isOpen).eq(false)
     })
   })
 })

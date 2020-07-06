@@ -12,7 +12,7 @@ export interface HookHeaderProps {
 
 const HookHeader = ({ name }: HookHeaderProps) => (
   <span>
-    {name} <span className='hook-failed-message'>(failed)</span>
+    {name === 'test' ? 'test body' : name} <span className='hook-failed-message'>(failed)</span>
   </span>
 )
 

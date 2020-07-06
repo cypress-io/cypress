@@ -64,7 +64,7 @@ describe('<Collapsible />', () => {
 
   it('calls onToggle when toggled', () => {
     const onToggle = sinon.spy()
-    const component = mount(<Collapsible onToggle={onToggle} />)
+    const component = mount(<Collapsible toggleOpen={onToggle} />)
 
     component.find('.collapsible-header').simulate('click')
     expect(onToggle).to.have.been.calledWith(true)

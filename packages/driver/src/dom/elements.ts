@@ -417,7 +417,13 @@ const activeElementIsDefault = (activeElement, body: HTMLElement) => {
 
 const isFocused = (el) => {
   try {
-    const doc = $document.getDocumentFromElement(el)
+    let doc
+
+    if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot(el)) {
+      doc = el.getRootNode()
+    } else {
+      doc = $document.getDocumentFromElement(el)
+    }
 
     const { activeElement, body } = doc
 
@@ -598,11 +604,7 @@ const getFirstCommonAncestor = (el1, el2) => {
 }
 
 const isWithinShadowRoot = (node: HTMLElement) => {
-  const win = $window.getWindowByElement(node)
-
-  if (!win) return false
-
-  return node.getRootNode() instanceof win.ShadowRoot
+  return node.getRootNode().toString() === '[object ShadowRoot]'
 }
 
 const getParent = (el) => {
@@ -931,8 +933,15 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
 
   return getFirstFocusableEl($el.parent())
 }
-const getActiveElByDocument = (doc: Document): HTMLElement | null => {
-  const activeElement = getNativeProp(doc, 'activeElement')
+
+const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
+  let activeElement
+
+  if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot($el[0])) {
+    activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
+  } else {
+    activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
+  }
 
   if (isFocused(activeElement)) {
     return activeElement as HTMLElement

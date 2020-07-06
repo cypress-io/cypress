@@ -62,10 +62,10 @@ export default class Test extends Runnable {
 
   @computed get isOpen () {
     if (this._isOpen === null) {
-      return this.state === 'failed'
+      return Boolean(this.state === 'failed'
       || this.isLongRunning
       || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
-      || this.store.hasSingleTest
+      || this.store.hasSingleTest)
     }
 
     return this._isOpen
