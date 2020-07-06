@@ -35,7 +35,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
     if (options.log !== false) {
       options._log = Cypress.log({
-        timeout: cy.timeout(),
+        timeout: ms,
         consoleProps () {
           return {
             'Waited For': `${ms}ms before continuing`,
