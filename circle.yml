@@ -1311,11 +1311,12 @@ jobs:
   test-binary-against-recipe-pull-request:
     <<: *defaults
     steps:
+      # test a specific pull request by number from cypress-example-recipes
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm run test:ci
-          pull_request_id: 503
-          folder: examples/stubbing-spying__window-fetch
+          pull_request_id: 515
+          folder: examples/fundamentals__typescript
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1640,11 +1641,11 @@ linux-workflow: &linux-workflow
           - build-binary
           - build-npm-package
     - test-binary-against-recipe-pull-request:
-        name: Test fetch polyfill
+        name: Test TypeScript recipe
         filters:
           branches:
             only:
-              - polyfill-fetch
+              - v5.0-release
         requires:
           - build-binary
           - build-npm-package
