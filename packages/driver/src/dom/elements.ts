@@ -1234,7 +1234,7 @@ const elementFromPoint = (doc, x, y) => {
     const getShadowElementFromPoint = (node) => {
       const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
 
-      if (!nodeFromPoint) return node
+      if (!nodeFromPoint || nodeFromPoint === node) return node
 
       return getShadowElementFromPoint(nodeFromPoint)
     }
