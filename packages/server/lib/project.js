@@ -207,6 +207,7 @@ class Project extends EE {
 
     this.spec = null
     this.browser = null
+    this.bail = false
 
     return Promise.try(() => {
       if (this.automation) {
@@ -372,6 +373,11 @@ class Project extends EE {
 
       onMocha: (event, runnable) => {
         debug('onMocha', event)
+
+        if (event === 'fail' && this.bail) {
+          this.server.bail()
+        }
+
         // bail if we dont have a
         // reporter instance
         if (!reporter) {
@@ -400,6 +406,10 @@ class Project extends EE {
   setCurrentSpecAndBrowser (spec, browser) {
     this.spec = spec
     this.browser = browser
+  }
+
+  setBail (bail) {
+    this.bail = bail
   }
 
   getCurrentSpecAndBrowser () {

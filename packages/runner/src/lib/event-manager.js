@@ -67,6 +67,12 @@ const eventManager = {
       window.location.href = url
     })
 
+    ws.on('bail:fail', () => {
+      if (!Cypress) return
+
+      Cypress.stop()
+    })
+
     ws.on('automation:push:message', (msg, data = {}) => {
       if (!Cypress) return
 

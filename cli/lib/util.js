@@ -191,6 +191,7 @@ const dequote = (str) => {
 
 const parseOpts = (opts) => {
   opts = _.pick(opts,
+    'bail',
     'browser',
     'cachePath',
     'cacheList',

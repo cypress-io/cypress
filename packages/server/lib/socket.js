@@ -475,6 +475,10 @@ class Socket {
     return this.toRunner('change:to:url', url)
   }
 
+  bail () {
+    return this.toRunner('bail:fail')
+  }
+
   close () {
     preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
 

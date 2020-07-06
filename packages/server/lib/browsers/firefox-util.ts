@@ -208,6 +208,11 @@ export default {
 
       return getPrimaryTab(browser)
       .then((tab) => {
+        if (!tab.memory) {
+          // in an early exit firefox has stopped already
+          return null
+        }
+
         return attachToTabMemory(tab)
         .then(gc(tab))
         .then(cc(tab))

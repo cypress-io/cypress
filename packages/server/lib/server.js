@@ -847,6 +847,10 @@ class Server {
     return this._socket && this._socket.changeToUrl(url)
   }
 
+  bail () {
+    return this._socket && this._socket.bail()
+  }
+
   onTestFileChange (filePath) {
     return this._socket && this._socket.onTestFileChange(filePath)
   }

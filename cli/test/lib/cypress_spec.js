@@ -171,5 +171,17 @@ describe('cypress', function () {
         expect(args).to.deep.eq(opts)
       })
     })
+
+    it('passes bail: true', () => {
+      const opts = {
+        bail: true,
+      }
+
+      return cypress.run(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
+    })
   })
 })
