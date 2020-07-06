@@ -224,11 +224,6 @@
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     },
-    "experimentalGetCookiesSameSite": {
-      "type": "boolean",
-      "default": false,
-      "description": "If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0."
-    },
     "experimentalSourceRewriting": {
       "type": "boolean",
       "default": false,

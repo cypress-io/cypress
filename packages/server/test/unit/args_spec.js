@@ -270,7 +270,7 @@ describe('lib/util/args', () => {
       expect(options.config).to.deep.eq(config)
     })
 
-    it('whitelists config properties', function () {
+    it('allows config properties', function () {
       const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
 
       expect(options.config.port).to.eq(1111)

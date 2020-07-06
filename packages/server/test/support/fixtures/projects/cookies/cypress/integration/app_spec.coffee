@@ -1,5 +1,5 @@
 Cypress.Cookies.defaults({
-  whitelist: "foo1"
+  preserve: "foo1"
 })
 
 describe "Cookies", ->
@@ -84,3 +84,4 @@ describe "Cookies", ->
         domain: "brian.dev.local"
       })
       .its("body").should("deep.eq", {wow: "bob"})
+  

@@ -287,6 +287,24 @@ cy
     subject // $ExpectType undefined
   })
 
+namespace CypressAUTWindowTests {
+  cy.go(2).then((win) => {
+    win // $ExpectType AUTWindow
+  })
+
+  cy.reload().then((win) => {
+    win // $ExpectType AUTWindow
+  })
+
+  cy.visit('https://google.com').then(win => {
+    win // $ExpectType AUTWindow
+  })
+
+  cy.window().then(win => {
+    win // $ExpectType AUTWindow
+  })
+}
+
 namespace CypressOnTests {
   Cypress.on('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error

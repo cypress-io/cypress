@@ -108,6 +108,16 @@ declare namespace Cypress {
   }
 
   /**
+   * Window type for Application Under Test(AUT)
+   */
+  type AUTWindow = Window & typeof globalThis & ApplicationWindow
+
+  /**
+   * The interface for user-defined properties in Window object under test.
+   */
+  interface ApplicationWindow {} // tslint:disable-line
+
+  /**
    * Several libraries are bundled with Cypress by default.
    *
    * @see https://on.cypress.io/api
@@ -1043,7 +1053,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/go
      */
-    go(direction: HistoryDirection | number, options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    go(direction: HistoryDirection | number, options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Get the current URL hash of the page that is currently active.
@@ -1380,7 +1390,7 @@ declare namespace Cypress {
      * @example
      *    cy.reload()
      */
-    reload(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1391,7 +1401,7 @@ declare namespace Cypress {
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload(true)
      */
-    reload(forceReload: boolean): Chainable<Window>
+    reload(forceReload: boolean): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -1934,8 +1944,8 @@ declare namespace Cypress {
      *    })
      *
      */
-    visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
-    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
+    visit(url: string, options?: Partial<VisitOptions>): Chainable<AUTWindow>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<AUTWindow>
 
     /**
      * Wait for a number of milliseconds.
@@ -2006,7 +2016,7 @@ declare namespace Cypress {
     })
     ```
      */
-    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    window(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Scopes all subsequent cy commands to within this element.
@@ -2135,7 +2145,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
   interface Failable {
@@ -2448,12 +2458,6 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`,
-     * `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.
-     * @default false
-     */
-    experimentalGetCookiesSameSite: boolean
-    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
@@ -2634,7 +2638,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(xhr: Request): void
+    ignore(xhr: Request): void
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
@@ -2733,16 +2737,16 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * @param {Window} contentWindow the remote page's window object
+     * @param {AUTWindow} contentWindow the remote page's window object
      */
-    onBeforeLoad(win: Window): void
+    onBeforeLoad(win: AUTWindow): void
 
     /**
      * Called once your page has fired its load event.
      *
-     * @param {Window} contentWindow the remote page's window object
+     * @param {AUTWindow} contentWindow the remote page's window object
      */
-    onLoad(win: Window): void
+    onLoad(win: AUTWindow): void
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -4650,12 +4654,12 @@ declare namespace Cypress {
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:load', fn: (win: Window) => void): void
+    (action: 'window:before:load', fn: (win: AUTWindow) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:load', fn: (win: Window) => void): void
+    (action: 'window:load', fn: (win: AUTWindow) => void): void
     /**
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4824,7 +4828,7 @@ declare namespace Cypress {
 
   interface Server extends RouteOptions {
     enable: boolean
-    whitelist: (xhr: any) => boolean
+    ignore: (xhr: any) => boolean
   }
 
   interface Viewport {

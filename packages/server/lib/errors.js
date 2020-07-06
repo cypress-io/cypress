@@ -923,6 +923,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Enable write permissions to this directory to ensure screenshots and videos are stored.
 
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
+    case 'EXPERIMENTAL_SAMESITE_REMOVED':
+      return stripIndent`\
+        The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress 5. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
+
+        You can safely remove this option from your config.`
     default:
   }
 }

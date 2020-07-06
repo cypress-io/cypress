@@ -187,7 +187,7 @@
     "typescript": "3.7.4"
   },
   "engines": {
-    "node": ">=12.8.1",
+    "node": ">=12.14.1",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",

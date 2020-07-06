@@ -338,7 +338,7 @@ describe('lib/server', () => {
         remoteAddress: '127.0.0.1',
       }
 
-      this.server._socketWhitelist.add({
+      this.server._socketAllowed.add({
         localPort: socket.remotePort,
         once: _.noop,
       })
