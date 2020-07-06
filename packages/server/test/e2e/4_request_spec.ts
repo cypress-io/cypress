@@ -1,6 +1,6 @@
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const e2e = require('../support/helpers/e2e').default
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import e2e from '../support/helpers/e2e'
 
 let counts = null
 
@@ -79,6 +79,13 @@ const onServer2 = function (app) {
 const onServer = function (app) {
   app.use(cookieParser())
 
+  app.get('/timeout', (req, res) => {
+    setTimeout(() => {
+      res.set('Access-Control-Allow-Origin', '*')
+      .end('it worked')
+    }, req.query.ms)
+  })
+
   app.get('/cookies*', (req, res) => {
     return res.json(req.cookies)
   })
@@ -87,7 +94,7 @@ const onServer = function (app) {
     return res.json(counts)
   })
 
-  return app.get('*', (req, res) => {
+  app.get('*', (req, res) => {
     const host = req.get('host')
 
     counts[host] += 1
@@ -161,13 +168,16 @@ describe('e2e requests', () => {
   })
 
   e2e.it('passes', {
-    spec: 'request_spec.coffee',
+    spec: 'request_spec.js',
     snapshot: true,
+    config: {
+      responseTimeout: 1000,
+    },
   })
 
   it('fails when network immediately fails', function () {
     return e2e.exec(this, {
-      spec: 'request_http_network_error_failing_spec.coffee',
+      spec: 'request_http_network_error_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
     })
@@ -175,7 +185,7 @@ describe('e2e requests', () => {
 
   it('fails on status code', function () {
     return e2e.exec(this, {
-      spec: 'request_status_code_failing_spec.coffee',
+      spec: 'request_status_code_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout (stdout) {
@@ -189,7 +199,7 @@ describe('e2e requests', () => {
 
   it('prints long http props on fail', function () {
     return e2e.exec(this, {
-      spec: 'request_long_http_props_failing_spec.coffee',
+      spec: 'request_long_http_props_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
       onStdout (stdout) {
