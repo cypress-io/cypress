@@ -2130,7 +2130,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
   interface Failable {
@@ -2443,12 +2443,6 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`,
-     * `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.
-     * @default false
-     */
-    experimentalGetCookiesSameSite: boolean
-    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
@@ -2622,7 +2616,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(xhr: Request): void
+    ignore(xhr: Request): void
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
@@ -3073,6 +3067,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'equal', value: any): Chainable<Subject>
+    /**
+   * Causes all `.key` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+   * @example
+   *    cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
+   * @see http://chaijs.com/api/bdd/#method_all
+   * @see https://on.cypress.io/assertions
+   */
+    (chainer: 'have.all.key', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.key` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.any.key', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example
@@ -4796,7 +4806,7 @@ declare namespace Cypress {
 
   interface Server extends RouteOptions {
     enable: boolean
-    whitelist: (xhr: any) => boolean
+    ignore: (xhr: any) => boolean
   }
 
   interface Viewport {

@@ -1,15 +1,16 @@
-const { $, _ } = Cypress
+const { $, _, Promise } = Cypress
 
-export const getCommandLogWithText = (text) => {
+export const getCommandLogWithText = (command, type = 'method') => {
+  // Open current test if not already open, so we can find the command log
+  cy.$$('.runnable-active .runnable-wrapper:not(.is-open)', top.document).click()
+
   return cy
-  .$$(`.runnable-active .command-wrapper:contains(${text}):visible`, top.document)
-  .parentsUntil('li')
-  .last()
-  .parent()
+  .$$(`.runnable-active .command-${type}:contains(${command})`, top.document)
+  .closest('.command')
 }
 
 export const findReactInstance = function (dom) {
-  let key = Object.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
+  let key = _.keys(dom).find((key) => key.startsWith('__reactInternalInstance$'))
   let internalInstance = dom[key]
 
   if (internalInstance == null) return null
@@ -19,12 +20,11 @@ export const findReactInstance = function (dom) {
     : internalInstance.return.stateNode
 }
 
-export const clickCommandLog = (sel) => {
+export const clickCommandLog = (sel, type) => {
   return cy.wait(10)
   .then(() => {
-    withMutableReporterState(() => {
-      const commandLogEl = getCommandLogWithText(sel)
-
+    return withMutableReporterState(() => {
+      const commandLogEl = getCommandLogWithText(sel, type)
       const reactCommandInstance = findReactInstance(commandLogEl[0])
 
       if (!reactCommandInstance) {
@@ -33,10 +33,12 @@ export const clickCommandLog = (sel) => {
 
       reactCommandInstance.props.appState.isRunning = false
 
-      $(commandLogEl).find('.command-wrapper').click()
+      $(commandLogEl).find('.command-wrapper')
+      .click()
+      .get(0).scrollIntoView()
 
       // make sure command was pinned, otherwise throw a better error message
-      expect(cy.$$('.command-pin:visible', top.document).length, 'command should be pinned').ok
+      expect(cy.$$('.runnable-active .command-pin', top.document).length, 'command should be pinned').ok
     })
   })
 }
@@ -46,9 +48,9 @@ export const withMutableReporterState = (fn) => {
 
   const currentTestLog = findReactInstance(cy.$$('.runnable-active', top.document)[0])
 
-  currentTestLog.props.model.isOpen = true
+  currentTestLog.props.model._isOpen = true
 
-  return Cypress.Promise.try(fn)
+  return Promise.try(fn)
   .then(() => {
     top.Runner.configureMobx({ enforceActions: 'always' })
   })
@@ -79,7 +81,7 @@ const getAllFn = (...aliases) => {
     return getAllFn((_.isArray(aliases[1]) ? aliases[1] : aliases[1].split(' ')).map((alias) => `@${aliases[0]}:${alias}`).join(' '))
   }
 
-  return Cypress.Promise.all(
+  return Promise.all(
     aliases[0].split(' ').map((alias) => {
       return cy.now('get', alias)
     }),

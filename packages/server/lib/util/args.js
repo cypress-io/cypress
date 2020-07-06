@@ -13,7 +13,7 @@ const nestedObjectsInCurlyBracesRe = /\{(.+?)\}/g
 const nestedArraysInSquareBracketsRe = /\[(.+?)\]/g
 const everythingAfterFirstEqualRe = /=(.*)/
 
-const whitelist = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
+const allowList = 'appPath apiKey browser ci ciBuildId clearLogs config configFile cwd env execPath exit exitWithCode generateKey getKey group headed inspectBrk key logs mode outputPath parallel ping port project proxySource quiet record reporter reporterOptions returnPkg runMode runProject smokeTest spec tag updating version'.split(' ')
 // returns true if the given string has double quote character "
 // only at the last position.
 const hasStrayEndQuote = (s) => {
@@ -34,17 +34,27 @@ const normalizeBackslash = (s) => {
   return s
 }
 
+/**
+ * remove stray double quote from runProject and other path properties
+ * due to bug in NPM passing arguments with backslash at the end
+ * @see https://github.com/cypress-io/cypress/issues/535
+ *
+ */
 const normalizeBackslashes = (options) => {
-  // remove stray double quote from runProject and other path properties
-  // due to bug in NPM passing arguments with
-  // backslash at the end
-  // https://github.com/cypress-io/cypress/issues/535
   // these properties are paths and likely to have backslash on Windows
   const pathProperties = ['runProject', 'project', 'appPath', 'execPath', 'configFile']
 
   pathProperties.forEach((property) => {
-    if (options[property]) {
+    // sometimes a string parameter might get parsed into a boolean
+    // for example "--project ''" will be transformed in "project: true"
+    // which we should treat as undefined
+    if (typeof options[property] === 'string') {
       options[property] = normalizeBackslash(options[property])
+    } else {
+      // configFile is a special case that can be set to false
+      if (property !== 'configFile') {
+        delete options[property]
+      }
     }
   })
 
@@ -148,6 +158,8 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
 }
 
 module.exports = {
+  normalizeBackslashes,
+
   toObject (argv) {
     debug('argv array: %o', argv)
 
@@ -177,14 +189,14 @@ module.exports = {
       alias,
     })
 
-    const whitelisted = _.pick(argv, whitelist)
+    const allowed = _.pick(argv, allowList)
 
     // were we invoked from the CLI or directly?
     const invokedFromCli = Boolean(options.cwd)
 
     options = _
     .chain(options)
-    .defaults(whitelisted)
+    .defaults(allowed)
     .omit(_.keys(alias)) // remove aliases
     .extend({ invokedFromCli })
     .defaults({
@@ -210,7 +222,12 @@ module.exports = {
 
     let { spec } = options
     const { env, config, reporterOptions, outputPath, tag } = options
-    const project = options.project || options.runProject
+    let project = options.project || options.runProject
+
+    // only accept project if it is a string
+    if (typeof project !== 'string') {
+      project = undefined
+    }
 
     if (spec) {
       const resolvePath = (p) => {
@@ -303,11 +320,11 @@ module.exports = {
   toArray (obj = {}) {
     // goes in reverse, takes an object
     // and converts to an array by picking
-    // only the whitelisted properties and
+    // only the allowed properties and
     // mapping them to include the argument
     return _
     .chain(obj)
-    .pick(...whitelist)
+    .pick(...allowList)
     .mapValues((val, key) => {
       return `--${key}=${stringify(val)}`
     }).values()

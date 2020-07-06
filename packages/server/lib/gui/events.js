@@ -21,6 +21,7 @@ const chromePolicyCheck = require('../util/chrome_policy_check')
 const browsers = require('../browsers')
 const konfig = require('../konfig')
 const editors = require('../util/editors')
+const fileOpener = require('../util/file-opener')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -34,6 +35,11 @@ const nullifyUnserializableValues = (obj) => {
 
 const handleEvent = function (options, bus, event, id, type, arg) {
   debug('got request for event: %s, %o', type, arg)
+
+  _.defaults(options, {
+    windowOpenFn: Windows.open,
+    getWindowByWebContentsFn: Windows.getByWebContents,
+  })
 
   const sendResponse = function (originalData = {}) {
     try {
@@ -155,17 +161,20 @@ const handleEvent = function (options, bus, event, id, type, arg) {
         return bus.emit('auth:message', msg)
       }
 
-      return auth.start(onMessage)
+      return auth.start(onMessage, arg)
       .then(send)
       .catch(sendErr)
 
     case 'window:open':
-      return Windows.open(options.projectRoot, arg)
+      return options.windowOpenFn(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 
     case 'window:close':
-      return Windows.getByWebContents(event.sender).destroy()
+      return options.getWindowByWebContentsFn(event.sender).destroy()
+
+    case 'open:file':
+      return fileOpener.openFile(arg)
 
     case 'open:finder':
       return open.opn(arg)
