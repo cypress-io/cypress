@@ -4456,6 +4456,8 @@ describe('mouse state', () => {
 
           expect(targetRect.top).gt(iframeRect.top)
           expect(targetRect.bottom).lt(iframeRect.bottom)
+          expect(targetRect.left).gt(iframeRect.left)
+          expect(targetRect.right).lt(iframeRect.right)
         })
       })
     })
