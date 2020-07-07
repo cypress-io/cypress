@@ -124,6 +124,15 @@ const mountVue = (component, optionsOrProps = {}) => {
     component.store = resetStoreVM(Vue, component)
   }
 
+  // render function components should be market to be properly initialized
+  // https://github.com/bahmutov/cypress-vue-unit-test/issues/313
+  if (
+    Cypress._.isPlainObject(component) &&
+    Cypress._.isFunction(component.render)
+  ) {
+    component._compiled = true
+  }
+
   return cy.window({ log: false }).then((win) => {
     win.Vue = Vue
 
