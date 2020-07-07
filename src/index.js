@@ -48,7 +48,12 @@ const installPlugins = (Vue, options) => {
     Cypress._.get(options, 'extensions.plugins')
   if (Cypress._.isArray(plugins)) {
     plugins.forEach((plugin) => {
-      Vue.use(plugin)
+      if (Array.isArray(plugin)) {
+        const [aPlugin, options] = plugin
+        Vue.use(aPlugin, options)
+      } else {
+        Vue.use(plugin)
+      }
     })
   }
 }

@@ -588,6 +588,7 @@ describe('HelloWorld component', () => {
 Spec | Description
 --- | ---
 [Hello](cypress/component/basic/hello) | Testing examples from Vue2 cookbook
+[Plugins](cypress/component/basic/plugins) | Loading additional plugins
 <!-- prettier-ignore-end -->
 
 ### Advanced examples
