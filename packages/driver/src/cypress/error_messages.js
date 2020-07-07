@@ -153,6 +153,15 @@ module.exports = {
     },
   },
 
+  breaking_change: {
+    blob_util2 (obj) {
+      return {
+        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
+        docsUrl: 'https://on.cypress.io/migration-guide',
+      }
+    },
+  },
+
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
