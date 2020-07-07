@@ -35,13 +35,9 @@
       }
 
       .collapsible-header {
-        &:focus {
+        &:focus-within {
           background-color: #f7f8f9;
           outline: 0;
-        }
-
-        &:hover:focus {
-          background-color: #f7f8f9;
         }
 
         .collapsible-header-inner:focus, .collapsible-header-text:focus {
