@@ -7,14 +7,14 @@ exports['e2e requests / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_spec.coffee)                                                      │
-  │ Searched:   cypress/integration/request_spec.coffee                                            │
+  │ Specs:      1 found (request_spec.js)                                                          │
+  │ Searched:   cypress/integration/request_spec.js                                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_spec.coffee                                                             (1 of 1)
+  Running:  request_spec.js                                                                 (1 of 1)
 
 
   redirects + requests
@@ -30,31 +30,32 @@ exports['e2e requests / passes'] = `
     ✓ passes even on non 2xx or 3xx status code
     ✓ sets Accept header to */* by default
     ✓ can override the accept header
-    ✓ issue #375: does not duplicate request cookies on 302 redirect
+    ✓ does not duplicate request cookies on 302 redirect
+    ✓ can make requests that take more than \`responseTimeout\` to complete
 
 
-  13 passing
+  14 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        13                                                                               │
-  │ Passing:      13                                                                               │
+  │ Tests:        14                                                                               │
+  │ Passing:      14                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_spec.coffee                                                              │
+  │ Spec Ran:     request_spec.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.coffee.mp4             (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_spec.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -64,9 +65,9 @@ exports['e2e requests / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  request_spec.coffee                      XX:XX       13       13        -        -        - │
+  │ ✔  request_spec.js                          XX:XX       14       14        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       13       13        -        -        -  
+    ✔  All specs passed!                        XX:XX       14       14        -        -        -  
 
 
 `
@@ -80,14 +81,14 @@ exports['e2e requests fails when network immediately fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_http_network_error_failing_spec.coffee)                           │
-  │ Searched:   cypress/integration/request_http_network_error_failing_spec.coffee                 │
+  │ Specs:      1 found (request_http_network_error_failing_spec.js)                               │
+  │ Searched:   cypress/integration/request_http_network_error_failing_spec.js                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_http_network_error_failing_spec.coffee                                  (1 of 1)
+  Running:  request_http_network_error_failing_spec.js                                      (1 of 1)
 
 
   when network connection cannot be established
@@ -146,21 +147,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_http_network_error_failing_spec.coffee                                   │
+  │ Spec Ran:     request_http_network_error_failing_spec.js                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.coffee/     (1280x720)
-     when network connection cannot be established -- fails (failed).png                            
+  -  /XXX/XXX/XXX/cypress/screenshots/request_http_network_error_failing_spec.js/when     (1280x720)
+      network connection cannot be established -- fails (failed).png                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
-                          ing_spec.coffee.mp4                                                       
+                          ing_spec.js.mp4                                                           
 
 
 ====================================================================================================
@@ -171,7 +172,7 @@ https://on.cypress.io/request
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  request_http_network_error_failing_      XX:XX        1        -        1        -        - │
-  │    spec.coffee                                                                                 │
+  │    spec.js                                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -187,14 +188,14 @@ exports['e2e requests fails on status code 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_status_code_failing_spec.coffee)                                  │
-  │ Searched:   cypress/integration/request_status_code_failing_spec.coffee                        │
+  │ Specs:      1 found (request_status_code_failing_spec.js)                                      │
+  │ Searched:   cypress/integration/request_status_code_failing_spec.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_status_code_failing_spec.coffee                                         (1 of 1)
+  Running:  request_status_code_failing_spec.js                                             (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -264,21 +265,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_status_code_failing_spec.coffee                                          │
+  │ Spec Ran:     request_status_code_failing_spec.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.coffee/when st     (1280x720)
-     atus code isnt 2xx or 3xx -- fails (failed).png                                                
+  -  /XXX/XXX/XXX/cypress/screenshots/request_status_code_failing_spec.js/when status     (1280x720)
+      code isnt 2xx or 3xx -- fails (failed).png                                                    
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
-                          c.coffee.mp4                                                              
+                          c.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -288,8 +289,7 @@ https://on.cypress.io/request
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  request_status_code_failing_spec.co      XX:XX        1        -        1        -        - │
-  │    ffee                                                                                        │
+  │ ✖  request_status_code_failing_spec.js      XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
@@ -305,14 +305,14 @@ exports['e2e requests prints long http props on fail 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (request_long_http_props_failing_spec.coffee)                              │
-  │ Searched:   cypress/integration/request_long_http_props_failing_spec.coffee                    │
+  │ Specs:      1 found (request_long_http_props_failing_spec.js)                                  │
+  │ Searched:   cypress/integration/request_long_http_props_failing_spec.js                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  request_long_http_props_failing_spec.coffee                                     (1 of 1)
+  Running:  request_long_http_props_failing_spec.js                                         (1 of 1)
 
 
   when status code isnt 2xx or 3xx
@@ -391,21 +391,21 @@ https://on.cypress.io/request
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     request_long_http_props_failing_spec.coffee                                      │
+  │ Spec Ran:     request_long_http_props_failing_spec.js                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.coffee/whe     (1280x720)
-     n status code isnt 2xx or 3xx -- fails (failed).png                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/request_long_http_props_failing_spec.js/when st     (1280x720)
+     atus code isnt 2xx or 3xx -- fails (failed).png                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
-                          _spec.coffee.mp4                                                          
+                          _spec.js.mp4                                                              
 
 
 ====================================================================================================
@@ -416,7 +416,7 @@ https://on.cypress.io/request
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  request_long_http_props_failing_spe      XX:XX        1        -        1        -        - │
-  │    c.coffee                                                                                    │
+  │    c.js                                                                                        │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 

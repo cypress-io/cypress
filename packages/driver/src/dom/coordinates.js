@@ -6,7 +6,13 @@ const getElementAtPointFromViewport = (doc, x, y) => {
   return $elements.elementFromPoint(doc, x, y)
 }
 
-const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
+const isAutIframe = (win) => {
+  const parent = win.parent
+
+  // https://github.com/cypress-io/cypress/issues/6412
+  // ensure the parent is a Window before checking prop
+  return $window.isWindow(parent) && !$elements.getNativeProp(parent, 'frameElement')
+}
 
 const getFirstValidSizedRect = (el) => {
   return _.find(el.getClientRects(), (rect) => {
@@ -53,8 +59,10 @@ const getElementPositioning = ($el) => {
     let curWindow = win
     let frame
 
+    // https://github.com/cypress-io/cypress/issues/6412
+    // ensure the parent is a Window before checking prop
     // walk up from a nested iframe so we continually add the x + y values
-    while (!isAutIframe(curWindow) && curWindow.parent !== curWindow) {
+    while ($window.isWindow(curWindow) && !isAutIframe(curWindow) && curWindow.parent !== curWindow) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
 
       if (curWindow && frame) {
