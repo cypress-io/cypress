@@ -596,6 +596,7 @@ Spec | Description
 <!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
+[mocking-components](cypress/component/advanced/mocking-components) | Mocking locally registered child components during tests
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
 [render-functions](cypress/component/advanced/render-functions) | Mounting components with a [render function](https://www.tutorialandexample.com/vue-js-render-functions/)
 <!-- prettier-ignore-end -->

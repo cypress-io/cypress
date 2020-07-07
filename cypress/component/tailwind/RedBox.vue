@@ -12,7 +12,9 @@ export default {
     greeting: function() {
       if (this.status) {
         return "Hello";
-      } else return "Goodbye";
+      } else {
+        return "Goodbye";
+      }
     }
   }
 };
