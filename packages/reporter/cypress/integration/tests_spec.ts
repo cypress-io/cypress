@@ -118,7 +118,12 @@ describe('controls', function () {
         cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
       })
 
-      itHandlesFileOpening('.runnable-header', {
+      it('displays tooltip on hover', () => {
+        cy.get('.runnable-header a').first().trigger('mouseover')
+        cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+      })
+
+      itHandlesFileOpening('.runnable-header a', {
         file: '/absolute/path/to/foo.js',
         line: 0,
         column: 0,

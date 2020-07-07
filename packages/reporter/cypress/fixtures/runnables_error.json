@@ -3,11 +3,13 @@
   "title": "",
   "root": true,
   "tests": [],
+  "hooks": [],
   "suites": [
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
+      "hooks": [],
       "tests": [
         {
           "id": "r3",
@@ -20,7 +22,7 @@
           },
           "commands": [
             {
-              "hookName": "test",
+              "hookId": "r3",
               "id": "c1",
               "instrument": "command",
               "message": "http://localhost:3000",
