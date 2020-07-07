@@ -121,10 +121,10 @@ const Progress = observer(({ model }: ProgressProps) => {
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
   const percentageRemaining = timeRemaining / model.timeout * 100 || 0
 
+  // we add a key to the span to ensure a rerender and restart of the animation on change
   return (
-    // we add a key here to ensure a rerender and restart of the animation on change
-    <div className='command-progress' key={timeRemaining}>
-      <span style={{ animationDuration: `${timeRemaining}ms`, width: `${percentageRemaining}%` }} />
+    <div className='command-progress'>
+      <span style={{ animationDuration: `${timeRemaining}ms`, width: `${percentageRemaining}%` }} key={timeRemaining} />
     </div>
   )
 })

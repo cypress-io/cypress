@@ -75,16 +75,7 @@ export default class Command extends Instrument {
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
-
-    if (this.timeout !== props.timeout) {
-      const timeElapsed = Date.now() - new Date(this.wallClockStartedAt).getTime()
-      const percentageComplete = timeElapsed / this.timeout
-      const newTimeout = (props.timeout - timeElapsed) / (1 - percentageComplete)
-      const newPosition = percentageComplete * newTimeout - timeElapsed
-
-      this.timeout = newTimeout
-      this.wallClockStartedAt = new Date(new Date(this.wallClockStartedAt).getTime() - newPosition).toJSON()
-    }
+    this.timeout = props.timeout
 
     this._checkLongRunning()
   }
