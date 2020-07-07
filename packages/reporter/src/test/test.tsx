@@ -100,18 +100,9 @@ class Test extends Component<Props> {
     if (!this.props.model.isOpen) return null
 
     return (
-      <div
-        className='runnable-instruments collapsible-content'
-        onClick={(e) => e.stopPropagation()}
-      >
-        <Attempts test={this.props.model} scrollIntoView={() => this._scrollIntoView()} />
-      </div>
-    )
-  }
 
-  _onErrorClick = (e:Event) => {
-    e.stopPropagation()
-    this.props.events.emit('show:error', this.props.model)
+      <Attempts test={this.props.model} scrollIntoView={() => this._scrollIntoView()} />
+    )
   }
 }
 

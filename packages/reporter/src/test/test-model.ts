@@ -42,7 +42,7 @@ export default class Test extends Runnable {
   _callbackAfterUpdate: UpdateTestCallback | null = null
 
   @observable attempts: AttemptModel[] = []
-  @observable _isOpen: Boolean | null = null
+  @observable _isOpen: boolean | null = null
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
 

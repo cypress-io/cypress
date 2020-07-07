@@ -31,7 +31,7 @@ export default class AttemptModel {
 
   constructor (props: TestProps, test: TestModel) {
     this.testId = props.id
-    this.id = props.currentRetry
+    this.id = props.currentRetry || 0
     this.test = test
     this._state = props.state
     this.err.update(props.err)
