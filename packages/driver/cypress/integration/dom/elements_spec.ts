@@ -1,3 +1,5 @@
+import { getActiveElByDocument, isFocused, elementFromPoint } from '../../../src/dom/elements'
+
 const { $ } = Cypress
 
 export {}
@@ -167,6 +169,165 @@ describe('src/dom/elements', () => {
       const $el = $('input')
 
       expect(Cypress.dom.isUndefinedOrHTMLBodyDoc($el)).to.be.false
+    })
+  })
+
+  context('.getActiveElByDocument', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/active-elements.html')
+    })
+
+    it('returns active element by looking it up on document', () => {
+      cy.get('input:first').focus().then(($el) => {
+        expect(getActiveElByDocument($el)).to.equal($el[0])
+      })
+    })
+
+    it('returns null if element is not focused', () => {
+      cy.get('input:first').then(($el) => {
+        expect(getActiveElByDocument($el)).to.be.null
+      })
+    })
+
+    describe('in the shadow dom', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/shadow-dom.html')
+      })
+
+      it('returns active element for shadow dom by looking it up on shadow root', () => {
+        cy
+        .get('#shadow-element-1')
+        .find('input', { includeShadowDom: true }).focus().then(($el) => {
+          expect(getActiveElByDocument($el)).to.equal($el[0])
+        })
+      })
+    })
+  })
+
+  context('.isFocused', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/active-elements.html')
+    })
+
+    it('returns true if the element is the active element', () => {
+      cy.get('input:first').focus().then(($el) => {
+        expect(isFocused($el[0])).to.be.true
+      })
+    })
+
+    it('returns true if the active element is the body and it is contenteditable', () => {
+      cy.get('body').focus().then(($body) => {
+        $body[0].setAttribute('contenteditable', 'true')
+        expect(isFocused($body[0])).to.be.true
+      })
+    })
+
+    it('returns false if the element is not the active element', () => {
+      cy.get('input:first').then(($el) => {
+        expect(isFocused($el[0])).to.be.false
+      })
+    })
+
+    it('returns false if there is no active element', () => {
+      cy.get('input:first').focus().then(($el) => {
+        $el.blur()
+        expect(isFocused($el[0])).to.be.false
+      })
+    })
+
+    it('returns false if the active element is the body', () => {
+      cy.get('body').focus().then(($body) => {
+        expect(isFocused($body[0])).to.be.false
+      })
+    })
+
+    it('returns false if determining the active element errors', () => {
+      cy.get('input:first').focus().then(($el) => {
+        Object.defineProperty($el[0].ownerDocument, 'activeElement', {
+          get () {
+            throw new Error('unexpected error')
+          },
+        })
+
+        expect(isFocused($el[0])).to.be.false
+      })
+    })
+
+    describe('in the shadow dom', () => {
+      it('returns true if the element is the active element of the shadow root', () => {
+        cy.visit('/fixtures/shadow-dom.html')
+        cy
+        .get('#shadow-element-1')
+        .find('input', { includeShadowDom: true }).focus().then(($el) => {
+          expect(isFocused($el[0])).to.be.true
+        })
+      })
+    })
+  })
+
+  context('.elementFromPoint', () => {
+    let doc
+    let node
+
+    beforeEach(() => {
+      Cypress.config('experimentalShadowDomSupport', false)
+
+      node = {}
+      doc = {
+        elementFromPoint: cy.stub().returns(node),
+      }
+    })
+
+    it('returns native element at point', () => {
+      expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+    })
+
+    describe('with shadow dom support enabled', () => {
+      beforeEach(() => {
+        Cypress.config('experimentalShadowDomSupport', true)
+      })
+
+      it('returns original node if node has no shadow root', () => {
+        expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+      })
+
+      it('returns shadow dom element at point', () => {
+        const shadowNode = {}
+        const shadowHostNode = {
+          shadowRoot: {
+            elementFromPoint: cy.stub().returns(shadowNode),
+          },
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(shadowNode)
+      })
+
+      it('returns original node if no element at point in shadow dom', () => {
+        const shadowHostNode = {
+          shadowRoot: {
+            elementFromPoint: cy.stub().returns(node),
+          },
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7794
+      it('returns shadow host if its element at point is itself', () => {
+        const shadowHostNode = {} as any
+
+        shadowHostNode.shadowRoot = {
+          elementFromPoint: cy.stub().returns(shadowHostNode),
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(shadowHostNode)
+      })
     })
   })
 })

@@ -1,22 +1,36 @@
 import _ from 'lodash'
 import { observable, computed } from 'mobx'
 
+import { FileDetails } from '@packages/ui-components'
+
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
 
-export default class Hook {
-  @observable id: string
-  @observable name: string
+export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
+
+export interface HookProps {
+  hookId: string
+  hookName: HookName
+  invocationDetails?: FileDetails
+}
+
+export default class Hook implements HookProps {
+  @observable hookId: string
+  @observable hookName: HookName
+  @observable hookNumber?: number
+  @observable invocationDetails?: FileDetails
+  @observable invocationOrder?: number
   @observable commands: Array<CommandModel> = []
   @observable failed = false
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: { name: string }) {
-    this.id = _.uniqueId('h')
-    this.name = props.name
+  constructor (props: HookProps) {
+    this.hookId = props.hookId
+    this.hookName = props.hookName
+    this.invocationDetails = props.invocationDetails
   }
 
   @computed get aliasesWithDuplicates () {

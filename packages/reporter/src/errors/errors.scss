@@ -137,7 +137,11 @@
         width: 100%;
 
         &:hover {
-          background: #fee0e3;
+          background: $err-header-background;
+        }
+
+        &:active {
+          background: darken($err-header-background, 2%);
         }
 
         .collapsible-header-text {
@@ -153,28 +157,46 @@
     }
 
     .runnable-err-print {
-      background: #ffeaec;
-      color: #4f4f4f;
-      cursor: pointer;
-      font-size: 13px;
-      padding: 7px 10px;
-
-      &:hover,
       &:focus {
         outline: none;
-        background: #fee0e3;
+
+        div {
+          background: $err-header-background;
+        }
       }
 
-      i {
-        border: solid 1px #4f4f4f;
-        border-radius: 4px;
-        font-size: 6px;
-        padding: 4px 3px;
-        vertical-align: middle;
-      }
+      div {
+        background: #ffeaec;
+        color: #4f4f4f;
+        cursor: pointer;
+        font-size: 13px;
+        height: 100%;
+        padding: 7px 10px;
+        width: 100%;
 
-      span {
-        vertical-align: middle;
+        &:focus {
+          outline: none;
+        }
+
+        &:hover {
+          background: $err-header-background;
+        }
+
+        &:active {
+          background: darken($err-header-background, 2%);
+        }
+
+        i {
+          border: solid 1px #4f4f4f;
+          border-radius: 4px;
+          font-size: 6px;
+          padding: 4px 3px;
+          vertical-align: middle;
+        }
+
+        span {
+          vertical-align: middle;
+        }
       }
     }
   }

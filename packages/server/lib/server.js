@@ -197,10 +197,8 @@ class Server {
 
       logger.setSettings(config)
 
-      // generate our request instance
-      // and set the responseTimeout
-      // TODO: might not be needed anymore
-      this._request = Request({ timeout: config.responseTimeout })
+      // TODO: does not need to be an instance anymore
+      this._request = Request()
       this._nodeProxy = httpProxy.createProxyServer()
 
       const getRemoteState = () => {

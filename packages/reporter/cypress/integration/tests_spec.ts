@@ -34,7 +34,7 @@ describe('controls', function () {
     describe('expand and collapse', function () {
       it('is collapsed by default', function () {
         cy.contains(this.passingTestTitle)
-        .parents('.runnable-wrapper').as('testWrapper')
+        .parents('.collapsible').first()
         .should('not.have.class', 'is-open')
         .find('.collapsible-content')
         .should('not.be.visible')
@@ -43,7 +43,7 @@ describe('controls', function () {
       describe('expand/collapse test manually', function () {
         beforeEach(function () {
           cy.contains(this.passingTestTitle)
-          .parents('.runnable-wrapper').as('testWrapper')
+          .parents('.collapsible').first().as('testWrapper')
           .should('not.have.class', 'is-open')
           .find('.collapsible-content')
           .should('not.be.visible')
@@ -67,6 +67,7 @@ describe('controls', function () {
 
         it('expands/collapses on enter', function () {
           cy.contains(this.passingTestTitle)
+          .parents('.collapsible-header').first()
           .focus().type('{enter}')
 
           cy.get('@testWrapper')
@@ -74,6 +75,7 @@ describe('controls', function () {
           .find('.collapsible-content').should('be.visible')
 
           cy.contains(this.passingTestTitle)
+          .parents('.collapsible-header').first()
           .focus().type('{enter}')
 
           cy.get('@testWrapper')
@@ -83,6 +85,7 @@ describe('controls', function () {
 
         it('expands/collapses on space', function () {
           cy.contains(this.passingTestTitle)
+          .parents('.collapsible-header').first()
           .focus().type(' ')
 
           cy.get('@testWrapper')
@@ -90,6 +93,7 @@ describe('controls', function () {
           .find('.collapsible-content').should('be.visible')
 
           cy.contains(this.passingTestTitle)
+          .parents('.collapsible-header').first()
           .focus().type(' ')
 
           cy.get('@testWrapper')
@@ -102,7 +106,7 @@ describe('controls', function () {
     describe('failed tests', function () {
       it('expands automatically', function () {
         cy.contains(this.failingTestTitle)
-        .parents('.runnable-wrapper').as('testWrapper')
+        .parents('.collapsible').first()
         .should('have.class', 'is-open')
         .find('.collapsible-content')
         .should('be.visible')
@@ -114,7 +118,12 @@ describe('controls', function () {
         cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
       })
 
-      itHandlesFileOpening('.runnable-header', {
+      it('displays tooltip on hover', () => {
+        cy.get('.runnable-header a').first().trigger('mouseover')
+        cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+      })
+
+      itHandlesFileOpening('.runnable-header a', {
         file: '/absolute/path/to/foo.js',
         line: 0,
         column: 0,

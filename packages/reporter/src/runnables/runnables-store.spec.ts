@@ -9,6 +9,7 @@ import TestModel, { TestProps } from '../test/test-model'
 import { AgentProps } from '../agents/agent-model'
 import { CommandProps } from '../commands/command-model'
 import { RouteProps } from '../routes/route-model'
+import { HookProps } from '../hooks/hook-model'
 
 const appStateStub = () => {
   return {
@@ -29,17 +30,20 @@ const scrollerStub = () => {
   } as ScrollerStub
 }
 
+const createHook = (hookId: string) => {
+  return { hookId, hookName: 'before each' } as HookProps
+}
 const createTest = (id: number) => {
-  return { id, title: `test ${id}` } as TestProps
+  return { id, title: `test ${id}`, hooks: [], state: 'processing' } as TestProps
 }
 const createSuite = (id: number, tests: Array<TestProps>, suites: Array<SuiteProps>) => {
-  return { id, title: `suite ${id}`, tests, suites } as SuiteProps
+  return { id, title: `suite ${id}`, tests, suites, hooks: [] } as SuiteProps
 }
 const createAgent = (id: number, testId: number) => {
   return { id, testId, instrument: 'agent' } as AgentProps
 }
-const createCommand = (id: number, testId: number) => {
-  return { id, testId, instrument: 'command' } as CommandProps
+const createCommand = (id: number, testId: number, hookId?: string) => {
+  return { id, testId, instrument: 'command', hookId } as CommandProps
 }
 const createRoute = (id: number, testId: number) => {
   return { id, testId, instrument: 'route' } as RouteProps
@@ -95,8 +99,9 @@ describe('runnables store', () => {
       const rootRunnable = createRootRunnable()
 
       rootRunnable.tests![0].agents = [createAgent(1, 1), createAgent(2, 1), createAgent(3, 1)]
-      rootRunnable.tests![0].commands = [createCommand(1, 1)]
+      rootRunnable.tests![0].commands = [createCommand(1, 1, 'h1')]
       rootRunnable.tests![0].routes = [createRoute(1, 1), createRoute(2, 1)]
+      rootRunnable.tests![0].hooks = [createHook('h1')]
       instance.setRunnables(rootRunnable)
       expect((instance.runnables[0] as TestModel).agents.length).to.equal(3)
       expect((instance.runnables[0] as TestModel).commands.length).to.equal(1)
@@ -109,6 +114,19 @@ describe('runnables store', () => {
       expect(instance.runnables[1].level).to.equal(0)
       expect((instance.runnables[1] as SuiteModel).children[0].level).to.equal(1)
       expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].level).to.equal(2)
+    })
+
+    it('merges down hooks', () => {
+      const rootRunnable = createRootRunnable()
+
+      rootRunnable.suites![0].hooks = [createHook('h1'), createHook('h2')]
+      rootRunnable.suites![0].suites[0].hooks = [createHook('h3')]
+      rootRunnable.suites![0].suites[0].tests[0].hooks = [createHook('h4')]
+      instance.setRunnables(rootRunnable)
+      expect(instance.runnables[0].hooks.length).to.equal(1)
+      expect(instance.runnables[1].hooks.length).to.equal(2)
+      expect((instance.runnables[1] as SuiteModel).children[2].hooks.length).to.equal(3)
+      expect(((instance.runnables[1] as SuiteModel).children[2] as SuiteModel).children[0].hooks.length).to.equal(5)
     })
 
     it('sets .isReady flag', () => {
@@ -206,8 +224,12 @@ describe('runnables store', () => {
 
   context('#updateLog', () => {
     it('updates the log', () => {
-      instance.setRunnables({ tests: [createTest(1)] })
-      instance.addLog(createCommand(1, 1))
+      const test = createTest(1)
+
+      test.hooks = [createHook('h1')]
+
+      instance.setRunnables({ tests: [test] })
+      instance.addLog(createCommand(1, 1, 'h1'))
       instance.updateLog({ id: 1, name: 'new name' } as LogProps)
       expect(instance.testById(1).commands[0].name).to.equal('new name')
     })

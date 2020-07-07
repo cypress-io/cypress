@@ -1270,7 +1270,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return snapshots.getStyles(...args)
     },
 
-    setRunnable (runnable, hookName) {
+    setRunnable (runnable, hookId) {
       // when we're setting a new runnable
       // prepare to run again!
       stopped = false
@@ -1278,7 +1278,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // reset the promise again
       state('promise', undefined)
 
-      state('hookName', hookName)
+      state('hookId', hookId)
 
       state('runnable', runnable)
 

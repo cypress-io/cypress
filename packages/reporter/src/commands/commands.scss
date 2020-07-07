@@ -16,35 +16,54 @@
       margin-right: 3px;
     }
 
-    .hook-name > .collapsible-header {
-      border-bottom: 1px solid transparent;
-      text-transform: uppercase;
-      color: #959595;
-      display: inline-block;
-      font-size: 11px;
-      cursor: pointer;
-
-      &:focus {
-        outline: 1px dotted #6c6c6c;
-      }
+    .hook-header {
+      display: flex;
+      width: 100%;
 
       &:hover {
-        border-bottom: 1px dotted #959595;
-        color: #333;
+        .collapsible-header {
+          color: #6a6b6c;
+        }
+
+        .hook-open-in-ide {
+          display: block;
+        }
       }
 
-      &:hover:focus {
-        border-bottom: 1px dotted #959595;
-        color: #333;
+      .collapsible-header {
+        text-transform: uppercase;
+        color: #959595;
+        display: inline-block;
+        flex-grow: 1;
+        font-size: 11px;
+        cursor: pointer;
+        padding: 4px 0;
+
+        &:focus {
+          outline: 1px dotted #6c6c6c;
+        }
+
+        > .collapsible-header-inner:focus {
+          outline: 0;
+        }
+
+        .hook-failed-message {
+          color: #E94F5F;
+          display: none;
+        }
       }
 
-      > .collapsible-header-inner:focus {
-        outline: 0;
-      }
-
-      .hook-failed-message {
-        color: #E94F5F;
+      .hook-open-in-ide {
+        align-items: center;
+        color: #6a6b6c;
         display: none;
+        padding: 4px 10px;
+
+        &:hover, &:focus {
+          background-color: rgba(186, 186, 186, 0.2);
+          outline: none;
+          text-decoration: none;
+        }
       }
     }
 
@@ -346,8 +365,7 @@
         padding: 0 3px;
         font-size: 11px;
         display: inline-block;
-        height: 14px;
-        line-height: 16px;
+        line-height: 14px;
       }
     }
 

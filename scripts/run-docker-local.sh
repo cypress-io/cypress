@@ -1,3 +1,4 @@
+#!/bin/bash
 set e+x
 
 echo "This script should be run from cypress's root"
@@ -12,6 +13,6 @@ echo "You should be able to edit files locally"
 echo "but execute the code in the container"
 
 docker run -v $PWD:/home/person/cypress \
-  -w /home/person/cypress \
+  -w /home/person/cypress${WORKING_DIR:-} \
   -it $name \
   /bin/bash
