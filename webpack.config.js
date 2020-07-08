@@ -16,19 +16,18 @@ module.exports = {
       {
         test: /\.vue$/,
         loader: 'vue-loader',
-        options: {
-          loaders: {
-            // you need to specify `i18n` loaders key with
-            // `vue-i18n-loader` (https://github.com/kazupon/vue-i18n-loader)
-            i18n: '@kazupon/vue-i18n-loader',
-          },
-        },
       },
       // this will apply to both plain `.css` files
       // AND `<style>` blocks in `.vue` files
       {
         test: /\.css$/,
         use: ['vue-style-loader', 'css-loader'],
+      },
+      // https://github.com/intlify/vue-i18n-loader
+      {
+        resourceQuery: /blockType=i18n/,
+        type: 'javascript/auto',
+        loader: '@intlify/vue-i18n-loader',
       },
     ],
   },

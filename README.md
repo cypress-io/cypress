@@ -596,6 +596,7 @@ Spec | Description
 <!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
+[i18n](cypress/component/advanced/i18n) | Testing component that uses [Vue I18n](https://kazupon.github.io/vue-i18n/) plugin
 [mocking-axios](cypress/component/advanced/mocking-axios) | Mocking 3rd party module imports, like `axios` for fetching data
 [mocking-components](cypress/component/advanced/mocking-components) | Mocking locally registered child components during tests
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
