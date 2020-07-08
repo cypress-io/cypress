@@ -726,12 +726,15 @@ If you want to disable code coverage instrumentation and reporting, use `--env c
 
 ## Development
 
-To see all local tests, install dependencies and open Cypress in GUI mode
+To see all local tests, install dependencies, build the code and open Cypress in GUI mode
 
 ```sh
 npm install
+npm run build
 npm run cy:open
 ```
+
+The build is done using `tsc` that transpiles all files from [src](src) to `dist` folder.
 
 ### Debugging
 

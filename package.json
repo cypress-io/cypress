@@ -25,15 +25,16 @@
     "url": "https://github.com/bahmutov/cypress-vue-unit-test.git"
   },
   "scripts": {
-    "build": "babel src --ignore src/*spec.js --out-dir dist && babel preprocessor --out-dir dist/preprocessor && babel plugins --out-dir dist/plugins",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
     "ban": "ban",
     "deps": "echo skip deps-ok && dependency-check --no-dev .",
     "issues": "git-issues",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "prettier --check '*.js' 'cypress/**/*.js' 'src/**/*.js' 'preprocessor/**/*.js' 'plugins/**/*.js'",
+    "lint": "prettier --check '*.js' 'cypress/**/*.js' 'src/**/*.js'",
     "prelint": "npm run pretty",
     "pretest": "npm run lint && npm run build",
-    "pretty": "prettier --write '*.js' 'cypress/**/*.js' 'src/**/*.js' 'preprocessor/**/*.js' 'plugins/**/*.js'",
+    "pretty": "prettier --write '*.js' 'cypress/**/*.js' 'src/**/*.js'",
     "size": "npm pack --dry",
     "test": "npm run cy:run",
     "unit": "mocha src/*-spec.js",
@@ -52,7 +53,6 @@
     ]
   },
   "devDependencies": {
-    "@babel/cli": "7.8.4",
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
     "axios": "0.19.2",
@@ -68,6 +68,7 @@
     "prettier": "2.0.5",
     "semantic-release": "17.1.1",
     "tailwindcss": "1.1.4",
+    "typescript": "3.9.6",
     "vue": "2.6.11",
     "vue-i18n": "7.8.1",
     "vue-loader": "15.9.3",
