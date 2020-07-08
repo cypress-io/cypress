@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Global Parent Fixture</title>
+</head>
+
+<body>
+  <span class="foo">Foo</span>
+</body>
+<script>
+  // This is defined to create a global parent which
+  // can cause issues when calling win.parent later 
+  // since the win.parent is now this element
+  // https://github.com/cypress-io/cypress/issues/6412
+  var parent = document.querySelector(".foo")
+</script>
+
+</html>

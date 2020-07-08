@@ -101,7 +101,7 @@ const MaybeSetBasicAuthHeaders: RequestMiddleware = function () {
 
 const SendRequestOutgoing: RequestMiddleware = function () {
   const requestOptions = {
-    timeout: this.req.responseTimeout || this.config.responseTimeout,
+    timeout: this.req.responseTimeout,
     strictSSL: false,
     followRedirect: false,
     retryIntervals: [0, 100, 200, 200],

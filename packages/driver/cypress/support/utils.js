@@ -2,7 +2,7 @@ const { $, _, Promise } = Cypress
 
 export const getCommandLogWithText = (command, type = 'method') => {
   // Open current test if not already open, so we can find the command log
-  cy.$$('.runnable-active .runnable-wrapper:not(.is-open)', top.document).click()
+  cy.$$('.runnable-active .collapsible:not(.is-open) .collapsible-header', top.document).click()
 
   return cy
   .$$(`.runnable-active .command-${type}:contains(${command})`, top.document)

@@ -16,7 +16,7 @@
     "debug": "4.1.1",
     "lodash": "4.17.15",
     "parse5-html-rewriting-stream": "5.1.1",
-    "recast": "0.18.8"
+    "recast": "0.19.1"
   },
   "devDependencies": {
     "@cypress/request-promise": "4.2.6",

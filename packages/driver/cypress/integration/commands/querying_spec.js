@@ -502,20 +502,18 @@ describe('src/cy/commands/querying', () => {
     })
 
     describe('.log', () => {
-      beforeEach(() => {
-        beforeEach(function () {
-          this.logs = []
+      beforeEach(function () {
+        this.logs = []
 
-          cy.on('log:added', (attrs, log) => {
-            if (attrs.name === 'root') {
-              this.lastLog = log
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'root') {
+            this.lastLog = log
 
-              this.logs.push(log)
-            }
-          })
-
-          return null
+            this.logs.push(log)
+          }
         })
+
+        return null
       })
 
       it('can turn off logging', () => {
