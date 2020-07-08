@@ -1,5 +1,5 @@
-const webpack = require('webpack')
-const util = require('util')
+import webpack from 'webpack'
+import util from 'util'
 
 // Cypress webpack bundler adaptor
 // https://github.com/cypress-io/cypress-webpack-preprocessor
@@ -54,7 +54,7 @@ function compileTemplate(options = {}) {
 /**
  * Warning: modifies the input object
  * @param {Cypress.ConfigOptions} config
- * @param {import('webpack/lib/Compiler').WebpackOptions} options
+ * @param {WebpackOptions} options
  */
 function insertBabelLoader(config, options) {
   const skipCodeCoverage = config && config.env && config.env.coverage === false

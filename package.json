@@ -17,6 +17,7 @@
   ],
   "license": "MIT",
   "main": "dist/index.js",
+  "types": "dist",
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"
   },
