@@ -287,6 +287,20 @@ interface MountOptions {
 type MountOptionsArgument = Partial<ComponentOptions & MountOptions>
 
 /**
+ * Direct Vue errors to the top error handler
+ * where they will fail Cypress test
+ * @see https://vuejs.org/v2/api/#errorHandler
+ * @see https://github.com/cypress-io/cypress/issues/7910
+ */
+function failTestOnVueError(err, vm, info) {
+  console.error(`Vue error 🔥`)
+  console.error(err)
+  console.error('component:', vm)
+  console.error('info:', info)
+  window.top.onerror(err)
+}
+
+/**
  * Mounts a Vue component inside Cypress browser.
  * @param {object} component imported from Vue file
  * @example
@@ -351,6 +365,8 @@ export const mount = (
     .then((win) => {
       // @ts-ignore
       win.Vue = Vue
+      // @ts-ignore
+      win.Vue.config.errorHandler = failTestOnVueError
 
       // @ts-ignore
       const document: Document = cy.state('document')

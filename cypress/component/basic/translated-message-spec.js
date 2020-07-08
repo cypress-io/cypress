@@ -1,10 +1,11 @@
+/// <reference types="cypress" />
+
 // testing i18n component
 // http://kazupon.github.io/vue-i18n
 import TranslatedMessage from './TranslatedMessage.vue'
 import VueI18n from 'vue-i18n'
 import { mountCallback } from 'cypress-vue-unit-test'
 
-/* eslint-env mocha */
 // https://github.com/bahmutov/cypress-vue-unit-test/issues/332
 describe.skip('VueI18n', () => {
   // need to use VueI18n as a plugin
