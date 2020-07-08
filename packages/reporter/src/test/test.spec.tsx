@@ -21,6 +21,7 @@ const model = (props?: Partial<TestModel>) => {
   return _.extend<TestModel>({
     agents: [],
     commands: [],
+    hooks: [],
     err: {},
     id: 't1',
     isActive: true,
@@ -112,13 +113,13 @@ describe('<Test />', () => {
     })
 
     it('renders <Hooks /> if there are commands', () => {
-      const component = mount(<Test model={model({ commands: [{ id: 1 }], state: 'failed' } as TestModel)} />)
+      const component = shallow(<Test model={model({ commands: [{ id: 1, hookId: 'h1' }], hooks: [{ hookId: 'h1' }], state: 'failed' } as TestModel)} />)
 
       expect(component.find(Hooks)).to.exist
     })
 
     it('renders <NoCommands /> is no commands', () => {
-      const component = mount(<Test model={model({ state: 'failed' })} />)
+      const component = shallow(<Test model={model({ state: 'failed' })} />)
 
       expect(component.find(NoCommands)).to.exist
     })

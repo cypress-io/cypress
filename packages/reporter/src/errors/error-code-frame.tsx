@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import Prism from 'prismjs'
 
 import { CodeFrame } from './err-model'
-import FileOpener from '../lib/file-opener'
+import FileNameOpener from '../lib/file-name-opener'
 
 interface Props {
   codeFrame: CodeFrame
@@ -24,7 +24,7 @@ class ErrorCodeFrame extends Component<Props> {
 
     return (
       <div className='test-err-code-frame'>
-        <FileOpener className="runnable-err-file-path" fileDetails={this.props.codeFrame} />
+        <FileNameOpener className="runnable-err-file-path" fileDetails={this.props.codeFrame} />
         <pre ref='codeFrame' data-line={highlightLine}>
           <code className={`language-${language || 'text'}`}>{frame}</code>
         </pre>

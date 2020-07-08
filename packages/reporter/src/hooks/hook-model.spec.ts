@@ -9,13 +9,10 @@ describe('Hook model', () => {
   let hook: Hook
 
   beforeEach(() => {
-    hook = new Hook({ name: 'before' })
-  })
-
-  it('gives hooks unique ids', () => {
-    const anotherHook = new Hook({ name: 'test' })
-
-    expect(hook.id).not.to.equal(anotherHook.id)
+    hook = new Hook({
+      hookId: 'h1',
+      hookName: 'before each',
+    })
   })
 
   context('#addCommand', () => {
@@ -151,7 +148,7 @@ describe('Hook model', () => {
       return hook.addCommand(command as CommandModel)
     }
 
-    it('returns duplicates marked with hasDuplicates and those that appear mulitple times in the commands array', () => {
+    it('returns duplicates marked with hasDuplicates and those that appear multiple times in the commands array', () => {
       addCommand('foo')
       addCommand('bar')
       addCommand('foo')
