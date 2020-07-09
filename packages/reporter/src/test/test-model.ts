@@ -1,8 +1,9 @@
 import _ from 'lodash'
 import { action, autorun, computed, observable, observe } from 'mobx'
+import { FileDetails } from '@packages/ui-components'
 
 import Err from '../errors/err-model'
-import Hook from '../hooks/hook-model'
+import Hook, { HookName } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Agent, { AgentProps } from '../agents/agent-model'
@@ -19,12 +20,13 @@ export interface TestProps extends RunnableProps {
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
+  invocationDetails?: FileDetails
 }
 
 export interface UpdatableTestProps {
   state?: TestProps['state']
   err?: TestProps['err']
-  hookName?: string
+  hookId?: string
   isOpen?: TestProps['isOpen']
 }
 
@@ -39,6 +41,15 @@ export default class Test extends Runnable {
   @observable isOpen = false
   @observable routes: Array<Route> = []
   @observable _state?: TestState | null = null
+  @observable _invocationCount: number = 0
+  @observable invocationDetails?: FileDetails
+  @observable hookCount: { [name in HookName]: number } = {
+    'before all': 0,
+    'before each': 0,
+    'after all': 0,
+    'after each': 0,
+    'test body': 0,
+  }
   type = 'test'
 
   callbackAfterUpdate: (() => void) | null = null
@@ -48,6 +59,15 @@ export default class Test extends Runnable {
 
     this._state = props.state
     this.err.update(props.err)
+
+    this.invocationDetails = props.invocationDetails
+
+    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
+    this.hooks.push(new Hook({
+      hookId: this.id.toString(),
+      hookName: 'test body',
+      invocationDetails: this.invocationDetails,
+    }))
 
     autorun(() => {
       // if at any point, a command goes long running, set isLongRunning
@@ -82,18 +102,36 @@ export default class Test extends Runnable {
     this.routes.push(route)
   }
 
-  addCommand (command: Command, hookName: string) {
-    const hook = this._findOrCreateHook(hookName)
-
+  addCommand (command: Command) {
     this.commands.push(command)
+
+    const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
+
+    const hook = this.hooks[hookIndex]
+
     hook.addCommand(command)
+
+    // make sure that hooks are in order of invocation
+    if (hook.invocationOrder === undefined) {
+      hook.invocationOrder = this._invocationCount++
+
+      if (hook.invocationOrder !== hookIndex) {
+        this.hooks[hookIndex] = this.hooks[hook.invocationOrder]
+        this.hooks[hook.invocationOrder] = hook
+      }
+    }
+
+    // assign number if non existent
+    if (hook.hookNumber === undefined) {
+      hook.hookNumber = ++this.hookCount[hook.hookName]
+    }
   }
 
   start () {
     this.isActive = true
   }
 
-  update ({ state, err, hookName, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
+  update ({ state, err, hookId, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
     let hadChanges = false
 
     const disposer = observe(this, (change) => {
@@ -118,8 +156,8 @@ export default class Test extends Runnable {
       this.isOpen = isOpen
     }
 
-    if (hookName) {
-      const hook = _.find(this.hooks, { name: hookName })
+    if (hookId) {
+      const hook = _.find(this.hooks, { hookId })
 
       if (hook) {
         hook.failed = true
@@ -153,17 +191,5 @@ export default class Test extends Runnable {
     })
     .compact()
     .last()
-  }
-
-  _findOrCreateHook (name: string) {
-    const hook = _.find(this.hooks, { name })
-
-    if (hook) return hook
-
-    const newHook = new Hook({ name })
-
-    this.hooks.push(newHook)
-
-    return newHook
   }
 }

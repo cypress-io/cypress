@@ -1,0 +1,30 @@
+<html>
+<head>
+  <style>
+    .full {
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+    }
+    .container-1 {
+      position: fixed;
+    }
+    .container-2,
+    .host {
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-1 full">
+    <div class="container-2 full">
+      <div class="host full"></div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelector('.host').attachShadow({ mode: 'open' })
+  </script>
+</body>
+</html>
