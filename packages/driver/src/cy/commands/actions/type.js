@@ -85,6 +85,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log = Cypress.log({
         message: [chars, deltaOptions],
         $el: options.$el,
+        timeout: options.timeout,
         consoleProps () {
           return {
             'Typed': chars,
@@ -408,7 +409,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             errorOnSelect: false,
           })
           .then(() => {
-            if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
+            let activeElement = $elements.getActiveElByDocument($elToClick)
+
+            if (!options.force && activeElement === null) {
               const node = $dom.stringify($elToClick)
               const onFail = options._log
 
@@ -476,6 +479,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: deltaOptions,
           $el,
+          timeout: options.timeout,
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),

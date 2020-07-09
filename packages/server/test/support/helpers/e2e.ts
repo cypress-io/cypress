@@ -1,5 +1,4 @@
-import helper from '../../spec_helper.coffee'
-const { expect, root } = helper as {expect: Chai.ExpectStatic, root: string}
+import { expect, root } from '../../spec_helper'
 
 require('mocha-banner').register()
 const chalk = require('chalk').default
@@ -152,7 +151,7 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, '$11.2.3')
+  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, '$11.2.3')
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
@@ -206,7 +205,6 @@ const startServer = function (obj) {
 
   return new Bluebird((resolve) => {
     return srv.listen(port, () => {
-      // eslint-disable-next-line no-console
       console.log(`listening on port: ${port}`)
       if (typeof onServer === 'function') {
         onServer(app, srv)
@@ -455,7 +453,7 @@ const e2e = {
       throw new Error(`
       passing { exit: false } to e2e options is no longer supported
       Please pass the --no-exit flag to the test command instead
-      e.g. "yarn test test/e2e/1_async_timeouts_spec.coffee --no-exit"
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --no-exit"
       `)
     }
 
@@ -509,6 +507,10 @@ const e2e = {
 
     if (options.record) {
       args.push('--record')
+    }
+
+    if (options.quiet) {
+      args.push('--quiet')
     }
 
     if (options.parallel) {

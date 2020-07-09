@@ -69,6 +69,10 @@ declare module 'cypress' {
      */
     port: number
     /**
+     * Run quietly, using only the configured reporter
+     */
+    quiet: boolean
+    /**
      * Whether to record the test run
      */
     record: boolean

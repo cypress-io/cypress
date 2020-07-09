@@ -241,6 +241,14 @@ const getSourceDetailsForLine = (projectRoot, line) => {
   }
 }
 
+const getSourceDetailsForFirstLine = (stack, projectRoot) => {
+  const line = getStackLines(stack)[0]
+
+  if (!line) return
+
+  return getSourceDetailsForLine(projectRoot, line)
+}
+
 const reconstructStack = (parsedStack) => {
   return _.map(parsedStack, (parsedLine) => {
     if (parsedLine.message != null) {
@@ -330,6 +338,7 @@ module.exports = {
   getCodeFrame,
   getSourceStack,
   getStackLines,
+  getSourceDetailsForFirstLine,
   hasCrossFrameStacks,
   normalizedStack,
   normalizedUserInvocationStack,

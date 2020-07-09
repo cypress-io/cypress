@@ -90,6 +90,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         const log = {
           $el: options.$el,
           message: deltaOptions,
+          timeout: options.timeout,
           consoleProps () {
             const obj = {
               // merge into consoleProps without mutating it
@@ -302,6 +303,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         const log = {
           message: messageArgs.join(', '),
+          timeout: options.timeout,
           consoleProps () {
             // merge into consoleProps without mutating it
             const obj = {}

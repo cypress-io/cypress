@@ -4,7 +4,7 @@ const Promise = require('bluebird')
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
-module.exports = (Commands, Cypress, cy) => {
+module.exports = (Commands, Cypress, cy, state) => {
   Commands.addAll({
     focused (options = {}) {
       const userOptions = options
@@ -15,8 +15,7 @@ module.exports = (Commands, Cypress, cy) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({
-        })
+        options._log = Cypress.log({ timeout: options.timeout })
       }
 
       const log = ($el) => {
@@ -80,11 +79,15 @@ module.exports = (Commands, Cypress, cy) => {
 
       options = _.defaults({}, userOptions, {
         retry: true,
-        withinSubject: cy.state('withinSubject'),
+        withinSubject: state('withinSubject'),
         log: true,
         command: null,
         verify: true,
       })
+
+      if (!Cypress.config('experimentalShadowDomSupport')) {
+        options.includeShadowDom = false
+      }
 
       let aliasObj
       const consoleProps = {}
@@ -98,6 +101,7 @@ module.exports = (Commands, Cypress, cy) => {
             message: selector,
             referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
             aliasType,
+            timeout: options.timeout,
             consoleProps: () => {
               return consoleProps
             },
@@ -164,7 +168,7 @@ module.exports = (Commands, Cypress, cy) => {
       // We want to strip everything after the last '.'
       // only when it is potentially a number or 'all'
       if ((_.indexOf(selector, '.') === -1) ||
-        (_.keys(cy.state('aliases')).includes(selector.slice(1)))) {
+        (_.keys(state('aliases')).includes(selector.slice(1)))) {
         toSelect = selector
       } else {
         allParts = _.split(selector, '.')
@@ -227,7 +231,7 @@ module.exports = (Commands, Cypress, cy) => {
           // if this is a route command
           if (command.get('name') === 'route') {
             if (!((_.indexOf(selector, '.') === -1) ||
-              (_.keys(cy.state('aliases')).includes(selector.slice(1))))
+              (_.keys(state('aliases')).includes(selector.slice(1))))
             ) {
               allParts = _.split(selector, '.')
               const index = _.last(allParts)
@@ -272,12 +276,20 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getElements = () => {
-        // attempt to query for the elements by withinSubject context
-        // and catch any sizzle errors!
         let $el
 
         try {
-          $el = cy.$$(selector, options.withinSubject)
+          let scope = options.withinSubject
+
+          if (options.includeShadowDom) {
+            const root = options.withinSubject || cy.state('document')
+            const elementsWithShadow = $dom.findAllShadowRoots(root)
+
+            scope = elementsWithShadow.concat(root)
+          }
+
+          $el = cy.$$(selector, scope)
+
           // jQuery v3 has removed its deprecated properties like ".selector"
           // https://jquery.com/upgrade-guide/3.0/breaking-change-deprecated-context-and-selector-properties-removed
           // but our error messages use this property to actually show the missing element
@@ -285,16 +297,17 @@ module.exports = (Commands, Cypress, cy) => {
           if ($el.selector == null) {
             $el.selector = selector
           }
-        } catch (e) {
-          e.onFail = () => {
+        } catch (err) {
+          // this is usually a sizzle error (invalid selector)
+          err.onFail = () => {
             if (options.log === false) {
-              return e
+              return err
             }
 
-            options._log.error(e)
+            options._log.error(err)
           }
 
-          throw e
+          throw err
         }
 
         // if that didnt find anything and we have a within subject
@@ -352,6 +365,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         options._log = Cypress.log({
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -363,7 +377,7 @@ module.exports = (Commands, Cypress, cy) => {
         return $el
       }
 
-      const withinSubject = cy.state('withinSubject')
+      const withinSubject = state('withinSubject')
 
       if (withinSubject) {
         return log(withinSubject)
@@ -452,12 +466,13 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log !== false) {
         consoleProps = {
           Content: text,
-          'Applied To': $dom.getElements(subject || cy.state('withinSubject')),
+          'Applied To': $dom.getElements(subject || state('withinSubject')),
         }
 
         options._log = Cypress.log({
           message: _.compact([filter, text]),
           type: subject ? 'child' : 'parent',
+          timeout: options.timeout,
           consoleProps: () => {
             return consoleProps
           },
@@ -482,7 +497,7 @@ module.exports = (Commands, Cypress, cy) => {
       const resolveElements = () => {
         const getOptions = _.extend({}, options, {
           // error: getErr(text, phrase)
-          withinSubject: subject || cy.state('withinSubject') || cy.$$('body'),
+          withinSubject: subject || state('withinSubject') || cy.$$('body'),
           filter: true,
           log: false,
           // retry: false ## dont retry because we perform our own element validation
@@ -537,6 +552,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           $el: subject,
           message: '',
+          timeout: options.timeout,
         })
       }
 
@@ -547,16 +563,16 @@ module.exports = (Commands, Cypress, cy) => {
       // reference the next command after this
       // within.  when that command runs we'll
       // know to remove withinSubject
-      const next = cy.state('current').get('next')
+      const next = state('current').get('next')
 
       // backup the current withinSubject
       // this prevents a bug where we null out
       // withinSubject when there are nested .withins()
       // we want the inner within to restore the outer
       // once its done
-      const prevWithinSubject = cy.state('withinSubject')
+      const prevWithinSubject = state('withinSubject')
 
-      cy.state('withinSubject', subject)
+      state('withinSubject', subject)
 
       fn.call(ctx, subject)
 
@@ -579,9 +595,9 @@ module.exports = (Commands, Cypress, cy) => {
         // exact same 'next' command, then this prevents accidentally
         // resetting withinSubject more than once.  If they point
         // to differnet 'next's then its okay
-        if (next !== cy.state('nextWithinSubject')) {
-          cy.state('withinSubject', prevWithinSubject || null)
-          cy.state('nextWithinSubject', next)
+        if (next !== state('nextWithinSubject')) {
+          state('withinSubject', prevWithinSubject || null)
+          state('nextWithinSubject', next)
         }
 
         // regardless nuke this listeners
@@ -598,11 +614,58 @@ module.exports = (Commands, Cypress, cy) => {
         cy.once('command:queue:before:end', () => {
           cleanup()
 
-          cy.state('withinSubject', null)
+          state('withinSubject', null)
         })
       }
 
       return subject
     },
   })
+
+  if (Cypress.config('experimentalShadowDomSupport')) {
+    Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
+      const userOptions = options || {}
+
+      options = _.defaults({}, userOptions, { log: true })
+
+      const consoleProps = {
+        'Applied To': $dom.getElements(subject),
+      }
+
+      if (options.log !== false) {
+        options._log = Cypress.log({
+          timeout: options.timeout,
+          consoleProps () {
+            return consoleProps
+          },
+        })
+      }
+
+      const setEl = ($el) => {
+        if (options.log === false) {
+          return
+        }
+
+        consoleProps.Yielded = $dom.getElements($el)
+        consoleProps.Elements = $el?.length
+
+        return options._log.set({ $el })
+      }
+
+      const getShadowRoots = () => {
+        // find all shadow roots of the subject(s), if any exist
+        const $el = subject
+        .map((i, node) => node.shadowRoot)
+        .filter((i, node) => node !== undefined && node !== null)
+
+        setEl($el)
+
+        return cy.verifyUpcomingAssertions($el, options, {
+          onRetry: getShadowRoots,
+        })
+      }
+
+      return getShadowRoots()
+    })
+  }
 }

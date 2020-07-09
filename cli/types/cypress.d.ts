@@ -216,8 +216,8 @@ declare namespace Cypress {
      */
     spec: {
       name: string // "config_passing_spec.coffee"
-      relative: string | null // "cypress/integration/config_passing_spec.coffee"
-      absolute: string | null
+      relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
+      absolute: string
     }
 
     /**
@@ -355,9 +355,9 @@ declare namespace Cypress {
      * @see https://on.cypress.io/api/commands
      */
     Commands: {
-      add(name: string, fn: (...args: any[]) => void): void
-      add(name: string, options: CommandOptions, fn: (...args: any[]) => void): void
-      overwrite(name: string, fn: (...args: any[]) => void): void
+      add(name: string, fn: (...args: any[]) => CanReturnChainable): void
+      add(name: string, options: CommandOptions, fn: (...args: any[]) => CanReturnChainable): void
+      overwrite(name: string, fn: (...args: any[]) => CanReturnChainable): void
     }
 
     /**
@@ -490,6 +490,8 @@ declare namespace Cypress {
      */
     off: Actions
   }
+
+  type CanReturnChainable = void | Chainable
 
   /**
    * Chainable interface for non-array Subjects
@@ -931,7 +933,7 @@ declare namespace Cypress {
      * @example
      *    cy.get('.article').find('footer') // Yield 'footer' within '.article'
      */
-    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    find<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Finds the descendent DOM elements with the given selector.
      *
@@ -940,7 +942,7 @@ declare namespace Cypress {
      *    // Find the li’s within the nav
      *    cy.get('.left-nav>.nav').find('>li')
      */
-    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable>): Chainable<JQuery<E>>
+    find<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Shadow>): Chainable<JQuery<E>>
 
     /**
      * Get the first DOM element within a set of DOM elements.
@@ -994,7 +996,7 @@ declare namespace Cypress {
      *    cy.get('input').should('be.disabled')
      *    cy.get('button').should('be.visible')
      */
-    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
+    get<K extends keyof HTMLElementTagNameMap>(selector: K, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<HTMLElementTagNameMap[K]>>
     /**
      * Get one or more DOM elements by selector.
      * The querying behavior of this command matches exactly how $(…) works in jQuery.
@@ -1004,7 +1006,7 @@ declare namespace Cypress {
      *    cy.get('ul li:first').should('have.class', 'active')
      *    cy.get('.dropdown-menu').click()
      */
-    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<JQuery<E>>
+    get<E extends Node = HTMLElement>(selector: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<JQuery<E>>
     /**
      * Get one or more DOM elements by alias.
      * @see https://on.cypress.io/get#Alias
@@ -1015,7 +1017,7 @@ declare namespace Cypress {
      *    //later retrieve the todos
      *    cy.get('@todos')
      */
-    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable>): Chainable<S>
+    get<S = any>(alias: string, options?: Partial<Loggable & Timeoutable & Withinable & Shadow>): Chainable<S>
 
     /**
      * Get a browser cookie by its name.
@@ -1067,13 +1069,13 @@ declare namespace Cypress {
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
 
-     /**
-     * Invoke a function on the previously yielded subject by a property path.
-     * Property path invocation cannot be strongly-typed.
-     * Invoking by a property path will always result in any.
-     *
-     * @see https://on.cypress.io/invoke
-     */
+    /**
+   * Invoke a function on the previously yielded subject by a property path.
+   * Property path invocation cannot be strongly-typed.
+   * Invoking by a property path will always result in any.
+   *
+   * @see https://on.cypress.io/invoke
+   */
     invoke(propertyPath: string, ...args: any[]): Chainable
 
     /**
@@ -1554,6 +1556,21 @@ declare namespace Cypress {
     setCookie(name: string, value: string, options?: Partial<SetCookieOptions>): Chainable<Cookie>
 
     /**
+     * Traverse into an element's shadow root.
+     * Requires `experimentalShadowDomSupport: true` config option
+     *
+    @example
+    ```js
+    cy.get('.top-level > my-component')
+      .shadow()
+      .find('.my-button')
+      .click()
+    ```
+     * @see https://on.cypress.io/experimental
+     */
+    shadow(): Chainable<Subject>
+
+    /**
      * Create an assertion. Assertions are automatically retried until they pass or time out.
      *
      * @see https://on.cypress.io/should
@@ -1925,7 +1942,7 @@ declare namespace Cypress {
      * @example
      *    cy.wait(1000) // wait for 1 second
      */
-    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<undefined>
+    wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
     /**
      * Wait for a specific XHR to respond.
      *
@@ -2154,6 +2171,18 @@ declare namespace Cypress {
   }
 
   /**
+   * Element traversal options for dealing with Shadow DOM
+   */
+  interface Shadow {
+    /**
+     * Include shadow DOM in search
+     *
+     * @default: false
+     */
+    includeShadowDom: boolean
+  }
+
+  /**
    * Options that control how a command is logged in the Reporter
    */
   interface Loggable {
@@ -2320,7 +2349,7 @@ declare namespace Cypress {
      * Path to folder containing fixture files (Pass false to disable)
      * @default "cypress/fixtures"
      */
-    fixturesFolder: string
+    fixturesFolder: string | false
     /**
      * Path to folder containing integration test files
      * @default "cypress/integration"
@@ -2335,7 +2364,7 @@ declare namespace Cypress {
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
      */
-    pluginsFile: string
+    pluginsFile: string | false
     /**
      * If `nodeVersion === 'system'` and a `node` executable is found, this will be the full filesystem path to that executable.
      * @default null
@@ -2350,12 +2379,12 @@ declare namespace Cypress {
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
      */
-    screenshotsFolder: string
+    screenshotsFolder: string | false
     /**
      * Path to file to load before test files load. This file is compiled and bundled. (Pass false to disable)
      * @default "cypress/support/index.js"
      */
-    supportFile: string
+    supportFile: string | false
     /**
      * Path to folder where videos will be saved after a headless or CI run
      * @default "cypress/videos"
@@ -2370,7 +2399,7 @@ declare namespace Cypress {
      * The quality setting for the video compression, in Constant Rate Factor (CRF). The value can be false to disable compression or a value between 0 and 51, where a lower value results in better quality (at the expense of a higher file size).
      * @default 32
      */
-    videoCompression: number
+    videoCompression: number | false
     /**
      * Whether Cypress will record a video of the test run when running headlessly.
      * @default true
@@ -2425,6 +2454,11 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
+    /**
+     * Enables shadow DOM support. Adds the `cy.shadow()` command and
+     * the `includeShadowDom` option to some DOM commands.
+     */
+    experimentalShadowDomSupport: boolean
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
@@ -3039,6 +3073,22 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'equal', value: any): Chainable<Subject>
+    /**
+   * Causes all `.key` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
+   * @example
+   *    cy.wrap({ a: 1, b: 2 }).should('have.all.key', 'a', 'b')
+   * @see http://chaijs.com/api/bdd/#method_all
+   * @see https://on.cypress.io/assertions
+   */
+    (chainer: 'have.all.key', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.key` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
+     * @example
+     *    cy.wrap({ a: 1, b: 2 }).should('have.any.key', 'a')
+     * @see http://chaijs.com/api/bdd/#method_any
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.any.key', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to require that the target have all of the given keys. This is the opposite of `.any`, which only requires that the target have at least one of the given keys.
      * @example

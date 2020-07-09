@@ -23,6 +23,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: file,
+          timeout: options.timeout,
           consoleProps () {
             return consoleProps
           },
@@ -97,6 +98,7 @@ module.exports = (Commands, Cypress, cy) => {
       if (options.log) {
         options._log = Cypress.log({
           message: fileName,
+          timeout: 0,
           consoleProps () {
             return consoleProps
           },

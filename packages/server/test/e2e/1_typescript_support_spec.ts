@@ -1,7 +1,7 @@
 import snapshot from 'snap-shot-it'
 
 import e2e from '../support/helpers/e2e'
-import Fixtures from '../support/helpers/fixtures.coffee'
+import Fixtures from '../support/helpers/fixtures'
 
 describe('e2e typescript', function () {
   e2e.setup()

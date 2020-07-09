@@ -17,6 +17,19 @@ const noTestsError = (specPath: string) => ({
   message: 'We could not detect any tests in the above file. Write some tests and re-run.',
 })
 
+const Loading = () => (
+  <div className="runnable-loading">
+    <div className="runnable-loading-animation">
+      <div />
+      <div />
+      <div />
+      <div />
+      <div />
+    </div>
+    <div className="runnable-loading-title">Your tests are loading...</div>
+  </div>
+)
+
 interface RunnablesListProps {
   runnables: RunnableArray
 }
@@ -30,7 +43,9 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
 ))
 
 function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
-  if (!isReady) return null
+  if (!isReady) {
+    return <Loading />
+  }
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
@@ -44,7 +59,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
 interface RunnablesProps {
   error?: Error
   runnablesStore: RunnablesStore
-  specPath: string
+  spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
 }
@@ -52,12 +67,12 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specPath } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader specPath={specPath} />
-        {content(runnablesStore, specPath, error)}
+        <RunnableHeader spec={spec} />
+        {content(runnablesStore, spec.relative, error)}
       </div>
     )
   }

@@ -2,9 +2,7 @@ import _ from 'lodash'
 import mockfs from 'mock-fs'
 import path from 'path'
 
-// eslint-disable-next-line
 export const logFs = () => {
-  // eslint-disable-next-line no-console
   console.dir(getFs(), { depth: null })
 }
 

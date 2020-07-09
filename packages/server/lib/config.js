@@ -104,7 +104,13 @@ browsers\
 // Know experimental flags / values
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
-const experimentalConfigKeys = ['experimentalGetCookiesSameSite', 'experimentalSourceRewriting', 'experimentalComponentTesting']
+const experimentalConfigKeys = toWords(`\
+experimentalGetCookiesSameSite
+experimentalSourceRewriting
+experimentalComponentTesting
+experimentalShadowDomSupport
+experimentalFetchPolyfill\
+`)
 
 const CONFIG_DEFAULTS = {
   port: null,
@@ -170,6 +176,8 @@ const CONFIG_DEFAULTS = {
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
   experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
+  experimentalShadowDomSupport: false,
+  experimentalFetchPolyfill: false,
 }
 
 const validationRules = {
@@ -216,6 +224,8 @@ const validationRules = {
   // experimental flag validation below
   experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
+  experimentalShadowDomSupport: v.isBoolean,
+  experimentalFetchPolyfill: v.isBoolean,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
