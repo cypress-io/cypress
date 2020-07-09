@@ -91,6 +91,8 @@ const verifyInternalFailure = (props) => {
   cy.get('.runnable-err-message')
   .should('include.text', `thrown in ${method.replace(/\./g, '-')}`)
 
+  cy.get('.runnable-err-stack-expander > .collapsible-header').click()
+
   cy.get('.runnable-err-stack-trace')
   .should('include.text', method)
 
