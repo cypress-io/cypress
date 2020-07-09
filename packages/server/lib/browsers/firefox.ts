@@ -366,7 +366,7 @@ export async function open (browser: Browser, url, options: any = {}): Bluebird<
     launchOptions,
   ] = await Bluebird.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
-    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
+    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
   ])
 

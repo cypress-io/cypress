@@ -205,12 +205,12 @@ export = {
 
   launch: launcher.launch,
 
-  writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute, onScreencastFrame) {
+  writeExtension (browser, isTextTerminal, proxyUrl, socketIoRoute) {
     debug('writing extension')
 
     // debug('writing extension to chrome browser')
     // get the string bytes for the final extension file
-    return extension.setHostAndPath(proxyUrl, socketIoRoute, onScreencastFrame)
+    return extension.setHostAndPath(proxyUrl, socketIoRoute)
     .then((str) => {
       const extensionDest = getExtensionDir(browser, isTextTerminal)
       const extensionBg = path.join(extensionDest, 'background.js')
