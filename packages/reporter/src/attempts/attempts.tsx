@@ -26,7 +26,7 @@ const AttemptHeader = ({ index, isOpen }:{index: number, isOpen: boolean}) => (
       <i className='fa fa-fw fa-angle-down' />
     </span>
     Attempt {index + 1}
-    <i className='attempt-state runnable-state fa fa-fw' />
+    <i className="attempt-state fa fa-fw" />
   </span>
 )
 
@@ -75,7 +75,7 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
           header={<AttemptHeader index={model.id} isOpen={model.isOpen} />}
           headerClass='attempt-name'
           isOpen={model.isOpen}
-          onToggle={model.toggleOpen}
+          toggleOpen={model.toggleOpen}
         >
           {renderAttemptContent(model)}
         </Collapsible>

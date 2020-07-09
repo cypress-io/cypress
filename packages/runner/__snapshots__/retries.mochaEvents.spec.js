@@ -41,7 +41,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 1
+      "retries": -1
     }
   ],
   [
@@ -2398,14 +2398,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h5",
@@ -2457,14 +2456,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "retries": 2
     },
     {
-      "name": "AssertionError",
       "message": "[error message]",
-      "showDiff": false,
-      "actual": null,
-      "onFail": "[Function]",
+      "name": "AssertionError",
+      "stack": "match.string",
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
-      "stack": "match.string"
+      "actual": null,
+      "showDiff": false
     }
   ],
   [
@@ -2501,14 +2499,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h5",
@@ -2877,7 +2874,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [
@@ -3200,7 +3197,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [
@@ -3599,7 +3596,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [
@@ -3641,14 +3638,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -3681,14 +3677,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "retries": 2
     },
     {
-      "name": "AssertionError",
       "message": "[error message]",
-      "showDiff": false,
-      "actual": null,
-      "onFail": "[Function]",
+      "name": "AssertionError",
+      "stack": "match.string",
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
-      "stack": "match.string"
+      "actual": null,
+      "showDiff": false
     }
   ],
   [
@@ -3775,14 +3770,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -3863,14 +3857,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -3903,14 +3896,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "retries": 2
     },
     {
-      "name": "AssertionError",
       "message": "[error message]",
-      "showDiff": false,
-      "actual": null,
-      "onFail": "[Function]",
+      "name": "AssertionError",
+      "stack": "match.string",
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
-      "stack": "match.string"
+      "actual": null,
+      "showDiff": false
     }
   ],
   [
@@ -3996,14 +3988,13 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "test 1",
       "hookName": "after each",
       "err": {
-        "name": "AssertionError",
         "message": "[error message]",
-        "showDiff": false,
-        "actual": null,
-        "onFail": "[Function]",
+        "name": "AssertionError",
+        "stack": "match.string",
         "sourceMappedStack": "match.string",
         "parsedStack": "match.array",
-        "stack": "match.string"
+        "actual": null,
+        "showDiff": false
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -4295,7 +4286,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [
@@ -5576,7 +5567,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [
@@ -6150,7 +6141,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "type": "test",
       "file": null,
       "currentRetry": 0,
-      "retries": 2
+      "retries": -1
     }
   ],
   [

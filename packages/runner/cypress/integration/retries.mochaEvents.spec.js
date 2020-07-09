@@ -183,7 +183,7 @@ describe('src/cypress/runner retries mochaEvents', () => {
           },
         },
       }, { config: { retries: 1 },
-        onInitialized (autCypress) {
+        onInitialized ({ autCypress }) {
           autCypress.Screenshot.onAfterScreenshot = cy.stub()
           onAfterScreenshot = cy.stub()
           autCypress.on('after:screenshot', onAfterScreenshot)
@@ -228,7 +228,7 @@ describe('src/cypress/runner retries mochaEvents', () => {
           },
         },
       }, { config: { retries: 1 },
-        onInitialized (autCypress) {
+        onInitialized ({ autCypress }) {
           autCypress.Screenshot.onAfterScreenshot = cy.stub()
           onAfterScreenshot = cy.stub()
           autCypress.on('after:screenshot', onAfterScreenshot)

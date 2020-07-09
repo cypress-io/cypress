@@ -102,10 +102,10 @@ function createCypress (defaultOptions = {}) {
    * @param {{state?: any, config?: any}} opts
    */
   const runIsolatedCypress = (mochaTestsOrFile, opts = {}) => {
-    _.defaultsDeep(opts, {
+    _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
-      onBeforeRun () {},
+      onInitialized () {},
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -197,8 +197,6 @@ function createCypress (defaultOptions = {}) {
           cy.spy(cy.state('window').console, 'log').as('console_log').log(false)
           cy.spy(cy.state('window').console, 'error').as('console_error').log(false)
 
-          opts.onInitialized(autCypress)
-
           autCypress.run((failed) => {
             resolve({ failed, mochaStubs, autCypress, win })
           })
@@ -215,7 +213,7 @@ function createCypress (defaultOptions = {}) {
           cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
-            opts.onBeforeRun({ specWindow, win, autCypress })
+            opts.onInitialized({ specWindow, win, autCypress })
 
             const testsInOwnFile = _.isString(mochaTestsOrFile)
             const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'

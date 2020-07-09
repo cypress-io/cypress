@@ -97,11 +97,15 @@ class Test extends Component<Props> {
 
   _contents (this: Test) {
     // performance optimization - don't render contents if not open
-    if (!this.props.model.isOpen) return null
+    const model = this.props.model
+
+    if (!model.isOpen) return null
 
     return (
+      <div style={{ paddingLeft: indent(model.level) }}>
 
-      <Attempts test={this.props.model} scrollIntoView={() => this._scrollIntoView()} />
+        <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+      </div>
     )
   }
 }

@@ -38,18 +38,31 @@
     }
   }
 
+
   .attempt-state-active {
+    .attempt-state {
+
     @include runnable-state-active;
+    }
   }
   .attempt-state-processing {
+    .attempt-state {
+
     @include runnable-state-processing;
+    }
   }
   .attempt-state-failed {
-    @include runnable-state-failed;
+    .attempt-state {
+      @include runnable-state-failed;
+    }
   }
   .attempt-state-passed {
+    .attempt-state {
+
     @include runnable-state-passed;
+    }
   }
+
 
   .attempt-name {
     display: flex;
@@ -85,6 +98,7 @@
       position: relative;
       background-color: #fff;
       user-select: none;
+      cursor: pointer;
 
       &:hover {
         background-color: #e8e8e8;

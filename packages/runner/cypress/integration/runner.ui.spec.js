@@ -270,7 +270,12 @@ describe('src/cypress/runner', () => {
       // the test ends
       cy.now('get', '.command-number:contains(25)')
       .then(($el) => {
-        expect($el).visible
+        return new Promise((resolve) => {
+          requestAnimationFrame(() => {
+            expect($el).visible
+            resolve()
+          })
+        })
       })
       .catch((e) => cy.state('reject')(e))
 

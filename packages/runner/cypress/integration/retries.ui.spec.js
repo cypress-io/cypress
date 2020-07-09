@@ -4,10 +4,10 @@ const { shouldHaveTestResults, containText } = helpers
 const { runIsolatedCypress } = helpers.createCypress({ config: { retries: 2 } })
 
 const getAttemptTag = (sel) => {
-  return cy.get(`.runnable-wrapper:contains(${sel}) .attempt-tag`)
+  return cy.get(`.test.runnable:contains(${sel}) .attempt-tag`)
 }
 
-const attemptTag = (sel) => `.runnable-wrapper .attempt-tag:contains(Attempt ${sel})`
+const attemptTag = (sel) => `.test.runnable .attempt-tag:contains(Attempt ${sel})`
 
 describe('src/cypress/runner retries ui', () => {
   // NOTE: for test-retries
@@ -35,7 +35,7 @@ describe('src/cypress/runner retries ui', () => {
     })
 
     it('can toggle failed attempt', () => {
-      cy.contains('.runnable-wrapper', 'test 3').click().within(() => {
+      cy.contains('.test.runnable', 'test 3').click().within(() => {
         cy.get('.runnable-err-print').should('not.be.visible')
         cy.contains('Attempt 1').click()
         cy.get('.runnable-err-print').should('be.visible')
@@ -89,7 +89,7 @@ describe('src/cypress/runner retries ui', () => {
           },
         },
       }, { config: { retries: 3, isTextTerminal: true },
-        onInitialized (autCypress) {
+        onInitialized ({ autCypress }) {
           let attempt = 0
 
           stub = cy.stub().callsFake(() => {
@@ -115,7 +115,7 @@ describe('src/cypress/runner retries ui', () => {
       },
     ).then(() => {
       expect(stub).callCount(3)
-      cy.get('.runnable-wrapper:contains(t2)').then(($el) => {
+      cy.get('.test.runnable:contains(t2)').then(($el) => {
         expect($el).not.class('is-open')
       })
     })
