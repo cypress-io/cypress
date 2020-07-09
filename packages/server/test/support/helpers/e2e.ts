@@ -151,7 +151,7 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d\.\d\.\d)/g, '$11.2.3')
+  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, '$11.2.3')
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
