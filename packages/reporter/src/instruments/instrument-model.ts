@@ -9,7 +9,7 @@ export interface AliasObject {
 export type Alias = string | Array<string> | null | AliasObject
 
 export interface InstrumentProps {
-  id: string
+  id: number
   alias?: Alias
   aliasType?: string | null
   displayName?: string
@@ -27,7 +27,7 @@ export default class Log {
   @observable.ref alias?: Alias = null
   @observable aliasType?: string | null = null
   @observable displayName?: string
-  @observable id?: string
+  @observable id?: number
   @observable name?: string
   @observable message?: string
   @observable type?: string

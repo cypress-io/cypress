@@ -15,6 +15,8 @@ const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
   commands: stringifyShort,
+  err: stringifyShort,
+  invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
   lifecycle: match.number,
@@ -45,8 +47,6 @@ const cleanseRunStateMap = {
   duration: 1,
   startTime: new Date(0),
   'err.stack': '[err stack]',
-  sourceMappedStack: match.string,
-  parsedStack: match.array,
 }
 
 const spyOn = (obj, prop, fn) => {

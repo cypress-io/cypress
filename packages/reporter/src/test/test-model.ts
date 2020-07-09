@@ -24,13 +24,14 @@ export interface TestProps extends RunnableProps {
   currentRetry: number
   retries?: number
   final?: boolean
+  invocationDetails?: FileDetails
 }
 
 export interface UpdatableTestProps {
   id: TestProps['id']
   state?: TestProps['state']
   err?: TestProps['err']
-  hookName?: string
+  hookId?: string
   isOpen?: TestProps['isOpen']
   currentRetry?: TestProps['currentRetry']
   retries?: TestProps['retries']

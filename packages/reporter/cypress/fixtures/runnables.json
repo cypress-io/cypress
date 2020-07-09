@@ -2,14 +2,14 @@
   "id": "r1",
   "title": "",
   "root": true,
-  "tests": [
-    
-  ],
+  "hooks": [],
+  "tests": [],
   "suites": [
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
+      "hooks": [],
       "tests": [
         {
           "id": "r3",
@@ -27,6 +27,7 @@
           "id": "r5",
           "title": "nested suite 1",
           "root": false,
+          "hooks": [],
           "tests": [
             {
               "id": "r6",
@@ -39,7 +40,7 @@
               "state": "active",
               "commands": [
                 {
-                  "hookName": "test",
+                  "hookId": "r7",
                   "id": "c1",
                   "instrument": "command",
                   "message": "http://localhost:3000",

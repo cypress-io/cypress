@@ -20,8 +20,9 @@ const model = (props?: Partial<TestModel>) => {
   return {
     agents: [],
     commands: [],
-    Err: {},
-    id: '1',
+    hooks: [],
+    err: {},
+    id: 't1',
     isActive: true,
     level: 1,
     routes: [],
@@ -78,20 +79,6 @@ describe('<Test />', () => {
     //   console.log(component)
     //   expect(component.find(Hooks)).to.exist
     // })
-
-    // it('renders <NoCommands /> is no commands', () => {
-    //   const component = mount(<Test model={model({ state: 'failed' })} />)
-
-    //   expect(component.find(NoCommands)).to.exist
-    // })
-
-    it('stops propagation when clicked', () => {
-      const component = mount(<Test model={model({ state: 'failed' })} />)
-      const e = { stopPropagation: sinon.spy() }
-
-      component.find('.collapsible-header').first().simulate('click', e)
-      expect(e.stopPropagation).to.have.been.called
-    })
   })
 
   context('scrolling into view', () => {

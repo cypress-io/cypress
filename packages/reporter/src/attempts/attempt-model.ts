@@ -1,35 +1,46 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 
-import AgentModel, { AgentProps } from '../agents/agent-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
-import ErrorModel from '../errors/err-model'
-import RouteModel, { RouteProps } from '../routes/route-model'
-import TestModel, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
-import HookModel from '../hooks/hook-model'
+import Agent, { AgentProps } from '../agents/agent-model'
+import Command, { CommandProps } from '../commands/command-model'
+import Err from '../errors/err-model'
+import Route, { RouteProps } from '../routes/route-model'
+import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Hook, { HookName } from '../hooks/hook-model'
+import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
 
 export default class AttemptModel {
-  @observable agents: AgentModel[] = []
-  @observable commands: CommandModel[] = []
-  @observable err = new ErrorModel({})
-  @observable hooks: HookModel[] = []
-  @observable isActive: boolean|null = null
-  @observable routes: RouteModel[] = []
+  @observable agents: Agent[] = []
+  @observable commands: Command[] = []
+  @observable err = new Err({})
+  @observable hooks: Hook[] = []
+  // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
+  @observable isActive: boolean | null = null
+  @observable routes: Route[] = []
+  @observable _state?: TestState | null = null
+  @observable _invocationCount: number = 0
+  @observable invocationDetails?: FileDetails
+  @observable hookCount: { [name in HookName]: number } = {
+    'before all': 0,
+    'before each': 0,
+    'after all': 0,
+    'after each': 0,
+    'test body': 0,
+  }
   @observable _isOpen: boolean|null = null
+
   @observable isOpenWhenLast: boolean | null = null
-  @observable _state: TestState|null = null
-
   _callbackAfterUpdate: Function | null = null
-
   testId: string
+
   @observable id: number
-  test: TestModel
+  test: Test
 
   _logs: {[key: string]: Log} = {}
 
-  constructor (props: TestProps, test: TestModel) {
+  constructor (props: TestProps, test: Test) {
     this.testId = props.id
     this.id = props.currentRetry || 0
     this.test = test
@@ -39,6 +50,15 @@ export default class AttemptModel {
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)
     _.each(props.routes, this.addLog)
+
+    this.invocationDetails = props.invocationDetails
+
+    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
+    this.hooks.push(new Hook({
+      hookId: this.id.toString(),
+      hookName: 'test body',
+      invocationDetails: this.invocationDetails,
+    }))
   }
 
   @computed get hasCommands () {
@@ -117,8 +137,8 @@ export default class AttemptModel {
 
     this.err.update(props.err)
 
-    if (props.hookName) {
-      const hook = _.find(this.hooks, { name: props.hookName })
+    if (props.hookId) {
+      const hook = _.find(this.hooks, { hookId: props.hookId })
 
       if (hook && props.err) {
         hook.failed = true
@@ -146,7 +166,7 @@ export default class AttemptModel {
   }
 
   _addAgent (props: AgentProps) {
-    const agent = new AgentModel(props)
+    const agent = new Agent(props)
 
     this._logs[props.id] = agent
     this.agents.push(agent)
@@ -155,7 +175,7 @@ export default class AttemptModel {
   }
 
   _addRoute (props: RouteProps) {
-    const route = new RouteModel(props)
+    const route = new Route(props)
 
     this._logs[props.id] = route
     this.routes.push(route)
@@ -164,25 +184,33 @@ export default class AttemptModel {
   }
 
   _addCommand (props: CommandProps) {
-    const command = new CommandModel(props)
-    const hook = this._findOrCreateHook(props.hookName)
+    const command = new Command(props)
 
     this._logs[props.id] = command
+
     this.commands.push(command)
+
+    const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
+
+    const hook = this.hooks[hookIndex]
+
     hook.addCommand(command)
 
+    // make sure that hooks are in order of invocation
+    if (hook.invocationOrder === undefined) {
+      hook.invocationOrder = this._invocationCount++
+
+      if (hook.invocationOrder !== hookIndex) {
+        this.hooks[hookIndex] = this.hooks[hook.invocationOrder]
+        this.hooks[hook.invocationOrder] = hook
+      }
+    }
+
+    // assign number if non existent
+    if (hook.hookNumber === undefined) {
+      hook.hookNumber = ++this.hookCount[hook.hookName]
+    }
+
     return command
-  }
-
-  _findOrCreateHook (name: string) {
-    const hook = _.find(this.hooks, { name })
-
-    if (hook) return hook
-
-    const newHook = new HookModel({ name })
-
-    this.hooks.push(newHook)
-
-    return newHook
   }
 }

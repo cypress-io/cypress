@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -184,7 +184,7 @@ const defaults = function (state, config, obj) {
     state: 'pending',
     instrument: 'command',
     url: state('url'),
-    hookName: state('hookName'),
+    hookId: state('hookId'),
     testId: runnable ? runnable.id : undefined,
     testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
     viewportWidth: state('viewportWidth'),

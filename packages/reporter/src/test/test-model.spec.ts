@@ -20,7 +20,8 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
   const defaults = {
     instrument: 'command',
     hookName: '',
-    id: 'c3',
+    id: 1,
+    hookId: 'c3',
     numElements: 1,
     testCurrentRetry: 0,
     testId: 'r3',
@@ -30,6 +31,15 @@ const createCommand = (props: Partial<CommandProps> = {}) => {
   } as CommandProps
 
   return _.defaults(props, defaults)
+}
+
+const commandHook: (hookId: string) => Partial<Command> = (hookId: string) => {
+  return {
+    hookId,
+    isMatchingEvent: () => {
+      return false
+    },
+  }
 }
 
 describe('Test model', () => {
@@ -120,7 +130,7 @@ describe('Test model', () => {
     it('creates a hook and adds the command to it if it does not exist', () => {
       const test = createTest()
 
-      test.addLog(createCommand({ instrument: 'command', hookName: 'someHook' }))
+      test.addLog(createCommand({ instrument: 'command', hookId: 'h3' }))
       expect(test.lastAttempt.hooks.length).to.equal(1)
       expect(test.lastAttempt.hooks[0].name).equal('someHook')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
@@ -129,8 +139,7 @@ describe('Test model', () => {
     it('adds the command to an existing hook if it already exists', () => {
       const test = createTest()
       const commandProps = createCommand({
-        instrument: 'command',
-        hookName: 'someHook',
+        hookId: 'h1',
       })
 
       const command = test.addLog(commandProps) as CommandModel
@@ -140,9 +149,80 @@ describe('Test model', () => {
       expect(test.lastAttempt.hooks.length).to.equal(1)
       expect(test.lastAttempt.hooks[0].name).to.equal('someHook')
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(1)
-      test.addLog(createCommand({ instrument: 'command', hookName: 'someHook' }))
+      test.addLog(createCommand({ instrument: 'command', hookId: 'h1' }))
       expect(test.lastAttempt.hooks.length).to.equal(1)
       expect(test.lastAttempt.hooks[0].commands.length).to.equal(2)
+    })
+
+    it('adds the command to the correct hook', () => {
+      const test = new TestModel({
+        id: 1,
+        hooks: [
+          { hookId: 'h1' } as HookProps,
+          { hookId: 'h2' } as HookProps,
+        ],
+      } as TestProps, 0)
+
+      test.addCommand(commandHook('h1') as Command)
+      expect(test.hooks[0].commands.length).to.equal(1)
+      expect(test.hooks[1].commands.length).to.equal(0)
+      expect(test.hooks[2].commands.length).to.equal(0)
+
+      test.addCommand(commandHook('1') as Command)
+      expect(test.hooks[0].commands.length).to.equal(1)
+      expect(test.hooks[1].commands.length).to.equal(1)
+      expect(test.hooks[2].commands.length).to.equal(0)
+    })
+
+    it('moves hooks into the correct order', () => {
+      const test = new TestModel({
+        id: 1,
+        hooks: [
+          { hookId: 'h1' } as HookProps,
+          { hookId: 'h2' } as HookProps,
+        ],
+      } as TestProps, 0)
+
+      test.addCommand(commandHook('h2') as Command)
+      expect(test.hooks[0].hookId).to.equal('h2')
+      expect(test.hooks[0].invocationOrder).to.equal(0)
+      expect(test.hooks[0].commands.length).to.equal(1)
+
+      test.addCommand(commandHook('h1') as Command)
+      expect(test.hooks[1].hookId).to.equal('h1')
+      expect(test.hooks[1].invocationOrder).to.equal(1)
+      expect(test.hooks[1].commands.length).to.equal(1)
+    })
+
+    it('counts and assigns the number of each hook type', () => {
+      const test = new TestModel({
+        id: 1,
+        hooks: [
+          { hookId: 'h1', hookName: 'before each' } as HookProps,
+          { hookId: 'h2', hookName: 'after each' } as HookProps,
+          { hookId: 'h3', hookName: 'before each' } as HookProps,
+        ],
+      } as TestProps, 0)
+
+      test.addCommand(commandHook('h1') as Command)
+      expect(test.hookCount['before each']).to.equal(1)
+      expect(test.hookCount['after each']).to.equal(0)
+      expect(test.hooks[0].hookNumber).to.equal(1)
+
+      test.addCommand(commandHook('h1') as Command)
+      expect(test.hookCount['before each']).to.equal(1)
+      expect(test.hookCount['after each']).to.equal(0)
+      expect(test.hooks[0].hookNumber).to.equal(1)
+
+      test.addCommand(commandHook('h3') as Command)
+      expect(test.hookCount['before each']).to.equal(2)
+      expect(test.hookCount['after each']).to.equal(0)
+      expect(test.hooks[1].hookNumber).to.equal(2)
+
+      test.addCommand(commandHook('h2') as Command)
+      expect(test.hookCount['before each']).to.equal(2)
+      expect(test.hookCount['after each']).to.equal(1)
+      expect(test.hooks[2].hookNumber).to.equal(1)
     })
   })
 
@@ -180,8 +260,8 @@ describe('Test model', () => {
     it('sets the hook to failed if it exists', () => {
       const test = createTest()
 
-      test.addLog(createCommand({ instrument: 'command', hookName: 'someHook' }))
-      test.finish({ hookName: 'someHook', err: { message: 'foo' } as Err } as UpdatableTestProps)
+      test.addLog(createCommand({ instrument: 'command' }))
+      test.finish({ hookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps)
       expect(test.lastAttempt.hooks[0].failed).to.be.true
     })
 
@@ -189,7 +269,7 @@ describe('Test model', () => {
       const test = createTest()
 
       expect(() => {
-        test.finish({ hookName: 'someHook' } as UpdatableTestProps)
+        test.finish({ hookId: 'h1' } as UpdatableTestProps)
       }).not.to.throw()
     })
   })
@@ -198,20 +278,20 @@ describe('Test model', () => {
     it('returns last command matching the error', () => {
       const test = createTest({ err: { message: 'SomeError' } as Err })
 
-      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookName: 'someHook' }))
-      test.addLog(createCommand({ err: {} as Err, hookName: 'someHook' }))
-      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookName: 'someHook' }))
-      test.addLog(createCommand({ err: {} as Err, hookName: 'anotherHook' }))
-      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as Err, hookName: 'anotherHook' }))
+      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookId: 'h1' }))
+      test.addLog(createCommand({ err: {} as Err, hookId: 'h1' }))
+      test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookId: 'h1' }))
+      test.addLog(createCommand({ err: {} as Err, hookId: 'h3' }))
+      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as Err, hookId: 'h3' }))
       expect(test.commandMatchingErr()!.name).to.equal('The One')
     })
 
     it('returns undefined if there are no commands with errors', () => {
       const test = createTest({ err: { message: 'SomeError' } as Err })
 
-      test.addLog(createCommand({ hookName: 'someHook' }))
-      test.addLog(createCommand({ hookName: 'someHook' }))
-      test.addLog(createCommand({ hookName: 'anotherHook' }))
+      test.addLog(createCommand({ hookId: 'h1' }))
+      test.addLog(createCommand({ hookId: 'h1' }))
+      test.addLog(createCommand({ hookId: 'h3' }))
       expect(test.commandMatchingErr()).to.be.undefined
     })
   })
