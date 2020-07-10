@@ -119,7 +119,7 @@ const resetStoreVM = (Vue, { store }) => {
  *         ^^^^^ this type
  *  mount(Hello)
  */
-type VueComponent = Vue.ComponentOptions<any>
+type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor
 
 /**
  * Options to pass to the component when creating it, like
@@ -286,6 +286,28 @@ interface MountOptions {
  */
 type MountOptionsArgument = Partial<ComponentOptions & MountOptions>
 
+// when we mount a Vue component, we add it to the global Cypress object
+// so here we extend the global Cypress namespace and its Cypress interface
+declare global {
+  // eslint-disable-next-line no-redeclare
+  namespace Cypress {
+    interface Cypress {
+      /**
+       * Mounted Vue instance is available under Cypress.vue
+       * @memberof Cypress
+       * @example
+       *  mount(Greeting)
+       *  .then(() => {
+       *    Cypress.vue.message = 'Hello There'
+       *  })
+       *  // new message is displayed
+       *  cy.contains('Hello There').should('be.visible')
+       */
+      vue: Vue
+    }
+  }
+}
+
 /**
  * Direct Vue errors to the top error handler
  * where they will fail Cypress test
@@ -352,6 +374,7 @@ export const mount = (
   // https://github.com/bahmutov/cypress-vue-unit-test/issues/313
   if (
     Cypress._.isPlainObject(component) &&
+    // @ts-ignore
     Cypress._.isFunction(component.render)
   ) {
     // @ts-ignore
@@ -412,6 +435,7 @@ export const mount = (
       // create root Vue component
       // and make it accessible via Cypress.vue
       if (isConstructor(component)) {
+        // @ts-ignore
         const Cmp = Vue.extend(component)
         // @ts-ignore
         Cypress.vue = new Cmp(props).$mount(componentNode)
