@@ -90,16 +90,16 @@ const testAfterRun = (test, Cypress) => {
   }
 }
 
-const setTestTimingsForHook = (test, hookId, obj) => {
+const setTestTimingsForHook = (test, hookName, obj) => {
   if (test.timings == null) {
     test.timings = {}
   }
 
-  if (test.timings[hookId] == null) {
-    test.timings[hookId] = []
+  if (test.timings[hookName] == null) {
+    test.timings[hookName] = []
   }
 
-  return test.timings[hookId].push(obj)
+  return test.timings[hookName].push(obj)
 }
 
 const setTestTimings = (test, name, obj) => {
@@ -349,11 +349,9 @@ const overrideRunnerHook = (Cypress, _runner, getTestById, getTest, setTest, get
       case 'afterEach': {
         const t = getTest()
 
-        const tests = getAllSiblingTests(t.parent, getTestById)
-
         // find all of the grep'd tests which share
         // the same parent suite as our current test
-        // const tests = getAllSiblingTests(t_1.parent, getTestById)
+        const tests = getAllSiblingTests(t.parent, getTestById)
 
         if (this.suite.root) {
           _runner._shouldBufferSuiteEnd = true
@@ -587,17 +585,6 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const setHookFailureProps = (test, hook, err) => {
-  err = $errUtils.wrapErr(err)
-  const hookName = getHookName(hook)
-
-  test.err = err
-  test.state = 'failed'
-  test.duration = hook.duration // TODO: nope (?)
-  test.hookName = hookName // TODO: why are we doing this?
-  test.failedFromHookId = hook.hookId
-}
-
 const hookFailed = (hook, err, getTest, getTestFromHookOrFindTest) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
@@ -611,6 +598,17 @@ const hookFailed = (hook, err, getTest, getTestFromHookOrFindTest) => {
   } else {
     return Cypress.action('runner:test:end', wrap(test))
   }
+}
+
+const setHookFailureProps = (test, hook, err) => {
+  err = $errUtils.wrapErr(err)
+  const hookName = getHookName(hook)
+
+  test.err = err
+  test.state = 'failed'
+  test.duration = hook.duration // TODO: nope (?)
+  test.hookName = hookName // TODO: why are we doing this?
+  test.failedFromHookId = hook.hookId
 }
 
 function getTestFromRunnable (runnable) {
@@ -1106,7 +1104,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       })
     },
 
-    onRunnableRun (run, runnable, args) {
+    onRunnableRun (runnableRun, runnable, args) {
       // extract out the next(fn) which mocha uses to
       // move to the next runnable - this will be our async seam
       const _next = args[0]
@@ -1150,6 +1148,12 @@ const create = (specWindow, mocha, Cypress, cy) => {
         test.wallClockStartedAt = wallClockStartedAt
       }
 
+      // if this isnt a hook, then the name is 'test'
+      const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+      // set hook id to hook id or test id
+      const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
+
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
       // of cy - since we now have a new 'test' and all of the
@@ -1179,9 +1183,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
         return _next.call(this)
       }
 
-      // if this isnt a hook, then the name is 'test'
-      const hookId = runnable.type === 'hook' ? runnable.hookId : 'test'
-
       const next = (err) => {
         // now set the duration of the after runnable run async event
         afterFnDurationEnd = (wallClockEnd = new Date())
@@ -1193,7 +1194,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
             // this is what it 'feels' like to the user
             runnable.duration = wallClockEnd - wallClockStartedAt
 
-            setTestTimingsForHook(test, {
+            setTestTimingsForHook(test, hookName, {
               hookId: runnable.hookId,
               fnDuration: fnDurationEnd - fnDurationStart,
               afterFnDuration: afterFnDurationEnd - afterFnDurationStart,
@@ -1307,7 +1308,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
         // call the original method with our
         // custom onNext function
-        return run.call(runnable, onNext)
+        return runnableRun.call(runnable, onNext)
       })
     },
 

@@ -10,7 +10,7 @@ import ErrorStack from '../errors/error-stack'
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
-import AttemptModel from '../attempts/attempt-model'
+import Attempt from '../attempts/attempt-model'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -31,7 +31,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: AttemptModel
+  model: Attempt
   isTestError?: boolean
 }
 

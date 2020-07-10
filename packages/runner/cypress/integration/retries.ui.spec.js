@@ -89,7 +89,7 @@ describe('src/cypress/runner retries ui', () => {
           },
         },
       }, { config: { retries: 3, isTextTerminal: true },
-        onInitialized ({ autCypress }) {
+        onBeforeRun ({ autCypress }) {
           let attempt = 0
 
           stub = cy.stub().callsFake(() => {

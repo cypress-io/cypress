@@ -11,7 +11,7 @@ import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
 
-export default class AttemptModel {
+export default class Attempt {
   @observable agents: Agent[] = []
   @observable commands: Command[] = []
   @observable err = new Err({})
@@ -55,7 +55,7 @@ export default class AttemptModel {
 
     this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
     this.hooks.push(new Hook({
-      hookId: this.id.toString(),
+      hookId: this.testId.toString(),
       hookName: 'test body',
       invocationDetails: this.invocationDetails,
     }))

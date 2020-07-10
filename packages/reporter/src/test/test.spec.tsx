@@ -72,13 +72,6 @@ describe('<Test />', () => {
 
       expect(component.find('.runnable-instruments')).not.to.be.empty
     })
-
-    // it('renders <Hooks /> if there are commands', () => {
-    //   const component = mount(<Test model={model({ attempts: [{ commands: [{ id: '1' }], agents: [], routes: [], isOpen: true, state: 'passed', err: {} }], isOpen: true, state: 'passed', err: { codeFrame: false } })} />)
-
-    //   console.log(component)
-    //   expect(component.find(Hooks)).to.exist
-    // })
   })
 
   context('scrolling into view', () => {
@@ -164,16 +157,6 @@ describe('<Test />', () => {
         testModel = model({ state: 'processing' })
         component = mount(<Test appState={appState} model={testModel} scroller={scroller} />)
       })
-
-      // it('scrolls into view if auto-scrolling is enabled, app is running, the model should render', () => {
-      //   appState.id = 'fooo'
-      //   appState.autoScrollingEnabled = true
-      //   appState.isRunning = true
-      //   testModel.state = 'processing'
-      //   testModel.shouldRender = true
-      //   component.instance()!.componentDidUpdate!({}, {})
-      //   expect(scroller.scrollIntoView).to.have.been.calledWith((component.instance() as any).containerRef.current)
-      // })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
         appState.isRunning = true

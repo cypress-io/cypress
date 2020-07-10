@@ -1,8 +1,10 @@
 import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
+import { FileDetails } from '@packages/ui-components'
 
-import AttemptModel from '../attempts/attempt-model'
+import Attempt from '../attempts/attempt-model'
 import Err from '../errors/err-model'
+import Hook from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
@@ -20,6 +22,7 @@ export interface TestProps extends RunnableProps {
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
+  hooks: Array<Hook>
   prevAttempts?: Array<TestProps>
   currentRetry: number
   retries?: number
@@ -42,21 +45,24 @@ export default class Test extends Runnable {
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
 
-  @observable attempts: AttemptModel[] = []
+  @observable attempts: Attempt[] = []
   @observable _isOpen: boolean | null = null
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
+
+  hooks: Hook[] = []
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
 
     _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
 
+    this.hooks = props.hooks
     this._addAttempt(props)
   }
 
   @computed get isLongRunning () {
-    return _.some(this.attempts, (attempt: AttemptModel) => {
+    return _.some(this.attempts, (attempt: Attempt) => {
       return attempt.isLongRunning
     })
   }
@@ -81,7 +87,7 @@ export default class Test extends Runnable {
   }
 
   @computed get lastAttempt () {
-    return _.last(this.attempts) as AttemptModel
+    return _.last(this.attempts) as Attempt
   }
 
   @computed get hasMultipleAttempts () {
@@ -101,18 +107,18 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
-  isLastAttempt (attemptModel: AttemptModel) {
+  isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
 
   addLog = (props: LogProps) => {
-    return this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
+    return this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
   }
 
   updateLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
+    this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
     })
   }
@@ -121,6 +127,7 @@ export default class Test extends Runnable {
     let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
+      props.hooks = this.hooks
       attempt = this._addAttempt(props)
     }
 
@@ -161,7 +168,7 @@ export default class Test extends Runnable {
   @action finish (props: UpdatableTestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
-    this._withAttempt(props.currentRetry || 0, (attempt: AttemptModel) => {
+    this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
       attempt.finish(props)
     })
   }
@@ -177,14 +184,14 @@ export default class Test extends Runnable {
   }
 
   _addAttempt = (props: TestProps) => {
-    const attempt = new AttemptModel(props, this)
+    const attempt = new Attempt(props, this)
 
     this.attempts.push(attempt)
 
     return attempt
   }
 
-  _withAttempt<T> (attemptIndex: number, cb: (attempt: AttemptModel) => T) {
+  _withAttempt<T> (attemptIndex: number, cb: (attempt: Attempt) => T) {
     const attempt = this.getAttemptByIndex(attemptIndex)
 
     if (attempt) return cb(attempt)

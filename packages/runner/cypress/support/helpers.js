@@ -15,7 +15,6 @@ const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
   commands: stringifyShort,
-  err: stringifyShort,
   invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
@@ -28,6 +27,7 @@ const eventCleanseMap = {
   message: '[error message]',
   sourceMappedStack: match.string,
   parsedStack: match.array,
+  'err.stack': '[err stack]',
 }
 
 const mochaEventCleanseMap = {
@@ -46,7 +46,6 @@ const cleanseRunStateMap = {
   lifecycle: 1,
   duration: 1,
   startTime: new Date(0),
-  'err.stack': '[err stack]',
 }
 
 const spyOn = (obj, prop, fn) => {
@@ -105,7 +104,7 @@ function createCypress (defaultOptions = {}) {
     _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
-      onInitialized () {},
+      onBeforeRun () {},
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -213,7 +212,7 @@ function createCypress (defaultOptions = {}) {
           cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
-            opts.onInitialized({ specWindow, win, autCypress })
+            opts.onBeforeRun({ specWindow, win, autCypress })
 
             const testsInOwnFile = _.isString(mochaTestsOrFile)
             const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'
