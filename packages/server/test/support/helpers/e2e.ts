@@ -83,6 +83,11 @@ const replaceDurationFromReporter = (str, p1, p2, p3) => {
 
 const replaceNodeVersion = (str, p1, p2, p3) => _.padEnd(`${p1}X (/foo/bar/node)`, (p1.length + p2.length + p3.length))
 
+const replaceCypressVersion = (str, p1, p2) => {
+  // Cypress: 12.10.10 -> Cypress: 1.2.3 (handling padding)
+  return _.padEnd(`${p1}1.2.3`, (p1.length + p2.length))
+}
+
 // when swapping out the duration, ensure we pad the
 // full length of the duration so it doesn't shift content
 const replaceDurationInTables = (str, p1, p2) => {
@@ -151,7 +156,7 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
-  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, '$11.2.3')
+  .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
   // Node Version: 10.2.3 (Users/jane/node) -> Node Version: X (foo/bar/node)
   .replace(/(Node Version\:\s+v)(\d+\.\d+\.\d+)( \(.*\)\s+)/g, replaceNodeVersion)
   // 15 seconds -> X second
