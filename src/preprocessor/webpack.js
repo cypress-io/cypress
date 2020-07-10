@@ -6,6 +6,7 @@ import util from 'util'
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const debug = require('debug')('cypress-vue-unit-test')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+// const { VueLoaderPlugin } = require('vue-loader')
 const fw = require('find-webpack')
 
 // Preventing chunks because we don't serve static assets
@@ -49,6 +50,20 @@ function compileTemplate(options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
   options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
+}
+
+/**
+ * Warning: modifies the input object
+ * @param {WebpackOptions} options
+ */
+
+function removeForkTsCheckerWebpackPlugin(options) {
+  if (!Array.isArray(options.plugins)) {
+    return
+  }
+  options.plugins = options.plugins.filter((plugin) => {
+    return plugin.typescript === undefined
+  })
 }
 
 /**
@@ -100,9 +115,11 @@ function insertBabelLoader(config, options) {
   options.module.rules.push(babelRule)
   options.plugins = options.plugins || []
 
-  const pluginFound = options.plugins.some(
-    (plugin) => plugin.constructor === VueLoaderPlugin,
-  )
+  const pluginFound = options.plugins.find((plugin) => {
+    return (
+      plugin.constructor && plugin.constructor.name === VueLoaderPlugin.name
+    )
+  })
   if (!pluginFound) {
     debug('inserting VueLoaderPlugin')
     options.plugins.push(new VueLoaderPlugin())
@@ -127,12 +144,18 @@ const onFileDefaultPreprocessor = (config) => {
   compileTemplate(webpackOptions)
   insertBabelLoader(config, webpackOptions)
 
+  // if I remove it, then get another message
+  // [VueLoaderPlugin Error] No matching use for vue-loader is found.
+  // removeForkTsCheckerWebpackPlugin(webpackOptions)
+
   if (debug.enabled) {
     console.error('final webpack')
-    console.error(util.inspect(webpackOptions, false, 10, true))
+    console.error(util.inspect(webpackOptions, false, 2, true))
   }
 
-  return webpackPreprocessor({ webpackOptions })
+  return webpackPreprocessor({
+    webpackOptions,
+  })
 }
 
 /**

@@ -8,3 +8,4 @@ cypress/screenshots
 .nyc_output
 coverage
 *.tgz
+examples/*/cypress/videos/
