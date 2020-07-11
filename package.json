@@ -60,7 +60,7 @@
     "babel-loader": "8.1.0",
     "ban-sensitive-files": "1.9.7",
     "css-loader": "3.4.2",
-    "cypress": "4.9.0",
+    "cypress": "4.10.0",
     "dependency-check": "3.4.1",
     "deps-ok": "1.4.1",
     "git-issues": "1.3.1",
