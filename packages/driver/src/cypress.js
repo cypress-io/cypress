@@ -34,6 +34,7 @@ const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
+const { wrapBlobUtil } = require('./util/breaking_change_warning')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -613,7 +614,7 @@ $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
 $Cypress.prototype.moment = moment
-$Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Blob = wrapBlobUtil(blobUtil)
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon

@@ -142,3 +142,9 @@ namespace BlobTests {
       dateUrl // $ExpectType string
   })
 }
+
+cy.window().then(window => {
+  window // $ExpectType AUTWindow
+
+  window.eval('1')
+})
