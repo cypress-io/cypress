@@ -13,7 +13,8 @@ const {
 
 const expectTextEndsWith = (expected) => {
   return ($el) => {
-    const text = $el.text().trim()
+    // only want to compare the body text, not text in <script> tag
+    const text = $el[0].innerText.trim()
 
     const passed = text.endsWith(expected)
 
@@ -3064,6 +3065,20 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(spyTableData).calledTwice
         })
       })
+    })
+  })
+
+  describe('shadow dom', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/shadow-dom.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7741
+    it('types into input', () => {
+      cy
+      .get('#shadow-element-1')
+      .find('input', { includeShadowDom: true })
+      .type('foo')
     })
   })
 })

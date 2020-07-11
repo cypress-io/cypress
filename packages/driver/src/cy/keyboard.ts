@@ -672,7 +672,7 @@ export class Keyboard {
         return options.$el.get(0)
       }
 
-      const activeEl = $elements.getActiveElByDocument(doc) || doc.body
+      const activeEl = $elements.getActiveElByDocument(options.$el) || doc.body
 
       return activeEl
     }
@@ -1098,7 +1098,7 @@ export class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    return $elements.getActiveElByDocument(doc) || doc.body
+    return $elements.getActiveElByDocument(options.$el) || doc.body
   }
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {

@@ -28,12 +28,18 @@
     line-height: 18px;
     padding-left: 0;
 
-    &.hover {
+    .runnable-wrapper:hover {
       background-color: #f7f8f9;
       cursor: pointer;
+    }
 
+    &.test.hover {
       > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
+      }
+
+      .hooks-container, .runnable-err-wrapper {
+        border-color: #828282;
       }
     }
 
@@ -65,7 +71,7 @@
       color: #bbbcbd;
     }
 
-    &.runnable-processing > .runnable-wrapper {
+    &.test.runnable-processing {
       .runnable-state {
         @extend .far;
         line-height: 18px; // @extend .far overrides line-height, so we need to set it again
@@ -74,7 +80,8 @@
       }
     }
 
-    &.test.runnable-failed > .runnable-wrapper {
+    &.runnable-failed > div > .runnable-wrapper,
+    &.runnable-failed > div > .runnable-instruments {
       border-left: 5px solid $fail;
 
       .fa-exclamation-triangle.has-command-failures {
@@ -82,13 +89,13 @@
       }
     }
 
-    &.suite.runnable-pending > div > .runnable-wrapper,
-    &.test.runnable-pending > .runnable-wrapper {
+    &.runnable-pending > div > .runnable-wrapper,
+    &.runnable-pending > div > .runnable-instruments {
       border-left: 5px solid lighten($pending, 25%);
     }
 
-    &.suite.runnable-passed > div > .runnable-wrapper,
-    &.test.runnable-passed > .runnable-wrapper {
+    &.runnable-passed > div > .runnable-wrapper,
+    &.runnable-passed > div > .runnable-instruments {
       border-left: 5px solid $pass;
     }
 
@@ -103,13 +110,9 @@
       }
     }
 
-    &.suite.runnable-skipped > div > .runnable-wrapper,
-    &.test.runnable-skipped > .runnable-wrapper {
+    &.runnable-skipped > div > .runnable-wrapper,
+    &.runnable-skipped > div > .runnable-instruments {
       border-left: 5px solid #9a9aaa;
-    }
-
-    &.suite.runnable-failed > div > .runnable-wrapper {
-      border-left: 5px solid $fail;
     }
 
     &.test.runnable-failed {
@@ -127,8 +130,8 @@
       }
     }
 
-    &.suite > div > .runnable-wrapper {
-      .collapsible-header:focus, .collapsible-header-inner:focus {
+    > div > .runnable-wrapper {
+      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
         outline: 0;
 
         .runnable-title {
@@ -137,14 +140,27 @@
       }
     }
 
-    &.runnable-passed > .runnable-wrapper {
+    &.test > div > .runnable-wrapper {
+      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
+        outline: 0;
+
+        .runnable-title {
+          outline: 0;
+          > span:first-child {
+            outline: 1px dotted;
+          }
+        }
+      }
+    }
+
+    &.test.runnable-passed {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
         color: $pass;
       }
     }
 
-    &.runnable-pending > .runnable-wrapper {
+    &.test.runnable-pending {
       .runnable-title {
         color: lighten($pending, 25%);
       }
@@ -166,12 +182,21 @@
     border-left: 5px solid transparent;
   }
 
+  .runnable-instruments {
+    border-left: 5px solid transparent;
+  }
+
   .collapsible > .runnable-wrapper {
     padding: 0;
 
     .collapsible-header {
       padding: 5px 15px 5px 5px;
     }
+  }
+
+  .collapsible > .runnable-instruments {
+    padding-right: 15px;
+    padding-bottom: 5px;
   }
 
   .runnable-title {
@@ -184,7 +209,7 @@
     }
   }
 
-  .runnable-content-region {
+  .runnable-wrapper > .collapsible-header {
     overflow: auto;
     position: relative;
     display: inline-flex;
@@ -197,22 +222,15 @@
   }
 
   .suite > div .runnable-wrapper,
-  .test .runnable-content-region {
+  .test .runnable-wrapper > .collapsible-header {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  .test .runnable-content-region {
-    padding-right: 30px;
-  }
-
   .runnable-controls {
+    float: right;
     overflow: hidden;
-    position: absolute;
-    right: 0;
-    text-align: right;
-    top: 0;
 
     label {
       padding: 2px 4px;
@@ -230,14 +248,37 @@
     visibility: visible;
   }
 
+  .test .collapsible {
+    display: flex;
+    flex-direction: column;
+
+    .runnable-wrapper {
+      .collapsible-header-inner {
+        width: 100%;
+
+        .collapsible-header-text {
+          display: flex;
+
+          .runnable-title {
+            flex-grow: 1;
+            padding-right: 10px;
+          }
+
+          .runnable-controls {
+            justify-self: flex-end;
+            min-width: 20px;
+          }
+        }
+      }
+    }
+  }
+
   .collapsible-header {
     display: flex;
   }
 
-  .test > .runnable-wrapper > .collapsible > .collapsible-header-wrapper > .collapsible-header {
-    .collapsible-indicator {
-      display: none;
-    }
+  .test > .collapsible > .runnable-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
+    display: none;
   }
 
   .runnable-header {
