@@ -144,7 +144,6 @@
     "@packages/ts": "*",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
-    "@types/node": "8.10.55",
     "awesome-typescript-loader": "5.2.1",
     "babel-loader": "8.1.0",
     "babel-plugin-add-module-exports": "1.0.2",
