@@ -19,15 +19,18 @@ const appStateStub = (props?: Partial<AppState>) => {
 
 const model = (props?: Partial<TestModel>) => {
   return _.extend<TestModel>({
+    agents: [],
     commands: [],
+    hooks: [],
     err: {},
     id: 't1',
     isActive: true,
     level: 1,
-    state: 'passed',
-    type: 'test',
+    routes: [],
     shouldRender: true,
+    state: 'passed',
     title: 'some title',
+    type: 'test',
   }, props)
 }
 
@@ -48,69 +51,69 @@ describe('<Test />', () => {
 
   context('open/closed', () => {
     it('renders without is-open class by default', () => {
-      const component = shallow(<Test model={model()} />)
+      const component = mount(<Test model={model()} />)
 
-      expect(component).not.to.have.className('is-open')
+      expect(component.find('.collapsible').first()).not.to.have.className('is-open')
     })
 
     it('renders with is-open class when the model state is failed', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
+      const component = mount(<Test model={model({ state: 'failed' })} />)
 
-      expect(component).to.have.className('is-open')
+      expect(component.find('.collapsible').first()).to.have.className('is-open')
     })
 
     it('renders with is-open class when the model is long running', () => {
-      const component = shallow(<Test model={model({ isLongRunning: true })} />)
+      const component = mount(<Test model={model({ isLongRunning: true })} />)
 
-      expect(component).to.have.className('is-open')
+      expect(component.find('.collapsible').first()).to.have.className('is-open')
     })
 
     it('renders with is-open class when there is only one test', () => {
-      const component = shallow(<Test model={model({ isLongRunning: true })} />)
+      const component = mount(<Test model={model({ isLongRunning: true })} />)
 
-      expect(component).to.have.className('is-open')
+      expect(component.find('.collapsible').first()).to.have.className('is-open')
     })
 
     context('toggling', () => {
       it('renders without is-open class when already open', () => {
-        const component = shallow(<Test model={model({ state: 'failed' })} />)
+        const component = mount(<Test model={model({ state: 'failed' })} />)
 
-        component.simulate('click')
-        expect(component).not.to.have.className('is-open')
+        component.find('.collapsible-header').first().simulate('click')
+        expect(component.find('.collapsible').first()).not.to.have.className('is-open')
       })
 
       it('renders with is-open class when not already open', () => {
-        const component = shallow(<Test model={model()} />)
+        const component = mount(<Test model={model()} />)
 
-        component.simulate('click')
-        expect(component).to.have.className('is-open')
+        component.find('.collapsible-header').first().simulate('click')
+        expect(component.find('.collapsible').first()).to.have.className('is-open')
       })
 
       it('renders without is-open class when toggled again', () => {
-        const component = shallow(<Test model={model()} />)
+        const component = mount(<Test model={model()} />)
 
-        component.simulate('click')
-        component.simulate('click')
-        expect(component).not.to.have.className('is-open')
+        component.find('.collapsible-header').first().simulate('click')
+        component.find('.collapsible-header').first().simulate('click')
+        expect(component.find('.collapsible').first()).not.to.have.className('is-open')
       })
     })
   })
 
   context('contents', () => {
     it('does not render the contents if not open', () => {
-      const component = shallow(<Test model={model()} />)
+      const component = mount(<Test model={model()} />)
 
-      expect(component.find('.runnable-instruments')).not.to.exist
+      expect(component.find('.runnable-instruments')).to.be.empty
     })
 
     it('renders the contents if open', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
+      const component = mount(<Test model={model({ state: 'failed' })} />)
 
-      expect(component.find('.runnable-instruments')).to.exist
+      expect(component.find('.runnable-instruments')).not.to.be.empty
     })
 
     it('renders <Hooks /> if there are commands', () => {
-      const component = shallow(<Test model={model({ commands: [{ id: 1 }], state: 'failed' } as TestModel)} />)
+      const component = shallow(<Test model={model({ commands: [{ id: 1, hookId: 'h1' }], hooks: [{ hookId: 'h1' }], state: 'failed' } as TestModel)} />)
 
       expect(component.find(Hooks)).to.exist
     })
@@ -122,10 +125,10 @@ describe('<Test />', () => {
     })
 
     it('stops propagation when clicked', () => {
-      const component = shallow(<Test model={model({ state: 'failed' })} />)
+      const component = mount(<Test model={model({ state: 'failed' })} />)
       const e = { stopPropagation: sinon.spy() }
 
-      component.find('.runnable-instruments').simulate('click', e)
+      component.find('.collapsible-header').first().simulate('click', e)
       expect(e.stopPropagation).to.have.been.called
     })
   })
@@ -135,6 +138,12 @@ describe('<Test />', () => {
 
     beforeEach(() => {
       scroller = scrollerStub()
+
+      // @ts-ignore
+      global.window.requestAnimationFrame = function (callback: FrameRequestCallback) {
+        // @ts-ignore
+        return callback()
+      }
     })
 
     context('on mount', () => {
@@ -147,7 +156,7 @@ describe('<Test />', () => {
           />,
         )
 
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
+        expect(scroller.scrollIntoView).to.have.been.calledWith((component.instance() as any).containerRef.current)
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
@@ -217,7 +226,7 @@ describe('<Test />', () => {
         testModel.isActive = true
         testModel.shouldRender = true
         component.instance()!.componentDidUpdate!({}, {})
-        expect(scroller.scrollIntoView).to.have.been.calledWith(component.ref('container'))
+        expect(scroller.scrollIntoView).to.have.been.calledWith((component.instance() as any).containerRef.current)
       })
 
       it('does not scroll into view if auto-scrolling is disabled', () => {

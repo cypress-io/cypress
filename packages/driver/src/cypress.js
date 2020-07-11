@@ -199,7 +199,7 @@ class $Cypress {
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
-    this.mocha = $Mocha.create(specWindow, this)
+    this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
 
     // wire up command create to cy
