@@ -1595,6 +1595,7 @@ linux-workflow: &linux-workflow
             ignore:
               ## TODO: remove this upon merging the PR
               - rename-blacklisthosts
+              - pull/7622
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -1650,6 +1651,7 @@ linux-workflow: &linux-workflow
             ignore:
               ## TODO: remove this upon merging the PR
               - rename-blacklisthosts
+              - pull/7622
     - test-binary-against-recipe-pull-request:
         name: Test TypeScript recipe
         filters:
