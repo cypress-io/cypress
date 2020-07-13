@@ -92,6 +92,12 @@ See [Recipes](./docs/recipes.md) for more examples.
 }
 ```
 
+## API
+
+- `mount` is the most important function, allows to mount a given React component as a mini web application and interact with it using Cypress commands
+- `unmount` removes previously mounted component, mostly useful to test how the component cleans up after itself
+- `mountHook` mounts a given React Hook in a test component for full testing, see `hooks` example
+
 ## Examples
 
 ```js
@@ -107,7 +113,7 @@ describe('HelloWorld component', () => {
 })
 ```
 
-Look at the examples in [cypress/component](cypress/component) folder. Here is the list in progress
+Look at the examples in [cypress/component](cypress/component) folder. Here is the list of examples showing various testing scenarios.
 
 ### Basic examples
 
