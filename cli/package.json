@@ -44,7 +44,7 @@
     "is-installed-globally": "0.3.2",
     "lazy-ass": "1.6.0",
     "listr": "0.14.3",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "log-symbols": "3.0.0",
     "minimist": "1.2.5",
     "moment": "2.26.0",

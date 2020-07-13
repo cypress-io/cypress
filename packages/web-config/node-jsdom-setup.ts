@@ -35,17 +35,20 @@ export const register = ({
   const sinonChai = require('sinon-chai')
   // const chaiEnzyme = require('chai-enzyme')
 
+  // @ts-ignore
   global.window = window
   global.document = window.document;
 
   // DOMWindow doesn't have Selection yet.
   (window as any).Selection = { prototype: { isCollapsed: {} } }
 
+  // @ts-ignore
   global.navigator = {
     userAgent: 'node.js',
   }
 
-  global.requestAnimationFrame = function (callback: ((...args: any[]) => void)) {
+  // @ts-ignore
+  global.requestAnimationFrame = function (callback: FrameRequestCallback) {
     return setTimeout(callback, 0)
   }
 
