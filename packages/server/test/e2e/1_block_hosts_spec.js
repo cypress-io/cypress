@@ -14,7 +14,7 @@ const onServer = function (app) {
   })
 }
 
-describe('e2e blacklist', () => {
+describe('e2e blockHosts', () => {
   e2e.setup({
     servers: [{
       port: 3131,
@@ -25,13 +25,14 @@ describe('e2e blacklist', () => {
     }],
     settings: {
       baseUrl: 'http://localhost:3232',
-      blacklistHosts: 'localhost:3131',
+      blockHosts: 'localhost:3131',
+      video: false,
     },
   })
 
   it('passes', function () {
     return e2e.exec(this, {
-      spec: 'blacklist_hosts_spec.coffee',
+      spec: 'block_hosts_spec.coffee',
       snapshot: true,
     })
   })

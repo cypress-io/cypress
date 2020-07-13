@@ -15,7 +15,7 @@ const compression = require('compression')
 const debug = require('debug')('cypress:server:server')
 const {
   agent,
-  blacklist,
+  blocked,
   concatStream,
   cors,
   uri,
@@ -238,7 +238,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Promise((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, blockHosts } = config
 
       this._server = http.createServer(app)
 
@@ -291,16 +291,17 @@ class Server {
             // if we are currently matching then we're
             // not making a direct connection anyway
             // so we only need to check this if we
-            // have blacklist hosts and are not matching.
+            // have blocked hosts and are not matching.
             //
-            // if we have blacklisted hosts lets
+            // if we have blocked hosts lets
             // see if this matches - if so then
             // we cannot allow it to make a direct
             // connection
-            if (blacklistHosts && !isMatching) {
-              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
 
-              debug(`HTTPS request ${urlToCheck} matches blacklist?`, isMatching)
+            if (blockHosts && !isMatching) {
+              isMatching = blocked.matches(urlToCheck, blockHosts)
+
+              debug(`HTTPS request ${urlToCheck} matches blockHosts?`, isMatching)
             }
 
             // make a direct connection only if

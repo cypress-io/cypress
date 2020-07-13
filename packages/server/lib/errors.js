@@ -664,7 +664,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Learn more at https://on.cypress.io/screenshot-api`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
-        A configuration option you have supplied has been renamed.
+        The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.
 
         Please rename ${chalk.yellow(arg1)} to ${chalk.blue(arg2)}`
     case 'CANNOT_CONNECT_BASE_URL':
