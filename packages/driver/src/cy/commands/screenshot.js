@@ -347,6 +347,10 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
   return before()
   .then(() => {
+    const win = state('window')
+
+    win.dispatchEvent(new CustomEvent('scroll'))
+
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
     }
