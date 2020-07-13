@@ -31,6 +31,11 @@ describe('src/cy/commands/screenshot', () => {
     }
   })
 
+  it('screenshot element', () => {
+    cy.visit('fixtures/issue-6099.html')
+    cy.get('main').screenshot()
+  })
+
   context('runnable:after:run:async', () => {
     it('is noop when not isTextTerminal', () => {
       // backup this property so we set it back to whatever
