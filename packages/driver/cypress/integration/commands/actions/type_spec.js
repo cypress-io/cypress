@@ -13,7 +13,8 @@ const {
 
 const expectTextEndsWith = (expected) => {
   return ($el) => {
-    const text = $el.text().trim()
+    // only want to compare the body text, not text in <script> tag
+    const text = $el[0].innerText.trim()
 
     const passed = text.endsWith(expected)
 

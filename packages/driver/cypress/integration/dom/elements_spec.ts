@@ -1,4 +1,4 @@
-import { getActiveElByDocument, isFocused } from '../../../src/dom/elements'
+import { getActiveElByDocument, isFocused, elementFromPoint } from '../../../src/dom/elements'
 
 const { $ } = Cypress
 
@@ -261,6 +261,72 @@ describe('src/dom/elements', () => {
         .find('input', { includeShadowDom: true }).focus().then(($el) => {
           expect(isFocused($el[0])).to.be.true
         })
+      })
+    })
+  })
+
+  context('.elementFromPoint', () => {
+    let doc
+    let node
+
+    beforeEach(() => {
+      Cypress.config('experimentalShadowDomSupport', false)
+
+      node = {}
+      doc = {
+        elementFromPoint: cy.stub().returns(node),
+      }
+    })
+
+    it('returns native element at point', () => {
+      expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+    })
+
+    describe('with shadow dom support enabled', () => {
+      beforeEach(() => {
+        Cypress.config('experimentalShadowDomSupport', true)
+      })
+
+      it('returns original node if node has no shadow root', () => {
+        expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+      })
+
+      it('returns shadow dom element at point', () => {
+        const shadowNode = {}
+        const shadowHostNode = {
+          shadowRoot: {
+            elementFromPoint: cy.stub().returns(shadowNode),
+          },
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(shadowNode)
+      })
+
+      it('returns original node if no element at point in shadow dom', () => {
+        const shadowHostNode = {
+          shadowRoot: {
+            elementFromPoint: cy.stub().returns(node),
+          },
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(node)
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7794
+      it('returns shadow host if its element at point is itself', () => {
+        const shadowHostNode = {} as any
+
+        shadowHostNode.shadowRoot = {
+          elementFromPoint: cy.stub().returns(shadowHostNode),
+        }
+
+        doc.elementFromPoint.returns(shadowHostNode)
+
+        expect(elementFromPoint(doc, 1, 2)).to.equal(shadowHostNode)
       })
     })
   })

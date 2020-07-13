@@ -17,8 +17,8 @@ const HOOKS = 'beforeAll beforeEach afterEach afterAll'.split(' ')
 const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
-const RUNNABLE_LOGS = 'routes agents commands'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle'.split(' ')
+const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
 
@@ -129,6 +129,27 @@ const wrapAll = (runnable) => {
     $utils.reduceProps(runnable, RUNNABLE_PROPS),
     $utils.reduceProps(runnable, RUNNABLE_LOGS),
   )
+}
+
+const condenseHooks = (runnable, getHookId) => {
+  const hooks = _.compact(_.concat(
+    runnable._beforeAll,
+    runnable._beforeEach,
+    runnable._afterAll,
+    runnable._afterEach,
+  ))
+
+  return _.map(hooks, (hook) => {
+    if (!hook.hookId) {
+      hook.hookId = getHookId()
+    }
+
+    if (!hook.hookName) {
+      hook.hookName = getHookName(hook)
+    }
+
+    return wrap(hook)
+  })
 }
 
 const getHookName = (hook) => {
@@ -378,7 +399,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId, getHookId) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -396,7 +417,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -420,7 +441,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId) => {
+const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId) => {
   const normalizeRunnable = (runnable) => {
     let i
 
@@ -446,6 +467,9 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       _.extend(runnable, i)
     }
 
+    // merge all hooks into single array
+    runnable.hooks = condenseHooks(runnable, getHookId)
+
     // reduce this runnable down to its props
     // and collections
     return wrapAll(runnable)
@@ -466,7 +490,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.map(_runnables, (runnable) => {
-          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId)
+          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId)
         })
       }
     })
@@ -480,7 +504,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     if (suite._onlyTests.length) {
       suite.tests = suite._onlyTests
       normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
-        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId)
+        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId, getHookId)
 
         push(normalizedTest)
 
@@ -493,7 +517,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       suite.tests = []
       normalizedSuite.tests = []
       _.each(suite._onlySuites, (onlySuite) => {
-        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId)
+        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId, getHookId)
 
         if (hasOnly(onlySuite)) {
           return filterOnly(normalizedOnlySuite, onlySuite)
@@ -501,12 +525,12 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       })
 
       suite.suites = _.filter(suite.suites, (childSuite) => {
-        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId)
+        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId, getHookId)
 
         return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
       })
 
-      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId))
+      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId))
     }
 
     return suite.tests.length || suite.suites.length
@@ -585,14 +609,6 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   })
 
   _runner.on('hook', (hook) => {
-    if (hook.hookId == null) {
-      hook.hookId = getHookId()
-    }
-
-    if (hook.hookName == null) {
-      hook.hookName = getHookName(hook)
-    }
-
     // mocha incorrectly sets currentTest on before/after all's.
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run
@@ -903,6 +919,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
         onRunnable,
         onLogsById,
         getTestId,
+        getHookId,
       )
     },
 
@@ -967,6 +984,9 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // if this isnt a hook, then the name is 'test'
       const hookName = runnable.type === 'hook' ? getHookName(runnable) : 'test'
+
+      // set hook id to hook id or test id
+      const hookId = runnable.type === 'hook' ? runnable.hookId : runnable.id
 
       // if we haven't yet fired this event for this test
       // that means that we need to reset the previous state
@@ -1061,7 +1081,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // running lifecycle events
       // and also get back a function result handler that we use as
       // an async seam
-      cy.setRunnable(runnable, hookName)
+      cy.setRunnable(runnable, hookId)
 
       // TODO: handle promise timeouts here!
       // whenever any runnable is about to run
