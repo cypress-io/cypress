@@ -448,7 +448,7 @@ exports['e2e spec isolation fails'] = {
           "body": "function () {\n        return cy.wait(200);\n    }"
         },
         {
-          "hookId": "h5",
+          "hookId": "h4",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -456,7 +456,7 @@ exports['e2e spec isolation fails'] = {
           "body": "function () {\n        return cy.wait(200);\n    }"
         },
         {
-          "hookId": "h4",
+          "hookId": "h3",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -500,7 +500,7 @@ exports['e2e spec isolation fails'] = {
                 },
                 "after each": [
                   {
-                    "hookId": "h3",
+                    "hookId": "h4",
                     "fnDuration": 400,
                     "afterFnDuration": 200
                   }
@@ -541,7 +541,7 @@ exports['e2e spec isolation fails'] = {
                 },
                 "after each": [
                   {
-                    "hookId": "h3",
+                    "hookId": "h4",
                     "fnDuration": 400,
                     "afterFnDuration": 200
                   }
@@ -582,14 +582,14 @@ exports['e2e spec isolation fails'] = {
                 },
                 "after each": [
                   {
-                    "hookId": "h3",
+                    "hookId": "h4",
                     "fnDuration": 400,
                     "afterFnDuration": 200
                   }
                 ],
                 "after all": [
                   {
-                    "hookId": "h4",
+                    "hookId": "h3",
                     "fnDuration": 400,
                     "afterFnDuration": 200
                   }
