@@ -21,9 +21,6 @@ declare module 'http' {
     createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
     createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
     protocol: 'http:' | 'https:' | string
-    freeSockets: {
-      [key: string]: Socket[]
-    }
   }
 
   interface ClientRequest {
