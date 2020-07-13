@@ -80,8 +80,10 @@ describe('<Test />', () => {
     beforeEach(() => {
       scroller = scrollerStub()
 
-      global.window.requestAnimationFrame = function (callback: () => void) {
-        callback()
+      // @ts-ignore
+      global.window.requestAnimationFrame = function (callback: FrameRequestCallback) {
+        // @ts-ignore
+        return callback()
       }
     })
 
