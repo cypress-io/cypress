@@ -21,4 +21,9 @@ describe('Mocking ES6 imports', () => {
     // confirm the stub was called
     cy.get('@greeting').should('have.been.calledOnce')
   })
+
+  it('resets the original import', () => {
+    mount(Hello)
+    cy.contains('Hello, world!')
+  })
 })
