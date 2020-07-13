@@ -4,7 +4,7 @@ import { FileDetails } from '@packages/ui-components'
 
 import Attempt from '../attempts/attempt-model'
 import Err from '../errors/err-model'
-import Hook from '../hooks/hook-model'
+import Hook, { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
@@ -44,20 +44,27 @@ export default class Test extends Runnable {
   type = 'test'
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
+  hooks: HookProps[]
+  invocationDetails?: FileDetails
 
   @observable attempts: Attempt[] = []
   @observable _isOpen: boolean | null = null
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
 
-  hooks: Hook[] = []
-
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
 
+    this.invocationDetails = props.invocationDetails
+
+    this.hooks = [...props.hooks, {
+      hookId: props.id.toString(),
+      hookName: 'test body',
+      invocationDetails: props.invocationDetails,
+    }]
+
     _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
 
-    this.hooks = props.hooks
     this._addAttempt(props)
   }
 
@@ -127,7 +134,6 @@ export default class Test extends Runnable {
     let attempt = this.getAttemptByIndex(props.currentRetry)
 
     if (!attempt) {
-      props.hooks = this.hooks
       attempt = this._addAttempt(props)
     }
 
@@ -184,6 +190,8 @@ export default class Test extends Runnable {
   }
 
   _addAttempt = (props: TestProps) => {
+    props.invocationDetails = this.invocationDetails
+    props.hooks = this.hooks
     const attempt = new Attempt(props, this)
 
     this.attempts.push(attempt)

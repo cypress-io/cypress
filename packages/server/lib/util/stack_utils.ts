@@ -29,7 +29,7 @@ export const getStackLines = (stack) => {
 }
 
 export const stackWithoutMessage = (stack) => {
-  return getStackLines(stack).join('\n').replace(/^[\s\n]*/, '')
+  return getStackLines(stack).join('\n')
 }
 
 export const replacedStack = (err, newStack) => {

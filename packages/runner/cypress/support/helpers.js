@@ -14,7 +14,9 @@ const { stringifyShort } = snapshotCommand
 const eventCleanseMap = {
   snapshots: stringifyShort,
   parent: stringifyShort,
+  tests: stringifyShort,
   commands: stringifyShort,
+  err: stringifyShort,
   invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
@@ -27,18 +29,17 @@ const eventCleanseMap = {
   message: '[error message]',
   sourceMappedStack: match.string,
   parsedStack: match.array,
-  'err.stack': '[err stack]',
 }
 
 const mochaEventCleanseMap = {
   ...eventCleanseMap,
-  tests: stringifyShort,
   start: match.date,
   end: match.date,
 }
 
 const cleanseRunStateMap = {
   ...eventCleanseMap,
+  'err.stack': '[err stack]',
   wallClockStartedAt: new Date(0),
   wallClockDuration: 1,
   fnDuration: 1,

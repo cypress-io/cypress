@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const helpers = require('../support/helpers')
 
 const { cleanseRunStateMap, shouldHaveTestResults, getRunState } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { isTextTerminal: true } })
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },

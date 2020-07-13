@@ -47,18 +47,13 @@ export default class Attempt {
     this._state = props.state
     this.err.update(props.err)
 
-    _.each(props.agents, this.addLog)
-    _.each(props.commands, this.addLog)
-    _.each(props.routes, this.addLog)
-
     this.invocationDetails = props.invocationDetails
 
     this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
-    this.hooks.push(new Hook({
-      hookId: this.testId.toString(),
-      hookName: 'test body',
-      invocationDetails: this.invocationDetails,
-    }))
+
+    _.each(props.agents, this.addLog)
+    _.each(props.commands, this.addLog)
+    _.each(props.routes, this.addLog)
   }
 
   @computed get hasCommands () {
