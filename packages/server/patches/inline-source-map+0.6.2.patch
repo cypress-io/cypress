@@ -1,0 +1,13 @@
+diff --git a/node_modules/inline-source-map/index.js b/node_modules/inline-source-map/index.js
+index df74d61..7641aad 100644
+--- a/node_modules/inline-source-map/index.js
++++ b/node_modules/inline-source-map/index.js
+@@ -91,7 +91,7 @@ Generator.prototype.addSourceContent = function (sourceFile, sourcesContent) {
+  */
+ Generator.prototype.base64Encode = function () {
+   var map = this.toString();
+-  return new Buffer(map).toString('base64');
++  return Buffer.from(map).toString('base64');
+ };
+ 
+ /**

@@ -1,0 +1,13 @@
+diff --git a/node_modules/combine-source-map/node_modules/convert-source-map/index.js b/node_modules/combine-source-map/node_modules/convert-source-map/index.js
+index bfe92d1..beae518 100644
+--- a/node_modules/combine-source-map/node_modules/convert-source-map/index.js
++++ b/node_modules/combine-source-map/node_modules/convert-source-map/index.js
+@@ -9,7 +9,7 @@ var mapFileCommentRx =
+   /(?:\/\/[@#][ \t]+sourceMappingURL=([^\s'"]+?)[ \t]*$)|(?:\/\*[@#][ \t]+sourceMappingURL=([^\*]+?)[ \t]*(?:\*\/){1}[ \t]*$)/mg
+ 
+ function decodeBase64(base64) {
+-  return new Buffer(base64, 'base64').toString();
++  return Buffer.from(base64, 'base64').toString();
+ }
+ 
+ function stripComment(sm) {
