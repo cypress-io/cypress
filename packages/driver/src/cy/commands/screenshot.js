@@ -283,8 +283,6 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
   const startTime = new Date()
 
-  let initialMinHeight
-
   const send = (event, props, resolve) => {
     Cypress.action(`cy:${event}`, props, resolve)
   }
@@ -307,21 +305,16 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     }
   }
 
-  const before = (element) => {
+  const before = () => {
     if (disableTimersAndAnimations) {
       cy.pauseTimers(true)
     }
 
-    initialMinHeight = element.css('min-height')
-    element.css('min-height', element.height())
-
     return sendAsync('before:screenshot', getOptions(true))
   }
 
-  const after = (element) => {
+  const after = () => {
     send('after:screenshot', getOptions(false))
-
-    element.css('min-height', initialMinHeight)
 
     if (disableTimersAndAnimations) {
       return cy.pauseTimers(false)
@@ -352,7 +345,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     ? subject
     : $dom.wrap(state('document').documentElement)
 
-  return before($el, state)
+  return before()
   .then(() => {
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
@@ -379,7 +372,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
 
     return props
   })
-  .finally(() => after($el))
+  .finally(after)
 }
 
 module.exports = function (Commands, Cypress, cy, state, config) {
