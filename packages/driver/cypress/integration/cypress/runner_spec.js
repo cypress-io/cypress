@@ -11,16 +11,6 @@ Cypress.on('test:after:run', (test) => {
 })
 
 describe('src/cypress/runner', () => {
-  it('handles "double quotes" in test name', (done) => {
-    cy.once('log:added', (log) => {
-      expect(log.hookName).to.equal('test')
-
-      return done()
-    })
-
-    return cy.wrap({})
-  })
-
   context('pending tests', () => {
     it('is not pending', () => {})
 

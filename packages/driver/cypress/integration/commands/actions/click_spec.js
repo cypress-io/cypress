@@ -3711,7 +3711,8 @@ describe('shadow dom', () => {
   it('does not hang when experimentalShadowDomSupport is false and clicking on custom element', () => {
     Cypress.config('experimentalShadowDomSupport', false)
     // needs some size or it's considered invisible and click will fail its prerequisites
-    cy.$$('#shadow-element-1').css({ padding: 2 })
+    // so we make it display: block so its getClientRects() contains only a single
+    cy.$$('#shadow-element-1').css({ display: 'block' })
 
     cy.get('#shadow-element-1').click()
   })
@@ -4455,6 +4456,8 @@ describe('mouse state', () => {
 
           expect(targetRect.top).gt(iframeRect.top)
           expect(targetRect.bottom).lt(iframeRect.bottom)
+          expect(targetRect.left).gt(iframeRect.left)
+          expect(targetRect.right).lt(iframeRect.right)
         })
       })
     })
