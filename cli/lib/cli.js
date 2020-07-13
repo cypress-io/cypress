@@ -227,7 +227,7 @@ const castCypressRunOptions = (opts) => {
 
 module.exports = {
   /**
-   * Parses Cypress RUN command line array into an object
+   * Parses `cypress run` command line option array into an object
    * with options that you can feed into a `cypress.run()` module API call.
    * @example
    *  const options = parseRunCommand(['cypress', 'run', '--browser', 'chrome'])
