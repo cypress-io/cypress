@@ -26,7 +26,7 @@ const coerceFalse = (arg) => {
   return arg !== 'false'
 }
 
-const coerceInt = (arg) => {
+const coerceAnyStringToInt = (arg) => {
   return typeof arg === 'string' ? parseInt(arg) : arg
 }
 
@@ -218,7 +218,7 @@ const castCypressRunOptions = (opts) => {
   // require special handling, because CLI parsing takes care of purely
   // boolean arguments
   const result = R.evolve({
-    port: coerceInt,
+    port: coerceAnyStringToInt,
     configFile: coerceFalse,
   })(opts)
 
