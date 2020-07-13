@@ -598,7 +598,7 @@ Spec | Description
 --- | ---
 [access-component](cypress/component/advanced/access-component) | Access the mounted component directly from test
 [i18n](cypress/component/advanced/i18n) | Testing component that uses [Vue I18n](https://kazupon.github.io/vue-i18n/) plugin
-[mocking-axios](cypress/component/advanced/mocking-axios) | Mocking 3rd party module imports, like `axios` for fetching data
+[mocking-axios](cypress/component/advanced/mocking-axios) | Mocking 3rd party module imports, like `axios` for fetching data using a wrapper module
 [mocking-components](cypress/component/advanced/mocking-components) | Mocking locally registered child components during tests
 [mocking-imports](cypress/component/advanced/mocking-imports) | Stub ES6 imports from the tests
 [render-functions](cypress/component/advanced/render-functions) | Mounting components with a [render function](https://www.tutorialandexample.com/vue-js-render-functions/)
