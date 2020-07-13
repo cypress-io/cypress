@@ -3727,11 +3727,11 @@ describe('Routes', () => {
       })
     })
 
-    context('blacklisted hosts', () => {
+    context('blocked hosts', () => {
       beforeEach(function () {
         return this.setup({
           config: {
-            blacklistHosts: [
+            blockHosts: [
               '*.google.com',
               'shop.apple.com',
               'cypress.io',
@@ -3744,7 +3744,7 @@ describe('Routes', () => {
 
       it('returns 503 and custom headers for all hosts', function () {
         const expectedHeader = (res, val) => {
-          expect(res.headers['x-cypress-matched-blacklisted-host']).to.eq(val)
+          expect(res.headers['x-cypress-matched-blocked-host']).to.eq(val)
         }
 
         return Promise.all([

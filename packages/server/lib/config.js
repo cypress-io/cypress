@@ -57,7 +57,7 @@ folders.push('componentFolder')
 const configKeys = toWords(`\
 animationDistanceThreshold      fileServerFolder
 baseUrl                         fixturesFolder
-blacklistHosts
+blockHosts
 chromeWebSecurity
 modifyObstructiveCode           integrationFolder
 env                             pluginsFile
@@ -90,8 +90,9 @@ retries
 // experimentalComponentTesting
 configKeys.push('componentFolder')
 
-// Deprecated and retired public configuration properties
+// Breaking public configuration properties, will error
 const breakingConfigKeys = toWords(`\
+blacklistHosts
 videoRecording
 screenshotOnHeadlessFailure
 trashAssetsBeforeHeadlessRuns
@@ -126,7 +127,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blacklistHosts: null,
+  blockHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
   socketIoRoute: '/__socket.io',
@@ -184,7 +185,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blacklistHosts: v.isStringOrArrayOfStrings,
+  blockHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
   configFile: v.isStringOrFalse,
@@ -252,6 +253,8 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'blacklistHosts':
+          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blockHosts')
         case 'experimentalGetCookiesSameSite':
           return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
         default:
