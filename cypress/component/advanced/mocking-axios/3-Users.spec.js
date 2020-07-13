@@ -1,11 +1,12 @@
 /// <reference types="cypress" />
 import { mount } from 'cypress-vue-unit-test'
-import Users from './Users.vue'
+import Users from './3-Users.vue'
+// test file can import the entire AxiosApi module
 import * as AxiosApi from './AxiosApi'
 
 describe('Mocking imports from Axios Wrapper', () => {
   it('renders mocked data', () => {
-    // stub export "get" that Users.vue imports and uses
+    // stub export "get" that Users component imports and uses
     cy.stub(AxiosApi, 'get')
       .resolves({
         data: [

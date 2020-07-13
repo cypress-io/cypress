@@ -1,14 +1,15 @@
 /// <reference types="cypress" />
 import { mount } from 'cypress-vue-unit-test'
-import AxiosGet from './AxiosGet.vue'
+import Users from './1-Users.vue'
+// we can load list of mock users straight from JSON file
+import mockUsers from './user.list.json'
 
 // import everything from "axios" module
 // so we can mock its methods from the test
-import * as Axios from 'axios'
+const Axios = require('axios')
 
 describe('Mocking get import from Axios', () => {
-  // https://github.com/bahmutov/cypress-vue-unit-test/issues/346
-  it.skip('renders mocked data', () => {
+  it('renders mocked data', () => {
     cy.stub(Axios, 'get')
       .resolves({
         data: [
@@ -20,12 +21,22 @@ describe('Mocking get import from Axios', () => {
       })
       .as('get')
 
-    console.log('Axios is', Axios)
-    console.log('window.AxiosLib is', window.AxiosLib)
-    console.log('window.AxiosLib === Axios?', window.AxiosLib === Axios)
-    mount(AxiosGet)
+    mount(Users)
     // mock response is used
     cy.get('li').should('have.length', 1)
+    cy.get('@get').should('have.been.calledOnce')
+  })
+
+  it('stubs with JSON loaded from fixture file', () => {
+    cy.stub(Axios, 'get')
+      .resolves({
+        data: mockUsers,
+      })
+      .as('get')
+
+    mount(Users)
+    // mock response is used
+    cy.get('li').should('have.length', 2)
     cy.get('@get').should('have.been.calledOnce')
   })
 })

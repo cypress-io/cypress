@@ -1,27 +1,71 @@
-# mocking axios
+# Mocking axios
 
-**Help wanted [#346](https://github.com/bahmutov/cypress-vue-unit-test/issues/346)**
+Axios is a 3rd party CommonJS module installed in `node_modules` and used from Vue components. To mock such module you have 3 choices, depending on how it is used.
 
-How can `import ... from '...'` be mocked from Vue and from JS spec files if the import is from `node_modules`? In plain JS files we use '@babel/plugin-transform-modules-commonjs' plugin so that all imports from file X are the same object and the individual properties can be stubbed using `cy.stub(X, 'import name')`. But the `vue-loader` used to transpile Vue files seems to not allow additional Babel plugins?
+## Named import
 
-See [mock-get-spec.js](mock-get-spec.js) and [AxiosGet.vue](AxiosGet.vue) for an open problem.
+If the component imports a single named property from a CommonJS module, the spec file can require the entire module and stub a property using [cy.stub](https://on.cypress.io/stub) command.
 
-## Workaround
+```js
+// component code
+import { get } from 'axios'
+get('...').then(...)
 
-As a good workaround in this case, you can use an intermediate CommonJS wrapper module, like [AxiosApi.js](AxiosApi.js) that re-experts the CommonJS module; you can then mock those exports.
+// spec file uses "require" to load the CommonJS module
+const Axios = require('axios')
+cy.stub(Axios, 'get').resolves({
+  data: [
+    {
+      id: 101,
+      name: 'Test User',
+    },
+  ],
+})
+```
+
+![Mocked get](./images/mock-get.png)
+
+See [1-Users.vue](1-Users.vue) and [1-Users.spec.js](1-Users.spec.js) files.
+
+## Method
+
+If the component imports the entire CommonJS module, then calls its method, you still require the same module from the spec file.
+
+```js
+// component code
+import axios from 'axios'
+axios.get('...').then(...)
+
+// spec file uses "require" to load the CommonJS module
+const Axios = require('axios')
+cy.stub(Axios, 'get').resolves({
+  data: [
+    {
+      id: 101,
+      name: 'Test User',
+    },
+  ],
+})
+```
+
+See [1-Users.vue](1-Users.vue) and [1-Users.spec.js](1-Users.spec.js) files.
+
+## Wrapped module
+
+Sometimes the component code uses an intermediate ES6 wrapper module, like [AxiosApi.js](AxiosApi.js) that re-experts the CommonJS module; you can then mock those exports.
 
 ```js
 // AxiosApi.js
 export * from 'axios'
 ```
 
-[Users.vue](Users.vue) shows the component that imports from `AxiosApi.js`
+[3-Users.vue](3-Users.vue) shows the component that imports from `AxiosApi.js`
 
 ```js
 import { get } from './AxiosApi'
 ```
 
-The test [mock-axios-wrapper-spec.js](mock-axios-wrapper-spec.js) mocks the "get" import.
+The test [3-Users.spec.js](3-Users.spec.js) mocks the "get" import.
 
 ```js
 import Users from './Users.vue'

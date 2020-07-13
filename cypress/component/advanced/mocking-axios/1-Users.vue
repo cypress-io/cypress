@@ -10,9 +10,8 @@
 </template>
 
 <script>
-const Axios = require('axios')
-
-window.AxiosLib = Axios
+// import just the "get" from axios
+import {get} from 'axios';
 
 export default {
   data() {
@@ -23,10 +22,7 @@ export default {
 
   // Fetches posts when the component is created.
   created() {
-    console.log('get is', get)
-    console.log('Axios is', Axios)
-
-    Axios.get('https://jsonplaceholder.cypress.io/users?_limit=3')
+    get('https://jsonplaceholder.cypress.io/users?_limit=3')
     .then(response => {
       // JSON responses are automatically parsed.
       this.users = response.data
