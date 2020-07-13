@@ -30,7 +30,7 @@
     "fira": "cypress-io/fira#fb63362742eea8cdce0d90825ab9264d77719e3d",
     "gravatar": "1.8.0",
     "human-interval": "0.1.6",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "markdown-it": "8.4.2",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",

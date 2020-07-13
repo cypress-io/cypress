@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build-prod": "tsc --project .",
+    "clean": "rm lib/*.js",
     "clean-deps": "rm -rf node_modules",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
@@ -16,7 +17,7 @@
     "bluebird": "3.5.3",
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
-    "lodash": "4.17.15",
+    "lodash": "4.17.19",
     "proxy-from-env": "1.1.0"
   },
   "devDependencies": {

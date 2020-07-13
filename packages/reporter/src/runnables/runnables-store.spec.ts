@@ -67,7 +67,9 @@ describe('runnables store', () => {
   let scroller: Scroller
 
   beforeEach(() => {
-    global.requestAnimationFrame = (cb: (() => void)) => {
+    // @ts-ignore
+    global.requestAnimationFrame = (cb: FrameRequestCallback) => {
+      // @ts-ignore
       return cb()
     }
 
