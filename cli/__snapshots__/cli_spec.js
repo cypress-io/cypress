@@ -62,6 +62,7 @@ exports['shows help for run --foo 1'] = `
   Runs Cypress tests from the CLI without the GUI
 
   Options:
+    --bail                                     exit the test suite immediately upon failing a test
     -b, --browser <browser-name-or-path>       runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.
     --ci-build-id <id>                         the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers
     -c, --config <config>                      sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.

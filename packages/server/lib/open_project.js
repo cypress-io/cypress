@@ -91,6 +91,7 @@ const moduleFactory = () => {
           options.browser = browser
 
           openProject.setCurrentSpecAndBrowser(spec, browser)
+          openProject.setBail(options.bail)
 
           const automation = openProject.getAutomation()
 

@@ -243,6 +243,11 @@
       "type": "boolean",
       "default": false,
       "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
+    },
+    "bail": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether cypress will exit the test suite immediately upon failing a test."
     }
   }
 }

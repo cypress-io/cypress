@@ -159,6 +159,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return `Timed out waiting for the browser to connect. ${arg1}`
     case 'TESTS_DID_NOT_START_FAILED':
       return 'The browser never connected. Something is wrong. The tests cannot run. Aborting...'
+    case 'BAILING_FAILED_TEST':
+      return 'Bailing due to failing test and "--bail" flag on CLI.'
     case 'DASHBOARD_API_RESPONSE_FAILED_RETRYING':
       return stripIndent`\
         We encountered an unexpected error talking to our servers.

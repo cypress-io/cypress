@@ -526,6 +526,10 @@ const e2e = {
       args.push(`--group=${options.group}`)
     }
 
+    if (options.bail) {
+      args.push(`--bail`)
+    }
+
     if (options.ciBuildId) {
       args.push(`--ci-build-id=${options.ciBuildId}`)
     }

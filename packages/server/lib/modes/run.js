@@ -909,7 +909,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    const { bail, browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -925,6 +925,7 @@ module.exports = {
 
     const warnings = {}
 
+    browserOpts.bail = bail
     browserOpts.projectRoot = projectRoot
 
     browserOpts.onWarning = (err) => {
@@ -1069,7 +1070,7 @@ module.exports = {
   },
 
   waitForTestsToFinishRunning (options = {}) {
-    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet } = options
+    const { project, screenshots, startedVideoCapture, endVideoCapture, videoName, compressedVideoName, videoCompression, videoUploadOnPasses, exit, spec, estimated, quiet, bail } = options
 
     // https://github.com/cypress-io/cypress/issues/2370
     // delay 1 second if we're recording a video to give
@@ -1149,6 +1150,10 @@ module.exports = {
           quiet,
         )
         .catch(warnVideoRecordingFailed)
+      }
+
+      if (hasFailingTests && bail) {
+        errors.throw('BAILING_FAILED_TEST')
       }
 
       return finish()
@@ -1297,6 +1302,7 @@ module.exports = {
           videoCompression: options.videoCompression,
           videoUploadOnPasses: options.videoUploadOnPasses,
           quiet: options.quiet,
+          bail: options.bail,
         }),
 
         connection: this.waitForBrowserToConnect({
@@ -1309,6 +1315,7 @@ module.exports = {
           socketId: options.socketId,
           webSecurity: options.webSecurity,
           projectRoot: options.projectRoot,
+          bail: options.bail,
         }),
       })
     })
@@ -1336,6 +1343,7 @@ module.exports = {
 
     _.defaults(options, {
       isTextTerminal: true,
+      bail: false,
       browser: 'electron',
       quiet: false,
     })
@@ -1427,6 +1435,7 @@ module.exports = {
               exit: options.exit,
               headed: options.headed,
               quiet: options.quiet,
+              bail: options.bail,
               outputPath: options.outputPath,
             })
             .tap((runSpecs) => {

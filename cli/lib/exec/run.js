@@ -62,6 +62,10 @@ const processRunOptions = (options = {}) => {
 
   const args = ['--run-project', options.project]
 
+  if (options.bail) {
+    args.push('--bail')
+  }
+
   if (options.browser) {
     args.push('--browser', options.browser)
   }

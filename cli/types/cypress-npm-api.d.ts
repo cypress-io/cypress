@@ -29,6 +29,10 @@ declare module 'cypress' {
    */
   interface CypressRunOptions extends CypressCommonOptions {
     /**
+     * Exit the test suite immediately upon n number of failing test suite.
+    */
+    bail: boolean
+    /**
      * Specify different browser to run tests in, either by name or by filesystem path
     */
     browser: string

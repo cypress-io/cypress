@@ -88,6 +88,7 @@ const parseVariableOpts = (fnArgs, args) => {
 }
 
 const descriptions = {
+  bail: 'exit the test suite immediately upon failing a test',
   browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
@@ -219,6 +220,7 @@ module.exports = {
     .command('run')
     .usage('[options]')
     .description('Runs Cypress tests from the CLI without the GUI')
+    .option('--bail', text('bail'))
     .option('-b, --browser <browser-name-or-path>', text('browserRunMode'))
     .option('--ci-build-id <id>', text('ciBuildId'))
     .option('-c, --config <config>', text('config'))
