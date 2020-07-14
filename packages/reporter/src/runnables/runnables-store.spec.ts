@@ -39,13 +39,13 @@ const createTest = (id: string) => {
 const createSuite = (id: string, tests: Array<TestProps>, suites: Array<SuiteProps>) => {
   return { id, title: `suite ${id}`, tests, suites, hooks: [] } as SuiteProps
 }
-const createAgent = (id: string, testId: string) => {
-  return { id, testId, instrument: 'agent' } as AgentProps
+const createAgent = (id: number, testId: string) => {
+  return { id, testId, instrument: 'agent', callCount: 0, testCurrentRetry: 0, functionName: 'foo' } as AgentProps
 }
-const createCommand = (id: string, testId: string, hookId?: string) => {
+const createCommand = (id: number, testId: string, hookId?: string) => {
   return { id, testId, instrument: 'command', hookId } as CommandProps
 }
-const createRoute = (id: string, testId: string) => {
+const createRoute = (id: number, testId: string) => {
   return { id, testId, instrument: 'route' } as RouteProps
 }
 
@@ -98,9 +98,9 @@ describe('runnables store', () => {
     it('adds logs to tests when specified', () => {
       const rootRunnable = createRootRunnable()
 
-      rootRunnable.tests![0].agents = [createAgent('1', '1'), createAgent('2', '1'), createAgent('3', '1')]
-      rootRunnable.tests![0].commands = [createCommand('1', '1', 'h1')]
-      rootRunnable.tests![0].routes = [createRoute('1', '1'), createRoute('2', '1')]
+      rootRunnable.tests![0].agents = [createAgent(1, '1'), createAgent(2, '1'), createAgent(3, '1')]
+      rootRunnable.tests![0].commands = [createCommand(1, '1', 'h1')]
+      rootRunnable.tests![0].routes = [createRoute(1, '1'), createRoute(2, '1')]
       rootRunnable.tests![0].hooks = [createHook('h1')]
       instance.setRunnables(rootRunnable)
       expect((instance.runnables[0] as TestModel).lastAttempt.agents.length).to.equal(3)
@@ -229,8 +229,8 @@ describe('runnables store', () => {
       test.hooks = [createHook('h1')]
 
       instance.setRunnables({ tests: [test] })
-      instance.addLog(createCommand('1', '1', 'h1'))
-      instance.updateLog({ id: '1', testId: '1', name: 'new name' } as LogProps)
+      instance.addLog(createCommand(1, '1', 'h1'))
+      instance.updateLog({ id: 1, testId: '1', name: 'new name' } as LogProps)
       expect(instance.testById('1').lastAttempt.commands[0].name).to.equal('new name')
     })
   })

@@ -4,7 +4,7 @@ import { FileDetails } from '@packages/ui-components'
 
 import Attempt from '../attempts/attempt-model'
 import Err from '../errors/err-model'
-import Hook, { HookProps } from '../hooks/hook-model'
+import { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
@@ -22,7 +22,7 @@ export interface TestProps extends RunnableProps {
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
-  hooks: Array<Hook>
+  hooks: Array<HookProps>
   prevAttempts?: Array<TestProps>
   currentRetry: number
   retries?: number

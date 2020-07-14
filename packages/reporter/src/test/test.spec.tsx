@@ -1,12 +1,11 @@
 import React from 'react'
 import { shallow, mount, ReactWrapper } from 'enzyme'
 import sinon, { SinonSpy } from 'sinon'
-import Test, { NoCommands } from './test'
-import TestModel from './test-model'
+import _ from 'lodash'
+import Test from './test'
+import TestModel, { TestState } from './test-model'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
-import Hooks from '../hooks/hooks'
-import { CommandProps } from '../commands/command-model'
 
 const appStateStub = (props?: Partial<AppState>) => {
   return {
@@ -42,6 +41,8 @@ type ScrollerStub = Scroller & {
 const scrollerStub = () => ({
   scrollIntoView: sinon.spy(),
 } as ScrollerStub)
+
+const setTestState = (test:TestModel, state:TestState) => _.extend(test, { state })
 
 describe('<Test />', () => {
   it('does not render when it should not render', () => {
@@ -162,14 +163,15 @@ describe('<Test />', () => {
 
       it('does not scroll into view if auto-scrolling is disabled', () => {
         appState.isRunning = true
-        testModel.state = 'processing'
+        setTestState(testModel, 'processing')
         component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).not.to.have.been.called
       })
 
       it('does not scroll into view if app is not running', () => {
         appState.autoScrollingEnabled = true
-        testModel.state = 'processing'
+        setTestState(testModel, 'processing')
+
         component.instance()!.componentDidUpdate!({}, {})
         expect(scroller.scrollIntoView).not.to.have.been.called
       })

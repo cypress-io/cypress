@@ -273,7 +273,7 @@ class Command extends Component<Props> {
       this.props.events.emit('unpin:snapshot', id)
       this._snapshot(true)
     } else {
-      this.props.appState.pinnedSnapshotId = id as string
+      this.props.appState.pinnedSnapshotId = id as number
       this.props.events.emit('pin:snapshot', id)
       this.props.events.emit('show:command', this.props.model.id)
     }
