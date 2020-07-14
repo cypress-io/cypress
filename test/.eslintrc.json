@@ -1,0 +1,9 @@
+{
+  "extends": [
+    "plugin:@cypress/dev/tests",
+    "plugin:@cypress/dev/react"
+  ],
+  "rules": {
+    "mocha/no-global-tests": "off"
+  }
+}
