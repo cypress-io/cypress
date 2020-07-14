@@ -96,7 +96,7 @@
     "pluralize": "8.0.0",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
-    "resolve": "1.13.1",
+    "resolve": "1.17.0",
     "return-deep-diff": "0.4.0",
     "sanitize-filename": "1.6.3",
     "semver": "6.3.0",
