@@ -31,11 +31,6 @@ describe('src/cy/commands/screenshot', () => {
     }
   })
 
-  it('screenshot element', () => {
-    cy.visit('fixtures/issue-6099.html')
-    cy.get('main').screenshot()
-  })
-
   context('runnable:after:run:async', () => {
     it('is noop when not isTextTerminal', () => {
       // backup this property so we set it back to whatever
@@ -766,6 +761,12 @@ describe('src/cy/commands/screenshot', () => {
             expect(doc === d).to.be.true
           })
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/6099
+      it('can screenshot when element height changes on scroll', () => {
+        cy.visit('fixtures/issue-6099.html')
+        cy.get('main').screenshot()
       })
     })
 
