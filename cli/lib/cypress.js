@@ -7,6 +7,7 @@ const fs = require('./fs')
 const open = require('./exec/open')
 const run = require('./exec/run')
 const util = require('./util')
+const cli = require('./cli')
 
 const cypressModuleApi = {
   /**
@@ -49,6 +50,22 @@ const cypressModuleApi = {
         })
       })
     })
+  },
+
+  cli: {
+    /**
+     * Parses CLI arguments into an object that you can pass to "cypress.run"
+     * @example
+     *  const cypress = require('cypress')
+     *  const cli = ['cypress', 'run', '--browser', 'firefox']
+     *  const options = await cypress.cli.parseRunArguments(cli)
+     *  // options is {browser: 'firefox'}
+     *  await cypress.run(options)
+     * @see https://on.cypress.io/module-api
+     */
+    parseRunArguments (args) {
+      return cli.parseRunCommand(args)
+    },
   },
 }
 
