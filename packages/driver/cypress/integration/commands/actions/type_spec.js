@@ -2795,22 +2795,23 @@ describe('src/cy/commands/actions/type - #type', () => {
     // https://github.com/cypress-io/cypress/issues/5502
     describe('moves the cursor from in-between to the start or the end', () => {
       it('input', () => {
-        cy
-        .get('input:first').clear().type('123{moveToStart}456{moveToEnd}789')
+        cy.get('input:first')
+        .type('123{moveToStart}456{moveToEnd}789')
         .should('have.value', '456123789')
       })
 
       it('contenteditable', () => {
-        cy
-        .get('[contenteditable]:first').invoke('text', '').type('123{moveToStart}456{enter}{moveToEnd}789')
+        cy.get('[contenteditable]:first')
+        .type('123{moveToStart}456{enter}{moveToEnd}789')
         .then(($div) => {
-          expect($div.get(0).innerText).to.eql('456\n123789')
+          // trim() is added for Firefox. It adds \n at the back as default.
+          expect($div.get(0).innerText.trim()).to.eql('456\n123789')
         })
       })
 
       it('textarea', () => {
-        cy
-        .get('textarea:first').clear().type('123{moveToStart}456{enter}{moveToEnd}789')
+        cy.get('textarea:first')
+        .type('123{moveToStart}456{enter}{moveToEnd}789')
         .should('have.value', '456\n123789')
       })
     })
