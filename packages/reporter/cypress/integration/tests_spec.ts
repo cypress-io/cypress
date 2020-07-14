@@ -137,12 +137,21 @@ describe('controls', function () {
       })
 
       it('calculates correct width', function () {
-        cy.clock(1577836801500, ['Date'])
+        const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
+
+        // take the wallClockStartedAt of this command and add 2500 milliseconds to it
+        // in order to simulate the command having run for 2.5 seconds of the total 4000 timeout
+        const date = new Date(wallClockStartedAt).setMilliseconds(2500)
+
+        cy.clock(date, ['Date'])
         cy.get('.runnable-active').click()
-        cy.get('.command-progress > span').should('have.attr', 'style').should('contain', 'animation-duration: 2500ms')
-        cy.get('.command-progress > span').should('have.attr', 'style').should('contain', 'width: 62.5%')
-        // ensures that actual width hits 0 within remaining 2.5 seconds
-        cy.get('.command-progress > span', { timeout: 2500 }).should('have.css', 'width', '0px')
+        cy.get('.command-progress > span').should(($span) => {
+          expect($span.attr('style')).to.contain('animation-duration: 1500ms')
+          expect($span.attr('style')).to.contain('width: 37.5%')
+
+          // ensures that actual width hits 0 within default timeout
+          expect($span).to.have.css('width', '0px')
+        })
       })
     })
   })
