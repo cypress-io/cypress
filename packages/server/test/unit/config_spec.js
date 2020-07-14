@@ -1309,6 +1309,31 @@ describe('lib/config', () => {
         },
       })
     })
+
+    it('resolves a single object', () => {
+      const cfg = {
+      }
+      const obj = {
+        foo: {
+          bar: {
+            baz: 42,
+          },
+        },
+      }
+
+      config.setPluginResolvedOn(cfg, obj)
+
+      expect(cfg).to.deep.eq({
+        foo: {
+          from: 'plugin',
+          value: {
+            bar: {
+              baz: 42,
+            },
+          },
+        },
+      })
+    })
   })
 
   context('_.defaultsDeep', () => {
