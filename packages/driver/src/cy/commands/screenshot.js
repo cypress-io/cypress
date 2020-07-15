@@ -355,7 +355,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
     // since we scroll down the page in takeScrollingScreenshots
     // and don't want the page size to change once we start
     // https://github.com/cypress-io/cypress/issues/6099
-    win.dispatchEvent(new CustomEvent('scroll'))
+    win.dispatchEvent(new win.CustomEvent('scroll'))
 
     if (onBeforeScreenshot) {
       onBeforeScreenshot.call(state('ctx'), $el)
