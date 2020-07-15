@@ -138,7 +138,7 @@ commands:
           at: ~/
       - run:
           command: |
-            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --');
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
 
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
