@@ -1726,6 +1726,18 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Exclude<S, void | undefined>): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Exclude<S | undefined, void>): Chainable<S | Subject>
+    /**
+     * Enables you to work with the subject yielded from the previous command.
+     *
+     * @see https://on.cypress.io/then
+     */
     then<S>(fn: (this: ObjectLike, currentSubject: Subject) => Chainable<S>): Chainable<S>
     /**
      * Enables you to work with the subject yielded from the previous command.

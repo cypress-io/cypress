@@ -179,6 +179,14 @@ cy.wrap(['bar', 'baz'])
   })
 
 describe('then', () => {
+  it('should respect the return type of callback', () => {
+    const result = cy.get('foo').then(el => el.attr('foo'))
+    result // $ExpectType Chainable<JQuery<HTMLElement> | string>
+
+    const result2 = cy.get('foo').then(el => `${el}`)
+    result2 // $ExpectType Chainable<string>
+  })
+
   it('should have the correct type signature', () => {
     cy.wrap({ foo: 'bar' })
       .then(s => {
