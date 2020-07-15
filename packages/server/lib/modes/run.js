@@ -919,7 +919,7 @@ module.exports = {
           const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
 
           if (existingScreenshot !== -1) {
-            // NOTE: saving screenshots to the same path with overwrite the previous one
+            // NOTE: saving screenshots to the same path will overwrite the previous one
             // so we shouldn't report more screenshots than exist on disk.
             // this happens when cy.screenshot is used in a retried test
             screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))

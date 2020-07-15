@@ -458,13 +458,13 @@ const evalFn = (win, fn) => {
   }
 }
 
-const shouldHaveTestResults = (expPassed, expFailed) => {
-  return ({ failed }) => {
-    expect(failed, 'resolve with failure count').eq(failed)
+const shouldHaveTestResults = (expPassed, expFailed, expPending) => {
+  return () => {
     expPassed = expPassed || '--'
     expFailed = expFailed || '--'
     cy.get('header .passed .num').should('have.text', `${expPassed}`)
     cy.get('header .failed .num').should('have.text', `${expFailed}`)
+    if (expPending) cy.get('header .pending .num').should('have.text', `${expPending}`)
   }
 }
 

@@ -147,6 +147,31 @@ describe('src/cypress/runner', () => {
 
     describe('hook failures', () => {
       describe('test failures w/ hooks', () => {
+        it('test [only]', () => {
+          runIsolatedCypress({
+            suites: {
+              'suite 1': {
+                hooks: ['before', 'beforeEach', 'afterEach', 'after'],
+                tests: [
+                  { name: 'test 1' },
+                  { name: 'test 2', only: true },
+                  { name: 'test 3' },
+                ],
+              },
+            },
+          }).then(shouldHaveTestResults(1, 0))
+        })
+
+        it('test [pending]', () => {
+          runIsolatedCypress(() => {
+            before(() => {})
+            it('t1')
+            it('t2')
+            it('t3')
+            after(() => {})
+          }).then(shouldHaveTestResults(0, 0, 3))
+        })
+
         it('fail with [before]', () => {
           runIsolatedCypress({
             suites: {

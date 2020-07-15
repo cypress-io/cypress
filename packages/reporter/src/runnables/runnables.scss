@@ -96,6 +96,11 @@
       border-left: 5px solid $pass;
     }
 
+    .runnable-retried > div > .runnable-wrapper,
+    .runnable-retried > div > .runnable-instruments {
+      border-left: 5px solid $retried;
+    }
+
     &.runnable-skipped > .runnable-wrapper {
       .runnable-state {
         @include runnable-state-skipped;

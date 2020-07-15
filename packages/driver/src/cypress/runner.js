@@ -777,6 +777,8 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     const tests = getAllSiblingTests(test.parent, getTestById)
 
     if (_.last(tests) !== test) {
+      test.final = true
+
       return fire(TEST_AFTER_RUN_EVENT, test, Cypress)
     }
   })
@@ -1169,10 +1171,10 @@ const create = (specWindow, mocha, Cypress, cy) => {
       const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
 
       if (isAfterAllHook) {
-        if (test.state !== 'failed') {
-          delete test.err
-          test.state = 'passed'
-        }
+        // if (test.state !== 'failed') {
+        //   delete test.err
+        //   test.state = 'passed'
+        // }
       }
 
       if (

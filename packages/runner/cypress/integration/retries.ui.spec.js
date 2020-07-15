@@ -11,6 +11,22 @@ const attemptTag = (sel) => `.test.runnable .attempt-tag:contains(Attempt ${sel}
 
 describe('src/cypress/runner retries ui', () => {
   // NOTE: for test-retries
+  it('collapses tests that retry and pass', () => {
+    runIsolatedCypress({
+      suites: {
+        'suite 1': {
+          tests: [
+            { name: 'test pass', fail: 0 },
+            { name: 'test pass on 2nd attempt', fail: 1 },
+          ],
+        },
+      },
+    })
+    .then(shouldHaveTestResults(2, 0))
+
+    cy.percySnapshot()
+  })
+
   it('can set retry config', () => {
     runIsolatedCypress({}, { config: { retries: 1 } })
     .then(({ autCypress }) => {
@@ -18,23 +34,20 @@ describe('src/cypress/runner retries ui', () => {
     })
   })
 
-  describe('retry ui', () => {
-    beforeEach(() => {
-      runIsolatedCypress({
-        suites: {
-          'suite 1': {
-            tests: [
-              { name: 'test 1', fail: 1 },
-              { name: 'test 2', fail: 2 },
-              { name: 'test 3', fail: 1 },
-            ],
-          },
+  it('can toggle failed attempt', () => {
+    runIsolatedCypress({
+      suites: {
+        'suite 1': {
+          tests: [
+            { name: 'test 1', fail: 1 },
+            { name: 'test 2', fail: 2 },
+            { name: 'test 3', fail: 1 },
+          ],
         },
-      }, { config: { retries: 1 } })
-      .then(shouldHaveTestResults(2, 1))
-    })
-
-    it('can toggle failed attempt', () => {
+      },
+    }, { config: { retries: 1 } })
+    .then(shouldHaveTestResults(2, 1))
+    .then(() => {
       cy.contains('.test.runnable', 'test 3').click().within(() => {
         cy.get('.runnable-err-print').should('not.be.visible')
         cy.contains('Attempt 1').click()
@@ -43,9 +56,7 @@ describe('src/cypress/runner retries ui', () => {
         // .find('i:last').pseudo(':before').should('have.property', 'content', '""')
         cy.get('.runnable-err-print').should('not.be.visible')
       })
-    })
 
-    it('can view error for failed attempt', () => {
       cy.contains('Attempt 1')
       .click()
       .closest('.attempt-item')

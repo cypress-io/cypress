@@ -129,14 +129,22 @@ commands:
       browser:
         description: browser shortname to target
         type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: ~/
       - run:
           command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'percy exec --');
+
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -693,6 +701,7 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: chrome
+          percy: true
 
   runner-integration-tests-firefox:
     <<: *defaults
@@ -1576,6 +1585,7 @@ linux-workflow: &linux-workflow
           - desktop-gui-integration-tests-2x
           - desktop-gui-component-tests
           - cli-visual-tests
+          - runner-integration-tests-chrome
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

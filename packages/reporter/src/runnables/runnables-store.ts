@@ -153,12 +153,6 @@ class RunnablesStore {
     })
   }
 
-  // updateTest (props: UpdatableTestProps, cb: UpdateTestCallback) {
-  //   this._withTest(props.id, (test) => {
-  //     return test.update(props, cb)
-  //   })
-  // }
-
   runnableStarted (props: TestProps) {
     this._withTest(props.id, (test) => {
       test.start(props)
