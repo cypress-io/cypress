@@ -42,6 +42,8 @@ const getDefaultWebpackOptions = (typescriptPath) => {
               compiler: typescriptPath || 'typescript',
               compilerOptions: {
                 esModuleInterop: true,
+                inlineSourceMap: true,
+                inlineSources: true,
                 downlevelIteration: true,
               },
             },
@@ -65,5 +67,8 @@ preprocessor.defaultOptions = {
   webpackOptions: getDefaultWebpackOptions(),
   watchOptions: {},
 }
+
+// for testing purposes, but do not add this to the typescript interface
+preprocessor.__reset = webpackPreprocessor.__reset
 
 module.exports = preprocessor
