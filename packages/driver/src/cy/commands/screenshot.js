@@ -349,6 +349,12 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
   .then(() => {
     const win = state('window')
 
+    // in the case that an element might change size on scroll
+    // we trigger a scroll event to ensure that all elements are
+    // at their final size before we calculate the total height
+    // since we scroll down the page in takeScrollingScreenshots
+    // and don't want the page size to change once we start
+    // https://github.com/cypress-io/cypress/issues/6099
     win.dispatchEvent(new CustomEvent('scroll'))
 
     if (onBeforeScreenshot) {
