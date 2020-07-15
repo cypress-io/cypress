@@ -586,8 +586,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('Cannot find module')
+          expect(res.body).to.include('Module not found')
         })
       })
     })
@@ -596,8 +595,6 @@ describe('Routes', () => {
       beforeEach(function () {
         Fixtures.scaffold('ids')
 
-        // remove cached options
-        delete require.cache[require.resolve('@cypress/browserify-preprocessor')]
         sinon.stub(resolve, 'typescript').callsFake(() => {
           return null
         })
@@ -630,8 +627,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('Cannot find module')
+          expect(res.body).to.include('Module not found')
         })
       })
     })
@@ -650,8 +646,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('ParseError')
+          expect(res.body).to.include('Unexpected token')
         })
       })
     })
