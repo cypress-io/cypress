@@ -11,6 +11,6 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn
-      - run: npm run lint
-      - run: npm run test
-      - run: npm run semantic-release || true
+      - run: yarn lint
+      - run: yarn test
+      - run: yarn semantic-release || true
