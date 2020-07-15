@@ -71,5 +71,8 @@
     "*.{js,jsx,ts,tsx,json}": [
       "yarn lint"
     ]
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
