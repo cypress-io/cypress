@@ -90,17 +90,17 @@ describe('lib/plugins/preprocessor', () => {
       sinon.stub(plugins, 'register')
       sinon.stub(plugins, 'execute').returns(() => {})
 
-      const preprocessorFn = function () {}
-      const preprocessor = sinon.stub().returns(preprocessorFn)
+      const userPreprocessorFn = function () {}
+      const userPreprocessor = sinon.stub().returns(userPreprocessorFn)
 
-      preprocessor.defaultOptions = {}
+      userPreprocessor.defaultOptions = {}
 
-      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', preprocessor)
+      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', userPreprocessor)
 
       preprocessor.getFile(this.filePath, this.config)
 
-      expect(plugins.register).to.be.calledWith('file:preprocessor', preprocessorFn)
-      expect(preprocessor).to.be.called
+      expect(plugins.register).to.be.calledWith('file:preprocessor', userPreprocessorFn)
+      expect(userPreprocessor).to.be.called
     })
   })
 

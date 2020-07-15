@@ -451,7 +451,7 @@
     "@babel/helper-plugin-utils" "^7.10.4"
     "@babel/plugin-syntax-json-strings" "^7.8.0"
 
-"@babel/plugin-proposal-nullish-coalescing-operator@7.10.4", "@babel/plugin-proposal-nullish-coalescing-operator@^7.10.4", "@babel/plugin-proposal-nullish-coalescing-operator@^7.8.3":
+"@babel/plugin-proposal-nullish-coalescing-operator@^7.10.4", "@babel/plugin-proposal-nullish-coalescing-operator@^7.8.3":
   version "7.10.4"
   resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-nullish-coalescing-operator/-/plugin-proposal-nullish-coalescing-operator-7.10.4.tgz#02a7e961fc32e6d5b2db0649e01bf80ddee7e04a"
   integrity sha512-wq5n1M3ZUlHl9sqT2ok1T2/MTt6AXE0e1Lz4WzWBr95LsAZ5qDXe4KnFuauYyEyLiohvXFMdbsOTMyLZs91Zlw==
@@ -1356,7 +1356,7 @@
   dependencies:
     regenerator-runtime "^0.13.4"
 
-"@babel/runtime@^7.10.2":
+"@babel/runtime@^7.10.2", "@babel/runtime@^7.10.5":
   version "7.10.5"
   resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.10.5.tgz#303d8bd440ecd5a491eae6117fd3367698674c5c"
   integrity sha512-otddXKhdNn7d0ptoFRHtMLa8LqDxLYwTjB4nYgM1yy5N6gU/MUf8zqyyLltCH3yAVitBzmwK4us+DD0l/MauAg==
@@ -1779,19 +1779,19 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/webpack-batteries-included-preprocessor@1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.0.2.tgz#3585f3c07478ad461cd19de4cedcf945920e59cd"
-  integrity sha512-PsRUbhNm4mFiyoeunu6OXBA0+5nAqWH4cQvU2QbKPlgcCQzB0fOQSkb+9thlgYdEhqNnkPvoqd3pPYDt8Y2paA==
+"@cypress/webpack-batteries-included-preprocessor@1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.0.4.tgz#c6263548f2fa4c8dfc321c6abcbd95f921c1f2a3"
+  integrity sha512-FI+/CAh++3MGWEB/UKjZJwd67C128kiybIxfHuT660WTOoSbjS5brigHAU+GO9xplNS59XwiZZOZZoz5NTfxaw==
   dependencies:
     "@babel/core" "^7.10.4"
     "@babel/plugin-proposal-class-properties" "7.10.4"
-    "@babel/plugin-proposal-nullish-coalescing-operator" "7.10.4"
     "@babel/plugin-proposal-object-rest-spread" "7.10.4"
     "@babel/plugin-transform-modules-commonjs" "7.10.4"
     "@babel/plugin-transform-runtime" "7.10.4"
     "@babel/preset-env" "^7.10.4"
     "@babel/preset-react" "7.10.4"
+    "@babel/runtime" "^7.10.5"
     "@cypress/webpack-preprocessor" "^5.4.1"
     babel-loader "^8.1.0"
     coffee-loader "1.0.0"
