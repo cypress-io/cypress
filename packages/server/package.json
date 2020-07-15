@@ -106,7 +106,7 @@
     "squirrelly": "7.9.2",
     "strip-ansi": "6.0.0",
     "syntax-error": "1.4.0",
-    "systeminformation": "4.21.1",
+    "systeminformation": "4.26.9",
     "term-size": "2.1.0",
     "tough-cookie": "4.0.0",
     "trash": "5.2.0",
@@ -114,7 +114,7 @@
     "underscore": "1.9.1",
     "underscore.string": "3.3.5",
     "url-parse": "1.4.7",
-    "uuid": "3.3.2",
+    "uuid": "3.4.0",
     "which": "2.0.2",
     "widest-line": "3.1.0",
     "winston": "2.4.4"
