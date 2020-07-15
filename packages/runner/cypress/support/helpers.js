@@ -17,6 +17,7 @@ const eventCleanseMap = {
   tests: stringifyShort,
   commands: stringifyShort,
   err: stringifyShort,
+  invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
   lifecycle: match.number,
@@ -439,6 +440,7 @@ const cleanseRunStateMap = {
   'err.stack': '[err stack]',
   sourceMappedStack: match.string,
   parsedStack: match.array,
+  invocationDetails: stringifyShort,
 }
 
 const shouldHaveTestResults = (expPassed, expFailed) => {

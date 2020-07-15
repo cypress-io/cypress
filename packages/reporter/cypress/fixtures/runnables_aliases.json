@@ -2,6 +2,7 @@
   "id": "r1",
   "title": "",
   "root": true,
+  "hooks": [],
   "suites": [],
   "tests": [
     {
