@@ -40,15 +40,22 @@ const getDefaultWebpackOptions = (typescriptPath) => {
             options: {
               transpileOnly: true,
               compiler: typescriptPath || 'typescript',
+              compilerOptions: {
+                esModuleInterop: true,
+                downlevelIteration: true,
+              },
             },
           },
         ],
       }],
     },
+    resolve: {
+      extensions: ['.js', '.jsx', '.ts', '.tsx', '.coffee'],
+    },
   }
 }
 
-const preprocessor = (options) => {
+const preprocessor = (options = {}) => {
   options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions(options.typescript)
 
   return webpackPreprocessor(options)

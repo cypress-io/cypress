@@ -7,13 +7,13 @@ const preprocessor = require('../../index')
 const fixturesDir = path.join(__dirname, '..', 'fixtures')
 const outputDir = path.join(__dirname, '..', '_test-output')
 
-const run = (fileName, options = {}) => {
+const run = (fileName) => {
   const file = Object.assign(new EventEmitter(), {
     filePath: path.join(outputDir, fileName),
     outputPath: path.join(outputDir, fileName.replace('.', '_output.')),
   })
 
-  return preprocessor(options)(file)
+  return preprocessor()(file)
 }
 
 describe('features', () => {
@@ -35,6 +35,14 @@ describe('features', () => {
   })
 
   it('handles typescript', () => {
-    return run('typescript_spec.ts', { typescript: require.resolve('typescript') })
+    return run('typescript_spec.ts')
+  })
+
+  it('handles tsx', () => {
+    return run('tsx_spec.tsx')
+  })
+
+  it('handles importing .js, .jsx, .ts, .tsx, and .coffee', () => {
+    return run('various_imports_spec.js')
   })
 })

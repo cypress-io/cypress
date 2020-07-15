@@ -1,0 +1,5 @@
+import './es_features_spec'
+import './jsx_spec'
+import './coffee_spec'
+import './typescript_spec'
+import './tsx_spec'
