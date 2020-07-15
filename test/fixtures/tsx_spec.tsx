@@ -8,5 +8,5 @@ type SomeType = {
 it('uses jsx', () => {
   const someObj: SomeType = { someProp: 'someValue' }
 
-  console.log(<div className={someObj.someProp} />)
+  console.log(<div className={someObj.someProp} />) // eslint-disable-line no-console
 })

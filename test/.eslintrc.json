@@ -4,6 +4,20 @@
     "plugin:@cypress/dev/react"
   ],
   "rules": {
-    "mocha/no-global-tests": "off"
+    "mocha/no-global-tests": "off",
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   }
 }
