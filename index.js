@@ -1,3 +1,4 @@
+const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 const getDefaultWebpackOptions = (typescriptPath) => {
@@ -11,11 +12,15 @@ const getDefaultWebpackOptions = (typescriptPath) => {
           loader: require.resolve('babel-loader'),
           options: {
             plugins: [
-              '@babel/plugin-transform-modules-commonjs',
-              '@babel/plugin-proposal-class-properties',
-              '@babel/plugin-proposal-object-rest-spread',
-              '@babel/plugin-transform-runtime',
-            ].map(require.resolve),
+              ...[
+                'babel-plugin-add-module-exports',
+                '@babel/plugin-proposal-class-properties',
+                '@babel/plugin-proposal-object-rest-spread',
+              ].map(require.resolve),
+              [require.resolve('@babel/plugin-transform-runtime'), {
+                absoluteRuntime: path.dirname(require.resolve('@babel/runtime/package')),
+              }],
+            ],
             presets: [
               '@babel/preset-env',
               '@babel/preset-react',
