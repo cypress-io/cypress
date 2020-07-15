@@ -13,7 +13,7 @@ const getDefaultWebpackOptions = (typescriptPath) => {
           options: {
             plugins: [
               ...[
-                'babel-plugin-add-module-exports',
+                '@babel/plugin-transform-modules-commonjs',
                 '@babel/plugin-proposal-class-properties',
                 '@babel/plugin-proposal-object-rest-spread',
               ].map(require.resolve),
