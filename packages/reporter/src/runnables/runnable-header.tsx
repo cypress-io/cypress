@@ -1,6 +1,6 @@
 import React, { Component, ReactElement } from 'react'
 
-import FileOpener from '../opener/file-opener'
+import FileNameOpener from '../lib/file-name-opener'
 
 const renderRunnableHeader = (children:ReactElement) => <div className="runnable-header">{children}</div>
 
@@ -15,7 +15,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
 
     if (spec.relative === '__all') {
       return renderRunnableHeader(
-        <span>All Specs</span>,
+        <span><span>All Specs</span></span>,
       )
     }
 
@@ -28,7 +28,7 @@ class RunnableHeader extends Component<RunnableHeaderProps> {
     }
 
     return renderRunnableHeader(
-      <FileOpener fileDetails={fileDetails} />,
+      <FileNameOpener fileDetails={fileDetails} />,
     )
   }
 }

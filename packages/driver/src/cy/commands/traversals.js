@@ -1,22 +1,18 @@
 const _ = require('lodash')
 
 const $dom = require('../../dom')
+const $elements = require('../../dom/elements')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
 const optInShadowTraversals = {
-  find: (cy, el, arg1, arg2) => {
-    const roots = []
-
-    // for each of the selection, find all descendent
-    // elements who have a shadow root, and return those
-    // roots.
-    for (let i = 0; i < el.length; i++) {
-      roots.push(...$dom.findAllShadowRoots(el[i]))
-    }
+  find: (cy, $el, arg1, arg2) => {
+    const roots = $el.map((i, el) => {
+      return $dom.findAllShadowRoots(el)
+    })
 
     // add the roots to the existing selection
-    const elementsWithShadow = el.add(roots)
+    const elementsWithShadow = $el.add(_.flatten(roots))
 
     // query the entire set of [selection + shadow roots]
     return elementsWithShadow.find(arg1, arg2)
@@ -24,41 +20,29 @@ const optInShadowTraversals = {
 }
 
 const autoShadowTraversals = {
-  parents: (cy, el, arg1) => {
-    let parents = []
-
-    for (let i = 0; i < el.length; i++) {
-      let current = el[i]
-      let parent
-
-      while ((parent = $dom.getParent(current))) {
-        parents.push(parent)
-        current = parent
-      }
-    }
+  parents: (cy, $el, arg1) => {
+    const parents = $el.map((i, el) => {
+      return $elements.getAllParents(el)
+    })
 
     return cy.$$(parents)
   },
-  closest: (cy, el, arg1) => {
-    let nodes = []
+  closest: (cy, $el, arg1) => {
+    const nodes = _.reduce($el, (nodes, el) => {
+      const getClosest = (node) => {
+        const closestNode = node.closest(arg1)
 
-    for (let i = 0; i < el.length; i++) {
-      let found = el[i].closest(arg1)
-      let root = el[i].getRootNode()
-      const win = $dom.getWindowByElement(el[i])
+        if (closestNode) return nodes.concat(closestNode)
 
-      // if we didn't already get a result, traverse
-      // up the tree if we are in a shadow root and
-      // repeat.
-      while (!found && root instanceof win.ShadowRoot) {
-        found = root.host.closest(arg1)
-        root = root.getRootNode()
+        const root = el.getRootNode()
+
+        if (!$elements.isShadowRoot(root)) return nodes
+
+        return getClosest(root.host)
       }
 
-      if (found) {
-        nodes.push(found)
-      }
-    }
+      return getClosest(el)
+    }, [])
 
     return cy.$$(nodes)
   },

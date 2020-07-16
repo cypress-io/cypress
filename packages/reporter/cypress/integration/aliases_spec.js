@@ -4,7 +4,7 @@ const { _ } = Cypress
 const addLog = function (runner, log) {
   const defaultLog = {
     event: false,
-    hookName: 'test',
+    hookId: 'r3',
     id: _.uniqueId('l'),
     instrument: 'command',
     renderProps: {},

@@ -17,6 +17,7 @@ const eventCleanseMap = {
   tests: stringifyShort,
   commands: stringifyShort,
   err: stringifyShort,
+  invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
   lifecycle: match.number,
@@ -91,13 +92,14 @@ function createCypress () {
 
   /**
    * Spawns an isolated Cypress runner as the AUT, with provided spec/fixture and optional state/config
-   * @param {()=>void | {[key:string]: any}} mochaTests
+   * @param {string | ()=>void | {[key:string]: any}} mochaTestsOrFile
    * @param {{state?: any, config?: any}} opts
    */
-  const runIsolatedCypress = (mochaTests, opts = {}) => {
+  const runIsolatedCypress = (mochaTestsOrFile, opts = {}) => {
     _.defaultsDeep(opts, {
       state: {},
       config: { video: false },
+      onBeforeRun () {},
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -193,7 +195,7 @@ function createCypress () {
           onInitializedListeners = []
 
           autCypress.run((failed) => {
-            resolve({ failed, mochaStubs, autCypress })
+            resolve({ failed, mochaStubs, autCypress, win })
           })
         }
 
@@ -208,15 +210,22 @@ function createCypress () {
           cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
+            opts.onBeforeRun({ specWindow, win, autCypress })
+
+            const testsInOwnFile = _.isString(mochaTestsOrFile)
+            const relativeFile = testsInOwnFile ? mochaTestsOrFile : 'cypress/fixtures/empty_spec.js'
+
             autCypress.onSpecWindow(specWindow, [
               {
-                absolute: 'cypress/fixtures/empty_spec.js',
-                relative: 'cypress/fixtures/empty_spec.js',
-                relativeUrl: '/__cypress/tests?p=cypress/fixtures/empty_spec.js',
+                absolute: relativeFile,
+                relative: relativeFile,
+                relativeUrl: `/__cypress/tests?p=${relativeFile}`,
               },
             ])
 
-            generateMochaTestsForWin(specWindow, mochaTests)
+            if (testsInOwnFile) return
+
+            generateMochaTestsForWin(specWindow, mochaTestsOrFile)
             specWindow.before = () => {}
             specWindow.beforeEach = () => {}
             specWindow.afterEach = () => {}
@@ -241,7 +250,7 @@ function createCypress () {
         .yieldsAsync({ response: {
           isOkStatusCode: true,
           isHtml: true,
-          url: 'http://localhost:3500/fixtures/generic.html',
+          url: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
         } })
 
         .withArgs('set:runnables')
@@ -278,7 +287,6 @@ function createCypress () {
     snapshotMochaEvents,
     onInitialized,
     getAutCypress,
-
   }
 }
 
@@ -432,6 +440,7 @@ const cleanseRunStateMap = {
   'err.stack': '[err stack]',
   sourceMappedStack: match.string,
   parsedStack: match.array,
+  invocationDetails: stringifyShort,
 }
 
 const shouldHaveTestResults = (expPassed, expFailed) => {

@@ -1,6 +1,6 @@
 const _ = Cypress._
 
-export const itHandlesFileOpening = (containerSelector, file, stackTrace = false) => {
+export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
   beforeEach(function () {
     cy.stub(this.runner, 'emit').callThrough()
   })
@@ -19,7 +19,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
     })
 
     it('opens in preferred opener', function () {
-      cy.get(`${containerSelector} a`).first().click().then(() => {
+      cy.get(selector).first().click().then(() => {
         expect(this.runner.emit).to.be.calledWith('open:file', {
           where: this.editor,
           ...file,
@@ -47,7 +47,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
         cy.contains('View stack trace').click()
       }
 
-      cy.get(`${containerSelector} a`).first().click()
+      cy.get(selector).first().click()
     })
 
     it('opens modal with available editors', function () {
@@ -79,7 +79,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
 
       it('shows validation message when hovering over submit button', function () {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Please select a preference')
+        cy.get('.cy-tooltip').last().should('have.text', 'Please select a preference')
       })
     })
 
@@ -99,7 +99,7 @@ export const itHandlesFileOpening = (containerSelector, file, stackTrace = false
 
       it('shows validation message when hovering over submit button', function () {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
-        cy.get('.cy-tooltip').should('have.text', 'Please enter the path for the "Other" editor')
+        cy.get('.cy-tooltip').last().should('have.text', 'Please enter the path for the "Other" editor')
       })
     })
 
