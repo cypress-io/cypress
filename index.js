@@ -38,7 +38,6 @@ const getDefaultWebpackOptions = (typescriptPath) => {
           {
             loader: require.resolve('ts-loader'),
             options: {
-              transpileOnly: true,
               compiler: typescriptPath || 'typescript',
               compilerOptions: {
                 esModuleInterop: true,
@@ -46,6 +45,9 @@ const getDefaultWebpackOptions = (typescriptPath) => {
                 inlineSources: true,
                 downlevelIteration: true,
               },
+              logLevel: 'error',
+              silent: true,
+              transpileOnly: true,
             },
           },
         ],
