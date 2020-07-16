@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const uuid = require('uuid')
+const { v4: uuid } = require('uuid')
 const Promise = require('bluebird')
 const Cookies = require('./cookies')
 const Screenshot = require('./screenshot')
