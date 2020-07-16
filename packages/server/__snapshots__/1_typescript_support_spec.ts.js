@@ -86,10 +86,29 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-/foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts:3
-describe('fail', - > );
-                   ^
-ParseError: Unexpected token
+Error: Webpack Compilation Error
+./cypress/integration/typescript_failing_spec.tsXX:XX
+Module parse failed: Unexpected token (4:19)
+File was processed with these loaders:
+ * ../../../../../cypress-webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
+You may need an additional loader to handle the result of these loaders.
+| // The code below is ignored by eslint
+| // because it tests failing spec.
+> describe('fail', - > );
+| //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHlwZXNjcmlwdF9mYWlsaW5nX3NwZWMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJ0eXBlc2NyaXB0X2ZhaWxpbmdfc3BlYy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUEsc0NBQXNDO0FBQ3RDLGlDQUFpQztBQUNqQyxRQUFRLENBQUMsTUFBTSxFQUFFLENBQUMsR0FBRSxBQUFELENBQUUsQ0FBQSIsInNvdXJjZXNDb250ZW50IjpbIi8vIFRoZSBjb2RlIGJlbG93IGlzIGlnbm9yZWQgYnkgZXNsaW50XG4vLyBiZWNhdXNlIGl0IHRlc3RzIGZhaWxpbmcgc3BlYy5cbmRlc2NyaWJlKCdmYWlsJywgLT4gKVxuIl19
+ @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
+
+/foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
+./cypress/integration/typescript_failing_spec.ts
+[tsl] ERROR in /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts(3,19)
+      TS1109: Expression expected.
+ @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
+
+/foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
+./cypress/integration/typescript_failing_spec.ts
+[tsl] ERROR in /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts(3,21)
+      TS1109: Expression expected.
+ @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

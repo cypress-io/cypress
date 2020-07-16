@@ -26,7 +26,41 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
+Error: Webpack Compilation Error
+./cypress/integration/record_error_spec.coffee
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+  using description file: /foo/bar/.projects/e2e/package.json (relative path: ./cypress/integration)
+    Field 'browser' doesn't contain a valid alias configuration
+    using description file: /foo/bar/.projects/e2e/package.json (relative path: ./cypress/it/does/not/exist)
+      no extension
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
+      .js
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.js doesn't exist
+      .jsx
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
+      .ts
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.ts doesn't exist
+      .tsx
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx doesn't exist
+      .coffee
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
+      as directory
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
+ @ ./cypress/integration/record_error_spec.coffee 1:0-31
+ @ multi ./cypress/integration/record_error_spec.coffee
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -760,26 +794,6 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
 `
 
-exports['e2e record misconfiguration errors and exits when no browser found 1'] = `
-Can't run because you've entered an invalid browser name.
-
-Browser: 'browserDoesNotExist' was not found on your system or is not supported by Cypress.
-
-Cypress supports the following browsers:
-- chrome
-- chromium
-- edge
-- electron
-- firefox (Cypress support in beta)
-
-You can also use a custom browser: https://on.cypress.io/customize-browsers
-
-Available browsers found on your system are:
-- browser1
-- browser2
-- browser3
-`
-
 exports['e2e record misconfiguration errors and exits when no specs found 1'] = `
 Can't run because no spec files were found.
 
@@ -962,7 +976,41 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
+Error: Webpack Compilation Error
+./cypress/integration/record_error_spec.coffee
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+  using description file: /foo/bar/.projects/e2e/package.json (relative path: ./cypress/integration)
+    Field 'browser' doesn't contain a valid alias configuration
+    using description file: /foo/bar/.projects/e2e/package.json (relative path: ./cypress/it/does/not/exist)
+      no extension
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
+      .js
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.js doesn't exist
+      .jsx
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
+      .ts
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.ts doesn't exist
+      .tsx
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx doesn't exist
+      .coffee
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
+      as directory
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
+ @ ./cypress/integration/record_error_spec.coffee 1:0-31
+ @ multi ./cypress/integration/record_error_spec.coffee
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
