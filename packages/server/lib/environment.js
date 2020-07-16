@@ -67,7 +67,14 @@ try {
   if (process.env.ELECTRON_EXTRA_LAUNCH_ARGS) {
     const electronLaunchArguments = process.env.ELECTRON_EXTRA_LAUNCH_ARGS.split(' ')
 
-    electronLaunchArguments.forEach(app.commandLine.appendArgument)
+    electronLaunchArguments.forEach((arg) => {
+      // arg can be just key --disable-http-cache
+      // or key value --remote-debugging-port=8315
+      // https://github.com/cypress-io/cypress/issues/7994
+      const [key, value] = arg.split('=')
+
+      value ? app.commandLine.appendSwitch(key, value) : app.commandLine.appendSwitch(key)
+    })
   }
 } catch (e) {
   debug('environment error %s', e.message)

@@ -54,12 +54,12 @@ describe('lib/environment', () => {
     })
 
     it('sets launch args', () => {
-      sinon.stub(app.commandLine, 'appendArgument')
+      sinon.stub(app.commandLine, 'appendSwitch')
       require(`${root}lib/environment`)
-      expect(app.commandLine.appendArgument).to.have.been.calledWith('--foo')
-      expect(app.commandLine.appendArgument).to.have.been.calledWith('--bar=baz')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--foo')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--bar', 'baz')
 
-      expect(app.commandLine.appendArgument).to.have.been.calledWith('--quux=true')
+      expect(app.commandLine.appendSwitch).to.have.been.calledWith('--quux', 'true')
     })
 
     return afterEach(() => {
