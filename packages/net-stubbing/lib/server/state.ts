@@ -8,12 +8,12 @@ export function state (): NetStubbingState {
     reset () {
       // clean up requests that are still pending
       for (const requestId in this.requests) {
-        const request = this.requests[requestId]
+        const { res } = this.requests[requestId]
 
-        request.res.removeAllListeners('finish')
-        request.res.removeAllListeners('error')
-        request.res.on('error', noop)
-        request.res.destroy()
+        res.removeAllListeners('finish')
+        res.removeAllListeners('error')
+        res.on('error', noop)
+        res.destroy()
       }
 
       this.requests = {}
