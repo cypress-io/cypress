@@ -352,6 +352,17 @@ describe('src/cy/commands/actions/scroll', () => {
           expect($container.get(0).scrollLeft).to.eq(500)
         })
       })
+
+      it('skips scrollability check', () => {
+        const scrollTo = cy.spy($.fn, 'scrollTo')
+
+        cy.get('button:first').scrollTo('bottom', { ensureScrollability: false }).then(() => {
+          cy.stub(cy, 'ensureScrollability')
+
+          expect(scrollTo).to.be.calledWithMatch({}, { ensureScrollability: false })
+          expect(cy.ensureScrollability).not.to.be.called
+        })
+      })
     })
 
     describe('assertion verification', () => {
