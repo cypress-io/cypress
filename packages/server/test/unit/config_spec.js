@@ -1310,6 +1310,7 @@ describe('lib/config', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/7959
     it('resolves a single object', () => {
       const cfg = {
       }
