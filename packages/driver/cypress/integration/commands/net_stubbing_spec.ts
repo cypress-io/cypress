@@ -979,6 +979,24 @@ describe('network stubbing', function () {
       })
     })
 
+    it('intercepts redirects as expected', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.route2('/redirect', (req) => {
+        req.reply((res) => {
+          expect(res.statusCode).to.eq(301)
+          expect(res.headers.location).to.eq(href)
+          res.send()
+        })
+      })
+      .as('redirect')
+      .route2('/fixtures/generic.html').as('dest')
+      .then(() => fetch(url))
+      .wait('@redirect')
+      .wait('@dest')
+    })
+
     it('intercepts cached responses as expected', function () {
       // use a queryparam to bust cache from previous runs of this test
       const url = `/fixtures/generic.html?t=${Date.now()}`
