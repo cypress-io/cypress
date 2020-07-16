@@ -41,9 +41,9 @@ module.exports = (Commands, Cypress, cy, state) => {
     // need to restore prior to running the next test
     // after which we simply null and wait for the
     // next viewport change
-    const defaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
+    const testDefaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
 
-    setViewportAndSynchronize(defaultViewport.viewportWidth, defaultViewport.viewportHeight)
+    setViewportAndSynchronize(testDefaultViewport.viewportWidth, testDefaultViewport.viewportHeight)
   })
 
   const setViewportAndSynchronize = (width, height) => {
