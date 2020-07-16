@@ -327,6 +327,7 @@ describe('per-test config', () => {
 })
 
 describe('viewport', () => {
+  // https://github.com/cypress-io/cypress/issues/7631
   it('can set viewport in testConfigOverrides', { viewportWidth: 200, viewportHeight: 100 }, () => {
     cy.visit('/fixtures/generic.html')
     cy.window().then((win) => {
