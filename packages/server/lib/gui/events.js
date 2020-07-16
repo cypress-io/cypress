@@ -134,7 +134,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //   - spec (with fields)
       //       name, absolute, relative
       //   - specType: "integration" | "component"
-      const fullSpec = _.merge({}, arg.spec, { specType: arg.specType })
+      //   - specFilter (optional): the string user searched for
+      const fullSpec = _.merge({}, arg.spec, {
+        specType: arg.specType,
+        specFilter: arg.specFilter,
+      })
 
       return openProject.launch(arg.browser, fullSpec, {
         projectRoot: options.projectRoot,
