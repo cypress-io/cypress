@@ -1163,6 +1163,10 @@ module.exports = {
       message: `${cmd('scrollTo')} can only be used to scroll 1 element, you tried to scroll {{num}} elements.\n\n`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
+    invalid_ensureScrollability: {
+      message: `${cmd('scrollTo')} \`{{ensureScrollability}}\` option must be a boolean. You passed: \`{{ensureScrollability}}\``,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
   },
 
   screenshot: {
