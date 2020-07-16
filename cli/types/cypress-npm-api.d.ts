@@ -307,6 +307,25 @@ declare module 'cypress' {
   }
 
   /**
+   * Methods allow parsing given CLI arguments the same way Cypress CLI does it.
+   */
+  interface CypressCliParser {
+    /**
+     * Parses the given array of string arguments to "cypress run"
+     * just like Cypress CLI does it.
+     * @see https://on.cypress.io/module-api
+     * @example
+     *  const cypress = require('cypress')
+     *  const args = ['cypress', 'run', '--browser', 'chrome']
+     *  const options = await cypress.cli.parseRunArguments(args)
+     *  // options is {browser: 'chrome'}
+     *  // pass the options to cypress.run()
+     *  const results = await cypress.run(options)
+     */
+    parseRunArguments(args: string[]): Promise<Partial<CypressRunOptions>>
+  }
+
+  /**
    * Cypress NPM module interface.
    * @see https://on.cypress.io/module-api
    * @example
@@ -337,6 +356,12 @@ declare module 'cypress' {
      * @see https://on.cypress.io/module-api#cypress-open
      */
     open(options?: Partial<CypressOpenOptions>): Promise<void>
+
+    /**
+     * Utility functions for parsing CLI arguments the same way
+     * Cypress does
+     */
+    cli: CypressCliParser
   }
 
   // export Cypress NPM module interface

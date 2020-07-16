@@ -70,7 +70,10 @@ class Test extends Component<Props> {
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
       window.requestAnimationFrame(() => {
-        scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+        // since this executes async in a RAF the ref might be null
+        if (this.containerRef.current) {
+          scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+        }
       })
     }
   }
