@@ -73,7 +73,14 @@ try {
       // https://github.com/cypress-io/cypress/issues/7994
       const [key, value] = arg.split('=')
 
-      value ? app.commandLine.appendSwitch(key, value) : app.commandLine.appendSwitch(key)
+      // because this is an environment variable, everything is a string
+      // thus we don't have to worry about casting
+      // --foo=false for example will be "--foo", "false"
+      if (value) {
+        app.commandLine.appendSwitch(key, value)
+      } else {
+        app.commandLine.appendSwitch(key)
+      }
     })
   }
 } catch (e) {
