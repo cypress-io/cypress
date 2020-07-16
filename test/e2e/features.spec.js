@@ -17,6 +17,13 @@ const run = (fileName) => {
   return preprocessor()(file)
 }
 
+const runAndEval = async (fileName) => {
+  const outputPath = await run(fileName)
+  const contents = await fs.readFile(outputPath)
+
+  eval(contents.toString())
+}
+
 describe('features', () => {
   beforeEach(async () => {
     preprocessor.__reset()
@@ -26,45 +33,31 @@ describe('features', () => {
   })
 
   it('handles module interop, object spread, class properties, and async/await', async () => {
-    const outputPath = await run('es_features_spec.js')
-    const exists = await fs.pathExists(outputPath)
-
-    expect(exists).to.be.true
+    await runAndEval('es_features_spec.js')
   })
 
   it('handles jsx', async () => {
-    const outputPath = await run('jsx_spec.jsx')
-    const exists = await fs.pathExists(outputPath)
-
-    expect(exists).to.be.true
+    await runAndEval('jsx_spec.jsx')
   })
 
   it('handles coffeescript', async () => {
-    const outputPath = await run('coffee_spec.coffee')
-    const exists = await fs.pathExists(outputPath)
+    await runAndEval('coffee_spec.coffee')
+  })
 
-    expect(exists).to.be.true
+  it('handles import default export in coffeescript', async () => {
+    await runAndEval('coffee_imports_spec.coffee')
   })
 
   it('handles typescript', async () => {
-    const outputPath = await run('typescript_spec.ts')
-    const exists = await fs.pathExists(outputPath)
-
-    expect(exists).to.be.true
+    await runAndEval('typescript_spec.ts')
   })
 
   it('handles tsx', async () => {
-    const outputPath = await run('tsx_spec.tsx')
-    const exists = await fs.pathExists(outputPath)
-
-    expect(exists).to.be.true
+    await runAndEval('tsx_spec.tsx')
   })
 
   it('handles importing .js, .jsx, .ts, .tsx, and .coffee', async () => {
-    const outputPath = await run('various_imports_spec.js')
-    const exists = await fs.pathExists(outputPath)
-
-    expect(exists).to.be.true
+    await runAndEval('various_imports_spec.js')
   })
 
   it('outputs inline source map', async () => {

@@ -3,9 +3,7 @@ type SomeType = {
   someProp: string
 }
 
-it('uses typescript', () => {
-  const someObj: SomeType = { someProp: 'someValue' }
+const someObj: SomeType = { someProp: 'someValue' }
 
-  // @ts-ignore
-  expect(someObj.someProp).to.equal('someValue')
-})
+// @ts-ignore
+expect(someObj.someProp).to.equal('someValue')

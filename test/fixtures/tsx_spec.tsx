@@ -5,8 +5,12 @@ type SomeType = {
   someProp: string
 }
 
-it('uses jsx', () => {
-  const someObj: SomeType = { someProp: 'someValue' }
+const someObj: SomeType = { someProp: 'someValue' }
+const component = <div className={someObj.someProp} />
 
-  console.log(<div className={someObj.someProp} />) // eslint-disable-line no-console
-})
+// @ts-ignore
+expect(component).to.be.an('object')
+
+// if (typeof component !== 'object') {
+//   throw new Error('component should be an object')
+// }

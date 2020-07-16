@@ -13,7 +13,7 @@ const getDefaultWebpackOptions = (typescriptPath) => {
           options: {
             plugins: [
               ...[
-                '@babel/plugin-transform-modules-commonjs',
+                'babel-plugin-add-module-exports',
                 '@babel/plugin-proposal-class-properties',
                 '@babel/plugin-proposal-object-rest-spread',
               ].map(require.resolve),
@@ -22,9 +22,9 @@ const getDefaultWebpackOptions = (typescriptPath) => {
               }],
             ],
             presets: [
-              '@babel/preset-env',
-              '@babel/preset-react',
-            ].map(require.resolve),
+              [require.resolve('@babel/preset-env'), { modules: 'commonjs' }],
+              require.resolve('@babel/preset-react'),
+            ],
           },
         }],
       }, {

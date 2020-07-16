@@ -1,2 +1,3 @@
-it "is a coffeescript spec", ->
-  expect(true).to.be.true
+fn = -> "return value"
+
+expect(fn()).to.equal "return value"
