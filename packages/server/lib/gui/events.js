@@ -127,6 +127,8 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'launch:browser':
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
+      debug('full list of options %o', arg)
+
       // the "arg" should have objects for
       //   - browser
       //   - spec (with fields)
