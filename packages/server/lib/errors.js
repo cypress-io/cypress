@@ -928,6 +928,15 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version 5.0.0. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
 
         You can safely remove this option from your config.`
+    case 'INCOMPATIBLE_PLUGIN_RETRIES':
+      return stripIndent`\
+        We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
+        
+        Test retries is supported natively in Cypress via the config value \`retries\`.
+        [retries docs link]
+
+        Remove the plugin from your dependencies to silence this warning.
+        `
     default:
   }
 }

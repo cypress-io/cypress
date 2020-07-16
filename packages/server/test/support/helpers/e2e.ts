@@ -619,6 +619,10 @@ const e2e = {
       ctx.skip()
     }
 
+    if (options.stubPackage) {
+      Fixtures.installStubPackage(options.project, options.stubPackage)
+    }
+
     args = ['index.js'].concat(args)
 
     let stdout = ''
