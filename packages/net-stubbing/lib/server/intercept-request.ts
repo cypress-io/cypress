@@ -253,9 +253,6 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
     backendRequest.req.headers['content-length'] = frame.req.body.length
   }
 
-  // prevent cached responses from being received
-  delete backendRequest.req.headers['if-none-match']
-
   if (frame.hasResponseHandler) {
     backendRequest.sendResponseToDriver = true
   }

@@ -979,6 +979,35 @@ describe('network stubbing', function () {
       })
     })
 
+    it('intercepts cached responses as expected', function () {
+      // use a queryparam to bust cache from previous runs of this test
+      const url = `/fixtures/generic.html?t=${Date.now()}`
+      let hits = 0
+
+      cy.route2('/fixtures/generic.html', (req) => {
+        req.reply((res) => {
+          // the second time the request is sent, headers should have been passed
+          // that result in Express serving a 304
+          // Cypress is not expected to understand cache mechanisms at this point -
+          // if the user wants to break caching, they can DIY by editing headers
+          const expectedStatusCode = [200, 304][hits]
+
+          expect(expectedStatusCode).to.exist
+          expect(res.statusCode).to.eq(expectedStatusCode)
+
+          hits++
+          res.send()
+        })
+      })
+      .as('foo')
+      .then(() => _.times(2, () => fetch(url)))
+      .wait('@foo')
+      .wait('@foo')
+      .then(() => {
+        expect(hits).to.eq(2)
+      })
+    })
+
     it('can intercept a large proxy response', function (done) {
       cy.route2('/1mb', (req) => {
         req.reply((res) => {
