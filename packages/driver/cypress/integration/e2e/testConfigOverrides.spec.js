@@ -326,6 +326,24 @@ describe('per-test config', () => {
   })
 })
 
+describe('viewport', () => {
+  it('can set viewport in testConfigOverrides', { viewportWidth: 200, viewportHeight: 100 }, () => {
+    cy.visit('/fixtures/generic.html')
+    cy.window().then((win) => {
+      expect(win.innerWidth).eq(200)
+      expect(win.innerHeight).eq(100)
+    })
+  })
+
+  it('viewport does not leak between tests', () => {
+    cy.visit('/fixtures/generic.html')
+    cy.window().then((win) => {
+      expect(win.innerWidth).eq(1000)
+      expect(win.innerHeight).eq(660)
+    })
+  })
+})
+
 describe('testConfigOverrides baseUrl @slow', () => {
   it('visit 1', { baseUrl: 'http://localhost:3501' }, () => {
     cy.visit('/fixtures/generic.html')
