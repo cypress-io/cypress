@@ -1,6 +1,10 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
+// console.log()
+// console.log('--- yep ---')
+// console.log()
+
 const getDefaultWebpackOptions = (typescriptPath) => {
   return {
     mode: 'development',
@@ -54,7 +58,7 @@ const getDefaultWebpackOptions = (typescriptPath) => {
       }],
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.ts', '.tsx', '.coffee'],
+      extensions: ['.js', '.json', '.jsx', '.ts', '.tsx', '.coffee'],
     },
   }
 }

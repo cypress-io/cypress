@@ -56,7 +56,7 @@ describe('features', () => {
     await runAndEval('tsx_spec.tsx')
   })
 
-  it('handles importing .js, .jsx, .ts, .tsx, and .coffee', async () => {
+  it('handles importing .js, .json, .jsx, .ts, .tsx, and .coffee', async () => {
     await runAndEval('various_imports_spec.js')
   })
 
