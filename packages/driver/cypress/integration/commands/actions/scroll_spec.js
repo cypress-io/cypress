@@ -352,7 +352,7 @@ describe('src/cy/commands/actions/scroll', () => {
           expect($container.get(0).scrollLeft).to.eq(500)
         })
       })
-
+      // https://github.com/cypress-io/cypress/issues/1924
       it('skips scrollability check', () => {
         const scrollTo = cy.spy($.fn, 'scrollTo')
 
