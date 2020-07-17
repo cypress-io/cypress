@@ -8,6 +8,11 @@ const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const getDefaultWebpackOptions = (typescriptPath) => {
   return {
     mode: 'development',
+    node: {
+      global: true,
+      __filename: true,
+      __dirname: true,
+    },
     module: {
       rules: [{
         test: /\.jsx?$/,

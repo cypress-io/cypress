@@ -60,6 +60,10 @@ describe('features', () => {
     await runAndEval('various_imports_spec.js')
   })
 
+  it('shims node globals', async () => {
+    await runAndEval('node_shim_spec.js')
+  })
+
   it('outputs inline source map', async () => {
     const outputPath = await run('es_features_spec.js')
     const contents = await fs.readFile(outputPath)
