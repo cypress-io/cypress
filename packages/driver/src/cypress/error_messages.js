@@ -1168,7 +1168,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/scrollto',
     },
     invalid_ensureScrollable: {
-      message: `${cmd('scrollTo')} \`{{ensureScrollable}}\` option must be a boolean. You passed: \`{{ensureScrollable}}\``,
+      message: `${cmd('scrollTo')} \`ensureScrollable\` option must be a boolean. You passed: \`{{ensureScrollable}}\``,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
   },

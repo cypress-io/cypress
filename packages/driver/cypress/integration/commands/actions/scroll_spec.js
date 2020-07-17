@@ -530,6 +530,17 @@ describe('src/cy/commands/actions/scroll', () => {
 
           cy.get('#scroll-to-both').scrollTo('25px', { easing: 'flower' })
         })
+
+        it('throws if ensureScrollable is not a boolean', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('`cy.scrollTo()` `ensureScrollable` option must be a boolean. You passed: `force`')
+            expect(err.docsUrl).to.eq('https://on.cypress.io/scrollto')
+
+            done()
+          })
+
+          cy.get('button:first').scrollTo('bottom', { ensureScrollable: 'force' })
+        })
       })
     })
 
