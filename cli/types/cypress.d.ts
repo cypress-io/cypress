@@ -732,7 +732,7 @@ declare namespace Cypress {
      *    $('#date').text(new Date().toJSON())
      *    // in the spec file
      *    // March 14, 2017 timestamp or Date object
-     *    const now = new Date(2017, 3, 14).getTime()
+     *    const now = new Date(2017, 2, 14).getTime()
      *    cy.clock(now)
      *    cy.visit('/index.html')
      *    cy.get('#date').contains('2017-03-14')
