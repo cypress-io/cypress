@@ -1,8 +1,10 @@
+/// <reference types="cypress" />
 import { mountCallback } from 'cypress-vue-unit-test'
+import { reverse } from './reverse'
 
 describe('Global filters', () => {
   const filters = {
-    reverse: (s) => s.split('').reverse().join(''),
+    reverse,
   }
 
   // use reverse filter in template
@@ -18,9 +20,12 @@ describe('Global filters', () => {
 
   it('registers global filter', () => {
     cy.wrap(window.Vue)
-      // cy.window().its('Vue')
       .invoke('filter', 'reverse')
       .should('equal', filters.reverse)
+  })
+
+  it('unit tests the reverse function', () => {
+    expect(reverse('Hello')).to.equal('olleH')
   })
 
   it('reverses the string', () => {

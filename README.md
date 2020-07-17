@@ -92,87 +92,10 @@ You can pass extensions (global components, mixins, modules to use)
 when mounting Vue component. Use `{ extensions: { ... }}` object inside
 the `options`.
 
-- `components` - object of 'id' and components to register globally.
-
-```js
-// two different components, each gets "numbers" list
-// into its property "messages"
-const template = `
-  <div>
-    <message-list :messages="numbers"/>
-    <a-list :messages="numbers"/>
-  </div>
-`
-// our top level data
-const data = () => ({ numbers: ['uno', 'dos'] })
-// register same component globally under different names
-const components = {
-  'message-list': MessageList,
-  'a-list': MessageList,
-}
-// extend Vue with global components
-const extensions = {
-  components,
-}
-beforeEach(mountCallback({ template, data }, { extensions }))
-```
-
-See [Vue component docs](https://vuejs.org/v2/api/#Vue-component),
-[global-components-spec.js](cypress/integration/global-components-spec.js)
-
-- `use` (alias `plugins`) - list of plugins
-
-```js
-const use = [MyPlugin]
-// extend Vue with plugins
-const extensions = {
-  use,
-}
-beforeEach(mountCallback({}, { extensions }))
-```
-
-See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
-and [plugin-spec.js](cypress/integration/plugin-spec.js)
-
-- `mixin` (alias `mixins`) - list of global mixins
-
-```js
-const MyMixin = {
-  // we have to use original Sinon to create a spy
-  // because we are outside a test function
-  // and cannot use "cy.spy"
-  created: Cypress.sinon.spy(),
-}
-const mixin = [MyMixin]
-// extend Vue with mixins
-const extensions = {
-  mixin,
-}
-beforeEach(mountCallback({}, { extensions }))
-
-it('calls mixin "created" method', () => {
-  expect(MyMixin.created).to.have.been.calledOnce
-})
-```
-
-See [Vue global mixin docs](https://vuejs.org/v2/guide/mixins.html#Global-Mixin)
-and [mixin-spec.js](cypress/integration/mixin-spec.js)
-
-- `filters` - hash of global filters
-
-```js
-const filters = {
-  reverse: (s) => s.split().reverse().join(),
-}
-// extend Vue with global filters
-const extensions = {
-  filters,
-}
-beforeEach(mountCallback({}, { extensions }))
-```
-
-See [Vue global filters docs](https://vuejs.org/v2/api/#Vue-filter)
-and [filters-spec.js](cypress/integration/filters-spec.js)
+- `components` - object of 'id' and components to register globally, see [Components](cypress/component/basic/components) example
+- `use` (alias `plugins`) - list of plugins, see [Plugins](cypress/component/basic/plugins)
+- `mixin` (alias `mixins`) - list of global mixins, see [Mixins](cypress/component/basic/mixins) example
+- `filters` - hash of global filters, see [Filters](cypress/component/basic/filters) example
 
 <a name="intro-example"/>
 
@@ -587,8 +510,12 @@ describe('HelloWorld component', () => {
 <!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
+[Components](cypress/component/basic/components) | Registers global components to use
+[Filters](cypress/component/basic/filters) | Registering global filters
 [Hello](cypress/component/basic/hello) | Testing examples from Vue2 cookbook
+[Mixins](cypress/component/basic/mixins) | Registering Vue mixins
 [Plugins](cypress/component/basic/plugins) | Loading additional plugins
+[Props](cypress/component/basic/props) | Pass props to the component during mount
 <!-- prettier-ignore-end -->
 
 ### Advanced examples

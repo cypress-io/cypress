@@ -15,3 +15,5 @@ const extensions = {
 
 mount({}, { extensions })
 ```
+
+See [Vue plugin docs](https://vuejs.org/v2/guide/plugins.html)
