@@ -48,7 +48,7 @@
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@applitools/eyes-cypress": "3.12.2",
+    "@applitools/eyes-cypress": "3.12.3",
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
