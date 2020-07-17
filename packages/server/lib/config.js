@@ -506,7 +506,7 @@ module.exports = {
   // {value: obj.val, from: "plugin"}
   setPluginResolvedOn (resolvedObj, obj) {
     return _.each(obj, (val, key) => {
-      if (_.isObject(val) && !_.isArray(val)) {
+      if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
         // recurse setting overrides
         // inside of this nested objected
         return this.setPluginResolvedOn(resolvedObj[key], val)
