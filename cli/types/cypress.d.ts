@@ -492,6 +492,10 @@ declare namespace Cypress {
   }
 
   type CanReturnChainable = void | Chainable
+  type ThenReturn<S, R> =
+    R extends void ? Chainable<S> :
+    R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
+    Chainable<S>
 
   /**
    * Chainable interface for non-array Subjects
@@ -1756,7 +1760,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
     then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
