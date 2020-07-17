@@ -23,13 +23,14 @@ module.exports = {
     })
   },
 
-  handleIframe (req, res, config, getRemoteState) {
+  handleIframe (req, res, config, getRemoteState, extraOptions) {
     const test = req.params[0]
     const iframePath = cwd('lib', 'html', 'iframe.html')
+    const specFilter = _.get(extraOptions, 'specFilter')
 
-    debug('handle iframe %o', { test })
+    debug('handle iframe %o', { test, specFilter })
 
-    return this.getSpecs(test, config)
+    return this.getSpecs(test, config, extraOptions)
     .then((specs) => {
       return this.getJavascripts(config)
       .then((js) => {
@@ -46,8 +47,8 @@ module.exports = {
     })
   },
 
-  getSpecs (spec, config) {
-    debug('get specs %o', { spec })
+  getSpecs (spec, config, extraOptions = {}) {
+    debug('get specs %o', { spec, extraOptions })
 
     const convertSpecPath = (spec) => {
       // get the absolute path to this spec and
@@ -59,15 +60,26 @@ module.exports = {
       return this.prepareForBrowser(convertedSpec, config.projectRoot)
     }
 
+    const specFilter = _.get(extraOptions, 'specFilter')
+    const specFilterContains = (spec) => {
+      // only makes sense if there is specFilter string
+      return spec.relative.includes(specFilter)
+    }
+    const specFilterFn = specFilter ? specFilterContains : R.T
+
     const getSpecsHelper = () => {
       // grab all of the specs if this is ci
       const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
 
       if (spec === '__all') {
+        debug('returning all specs')
+
         return specsUtil.find(config)
         .then(R.tap((specs) => {
           return debug('found __all specs %o', specs)
-        })).filter((spec) => {
+        }))
+        .filter(specFilterFn)
+        .filter((spec) => {
           if (experimentalComponentTestingEnabled) {
             return spec.specType === 'integration'
           }

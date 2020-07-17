@@ -1,6 +1,7 @@
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:routes')
 
 const AppData = require('./util/app_data')
@@ -46,7 +47,12 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
 
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
-    files.handleIframe(req, res, config, getRemoteState)
+    debug('handling iframe for project spec %o', project.spec)
+    const extraOptions = {
+      specFilter: _.get(project, 'spec.specFilter'),
+    }
+
+    files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
