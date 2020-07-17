@@ -17,6 +17,7 @@ describe('e2e es modules', () => {
       snapshot: true,
       expectedExitCode: 1,
       noTypeScript: true,
+      onStdout: e2e.normalizeWebpackErrors,
     })
   })
 })

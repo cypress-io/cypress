@@ -143,7 +143,7 @@ The error was:
 
 Error: Webpack Compilation Error
 ./cypress/integration/stdout_exit_early_failing_spec.js
-Module build failed (from /Users/chrisbreiding/Dev/cypress/cypress-webpack-batteries-included-preprocessor/node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
 
 > 1 | +>

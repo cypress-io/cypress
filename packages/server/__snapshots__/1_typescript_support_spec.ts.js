@@ -90,12 +90,12 @@ Error: Webpack Compilation Error
 ./cypress/integration/typescript_failing_spec.tsXX:XX
 Module parse failed: Unexpected token (4:19)
 File was processed with these loaders:
- * ../../../../../cypress-webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
+ * ../../../../node_modules/@cypress/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
 You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint
 | // because it tests failing spec.
 > describe('fail', - > );
-| //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoidHlwZXNjcmlwdF9mYWlsaW5nX3NwZWMuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyJ0eXBlc2NyaXB0X2ZhaWxpbmdfc3BlYy50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUEsc0NBQXNDO0FBQ3RDLGlDQUFpQztBQUNqQyxRQUFRLENBQUMsTUFBTSxFQUFFLENBQUMsR0FBRSxBQUFELENBQUUsQ0FBQSIsInNvdXJjZXNDb250ZW50IjpbIi8vIFRoZSBjb2RlIGJlbG93IGlzIGlnbm9yZWQgYnkgZXNsaW50XG4vLyBiZWNhdXNlIGl0IHRlc3RzIGZhaWxpbmcgc3BlYy5cbmRlc2NyaWJlKCdmYWlsJywgLT4gKVxuIl19
+| 
  @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
 
 /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts

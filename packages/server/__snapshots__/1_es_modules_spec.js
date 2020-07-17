@@ -88,7 +88,7 @@ The error was:
 
 Error: Webpack Compilation Error
 ./lib/fail.js
-Module build failed (from /Users/chrisbreiding/Dev/cypress/cypress-webpack-batteries-included-preprocessor/node_modules/babel-loader/lib/index.js):
+Module build failed (from [..]):
 SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
 
   1 | export default {

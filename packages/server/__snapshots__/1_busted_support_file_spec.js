@@ -25,9 +25,9 @@ Error: Webpack Compilation Error
 ./cypress/support/index.js
 Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
 resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
-  using description file: /Users/chrisbreiding/Dev/cypress/cypress/packages/server/package.json (relative path: ./.projects/busted-support-file/cypress/support)
+  using description file: [..] (relative path: ./.projects/busted-support-file/cypress/support)
     Field 'browser' doesn't contain a valid alias configuration
-    using description file: /Users/chrisbreiding/Dev/cypress/cypress/packages/server/package.json (relative path: ./.projects/busted-support-file/cypress/support/does/not/exist)
+    using description file: [..] (relative path: ./.projects/busted-support-file/cypress/support/does/not/exist)
       no extension
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist doesn't exist

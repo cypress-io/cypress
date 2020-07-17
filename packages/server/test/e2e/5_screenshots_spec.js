@@ -66,6 +66,7 @@ describe('e2e screenshots', () => {
     expectedExitCode: 4,
     snapshot: true,
     timeout: 180000,
+    onStdout: e2e.normalizeWebpackErrors,
     onRun (exec, browser) {
       return exec()
       .then(() => {

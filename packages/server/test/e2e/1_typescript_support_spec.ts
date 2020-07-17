@@ -18,6 +18,7 @@ describe('e2e typescript', function () {
       spec: 'typescript_failing_spec.ts',
       snapshot: true,
       expectedExitCode: 1,
+      onStdout: e2e.normalizeWebpackErrors,
     })
   })
 
