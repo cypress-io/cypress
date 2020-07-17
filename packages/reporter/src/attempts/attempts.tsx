@@ -36,7 +36,7 @@ function renderAttemptContent (model: AttemptModel) {
   // performance optimization - don't render contents if not open
 
   return (
-    <div >
+    <div className={`attempt-${model.id + 1}`}>
       <Agents model={model} />
       <Routes model={model} />
       <div ref='commands' className='runnable-commands-region'>

@@ -1170,13 +1170,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
       const isHook = runnable.type === 'hook'
       const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
 
-      if (isAfterAllHook) {
-        // if (test.state !== 'failed') {
-        //   delete test.err
-        //   test.state = 'passed'
-        // }
-      }
-
       if (
         isHook &&
           test.trueFn &&

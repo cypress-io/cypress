@@ -27,14 +27,27 @@ describe('src/cypress/runner retries ui', () => {
     cy.percySnapshot()
   })
 
-  it('can set retry config', () => {
-    runIsolatedCypress({}, { config: { retries: 1 } })
-    .then(({ autCypress }) => {
-      expect(autCypress.config()).to.has.property('retries', 1)
-    })
+  it('collapses prev attempts and keeps final one open on failure', () => {
+    runIsolatedCypress({
+      suites: {
+        'suite 1': {
+          tests: [
+            { name: 'test 1',
+              fail: true,
+            },
+            { name: 'test 2',
+
+            },
+          ],
+        },
+      },
+    }, { config: { retries: 2 } })
+    .then(shouldHaveTestResults(1, 1))
+
+    cy.percySnapshot()
   })
 
-  it('can toggle failed attempt', () => {
+  it('can toggle failed prev attempt open', () => {
     runIsolatedCypress({
       suites: {
         'suite 1': {
@@ -48,15 +61,6 @@ describe('src/cypress/runner retries ui', () => {
     }, { config: { retries: 1 } })
     .then(shouldHaveTestResults(2, 1))
     .then(() => {
-      cy.contains('.test.runnable', 'test 3').click().within(() => {
-        cy.get('.runnable-err-print').should('not.be.visible')
-        cy.contains('Attempt 1').click()
-        cy.get('.runnable-err-print').should('be.visible')
-        cy.contains('Attempt 1').click()
-        // .find('i:last').pseudo(':before').should('have.property', 'content', '""')
-        cy.get('.runnable-err-print').should('not.be.visible')
-      })
-
       cy.contains('Attempt 1')
       .click()
       .closest('.attempt-item')
@@ -65,21 +69,8 @@ describe('src/cypress/runner retries ui', () => {
 
       cy.get('@console_error').should('be.calledWithMatch', 'AssertionError: test 2')
     })
-  })
 
-  it('simple retry', () => {
-    runIsolatedCypress({
-      suites: {
-        'suite 1': {
-          tests: [
-            { name: 'test 1',
-              fail: 1,
-            },
-          ],
-        },
-      },
-    }, { config: { retries: 1 } })
-    .then(shouldHaveTestResults(1, 0))
+    cy.percySnapshot()
   })
 
   it('takes screenshots properly on every attempt failure', () => {
@@ -112,7 +103,7 @@ describe('src/cypress/runner retries ui', () => {
                 return
               }
 
-              const $attemptCollapsible = cy.$$(`.attempt-tag:contains(Attempt ${attempt})`)
+              const $attemptCollapsible = cy.$$(attemptTag(attempt))
               .parentsUntil('.collapsible').last().parent()
 
               expect($attemptCollapsible).have.class('is-open')
@@ -132,7 +123,8 @@ describe('src/cypress/runner retries ui', () => {
     })
   })
 
-  it('test retry with hooks', () => {
+  // TODO: future versions should run all hooks associated with test on retry
+  it('before all hooks are not run on the second attempt', () => {
     runIsolatedCypress({
       suites: {
         'suite 1': {
@@ -145,7 +137,10 @@ describe('src/cypress/runner retries ui', () => {
     .then(() => {
       cy.contains('test')
       cy.contains('after all')
+      cy.contains('before all').should('not.exist')
     })
+
+    cy.percySnapshot()
   })
 
   it('test retry with [only]', () => {
@@ -162,6 +157,11 @@ describe('src/cypress/runner retries ui', () => {
       },
     }, { config: { retries: 1 } })
     .then(shouldHaveTestResults(1, 0))
+    .then(() => {
+      cy.contains('test 2')
+      cy.contains('test 1').should('not.exist')
+      cy.contains('test 3').should('not.exist')
+    })
   })
 
   it('test retry with many hooks', () => {
@@ -176,13 +176,21 @@ describe('src/cypress/runner retries ui', () => {
           ],
           tests: [
             { name: 'test 1' },
-            { name: 'test 2', fail: 1 },
-            { name: 'test 3' },
+            { name: 'test 2' },
+            { name: 'test 3', fail: 1 },
           ],
         },
       },
     }, { config: { retries: 1 } })
     .then(shouldHaveTestResults(3, 0))
+    .then(() => {
+      cy.contains('test 3').click()
+      getAttemptTag('test 3').first().click()
+
+      .within(() => {
+        cy.contains('after all').should('not.exist')
+      })
+    })
   })
 
   it('can retry from [beforeEach]', () => {
