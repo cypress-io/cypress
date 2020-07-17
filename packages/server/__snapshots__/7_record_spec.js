@@ -39,6 +39,9 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
       .js
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.js doesn't exist
+      .json
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.json doesn't exist
       .jsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
@@ -55,6 +58,7 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
         /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
@@ -989,6 +993,9 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
       .js
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.js doesn't exist
+      .json
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.json doesn't exist
       .jsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
@@ -1005,6 +1012,7 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
         /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
