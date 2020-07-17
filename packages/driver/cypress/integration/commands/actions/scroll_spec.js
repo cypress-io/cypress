@@ -352,14 +352,15 @@ describe('src/cy/commands/actions/scroll', () => {
           expect($container.get(0).scrollLeft).to.eq(500)
         })
       })
+
       // https://github.com/cypress-io/cypress/issues/1924
       it('skips scrollability check', () => {
         const scrollTo = cy.spy($.fn, 'scrollTo')
 
-        cy.get('button:first').scrollTo('bottom', { ensureScrollability: false }).then(() => {
+        cy.get('button:first').scrollTo('bottom', { ensureScrollable: false }).then(() => {
           cy.stub(cy, 'ensureScrollability')
 
-          expect(scrollTo).to.be.calledWithMatch({}, { ensureScrollability: false })
+          expect(scrollTo).to.be.calledWithMatch({}, { ensureScrollable: false })
           expect(cy.ensureScrollability).not.to.be.called
         })
       })
@@ -427,6 +428,9 @@ describe('src/cy/commands/actions/scroll', () => {
       it('throws when subject isn\'t scrollable', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.scrollTo()` failed because this element is not scrollable:')
+          expect(err.message).to.include(`\`<button>button</button>\``)
+          expect(err.message).to.include('Fix this problem, or use `{ensureScrollable: false}` to disable the scrollability check.')
+          expect(err.docsUrl).to.eq('https://on.cypress.io/scrollto')
 
           done()
         })
