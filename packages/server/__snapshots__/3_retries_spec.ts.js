@@ -1,4 +1,4 @@
-exports['e2e firefox / supports retries'] = `
+exports['retries / supports retries'] = `
 
 ====================================================================================================
 
@@ -41,8 +41,8 @@ exports['e2e firefox / supports retries'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed).png               (1280x720)
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed) (attempt 2).p     (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed).png               (1366x694)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed) (attempt 2).p     (1366x694)
      ng                                                                                             
 
 
