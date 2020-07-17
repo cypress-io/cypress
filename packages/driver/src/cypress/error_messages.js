@@ -368,11 +368,15 @@ module.exports = {
       message: 'Invalid position argument: `{{position}}`. Position may only be {{validPositions}}.',
       docsUrl: 'https://on.cypress.io/element-cannot-be-interacted-with',
     },
-    not_scrollable: [
-      `${cmd('{{cmd}}')} failed because this element is not scrollable:`,
-      '`{{node}}\`',
-      '',
-    ].join('\n'),
+    not_scrollable: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because this element is not scrollable:
+  
+        \`{{node}}\`
+  
+        Fix this problem, or use \`{ensureScrollable: false}\` to disable the scrollability check.`,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
     not_visible: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not visible:
