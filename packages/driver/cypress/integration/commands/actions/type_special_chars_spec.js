@@ -40,6 +40,30 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     cy.visit('/fixtures/dom.html')
   })
 
+  // https://github.com/cypress-io/cypress/issues/5502
+  describe('moves the cursor from in-between to the start or the end', () => {
+    it('input', () => {
+      cy.get('input:first')
+      .type('123{moveToStart}456{moveToEnd}789')
+      .should('have.value', '456123789')
+    })
+
+    it('contenteditable', () => {
+      cy.get('[contenteditable]:first')
+      .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
+      .then(($div) => {
+        // trim() is added for Firefox. It adds \n at the back as default.
+        expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789\nabcghi')
+      })
+    })
+
+    it('textarea', () => {
+      cy.get('textarea:first')
+      .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
+      .should('have.value', 'def123\n456\n789\nabcghi')
+    })
+  })
+
   context('parseSpecialCharSequences: false', () => {
     it('types special character sequences literally', (done) => {
       cy.get(':text:first').invoke('val', 'foo')
