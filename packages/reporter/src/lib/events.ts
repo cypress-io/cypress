@@ -163,11 +163,11 @@ const events: Events = {
     })
 
     localBus.on('show:error', (test: TestModel) => {
-      const command = test.err.isCommandErr && test.commandMatchingErr()
+      const command = test.err.isCommandErr ? test.commandMatchingErr() : null
 
       runner.emit('runner:console:error', {
         err: test.err,
-        commandId: command ? command.id : undefined,
+        commandId: command?.id,
       })
     })
 

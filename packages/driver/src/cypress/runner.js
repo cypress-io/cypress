@@ -1039,6 +1039,10 @@ const create = (specWindow, mocha, Cypress, cy) => {
       }
 
       if (willRetry && isAfterEachHook) {
+        if (test._hasEmitRetry) {
+          return noFail()
+        }
+
         setHookFailureProps(test, runnable, err)
 
         const newTest = test.clone()
@@ -1046,6 +1050,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
         newTest._currentRetry = test._currentRetry + 1
 
         test.parent.testsQueue.unshift(newTest)
+        test._hasEmitRetry = true
 
         Cypress.action('runner:retry', wrap(test), test.err)
 
@@ -1169,11 +1174,13 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       const isHook = runnable.type === 'hook'
       const isAfterAllHook = isHook && runnable.hookName.match(/after all/)
+      const isAfterEachHook = isHook && runnable.hookName.match(/after each/)
 
       if (
         isHook &&
           test.trueFn &&
-          !isAfterAllHook
+           !isAfterEachHook &&
+           !isAfterAllHook
       ) {
         return _next.call(this)
       }
@@ -1394,18 +1401,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       if (attrs) {
         return $Log.getSnapshotProps(attrs)
-      }
-    },
-
-    getErrorByTestId (testId, attemptIndex) {
-      let test = getTestById(testId)
-
-      if (test) {
-        if (attemptIndex != null && attemptIndex < test.prevAttempts.length) {
-          test = test.prevAttempts[attemptIndex]
-        }
-
-        return $errUtils.wrapErr(test.err)
       }
     },
 

@@ -183,7 +183,9 @@ function createCypress (defaultOptions = {}) {
 
           spyOn(autCypress.mocha.getRunner(), 'fail', (...args) => {
             Cypress.log({
-              name: 'Runner Fail',
+              name: 'Runner (fail event)',
+              ended: true,
+              event: true,
               message: `${args[1]}`,
               state: 'failed',
               consoleProps: () => {

@@ -12,7 +12,7 @@ function customPercySnapshot (
   }
 
   const opts = _.defaults({}, options, {
-    elementOverrides: { '.stats .duration': ($el) => $el.text('XX.XX') },
+    elementOverrides: { '.stats .duration': ($el) => $el.text('XX.XX'), '.cy-tooltip': true },
   })
 
   /**
@@ -24,7 +24,17 @@ function customPercySnapshot (
 
   const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
 
-  _.each(opts.elementOverrides, (v, k) => v(cy.$$(k)))
+  _.each(opts.elementOverrides, (v, k) => {
+    const $el = cy.$$(k)
+
+    if (_.isFunction(v)) {
+      v($el)
+
+      return
+    }
+
+    $el.css({ visibility: 'hidden' })
+  })
 
   // if we're in interactive mode via (cypress open)
   // then bail immediately

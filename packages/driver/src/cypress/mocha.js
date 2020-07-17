@@ -265,7 +265,12 @@ const restoreHookRetries = () => {
 const patchSuiteRetries = () => {
   Suite.prototype.retries = function (...args) {
     if (args[0] !== undefined && args[0] > -1) {
-      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {})
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {
+        args: {
+          title: this.title,
+          numRetries: args[0] ?? 2,
+        },
+      })
 
       throw err
     }
@@ -277,7 +282,12 @@ const patchSuiteRetries = () => {
 const patchHookRetries = () => {
   Hook.prototype.retries = function (...args) {
     if (args[0] !== undefined && args[0] > -1) {
-      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {})
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {
+        args: {
+          title: this.parent.title,
+          numRetries: args[0] ?? 2,
+        },
+      })
 
       // so this error doesn't cause a retry
       getTestFromRunnable(this)._retries = -1
@@ -379,7 +389,12 @@ function patchSuiteAddTest (Cypress) {
 
     test.retries = function (...args) {
       if (args[0] !== undefined && args[0] > -1) {
-        const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {})
+        const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {
+          args: {
+            title: test.title,
+            numRetries: args[0] ?? 2,
+          },
+        })
 
         // so this error doesn't cause a retry
         test._retries = -1
