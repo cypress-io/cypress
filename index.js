@@ -1,10 +1,6 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
-// console.log()
-// console.log('--- yep ---')
-// console.log()
-
 const getDefaultWebpackOptions = (typescriptPath) => {
   return {
     mode: 'development',
