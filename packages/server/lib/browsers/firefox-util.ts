@@ -177,6 +177,10 @@ export default {
 
     const { browser } = foxdriver
 
+    browser.on('error', (err) => {
+      debug('received error from foxdriver connection, ignoring %o', err)
+    })
+
     forceGcCc = () => {
       let gcDuration; let ccDuration
 
