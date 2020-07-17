@@ -338,6 +338,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const ensureScrollability = () => {
+        // Some elements are not scrollable, user may opt out of error checking
+        // https://github.com/cypress-io/cypress/issues/1924
         if (!options.ensureScrollability) {
           return
         }
