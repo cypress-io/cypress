@@ -197,11 +197,7 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
-      "foxdriver",
-      "**/@cypress/browserify-preprocessor",
-      "@cypress/browserify-preprocessor/**",
-      "**/browserify",
-      "browserify/**"
+      "foxdriver"
     ]
   },
   "optionalDependencies": {
