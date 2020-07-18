@@ -16,7 +16,6 @@ export default {
 
   computed: {
     error() {
-      debugger;
       console.log(this.username);
       return this.username.trim().length < 7
         ? "Please enter a longer username"

@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 
 import Vue from 'vue'
+import {mount as testUtilsMount, VueClass, VueTestUtilsConfigOptions} from '@vue/test-utils'
 const { stripIndent } = require('common-tags')
 
 // mountVue options
@@ -18,15 +19,6 @@ function checkMountModeEnabled() {
       `In order to use mount or unmount functions please place the spec in component folder`,
     )
   }
-}
-
-const deleteConstructor = (comp) => delete comp._Ctor
-
-const deleteCachedConstructors = (component) => {
-  if (!component.components) {
-    return
-  }
-  Cypress._.values(component.components).forEach(deleteConstructor)
 }
 
 const registerGlobalComponents = (Vue, options) => {
@@ -78,7 +70,7 @@ const installMixins = (Vue, options) => {
   }
 }
 
-const isConstructor = (object) => object && object._compiled
+const isConstructor = c => typeof c === 'function' && c.cid
 
 // @ts-ignore
 const hasStore = ({ store }: { store: object }) => store && store._vm
@@ -284,7 +276,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -315,7 +307,7 @@ declare global {
  * @see https://github.com/cypress-io/cypress/issues/7910
  */
 function failTestOnVueError(err, vm, info) {
-  console.error(`Vue error 🔥`)
+  console.error(`Vue error`)
   console.error(err)
   console.error('component:', vm)
   console.error('info:', info)
@@ -387,11 +379,6 @@ export const mount = (
     })
     .then((win) => {
       // @ts-ignore
-      win.Vue = Vue
-      // @ts-ignore
-      win.Vue.config.errorHandler = failTestOnVueError
-
-      // @ts-ignore
       const document: Document = cy.state('document')
       let el = document.getElementById('cypress-jsdom')
 
@@ -430,19 +417,17 @@ export const mount = (
       installMixins(Vue, options)
       installPlugins(Vue, options)
       registerGlobalComponents(Vue, options)
-      deleteCachedConstructors(component)
 
-      // create root Vue component
-      // and make it accessible via Cypress.vue
-      if (isConstructor(component)) {
-        // @ts-ignore
-        const Cmp = Vue.extend(component)
-        // @ts-ignore
-        Cypress.vue = new Cmp(props).$mount(componentNode)
-      } else {
-        // @ts-ignore
-        Cypress.vue = new Vue(component).$mount(componentNode)
-      }
+      Vue.config.errorHandler = null
+
+      // @ts-ignore
+      props.el = '#cypress-jsdom'
+
+      const VTUWrapper = isConstructor(component) ?
+          testUtilsMount(component as VueClass<any>, props) :
+          testUtilsMount({...component as VueClass<any>, ...props} as any)
+
+      Cypress.vue = VTUWrapper.vm
     })
 }
 
