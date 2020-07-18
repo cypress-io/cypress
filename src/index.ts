@@ -417,7 +417,7 @@ export const mount = (
 
       const wrapper = localVue.extend(component as any)
 
-      const VTUWrapper = testUtilsMount(wrapper, { ...localVue, ...props })
+      const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
       Cypress.vue = VTUWrapper.vm
       Cypress.vueWrapper = VTUWrapper
     })
