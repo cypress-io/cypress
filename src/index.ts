@@ -1,7 +1,10 @@
 /// <reference types="cypress" />
-
-import Vue from 'vue'
-import {mount as testUtilsMount, VueClass, VueTestUtilsConfigOptions} from '@vue/test-utils'
+import {
+  createLocalVue,
+  mount as testUtilsMount,
+  VueTestUtilsConfigOptions,
+  Wrapper
+} from '@vue/test-utils'
 const { stripIndent } = require('common-tags')
 
 // mountVue options
@@ -69,8 +72,6 @@ const installMixins = (Vue, options) => {
     })
   }
 }
-
-const isConstructor = c => typeof c === 'function' && c.cid
 
 // @ts-ignore
 const hasStore = ({ store }: { store: object }) => store && store._vm
@@ -296,6 +297,7 @@ declare global {
        *  cy.contains('Hello There').should('be.visible')
        */
       vue: Vue
+      vueWrapper: Wrapper<Vue>
     }
   }
 }
@@ -378,8 +380,14 @@ export const mount = (
       log: false,
     })
     .then((win) => {
+      const localVue = createLocalVue()
+      // @ts-ignore
+      win.Vue = localVue
+      localVue.config.errorHandler = failTestOnVueError
+
       // @ts-ignore
       const document: Document = cy.state('document')
+      document.body.innerHTML = ''
       let el = document.getElementById('cypress-jsdom')
 
       // If the target div doesn't exist, create it
@@ -413,21 +421,19 @@ export const mount = (
       el.append(componentNode)
 
       // setup Vue instance
-      installFilters(Vue, options)
-      installMixins(Vue, options)
-      installPlugins(Vue, options)
-      registerGlobalComponents(Vue, options)
-
-      Vue.config.errorHandler = null
+      installFilters(localVue, options)
+      installMixins(localVue, options)
+      installPlugins(localVue, options)
+      registerGlobalComponents(localVue, options)
 
       // @ts-ignore
-      props.el = '#cypress-jsdom'
+      props.attachTo = el
 
-      const VTUWrapper = isConstructor(component) ?
-          testUtilsMount(component as VueClass<any>, props) :
-          testUtilsMount({...component as VueClass<any>, ...props} as any)
+      const wrapper = localVue.extend(component as any)
 
+      const VTUWrapper = testUtilsMount(wrapper, { ...localVue, ...props })
       Cypress.vue = VTUWrapper.vm
+      Cypress.vueWrapper = VTUWrapper
     })
 }
 
