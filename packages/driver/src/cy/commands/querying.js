@@ -311,7 +311,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         }
 
         // if that didnt find anything and we have a within subject
-        // and we have been explictly told to filter
+        // and we have been explicitly told to filter
         // then just attempt to filter out elements from our within subject
         if (!$el.length && options.withinSubject && options.filter) {
           const filtered = options.withinSubject.filter(selector)
@@ -490,7 +490,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log.set({ $el })
       }
 
-      // find elements by the :cy-contains psuedo selector
+      // find elements by the :cy-contains pseudo selector
       // and any submit inputs with the attributeContainsWord selector
       const selector = $dom.getContainsSelector(text, filter, options)
 

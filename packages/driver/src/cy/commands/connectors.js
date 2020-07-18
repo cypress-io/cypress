@@ -372,7 +372,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
       // if we're not a function and we have a traversal
       // error then throw it now - since that provide a
-      // more specific error regarding non-existant
+      // more specific error regarding non-existent
       // properties or null or undefined values
       if (traversalErr) {
         throw traversalErr

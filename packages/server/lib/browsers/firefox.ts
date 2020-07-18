@@ -116,7 +116,7 @@ const defaultPreferences = {
   // Disable the ProcessHangMonitor
   'dom.ipc.reportProcessHangs': false,
 
-  // Disable slow script dialogues
+  // Disable slow script dialogs
   'dom.max_chrome_script_run_time': 0,
   'dom.max_script_run_time': 0,
 

@@ -77,7 +77,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
       return ensureDescendents(fromElViewport)
     } catch (err) {
       // if we're being covered by a fixed position element then
-      // we're going to attempt to continously scroll the element
+      // we're going to attempt to continuously scroll the element
       // from underneath this fixed position element until we can't
       // anymore
       const $fixed = getFixedOrStickyEl($elAtCoords)

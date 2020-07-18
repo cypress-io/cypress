@@ -368,7 +368,7 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return ensureUrl.isListening(apiUrl)
       .then(send)
       .catch((err) => {
-        // if it's an aggegrate error, just send the first one
+        // if it's an aggregate error, just send the first one
         if (err.length) {
           const subErr = err[0]
 

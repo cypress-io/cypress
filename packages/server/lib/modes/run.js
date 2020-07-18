@@ -113,7 +113,7 @@ const formatSymbolSummary = (failures) => {
   return getSymbol(failures)
 }
 
-const formatPath = (name, n, colour = 'reset') => {
+const formatPath = (name, n, color = 'reset') => {
   if (!name) return ''
 
   const fakeCwdPath = env.get('FAKE_CWD_PATH')
@@ -133,10 +133,10 @@ const formatPath = (name, n, colour = 'reset') => {
   if (n) {
     let nameWithNewLines = newlines.addNewlineAtEveryNChar(name, n)
 
-    return `${color(nameWithNewLines, colour)}`
+    return `${color(nameWithNewLines, color)}`
   }
 
-  return `${color(name, colour)}`
+  return `${color(name, color)}`
 }
 
 const formatNodeVersion = ({ resolvedNodeVersion, resolvedNodePath }, width) => {
@@ -1023,7 +1023,7 @@ module.exports = {
         console.log('')
 
         // always first close the open browsers
-        // before retrying or dieing
+        // before retrying or dying
         return openProject.closeBrowser()
         .then(() => {
           if (attempts === 1 || attempts === 2) {

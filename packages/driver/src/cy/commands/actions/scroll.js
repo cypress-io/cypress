@@ -107,7 +107,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (!parentIsWin) {
         // scroll the parent into view first
-        // before attemp
+        // before attempt
         options.$parent[0].scrollIntoView()
       }
 

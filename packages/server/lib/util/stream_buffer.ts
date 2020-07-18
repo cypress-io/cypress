@@ -23,7 +23,7 @@ function streamBuffer (initialSize = 2048) {
         newBufferLength *= 2
       }
 
-      debug('extending buffer to accomodate new chunk', {
+      debug('extending buffer to accommodate new chunk', {
         bufferLength: buffer.length,
         newBufferLength,
       })

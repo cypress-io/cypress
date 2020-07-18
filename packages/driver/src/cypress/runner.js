@@ -958,7 +958,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
       }
 
       // closure for calculating the actual
-      // runtime of a runnables fn exection duration
+      // runtime of a runnables fn execution duration
       // and also the run of the runnable:after:run:async event
       let lifecycleStart
       let wallClockStartedAt = null
@@ -1194,7 +1194,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // emit the final 'end' event
       // since our reporter depends on this event
-      // and mocha may never fire this becuase our
+      // and mocha may never fire this because our
       // runnable may never finish
       _runner.emit('end')
 

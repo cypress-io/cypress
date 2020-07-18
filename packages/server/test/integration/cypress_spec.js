@@ -1807,7 +1807,7 @@ describe('lib/cypress', () => {
       .then(() => {
         return settings.read(this.todosPath)
       }).then((json) => {
-        // this should be overriden by the env argument
+        // this should be overridden by the env argument
         json.baseUrl = 'http://localhost:8080'
 
         return settings.write(this.todosPath, json)

@@ -647,7 +647,7 @@ describe('src/cy/commands/screenshot', () => {
 
         cy.get('.short-element').screenshot()
         .then(() => {
-          // even though we don't need to scroll, the implementation behaviour is to
+          // even though we don't need to scroll, the implementation behavior is to
           // try to scroll until the element is at the top of the viewport.
           expect(scrollTo.getCall(0).args).to.eql([0, 20])
 

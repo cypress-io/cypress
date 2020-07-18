@@ -135,7 +135,7 @@ class Test extends Component<Props> {
 
   _shouldBeOpen () {
     // if this.isOpen is non-null, prefer that since the user has
-    // explicity chosen to open or close the test
+    // explicitly chosen to open or close the test
     if (this.isOpen !== null) return this.isOpen
 
     // otherwise, look at reasons to auto-open the test

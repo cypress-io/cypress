@@ -1118,7 +1118,7 @@ describe('src/cy/commands/waiting', () => {
             expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
               Command: 'wait',
               'Waited For': 'getFoo, getBar',
-              Yielded: [xhrs[0], xhrs[1]], // explictly create the array here
+              Yielded: [xhrs[0], xhrs[1]], // explicitly create the array here
             })
           })
         })

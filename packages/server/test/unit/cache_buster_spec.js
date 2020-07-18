@@ -4,7 +4,7 @@ const CacheBuster = require(`${root}lib/util/cache_buster`)
 
 describe('lib/cache_buster', () => {
   context('#get', () => {
-    it('returns seperator + 3 characters', () => {
+    it('returns separator + 3 characters', () => {
       expect(CacheBuster.get().length).to.eq(4)
     })
   })

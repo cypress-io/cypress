@@ -15,7 +15,7 @@ const runnableRun = Runnable.prototype.run
 const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
 
-// don't let mocha polute the global namespace
+// don't let mocha pollute the global namespace
 delete window.mocha
 delete window.Mocha
 
@@ -235,7 +235,7 @@ const restoreRunnableRun = () => {
 }
 
 // matching the current Runner.prototype.fail except
-// changing the logic for determing whether this is a valid err
+// changing the logic for determining whether this is a valid err
 const patchRunnerFail = () => {
   Runner.prototype.fail = function (runnable, err) {
     const errMessage = _.get(err, 'message')

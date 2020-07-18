@@ -324,7 +324,7 @@ const getPath = function (data, ext, screenshotsFolder) {
   }
 
   // truncate file names to be less than 220 characters
-  // to accomodate filename size limits
+  // to accommodate filename size limits
   const maxFileNameLength = 220
   const index = names.length - 1
 

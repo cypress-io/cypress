@@ -13,7 +13,7 @@ const $dom = require('../dom')
 // is(:focus).
 // see https://github.com/jquery/sizzle/wiki#sizzlematchesselector-domelement-element-string-selector-
 
-// this is to help to interpretor make optimizations around try/catch
+// this is to help to interpreter make optimizations around try/catch
 const tryCatchFinally = function ({ tryFn, catchFn, finallyFn }) {
   try {
     return tryFn()

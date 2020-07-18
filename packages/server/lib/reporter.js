@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const path = require('path')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
-// and prevents accidently upgrading this one
+// and prevents accidentally upgrading this one
 // TODO: look into upgrading this to version in driver
 const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')

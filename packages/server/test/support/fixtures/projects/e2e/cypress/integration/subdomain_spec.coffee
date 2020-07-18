@@ -35,8 +35,8 @@ describe "subdomains", ->
       .then (cookie) ->
         ## there should have been only a single secret-session
         ## request cookie sent on this XHR request
-        occurences = Cypress._.compact(cookie.split("secret-session"))
-        expect(occurences).to.have.length(1)
+        occurrences = Cypress._.compact(cookie.split("secret-session"))
+        expect(occurrences).to.have.length(1)
 
   it "correctly sets domain based cookies", ->
     cy
