@@ -19,6 +19,5 @@ it('renders label', () => {
   cy.get('input#username')
 
   // Get input field by label text we passed as slot
-  // enable once #364 is working
-  // cy.contains('label', 'Enter Username')
+  cy.contains('label', 'Enter Username')
 })
