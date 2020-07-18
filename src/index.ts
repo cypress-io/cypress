@@ -53,7 +53,6 @@ const installPlugins = (Vue, options, props) => {
       Cypress._.get(options, 'extensions.plugins') ||
       []
 
-  debugger;
   // @ts-ignore
   plugins.forEach((p) => {
     Array.isArray(p) ? Vue.use(...p) : Vue.use(p)
