@@ -13,7 +13,7 @@ describe('Mount component', () => {
     template,
     data() {
       return {
-        message: 'Hello Vue!'
+        message: 'Hello Vue!',
       }
     },
   }

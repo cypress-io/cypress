@@ -5,6 +5,7 @@ import {
   VueTestUtilsConfigOptions,
   Wrapper
 } from '@vue/test-utils'
+import VueI18n from "vue-i18n";
 const { stripIndent } = require('common-tags')
 
 // mountVue options
@@ -45,21 +46,14 @@ const installFilters = (Vue, options) => {
   }
 }
 
-const installPlugins = (Vue, options) => {
+const installPlugins = (Vue, options, props) => {
   const plugins: VuePlugins =
-    Cypress._.get(options, 'extensions.use') ||
-    Cypress._.get(options, 'extensions.plugins')
+      Cypress._.get(props, 'plugins') ||
+      Cypress._.get(options, 'extensions.use') ||
+      Cypress._.get(options, 'extensions.plugins') ||
+      []
 
-  if (Cypress._.isArray(plugins)) {
-    plugins.forEach((plugin) => {
-      if (Array.isArray(plugin)) {
-        const [aPlugin, options] = plugin
-        Vue.use(aPlugin, options)
-      } else {
-        Vue.use(plugin)
-      }
-    })
-  }
+  plugins.forEach(Vue.use)
 }
 
 const installMixins = (Vue, options) => {
@@ -132,15 +126,12 @@ type VueFilters = {
 type VueMixin = unknown
 type VueMixins = VueMixin | VueMixin[]
 
-/**
- * A Vue plugin to register,
- * or a plugin + its options pair inside an array
- */
-type VuePlugin = unknown | [unknown, unknown]
+type VuePluginOptions = unknown
+type VuePlugin = unknown | [unknown, VuePluginOptions]
 /**
  * A single Vue plugin or a list of plugins to register
  */
-type VuePlugins = VuePlugin | VuePlugin[]
+type VuePlugins = VuePlugin[]
 
 /**
  * Additional Vue services to register while mounting the component, like
@@ -352,29 +343,6 @@ export const mount = (
       Please remove it from your 'mountVue' options.`)
   }
 
-  // set global Vue instance:
-  // 1. convenience for debugging in DevTools
-  // 2. some libraries might check for this global
-  // appIframe.contentWindow.Vue = Vue
-
-  // refresh inner Vue instance of Vuex store
-  // @ts-ignore
-  if (hasStore(component)) {
-    // @ts-ignore
-    component.store = resetStoreVM(Vue, component)
-  }
-
-  // render function components should be market to be properly initialized
-  // https://github.com/bahmutov/cypress-vue-unit-test/issues/313
-  if (
-    Cypress._.isPlainObject(component) &&
-    // @ts-ignore
-    Cypress._.isFunction(component.render)
-  ) {
-    // @ts-ignore
-    component._compiled = true
-  }
-
   return cy
     .window({
       log: false,
@@ -384,6 +352,19 @@ export const mount = (
       // @ts-ignore
       win.Vue = localVue
       localVue.config.errorHandler = failTestOnVueError
+
+
+      // set global Vue instance:
+      // 1. convenience for debugging in DevTools
+      // 2. some libraries might check for this global
+      // appIframe.contentWindow.Vue = localVue
+
+      // refresh inner Vue instance of Vuex store
+      // @ts-ignore
+      if (hasStore(component)) {
+        // @ts-ignore
+        component.store = resetStoreVM(localVue, component)
+      }
 
       // @ts-ignore
       const document: Document = cy.state('document')
@@ -423,11 +404,12 @@ export const mount = (
       // setup Vue instance
       installFilters(localVue, options)
       installMixins(localVue, options)
-      installPlugins(localVue, options)
+      // @ts-ignore
+      installPlugins(localVue, options, props)
       registerGlobalComponents(localVue, options)
 
       // @ts-ignore
-      props.attachTo = el
+      props.attachTo = componentNode
 
       const wrapper = localVue.extend(component as any)
 

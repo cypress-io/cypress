@@ -1,21 +1,15 @@
 /// <reference types="cypress" />
-
+import Vue from 'vue'
 import TranslatedMessage from './TranslatedMessage.vue'
 import VueI18n from 'vue-i18n'
 import { mountCallback } from 'cypress-vue-unit-test'
 
+Vue.use(VueI18n)
+const i18n = new VueI18n({ locale: 'en' })
+
 describe('VueI18n', () => {
-  // need to use VueI18n as a plugin
-  const extensions = {
-    plugins: [VueI18n],
-    components: {
-      TranslatedMessage,
-    },
-  }
-
-  const template = '<translated-message />'
-
-  beforeEach(mountCallback({ template }, { extensions }))
+  // const i18n = new VueI18n({ locale: 'en' })
+  beforeEach(mountCallback(TranslatedMessage, { i18n }))
 
   it('shows English, Japanese and Russian greeting', () => {
     cy.viewport(400, 200)

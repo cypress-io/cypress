@@ -20,7 +20,7 @@
 <template>
   <div id="app">
     <label for="locale">locale</label>
-    <select v-model="locale">
+    <select v-model="locale" id="locale">
       <option>en</option>
       <option>fa</option>
       <option>ja</option>
@@ -32,8 +32,10 @@
 
 <script>
 export default {
-  name: 'app',
-  data () { return { locale: 'en' } },
+  name: 'TranslatedMessage',
+  data () {
+    return { locale: 'en' }
+  },
   watch: {
     locale (val) {
       this.$i18n.locale = val

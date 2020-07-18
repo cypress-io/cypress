@@ -114,8 +114,8 @@ The code is pretty simple
 ```js
 var app = new Vue({
   el: '#app',
-  data: {
-    message: 'Hello Vue!',
+  data() {
+    return { message: 'Hello Vue!' }
   },
 })
 ```
@@ -210,12 +210,14 @@ describe('Declarative rendering', () => {
     </ol>
   `
 
-  const data = {
-    todos: [
-      { text: 'Learn JavaScript' },
-      { text: 'Learn Vue' },
-      { text: 'Build something awesome' },
-    ],
+  function data() {
+    return {
+      todos: [
+        { text: 'Learn JavaScript' },
+        { text: 'Learn Vue' },
+        { text: 'Build something awesome' },
+       ],
+    }
   }
 
   beforeEach(mountCallback({ template, data }))
@@ -274,8 +276,8 @@ describe('Handling User Input', () => {
     </div>
   `
 
-  const data = {
-    message: 'Hello Vue.js!',
+  function data() {
+    return { message: 'Hello Vue.js!' }
   }
 
   const methods = {
