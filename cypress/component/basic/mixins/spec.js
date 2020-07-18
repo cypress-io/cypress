@@ -2,6 +2,8 @@
 import { mount, mountCallback } from 'cypress-vue-unit-test'
 
 describe('Mixins', () => {
+  const template = '<div>mixin test</div>'
+
   context('Global mixin', () => {
     const MyMixin = {
       // we have to use original Sinon to create a spy
@@ -14,10 +16,13 @@ describe('Mixins', () => {
     const extensions = {
       mixin,
     }
-    beforeEach(mountCallback({}, { extensions }))
+    beforeEach(mountCallback({ template }, { extensions }))
 
     it('calls mixin "created" method', () => {
-      expect(MyMixin.created).to.have.been.calledOnce
+      // the "created" will be called twice
+      // 1 - when the test wrapper element made by the Vue test utils is created
+      // 2 - when the element above we are testing is created
+      expect(MyMixin.created).to.have.been.calledTwice
     })
   })
 
@@ -32,9 +37,12 @@ describe('Mixins', () => {
       const extensions = {
         mixin,
       }
-      mount({}, { extensions })
+      mount({ template }, { extensions })
       // use the alias to retrieve the stub to check
-      cy.get('@created').should('have.been.calledOnce')
+      // the "created" will be called twice
+      // 1 - when the test wrapper element made by the Vue test utils is created
+      // 2 - when the element above we are testing is created
+      cy.get('@created').should('have.been.calledTwice')
     })
   })
 })
