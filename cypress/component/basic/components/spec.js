@@ -27,22 +27,6 @@ describe('Global components', () => {
   }
   beforeEach(mountCallback({ template, data }, { extensions }))
 
-  it('registers global component', () => {
-    cy.window()
-      .its('Vue')
-      .invoke('component', 'message-list')
-      // returns component constructor
-      // so we can compare with our component's constructor (Ctor)
-      .should('equal', MessageList._Ctor[0])
-
-    // second registered component "a-list" also points
-    // at the same component
-    cy.window()
-      .its('Vue')
-      .invoke('component', 'a-list')
-      .should('equal', MessageList._Ctor[0])
-  })
-
   it('shows two items at the start in both lists', () => {
     getItems().should('have.length', 4)
   })
