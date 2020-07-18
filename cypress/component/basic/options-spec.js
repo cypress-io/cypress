@@ -13,7 +13,7 @@ const data = {
 describe('Mount component', () => {
   // hmm, there are no more options to pass
 
-  const component = { template, data }
+  const component = { template, data() { return data } }
   beforeEach(mountCallback(component))
 
   it('shows hello', () => {
