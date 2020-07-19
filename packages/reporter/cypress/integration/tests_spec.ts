@@ -153,6 +153,30 @@ describe('controls', function () {
           expect($span).to.have.css('width', '0px')
         })
       })
+
+      it('recalculates correct width after being closed', function () {
+        const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
+
+        // take the wallClockStartedAt of this command and add 1000 milliseconds to it
+        // in order to simulate the command having run for 1 second of the total 4000 timeout
+        const date = new Date(wallClockStartedAt).setMilliseconds(1000)
+
+        cy.clock(date, ['Date'])
+        cy.get('.runnable-active').click()
+        cy.get('.command-progress > span').should(($span) => {
+          expect($span.attr('style')).to.contain('animation-duration: 3000ms')
+          expect($span.attr('style')).to.contain('width: 75%')
+        })
+
+        // set the clock ahead as if time has passed
+        cy.tick(2000)
+
+        cy.get('.runnable-active > .collapsible > .runnable-wrapper').click().click()
+        cy.get('.command-progress > span').should(($span) => {
+          expect($span.attr('style')).to.contain('animation-duration: 1000ms')
+          expect($span.attr('style')).to.contain('width: 25%')
+        })
+      })
     })
   })
 })
