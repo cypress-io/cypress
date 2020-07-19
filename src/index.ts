@@ -5,7 +5,6 @@ import {
   VueTestUtilsConfigOptions,
   Wrapper
 } from '@vue/test-utils'
-import VueI18n from "vue-i18n";
 const { stripIndent } = require('common-tags')
 
 // mountVue options
