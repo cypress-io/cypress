@@ -707,6 +707,18 @@ declare namespace Cypress {
      * This means that when you instantiate new Date in your application,
      * it will have a time of January 1st, 1970.
      *
+     * To restore the real clock call `.restore()`
+     *
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // restore the application clock
+     *  cy.clock().then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.clock().invoke('restore')
+     *
      * @see https://on.cypress.io/clock
      */
     clock(): Chainable<Clock>
@@ -716,15 +728,22 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clock
      * @example
-     *    // your app code
+     *    // in your app code
      *    $('#date').text(new Date().toJSON())
-     *    // from spec file
-     *    const now = new Date(2017, 3, 14).getTime() // March 14, 2017 timestamp
+     *    // in the spec file
+     *    // March 14, 2017 timestamp or Date object
+     *    const now = new Date(2017, 2, 14).getTime()
      *    cy.clock(now)
      *    cy.visit('/index.html')
      *    cy.get('#date').contains('2017-03-14')
+     *    // to restore the real clock
+     *    cy.clock().then(clock => {
+     *      clock.restore()
+     *    })
+     *    // or use this shortcut
+     *    cy.clock().invoke('restore')
      */
-    clock(now: number, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
      *
@@ -733,7 +752,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -1797,6 +1816,17 @@ declare namespace Cypress {
      * `cy.clock()` must be called before `cy.tick()`
      *
      * @see https://on.cypress.io/clock
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // advance time by 10 minutes
+     *  cy.tick(600*1000)
+     *  // you can restore the real clock
+     *  cy.tick(1000).then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.tick(5000).invoke('restore')
      */
     tick(milliseconds: number): Chainable<Clock>
 
@@ -4754,10 +4784,22 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @see https://on.cypress.io/tick
      */
     tick(time: number): void
     /**
-     * Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+     * Restore all overridden native functions.
+     * This is automatically called between tests, so should not generally be needed.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.restore()
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('restore')
      */
     restore(): void
   }
