@@ -1,12 +1,4 @@
 .reporter {
-  .collapsible-content {
-    display: none;
-  }
-
-  .is-open > .collapsible-content {
-    display: block;
-  }
-
   .collapsible-indicator {
     @extend .#{$fa-css-prefix}-caret-right;
     margin-right: 3px;
