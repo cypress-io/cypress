@@ -381,8 +381,20 @@ namespace CypressTriggerTests {
     })
 }
 
-const now = new Date(2019, 3, 2).getTime()
-cy.clock(now, ['Date'])
+namespace CypressClockTests {
+  // timestamp
+  cy.clock(new Date(2019, 3, 2).getTime(), ['Date'])
+  // timestamp shortcut
+  cy.clock(+ new Date(), ['Date'])
+  // Date object
+  cy.clock(new Date(2019, 3, 2))
+  // restoring the clock
+  cy.clock().then(clock => {
+    clock.restore()
+  })
+  // restoring the clock shortcut
+  cy.clock().invoke('restore')
+}
 
 namespace CypressContainsTests {
   cy.contains('#app')
