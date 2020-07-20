@@ -10,7 +10,3 @@ const component = <div className={someObj.someProp} />
 
 // @ts-ignore
 expect(component).to.be.an('object')
-
-// if (typeof component !== 'object') {
-//   throw new Error('component should be an object')
-// }
