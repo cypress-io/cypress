@@ -64,18 +64,14 @@ class Collapsible extends Component<Props, State> {
           {this.props.headerExtras}
         </div>
         <div className={cs('collapsible-content', this.props.contentClass)}>
-          {this.props.children}
+          {this.state.isOpen && this.props.children}
         </div>
       </div>
     )
   }
 
   _toggleOpen = () => {
-    this.setState({ isOpen: !this.state.isOpen }, () => {
-      if (this.props.toggleOpen) {
-        this.props.toggleOpen(this.state.isOpen)
-      }
-    })
+    this.setState({ isOpen: !this.state.isOpen })
   }
 
   _onClick = (e: MouseEvent) => {
