@@ -1779,10 +1779,10 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/webpack-batteries-included-preprocessor@1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.1.1.tgz#0e866a5c77c9445d361b96589de9645da105e1d0"
-  integrity sha512-PiqY2CeXENsi9zyHwVL6CodjZlzEf86RsZXfyRHNdqZJD1M8nfR1YMIWujyGJGdKAGeqC0wYz5iEaWjHNaGvgA==
+"@cypress/webpack-batteries-included-preprocessor@1.1.3":
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.1.3.tgz#84a4ce5a64d0f8726214792489ec06058b216d64"
+  integrity sha512-kGK8BKOlljNJ1EZQG5XGR7+rWOs90ft/0Fr9sS7M6OfDHH31oBCBKQ4UYNuXHQZrWSoySOXK74OWzpjvfggs8g==
   dependencies:
     "@babel/core" "^7.10.4"
     "@babel/plugin-proposal-class-properties" "7.10.4"
