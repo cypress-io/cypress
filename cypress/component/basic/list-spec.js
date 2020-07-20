@@ -11,12 +11,14 @@ describe('Declarative rendering', () => {
     </ol>
   `
 
-  const data = {
-    todos: [
-      { text: 'Learn JavaScript' },
-      { text: 'Learn Vue' },
-      { text: 'Build something awesome' },
-    ],
+  function data() {
+    return {
+      todos: [
+        { text: 'Learn JavaScript' },
+        { text: 'Learn Vue' },
+        { text: 'Build something awesome' },
+      ],
+    }
   }
 
   beforeEach(mountCallback({ template, data }))

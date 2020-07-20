@@ -114,8 +114,8 @@ The code is pretty simple
 ```js
 var app = new Vue({
   el: '#app',
-  data: {
-    message: 'Hello Vue!',
+  data() {
+    return { message: 'Hello Vue!' }
   },
 })
 ```
@@ -210,12 +210,14 @@ describe('Declarative rendering', () => {
     </ol>
   `
 
-  const data = {
-    todos: [
-      { text: 'Learn JavaScript' },
-      { text: 'Learn Vue' },
-      { text: 'Build something awesome' },
-    ],
+  function data() {
+    return {
+      todos: [
+        { text: 'Learn JavaScript' },
+        { text: 'Learn Vue' },
+        { text: 'Build something awesome' },
+      ],
+    }
   }
 
   beforeEach(mountCallback({ template, data }))
@@ -274,8 +276,8 @@ describe('Handling User Input', () => {
     </div>
   `
 
-  const data = {
-    message: 'Hello Vue.js!',
+  function data() {
+    return { message: 'Hello Vue.js!' }
   }
 
   const methods = {
@@ -516,6 +518,7 @@ Spec | Description
 [Mixins](cypress/component/basic/mixins) | Registering Vue mixins
 [Plugins](cypress/component/basic/plugins) | Loading additional plugins
 [Props](cypress/component/basic/props) | Pass props to the component during mount
+[Slots](cypress/component/basic/slots) | Passing slots and scopedSlots to the component
 [Small examples](cypress/component/basic/small-examples) | A few small examples testing forms, buttons
 <!-- prettier-ignore-end -->
 
@@ -551,13 +554,6 @@ Repo | Description
 <!-- prettier-ignore-end -->
 
 ## Known problems
-
-<details id="slots">
-  <summary>Slots not supported</summary>
-
-See issue [#364](https://github.com/bahmutov/cypress-vue-unit-test/issues/364)
-
-</details>
 
 <a name="bundling"/>
 

@@ -10,8 +10,8 @@ describe('Handling User Input', () => {
     </div>
   `
 
-  const data = {
-    message: 'Hello Vue.js!',
+  function data() {
+    return { message: 'Hello Vue.js!' }
   }
 
   const methods = {

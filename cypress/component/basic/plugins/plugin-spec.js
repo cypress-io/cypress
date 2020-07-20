@@ -3,6 +3,7 @@ import { MyPlugin } from './MyPlugin'
 import { MyPluginWithOptions } from './MyPluginWithOptions'
 import { mount, mountCallback } from 'cypress-vue-unit-test'
 
+const EmptyComponent = { template: '<div></div>' }
 describe('Single component mount', () => {
   it('has the plugin', () => {
     const use = [MyPlugin]
@@ -12,7 +13,7 @@ describe('Single component mount', () => {
       use,
     }
 
-    mount({}, { extensions })
+    mount(EmptyComponent, { extensions })
 
     cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
   })
@@ -26,7 +27,7 @@ describe('Custom plugin MyPlugin', () => {
     use,
   }
   // use "mountCallback" to register the plugins
-  beforeEach(mountCallback({}, { extensions }))
+  beforeEach(mountCallback(EmptyComponent, { extensions }))
 
   it('registers global method on Vue instance', () => {
     cy.window().its('Vue').its('aPluginMethod').should('be.a', 'function')
@@ -49,7 +50,7 @@ describe('Plugins with options', () => {
       use,
     }
 
-    mount({}, { extensions })
+    mount(EmptyComponent, { extensions })
 
     // first plugin works
     cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')

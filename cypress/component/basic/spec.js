@@ -9,11 +9,14 @@ describe('Declarative rendering', () => {
     </div>
   `
 
-  const data = {
-    message: 'Hello Vue!',
-  }
-
-  beforeEach(mountCallback({ template, data }))
+  beforeEach(
+    mountCallback({
+      template,
+      data() {
+        return { message: 'Hello Vue!' }
+      },
+    }),
+  )
 
   it('shows hello', () => {
     cy.contains('Hello Vue!')

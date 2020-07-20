@@ -89,6 +89,7 @@
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-preprocessor": "5.4.1",
     "@intlify/vue-i18n-loader": "1.0.0",
+    "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
     "common-tags": "1.8.0",
     "debug": "4.1.1",

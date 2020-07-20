@@ -1,6 +1,10 @@
 /// <reference types="cypress" />
-
-import Vue from 'vue'
+import {
+  createLocalVue,
+  mount as testUtilsMount,
+  VueTestUtilsConfigOptions,
+  Wrapper
+} from '@vue/test-utils'
 const { stripIndent } = require('common-tags')
 
 // mountVue options
@@ -18,15 +22,6 @@ function checkMountModeEnabled() {
       `In order to use mount or unmount functions please place the spec in component folder`,
     )
   }
-}
-
-const deleteConstructor = (comp) => delete comp._Ctor
-
-const deleteCachedConstructors = (component) => {
-  if (!component.components) {
-    return
-  }
-  Cypress._.values(component.components).forEach(deleteConstructor)
 }
 
 const registerGlobalComponents = (Vue, options) => {
@@ -50,21 +45,17 @@ const installFilters = (Vue, options) => {
   }
 }
 
-const installPlugins = (Vue, options) => {
+const installPlugins = (Vue, options, props) => {
   const plugins: VuePlugins =
-    Cypress._.get(options, 'extensions.use') ||
-    Cypress._.get(options, 'extensions.plugins')
+      Cypress._.get(props, 'plugins') ||
+      Cypress._.get(options, 'extensions.use') ||
+      Cypress._.get(options, 'extensions.plugins') ||
+      []
 
-  if (Cypress._.isArray(plugins)) {
-    plugins.forEach((plugin) => {
-      if (Array.isArray(plugin)) {
-        const [aPlugin, options] = plugin
-        Vue.use(aPlugin, options)
-      } else {
-        Vue.use(plugin)
-      }
-    })
-  }
+  // @ts-ignore
+  plugins.forEach((p) => {
+    Array.isArray(p) ? Vue.use(...p) : Vue.use(p)
+  })
 }
 
 const installMixins = (Vue, options) => {
@@ -77,8 +68,6 @@ const installMixins = (Vue, options) => {
     })
   }
 }
-
-const isConstructor = (object) => object && object._compiled
 
 // @ts-ignore
 const hasStore = ({ store }: { store: object }) => store && store._vm
@@ -139,15 +128,12 @@ type VueFilters = {
 type VueMixin = unknown
 type VueMixins = VueMixin | VueMixin[]
 
-/**
- * A Vue plugin to register,
- * or a plugin + its options pair inside an array
- */
-type VuePlugin = unknown | [unknown, unknown]
+type VuePluginOptions = unknown
+type VuePlugin = unknown | [unknown, VuePluginOptions]
 /**
  * A single Vue plugin or a list of plugins to register
  */
-type VuePlugins = VuePlugin | VuePlugin[]
+type VuePlugins = VuePlugin[]
 
 /**
  * Additional Vue services to register while mounting the component, like
@@ -284,7 +270,7 @@ interface MountOptions {
 /**
  * Utility type for union of options passed to "mount(..., options)"
  */
-type MountOptionsArgument = Partial<ComponentOptions & MountOptions>
+type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUtilsConfigOptions>
 
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
@@ -304,6 +290,7 @@ declare global {
        *  cy.contains('Hello There').should('be.visible')
        */
       vue: Vue
+      vueWrapper: Wrapper<Vue>
     }
   }
 }
@@ -315,7 +302,7 @@ declare global {
  * @see https://github.com/cypress-io/cypress/issues/7910
  */
 function failTestOnVueError(err, vm, info) {
-  console.error(`Vue error 🔥`)
+  console.error(`Vue error`)
   console.error(err)
   console.error('component:', vm)
   console.error('info:', info)
@@ -358,41 +345,32 @@ export const mount = (
       Please remove it from your 'mountVue' options.`)
   }
 
-  // set global Vue instance:
-  // 1. convenience for debugging in DevTools
-  // 2. some libraries might check for this global
-  // appIframe.contentWindow.Vue = Vue
-
-  // refresh inner Vue instance of Vuex store
-  // @ts-ignore
-  if (hasStore(component)) {
-    // @ts-ignore
-    component.store = resetStoreVM(Vue, component)
-  }
-
-  // render function components should be market to be properly initialized
-  // https://github.com/bahmutov/cypress-vue-unit-test/issues/313
-  if (
-    Cypress._.isPlainObject(component) &&
-    // @ts-ignore
-    Cypress._.isFunction(component.render)
-  ) {
-    // @ts-ignore
-    component._compiled = true
-  }
-
   return cy
     .window({
       log: false,
     })
     .then((win) => {
+      const localVue = createLocalVue()
       // @ts-ignore
-      win.Vue = Vue
+      win.Vue = localVue
+      localVue.config.errorHandler = failTestOnVueError
+
+
+      // set global Vue instance:
+      // 1. convenience for debugging in DevTools
+      // 2. some libraries might check for this global
+      // appIframe.contentWindow.Vue = localVue
+
+      // refresh inner Vue instance of Vuex store
       // @ts-ignore
-      win.Vue.config.errorHandler = failTestOnVueError
+      if (hasStore(component)) {
+        // @ts-ignore
+        component.store = resetStoreVM(localVue, component)
+      }
 
       // @ts-ignore
       const document: Document = cy.state('document')
+      document.body.innerHTML = ''
       let el = document.getElementById('cypress-jsdom')
 
       // If the target div doesn't exist, create it
@@ -426,23 +404,20 @@ export const mount = (
       el.append(componentNode)
 
       // setup Vue instance
-      installFilters(Vue, options)
-      installMixins(Vue, options)
-      installPlugins(Vue, options)
-      registerGlobalComponents(Vue, options)
-      deleteCachedConstructors(component)
+      installFilters(localVue, options)
+      installMixins(localVue, options)
+      // @ts-ignore
+      installPlugins(localVue, options, props)
+      registerGlobalComponents(localVue, options)
 
-      // create root Vue component
-      // and make it accessible via Cypress.vue
-      if (isConstructor(component)) {
-        // @ts-ignore
-        const Cmp = Vue.extend(component)
-        // @ts-ignore
-        Cypress.vue = new Cmp(props).$mount(componentNode)
-      } else {
-        // @ts-ignore
-        Cypress.vue = new Vue(component).$mount(componentNode)
-      }
+      // @ts-ignore
+      props.attachTo = componentNode
+
+      const wrapper = localVue.extend(component as any)
+
+      const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
+      Cypress.vue = VTUWrapper.vm
+      Cypress.vueWrapper = VTUWrapper
     })
 }
 
