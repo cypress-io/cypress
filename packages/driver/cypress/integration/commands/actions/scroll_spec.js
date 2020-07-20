@@ -429,7 +429,7 @@ describe('src/cy/commands/actions/scroll', () => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.scrollTo()` failed because this element is not scrollable:')
           expect(err.message).to.include(`\`<button>button</button>\``)
-          expect(err.message).to.include('Make sure you\'re targeting the correct element or use  `{ensureScrollable: false}` to disable the scrollable check.')
+          expect(err.message).to.include('Make sure you\'re targeting the correct element or use `{ensureScrollable: false}` to disable the scrollable check.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/scrollto')
 
           done()
