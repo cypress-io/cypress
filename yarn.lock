@@ -14016,10 +14016,10 @@ https-proxy-agent@^4.0.0:
     agent-base "5"
     debug "4"
 
-human-interval@0.1.6:
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/human-interval/-/human-interval-0.1.6.tgz#0057973454764c3abcbeb2aed612fc9644e68488"
-  integrity sha1-AFeXNFR2TDq8vrKu1hL8lkTmhIg=
+human-interval@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/human-interval/-/human-interval-1.0.0.tgz#7ba00a15f3d94ab6a4c16f76060e4aa07c713019"
+  integrity sha512-SWPw3rD6/ocA0JnGePoXp5Zf5eILzsoL5vdWdLwtTuyrElyCpfQb0whIcxMdK/gAKNl2rFDGkPAbwI2KGZCvNA==
 
 human-signals@^1.1.1:
   version "1.1.1"
