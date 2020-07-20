@@ -1,23 +1,7 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
-const getCompilerOptions = (file) => {
-  const ext = file ? path.extname(file.filePath) : undefined
-  const options = {
-    esModuleInterop: true,
-    inlineSourceMap: true,
-    inlineSources: true,
-    downlevelIteration: true,
-  }
-
-  if (ext === '.tsx' || ext === '.jsx' || ext === '.js') {
-    options.jsx = 'react'
-  }
-
-  return options
-}
-
-const getDefaultWebpackOptions = (options = {}, file) => {
+const getDefaultWebpackOptions = (options = {}) => {
   return {
     mode: 'development',
     node: {
@@ -60,9 +44,12 @@ const getDefaultWebpackOptions = (options = {}, file) => {
             loader: require.resolve('ts-loader'),
             options: {
               compiler: options.typescript || 'typescript',
-              compilerOptions: getCompilerOptions(file),
-              // disable tsconfig-loading by loading an empty one
-              configFile: require.resolve('./empty-tsconfig'),
+              compilerOptions: {
+                esModuleInterop: true,
+                inlineSourceMap: true,
+                inlineSources: true,
+                downlevelIteration: true,
+              },
               logLevel: 'error',
               silent: true,
               transpileOnly: true,

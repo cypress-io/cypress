@@ -52,8 +52,7 @@
     "semantic-release": "17.1.1"
   },
   "files": [
-    "index.js",
-    "empty-tsconfig.json"
+    "index.js"
   ],
   "license": "MIT",
   "repository": {

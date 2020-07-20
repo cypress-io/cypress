@@ -48,16 +48,12 @@ describe('features', () => {
     await runAndEval('coffee_imports_spec.coffee')
   })
 
-  it('handles typescript with tsconfig', async () => {
-    await runAndEval('typescript-with-tsconfig/with_tsconfig_spec.ts')
-  })
-
-  it('handles typescript without tsconfig', async () => {
-    await runAndEval('typescript-without-tsconfig/without_tsconfig_spec.ts')
+  it('handles typescript', async () => {
+    await runAndEval('typescript-project/ts_spec.ts')
   })
 
   it('handles tsx', async () => {
-    await runAndEval('typescript-with-tsconfig/tsx_spec.tsx')
+    await runAndEval('typescript-project/tsx_spec.tsx')
   })
 
   it('handles importing .js, .json, .jsx, .ts, .tsx, and .coffee', async () => {
