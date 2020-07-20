@@ -68,4 +68,12 @@ describe('e2e firefox', function () {
       expect(stderr).not.to.include('foxdriver')
     },
   })
+
+  // NOTE: only an issue on windows
+  // https://github.com/cypress-io/cypress/issues/6392
+  e2e.it.skip('can run multiple specs', {
+    browser: 'firefox',
+    project: Fixtures.projectPath('e2e'),
+    spec: 'simple_spec.coffee,simple_passing_spec.coffee',
+  })
 })

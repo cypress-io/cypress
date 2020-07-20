@@ -11,7 +11,7 @@ const debugVerboseSend = debugModule('cypress-verbose:server:browsers:cri-client
 // debug using cypress-verbose:server:browsers:cri-client:recv:*
 const debugVerboseReceive = debugModule('cypress-verbose:server:browsers:cri-client:recv:[<--]')
 
-const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is not open/
+const WEBSOCKET_NOT_OPEN_RE = /^WebSocket is (?:not open|already in CLOSING or CLOSED state)/
 
 /**
  * Url returned by the Chrome Remote Interface
