@@ -131,7 +131,8 @@
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
     "find-webpack": "2.0.0",
-    "mime-types": "2.1.26"
+    "mime-types": "2.1.26",
+    "unfetch": "4.1.0"
   },
   "release": {
     "branches": [
