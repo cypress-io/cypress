@@ -1337,6 +1337,7 @@ jobs:
           pull_request_id: 515
           folder: examples/fundamentals__typescript
       - test-binary-against-repo:
+          repo: cypress-example-recipes
           command: npm test
           pull_request_id: 513
           folder: examples/fundamentals__module-api-wrap
