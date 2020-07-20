@@ -4,7 +4,7 @@ import Fixtures from '../support/helpers/fixtures'
 describe('retries', () => {
   e2e.setup()
 
-  e2e.it.only('supports retries', {
+  e2e.it('supports retries', {
     project: Fixtures.projectPath('retries-2'),
     spec: 'fail-twice.js',
     snapshot: true,
