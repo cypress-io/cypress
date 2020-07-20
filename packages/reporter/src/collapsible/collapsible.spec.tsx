@@ -25,7 +25,7 @@ describe('<Collapsible />', () => {
   it('renders with headerStyle when specified', () => {
     const component = shallow(<Collapsible headerStyle={{ margin: 0 }} />)
 
-    expect(component.find('.collapsible-header')).to.have.style('margin', '0')
+    expect(component.find('.collapsible-header-inner')).to.have.style('margin', '0')
   })
 
   it('renders the header', () => {

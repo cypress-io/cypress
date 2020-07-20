@@ -48,10 +48,13 @@ class Collapsible extends Component<Props, State> {
             onClick={this._onClick}
             onKeyPress={onEnterOrSpace(this._onKeyPress)}
             role='button'
-            style={this.props.headerStyle}
             tabIndex={0}
           >
-            <div className='collapsible-header-inner' tabIndex={-1}>
+            <div
+              className='collapsible-header-inner'
+              style={this.props.headerStyle}
+              tabIndex={-1}
+            >
               <i className='collapsible-indicator fa-fw fas' />
               <span className='collapsible-header-text'>
                 {this.props.header}
