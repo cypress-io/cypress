@@ -374,7 +374,7 @@ module.exports = {
   
         \`{{node}}\`
   
-        Fix this problem, or use \`{ensureScrollable: false}\` to disable the scrollability check.`,
+        Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
     not_visible: {
