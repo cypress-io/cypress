@@ -93,6 +93,7 @@
     "babel-plugin-istanbul": "6.0.0",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
-    "find-webpack": "2.0.0"
+    "find-webpack": "2.0.0",
+    "unfetch": "4.1.0"
   }
 }
