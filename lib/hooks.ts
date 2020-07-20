@@ -1,4 +1,6 @@
 // @ts-ignore
+const unfetch = require('unfetch/dist/unfetch.js')
+// @ts-ignore
 const isComponentSpec = () => Cypress.spec.specType === 'component'
 
 // When running component specs, we cannot allow "cy.visit"
@@ -34,11 +36,29 @@ function renderTestingPlatform() {
   return cy.get(selector, { log: false })
 }
 
+/**
+ * Replaces window.fetch with a polyfill based on XMLHttpRequest
+ * that Cypress can spy on and stub
+ * @see https://www.cypress.io/blog/2020/06/29/experimental-fetch-polyfill/
+ */
+function polyfillFetchIfNeeded() {
+  // @ts-ignore
+  if (Cypress.config('experimentalFetchPolyfill')) {
+    if (!cy.state('fetchPolyfilled')) {
+      delete window.fetch
+      window.fetch = unfetch
+      // @ts-ignore
+      cy.state('fetchPolyfilled', true)
+    }
+  }
+}
+
 before(() => {
   if (!isComponentSpec()) {
     return
   }
 
+  polyfillFetchIfNeeded()
   renderTestingPlatform()
 })
 
