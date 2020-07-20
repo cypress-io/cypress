@@ -2591,6 +2591,12 @@ declare namespace Cypress {
      * @default 'swing'
      */
     easing: 'swing' | 'linear',
+    /**
+     * Ensure element is scrollable. Error if element is not scrollable
+     *
+     * @default true
+     */
+    ensureScrollable: boolean,
   }
 
   interface ScrollIntoViewOptions extends ScrollToOptions {
