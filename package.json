@@ -142,7 +142,7 @@
     "gulp-rename": "1.4.0",
     "hasha": "5.0.0",
     "http-server": "0.12.1",
-    "human-interval": "0.1.6",
+    "human-interval": "1.0.0",
     "husky": "2.4.1",
     "inquirer": "3.3.0",
     "inquirer-confirm": "2.0.3",

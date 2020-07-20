@@ -382,11 +382,15 @@ module.exports = {
       message: 'Invalid position argument: `{{position}}`. Position may only be {{validPositions}}.',
       docsUrl: 'https://on.cypress.io/element-cannot-be-interacted-with',
     },
-    not_scrollable: [
-      `${cmd('{{cmd}}')} failed because this element is not scrollable:`,
-      '`{{node}}\`',
-      '',
-    ].join('\n'),
+    not_scrollable: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because this element is not scrollable:
+  
+        \`{{node}}\`
+  
+        Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
     not_visible: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not visible:
@@ -1175,6 +1179,10 @@ module.exports = {
     },
     multiple_containers: {
       message: `${cmd('scrollTo')} can only be used to scroll 1 element, you tried to scroll {{num}} elements.\n\n`,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
+    invalid_ensureScrollable: {
+      message: `${cmd('scrollTo')} \`ensureScrollable\` option must be a boolean. You passed: \`{{ensureScrollable}}\``,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
   },
