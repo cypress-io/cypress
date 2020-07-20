@@ -1,31 +1,43 @@
 /// <reference types="cypress" />
 import Vue from 'vue'
-import TranslatedMessage from './TranslatedMessage.vue'
+import TranslatedMessageWithJSON from './TranslatedJSONMessage.vue'
+import TranslatedMessageI18nBlock from './TranslatedI18nMessage.vue'
 import VueI18n from 'vue-i18n'
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mount } from 'cypress-vue-unit-test'
+import messages from './translations.json'
 
-Vue.use(VueI18n)
-const i18n = new VueI18n({ locale: 'en' })
+function expectHelloWorldGreeting() {
+  cy.viewport(400, 200)
+  const allLocales = Cypress.vue.$i18n.availableLocales
+
+  // ensure we don't strip locales
+  expect(Object.keys(messages)).to.have.members(allLocales)
+
+  allLocales.forEach((locale) => {
+    cy.get('select').select(locale).should('have.value', locale)
+    const hello = messages[locale].hello
+    cy.contains(hello)
+  })
+}
 
 describe('VueI18n', () => {
-  beforeEach(mountCallback(TranslatedMessage, { i18n }))
+  Vue.use(VueI18n)
 
-  it('shows English, Japanese and Russian greeting', () => {
-    cy.viewport(400, 200)
+  describe('with i18n block', () => {
+    beforeEach(() => {
+      const i18n = new VueI18n({ locale: 'en' })
+      mount(TranslatedMessageI18nBlock, { i18n })
+    })
 
-    cy.get('select').select('en').should('have.value', 'en')
-    cy.contains('message: hello')
-
-    cy.get('select').select('fa').should('have.value', 'fa')
-    cy.contains('message: سلام دنیا')
-
-    cy.get('select').select('ja').should('have.value', 'ja')
-    cy.contains('message: こんにちは、世界')
-
-    cy.get('select').select('ru').should('have.value', 'ru')
-    cy.contains('message: Привет мир')
+    it('shows HelloWorld for all locales', expectHelloWorldGreeting)
   })
 
-  // TODO how to load messages not from i18n block but from external JSON file?
-  // then we could reuse the messages to check the contents
+  describe('with messages argument', () => {
+    beforeEach(() => {
+      const i18n = new VueI18n({ locale: 'en', messages })
+      mount(TranslatedMessageWithJSON, { i18n })
+    })
+
+    it('shows HelloWorld for all locales', expectHelloWorldGreeting)
+  })
 })

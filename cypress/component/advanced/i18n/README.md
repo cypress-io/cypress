@@ -1,8 +1,7 @@
 # i18n example
 
-Using [vue-i18n](https://kazupon.github.io/vue-i18n/) and [@intlify/vue-i18n-loader](https://github.com/intlify/vue-i18n-loader/tree/master) stable.
-
-See [TranslatedMessage.vue](TranslatedMessage.vue) and its test in [spec.js](spec.js)
+* For JSON-only, see [TranslatedJSONMessage.vue](TranslatedJSONMessage.vue) and its test in [spec.js](spec.js)
+* From i18n support loading, see [TranslatedI18nMessage.vue](TranslatedI18nMessage.vue) and its test in [spec.js](spec.js)
 
 ![i18n test in action](./images/i18n.gif)
 
