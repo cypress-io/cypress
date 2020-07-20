@@ -100,7 +100,7 @@ class Test extends Component<Props> {
 
   _contents (this: Test) {
     // performance optimization - don't render contents if not open
-    const model = this.props.model
+    const { model } = this.props
 
     if (!model.isOpen) return null
 
