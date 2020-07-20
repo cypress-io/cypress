@@ -1166,10 +1166,13 @@ const create = (specWindow, mocha, Cypress, cy) => {
       // of cy - since we now have a new 'test' and all of the
       // associated _runnables will share this state
       if (!fired(TEST_BEFORE_RUN_EVENT, test)) {
+        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
+
+        // this is the earliest we can set test._retries since test:before:run
+        // will load in testConfigOverrides (per test configuration)
         const retries = Cypress.getTestRetries() ?? -1
 
         test._retries = retries
-        fire(TEST_BEFORE_RUN_EVENT, test, Cypress)
       }
 
       const isHook = runnable.type === 'hook'

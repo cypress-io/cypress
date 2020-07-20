@@ -340,6 +340,10 @@ function patchTestClone () {
 
     const ret = testClone.apply(this, arguments)
 
+    // carry over testConfigOverrides
+    ret.cfg = this.cfg
+
+    // carry over test.id
     ret.id = this.id
 
     return ret

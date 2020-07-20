@@ -168,13 +168,15 @@ class $Cypress {
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 
-      if (!testRetries) return null
-
       if (_.isNumber(testRetries)) {
         return testRetries
       }
 
-      return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+      if (_.isObject(testRetries)) {
+        return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+      }
+
+      return null
     }
 
     this.Cookies = $Cookies.create(config.namespace, d)

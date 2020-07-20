@@ -391,7 +391,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
             it('[2 retries]', { retries: 2 }, () => assert(false))
             it('[open mode, no retry]', { retries: { runMode: 2, openMode: 0 } }, () => assert(false))
             it('[run mode, retry]', { retries: { runMode: 1, openMode: 0 }, isInteractive: false }, () => assert(false))
-            it('[open mode, 2 retries]', 2, () => assert(false))
+            it('[open mode, 2 retries]', { isInteractive: true }, () => assert(false))
             describe('suite 2', { retries: 1 }, () => {
               it('[set retries on suite]', () => assert(false))
             })
@@ -400,10 +400,10 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       })
       .then(shouldHaveTestResults(0, 7))
       .then(() => {
-        getAttemptTag('[no retry]').should('not.be.visible').then(haveCorrectError)
+        getAttemptTag('[no retry]').should('have.length', 1).then(haveCorrectError)
         getAttemptTag('[1 retry]').should('have.length', 2).then(haveCorrectError)
         getAttemptTag('[2 retries]').should('have.length', 3).then(haveCorrectError)
-        getAttemptTag('[open mode, no retry]').should('not.be.visible').then(haveCorrectError)
+        getAttemptTag('[open mode, no retry]').should('have.length', 1).then(haveCorrectError)
         getAttemptTag('[run mode, retry]').should('have.length', 2).then(haveCorrectError)
         getAttemptTag('[open mode, 2 retries]').should('have.length', 3).then(haveCorrectError)
         getAttemptTag('[set retries on suite]').should('have.length', 2).then(haveCorrectError)
