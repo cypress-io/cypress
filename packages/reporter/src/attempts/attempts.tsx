@@ -31,8 +31,6 @@ const AttemptHeader = ({ index, isOpen }:{index: number, isOpen: boolean}) => (
 )
 
 function renderAttemptContent (model: AttemptModel) {
-  if (!model.isOpen) return null
-
   // performance optimization - don't render contents if not open
 
   return (

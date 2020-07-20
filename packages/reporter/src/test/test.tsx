@@ -98,11 +98,8 @@ class Test extends Component<Props> {
     </>)
   }
 
-  _contents (this: Test) {
-    // performance optimization - don't render contents if not open
+  _contents () {
     const { model } = this.props
-
-    if (!model.isOpen) return null
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
