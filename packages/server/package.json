@@ -57,7 +57,7 @@
     "express": "4.16.4",
     "find-process": "1.4.1",
     "firefox-profile": "2.0.0",
-    "fix-path": "2.1.0",
+    "fix-path": "3.0.0",
     "fluent-ffmpeg": "2.1.2",
     "fs-extra": "8.1.0",
     "get-port": "5.1.1",
