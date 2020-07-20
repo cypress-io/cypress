@@ -66,7 +66,7 @@
     "graceful-fs": "4.2.0",
     "http-proxy": "cypress-io/node-http-proxy#9322b4b69b34f13a6f3874e660a35df3305179c6",
     "http-status-codes": "1.4.0",
-    "human-interval": "0.1.6",
+    "human-interval": "1.0.0",
     "image-size": "0.8.3",
     "is-fork-pr": "2.5.0",
     "is-html": "2.0.0",
