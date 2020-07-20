@@ -1338,10 +1338,10 @@
     jsonpointer "^4.0.0"
     xtend "^4.0.0"
 
-"@benmalka/foxdriver@0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.4.0.tgz#aecd158a785a09e104da036efe7611a13af4ed11"
-  integrity sha512-Uc9n5TTRV2AhfYaqkaDc5k72pfKxyd6LDVrQJyNLZ7uY4ThgEcQMjpVRkB8C7v16gKhubH4gmD0lad5pGvDUBg==
+"@benmalka/foxdriver@0.4.1":
+  version "0.4.1"
+  resolved "https://registry.yarnpkg.com/@benmalka/foxdriver/-/foxdriver-0.4.1.tgz#d21113f450b5d2dee669162b3f983c4588d0459e"
+  integrity sha512-9+47yCc2zP9VwtxLWkDY4fu3QIootCpFFTY+dMJLQ03RtrR2VbtZhbHT/fJ1C1K//x4V2pF0LE74ClQZBLI6jA==
   dependencies:
     fs-extra "^4.0.1"
     get-port "^3.2.0"
