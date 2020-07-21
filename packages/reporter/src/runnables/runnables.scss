@@ -28,9 +28,33 @@
     line-height: 18px;
     padding-left: 0;
 
-    .runnable-wrapper:hover {
-      background-color: #f7f8f9;
-      cursor: pointer;
+    .runnable-wrapper {
+      border-left: 5px solid transparent;
+      padding: 0;
+
+      .collapsible-header {
+        &:focus {
+          .collapsible-header-inner {
+            background-color: #f7f8f9;
+            cursor: pointer;
+          }
+        }
+
+        .collapsible-header-inner {
+          &:hover {
+            background-color: #f7f8f9;
+            cursor: pointer;
+          }
+
+          &:focus {
+            outline: 0;
+          }
+
+          height: 100%;
+          padding: 5px 15px 5px 5px;
+          width: 100%;
+        }
+      }
     }
 
     &.test.hover {
@@ -41,11 +65,6 @@
       .hooks-container, .runnable-err-wrapper {
         border-color: #828282;
       }
-    }
-
-    &:focus {
-      outline: 1px dotted #6c6c6c;
-      outline-offset: -1px;
     }
 
     &.runnable-active {
@@ -130,29 +149,6 @@
       }
     }
 
-    > div > .runnable-wrapper {
-      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
-        outline: 0;
-
-        .runnable-title {
-          outline: 1px dotted;
-        }
-      }
-    }
-
-    &.test > div > .runnable-wrapper {
-      .collapsible-header:focus, .collapsible-header-inner:focus, .collapsible-header-text:focus {
-        outline: 0;
-
-        .runnable-title {
-          outline: 0;
-          > span:first-child {
-            outline: 1px dotted;
-          }
-        }
-      }
-    }
-
     &.test.runnable-passed {
       .runnable-state {
         @extend .#{$fa-css-prefix}-check;
@@ -176,22 +172,8 @@
     }
   }
 
-  .runnable-wrapper {
-    padding: 5px 15px 5px 5px;
-    overflow: hidden;
-    border-left: 5px solid transparent;
-  }
-
   .runnable-instruments {
     border-left: 5px solid transparent;
-  }
-
-  .collapsible > .runnable-wrapper {
-    padding: 0;
-
-    .collapsible-header {
-      padding: 5px 15px 5px 5px;
-    }
   }
 
   .collapsible > .runnable-instruments {
