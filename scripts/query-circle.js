@@ -9,6 +9,9 @@ if (!process.env.CIRCLE_WORKFLOW_ID) {
   process.exit(1)
 }
 
+// we expect CircleCI to set the current polling job name
+const jobName = process.env.CIRCLE_JOB || 'Poll CircleCI'
+
 const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
@@ -73,9 +76,9 @@ const getJobStatus = async (workfowId) => {
   return response
 }
 
-const jobName = (job) => `- ${job.name}`
-
 const printJobs = (jobs) => {
+  const jobName = (job) => `- ${job.name}`
+
   console.log(jobs.map(jobName).join('\n'))
 }
 
@@ -104,7 +107,7 @@ const waitForAllJobs = async (workflowId) => {
   console.log('*** running jobs ***')
   printJobs(runningJobs)
 
-  if (runningJobs.length === 1 && runningJobs[0].name === 'Poll CircleCI') {
+  if (runningJobs.length === 1 && runningJobs[0].name === jobName) {
     // this job only!
     console.log('all jobs are done, finishing this job')
 
@@ -127,8 +130,8 @@ const minutes = (m) => m * 60 * 1000
 
 // https://github.com/demmer/bluebird-retry
 retry(waitForAllJobs.bind(null, workflowId), {
-  timeout: minutes(20),
-  interval: seconds(30),
+  timeout: minutes(30), // max time for this job
+  interval: seconds(30), // poll intervals
   max_interval: seconds(30),
 }).then(() => {
   console.log('all done')
