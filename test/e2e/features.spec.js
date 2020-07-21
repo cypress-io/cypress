@@ -8,17 +8,17 @@ const preprocessor = require('../../index')
 const fixturesDir = path.join(__dirname, '..', 'fixtures')
 const outputDir = path.join(__dirname, '..', '_test-output')
 
-const run = (fileName) => {
+const run = (fileName, options) => {
   const file = Object.assign(new EventEmitter(), {
     filePath: path.join(outputDir, fileName),
     outputPath: path.join(outputDir, fileName.replace('.', '_output.')),
   })
 
-  return preprocessor()(file)
+  return preprocessor(options)(file)
 }
 
-const runAndEval = async (fileName) => {
-  const outputPath = await run(fileName)
+const runAndEval = async (fileName, options) => {
+  const outputPath = await run(fileName, options)
   const contents = await fs.readFile(outputPath)
 
   eval(contents.toString())
@@ -48,15 +48,7 @@ describe('features', () => {
     await runAndEval('coffee_imports_spec.coffee')
   })
 
-  it('handles typescript', async () => {
-    await runAndEval('typescript-project/ts_spec.ts')
-  })
-
-  it('handles tsx', async () => {
-    await runAndEval('typescript-project/tsx_spec.tsx')
-  })
-
-  it('handles importing .js, .json, .jsx, .ts, .tsx, and .coffee', async () => {
+  it('handles importing .js, .json, .jsx, and .coffee', async () => {
     await runAndEval('various_imports_spec.js')
   })
 
@@ -69,5 +61,21 @@ describe('features', () => {
     const contents = await fs.readFile(outputPath)
 
     expect(contents.toString()).to.include('//# sourceMappingURL=data:application/json;charset=utf-8;base64')
+  })
+
+  describe('with typescript option set', () => {
+    const options = { typescript: require.resolve('typescript') }
+
+    it('handles typescript', async () => {
+      await runAndEval('typescript-project/ts_spec.ts', options)
+    })
+
+    it('handles tsx', async () => {
+      await runAndEval('typescript-project/tsx_spec.tsx', options)
+    })
+
+    it('handles importing .ts and .tsx', async () => {
+      await runAndEval('typescript_imports_spec.js', options)
+    })
   })
 })

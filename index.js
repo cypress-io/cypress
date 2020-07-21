@@ -2,7 +2,7 @@ const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
 const getDefaultWebpackOptions = (options = {}) => {
-  return {
+  const config = {
     mode: 'development',
     node: {
       global: true,
@@ -36,32 +36,40 @@ const getDefaultWebpackOptions = (options = {}) => {
         test: /\.coffee$/,
         exclude: [/node_modules/],
         loader: require.resolve('coffee-loader'),
-      }, {
-        test: /\.tsx?$/,
-        exclude: [/node_modules/],
-        use: [
-          {
-            loader: require.resolve('ts-loader'),
-            options: {
-              compiler: options.typescript || 'typescript',
-              compilerOptions: {
-                esModuleInterop: true,
-                inlineSourceMap: true,
-                inlineSources: true,
-                downlevelIteration: true,
-              },
-              logLevel: 'error',
-              silent: true,
-              transpileOnly: true,
-            },
-          },
-        ],
       }],
     },
     resolve: {
-      extensions: ['.js', '.json', '.jsx', '.ts', '.tsx', '.coffee'],
+      extensions: ['.js', '.json', '.jsx', '.coffee'],
     },
   }
+
+  if (options.typescript) {
+    config.module.rules.push({
+      test: /\.tsx?$/,
+      exclude: [/node_modules/],
+      use: [
+        {
+          loader: require.resolve('ts-loader'),
+          options: {
+            compiler: options.typescript,
+            compilerOptions: {
+              esModuleInterop: true,
+              inlineSourceMap: true,
+              inlineSources: true,
+              downlevelIteration: true,
+            },
+            logLevel: 'error',
+            silent: true,
+            transpileOnly: true,
+          },
+        },
+      ],
+    })
+
+    config.resolve.extensions = config.resolve.extensions.concat(['.ts', '.tsx'])
+  }
+
+  return config
 }
 
 const preprocessor = (options = {}) => {

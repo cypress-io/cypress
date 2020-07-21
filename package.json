@@ -28,7 +28,6 @@
     "coffee-loader": "0.9.0",
     "coffeescript": "1.12.7",
     "ts-loader": "8.0.1",
-    "typescript": "3.9.6",
     "webpack": "^4.43.0"
   },
   "devDependencies": {
@@ -49,7 +48,8 @@
     "lint-staged": "10.2.11",
     "mocha": "^8.0.1",
     "react": "^16.13.1",
-    "semantic-release": "17.1.1"
+    "semantic-release": "17.1.1",
+    "typescript": "3.9.6"
   },
   "files": [
     "index.js"
