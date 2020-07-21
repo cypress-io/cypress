@@ -39,7 +39,13 @@ const getWorkflow = async (workflowId) => {
   return response
 }
 
-const waitForAllJobs = async (workflowId) => {
+/**
+ * Job status
+ *  - blocked (has not run yet)
+ *  - running (currently running)
+ *  - failed | success
+*/
+const getJobStatus = async (workfowId) => {
   const auth = getAuth()
   // typo at https://circleci.com/docs/2.0/api-intro/
   // to retrieve all jobs, the url is "/workflow/:id/job"
@@ -63,14 +69,24 @@ const waitForAllJobs = async (workflowId) => {
   //     }
   //   ]
   // }
+  return response
+}
+
+const waitForAllJobs = async (workflowId) => {
+  const response = await getJobStatus(workflowId)
 
   // if a job is pending, its status will be "blocked"
   const blockedJobs = response.items.filter((job) => job.status === 'blocked')
 
+  const runningJobs = response.items.filter((job) => job.status === 'running')
+
   console.log('blocked jobs')
   console.log(blockedJobs.map((job) => `- ${job.name}`).join('\n'))
 
-  if (blockedJobs.length === 1) {
+  console.log('running jobs')
+  console.log(runningJobs.map((job) => `- ${job.name}`).join('\n'))
+
+  if (runningJobs.length === 1 && runningJobs[0].name === 'Poll CircleCI') {
     // this job only!
     console.log('all jobs are done, finishing this job')
 
@@ -102,3 +118,5 @@ retry(waitForAllJobs.bind(null, workflowId), {
   console.error(err)
   process.exit(1)
 })
+
+// getJobStatus(workflowId).then(console.log, console.error)
