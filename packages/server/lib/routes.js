@@ -17,11 +17,8 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
-    // https://github.com/cypress-io/cypress/issues/5909
-    const specUrl = req.originalUrl.replace('/__cypress/tests?p=', '')
-
     // slice out the cache buster
-    const test = CacheBuster.strip(specUrl)
+    const test = CacheBuster.strip(req.query.p)
 
     spec.handle(test, req, res, config, next, onError)
   })

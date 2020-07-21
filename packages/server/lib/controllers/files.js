@@ -108,7 +108,8 @@ module.exports = {
 
     debug('test url for file %o', { file, url })
 
-    return url
+    // https://github.com/cypress-io/cypress/issues/5909
+    return url.replace(/\+/g, '%2B')
   },
 
   getTitle (test) {
