@@ -400,6 +400,15 @@ jobs:
           command: node cli/bin/cypress info --dev
       - store-npm-logs
 
+  # a special job that keeps polling Circle and when all
+  # individual jobs are finished, it closes the Percy build
+  poll-circleci:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: node ./scripts/query-circle
+
   cli-visual-tests:
     <<: *defaults
     parallelism: 1
@@ -1462,6 +1471,11 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
+        requires:
+          - build
+    - poll-circleci:
+        name: Poll CircleCI
+        context: test-runner:poll-circle-workflow
         requires:
           - build
     - lint-types:

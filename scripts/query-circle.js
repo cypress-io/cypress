@@ -4,6 +4,13 @@ if (!process.env.CIRCLE_TOKEN) {
   process.exit(1)
 }
 
+if (!process.env.CIRCLE_WORKFLOW_ID) {
+  console.error('Cannot find CIRCLE_WORKFLOW_ID')
+  process.exit(1)
+}
+
+const workflowId = process.env.CIRCLE_WORKFLOW_ID
+
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
 const got = require('got')
@@ -60,10 +67,8 @@ const getWorkflowJobs = async (workflowId) => {
 
 // finished, has one failed job
 // const workflowId = '566ffe9a-62d4-45cd-9a27-9882139e0121'
-
 // pending workflow
 // jobs that have not run have "status: 'blocked'"
-const workflowId = '67d8fced-28ce-4a32-9048-101a6418ca22'
 
 // getWorkflow(workflowId).then(console.log, console.error)
 getWorkflowJobs(workflowId).then(console.log, console.error)
