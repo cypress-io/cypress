@@ -16,6 +16,7 @@ const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 const Promise = require('bluebird')
 const retry = require('bluebird-retry')
 const got = require('got')
+const _ = require('lodash')
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {
@@ -72,6 +73,12 @@ const getJobStatus = async (workfowId) => {
   return response
 }
 
+const jobName = (job) => `- ${job.name}`
+
+const printJobs = (jobs) => {
+  console.log(jobs.map(jobName).join('\n'))
+}
+
 const waitForAllJobs = async (workflowId) => {
   let response
 
@@ -83,15 +90,19 @@ const waitForAllJobs = async (workflowId) => {
   }
 
   // if a job is pending, its status will be "blocked"
-  const blockedJobs = response.items.filter((job) => job.status === 'blocked')
+  const blockedJobs = _.filter(response.items, { status: 'blocked' })
+  const failedJobs = _.filter(response.items, { status: 'failed' })
+  const runningJobs = _.filter(response.items, { status: 'running' })
 
-  const runningJobs = response.items.filter((job) => job.status === 'running')
+  console.log('')
+  console.log('*** failed jobs ***')
+  printJobs(failedJobs)
 
-  console.log('blocked jobs')
-  console.log(blockedJobs.map((job) => `- ${job.name}`).join('\n'))
+  console.log('*** blocked jobs ***')
+  printJobs(blockedJobs)
 
-  console.log('running jobs')
-  console.log(runningJobs.map((job) => `- ${job.name}`).join('\n'))
+  console.log('*** running jobs ***')
+  printJobs(runningJobs)
 
   if (runningJobs.length === 1 && runningJobs[0].name === 'Poll CircleCI') {
     // this job only!
