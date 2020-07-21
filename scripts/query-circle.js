@@ -20,6 +20,8 @@ const Promise = require('bluebird')
 const retry = require('bluebird-retry')
 const got = require('got')
 const _ = require('lodash')
+// always print the debug logs
+const debug = require('debug')('*')
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {
@@ -76,12 +78,6 @@ const getJobStatus = async (workfowId) => {
   return response
 }
 
-const printJobs = (jobs) => {
-  const jobName = (job) => `- ${job.name}`
-
-  console.log(jobs.map(jobName).join('\n'))
-}
-
 const waitForAllJobs = async (workflowId) => {
   let response
 
@@ -97,17 +93,11 @@ const waitForAllJobs = async (workflowId) => {
   const failedJobs = _.filter(response.items, { status: 'failed' })
   const runningJobs = _.filter(response.items, { status: 'running' })
 
-  console.log('')
-  console.log('*** failed jobs ***')
-  printJobs(failedJobs)
+  debug('failed jobs %o', _.map(failedJobs, 'name'))
+  debug('blocked jobs %o', _.map(blockedJobs, 'name'))
+  debug('running jobs %o', _.map(runningJobs, 'name'))
 
-  console.log('*** blocked jobs ***')
-  printJobs(blockedJobs)
-
-  console.log('*** running jobs ***')
-  printJobs(runningJobs)
-
-  if (runningJobs.length === 1 && runningJobs[0].name === jobName) {
+  if (!runningJobs.length || (runningJobs.length === 1 && runningJobs[0].name === jobName)) {
     // this job only!
     console.log('all jobs are done, finishing this job')
 
