@@ -73,7 +73,14 @@ const getJobStatus = async (workfowId) => {
 }
 
 const waitForAllJobs = async (workflowId) => {
-  const response = await getJobStatus(workflowId)
+  let response
+
+  try {
+    response = await getJobStatus(workflowId)
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
 
   // if a job is pending, its status will be "blocked"
   const blockedJobs = response.items.filter((job) => job.status === 'blocked')
