@@ -1,6 +1,7 @@
 import RewritingStream from 'parse5-html-rewriting-stream'
 import * as htmlRules from './html-rules'
 import stream from 'stream'
+import Bluebird from 'bluebird'
 import { DeferSourceMapRewriteFn } from './js'
 
 // the HTML rewriter passes inline JS to the JS rewriter, hence
@@ -14,7 +15,7 @@ export function HtmlJsRewriter (url: string, deferSourceMapRewrite?: DeferSource
   return rewriter
 }
 
-export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): Promise<string> {
+export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): Bluebird<string> {
   let out = ''
   const rewriter = HtmlJsRewriter(url, deferSourceMapRewrite)
 
@@ -24,7 +25,7 @@ export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?
 
   rewriter.end(html)
 
-  return new Promise<string>((resolve) => {
+  return new Bluebird<string>((resolve) => {
     rewriter.on('end', () => {
       resolve(out)
     })
