@@ -422,6 +422,10 @@ jobs:
         type: env_var_name
     steps:
       - when:
+          # if this is an external pull request, the environment variables
+          # are NOT set for security reasons, thus no need to poll -
+          # and no need to finalize Percy, since there will be no
+          # visual tests
           condition: <<parameters.required_env_var>>
           steps:
             - attach_workspace:
