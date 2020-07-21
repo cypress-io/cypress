@@ -45,24 +45,24 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
       .jsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
+      .coffee
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
       .ts
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.ts doesn't exist
       .tsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx doesn't exist
-      .coffee
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
       as directory
         /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
  @ ./cypress/integration/record_error_spec.coffee 1:0-31
  @ multi ./cypress/integration/record_error_spec.coffee
 
@@ -999,24 +999,24 @@ resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
       .jsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx doesn't exist
+      .coffee
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
       .ts
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.ts doesn't exist
       .tsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx doesn't exist
-      .coffee
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee doesn't exist
       as directory
         /foo/bar/.projects/e2e/cypress/it/does/not/exist doesn't exist
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
 [/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
-[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
  @ ./cypress/integration/record_error_spec.coffee 1:0-31
  @ multi ./cypress/integration/record_error_spec.coffee
 

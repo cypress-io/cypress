@@ -40,24 +40,24 @@ resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/su
       .jsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx doesn't exist
+      .coffee
+        Field 'browser' doesn't contain a valid alias configuration
+        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee doesn't exist
       .ts
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts doesn't exist
       .tsx
         Field 'browser' doesn't contain a valid alias configuration
         /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx doesn't exist
-      .coffee
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee doesn't exist
       as directory
         /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist doesn't exist
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
-[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
  @ ./cypress/support/index.js 3:0-27
  @ multi ./cypress/support/index.js
 

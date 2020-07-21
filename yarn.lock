@@ -1784,10 +1784,10 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/webpack-batteries-included-preprocessor@1.1.4":
-  version "1.1.4"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.1.4.tgz#18cc18175c057bef77627a979a3a20701f255df8"
-  integrity sha512-nXD+Qg8Kln4DiQGQyNozVD9pqMX/MRX/euqrIgUkemvhXi6qYWh5cvp++0jjeMTnlm5qc970OYQVwt1B28VaXA==
+"@cypress/webpack-batteries-included-preprocessor@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.2.0.tgz#0b9aff0f532090d769a7a60a703215c71f05365f"
+  integrity sha512-jan/fjY0L+NwuS/1e10GsS6wesRSszrnc/xquvUaG3VSZk5ARpuQV9nxC3ed0a/l7DtMSZjf9UlApJR/rxx8ng==
   dependencies:
     "@babel/core" "^7.10.4"
     "@babel/plugin-proposal-class-properties" "7.10.4"
@@ -1802,7 +1802,6 @@
     coffee-loader "0.9.0"
     coffeescript "1.12.7"
     ts-loader "8.0.1"
-    typescript "3.9.6"
     webpack "^4.43.0"
 
 "@cypress/webpack-preprocessor@5.4.1", "@cypress/webpack-preprocessor@^5.4.1":
@@ -24604,7 +24603,7 @@ typescript@3.7.4:
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
   integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
 
-typescript@3.9.6, typescript@^3.0.3, typescript@^3.8.3:
+typescript@^3.0.3, typescript@^3.8.3:
   version "3.9.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.9.6.tgz#8f3e0198a34c3ae17091b35571d3afd31999365a"
   integrity sha512-Pspx3oKAPJtjNwE92YS05HQoY7z2SFyOpHo9MqJor3BXAGNaPUs83CuVp9VISFkSjyRfiTpmKuAYGJB7S7hOxw==
