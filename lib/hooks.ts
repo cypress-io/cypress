@@ -75,12 +75,16 @@ function cleanupStyles() {
 
   const styles = document.body.querySelectorAll('style')
   styles.forEach(styleElement => {
-    document.body.removeChild(styleElement)
+    if (styleElement.parentElement) {
+      styleElement.parentElement.removeChild(styleElement)
+    }
   })
 
   const links = document.body.querySelectorAll('link[rel=stylesheet]')
   links.forEach(link => {
-    document.body.removeChild(link)
+    if (link.parentElement) {
+      link.parentElement.removeChild(link)
+    }
   })
 }
 

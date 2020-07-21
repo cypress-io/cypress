@@ -151,6 +151,7 @@ plus a few smaller sanity specs in [cypress/component/basic](cypress/component/b
 <!-- prettier-ignore-start -->
 Spec | Description
 --- | ---
+[api-test](cypress/component/advanced/api-test) | Mix [REST api tests](https://glebbahmutov.com/blog/api-testing-with-sever-logs/) that use [cy-api](https://github.com/bahmutov/cy-api) with component tests
 [app-action-example](cypress/component/advanced/app-action-example) | App actions against components
 [context](cypress/component/advanced/context) | Confirms components that use React context feature work
 [custom-command](cypress/component/advanced/custom-command) | Wraps `mount` in a custom command for convenience
