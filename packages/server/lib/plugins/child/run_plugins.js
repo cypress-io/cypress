@@ -6,7 +6,6 @@ const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 const tsnode = require('ts-node')
 const resolve = require('resolve')
-const pkg = require('@packages/root')
 
 const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
@@ -227,8 +226,6 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   }
 
   ipc.on('load', (config) => {
-    config.version = pkg.version
-
     debug('plugins load file "%s"', pluginsFile)
     debug('passing config %o', config)
     load(ipc, config, pluginsFile)
