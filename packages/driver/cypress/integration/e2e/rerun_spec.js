@@ -43,4 +43,21 @@ describe('rerun state bugs', () => {
       }
     })
   })
+
+  it('does nothing if there is no runner', () => {
+    // https://github.com/cypress-io/cypress/issues/7968
+    cy.stub(Cypress.cy, 'stop')
+    const runner = Cypress.runner
+
+    Cypress.runner = null
+
+    Cypress.stop()
+
+    const stopWasCalled = Cypress.cy.stop.called
+
+    Cypress.runner = runner
+    Cypress.cy.stop.restore()
+
+    expect(stopWasCalled).to.be.false
+  })
 })

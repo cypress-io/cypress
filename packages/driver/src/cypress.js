@@ -557,6 +557,11 @@ class $Cypress {
   }
 
   stop () {
+    if (!this.runner) {
+      // the tests have been reloaded
+      return
+    }
+
     this.runner.stop()
     this.cy.stop()
 

@@ -18,7 +18,7 @@
     "execa": "4.0.0",
     "fs-extra": "8.1.0",
     "lodash": "4.17.19",
-    "plist": "2.1.0",
+    "plist": "3.0.1",
     "ramda": "0.24.1"
   },
   "devDependencies": {
