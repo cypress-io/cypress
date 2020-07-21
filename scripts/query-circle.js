@@ -13,6 +13,7 @@ const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
+const retry = require('bluebird-retry')
 const got = require('got')
 
 /* eslint-disable-next-line no-unused-vars */
@@ -37,7 +38,7 @@ const getWorkflow = async (workflowId) => {
   return response
 }
 
-const getWorkflowJobs = async (workflowId) => {
+const waitForAllJobs = async (workflowId) => {
   const auth = getAuth()
   // typo at https://circleci.com/docs/2.0/api-intro/
   // to retrieve all jobs, the url is "/workflow/:id/job"
@@ -62,6 +63,18 @@ const getWorkflowJobs = async (workflowId) => {
   //   ]
   // }
 
+  // if a job is pending, its status will be "blocked"
+  const blockedJobs = response.items.filter((job) => job.status === 'blocked')
+
+  console.log('blocked jobs')
+  console.log(blockedJobs.map((job) => `- ${job.name}`).join('\n'))
+
+  if (blockedJobs.length === 1) {
+    // this job only!
+    console.log('all jobs are done, finishing this job')
+    process.exit(0)
+  }
+
   return response
 }
 
@@ -71,4 +84,12 @@ const getWorkflowJobs = async (workflowId) => {
 // jobs that have not run have "status: 'blocked'"
 
 // getWorkflow(workflowId).then(console.log, console.error)
-getWorkflowJobs(workflowId).then(console.log, console.error)
+// getWorkflowJobs(workflowId).then(console.log, console.error)
+
+// https://github.com/demmer/bluebird-retry
+retry(waitForAllJobs.bind(null, workflowId), {
+  max_retries: 1,
+  interval: 30 * 1000,
+}).then(() => {
+  console.log('all done')
+})
