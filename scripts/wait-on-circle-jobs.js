@@ -10,7 +10,7 @@ if (!process.env.CIRCLE_WORKFLOW_ID) {
 }
 
 // we expect CircleCI to set the current polling job name
-const jobName = process.env.CIRCLE_JOB || 'Poll CircleCI'
+const jobName = process.env.CIRCLE_JOB || 'poll-circle-jobs'
 
 const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
