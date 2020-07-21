@@ -347,7 +347,7 @@ commands:
     steps:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --circle-jobs <<parameters.job-names>>
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
 jobs:
   ## code checkout and yarn installs
@@ -427,7 +427,11 @@ jobs:
             - attach_workspace:
                 at: ~/
             - wait-on-circle-jobs:
-                job-names: desktop-gui-integration-tests-2x,desktop-gui-component-tests,cli-visual-tests,runner-integration-tests-chrome,
+                job-names: >
+                  desktop-gui-integration-tests-2x,
+                  desktop-gui-component-tests,
+                  cli-visual-tests,
+                  runner-integration-tests-chrome,
             - run: npx percy finalize --all
 
   cli-visual-tests:

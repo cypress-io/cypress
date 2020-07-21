@@ -27,20 +27,21 @@ if (!process.env.CIRCLE_WORKFLOW_ID) {
 
 const args = minimist(process.argv.slice(2), { boolean: false })
 
-const circleJobs = _
-.chain(args['circle-jobs'])
+const jobNames = _
+.chain(args['job-names'])
 .split(',')
 .without('true')
+.map(_.trim)
 .compact()
 .value()
 
-if (!circleJobs.length) {
-  console.error('Missing argument: --circle-jobs')
+if (!jobNames.length) {
+  console.error('Missing argument: --job-names')
   console.error('You must pass a comma separated list of Circle CI job names to wait for.')
   process.exit(1)
 }
 
-debug('received circle jobs: %o', circleJobs)
+debug('received circle jobs: %o', jobNames)
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {
