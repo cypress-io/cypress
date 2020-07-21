@@ -29,8 +29,8 @@ const validOrientations = ['landscape', 'portrait']
 // refresh would cause viewport to hang
 let currentViewport = null
 
-module.exports = (Commands, Cypress, cy, state, config) => {
-  const defaultViewport = _.pick(config(), 'viewportWidth', 'viewportHeight')
+module.exports = (Commands, Cypress, cy, state) => {
+  const defaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
 
   // currentViewport could already be set due to previous runs
   currentViewport = currentViewport || defaultViewport
@@ -41,7 +41,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     // need to restore prior to running the next test
     // after which we simply null and wait for the
     // next viewport change
-    setViewportAndSynchronize(defaultViewport.viewportWidth, defaultViewport.viewportHeight)
+    const configDefaultViewport = _.pick(Cypress.config(), 'viewportWidth', 'viewportHeight')
+
+    setViewportAndSynchronize(configDefaultViewport.viewportWidth, configDefaultViewport.viewportHeight)
   })
 
   const setViewportAndSynchronize = (width, height) => {

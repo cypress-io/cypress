@@ -41,7 +41,7 @@ const unavailableErr = () => {
   return $errUtils.throwErrByPath('server.unavailable')
 }
 
-const getDisplayName = (route) => route && route.response ? 'xhr stub' : 'xhr'
+const getDisplayName = (route) => _.isNil(route?.response) ? 'xhr' : 'xhr stub'
 
 const stripOrigin = (url) => {
   const location = $Location.create(url)
@@ -126,7 +126,7 @@ const startXhrServer = (cy, state, config) => {
             'Matched URL': route?.url,
             Status: xhr.statusMessage,
             Duration: xhr.duration,
-            'Stubbed': route && route.response != null ? 'Yes' : 'No',
+            Stubbed: _.isNil(route?.response) ? 'No' : 'Yes',
             Request: xhr.request,
             Response: xhr.response,
             XHR: xhr._getXhr(),

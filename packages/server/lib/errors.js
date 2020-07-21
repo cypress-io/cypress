@@ -550,7 +550,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         The support file is missing or invalid.
 
-        Your \`supportFile\` is set to \`${arg1}\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\` or \`.coffee\` file or, if you're using a preprocessor plugin, it must be supported by that plugin.
+        Your \`supportFile\` is set to \`${arg1}\`, but either the file is missing or it's invalid. The \`supportFile\` must be a \`.js\`, \`.ts\`, \`.coffee\` file or be supported by your preprocessor plugin (if configured).
 
         Correct your \`${arg2}\`, create the appropriate file, or set \`supportFile\` to \`false\` if a support file is not necessary for your project.
 
@@ -561,9 +561,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       msg = stripIndent`\
         The plugins file is missing or invalid.
 
-        Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\` or \`.coffee\` file.
+        Your \`pluginsFile\` is set to \`${arg1}\`, but either the file is missing, it contains a syntax error, or threw an error when required. The \`pluginsFile\` must be a \`.js\`, \`.ts\`, or \`.coffee\` file.
 
-        Or you might have renamed the extension of your \`pluginsFile\` to \`.ts\`. If that's the case, restart the test runner.
+        Or you might have renamed the extension of your \`pluginsFile\`. If that's the case, restart the test runner.
 
         Please fix this, or set \`pluginsFile\` to \`false\` if a plugins file is not necessary for your project.`.trim()
 
