@@ -13,6 +13,7 @@ const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
+const Promise = require('bluebird')
 const retry = require('bluebird-retry')
 const got = require('got')
 
@@ -72,10 +73,11 @@ const waitForAllJobs = async (workflowId) => {
   if (blockedJobs.length === 1) {
     // this job only!
     console.log('all jobs are done, finishing this job')
-    process.exit(0)
+
+    return Promise.resolve()
   }
 
-  return response
+  return Promise.reject(new Error('Jobs have not finished'))
 }
 
 // finished, has one failed job
@@ -86,10 +88,17 @@ const waitForAllJobs = async (workflowId) => {
 // getWorkflow(workflowId).then(console.log, console.error)
 // getWorkflowJobs(workflowId).then(console.log, console.error)
 
+const seconds = (s) => s * 1000
+const minutes = (m) => m * 60 * 1000
+
 // https://github.com/demmer/bluebird-retry
 retry(waitForAllJobs.bind(null, workflowId), {
-  max_retries: 1,
-  interval: 30 * 1000,
+  timeout: minutes(20),
+  interval: seconds(30),
+  max_interval: seconds(30),
 }).then(() => {
   console.log('all done')
+}, (err) => {
+  console.error(err)
+  process.exit(1)
 })

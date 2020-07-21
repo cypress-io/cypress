@@ -408,6 +408,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: node ./scripts/query-circle
+      - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
@@ -854,13 +855,6 @@ jobs:
       - run:
           command: node index.js
           working_directory: packages/launcher
-
-  percy-finalize:
-    <<: *defaults
-    steps:
-      - run:
-          name: "finalizes percy builds"
-          command: npx percy finalize --all
 
   build-binary:
     <<: *defaults
@@ -1608,13 +1602,6 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
-
-    - percy-finalize:
-        requires:
-          - desktop-gui-integration-tests-2x
-          - desktop-gui-component-tests
-          - cli-visual-tests
-          - runner-integration-tests-chrome
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
