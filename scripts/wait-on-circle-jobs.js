@@ -1,4 +1,20 @@
 /* eslint-disable no-console */
+
+const _ = require('lodash')
+const minimist = require('minimist')
+const Promise = require('bluebird')
+const retry = require('bluebird-retry')
+const got = require('got')
+// always print the debug logs
+const debug = require('debug')('*')
+
+// we expect CircleCI to set the current polling job name
+const jobName = process.env.CIRCLE_JOB || 'wait-on-circle-jobs'
+
+const workflowId = process.env.CIRCLE_WORKFLOW_ID
+
+const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
+
 if (!process.env.CIRCLE_TOKEN) {
   console.error('Cannot find CIRCLE_TOKEN')
   process.exit(1)
@@ -9,19 +25,22 @@ if (!process.env.CIRCLE_WORKFLOW_ID) {
   process.exit(1)
 }
 
-// we expect CircleCI to set the current polling job name
-const jobName = process.env.CIRCLE_JOB || 'poll-circle-jobs'
+const args = minimist(process.argv.slice(2), { boolean: false })
 
-const workflowId = process.env.CIRCLE_WORKFLOW_ID
+const circleJobs = _
+.chain(args['circle-jobs'])
+.split(',')
+.without('true')
+.compact()
+.value()
 
-const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
+if (!circleJobs.length) {
+  console.error('Missing argument: --circle-jobs')
+  console.error('You must pass a comma separated list of Circle CI job names to wait for.')
+  process.exit(1)
+}
 
-const Promise = require('bluebird')
-const retry = require('bluebird-retry')
-const got = require('got')
-const _ = require('lodash')
-// always print the debug logs
-const debug = require('debug')('*')
+debug('received circle jobs: %o', circleJobs)
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {

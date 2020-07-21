@@ -219,6 +219,7 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
+
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
@@ -337,6 +338,17 @@ commands:
                 path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
+  wait-on-circle-jobs:
+    description: Polls certain Circle CI jobs until they finish
+    parameters:
+      job-names:
+        description: comma separated list of circle ci job names to wait for
+        type: string
+    steps:
+      - run:
+          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
+          command: node ./scripts/wait-on-circle-jobs.js --circle-jobs <<parameters.job-names>>
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -402,13 +414,21 @@ jobs:
 
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
-  poll-circleci:
+  percy-finalize:
     <<: *defaults
+    executor: cy-doc
+    parameters:
+      required_env_var:
+        type: env_var_name
     steps:
-      - attach_workspace:
-          at: ~/
-      - run: node ./scripts/query-circle
-      - run: npx percy finalize --all
+      - when:
+          condition: <<parameters.required_env_var>>
+          steps:
+            - attach_workspace:
+                at: ~/
+            - wait-on-circle-jobs:
+                job-names: desktop-gui-integration-tests-2x,desktop-gui-component-tests,cli-visual-tests,runner-integration-tests-chrome,
+            - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
@@ -1467,9 +1487,9 @@ linux-workflow: &linux-workflow
         name: Linux lint
         requires:
           - build
-    - poll-circleci:
-        name: Poll CircleCI
+    - percy-finalize:
         context: test-runner:poll-circle-workflow
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
     - lint-types:
