@@ -55,6 +55,7 @@
     "@babel/preset-env": "7.4.5",
     "@babel/preset-react": "7.0.0",
     "@babel/preset-typescript": "7.10.4",
+    "@bahmutov/cy-api": "1.4.2",
     "@date-io/date-fns": "1",
     "@emotion/babel-preset-css-prop": "10.0.27",
     "@emotion/core": "10.0.22",
