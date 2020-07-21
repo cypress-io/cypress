@@ -113,13 +113,27 @@ const waitForAllJobs = async (workflowId) => {
   const failedJobs = _.filter(response.items, { status: 'failed' })
   const runningJobs = _.filter(response.items, { status: 'running' })
 
+  const blockedJobNames = _.map(blockedJobs, 'name')
+  const runningJobNames = _.map(runningJobs, 'name')
+
   debug('failed jobs %o', _.map(failedJobs, 'name'))
-  debug('blocked jobs %o', _.map(blockedJobs, 'name'))
-  debug('running jobs %o', _.map(runningJobs, 'name'))
+  debug('blocked jobs %o', blockedJobNames)
+  debug('running jobs %o', runningJobNames)
 
   if (!runningJobs.length || (runningJobs.length === 1 && runningJobs[0].name === jobName)) {
-    // this job only!
+    // there are no more jobs to run, or this is the last running job
     console.log('all jobs are done, finishing this job')
+
+    return Promise.resolve()
+  }
+
+  const futureOrRunning = _.union(blockedJobs, runningJobNames)
+  const jobsToWaitFor = _.intersection(jobNames, futureOrRunning)
+
+  debug('jobs to wait for %o', jobsToWaitFor)
+
+  if (!jobsToWaitFor.length) {
+    console.log('No more jobs to wait for!')
 
     return Promise.resolve()
   }
