@@ -1,24 +1,30 @@
 import { expect } from 'chai'
 import { rewriteHtmlJs } from '../../lib/html'
+import { rewriteHtmlJsAsync } from '../../lib'
 import snapshot from 'snap-shot-it'
 import { testHtml } from '../fixtures'
 
 const URL = 'http://example.com/foo.html'
 
-const rewriteNoSourceMap = async (html) => rewriteHtmlJs(URL, html)
+const rewriteNoSourceMap = (html) => rewriteHtmlJs(URL, html)
+
+const rewriteSyncAsync = async (html) => {
+  snapshot(await rewriteHtmlJs(URL, html))
+  snapshot(await rewriteHtmlJsAsync(URL, html, () => ''))
+}
 
 describe('html rewriter', function () {
   context('.rewriteHtmlJs', function () {
     // https://github.com/cypress-io/cypress/issues/2393
     it('strips SRI', async function () {
-      snapshot(await rewriteNoSourceMap('<script type="text/javascript" integrity="foo" src="bar">'))
+      await rewriteSyncAsync('<script type="text/javascript" integrity="foo" src="bar">')
 
-      snapshot(await rewriteNoSourceMap('<script type="text/javascript" integrity="foo" src="bar"/>'))
+      await rewriteSyncAsync('<script type="text/javascript" integrity="foo" src="bar"/>')
 
-      snapshot(await rewriteNoSourceMap('<script type="text/javascript" integrity="foo" src="bar">foo</script>'))
+      await rewriteSyncAsync('<script type="text/javascript" integrity="foo" src="bar">foo</script>')
 
       // should preserve namespaced attrs and still rewrite if no `type`
-      snapshot(await rewriteNoSourceMap('<script foo:bar="baz" integrity="foo" src="bar">'))
+      await rewriteSyncAsync('<script foo:bar="baz" integrity="foo" src="bar">')
     })
 
     it('rewrites a real-ish document with sourcemaps for inline js', async () => {
@@ -35,15 +41,15 @@ describe('html rewriter', function () {
 
     context('with inline scripts', function () {
       it('rewrites inline JS with no type', async function () {
-        snapshot(await rewriteNoSourceMap('<script>window.top</script>'))
+        await rewriteSyncAsync('<script>window.top</script>')
       })
 
       it('rewrites inline JS with type', async function () {
-        snapshot(await rewriteNoSourceMap('<script type="text/javascript">window.top</script>'))
+        await rewriteSyncAsync('<script type="text/javascript">window.top</script>')
       })
 
       it('does not rewrite non-JS inline', async function () {
-        snapshot(await rewriteNoSourceMap('<script type="x-foo/bar">window.top</script>'))
+        await rewriteSyncAsync('<script type="x-foo/bar">window.top</script>')
       })
 
       it('ignores invalid inline JS', async function () {

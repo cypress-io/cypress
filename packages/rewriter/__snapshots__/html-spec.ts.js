@@ -3,14 +3,31 @@ exports['html rewriter .rewriteHtmlJs strips SRI 1'] = `
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 2'] = `
-<script type="text/javascript" cypress:stripped-integrity="foo" src="bar"/>
+<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 3'] = `
-<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">foo</script>
+<script type="text/javascript" cypress:stripped-integrity="foo" src="bar"/>
 `
 
 exports['html rewriter .rewriteHtmlJs strips SRI 4'] = `
+<script type="text/javascript" cypress:stripped-integrity="foo" src="bar"/>
+`
+
+exports['html rewriter .rewriteHtmlJs strips SRI 5'] = `
+<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">foo</script>
+`
+
+exports['html rewriter .rewriteHtmlJs strips SRI 6'] = `
+<script type="text/javascript" cypress:stripped-integrity="foo" src="bar">foo
+//# sourceMappingURL=/__cypress/source-maps/1.0.map</script>
+`
+
+exports['html rewriter .rewriteHtmlJs strips SRI 7'] = `
+<script foo:bar="baz" cypress:stripped-integrity="foo" src="bar">
+`
+
+exports['html rewriter .rewriteHtmlJs strips SRI 8'] = `
 <script foo:bar="baz" cypress:stripped-integrity="foo" src="bar">
 `
 
@@ -26,11 +43,25 @@ exports['html rewriter .rewriteHtmlJs with inline scripts rewrites inline JS wit
 <script>globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'top')</script>
 `
 
+exports['html rewriter .rewriteHtmlJs with inline scripts rewrites inline JS with no type 2'] = `
+<script>globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'top')
+//# sourceMappingURL=/__cypress/source-maps/1.1.map</script>
+`
+
 exports['html rewriter .rewriteHtmlJs with inline scripts rewrites inline JS with type 1'] = `
 <script type="text/javascript">globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'top')</script>
 `
 
+exports['html rewriter .rewriteHtmlJs with inline scripts rewrites inline JS with type 2'] = `
+<script type="text/javascript">globalThis.top.Cypress.resolveWindowReference(globalThis, window, 'top')
+//# sourceMappingURL=/__cypress/source-maps/1.2.map</script>
+`
+
 exports['html rewriter .rewriteHtmlJs with inline scripts does not rewrite non-JS inline 1'] = `
+<script type="x-foo/bar">window.top</script>
+`
+
+exports['html rewriter .rewriteHtmlJs with inline scripts does not rewrite non-JS inline 2'] = `
 <script type="x-foo/bar">window.top</script>
 `
 
