@@ -25,6 +25,7 @@ function customPercySnapshot (
   const screenshotName = titlePath.concat(name).filter(Boolean).join(' > ')
 
   _.each(opts.elementOverrides, (v, k) => {
+    // eslint-disable-next-line cypress/no-assigning-return-values
     const $el = cy.$$(k)
 
     if (_.isFunction(v)) {
