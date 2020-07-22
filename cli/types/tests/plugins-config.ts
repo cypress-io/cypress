@@ -13,6 +13,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config.screenshotsFolder // $ExpectType: string | false
   config.videoCompression // $ExpectType: number | false
   config.projectRoot // $ExpectType: string
+  config.version // $ExpectType: string
 
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string
