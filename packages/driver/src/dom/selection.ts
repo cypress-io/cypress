@@ -566,18 +566,43 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
     if (doc.designMode === 'on') {
       // When designMode is 'on', we don't have to find the root content editable,
       // because everything is editable. And the entire document should be selected.
-      el = doc.documentElement
+      el = doc.getElementsByTagName('body')[0]
+
+      // When there is no body element.
+      if (!el) {
+        el = doc.documentElement
+      }
     } else {
       // When el is contentEditable, it is usually not a whole content editable element.
-      // It's a small one inside the big editor.
+      // It's a small element inside the big content editable div.
       // So, we need to find the root contentEditable that contains the entire editable text.
-      const rootContentEditable = (el) => {
-        return $elements.isContentEditable(el.parentElement)
-          ? rootContentEditable(el.parentElement)
+      const rootContentEditable = (el: HTMLElement): HTMLElement => {
+        return $elements.isContentEditable(el.parentElement as HTMLElement)
+          ? rootContentEditable(el.parentElement as HTMLElement)
           : el
       }
 
-      el = rootContentEditable(el)
+      const root = rootContentEditable(el)
+
+      // FireFox doesn't clear empty <br> in the content editable.
+      if (Cypress.browser.family === 'firefox' && root.innerText === '\n') {
+        root.innerText = ''
+      }
+
+      // When we select the wrapper content editable div in FireFox,
+      // it appends text after HTML elements like <div>foo</div>bar.
+      // Because of that, we need to select the last element manually here.
+      if (toStart) {
+        el = root.children[0] as HTMLElement
+      } else {
+        el = root.children[root.children.length - 1] as HTMLElement
+      }
+
+      // el can be undefined when content editable is empty.
+      // el can be <br> in FireFox with the simple text input like 123{Enter}456.
+      if (!el || el.tagName.toLowerCase() === 'br') {
+        el = root
+      }
     }
 
     // Select all in contenteditable.
@@ -590,10 +615,7 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
     selection!.addRange(range)
 
     if (toStart) {
-      // in FireFox, the character at 0 is `\n`.
-      // Because of that, newline is added after new text when the cursor is move to the start.
-      // Number 1 below is the measure to avoid that.
-      selection!.collapse(el, Cypress.browser.family === 'firefox' ? 1 : 0)
+      selection!.collapse(el, 0)
     } else {
       selection!.collapseToEnd()
     }
