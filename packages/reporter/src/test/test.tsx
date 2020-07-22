@@ -74,7 +74,6 @@ class Test extends Component<Props> {
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
-        toggleOpen={model.toggleOpen}
       >
         {this._contents()}
       </Collapsible>

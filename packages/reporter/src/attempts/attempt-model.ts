@@ -145,16 +145,6 @@ export default class Attempt {
     }
   }
 
-  @action toggleOpen = (isOpen?: boolean) => {
-    if (isOpen) {
-      this._isOpen = isOpen
-
-      return
-    }
-
-    this._isOpen = !this.isOpen
-  }
-
   @action finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false

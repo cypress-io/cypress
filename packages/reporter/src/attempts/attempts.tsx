@@ -73,7 +73,6 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
           header={<AttemptHeader index={model.id} isOpen={model.isOpen} />}
           headerClass='attempt-name'
           isOpen={model.isOpen}
-          toggleOpen={model.toggleOpen}
         >
           {renderAttemptContent(model)}
         </Collapsible>

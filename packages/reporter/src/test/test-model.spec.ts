@@ -315,19 +315,5 @@ describe('Test model', () => {
 
       expect(test.isOpen).eq(true)
     })
-
-    it('false when toggled from true', () => {
-      const test = createTest({}, { hasSingleTest: true })
-
-      test.toggleOpen()
-
-      expect(test.isOpen).eq(false)
-    })
-
-    it('true when toggled from false', () => {
-      const test = createTest()
-
-      expect(test.isOpen).eq(false)
-    })
   })
 })

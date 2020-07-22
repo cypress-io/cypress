@@ -51,16 +51,6 @@ describe('<Test />', () => {
     expect(component).to.be.empty
   })
 
-  context('toggleOpen', () => {
-    it('calls toggleOpen when toggled', () => {
-      const _model = model({ state: 'failed' })
-      const component = mount(<Test model={_model} />)
-
-      component.find('.collapsible-header').first().simulate('click')
-      expect(_model.toggleOpen).calledOnce
-    })
-  })
-
   context('contents', () => {
     it('does not render the contents if not open', () => {
       const component = mount(<Test model={model({ isOpen: false })} />)

@@ -1,7 +1,5 @@
 import React from 'react'
-import { shallow, mount } from 'enzyme'
-import sinon from 'sinon'
-
+import { shallow } from 'enzyme'
 import Collapsible from './collapsible'
 
 describe('<Collapsible />', () => {
@@ -62,15 +60,5 @@ describe('<Collapsible />', () => {
     component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
     component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
     expect(component).not.to.have.className('is-open')
-  })
-
-  it('calls onToggle when toggled', () => {
-    const onToggle = sinon.spy()
-    const component = mount(<Collapsible toggleOpen={onToggle} />)
-
-    component.find('.collapsible-header').simulate('click')
-    expect(onToggle).to.have.been.calledWith(true)
-    component.find('.collapsible-header').simulate('click')
-    expect(onToggle).to.have.been.calledWith(false)
   })
 })

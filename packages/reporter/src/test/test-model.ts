@@ -140,10 +140,6 @@ export default class Test extends Runnable {
     attempt.start()
   }
 
-  @action toggleOpen = () => {
-    this._isOpen = !this.isOpen
-  }
-
   @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
     if (props.isOpen != null) {
       this.setIsOpenWhenActive(props.isOpen)
