@@ -421,22 +421,27 @@ jobs:
       required_env_var:
         type: env_var_name
     steps:
-      - when:
+      - attach_workspace:
+          at: ~/
+      - run:
           # if this is an external pull request, the environment variables
           # are NOT set for security reasons, thus no need to poll -
-          # and no need to finalize Percy, since there will be no
-          # visual tests
-          condition: <<parameters.required_env_var>>
-          steps:
-            - attach_workspace:
-                at: ~/
-            - wait-on-circle-jobs:
-                job-names: >
-                  desktop-gui-integration-tests-2x,
-                  desktop-gui-component-tests,
-                  cli-visual-tests,
-                  runner-integration-tests-chrome,
-            - run: npx percy finalize --all
+          # and no need to finalize Percy, since there will be no visual tests
+          name: Check if <<parameters.required_env_var>> is set
+          command: |
+            if [[ -v <<parameters.required_env_var>> ]]; then
+              echo "Internal PR, good to go"
+            else
+              echo "This is an external PR, cannot access other services"
+              circleci-agent step halt
+            if
+      - wait-on-circle-jobs:
+          job-names: >
+            desktop-gui-integration-tests-2x,
+            desktop-gui-component-tests,
+            cli-visual-tests,
+            runner-integration-tests-chrome,
+      - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
