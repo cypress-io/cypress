@@ -2526,6 +2526,10 @@ declare namespace Cypress {
     * Absolute path to the root of the project
     */
     projectRoot: string
+    /**
+     * Cypress version.
+     */
+    version: string
   }
 
   interface DebugOptions {
