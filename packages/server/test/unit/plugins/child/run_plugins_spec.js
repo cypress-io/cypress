@@ -118,7 +118,7 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
-      this.ipc.on.withArgs('load').yield()
+      this.ipc.on.withArgs('load').yield({})
 
       this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
         expect(event).to.eq('load:error')
@@ -150,7 +150,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
-      return this.ipc.on.withArgs('load').yield()
+      return this.ipc.on.withArgs('load').yield({})
     })
 
     context('file:preprocessor', () => {
