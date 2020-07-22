@@ -1497,7 +1497,8 @@ linux-workflow: &linux-workflow
           - build
     - percy-finalize:
         context: test-runner:poll-circle-workflow
-        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
+        # skips job if not defined (in case of an external PR we hope)
+        required_env_var: PERCY_TOKEN
         requires:
           - build
     - lint-types:
