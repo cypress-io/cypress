@@ -7,6 +7,8 @@ const getAttemptTag = (sel) => {
   return cy.get(`.test.runnable:contains(${sel}) .attempt-tag`)
 }
 
+const shouldBeOpen = ($el) => cy.wrap($el).parentsUntil('.collapsible').last().parent().should('have.class', 'is-open')
+
 const attemptTag = (sel) => `.attempt-tag:contains(Attempt ${sel})`
 const cyReject = (fn) => {
   return () => {
@@ -266,6 +268,14 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
         cy.get('.attempt-2 .hook-item .collapsible:contains(test body)').should('not.exist')
         cy.get('.attempt-2 .hook-item .collapsible:contains(after each)')
         cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (2))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (3))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(before each (4))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(test body)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after each)')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
       })
 
       cy.percySnapshot()
@@ -286,12 +296,12 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   })
 
   describe('afterEach', () => {
-    it('afterEach hooks retry, but subsequent ones do not run', () => {
+    it('afterEach hooks retry, but do not continue to run after one fails', () => {
       runIsolatedCypress({
-        hooks: [{ type: 'afterEach', fail: 1 }],
+        hooks: [{ type: 'afterEach', fail: 2 }],
         suites: {
           's1': {
-            hooks: [{ type: 'afterEach', fail: 2 }],
+            hooks: [{ type: 'afterEach', fail: 1 }, 'afterEach', 'after'],
             tests: ['t1'],
           },
 
@@ -299,12 +309,28 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       }, { config: { retries: 2 } })
       .then(shouldHaveTestResults(1, 0))
       .then(() => {
-        cy.contains('Attempt 1').click()
-        cy.get('.attempt-1 .hook-item .collapsible:contains(after each)').find('.command-state-failed')
-        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))').should('not.exist')
+        cy.contains('Attempt 1')
+        .click()
+        .then(shouldBeOpen)
+
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (1))').find('.command-state-failed')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after each (3))').should('not.exist')
+        cy.get('.attempt-1 .hook-item .collapsible:contains(after all)').should('not.exist')
 
         cy.contains('Attempt 2').click()
+        .then(shouldBeOpen)
+
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))').find('.command-state-failed')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after all)').should('not.exist')
+
         cy.get('.attempt-tag').should('have.length', 3)
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (1))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (2))')
+        cy.get('.attempt-2 .hook-item .collapsible:contains(after each (3))')
+        cy.get('.attempt-3 .hook-item .collapsible:contains(after all)')
       })
 
       cy.percySnapshot()

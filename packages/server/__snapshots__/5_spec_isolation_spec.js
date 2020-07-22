@@ -764,7 +764,7 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
 Because this error occurred during a \`after all\` hook we are skipping the remaining tests in the current suite: \`after hooks\`
 
-Although you have test retries enabled, we do not retry 'before all' or 'after all' hooks
+Although you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail
       [stack trace lines]
 
 
@@ -1090,13 +1090,13 @@ exports['failing with retries enabled'] = {
           ],
           "state": "failed",
           "body": "function () { }",
-          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks\n      [stack trace lines]",
+          "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry 'before all' or 'after all' hooks",
+                "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail",
                 "stack": "[stack trace lines]"
               },
               "timings": {

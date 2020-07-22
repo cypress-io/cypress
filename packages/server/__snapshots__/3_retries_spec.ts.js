@@ -41,8 +41,8 @@ exports['retries / supports retries'] = `
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed).png               (1366x694)
-  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed) (attempt 2).p     (1366x694)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed).png               (1280x720)
+  -  /XXX/XXX/XXX/cypress/screenshots/fail-twice.js/fail twice (failed) (attempt 2).p     (1280x720)
      ng                                                                                             
 
 
@@ -65,8 +65,7 @@ exports['retries / supports retries'] = `
 
 
 `
-
-exports['e2e firefox / warns about retries plugin'] = `
+exports['retries / warns about retries plugin'] = `
 We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`node_modules/cypress-plugin-retries\`.
 
 Test retries is supported natively in Cypress via the config value \`retries\`.

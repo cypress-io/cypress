@@ -334,8 +334,8 @@ const patchRunnableRun = (Cypress) => {
 
 function patchTestClone () {
   Test.prototype.clone = function () {
-    if (this.trueFn) {
-      this.fn = this.trueFn
+    if (this._retriesBeforeEachFailedTestFn) {
+      this.fn = this._retriesBeforeEachFailedTestFn
     }
 
     const ret = testClone.apply(this, arguments)

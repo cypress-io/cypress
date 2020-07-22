@@ -55,6 +55,18 @@ module.exports = {
     return console.log(...msgs)
   },
 
+  monkeypatchBefore (origFn, fn) {
+    return function () {
+      const newArgs = fn.apply(this, arguments)
+
+      if (newArgs !== undefined) {
+        return origFn.apply(this, newArgs)
+      }
+
+      return origFn.apply(this, arguments)
+    }
+  },
+
   unwrapFirst (val) {
     // this method returns the first item in an array
     // and if its still a jquery object, then we return
