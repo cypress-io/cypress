@@ -36,6 +36,30 @@
     &:last-child > .collapsible:before {
       display: none;
     }
+
+    > .is-open .open-close-indicator {
+        i.fa-angle-down {
+          margin-top: 0;
+        }
+  
+        i.fa-angle-up {
+          order: 1;
+          margin-top: -4px;
+        }
+      }
+
+    .open-close-indicator {
+      display: flex;
+      flex-direction: column;
+  
+      i {
+        margin-right: 5px;
+  
+        &.fa-angle-down {
+          margin-top: -4px;
+        }
+      }
+    }
   }
 
 
@@ -55,11 +79,20 @@
     .attempt-state {
       @include runnable-state-failed;
     }
+
+    .attempt-name:after {
+      color: $fail;
+    }
   }
   .attempt-state-passed {
     .attempt-state {
 
     @include runnable-state-passed;
+    }
+
+
+    .attempt-name:after {
+      color: $pass;
     }
   }
 
@@ -108,30 +141,6 @@
     .collapsible-indicator,
     .collapsible-more {
       display: none;
-    }
-
-    .open-close-indicator {
-      display: flex;
-      flex-direction: column;
-
-      i {
-        margin-right: 5px;
-
-        &.fa-angle-down {
-          margin-top: -4px;
-        }
-      }
-
-      &.is-open {
-        i.fa-angle-down {
-          margin-top: 0;
-        }
-
-        i.fa-angle-up {
-          order: 1;
-          margin-top: -4px;
-        }
-      }
     }
 
     .attempt-state {

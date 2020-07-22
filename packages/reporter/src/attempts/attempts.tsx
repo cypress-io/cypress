@@ -19,9 +19,9 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index, isOpen }:{index: number, isOpen: boolean}) => (
+const AttemptHeader = ({ index }:{index: number}) => (
   <span className='attempt-tag'>
-    <span className={cs('open-close-indicator', { 'is-open': isOpen })}>
+    <span className='open-close-indicator'>
       <i className='fa fa-fw fa-angle-up' />
       <i className='fa fa-fw fa-angle-down' />
     </span>
@@ -70,7 +70,7 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
         ref="container"
       >
         <Collapsible
-          header={<AttemptHeader index={model.id} isOpen={model.isOpen} />}
+          header={<AttemptHeader index={model.id}/>}
           headerClass='attempt-name'
           isOpen={model.isOpen}
         >
