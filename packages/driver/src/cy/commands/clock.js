@@ -43,6 +43,10 @@ module.exports = function (Commands, Cypress, cy, state) {
         return clock
       }
 
+      if (_.isDate(now)) {
+        now = now.getTime()
+      }
+
       if (_.isObject(now)) {
         userOptions = now
         now = undefined

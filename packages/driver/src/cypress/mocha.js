@@ -92,9 +92,12 @@ function getInvocationDetails (specWindow, config) {
   if (specWindow.Error) {
     let stack = (new specWindow.Error()).stack
 
+    // note: specWindow.Cypress can be undefined or null
+    // if the user quickly reloads the tests multiple times
+
     // firefox throws a different stack than chromium
     // which includes this file (mocha.js) and mocha/.../common.js at the top
-    if (specWindow.Cypress.browser.family === 'firefox') {
+    if (specWindow.Cypress && specWindow.Cypress.browser.family === 'firefox') {
       stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'mocha/lib/interfaces/common.js')
     }
 

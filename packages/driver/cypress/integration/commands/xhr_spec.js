@@ -832,6 +832,34 @@ describe('src/cy/commands/xhr', () => {
           })
         })
 
+        // https://github.com/cypress-io/cypress/issues/8018
+        it('logs empty string response as stubbed', () => {
+          cy
+          .server()
+          .route(/foo/, '').as('getFoo')
+          .window().then((win) => {
+            win.$.get('foo')
+
+            return null
+          }).then(function () {
+            const { lastLog } = this
+
+            expect(lastLog.pick('name', 'displayName', 'event', 'alias', 'aliasType', 'state')).to.deep.eq({
+              name: 'xhr',
+              displayName: 'xhr stub',
+              event: true,
+              alias: 'getFoo',
+              aliasType: 'route',
+              state: 'pending',
+            })
+
+            const snapshots = lastLog.get('snapshots')
+
+            expect(snapshots.length).to.eq(1)
+            expect(snapshots[0].name).to.eq('request')
+          })
+        })
+
         it('does not end xhr requests when the associated command ends', () => {
           let logs = null
 

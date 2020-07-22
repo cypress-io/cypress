@@ -36,7 +36,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
     if (options.log !== false) {
       options._log = Cypress.log({
-        timeout: cy.timeout(),
+        timeout: ms,
         consoleProps () {
           return {
             'Waited For': `${ms}ms before continuing`,
@@ -56,7 +56,6 @@ module.exports = (Commands, Cypress, cy, state) => {
 
     if (options.log !== false) {
       log = options._log = Cypress.log({
-        timeout: options.timeout,
         type: 'parent',
         aliasType: 'route',
         options: userOptions,
@@ -165,12 +164,20 @@ module.exports = (Commands, Cypress, cy, state) => {
         options = _.omit(options, '_runnableTimeout')
         options.timeout = requestTimeout || Cypress.config('requestTimeout')
 
+        if (log) {
+          log.set('timeout', options.timeout)
+        }
+
         return checkForXhr(alias, 'request', index, num, options)
       }
 
       const waitForResponse = () => {
         options = _.omit(options, '_runnableTimeout')
         options.timeout = responseTimeout || Cypress.config('responseTimeout')
+
+        if (log) {
+          log.set('timeout', options.timeout)
+        }
 
         return checkForXhr(alias, 'response', index, num, options)
       }

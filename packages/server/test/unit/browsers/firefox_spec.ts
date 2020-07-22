@@ -8,6 +8,7 @@ import * as firefox from '../../../lib/browsers/firefox'
 import { EventEmitter } from 'events'
 import Marionette from 'marionette-client'
 import Foxdriver from '@benmalka/foxdriver'
+import os from 'os'
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
 const utils = require('../../../lib/browsers/utils')
@@ -67,6 +68,7 @@ describe('lib/browsers/firefox', () => {
     const browser = {
       listTabs: sinon.stub().resolves([foxdriverTab]),
       request: sinon.stub().withArgs('listTabs').resolves({ tabs: [foxdriverTab] }),
+      on: sinon.stub(),
     }
 
     foxdriver = {
@@ -102,6 +104,11 @@ describe('lib/browsers/firefox', () => {
         browser: this.browser,
       }
 
+      this.browserInstance = {
+        // should be high enough to not kill any real PIDs
+        pid: Number.MAX_SAFE_INTEGER,
+      }
+
       sinon.stub(process, 'pid').value(1111)
 
       protocol.foo = 'bar'
@@ -109,7 +116,6 @@ describe('lib/browsers/firefox', () => {
       sinon.stub(plugins, 'has')
       sinon.stub(plugins, 'execute')
       sinon.stub(utils, 'writeExtension').resolves('/path/to/ext')
-      this.browserInstance = {}
       sinon.stub(utils, 'launch').resolves(this.browserInstance)
       sinon.spy(FirefoxProfile.prototype, 'setPreference')
       sinon.spy(FirefoxProfile.prototype, 'updatePreferences')
@@ -201,7 +207,7 @@ describe('lib/browsers/firefox', () => {
 
     it('writes extension', function () {
       return firefox.open(this.browser, 'http://', this.options).then(() => {
-        expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.socketIoRoute, this.options.onScreencastFrame)
+        expect(utils.writeExtension).to.be.calledWith(this.options.browser, this.options.isTextTerminal, this.options.proxyUrl, this.options.socketIoRoute)
       })
     })
 
@@ -320,6 +326,29 @@ describe('lib/browsers/firefox', () => {
       .then((wrapperErr) => {
         expect(wrapperErr.message).to.include('Cypress failed to make a connection to Firefox.')
         expect(wrapperErr.message).to.include(err.message)
+      })
+    })
+
+    context('returns BrowserInstance', function () {
+      it('from browsers.launch', async function () {
+        const instance = await firefox.open(this.browser, 'http://', this.options)
+
+        expect(instance).to.eq(this.browserInstance)
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/6392
+      it('detached on Windows', async function () {
+        sinon.stub(os, 'platform').returns('win32')
+        const instance = await firefox.open(this.browser, 'http://', this.options)
+
+        expect(instance).to.not.eq(this.browserInstance)
+        expect(instance.pid).to.eq(this.browserInstance.pid)
+
+        await new Promise((resolve) => {
+          // ensure events are wired as expected
+          instance.on('exit', resolve)
+          instance.kill()
+        })
       })
     })
   })
