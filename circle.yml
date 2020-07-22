@@ -424,7 +424,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          # if this is an external pull request, the environment variables
+          # NOTE: if this is an external pull request, the environment variables
           # are NOT set for security reasons, thus no need to poll -
           # and no need to finalize Percy, since there will be no visual tests
           name: Check if <<parameters.required_env_var>> is set
