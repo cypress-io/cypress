@@ -593,9 +593,25 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
       // it appends text after HTML elements like <div>foo</div>bar.
       // Because of that, we need to select the last element manually here.
       if (toStart) {
-        el = root.children[0] as HTMLElement
+        const firstEl = root.children[0] as HTMLElement
+
+        if (firstEl) {
+          // If root's innerText doesn't start with firstEl's innerText,
+          // it means that bare text is in front of that element like 123<div>456</div>
+          el = root.innerText.startsWith(firstEl.innerText) ? firstEl : root
+        } else {
+          el = root
+        }
       } else {
-        el = root.children[root.children.length - 1] as HTMLElement
+        const lastEl = root.children[root.children.length - 1] as HTMLElement
+
+        if (lastEl) {
+          // If root's innerText doesn't end with lastEl's innerText,
+          // it means that bare text is in the behind of that element like <div>123</div>456
+          el = root.innerText.endsWith(lastEl.innerText) ? lastEl : root
+        } else {
+          el = root
+        }
       }
 
       // el can be undefined when content editable is empty.
