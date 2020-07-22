@@ -1,0 +1,20 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "timezone": "America/New_York",
+  "schedule": "before 3am on Monday",
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "masterIssue": true,
+  "masterIssueApproval": true,
+  "labels": [
+    "type: dependencies",
+    "renovate"
+  ]
+}
