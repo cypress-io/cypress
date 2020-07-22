@@ -13,6 +13,7 @@ function customPercySnapshot (
 
   const opts = _.defaults({}, options, {
     elementOverrides: { '.stats .duration': ($el) => $el.text('XX.XX'), '.cy-tooltip': true },
+    widths: [Cypress.config().viewportWidth],
   })
 
   /**
@@ -43,6 +44,8 @@ function customPercySnapshot (
     return cy.log('percy: skipping snapshot in interactive mode')
   }
 
-  return origFn(screenshotName)
+  return origFn(screenshotName, {
+    widths: opts.widths,
+  })
 }
 Cypress.Commands.overwrite('percySnapshot', customPercySnapshot)
