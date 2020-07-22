@@ -132,7 +132,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -165,7 +165,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -326,7 +326,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -371,7 +371,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -536,7 +536,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -585,7 +585,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -695,7 +695,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -721,7 +721,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -748,7 +748,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -860,7 +860,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -909,7 +909,7 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1062,7 +1062,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "file": null,
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1149,7 +1149,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "file": null,
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     },
     {
       "message": "[error message]",
@@ -1279,7 +1279,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1347,7 +1347,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1500,7 +1500,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "file": null,
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1653,7 +1653,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1707,7 +1707,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1774,7 +1774,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1939,7 +1939,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -1965,7 +1965,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2004,7 +2004,7 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2150,7 +2150,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "file": null,
       "invocationDetails": "{Object 8}",
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2263,7 +2263,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2310,7 +2310,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2358,7 +2358,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2497,7 +2497,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2537,7 +2537,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2578,7 +2578,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2757,7 +2757,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2804,7 +2804,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
@@ -2864,7 +2864,7 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "invocationDetails": "{Object 8}",
       "final": true,
       "currentRetry": 0,
-      "retries": -1
+      "retries": 0
     }
   ],
   [
