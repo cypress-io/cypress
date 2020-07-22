@@ -9,7 +9,7 @@
   "minor": {
     "automerge": false
   },
-  "rangeStrategy": "pin",
+  "rangeStrategy": "bump",
   "packageRules": [
     {
       "packagePatterns": "^@types/",
