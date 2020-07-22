@@ -434,7 +434,7 @@ jobs:
             else
               echo "This is an external PR, cannot access other services"
               circleci-agent step halt
-            if
+            fi
       - wait-on-circle-jobs:
           job-names: >
             desktop-gui-integration-tests-2x,
