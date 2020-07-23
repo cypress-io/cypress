@@ -159,6 +159,16 @@ describe('lib/util/args', () => {
         return snapshot('invalid env error', stripAnsi(err.message))
       }
     })
+
+    // https://github.com/cypress-io/cypress/issues/6891
+    it('handles values containing exponential operators', function () {
+      const options = this.setup('--env', 'foo=bar,hash=769e98018')
+
+      expect(options.config.env).to.deep.eq({
+        foo: 'bar',
+        hash: '769e98018',
+      })
+    })
   })
 
   context('--reporterOptions', () => {

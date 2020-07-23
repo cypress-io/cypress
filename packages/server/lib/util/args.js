@@ -92,7 +92,8 @@ const pipesToCommas = (str) => {
 
 const tryJSONParse = (str) => {
   try {
-    return JSON.parse(str)
+    // https://github.com/cypress-io/cypress/issues/6891
+    return JSON.parse(str) === Infinity ? null : JSON.parse(str)
   } catch (err) {
     return null
   }

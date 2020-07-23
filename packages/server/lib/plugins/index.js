@@ -6,6 +6,7 @@ const resolve = require('resolve')
 const Promise = require('bluebird')
 const errors = require('../errors')
 const util = require('./util')
+const pkg = require('@packages/root')
 
 let pluginsProcess = null
 let registeredEvents = {}
@@ -99,6 +100,7 @@ const init = (config, options) => {
     _.extend(config, {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
+      version: pkg.version,
     })
 
     ipc.send('load', config)

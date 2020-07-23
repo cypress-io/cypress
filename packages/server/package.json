@@ -20,6 +20,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
+    "@benmalka/foxdriver": "0.4.1",
     "@cypress/browserify-preprocessor": "2.2.4",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.1",
@@ -58,7 +59,6 @@
     "firefox-profile": "2.0.0",
     "fix-path": "3.0.0",
     "fluent-ffmpeg": "2.1.2",
-    "foxdriver": "0.1.1",
     "fs-extra": "8.1.0",
     "get-port": "5.1.1",
     "getos": "3.2.1",

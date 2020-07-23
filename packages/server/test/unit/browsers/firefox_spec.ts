@@ -3,7 +3,7 @@ require('../../spec_helper')
 import 'chai-as-promised'
 import { expect } from 'chai'
 import { EventEmitter } from 'events'
-import Foxdriver from 'foxdriver'
+import Foxdriver from '@benmalka/foxdriver'
 import Marionette from 'marionette-client'
 import os from 'os'
 import sinon from 'sinon'
