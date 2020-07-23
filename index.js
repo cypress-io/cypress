@@ -70,7 +70,10 @@ const getDefaultWebpackOptions = (file, options = {}) => {
     })
 
     config.resolve.extensions = config.resolve.extensions.concat(['.ts', '.tsx'])
-    config.resolve.plugins = [new TsconfigPathsPlugin({ configFile })]
+    config.resolve.plugins = [new TsconfigPathsPlugin({
+      configFile,
+      silent: true,
+    })]
   }
 
   return config
