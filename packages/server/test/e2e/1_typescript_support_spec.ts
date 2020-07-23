@@ -31,6 +31,12 @@ describe('e2e typescript', function () {
     })
   })
 
+  it('respects tsconfig paths', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('ts-proj-with-paths'),
+    })
+  })
+
   it('handles tsconfig with module other than commonjs', function () {
     const projPath = Fixtures.projectPath('ts-proj-with-own-tsconfig')
 
