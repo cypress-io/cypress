@@ -42,6 +42,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
 
   function failCurrentTest (err: Error) {
     // @ts-ignore
+    // NOTE: this only works to fail the test if a cy chain is active
     Cypress.action('cy:fail', err, state('runnable'))
   }
 

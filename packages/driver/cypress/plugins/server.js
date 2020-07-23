@@ -40,6 +40,10 @@ ports.forEach((port) => {
     .send('<html><body>hello there</body></html>')
   })
 
+  app.get('/redirect', (req, res) => {
+    res.redirect(301, req.query.href)
+  })
+
   // allows us to serve the testrunner into an iframe for testing
   app.use('/isolated-runner', express.static(path.join(__dirname, '../../../runner/dist')))
 
