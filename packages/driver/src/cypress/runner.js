@@ -547,6 +547,12 @@ const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => 
   // in which case we need to lookup the test
   const test = getTest() || getTestFromHookOrFindTest(hook)
 
+  // https://github.com/cypress-io/cypress/issues/4062
+  // https://github.com/cypress-io/cypress/issues/5681
+  if (test.state === 'failed' && hookName === 'after all') {
+    return
+  }
+
   test.err = err
   test.state = 'failed'
   test.duration = hook.duration // TODO: nope (?)
