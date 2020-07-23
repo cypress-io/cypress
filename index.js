@@ -76,8 +76,14 @@ const getDefaultWebpackOptions = (file, options = {}) => {
   return config
 }
 
+const typescriptExtensionRegex = /\.tsx?$/
+
 const preprocessor = (options = {}) => {
   return (file) => {
+    if (!options.typescript && typescriptExtensionRegex.test(file.filePath)) {
+      return Promise.reject(new Error(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support.\n\nThe file: ${file.filePath}`))
+    }
+
     options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions(file, options)
 
     return webpackPreprocessor(options)(file)

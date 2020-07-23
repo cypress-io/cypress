@@ -63,7 +63,11 @@ describe('features', () => {
     expect(contents.toString()).to.include('//# sourceMappingURL=data:application/json;charset=utf-8;base64')
   })
 
-  describe.only('with typescript option set', () => {
+  describe('with typescript option set', () => {
+    const shouldntResolve = () => {
+      throw new Error('Should error, should not resolve')
+    }
+
     const options = { typescript: require.resolve('typescript') }
 
     it('handles typescript (and tsconfig paths)', async () => {
@@ -76,6 +80,24 @@ describe('features', () => {
 
     it('handles importing .ts and .tsx', async () => {
       await runAndEval('typescript_imports_spec.js', options)
+    })
+
+    it('errors when processing .ts file and typescript option is not set', function () {
+      return run('ts_spec.ts')
+      .then(shouldntResolve)
+      .catch((err) => {
+        expect(err.message).to.include(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support`)
+        expect(err.message).to.include('ts_spec.ts')
+      })
+    })
+
+    it('errors when processing .tsx file and typescript option is not set', function () {
+      return run('tsx_spec.tsx')
+      .then(shouldntResolve)
+      .catch((err) => {
+        expect(err.message).to.include(`You are attempting to run a TypeScript file, but do not have TypeScript installed. Ensure you have 'typescript' installed to enable TypeScript support`)
+        expect(err.message).to.include('tsx_spec.tsx')
+      })
     })
   })
 })
