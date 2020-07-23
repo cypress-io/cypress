@@ -1,5 +1,5 @@
-describe "blacklist", ->
-  it "forces blacklisted hosts to return 503", ->
+describe "block hosts", ->
+  it "forces blocked hosts to return 503", ->
     cy
       .visit("http://localhost:3232")
 

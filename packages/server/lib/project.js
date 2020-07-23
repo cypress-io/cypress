@@ -173,10 +173,10 @@ class Project extends EE {
 
   _initPlugins (cfg, options) {
     // only init plugins with the
-    // whitelisted config values to
+    // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    cfg = config.whitelist(cfg)
+    cfg = config.allowed(cfg)
 
     return plugins.init(cfg, {
       projectRoot: this.projectRoot,

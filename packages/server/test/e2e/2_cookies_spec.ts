@@ -1,7 +1,7 @@
-const moment = require('moment')
-const parser = require('cookie-parser')
-const e2e = require('../support/helpers/e2e').default
-const humanInterval = require('human-interval')
+import moment from 'moment'
+import parser from 'cookie-parser'
+import e2e from '../support/helpers/e2e'
+import humanInterval from 'human-interval'
 
 const onServer = function (app) {
   app.use(parser())
@@ -194,7 +194,6 @@ describe('e2e cookies', () => {
     // we can remove this extra test case
     e2e.it('with forced SameSite strictness', {
       config: {
-        experimentalGetCookiesSameSite: true,
         baseUrl,
         env: {
           baseUrl,
@@ -248,7 +247,6 @@ describe('e2e cookies', () => {
       ) => {
         e2e.it(`passes with baseurl: ${baseUrl}`, {
           config: {
-            experimentalGetCookiesSameSite: true,
             baseUrl,
             env: {
               baseUrl,

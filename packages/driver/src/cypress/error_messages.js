@@ -153,6 +153,15 @@ module.exports = {
     },
   },
 
+  breaking_change: {
+    blob_util2 (obj) {
+      return {
+        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
+        docsUrl: 'https://on.cypress.io/migration-guide',
+      }
+    },
+  },
+
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
@@ -300,6 +309,11 @@ module.exports = {
           - \`cy.setCookie()\`
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
+    },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
     },
   },
 
@@ -1294,6 +1308,7 @@ module.exports = {
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {

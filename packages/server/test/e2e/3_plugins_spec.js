@@ -6,6 +6,7 @@ const Fixtures = require('../support/helpers/fixtures')
 const e2eProject = Fixtures.projectPath('e2e')
 const pluginExtension = Fixtures.projectPath('plugin-extension')
 const pluginConfig = Fixtures.projectPath('plugin-config')
+const pluginConfigVersion = Fixtures.projectPath('plugin-config-version')
 const pluginFilterBrowsers = Fixtures.projectPath('plugin-filter-browsers')
 const workingPreprocessor = Fixtures.projectPath('working-preprocessor')
 const pluginsRootAsyncError = Fixtures.projectPath('plugins-root-async-error')
@@ -65,6 +66,12 @@ describe('e2e plugins', function () {
       project: pluginConfig,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
+    })
+  })
+
+  it('passes version correctly', function () {
+    return e2e.exec(this, {
+      project: pluginConfigVersion,
     })
   })
 
