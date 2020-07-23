@@ -20,8 +20,8 @@ describe('e2e plugins', () => {
     })
   })
 
-  it('handles specs with $, &, ? in file name', function () {
-    let relativeSpecPath = path.join('d?ir&1%', '%di?r2&', 's%pec&?.js')
+  it('handles specs with $, &, ?, + in file name', function () {
+    let relativeSpecPath = path.join('d?ir&1%', '%di?r2&', 's%p+ec&?.js')
 
     // windows doesn't support ? in file names
     if (process.platform === 'win32') {
