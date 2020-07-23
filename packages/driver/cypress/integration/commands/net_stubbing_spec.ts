@@ -407,17 +407,12 @@ describe('network stubbing', function () {
       cy.route2({
         url: '*',
       }, 'hello world').then(() => {
-        const xhr = new XMLHttpRequest
-
-        xhr.open('GET', '/abc123')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/abc123').done((responseText, _, xhr) => {
           expect(xhr.status).to.eq(200)
-          expect(xhr.responseText).to.eq('hello world')
+          expect(responseText).to.eq('hello world')
 
           done()
-        }
+        })
       })
     })
 
@@ -427,17 +422,12 @@ describe('network stubbing', function () {
 
     it('can stub a response with an empty StaticResponse', function (done) {
       cy.route2('/', {}).then(() => {
-        const xhr = new XMLHttpRequest
-
-        xhr.open('GET', '/')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/').done((responseText, _, xhr) => {
           expect(xhr.status).to.eq(200)
-          expect(xhr.responseText).to.eq('')
+          expect(responseText).to.eq('')
 
           done()
-        }
+        })
       })
     })
 
@@ -445,17 +435,12 @@ describe('network stubbing', function () {
       cy.route2('/', {
         forceNetworkError: true,
       }).then(() => {
-        const xhr = new XMLHttpRequest
-
-        xhr.open('GET', '/')
-        xhr.send()
-
-        xhr.onerror = () => {
-          expect(xhr.readyState).to.eq(4)
+        $.get('/').fail((xhr) => {
+          expect(xhr.statusText).to.eq('error')
           expect(xhr.status).to.eq(0)
 
           done()
-        }
+        })
       })
     })
 
@@ -488,23 +473,11 @@ describe('network stubbing', function () {
         },
       }).as('getFoo').visit('http://localhost:3500/fixtures/jquery.html').window().then(function (win) {
         return new Promise(function (resolve) {
-          let xhr
-
-          xhr = new win.XMLHttpRequest
-          xhr.open('GET', '/foo')
-          xhr.send()
-
-          return xhr.onload = resolve
+          $.get('/foo').done(_.ary(resolve, 0))
         })
       }).wait('@getFoo').its('request.url').should('include', '/foo').visit('http://localhost:3500/fixtures/generic.html').window().then(function (win) {
         return new Promise(function (resolve) {
-          let xhr
-
-          xhr = new win.XMLHttpRequest
-          xhr.open('GET', '/foo')
-          xhr.send()
-
-          return xhr.onload = resolve
+          $.get('/foo').done(_.ary(resolve, 0))
         })
       }).wait('@getFoo').its('request.url').should('include', '/foo')
     })
@@ -556,18 +529,15 @@ describe('network stubbing', function () {
         })
 
         expect(req).to.include({
-          url: 'http://localhost:3500/def456',
           method: 'GET',
           httpVersion: '1.1',
         })
 
+        expect(req.url).to.match(/^http:\/\/localhost:3500\/def456/)
+
         done()
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/def456')
-
-        xhr.send()
+        $.get('/def456')
       })
     })
 
@@ -577,11 +547,7 @@ describe('network stubbing', function () {
 
         done()
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('POST', '/aaa')
-
-        xhr.send('foo-bar-baz')
+        $.post('/aaa', 'foo-bar-baz')
       })
     })
 
@@ -601,11 +567,7 @@ describe('network stubbing', function () {
           done()
         })
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('POST', '/post-only')
-
-        xhr.send('foo-bar-baz')
+        $.post('/post-only', 'foo-bar-baz')
       })
     })
 
@@ -653,16 +615,11 @@ describe('network stubbing', function () {
 
         req.method = 'PATCH'
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('POST', '/dump-method')
-        xhr.send()
-
-        xhr.onload = () => {
-          expect(xhr.responseText).to.contain('request method: PATCH')
+        $.post('/dump-method').done((responseText) => {
+          expect(responseText).to.contain('request method: PATCH')
 
           done()
-        }
+        })
       })
     })
 
@@ -675,16 +632,11 @@ describe('network stubbing', function () {
 
         req.body = body
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('POST', '/post-only')
-        xhr.send('quuz')
-
-        xhr.onload = () => {
-          expect(xhr.responseText).to.contain(body)
+        $.post('/post-only', 'quuz').done((responseText) => {
+          expect(responseText).to.contain(body)
 
           done()
-        }
+        })
       })
     })
 
@@ -699,16 +651,11 @@ describe('network stubbing', function () {
 
         req.body = body
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/post-only')
-        xhr.send()
-
-        xhr.onload = () => {
-          expect(xhr.responseText).to.contain(body)
+        $.get('/post-only').done((responseText) => {
+          expect(responseText).to.contain(body)
 
           done()
-        }
+        })
       })
     })
 
@@ -967,15 +914,9 @@ describe('network stubbing', function () {
           done()
         })
 
-        expect(req).to.include({
-          url: 'http://localhost:3500/json-content-type',
-        })
+        expect(req.url).to.match(/^http:\/\/localhost:3500\/json-content-type/)
       }).then(function () {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/json-content-type')
-
-        xhr.send()
+        $.get('/json-content-type')
       })
     })
 
@@ -997,7 +938,9 @@ describe('network stubbing', function () {
       .wait('@dest')
     })
 
-    it('intercepts cached responses as expected', function () {
+    it('intercepts cached responses as expected', {
+      browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
+    }, function () {
       // use a queryparam to bust cache from previous runs of this test
       const url = `/fixtures/generic.html?t=${Date.now()}`
       let hits = 0
@@ -1032,17 +975,12 @@ describe('network stubbing', function () {
           res.send()
         })
       }).then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/1mb')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/1mb').done((responseText) => {
           // NOTE: the log from this when it fails is so long that it causes the browser to lock up :[
-          expect(xhr.responseText).to.eq('X'.repeat(1024 * 1024))
+          expect(responseText).to.eq('X'.repeat(1024 * 1024))
 
           done()
-        }
+        })
       })
     })
 
@@ -1054,17 +992,13 @@ describe('network stubbing', function () {
           res.delay(1000).send('delay worked')
         })
       }).then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/timeout')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/timeout')
+        .done((responseText) => {
           expect(Date.now() - this.start).to.be.closeTo(1100, 100)
-          expect(xhr.responseText).to.include('delay worked')
+          expect(responseText).to.include('delay worked')
 
           done()
-        }
+        })
       })
     })
 
@@ -1099,18 +1033,13 @@ describe('network stubbing', function () {
           res.throttle(1024).send()
         })
       }).then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/1mb')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/1mb').done((responseText) => {
           // 1MB @ 1MB/s = ~1 second
           expect(Date.now() - this.start).to.be.closeTo(1000, 250)
-          expect(xhr.responseText).to.eq('X'.repeat(1024 * 1024))
+          expect(responseText).to.eq('X'.repeat(1024 * 1024))
 
           done()
-        }
+        })
       })
     })
 
@@ -1126,17 +1055,12 @@ describe('network stubbing', function () {
           res.throttle(kbps).send(payload)
         })
       }).then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/timeout')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/timeout').done((responseText) => {
           expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 250)
-          expect(xhr.responseText).to.eq(payload)
+          expect(responseText).to.eq(payload)
 
           done()
-        }
+        })
       })
     })
 
@@ -1158,17 +1082,12 @@ describe('network stubbing', function () {
           })
         })
       }).then(() => {
-        const xhr = new XMLHttpRequest()
-
-        xhr.open('GET', '/timeout')
-        xhr.send()
-
-        xhr.onload = () => {
+        $.get('/timeout').done((responseText) => {
           expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000, 100)
-          expect(xhr.responseText).to.eq(payload)
+          expect(responseText).to.eq(payload)
 
           done()
-        }
+        })
       })
     })
 
