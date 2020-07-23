@@ -68,10 +68,11 @@ exports['retries / supports retries'] = `
 exports['retries / warns about retries plugin'] = `
 We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`node_modules/cypress-plugin-retries\`.
 
-Test retries is supported natively in Cypress via the config value \`retries\`.
-[retries docs link]
+Test retries is now supported in Cypress version 5.0.0.
 
 Remove the plugin from your dependencies to silence this warning.
+
+https://on.cypress.io/test-retries
 
 
 ====================================================================================================

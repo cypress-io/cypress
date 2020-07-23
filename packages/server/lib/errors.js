@@ -930,12 +930,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
-        We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
-        
-        Test retries is supported natively in Cypress via the config value \`retries\`.
-        [retries docs link]
+      We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
+      
+      Test retries is now supported in Cypress version 5.0.0.
 
-        Remove the plugin from your dependencies to silence this warning.
+      Remove the plugin from your dependencies to silence this warning.
+      
+      https://on.cypress.io/test-retries
         `
     default:
   }
