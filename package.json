@@ -128,7 +128,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.1",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "5.4.1",
+    "@cypress/webpack-preprocessor": "5.4.2",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
     "find-webpack": "2.0.0",
