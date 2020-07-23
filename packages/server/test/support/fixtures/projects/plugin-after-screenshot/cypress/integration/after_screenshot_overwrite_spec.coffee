@@ -1,6 +1,3 @@
-
-
-
 Cypress._.times 3, () =>
   it "cy.screenshot() - replacement", ->
     cy.screenshot("replace-me", { capture: "runner" }, {
