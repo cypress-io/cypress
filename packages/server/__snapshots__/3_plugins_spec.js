@@ -447,3 +447,71 @@ The following are valid events:
 
       [stack trace lines]
 `
+
+exports['e2e plugins does not report more screenshots than exist if user overwrites screenshot in afterScreenshot hook 1'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (after_screenshot_overwrite_spec.coffee)                                   │
+  │ Searched:   cypress/integration/after_screenshot_overwrite_spec.coffee                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  after_screenshot_overwrite_spec.coffee                                          (1 of 1)
+
+
+  ✓ cy.screenshot() - replacement
+  ✓ cy.screenshot() - replacement
+  ✓ cy.screenshot() - replacement
+
+  3 passing
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        3                                                                                │
+  │ Passing:      3                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  1                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     after_screenshot_overwrite_spec.coffee                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite_spec     (X second)
+                          .coffee.mp4                                                               
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  after_screenshot_overwrite_spec.cof      XX:XX        3        3        -        -        - │
+  │    fee                                                                                         │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+
+
+`

@@ -163,6 +163,13 @@ describe('taking screenshots', () => {
     })
   })
 
+  it('screenshots in a retried test', { retries: 2 }, () => {
+    cy.screenshot('retrying-test')
+    .then(() => {
+      throw new Error('fail')
+    })
+  })
+
   it('ensures unique paths for non-named screenshots', () => {
     cy.screenshot({ capture: 'runner' })
     cy.screenshot({ capture: 'runner' })

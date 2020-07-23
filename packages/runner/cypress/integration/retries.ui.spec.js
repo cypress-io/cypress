@@ -83,7 +83,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     cy.percySnapshot()
   })
 
-  it('takes screenshots properly on every attempt failure', () => {
+  it('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
     let stub
 
     runIsolatedCypress(
@@ -106,11 +106,6 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
 
           stub = cy.stub().callsFake(cyReject(() => {
             attempt++
-            if (attempt === 1) {
-              expect(cy.$$('.hooks-container:contains(t2) .command')).exist.and.visible
-
-              return
-            }
 
             const $attemptCollapsible = cy.$$(attemptTag(attempt))
             .parentsUntil('.collapsible').last().parent()

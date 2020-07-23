@@ -65,6 +65,7 @@ exports['retries / supports retries'] = `
 
 
 `
+
 exports['retries / warns about retries plugin'] = `
 We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`node_modules/cypress-plugin-retries\`.
 

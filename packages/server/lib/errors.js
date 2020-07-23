@@ -937,7 +937,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       Remove the plugin from your dependencies to silence this warning.
       
       https://on.cypress.io/test-retries
-        `
+      `
     default:
   }
 }

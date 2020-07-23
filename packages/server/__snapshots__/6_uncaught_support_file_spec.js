@@ -16,8 +16,6 @@ exports['e2e uncaught support file errors failing 1'] = `
   Running:  spec.coffee                                                                     (1 of 1)
 
 
-  (Attempt 1 of 3) An uncaught error was detected outside of a test
-  (Attempt 2 of 3) An uncaught error was detected outside of a test
   1) An uncaught error was detected outside of a test
 
   0 passing
@@ -46,7 +44,7 @@ We dynamically generated a new test to display this failure.
   │ Failing:      1                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     spec.coffee                                                                      │
@@ -57,10 +55,6 @@ We dynamically generated a new test to display this failure.
 
   -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs          (YxX)
      ide of a test (failed).png                                                                     
-  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs          (YxX)
-     ide of a test (failed) (attempt 2).png                                                         
-  -  /XXX/XXX/XXX/cypress/screenshots/spec.coffee/An uncaught error was detected outs          (YxX)
-     ide of a test (failed) (attempt 3).png                                                         
 
 
   (Video)

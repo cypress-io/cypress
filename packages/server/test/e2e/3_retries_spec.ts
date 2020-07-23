@@ -10,7 +10,7 @@ describe('retries', () => {
     snapshot: true,
   })
 
-  e2e.it('warns about retries plugin', {
+  e2e.it.only('warns about retries plugin', {
     project: Fixtures.projectPath('plugin-retries'),
     spec: 'main.spec.js',
     stubPackage: 'cypress-plugin-retries',
