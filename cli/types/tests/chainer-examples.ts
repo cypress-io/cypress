@@ -157,6 +157,9 @@ cy.wrap([1, 2, 3]).should('include.members', [1, 2])
   function addTwo() { val += 2 }
   function getVal() { return val }
   cy.wrap(addTwo).should('increase', getVal)
+
+  const myObj = { val: 1 }
+  cy.wrap(addTwo).should('increase', myObj, 'val')
 }
 
 cy.wrap('foobar').should('match', /^foo/)

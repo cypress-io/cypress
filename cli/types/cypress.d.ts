@@ -3306,7 +3306,7 @@ declare namespace Cypress {
      *    function getVal() { return val }
      *    cy.wrap(addTwo).should('increase', getVal)
      *
-     *    let myObj = { val: 1 }
+     *    const myObj = { val: 1 }
      *    function addTwo() { myObj.val += 2 }
      *    cy.wrap(addTwo).should('increase', myObj, 'val')
      * @see http://chaijs.com/api/bdd/#method_increase
@@ -3814,7 +3814,7 @@ declare namespace Cypress {
      *    function getVal() { return val }
      *    cy.wrap(() => {}).should('not.increase', getVal)
      *
-     *    let myObj = { val: 1 }
+     *    const myObj = { val: 1 }
      *    function addTwo() { myObj.val += 2 }
      *    cy.wrap(addTwo).should('increase', myObj, 'val')
      * @see http://chaijs.com/api/bdd/#method_increase
