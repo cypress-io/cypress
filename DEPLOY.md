@@ -38,7 +38,7 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 
 - Ensure you have the following permissions set up:
     - An AWS account with permission to create AWS access keys for the Cypress CDN.
-    - Permissions for your npm account to publish the `cypress` package.
+    - Permissions for your NPM account to publish the `cypress` package.
     - Permissions to modify environment variables for `cypress` on CircleCI and AppVeyor.
     - Permissions to update releases in ZenHub.
 
