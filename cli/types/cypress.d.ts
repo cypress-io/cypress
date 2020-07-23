@@ -2747,6 +2747,15 @@ declare namespace Cypress {
     method: 'GET' | 'POST'
 
     /**
+     * The should_wait method to use in the visit. Can be true or false.
+     * To check if test should wait or nut
+     * default : true
+     *
+     * @default "GET"
+     */
+    should_wait: true | false
+
+    /**
      * An optional body to send along with a `POST` request. If it is a string, it will be passed along unmodified. If it is an object, it will be URL encoded to a string and sent with a `Content-Type: application/x-www-urlencoded` header.
      *
      * @example
