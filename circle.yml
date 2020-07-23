@@ -1335,10 +1335,6 @@ jobs:
           command: npm run test:ci
           pull_request_id: 515
           folder: examples/fundamentals__typescript
-      - test-binary-against-repo:
-          command: npm test
-          pull_request_id: 513
-          folder: examples/fundamentals__module-api-wrap
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1675,12 +1671,6 @@ linux-workflow: &linux-workflow
               ## TODO: remove this upon merging the PR
               - rename-blacklisthosts
               - pull/7622
-    - test-binary-against-recipe-pull-request:
-        name: Test TypeScript recipe
-        filters:
-          branches:
-            only:
-              - v5.0-release
     # when working on a feature or a fix,
     # you are probably working in a branch
     # and you want to run a specific PR in the cypress-example-recipes
