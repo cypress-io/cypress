@@ -3881,80 +3881,80 @@ declare namespace Cypress {
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.always.calledWithNew'): Chainable<Subject>
+    (chainer: 'be.always.calledWithNew' | 'always.have.been.calledWithNew'): Chainable<Subject>
     /**
      * Assert if spy was always called with matching arguments (and possibly others).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithmatcharg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'be.always.calledWithMatch' | 'always.have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy always returned the provided value.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysreturnedobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'always.returned', value: any): Chainable<Subject>
+    (chainer: 'always.returned' | 'have.always.returned', value: any): Chainable<Subject>
     /**
      * `true` if the spy was called at least once
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalled
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.called'): Chainable<Subject>
+    (chainer: 'be.called' | 'have.been.called'): Chainable<Subject>
     /**
      * Assert spy was called after `anotherSpy`
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledafteranotherspy
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'be.calledAfter' | 'have.been.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
     /**
      * Assert spy was called before `anotherSpy`
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledbeforeanotherspy
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'be.calledBefore' | 'have.been.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
     /**
      * Assert spy was called at least once with `obj` as `this`. `calledOn` also accepts a matcher (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers)).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledOn', context: any): Chainable<Subject>
+    (chainer: 'be.calledOn' | 'have.been.calledOn', context: any): Chainable<Subject>
     /**
      * Assert spy was called exactly once
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonce
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledOnce'): Chainable<Subject>
+    (chainer: 'be.calledOnce' | 'have.been.calledOnce'): Chainable<Subject>
     /**
      * Assert spy was called exactly three times
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledthrice
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledThrice'): Chainable<Subject>
+    (chainer: 'be.calledThrice' | 'have.been.calledThrice'): Chainable<Subject>
     /**
      * Assert spy was called exactly twice
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledtwice
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledTwice'): Chainable<Subject>
+    (chainer: 'be.calledTwice' | 'have.been.calledTwice'): Chainable<Subject>
     /**
      * Assert spy was called at least once with the provided arguments and no others.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithexactlyarg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    (chainer: 'be.calledWithExactly' | 'have.been.calledWithExactly', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy was called with matching arguments (and possibly others).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithmatcharg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'be.calledWithMatch' | 'have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy/stub was called the `new` operator.
      * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'be.calledWithNew'): Chainable<Subject>
+    (chainer: 'be.calledWithNew' | 'have.been.calledWithNew'): Chainable<Subject>
     /**
      * Assert spy always threw an exception.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysthrew
@@ -3978,7 +3978,7 @@ declare namespace Cypress {
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyreturnedobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'returned', value: any): Chainable<Subject>
+    (chainer: 'returned' | 'have.returned', value: any): Chainable<Subject>
 
     // sinon-chai.not
     /**
@@ -3987,80 +3987,80 @@ declare namespace Cypress {
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.always.calledWithNew'): Chainable<Subject>
+    (chainer: 'not.be.always.calledWithNew' | 'not.always.have.been.calledWithNew'): Chainable<Subject>
     /**
      * Assert if spy was not always called with matching arguments (and possibly others).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithmatcharg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.always.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.be.always.calledWithMatch' | 'not.always.have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy not always returned the provided value.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysreturnedobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.always.returned', value: any): Chainable<Subject>
+    (chainer: 'not.always.returned' | 'not.have.always.returned', value: any): Chainable<Subject>
     /**
      * `true` if the spy was not called at least once
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalled
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.called'): Chainable<Subject>
+    (chainer: 'not.be.called' | 'not.have.been.called'): Chainable<Subject>
     /**
      * Assert spy was not.called after `anotherSpy`
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledafteranotherspy
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'not.be.calledAfter' | 'not.have.been.calledAfter', spy: sinon.SinonSpy): Chainable<Subject>
     /**
      * Assert spy was not called before `anotherSpy`
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledbeforeanotherspy
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
+    (chainer: 'not.be.calledBefore' | 'not.have.been.calledBefore', spy: sinon.SinonSpy): Chainable<Subject>
     /**
      * Assert spy was not called at least once with `obj` as `this`. `calledOn` also accepts a matcher (see [matchers](http://sinonjs.org/releases/v4.1.3/spies/#matchers)).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledOn', context: any): Chainable<Subject>
+    (chainer: 'not.be.calledOn' | 'not.have.been.calledOn', context: any): Chainable<Subject>
     /**
      * Assert spy was not called exactly once
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledonce
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledOnce'): Chainable<Subject>
+    (chainer: 'not.be.calledOnce' | 'not.have.been.calledOnce'): Chainable<Subject>
     /**
      * Assert spy was not called exactly three times
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledthrice
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledThrice'): Chainable<Subject>
+    (chainer: 'not.be.calledThrice' | 'not.have.been.calledThrice'): Chainable<Subject>
     /**
      * Assert spy was not called exactly twice
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledtwice
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledTwice'): Chainable<Subject>
+    (chainer: 'not.be.calledTwice' | 'not.have.been.calledTwice'): Chainable<Subject>
     /**
      * Assert spy was not called at least once with the provided arguments and no others.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithexactlyarg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledWithExactly', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.be.calledWithExactly' | 'not.have.been.calledWithExactly', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy was not called with matching arguments (and possibly others).
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithmatcharg1-arg2-
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledWithMatch', ...args: any[]): Chainable<Subject>
+    (chainer: 'not.be.calledWithMatch' | 'not.have.been.calledWithMatch', ...args: any[]): Chainable<Subject>
     /**
      * Assert spy/stub was not called the `new` operator.
      * Beware that this is inferred based on the value of the this object and the spy function’s prototype, so it may give false positives if you actively return the right kind of object.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwithnew
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.be.calledWithNew'): Chainable<Subject>
+    (chainer: 'not.be.calledWithNew' | 'not.have.been.calledWithNew'): Chainable<Subject>
     /**
      * Assert spy did not always throw an exception.
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwaysthrew
@@ -4084,7 +4084,7 @@ declare namespace Cypress {
      * @see http://sinonjs.org/releases/v4.1.3/spies/#spyreturnedobj
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.returned', value: any): Chainable<Subject>
+    (chainer: 'not.returned' | 'not.have.returned', value: any): Chainable<Subject>
 
     // jquery-chai
     /**
