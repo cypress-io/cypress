@@ -1,6 +1,0 @@
-{
-  "include": ["*.ts", "*.tsx"],
-  "compilerOptions": {
-    "jsx": "react"
-  }
-}

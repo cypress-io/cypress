@@ -63,15 +63,15 @@ describe('features', () => {
     expect(contents.toString()).to.include('//# sourceMappingURL=data:application/json;charset=utf-8;base64')
   })
 
-  describe('with typescript option set', () => {
+  describe.only('with typescript option set', () => {
     const options = { typescript: require.resolve('typescript') }
 
-    it('handles typescript', async () => {
-      await runAndEval('typescript-project/ts_spec.ts', options)
+    it('handles typescript (and tsconfig paths)', async () => {
+      await runAndEval('ts_spec.ts', options)
     })
 
     it('handles tsx', async () => {
-      await runAndEval('typescript-project/tsx_spec.tsx', options)
+      await runAndEval('tsx_spec.tsx', options)
     })
 
     it('handles importing .ts and .tsx', async () => {

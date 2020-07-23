@@ -1,7 +1,7 @@
 const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 
-const getDefaultWebpackOptions = (options = {}) => {
+const getDefaultWebpackOptions = (file, options = {}) => {
   const config = {
     mode: 'development',
     node: {
@@ -44,6 +44,9 @@ const getDefaultWebpackOptions = (options = {}) => {
   }
 
   if (options.typescript) {
+    const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
+    const configFile = require('tsconfig').findSync(path.dirname(file.filePath))
+
     config.module.rules.push({
       test: /\.tsx?$/,
       exclude: [/node_modules/],
@@ -67,6 +70,7 @@ const getDefaultWebpackOptions = (options = {}) => {
     })
 
     config.resolve.extensions = config.resolve.extensions.concat(['.ts', '.tsx'])
+    config.resolve.plugins = [new TsconfigPathsPlugin({ configFile })]
   }
 
   return config
@@ -74,7 +78,7 @@ const getDefaultWebpackOptions = (options = {}) => {
 
 const preprocessor = (options = {}) => {
   return (file) => {
-    options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions(options, file)
+    options.webpackOptions = options.webpackOptions || getDefaultWebpackOptions(file, options)
 
     return webpackPreprocessor(options)(file)
   }
