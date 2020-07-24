@@ -3025,6 +3025,22 @@ declare namespace Cypress {
      */
     (chainer: 'be.undefined'): Chainable<Subject>
     /**
+     * Asserts that the target is strictly (`===`) equal to null.
+     * @example
+     *    cy.wrap(null).should('be.null')
+     * @see http://chaijs.com/api/bdd/#method_null
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.null'): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to NaN.
+     * @example
+     *    cy.wrap(NaN).should('be.NaN')
+     * @see http://chaijs.com/api/bdd/#method_null
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.NaN'): Chainable<Subject>
+    /**
      * Asserts that the target is a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
@@ -3550,6 +3566,22 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.undefined'): Chainable<Subject>
     /**
+     * Asserts that the target is strictly (`===`) equal to null.
+     * @example
+     *    cy.wrap(null).should('not.be.null')
+     * @see http://chaijs.com/api/bdd/#method_null
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.null'): Chainable<Subject>
+    /**
+     * Asserts that the target is strictly (`===`) equal to NaN.
+     * @example
+     *    cy.wrap(NaN).should('not.be.NaN')
+     * @see http://chaijs.com/api/bdd/#method_nan
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.NaN'): Chainable<Subject>
+    /**
      * Asserts that the target is not a number or a date greater than or equal to the given number or date `start`, and less than or equal to the given number or date `finish` respectively.
      * However, it’s often best to assert that the target is equal to its expected value.
      * @example
@@ -3979,6 +4011,60 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'returned' | 'have.returned', value: any): Chainable<Subject>
+    /**
+     * Assert spy was called before anotherSpy, and no spy calls occurred between spy and anotherSpy.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledimmediatelybeforeanotherspy
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.calledImmediatelyBefore' | 'have.been.calledImmediatelyBefore', anotherSpy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was called after anotherSpy, and no spy calls occurred between anotherSpy and spy.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledimmediatelyafteranotherspy
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.calledImmediatelyAfter' | 'have.been.calledImmediatelyAfter', anotherSpy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert the spy was always called with obj as this
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledonobj
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.always.calledOn' | 'always.have.been.calledOn', obj: any): Chainable<Subject>
+    /**
+     * Assert spy was called at least once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.calledWith' | 'have.been.calledWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was always called with the provided arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.always.calledWith' | 'always.have.been.calledWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was called at exactly once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.calledOnceWith' | 'have.been.calledOnceWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was always called with the exact provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithexactlyarg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.always.calledWithExactly' | 'have.been.calledWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was called at exactly once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.calledOnceWithExactly' | 'have.been.calledOnceWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy always returned the provided value.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.always.returned', obj: any): Chainable<Subject>
 
     // sinon-chai.not
     /**
@@ -4085,6 +4171,60 @@ declare namespace Cypress {
      * @see https://on.cypress.io/assertions
      */
     (chainer: 'not.returned' | 'not.have.returned', value: any): Chainable<Subject>
+    /**
+     * Assert spy was called before anotherSpy, and no spy calls occurred between spy and anotherSpy.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledimmediatelybeforeanotherspy
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.calledImmediatelyBefore' | 'not.have.been.calledImmediatelyBefore', anotherSpy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert spy was called after anotherSpy, and no spy calls occurred between anotherSpy and spy.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledimmediatelyafteranotherspy
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.calledImmediatelyAfter' | 'not.have.been.calledImmediatelyAfter', anotherSpy: sinon.SinonSpy): Chainable<Subject>
+    /**
+     * Assert the spy was always called with obj as this
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledonobj
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.always.calledOn' | 'not.always.have.been.calledOn', obj: any): Chainable<Subject>
+    /**
+     * Assert spy was called at least once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.calledWith' | 'not.have.been.calledWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was always called with the provided arguments (and possibly others).
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.always.calledWith' | 'not.always.have.been.calledWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was called at exactly once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spycalledwitharg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.calledOnceWith' | 'not.have.been.calledOnceWith', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was always called with the exact provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#spyalwayscalledwithexactlyarg1-arg2-
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.always.calledWithExactly' | 'not.have.been.calledWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy was called at exactly once with the provided arguments.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.calledOnceWithExactly' | 'not.have.been.calledOnceWithExactly', ...args: any[]): Chainable<Subject>
+    /**
+     * Assert spy always returned the provided value.
+     * @see http://sinonjs.org/releases/v4.1.3/spies/#
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.always.returned', obj: any): Chainable<Subject>
 
     // jquery-chai
     /**

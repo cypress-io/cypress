@@ -229,6 +229,12 @@ cy.wrap(true).should('not.be.undefined')
 
 cy.wrap(3).should('not.be.within', 5, 10)
 
+cy.wrap(null).should('be.null')
+cy.wrap(123).should('not.be.null')
+
+cy.wrap(NaN).should('be.NaN')
+cy.wrap('cypress').should('not.be.NaN')
+
 ;
 () => {
   let dots = ''
