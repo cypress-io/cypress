@@ -147,12 +147,12 @@ const create = ($$, state) => {
 
       // TODO: throw error here if cy is undefined!
 
-      // for some reason certain libraries (ex. polymer)
-      // get stuck here at cloneNode within $().clone()
-      // so we have to use importNode to prevent hanging
-      // and then re-wrap in jQuery
+      // certain frameworks (ex. polymer) which use the shadow DOM
+      // get stuck here if we try to use cloneNode
+      // so we have to use importNode to clone the element
+      // to the outer doc and then reassign ownership to the original doc
       // https://github.com/cypress-io/cypress/issues/1068
-      const $body = $$(document.importNode($$('body')[0], true))
+      const $body = $$(state('document').adoptNode(document.importNode($$('body')[0], true)))
 
       // for the head and body, get an array of all CSS,
       // whether it's links or style tags
