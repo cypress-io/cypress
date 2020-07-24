@@ -973,6 +973,7 @@ describe('lib/gui/events', () => {
             absolute: '/path/to/bar',
             relative: 'to/bar',
             specType: 'integration',
+            specFilter: undefined,
           })
 
           opts.onBrowserOpen()
