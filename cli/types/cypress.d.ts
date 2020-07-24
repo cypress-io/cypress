@@ -2422,6 +2422,11 @@ declare namespace Cypress {
      */
     resolvedNodeVersion: string
     /**
+     * Whether Cypress will screenshot a failed test run when running headlessly.
+     * @default true
+     */
+    screenshot: boolean
+    /**
      * Path to folder where screenshots will be saved from [cy.screenshot()](https://on.cypress.io/screenshot) command or after a headless or CI run’s test failure
      * @default "cypress/screenshots"
      */
