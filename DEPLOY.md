@@ -1,24 +1,24 @@
 # Deployment
 
-Anyone can build the binary and NPM package, but you can only deploy the Cypress application and publish the NPM module `cypress` if you are a member of the `cypress` NPM organization.
+Anyone can build the binary and npm package, but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 
 > :information_source: See the [publishing](#publishing) section for how to build, test and publish a
-new official version of the binary and `cypress` NPM package.
+new official version of the binary and `cypress` npm package.
 
 ## Building Locally
 
-### Building the NPM package
+### Building the npm package
 
 > :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
 
-Building a new NPM package is very quick.
+Building a new npm package is very quick.
 
 - Increment the version in the root `package.json`
 - `yarn build --scope cypress`
 
 The steps above:
 
-- Build the `cypress` NPM package
+- Build the `cypress` npm package
 - Transpile the code into ES5 to be compatible with the common Node versions
 - Put the result into the [`cli/build`](./cli/build) folder.
 
@@ -26,7 +26,7 @@ The steps above:
 
 > :warning: Note: The steps in this section are automated in CI, and you should not need to do them yourself when publishing.
 
-The NPM package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
+The npm package requires a corresponding binary of the same version. In production, it will try to retrieve the binary from the Cypress CDN if it is not cached locally.
 
 You can build the Cypress binary locally by running `yarn binary-build`. You can use Docker to build a Linux binary by running `yarn binary-build-linux`.
 
@@ -62,12 +62,12 @@ You can build the Cypress binary locally by running `yarn binary-build`. You can
 
 ### Before Publishing a New Version
 
-In order to publish a new `cypress` package to the NPM registry, we must build and test it across multiple platforms and test projects. This makes publishing *directly* into the NPM registry impossible. Instead, we have CI set up to do the following on every commit to `develop`:
+In order to publish a new `cypress` package to the npm registry, we must build and test it across multiple platforms and test projects. This makes publishing *directly* into the npm registry impossible. Instead, we have CI set up to do the following on every commit to `develop`:
 
-1. Build the NPM package with the new target version baked in.
+1. Build the npm package with the new target version baked in.
 2. Build the Linux/Mac binaries on CircleCI and build Windows on AppVeyor.
-3. Upload the binaries and the new NPM package to `cdn.cypress.io` under the "beta" folder.
-4. Launch the test projects like [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) and [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) using the newly-uploaded package & binary instead of installing from the NPM registry. That installation looks like this:
+3. Upload the binaries and the new npm package to `cdn.cypress.io` under the "beta" folder.
+4. Launch the test projects like [cypress-test-node-versions](https://github.com/cypress-io/cypress-test-node-versions) and [cypress-test-example-repos](https://github.com/cypress-io/cypress-test-example-repos) using the newly-uploaded package & binary instead of installing from the npm registry. That installation looks like this:
     ```shell
     export CYPRESS_INSTALL_BINARY=https://cdn.../binary/<new version>/<commit hash>/cypress.zip
     npm i https://cdn.../npm/<new version>/<commit hash>/cypress.tgz
@@ -92,13 +92,13 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     yarn move-binaries --sha <commit sha> --version <new target version>
     ```
 
-3. Publish the new NPM package under the `dev` tag, using your personal NPM account.
+3. Publish the new npm package under the `dev` tag, using your personal npm account.
     - To find the link to the package file `cypress.tgz`:
         1. In GitHub, go to the latest commit (the one whose sha you used in the last step).
             ![commit-link](https://user-images.githubusercontent.com/1157043/80608728-33fe6100-8a05-11ea-8b53-375303757b67.png)
         2. Scroll down past the changes to the comments. The first comment should be a `cypress-bot` comment that includes a line beginning `npm install ...`. Grab the `https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz` link.
             ![cdn-tgz-link](https://user-images.githubusercontent.com/1157043/80608736-3791e800-8a05-11ea-8d75-e4f80128e857.png)
-    - Publish to the NPM registry straight from the URL:
+    - Publish to the npm registry straight from the URL:
         ```shell
         npm publish https://cdn.../npm/X.Y.Z/<long sha>/cypress.tgz --tag dev
         ```
@@ -131,7 +131,7 @@ In the following instructions, "X.Y.Z" is used to denote the version of Cypress 
     - Merge any release-specific documentation changes into the main release PR.
     - Merging this PR into `develop` will deploy to `docs-staging` and then a PR will be automatically created against `master`. It will be automatically merged after it passes and will deploy to production.
 
-7. Make the new NPM version the "latest" version by updating the dist-tag `latest` to point to the new version:
+7. Make the new npm version the "latest" version by updating the dist-tag `latest` to point to the new version:
     ```shell
     npm dist-tag add cypress@X.Y.Z
     ```
