@@ -25,7 +25,7 @@ describe('<Collapsible />', () => {
   it('renders with headerStyle when specified', () => {
     const component = shallow(<Collapsible headerStyle={{ margin: 0 }} />)
 
-    expect(component.find('.collapsible-header')).to.have.style('margin', '0')
+    expect(component.find('.collapsible-header-inner')).to.have.style('margin', '0')
   })
 
   it('renders the header', () => {
@@ -40,17 +40,19 @@ describe('<Collapsible />', () => {
     expect(component.find('.collapsible-content')).to.have.className('bar')
   })
 
-  it('renders the children', () => {
-    const component = shallow(<Collapsible><main>A child</main></Collapsible>)
-
-    expect(component.find('.collapsible-content main')).to.have.text('A child')
-  })
-
   it('opens when clicking header', () => {
     const component = shallow(<Collapsible />)
 
     component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
     expect(component).to.have.className('is-open')
+  })
+
+  it('renders the children only when open', () => {
+    const component = shallow(<Collapsible><main>A child</main></Collapsible>)
+
+    expect(component.find('.collapsible-content')).not.to.have.text('A child')
+    component.find('.collapsible-header').simulate('click', { stopPropagation () {} })
+    expect(component.find('.collapsible-content main')).to.have.text('A child')
   })
 
   it('closes when clicking header twice', () => {

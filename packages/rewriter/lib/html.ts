@@ -14,7 +14,7 @@ export function HtmlJsRewriter (url: string, deferSourceMapRewrite?: DeferSource
   return rewriter
 }
 
-export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): string {
+export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?: DeferSourceMapRewriteFn): Promise<string> {
   let out = ''
   const rewriter = HtmlJsRewriter(url, deferSourceMapRewrite)
 
@@ -24,5 +24,9 @@ export function rewriteHtmlJs (url: string, html: string, deferSourceMapRewrite?
 
   rewriter.end(html)
 
-  return out
+  return new Promise<string>((resolve) => {
+    rewriter.on('end', () => {
+      resolve(out)
+    })
+  })
 }

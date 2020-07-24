@@ -226,6 +226,10 @@ commands:
         description: Pull request number to check out before installing and testing
         type: integer
         default: 0
+      wait-on:
+        description: Whether to use wait-on to wait on a server to be booted
+        type: string
+        default: ""
     steps:
       - attach_workspace:
           at: ~/
@@ -265,6 +269,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           command: npm start --if-present
           background: true
+      - run:
+          condition: <<parameters.wait-on>>
+          name: "Waiting on server to boot: <<parameters.wait-on>>"
+          command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
       - when:
           condition: << parameters.folder >>
           steps:
@@ -1386,6 +1394,7 @@ jobs:
           repo: cypress-documentation
           browser: firefox
           command: "npm run cypress:run"
+          wait-on: http://localhost:2222
 
   "test-binary-against-realworld-firefox":
     <<: *defaults
