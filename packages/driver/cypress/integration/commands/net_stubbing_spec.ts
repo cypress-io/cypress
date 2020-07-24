@@ -253,10 +253,8 @@ describe('network stubbing', function () {
 
         it('is incremented to 2', function () {
           cy.route2(/foo/, {}).then(function () {
-            return $.get('/foo')
-          }).then(function () {
-            expect(this.lastLog.get('numResponses')).to.eq(1)
-          })
+            $.get('/foo')
+          }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 1)
         })
 
         it('is incremented for each matching request', function () {
