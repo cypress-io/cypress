@@ -1,3 +1,6 @@
+const { expect } = require('chai')
+const { imgSrcToDataURL } = require('blob-util')
+
 describe('Specs List', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
@@ -30,6 +33,13 @@ describe('Specs List', function () {
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
 
       start()
+    })
+  })
+
+  context('sanity checks', function () {
+    imgSrcToDataURL('has sinon assertions', function () {
+      expect(this.ipc.openFinder, '.called').to.have.property('called', false)
+      expect(this.ipc.openFinder, 'sinon-chai').to.not.be.called
     })
   })
 
@@ -204,9 +214,11 @@ describe('Specs List', function () {
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
-            expect(launchArgs[0].browser.name).to.eq('chrome')
+            expect(launchArgs[0].browser.name, 'browser name').to.eq('chrome')
 
-            expect(launchArgs[0].spec.name).to.eq('All Specs')
+            expect(launchArgs[0].spec.name, 'spec name').to.eq('All Specs')
+
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq(null)
           })
         })
 
@@ -410,12 +422,18 @@ describe('Specs List', function () {
           cy.get('.filter').type('new')
         })
 
-        it('displays only matching spec', () => {
+        it('displays only matching spec', function () {
           cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'account_new_spec.coffee')
 
-          cy.contains('.all-tests', 'Run 1 spec')
+          cy.contains('.all-tests', 'Run 1 spec').click()
+          .then(() => {
+            expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
+            const launchArgs = this.ipc.launchBrowser.lastCall.args
+
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq('new')
+          })
         })
 
         it('only shows matching folders', () => {
@@ -456,7 +474,10 @@ describe('Specs List', function () {
         it('disables run all tests if no results', function () {
           cy.get('.filter').clear().type('foobarbaz')
 
-          cy.contains('.all-tests', 'No specs').should('have.class', 'disabled')
+          cy.contains('.all-tests', 'No specs').should('have.class', 'disabled').click()
+          .then(function () {
+            expect(this.ipc.launchBrowser).to.have.property('called').equal(false)
+          })
         })
 
         it('clears and focuses the filter field when clear search is clicked', function () {
@@ -541,7 +562,7 @@ describe('Specs List', function () {
         cy.get('@firstSpec')
         .click()
         .then(function () {
-          expect(this.ipc.closeBrowser).to.be.called
+          expect(this.ipc.closeBrowser).to.have.property('called', true)
 
           const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -698,7 +719,8 @@ describe('Specs List', function () {
         })
 
         it('opens in preferred opener', function () {
-          cy.get('@button').click().then(() => {
+          cy.get('@button').click()
+          .then(() => {
             expect(this.ipc.openFile).to.be.calledWith({
               where: this.availableEditors[4],
               file: '/user/project/cypress/integration/app_spec.coffee',
