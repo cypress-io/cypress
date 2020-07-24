@@ -44,6 +44,16 @@ class SpecsList extends Component {
       }
     }
 
+    const disabledMessage = (<span className={cs('all-tests', 'disabled')}>No specs</span>)
+
+    const runTestsMessage = (<a onClick={this._selectSpec.bind(this, allSpecsSpec)}
+      disabled={runButtonDisabled}
+      title="Run all integration specs together"
+      className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
+      <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
+      {runSpecsLabel}
+    </a>)
+
     return (
       <div className='specs'>
         <header>
@@ -69,13 +79,11 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-          <a onClick={this._selectSpec.bind(this, allSpecsSpec)}
-            disabled={runButtonDisabled}
-            title="Run all integration specs together"
-            className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
-            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
-            {runSpecsLabel}
-          </a>
+          {
+            runButtonDisabled
+              ? disabledMessage
+              : runTestsMessage
+          }
         </header>
         {this._specsList()}
       </div>

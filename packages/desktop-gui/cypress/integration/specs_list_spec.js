@@ -453,6 +453,12 @@ describe('Specs List', function () {
           cy.contains('.all-tests', 'No specs')
         })
 
+        it('disables run all tests if no results', function () {
+          cy.get('.filter').clear().type('foobarbaz')
+
+          cy.contains('.all-tests', 'No specs').should('have.class', 'disabled')
+        })
+
         it('clears and focuses the filter field when clear search is clicked', function () {
           cy.get('.filter').clear().type('foobarbaz')
           cy.get('.btn').contains('Clear search').click()
