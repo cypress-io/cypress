@@ -6,6 +6,7 @@
 // in the future the NPM module itself will be in TypeScript
 // but for now describe it as an ambient module
 
+type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
 declare module 'cypress' {
   /**
    * All options that one can pass to "cypress.run"
@@ -154,7 +155,6 @@ declare module 'cypress' {
   // small utility types to better express meaning of other types
   type dateTimeISO = string
   type ms = number
-  type hookId = string
   type testId = string
   type pixels = number
 
@@ -174,10 +174,9 @@ declare module 'cypress' {
      * Error message if there is an error
      */
     error: string | null
-    timings: any
-    failedFromHookId: hookId | null
-    wallClockStartedAt: dateTimeISO
-    wallClockDuration: ms
+    failedFromHookName: HookName
+    startedAt: dateTimeISO
+    duration: ms
     videoTimestamp: ms
   }
 
@@ -185,8 +184,7 @@ declare module 'cypress' {
    * Information about a single "before", "beforeEach", "afterEach" and "after" hook.
   */
   interface HookInformation {
-    hookId: hookId
-    hookName: 'before' | 'beforeEach' | 'afterEach' | 'after'
+    hookName: HookName
     title: string[]
     body: string
   }
@@ -199,7 +197,6 @@ declare module 'cypress' {
     name: string
     testId: testId
     takenAt: dateTimeISO
-    testAttemptIndex: number
     /**
      * Absolute path to the saved image
      */
@@ -222,9 +219,9 @@ declare module 'cypress' {
       pending: number
       skipped: number
       failures: number
-      wallClockStartedAt: dateTimeISO
-      wallClockEndedAt: dateTimeISO
-      wallClockDuration: ms
+      startedAt: dateTimeISO
+      endedAt: dateTimeISO
+      duration: ms
     },
     /**
      * Reporter name like "spec"
