@@ -20,7 +20,29 @@ class SpecsList extends Component {
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (!specsStore.filter && !specsStore.specs.length) return this._empty()
+    const filteredSpecs = specsStore.getFilteredSpecs()
+
+    const hasSpecFilter = specsStore.filter
+    const numberOfShownSpecs = filteredSpecs.length
+    const hasNoSpecs = !hasSpecFilter && !numberOfShownSpecs
+
+    if (hasNoSpecs) {
+      return this._empty()
+    }
+
+    let runSpecsLabel = allSpecsSpec.displayName
+    let runButtonDisabled = false
+
+    if (hasSpecFilter) {
+      if (numberOfShownSpecs < 1) {
+        runSpecsLabel = 'No specs'
+        runButtonDisabled = true
+      } else {
+        const specLabel = numberOfShownSpecs === 1 ? 'spec' : 'specs'
+
+        runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
+      }
+    }
 
     return (
       <div className='specs'>
@@ -48,10 +70,11 @@ class SpecsList extends Component {
             </Tooltip>
           </div>
           <a onClick={this._selectSpec.bind(this, allSpecsSpec)}
+            disabled={runButtonDisabled}
             title="Run all integration specs together"
             className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
             <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
-            {allSpecsSpec.displayName}
+            {runSpecsLabel}
           </a>
         </header>
         {this._specsList()}
