@@ -406,6 +406,7 @@ describe('Specs List', function () {
           this.ipc.getSpecs.yields(null, this.specs)
           this.openProject.resolve(this.config)
 
+          cy.contains('.all-tests', 'Run all specs')
           cy.get('.filter').type('new')
         })
 
@@ -413,6 +414,8 @@ describe('Specs List', function () {
           cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'account_new_spec.coffee')
+
+          cy.contains('.all-tests', 'Run 1 spec')
         })
 
         it('only shows matching folders', () => {
@@ -427,6 +430,8 @@ describe('Specs List', function () {
 
           cy.get('.specs-list .file')
           .should('have.length', this.numSpecs)
+
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('clears the filter if the user press ESC key', function () {
@@ -435,6 +440,8 @@ describe('Specs List', function () {
 
           cy.get('.specs-list .file')
           .should('have.length', this.numSpecs)
+
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('shows empty message if no results', function () {
@@ -442,6 +449,8 @@ describe('Specs List', function () {
           cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
+
+          cy.contains('.all-tests', 'No specs')
         })
 
         it('clears and focuses the filter field when clear search is clicked', function () {
@@ -475,6 +484,7 @@ describe('Specs List', function () {
           this.openProject.resolve(this.config)
 
           cy.get('.filter').should('have.value', 'app')
+          cy.contains('.all-tests', 'Run 1 spec')
         })
 
         it('does not apply it for a different project', function () {
