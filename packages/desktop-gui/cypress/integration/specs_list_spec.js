@@ -1,6 +1,3 @@
-const { expect } = require('chai')
-const { imgSrcToDataURL } = require('blob-util')
-
 describe('Specs List', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
@@ -37,7 +34,7 @@ describe('Specs List', function () {
   })
 
   context('sanity checks', function () {
-    imgSrcToDataURL('has sinon assertions', function () {
+    it('has sinon assertions', function () {
       expect(this.ipc.openFinder, '.called').to.have.property('called', false)
       expect(this.ipc.openFinder, 'sinon-chai').to.not.be.called
     })
