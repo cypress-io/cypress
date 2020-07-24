@@ -34,10 +34,14 @@ module.exports = {
     .then((specs) => {
       return this.getJavascripts(config)
       .then((js) => {
+        const allFilesToSend = js.concat(specs)
+
+        debug('all files to send %o', _.map(allFilesToSend, 'relative'))
+
         const iframeOptions = {
           title: this.getTitle(test),
           domain: getRemoteState().domainName,
-          scripts: JSON.stringify(js.concat(specs)),
+          scripts: JSON.stringify(allFilesToSend),
         }
 
         debug('iframe %s options %o', test, iframeOptions)
@@ -61,9 +65,13 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
+
+    debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
       // only makes sense if there is specFilter string
-      return spec.relative.includes(specFilter)
+      // the filter should match the logic in
+      // desktop-gui/src/specs/specs-store.js
+      return spec.relative.toLowerCase().includes(specFilter.toLowerCase())
     }
     const specFilterFn = specFilter ? specFilterContains : R.T
 

@@ -159,7 +159,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          const project = new Project('/path/to/project')
+          this.project = new Project('/path/to/project')
 
           return Promise.all([
             // open our https server
@@ -168,7 +168,7 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new Server(new Watchers())),
 
-            this.server.open(cfg, project)
+            this.server.open(cfg, this.project)
             .spread((port) => {
               if (initialUrl) {
                 this.server._onDomainSet(initialUrl)
@@ -202,6 +202,7 @@ describe('Routes', () => {
     Fixtures.remove()
     this.session.destroy()
     preprocessor.close()
+    this.project = null
 
     return Promise.join(
       this.server.close(),
@@ -1133,6 +1134,26 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           const body = cleanResponseBody(res.body)
+
+          expect(body).to.eq(contents)
+        })
+      })
+
+      it('can send back tests matching spec filter', function () {
+        // only returns tests with "sub_test" in their names
+        const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
+
+        this.project.spec = {
+          specFilter: 'sub_test',
+        }
+
+        return this.rp('http://localhost:2020/__cypress/iframes/__all')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          console.log(body)
 
           expect(body).to.eq(contents)
         })

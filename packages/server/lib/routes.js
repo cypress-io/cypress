@@ -47,10 +47,15 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
 
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
-    debug('handling iframe for project spec %o', project.spec)
     const extraOptions = {
       specFilter: _.get(project, 'spec.specFilter'),
     }
+
+    debug('project %o', project)
+    debug('handling iframe for project spec %o', {
+      spec: project.spec,
+      extraOptions,
+    })
 
     files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
