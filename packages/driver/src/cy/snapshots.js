@@ -147,10 +147,10 @@ const create = ($$, state) => {
 
       // TODO: throw error here if cy is undefined!
 
-      // certain frameworks (ex. polymer) which use the shadow DOM
-      // get stuck here if we try to use cloneNode
+      // cloneNode can actually trigger functions attached to custom elements
       // so we have to use importNode to clone the element
       // to the outer doc and then reassign ownership to the original doc
+      // https://github.com/cypress-io/cypress/issues/7187
       // https://github.com/cypress-io/cypress/issues/1068
       const $body = $$(state('document').adoptNode(document.importNode($$('body')[0], true)))
 
