@@ -15,6 +15,15 @@ class SpecsList extends Component {
   constructor (props) {
     super(props)
     this.filterRef = React.createRef()
+    // when the specs are running and the user changes the search filter
+    // we still want to show the previous button label to reflect what
+    // is currently running
+    this.runAllSavedLabel = null
+
+    if (window.Cypress) {
+      // expose project object for testing
+      window.__project = this.props.project
+    }
   }
 
   render () {
@@ -30,18 +39,25 @@ class SpecsList extends Component {
       return this._empty()
     }
 
+    const areTestsRunning = this.props.project.browserState === 'opening' || this.props.project.browserState === 'opened'
     let runSpecsLabel = allSpecsSpec.displayName
     let runButtonDisabled = false
 
-    if (hasSpecFilter) {
-      if (numberOfShownSpecs < 1) {
-        runSpecsLabel = 'No specs'
-        runButtonDisabled = true
-      } else {
-        const specLabel = numberOfShownSpecs === 1 ? 'spec' : 'specs'
+    if (areTestsRunning && this.runAllSavedLabel) {
+      runSpecsLabel = this.runAllSavedLabel
+    } else {
+      if (hasSpecFilter) {
+        if (numberOfShownSpecs < 1) {
+          runSpecsLabel = 'No specs'
+          runButtonDisabled = true
+        } else {
+          const specLabel = numberOfShownSpecs === 1 ? 'spec' : 'specs'
 
-        runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
+          runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
+        }
       }
+
+      this.runAllSavedLabel = runSpecsLabel.replace('Run', 'Running')
     }
 
     const runTestsButton = (<button onClick={this._selectSpec.bind(this, allSpecsSpec)}

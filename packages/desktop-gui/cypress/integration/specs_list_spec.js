@@ -486,6 +486,28 @@ describe('Specs List', function () {
             expect(JSON.parse(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`])).to.equal('new')
           })
         })
+
+        it('does not update run button label while running', function () {
+          cy.contains('.all-tests', 'Run 1 spec').click()
+          // mock opened browser and running tests
+          cy.window().its('__project').then((project) => {
+            project.browserOpened()
+          })
+
+          // the button has its its label reflect the running specs
+          cy.contains('.all-tests', 'Running 1 spec')
+          .should('have.class', 'active')
+
+          // the button has its label unchanged while the specs are running
+          cy.get('.filter').clear()
+          cy.contains('.all-tests', 'Running 1 spec')
+          .should('have.class', 'active')
+
+          // but once the project stops running tests, the button gets updated
+          cy.get('.close-browser').click()
+          cy.contains('.all-tests', 'Run all specs')
+          .should('not.have.class', 'active')
+        })
       })
 
       describe('when there\'s a saved filter', function () {
