@@ -287,6 +287,20 @@ module.exports = {
       options.config = {}
     }
 
+    const invalidConfigOptions = _.keys(options.config).reduce((invalid, option) => {
+      if (!configKeys.find((configKey) => configKey === option)) {
+        invalid.push(option)
+      }
+
+      return invalid
+    }, [])
+
+    if (invalidConfigOptions.length && !options.invokedFromCli) {
+      const err = errors.get('INVALID_CONFIG_OPTION', invalidConfigOptions)
+
+      errors.log(err)
+    }
+
     _.extend(options.config, configValues)
 
     // remove them from the root options object

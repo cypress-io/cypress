@@ -923,6 +923,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Enable write permissions to this directory to ensure screenshots and videos are stored.
 
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
+    case 'INVALID_CONFIG_OPTION':
+      return stripIndent`\
+        Warning:
+      
+        ${arg1.map((arg) => `\`${arg}\` is not a valid configuration option`)}
+
+        https://on.cypress.io/configuration`
     default:
   }
 }
