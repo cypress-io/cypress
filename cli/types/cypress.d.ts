@@ -3179,7 +3179,7 @@ declare namespace Cypress {
     (chainer: 'have.any.keys' | 'include.any.keys', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to require the target to be a superset of the expected set, rather than an identical set.
-     * @example 
+     * @example
      *    cy.wrap({ a: 1, b: 2 }).should('include.all.keys', 'a', 'b')
      * @see http://chaijs.com/api/bdd/#method_keys
      * @see https://on.cypress.io/assertions
@@ -3414,7 +3414,7 @@ declare namespace Cypress {
      */
     (chainer: 'be.oneOf', list: ReadonlyArray<any>): Chainable<Subject>
     /**
-     * Asserts that the target is extensible, which means that new properties can be added to it. 
+     * Asserts that the target is extensible, which means that new properties can be added to it.
      * @example
      *    cy.wrap({a: 1}).should('be.extensible')
      * @see http://chaijs.com/api/bdd/#method_extensible
@@ -3998,7 +3998,7 @@ declare namespace Cypress {
      */
     (chainer: 'not.be.oneOf', list: ReadonlyArray<any>): Chainable<Subject>
     /**
-     * Asserts that the target is extensible, which means that new properties can be added to it. 
+     * Asserts that the target is extensible, which means that new properties can be added to it.
      * @example
      *    let o = Object.seal({})
      *    cy.wrap(o).should('not.be.extensible')
