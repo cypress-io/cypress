@@ -56,8 +56,6 @@ class SpecsList extends Component {
           runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
         }
       }
-
-      this.runAllSavedLabel = runSpecsLabel.replace('Run', 'Running')
     }
 
     const runTestsButton = (<button onClick={this._selectSpec.bind(this, allSpecsSpec)}
@@ -157,6 +155,20 @@ class SpecsList extends Component {
     e.preventDefault()
 
     const { project } = this.props
+
+    if (spec.relative === '__all') {
+      if (specsStore.filter) {
+        const filteredSpecs = specsStore.getFilteredSpecs()
+        const numberOfShownSpecs = filteredSpecs.length
+
+        this.runAllSavedLabel = numberOfShownSpecs === 1
+          ? 'Running 1 spec' : `Running ${numberOfShownSpecs} specs`
+      } else {
+        this.runAllSavedLabel = 'Running all specs'
+      }
+    } else {
+      this.runAllSavedLabel = 'Running 1 spec'
+    }
 
     return projectsApi.runSpec(project, spec, project.chosenBrowser, specsStore.filter)
   }

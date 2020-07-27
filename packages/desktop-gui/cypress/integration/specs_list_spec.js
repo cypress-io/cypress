@@ -490,6 +490,7 @@ describe('Specs List', function () {
         it('does not update run button label while running', function () {
           cy.contains('.all-tests', 'Run 1 spec').click()
           // mock opened browser and running tests
+          // to force "Stop" button to show up
           cy.window().its('__project').then((project) => {
             project.browserOpened()
           })
@@ -591,6 +592,11 @@ describe('Specs List', function () {
         cy.get('@firstSpec').click()
         .parent()
         .should('have.class', 'active')
+      })
+
+      it('shows the running spec label', () => {
+        cy.get('@firstSpec').click()
+        cy.contains('.all-tests', 'Running 1 spec')
       })
 
       it('maintains active selection if specs change', function () {
