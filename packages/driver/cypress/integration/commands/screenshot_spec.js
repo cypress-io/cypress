@@ -94,9 +94,9 @@ describe('src/cy/commands/screenshot', () => {
       })
     })
 
-    it('is noop when screenshot is false', () => {
+    it('is noop when screenshotOnRunFailure is false', () => {
       Cypress.config('isInteractive', false)
-      Cypress.config('screenshot', false)
+      Cypress.config('screenshotOnRunFailure', false)
 
       cy.spy(Cypress, 'action').log(false)
 

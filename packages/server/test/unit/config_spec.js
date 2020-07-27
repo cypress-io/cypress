@@ -593,15 +593,15 @@ describe('lib/config', () => {
         })
       })
 
-      context('screenshot', () => {
+      context('screenshotOnRunFailure', () => {
         it('passes if a boolean', function () {
-          this.setup({ screenshot: false })
+          this.setup({ screenshotOnRunFailure: false })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a boolean', function () {
-          this.setup({ screenshot: 42 })
+          this.setup({ screenshotOnRunFailure: 42 })
 
           return this.expectValidationFails('be a boolean')
         })
@@ -1139,7 +1139,7 @@ describe('lib/config', () => {
             video: { value: true, from: 'default' },
             videoCompression: { value: 32, from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },
-            screenshot: { value: true, from: 'default' },
+            screenshotOnRunFailure: { value: true, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
@@ -1216,7 +1216,7 @@ describe('lib/config', () => {
             video: { value: true, from: 'default' },
             videoCompression: { value: 32, from: 'default' },
             videoUploadOnPasses: { value: true, from: 'default' },
-            screenshot: { value: true, from: 'default' },
+            screenshotOnRunFailure: { value: true, from: 'default' },
             videosFolder: { value: 'cypress/videos', from: 'default' },
             supportFile: { value: 'cypress/support', from: 'default' },
             pluginsFile: { value: 'cypress/plugins', from: 'default' },
