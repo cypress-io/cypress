@@ -167,9 +167,9 @@ describe('driver/src/cy/snapshots', () => {
     })
   })
 
-  context('shadow dom', () => {
+  context('custom elements', () => {
     beforeEach(() => {
-      cy.visit('/fixtures/shadow-dom.html')
+      cy.visit('/fixtures/custom-elements.html')
     })
 
     // https://github.com/cypress-io/cypress/issues/7187

@@ -20,13 +20,7 @@
     </cy-test-element>
     <cy-test-element id="shadow-element-7" innerClass="in-and-out" content="Shadow Content 7"></cy-test-element>
 
-    <cy-snapshot-element id="snapshot-element"></cy-snapshot-element>
-
     <script type="text/javascript">
-      // define empty functions to stub in tests
-      window.shadowScreenshotConstructor = function () {}
-      window.shadowScreenshotAttributeChanged = function () {}
-
       if (window.customElements) {
         window.customElements.define('cy-test-element', class extends HTMLElement {
           constructor () {
@@ -38,18 +32,6 @@
             const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
 
             root.innerHTML = `<p class="${className}">${content}</p><input /><slot></slot>`
-          }
-        })
-
-        window.customElements.define('cy-snapshot-element', class extends HTMLElement {
-          constructor () {
-            super()
-
-            window.shadowScreenshotConstructor()
-          }
-
-          attributeChangedCallback () {
-            window.shadowScreenshotAttributeChanged()
           }
         })
       }
