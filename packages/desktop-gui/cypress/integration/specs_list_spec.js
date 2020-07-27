@@ -33,13 +33,6 @@ describe('Specs List', function () {
     })
   })
 
-  context('sanity checks', function () {
-    it('has sinon assertions', function () {
-      expect(this.ipc.openFinder, '.called').to.have.property('called', false)
-      expect(this.ipc.openFinder, 'sinon-chai').to.not.be.called
-    })
-  })
-
   describe('no specs', function () {
     beforeEach(function () {
       this.ipc.getSpecs.yields(null, [])
@@ -471,7 +464,7 @@ describe('Specs List', function () {
         it('disables run all tests if no results', function () {
           cy.get('.filter').clear().type('foobarbaz')
 
-          cy.contains('.all-tests', 'No specs').should('have.class', 'disabled').click()
+          cy.contains('.all-tests', 'No specs').should('be.disabled').click({ force: true })
           .then(function () {
             expect(this.ipc.launchBrowser).to.have.property('called').equal(false)
           })

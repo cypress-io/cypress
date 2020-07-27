@@ -74,6 +74,7 @@ $max-nesting-level: 14;
     position: relative;
     display: inline;
     font-size: 13px;
+    border: 1px solid #c7c7c7;
     color: #637eb9;
     padding: 5px 10px;
 
@@ -94,7 +95,7 @@ $max-nesting-level: 14;
       }
     }
 
-    &.disabled {
+    &:disabled {
       cursor: not-allowed;
       color: #ddd;
     }
