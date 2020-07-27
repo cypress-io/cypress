@@ -13,6 +13,8 @@ describe('controls', function () {
           runner: this.runner,
           spec: {
             relative: '__all',
+            name: '',
+            absolute: '',
           },
         })
       })
@@ -40,6 +42,8 @@ describe('controls', function () {
           runner: this.runner,
           spec: {
             relative: '__all',
+            name: '',
+            absolute: '',
             specFilter: 'cof',
           },
         })
