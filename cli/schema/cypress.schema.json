@@ -127,7 +127,7 @@
     "screenshot": {
       "type": "boolean",
       "default": true,
-      "description": "Whether Cypress will screenshot a failed test run when running headlessly"
+      "description": "Whether Cypress will take a screenshot when a test fails during cypress run"
     },
     "screenshotsFolder": {
       "type": "string",
