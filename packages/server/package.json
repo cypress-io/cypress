@@ -188,7 +188,7 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
-      "foxdriver"
+      "@benmalka/foxdriver"
     ]
   },
   "optionalDependencies": {
