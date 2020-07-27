@@ -29,6 +29,34 @@ describe('controls', function () {
     })
   })
 
+  context('filtered specs', function () {
+    beforeEach(function () {
+      cy.fixture('runnables').as('runnables')
+
+      this.runner = new EventEmitter()
+
+      cy.visit('/dist').then((win) => {
+        win.render({
+          runner: this.runner,
+          spec: {
+            relative: '__all',
+            specFilter: 'cof',
+          },
+        })
+      })
+
+      cy.get('.reporter').then(() => {
+        this.runner.emit('runnables:ready', this.runnables)
+
+        this.runner.emit('reporter:start', {})
+      })
+    })
+
+    it('shows header', () => {
+      cy.contains('.runnable-header', 'Specs matching "cof"')
+    })
+  })
+
   context('single spec', function () {
     beforeEach(function () {
       cy.fixture('runnables').as('runnables')

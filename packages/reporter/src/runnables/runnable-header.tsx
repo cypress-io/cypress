@@ -11,9 +11,16 @@ interface RunnableHeaderProps {
 class RunnableHeader extends Component<RunnableHeaderProps> {
   render () {
     const { spec } = this.props
+
     const relativeSpecPath = spec.relative
 
     if (spec.relative === '__all') {
+      if (spec.specFilter) {
+        return renderRunnableHeader(
+          <span><span>Specs matching "{spec.specFilter}"</span></span>,
+        )
+      }
+
       return renderRunnableHeader(
         <span><span>All Specs</span></span>,
       )
