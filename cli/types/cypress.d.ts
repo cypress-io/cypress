@@ -3168,7 +3168,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_all
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.all.keys', ...value: string[]): Chainable<Subject>
+    (chainer: 'have.all.keys' | 'have.keys' | 'have.deep.keys' | 'have.all.deep.keys', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to only require that the target have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
      * @example
@@ -3176,7 +3176,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_any
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.any.keys', ...value: string[]): Chainable<Subject>
+    (chainer: 'have.any.keys' | 'include.any.keys', ...value: string[]): Chainable<Subject>
+    /**
+     * Causes all `.keys` assertions that follow in the chain to require the target to be a superset of the expected set, rather than an identical set.
+     * @example 
+     *    cy.wrap({ a: 1, b: 2 }).should('include.all.keys', 'a', 'b')
+     * @see http://chaijs.com/api/bdd/#method_keys
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'include.all.keys', ...value: string[]): Chainable<Subject>
     /**
      * Asserts that the target has a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
@@ -3194,7 +3202,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length', value: number): Chainable<Subject>
+    (chainer: 'have.length' | 'have.lengthOf', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is greater than to the given number `n`.
      * @example
@@ -3203,7 +3211,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'have.length.greaterThan' | 'have.lengthOf.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is greater than to the given number `n`.
      * @example
@@ -3212,7 +3220,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.gt', value: number): Chainable<Subject>
+    (chainer: 'have.length.gt' | 'have.lengthOf.gt' | 'have.length.above' | 'have.lengthOf.above', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is greater than or equal to the given number `n`.
      * @example
@@ -3221,7 +3229,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.gte', value: number): Chainable<Subject>
+    (chainer: 'have.length.gte' | 'have.lengthOf.gte' | 'have.length.at.least' | 'have.lengthOf.at.least', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
@@ -3230,7 +3238,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.lessThan', value: number): Chainable<Subject>
+    (chainer: 'have.length.lessThan' | 'have.lengthOf.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
@@ -3239,7 +3247,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.lt', value: number): Chainable<Subject>
+    (chainer: 'have.length.lt' | 'have.lengthOf.lt' | 'have.length.below' | 'have.lengthOf.below', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is less than or equal to the given number `n`.
      * @example
@@ -3248,7 +3256,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.lte', value: number): Chainable<Subject>
+    (chainer: 'have.length.lte' | 'have.lengthOf.lte' | 'have.length.at.most' | 'have.lengthOf.at.most', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is within `start` and `finish`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('have.length.within', 1, 5)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.length.within' | 'have.lengthOf.within', start: number, finish: number): Chainable<Subject>
     /**
      * Asserts that the target array has the same members as the given array `set`.
      * @example
@@ -3256,7 +3272,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.members', values: any[]): Chainable<Subject>
+    (chainer: 'have.members' | 'have.deep.members', values: any[]): Chainable<Subject>
     /**
      * Asserts that the target array has the same members as the given array where order matters.
      * @example
@@ -3282,7 +3298,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.property', property: string, value?: any): Chainable<Subject>
+    (chainer: 'have.property' | 'have.nested.property' | 'have.own.property' | 'have.a.property' | 'have.deep.property' | 'have.deep.own.property' | 'have.deep.nested.property', property: string, value?: any): Chainable<Subject>
+    /**
+     * Asserts that the target has its own property descriptor with the given key name.
+     * @example
+     *    cy.wrap({a: 1}).should('have.ownPropertyDescriptor', 'a', { value: 1 })
+     * @see http://chaijs.com/api/bdd/#method_ownpropertydescriptor
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'have.ownPropertyDescriptor' | 'haveOwnPropertyDescriptor', name: string, descriptor?: PropertyDescriptor): Chainable<Subject>
     /**
      * Asserts that the target string contains the given substring `str`.
      * @example
@@ -3298,7 +3322,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include', value: any): Chainable<Subject>
+    (chainer: 'include' | 'deep.include' | 'nested.include' | 'own.include' | 'deep.own.include' | 'deep.nested.include', value: any): Chainable<Subject>
     /**
      * When the target is a string, `.include` asserts that the given string `val` is a substring of the target.
      * @example
@@ -3306,7 +3330,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'include.members', value: any[]): Chainable<Subject>
+    (chainer: 'include.members' | 'include.ordered.members' | 'include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
      * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
      * invoked after invoking the target function compared to when it’s invoked beforehand.
@@ -3381,6 +3405,50 @@ declare namespace Cypress {
      */
     // tslint:disable-next-line ban-types
     (chainer: 'throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /**
+     * Asserts that the target is a member of the given array list.
+     * @example
+     *    cy.wrap(1).should('be.oneOf', [1, 2, 3])
+     * @see http://chaijs.com/api/bdd/#method_oneof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.oneOf', list: ReadonlyArray<any>): Chainable<Subject>
+    /**
+     * Asserts that the target is extensible, which means that new properties can be added to it. 
+     * @example
+     *    cy.wrap({a: 1}).should('be.extensible')
+     * @see http://chaijs.com/api/bdd/#method_extensible
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.extensible'): Chainable<Subject>
+    /**
+     * Asserts that the target is sealed, which means that new properties can’t be added to it, and its existing properties can’t be reconfigured or deleted.
+     * @example
+     *    let sealedObject = Object.seal({})
+     *    let frozenObject = Object.freeze({})
+     *    cy.wrap(sealedObject).should('be.sealed')
+     *    cy.wrap(frozenObject).should('be.sealed')
+     * @see http://chaijs.com/api/bdd/#method_sealed
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.sealed'): Chainable<Subject>
+    /**
+     * Asserts that the target is frozen, which means that new properties can’t be added to it, and its existing properties can’t be reassigned to different values, reconfigured, or deleted.
+     * @example
+     *    let frozenObject = Object.freeze({})
+     *    cy.wrap(frozenObject).should('be.frozen')
+     * @see http://chaijs.com/api/bdd/#method_frozen
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.frozen'): Chainable<Subject>
+    /**
+     * Asserts that the target is a number, and isn’t `NaN` or positive/negative `Infinity`.
+     * @example
+     *    cy.wrap(1).should('be.finite')
+     * @see http://chaijs.com/api/bdd/#method_finite
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'be.finite'): Chainable<Subject>
 
     // chai.not
     /**
@@ -3692,7 +3760,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_all
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.all.keys', ...value: string[]): Chainable<Subject>
+    (chainer: 'not.have.all.keys' | 'not.have.keys' | 'not.have.deep.keys' | 'not.have.all.deep.keys', ...value: string[]): Chainable<Subject>
     /**
      * Causes all `.keys` assertions that follow in the chain to only require that the target not have at least one of the given keys. This is the opposite of `.all`, which requires that the target have all of the given keys.
      * @example
@@ -3700,7 +3768,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_any
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.any.keys', ...value: string[]): Chainable<Subject>
+    (chainer: 'not.have.any.keys' | 'not.include.any.keys', ...value: string[]): Chainable<Subject>
     /**
      * Asserts that the target does not have a property with the given key `name`. See the `deep-eql` project page for info on the deep equality algorithm: https://github.com/chaijs/deep-eql.
      * @example
@@ -3718,7 +3786,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length', value: number): Chainable<Subject>
+    (chainer: 'not.have.length' | 'not.have.lengthOf', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is not greater than to the given number `n`.
      * @example
@@ -3727,7 +3795,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length.greaterThan', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.greaterThan' | 'not.have.lengthOf.greaterThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is not greater than to the given number `n`.
      * @example
@@ -3736,7 +3804,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length.gt', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.gt' | 'not.have.lengthOf.gt' | 'not.have.length.above' | 'not.have.lengthOf.above', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is not greater than or equal to the given number `n`.
      * @example
@@ -3745,7 +3813,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'have.length.gte', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.gte' | 'not.have.lengthOf.gte' | 'not.have.length.at.least' | 'not.have.lengthOf.at.least', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is less than to the given number `n`.
      * @example
@@ -3754,7 +3822,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length.lessThan', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lessThan' | 'not.have.lengthOf.lessThan', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is not less than to the given number `n`.
      * @example
@@ -3763,7 +3831,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length.lt', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lt' | 'not.have.lengthOf.lt' | 'not.have.length.below' | 'not.have.lengthOf.below', value: number): Chainable<Subject>
     /**
      * Asserts that the target’s `length` property is not less than or equal to the given number `n`.
      * @example
@@ -3772,7 +3840,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_lengthof
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.length.lte', value: number): Chainable<Subject>
+    (chainer: 'not.have.length.lte' | 'not.have.lengthOf.lte' | 'not.have.length.at.most' | 'not.have.lengthOf.at.most', value: number): Chainable<Subject>
+    /**
+     * Asserts that the target’s `length` property is within `start` and `finish`.
+     * @example
+     *    cy.wrap([1, 2, 3]).should('not.have.length.within', 6, 12)
+     * @see http://chaijs.com/api/bdd/#method_lengthof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.length.within' | 'not.have.lengthOf.within', start: number, finish: number): Chainable<Subject>
     /**
      * Asserts that the target array does not have the same members as the given array `set`.
      * @example
@@ -3780,7 +3856,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.members', values: any[]): Chainable<Subject>
+    (chainer: 'not.have.members' | 'not.have.deep.members', values: any[]): Chainable<Subject>
     /**
      * Asserts that the target array does not have the same members as the given array where order matters.
      * @example
@@ -3806,7 +3882,15 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_property
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.have.property', property: string, value?: any): Chainable<Subject>
+    (chainer: 'not.have.property' | 'not.have.nested.property' | 'not.have.own.property' | 'not.have.a.property' | 'not.have.deep.property' | 'not.have.deep.own.property' | 'not.have.deep.nested.property', property: string, value?: any): Chainable<Subject>
+    /**
+     * Asserts that the target has its own property descriptor with the given key name.
+     * @example
+     *    cy.wrap({a: 1}).should('not.have.ownPropertyDescriptor', 'a', { value: 2 })
+     * @see http://chaijs.com/api/bdd/#method_ownpropertydescriptor
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.have.ownPropertyDescriptor' | 'not.haveOwnPropertyDescriptor', name: string, descriptor?: PropertyDescriptor): Chainable<Subject>
     /**
      * Asserts that the target string does not contains the given substring `str`.
      * @example
@@ -3822,7 +3906,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_include
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include', value: any): Chainable<Subject>
+    (chainer: 'not.include' | 'not.deep.include' | 'not.nested.include' | 'not.own.include' | 'not.deep.own.include' | 'not.deep.nested.include', value: any): Chainable<Subject>
     /**
      * When the target is a string, `.include` asserts that the given string `val` is not a substring of the target.
      * @example
@@ -3830,7 +3914,7 @@ declare namespace Cypress {
      * @see http://chaijs.com/api/bdd/#method_members
      * @see https://on.cypress.io/assertions
      */
-    (chainer: 'not.include.members', value: any[]): Chainable<Subject>
+    (chainer: 'not.include.members' | 'not.include.ordered.members' | 'not.include.deep.ordered.members', value: any[]): Chainable<Subject>
     /**
      * When one argument is provided, `.increase` asserts that the given function `subject` returns a greater number when it’s
      * invoked after invoking the target function compared to when it’s invoked beforehand.
@@ -3905,6 +3989,49 @@ declare namespace Cypress {
      */
     // tslint:disable-next-line ban-types
     (chainer: 'not.throw', error: Error | Function, expected?: string | RegExp): Chainable<Subject>
+    /**
+     * Asserts that the target is a member of the given array list.
+     * @example
+     *    cy.wrap(42).should('not.be.oneOf', [1, 2, 3])
+     * @see http://chaijs.com/api/bdd/#method_oneof
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.oneOf', list: ReadonlyArray<any>): Chainable<Subject>
+    /**
+     * Asserts that the target is extensible, which means that new properties can be added to it. 
+     * @example
+     *    let o = Object.seal({})
+     *    cy.wrap(o).should('not.be.extensible')
+     * @see http://chaijs.com/api/bdd/#method_extensible
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.extensible'): Chainable<Subject>
+    /**
+     * Asserts that the target is sealed, which means that new properties can’t be added to it, and its existing properties can’t be reconfigured or deleted.
+     * @example
+     *    cy.wrap({a: 1}).should('be.sealed')
+     *    cy.wrap({a: 1}).should('be.sealed')
+     * @see http://chaijs.com/api/bdd/#method_sealed
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.sealed'): Chainable<Subject>
+    /**
+     * Asserts that the target is frozen, which means that new properties can’t be added to it, and its existing properties can’t be reassigned to different values, reconfigured, or deleted.
+     * @example
+     *    cy.wrap({a: 1}).should('not.be.frozen')
+     * @see http://chaijs.com/api/bdd/#method_frozen
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.frozen'): Chainable<Subject>
+    /**
+     * Asserts that the target is a number, and isn’t `NaN` or positive/negative `Infinity`.
+     * @example
+     *    cy.wrap(NaN).should('not.be.finite')
+     *    cy.wrap(Infinity).should('not.be.finite')
+     * @see http://chaijs.com/api/bdd/#method_finite
+     * @see https://on.cypress.io/assertions
+     */
+    (chainer: 'not.be.finite'): Chainable<Subject>
 
     // sinon-chai
     /**
