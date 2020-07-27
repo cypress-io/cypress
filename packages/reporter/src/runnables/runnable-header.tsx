@@ -2,7 +2,7 @@ import React, { Component, ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
 
-const renderRunnableHeader = (children:ReactElement) => <div className="runnable-header">{children}</div>
+const renderRunnableHeader = (children: ReactElement) => <div className="runnable-header">{children}</div>
 
 interface RunnableHeaderProps {
   spec: Cypress.Cypress['spec']
