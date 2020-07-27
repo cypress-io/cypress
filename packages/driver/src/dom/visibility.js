@@ -244,7 +244,7 @@ const elIsNotElementFromPoint = function ($el) {
   // we also check if the element at point is a
   // parent since pointer-events: none
   // will cause elAtCenterPoint to fall through to parent
-  return !($elements.isDescendent($el, $elAtPoint) || ($elAtPoint && $elements.isDescendent($elAtPoint, $el)))
+  return !($elements.isDescendent($el, $elAtPoint) || ($elAtPoint && $elements.isAncestor($el, $elAtPoint)))
 }
 
 const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent()) {
