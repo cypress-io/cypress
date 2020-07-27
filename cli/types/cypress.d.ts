@@ -2422,7 +2422,7 @@ declare namespace Cypress {
      */
     resolvedNodeVersion: string
     /**
-     * Whether Cypress will screenshot a failed test run when running headlessly.
+     * Whether Cypress will take a screenshot when a test fails during cypress run.
      * @default true
      */
     screenshot: boolean
