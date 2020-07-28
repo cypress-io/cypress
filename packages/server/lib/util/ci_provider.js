@@ -34,6 +34,12 @@ const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
 
+const isCodeBuild = () => {
+  return _.some(process.env, (val, key) => {
+    return /^CODEBUILD_/.test(key)
+  })
+}
+
 const isCodeshipBasic = () => {
   return process.env.CI_NAME && (process.env.CI_NAME === 'codeship') && process.env.CODESHIP
 }
@@ -86,6 +92,7 @@ const CI_PROVIDERS = {
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
   'circle': 'CIRCLECI',
+  'codeBuild': isCodeBuild,
   'codeshipBasic': isCodeshipBasic,
   'codeshipPro': isCodeshipPro,
   'concourse': isConcourse,
@@ -173,6 +180,9 @@ const _providerCiParams = () => {
       'CIRCLE_PULL_REQUEST',
       'CIRCLE_REPOSITORY_URL',
       'CI_PULL_REQUEST',
+    ]),
+    codeBuild: extract([
+      'CODEBUILD_BUILD_ID',
     ]),
     codeshipBasic: extract([
       'CI_BUILD_ID',
@@ -416,6 +426,15 @@ const _providerCommitParams = () => {
       authorName: env.CIRCLE_USERNAME,
       // authorEmail: ???
       // remoteOrigin: ???
+      // defaultBranch: ???
+    },
+    codeBuild: {
+      sha: env.CODEBUILD_RESOLVED_SOURCE_VERSION,
+      branch: env.CODEBUILD_SOURCE_VERSION,
+      // message: ???
+      // authorName: ???
+      // authorEmail: ???
+      remoteOrigin: env.CODEBUILD_SOURCE_REPO_URL,
       // defaultBranch: ???
     },
     codeshipBasic: {

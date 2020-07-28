@@ -291,6 +291,27 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('codeBuild', () => {
+    resetEnv = mockedEnv({
+      CODEBUILD_BUILD_ID: 'buildId',
+
+      CODEBUILD_RESOLVED_SOURCE_VERSION: 'commit',
+      CODEBUILD_SOURCE_VERSION: 'branch',
+      CODEBUILD_SOURCE_REPO_URL: 'repositoryUri',
+    }, { clear: true })
+
+    expectsName('codeBuild')
+    expectsCiParams({
+      codebuildBuildId: 'buildId',
+    })
+
+    return expectsCommitParams({
+      sha: 'commit',
+      branch: 'branch',
+      remoteOrigin: 'repositoryUri',
+    })
+  })
+
   it('codeshipBasic', () => {
     resetEnv = mockedEnv({
       CODESHIP: 'TRUE',
