@@ -178,9 +178,16 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
 /**
  * Describes a response that will be sent back to the browser to fulfill the request.
  */
-export type StaticResponse = GenericStaticResponse<string, string | object>
+export type StaticResponse = GenericStaticResponse<string, string | object, number | ThrottleKbpsPreset> & {
+  /**
+  * If set, `delayMs` will pass before the response is sent.
+  */
+ delayMs?: number
+}
 
-export interface GenericStaticResponse<Fixture, Body> {
+export type ThrottleKbpsPreset = 'gprs' | 'edge' | '2g+' | '3g' | '3g+' | '4g' | 'dsl' | 'wifi'
+
+export interface GenericStaticResponse<Fixture, Body, ThrottleKbps> {
   /**
    * If set, serve a fixture as the response body.
    */
@@ -201,6 +208,10 @@ export interface GenericStaticResponse<Fixture, Body> {
    * If `forceNetworkError` is truthy, Cypress will destroy the connection to the browser and send no response. Useful for simulating a server that is not reachable. Must not be set in combination with other options.
    */
   forceNetworkError?: boolean
+  /**
+   * If set, the `body` will be sent at `throttleKbps` kbps.
+   */
+  throttleKbps?: ThrottleKbps
 }
 
 /**
