@@ -245,7 +245,7 @@ describe('src/cypress/dom/visibility', () => {
 </div>`)
 
       this.$childPointerEventsNone = add(`\
-<div style="position: fixed; top: 40px;">
+<div style="position: fixed; top: 60px;">
   <span style="pointer-events: none;">child pointer-events: none</span>
 </div>\
 `)
@@ -305,8 +305,9 @@ describe('src/cypress/dom/visibility', () => {
 
       this.$parentPointerEventsNoneCovered = add(`\
 <div style="pointer-events: none;">
-  <span style="position: fixed;">parent pointer-events: none</span>
-</div>\
+  <span style="position: fixed; top: 40px;">parent pointer-events: none</span>
+</div>
+<span style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</span>\
 `)
 
       this.$elOutOfParentBoundsToLeft = add(`\
