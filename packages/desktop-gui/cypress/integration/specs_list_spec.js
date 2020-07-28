@@ -597,6 +597,7 @@ describe('Specs List', function () {
       it('shows the running spec label', () => {
         cy.get('@firstSpec').click()
         cy.contains('.all-tests', 'Running 1 spec')
+        .find('.fa-dot-circle')
       })
 
       it('maintains active selection if specs change', function () {
