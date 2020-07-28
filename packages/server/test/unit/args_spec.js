@@ -6,6 +6,7 @@ const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
 const argsUtil = require(`${root}lib/util/args`)
 const getWindowsProxyUtil = require(`${root}lib/util/get-windows-proxy`)
+const errors = require(`${root}lib/errors`)
 
 const cwd = process.cwd()
 
@@ -287,6 +288,16 @@ describe('lib/util/args', () => {
       expect(options.config.supportFile).to.eq('path/to/support_file')
 
       expect(options).not.to.have.property('foo')
+    })
+
+    it('throws a warning if config option is not valid', function () {
+      sinon.spy(errors, 'get')
+      sinon.spy(errors, 'log')
+
+      this.setup('--config', 'foo=bar,baz=foo')
+
+      expect(errors.get).to.be.calledWith('INVALID_CONFIG_OPTION')
+      expect(errors.log).to.be.calledOnce
     })
 
     it('overrides port in config', function () {
