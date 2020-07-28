@@ -91,7 +91,7 @@ const create = (state) => {
 
     // store the current focused element
     // since when we call .focus() it will change
-    const $focused = getFocused()
+    const $focused = getFocused(el.ownerDocument)
 
     let hasFocused = false
 
@@ -220,8 +220,8 @@ const create = (state) => {
     return false
   }
 
-  const getFocused = () => {
-    const { activeElement } = state('document')
+  const getFocused = (document = state('document')) => {
+    const { activeElement } = document
 
     if ($dom.isFocused(activeElement)) {
       return $dom.wrap(activeElement)
