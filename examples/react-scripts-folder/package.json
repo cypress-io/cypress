@@ -3,7 +3,7 @@
   "description": "Handles component tests from cypress folder",
   "private": true,
   "scripts": {
-    "test": "../../node_modules/.bin/cypress run",
+    "test": "node ../../scripts/cypress-expect run --passing 5",
     "cy:open": "../../node_modules/.bin/cypress open",
     "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js",
     "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js"
