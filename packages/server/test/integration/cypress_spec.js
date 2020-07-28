@@ -144,11 +144,11 @@ describe('lib/cypress', () => {
     }
 
     // returns error object
-    this.expectExitWithErr = (type, msg1, msg2) => {
+    this.expectExitWithErr = (type, msg1, msg2, call = 0) => {
       expect(errors.log, 'error was logged').to.be.calledWithMatch({ type })
       expect(process.exit, 'process.exit was called').to.be.calledWith(1)
 
-      const err = errors.log.getCall(0).args[0]
+      const err = errors.log.getCall(call).args[0]
 
       if (msg1) {
         expect(err.message, 'error text').to.include(msg1)
@@ -895,8 +895,8 @@ describe('lib/cypress', () => {
         '--config=trashAssetsBeforeHeadlessRuns=false',
       ])
       .then(() => {
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeHeadlessRuns')
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeRuns')
+        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeHeadlessRuns', null, 1)
+        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeRuns', null, 1)
       })
     })
 
@@ -917,8 +917,8 @@ describe('lib/cypress', () => {
         '--config=screenshotOnHeadlessFailure=false',
       ])
       .then(() => {
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'screenshotOnHeadlessFailure')
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'You now configure this behavior in your test code')
+        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'screenshotOnHeadlessFailure', null, 1)
+        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'You now configure this behavior in your test code', null, 1)
       })
     })
 
