@@ -201,6 +201,7 @@ describe('Specs List', function () {
 
         it('triggers browser launch on click of button', () => {
           cy.contains('.all-tests', 'Run all specs').click()
+          .find('.fa-dot-circle')
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -418,6 +419,7 @@ describe('Specs List', function () {
           .and('contain', 'account_new_spec.coffee')
 
           cy.contains('.all-tests', 'Run 1 spec').click()
+          .find('.fa-dot-circle')
           .then(() => {
             expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
             const launchArgs = this.ipc.launchBrowser.lastCall.args
@@ -450,6 +452,7 @@ describe('Specs List', function () {
           .should('have.length', this.numSpecs)
 
           cy.contains('.all-tests', 'Run all specs')
+          .find('.fa-play')
         })
 
         it('shows empty message if no results', function () {

@@ -39,7 +39,7 @@ class SpecsList extends Component {
       return this._empty()
     }
 
-    const areTestsRunning = this.props.project.browserState === 'opening' || this.props.project.browserState === 'opened'
+    const areTestsRunning = this._areTestsRunning()
     let runSpecsLabel = allSpecsSpec.displayName
     let runButtonDisabled = false
 
@@ -62,7 +62,7 @@ class SpecsList extends Component {
       disabled={runButtonDisabled}
       title="Run all integration specs together"
       className={cs('btn-link all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
-      <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
+      <i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}
       {runSpecsLabel}
     </button>)
 
@@ -125,8 +125,17 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
-  _allSpecsIcon (allSpecsChosen) {
-    return allSpecsChosen ? 'far fa-dot-circle green' : 'fas fa-play'
+  _allSpecsIcon () {
+    return this._areTestsRunning() ? 'far fa-dot-circle green' : 'fas fa-play'
+  }
+
+  _areTestsRunning () {
+    if (!this.props.project) {
+      return false
+    }
+
+    return this.props.project.browserState === 'opening'
+      || this.props.project.browserState === 'opened'
   }
 
   _specIcon (isChosen) {
