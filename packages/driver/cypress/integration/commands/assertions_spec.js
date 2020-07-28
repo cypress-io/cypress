@@ -431,6 +431,16 @@ describe('src/cy/commands/assertions', () => {
         cy.noop({}).should('dee.eq', {})
       })
 
+      it('throws err when assertion contains only one language chainer', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq('The chainer `be` contains only one language chainer. Please use a valid assertion.')
+
+          done()
+        })
+
+        cy.noop(true).should('be', true)
+      })
+
       it('throws err when ends with a non available chainable', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('The chainer `eq2` was not found. Could not build assertion.')
