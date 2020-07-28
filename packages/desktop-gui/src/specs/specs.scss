@@ -17,6 +17,8 @@ $max-nesting-level: 14;
     height: 42px;
     background: #f5f5f5;
     border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
   }
 
   .search {
@@ -24,7 +26,7 @@ $max-nesting-level: 14;
     margin-right: 15px;
     display: inline-block;
     position: relative;
-    width: calc(100% - 200px);
+    width: calc(100% - 160px);
 
     label {
       position: absolute;
@@ -74,10 +76,8 @@ $max-nesting-level: 14;
     position: relative;
     display: inline;
     font-size: 13px;
-    border: 1px solid #c7c7c7;
     color: #637eb9;
     padding: 5px 10px;
-    min-width: 160px;
 
     &:hover, &:focus {
       color: #38589c;

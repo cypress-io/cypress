@@ -61,7 +61,7 @@ class SpecsList extends Component {
     const runTestsButton = (<button onClick={this._selectSpec.bind(this, allSpecsSpec)}
       disabled={runButtonDisabled}
       title="Run all integration specs together"
-      className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
+      className={cs('btn-link all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
       <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
       {runSpecsLabel}
     </button>)
