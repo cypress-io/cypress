@@ -97,7 +97,7 @@ function getInvocationDetails (specWindow, config) {
 
     // firefox throws a different stack than chromium
     // which includes this file (mocha.js) and mocha/.../common.js at the top
-    if (specWindow.Cypress && specWindow.Cypress.browser.family === 'firefox') {
+    if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
       stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'mocha/lib/interfaces/common.js')
     }
 
@@ -114,7 +114,9 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
     this._createHook = function (title, fn) {
       const hook = _createHook.call(this, title, fn)
 
-      hook.invocationDetails = getInvocationDetails(specWindow, config)
+      if (!hook.invocationDetails) {
+        hook.invocationDetails = getInvocationDetails(specWindow, config)
+      }
 
       return hook
     }
@@ -131,7 +133,9 @@ function overloadMochaTest (suite, specWindow, config) {
   const _fn = suite.addTest
 
   suite.addTest = function (test) {
-    test.invocationDetails = getInvocationDetails(specWindow, config)
+    if (!test.invocationDetails) {
+      test.invocationDetails = getInvocationDetails(specWindow, config)
+    }
 
     return _fn.call(this, test)
   }
