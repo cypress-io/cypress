@@ -388,7 +388,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   Cypress.on('runnable:after:run:async', (test, runnable) => {
     const screenshotConfig = $Screenshot.getConfig()
 
-    if (!test.err || !screenshotConfig.screenshotOnRunFailure || config('isInteractive') || test.err.isPending) {
+    if (!test.err || !screenshotConfig.screenshotOnRunFailure || config('isInteractive') || test.err.isPending || !config('screenshotOnRunFailure')) {
       return
     }
 
