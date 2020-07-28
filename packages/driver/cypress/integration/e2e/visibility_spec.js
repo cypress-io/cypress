@@ -29,11 +29,16 @@ describe('visibility', () => {
     })
   })
 
-  // https://github.com/cypress-io/cypress/issues/7794
-  describe('with shadow dom and fixed position ancestor', () => {
-    it('does not hang when checking visibility', () => {
+  describe('with shadow dom', () => {
+    // https://github.com/cypress-io/cypress/issues/7794
+    it('fixed position ancestor does not hang when checking visibility', () => {
       cy.visit('/fixtures/issue-7794.html')
       cy.get('.container-2').should('be.visible')
+    })
+
+    it('non-visible ancestor causes element to not be visible', () => {
+      cy.visit('/fixtures/shadow-dom.html')
+      cy.get('.inside-non-visible', { includeShadowDom: true }).should('not.be.visible')
     })
   })
 })
