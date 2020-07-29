@@ -622,7 +622,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
     // hooks do not have their own id, their
     // commands need to grouped with the test
     // and we can only associate them by this id
-    const test = getTest() || getTestFromHookOrFindTest(hook)
+    const test = getTestFromHookOrFindTest(hook)
 
     if (!test) {
       // we couldn't find a test to run with this hook
