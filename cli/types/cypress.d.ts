@@ -2319,6 +2319,24 @@ declare namespace Cypress {
      * @default false
      */
     multiple: boolean
+    /**
+     * Press ctrl key
+     *
+     * @default false
+     */
+    ctrlKey: boolean
+    /**
+     * Press alt key
+     *
+     * @default false
+     */
+    altKey: boolean
+    /**
+     * Press shift key
+     *
+     * @default false
+     */
+    shiftKey: boolean
   }
 
   interface ResolvedConfigOptions {
