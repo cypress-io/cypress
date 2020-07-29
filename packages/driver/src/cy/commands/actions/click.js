@@ -34,7 +34,7 @@ const formatMouseEvents = (events) => {
 }
 
 module.exports = (Commands, Cypress, cy, state, config) => {
-  const { mouse } = cy.devices
+  const { mouse, keyboard } = cy.devices
 
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
     let position
@@ -157,6 +157,15 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           const forceEl = options.force && $elToClick.get(0)
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
+
+          if (options.ctrlKey) {
+            keyboard.type({
+              $el: options.$el,
+              delay: 10,
+              chars: '{ctrl}',
+              release: false,
+            })
+          }
 
           const onReadyProps = onReady(fromElViewport, forceEl)
 
