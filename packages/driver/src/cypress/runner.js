@@ -545,7 +545,7 @@ const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => 
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
-  const test = getTest() || getTestFromHookOrFindTest(hook)
+  const test = getTestFromHookOrFindTest(hook)
 
   test.err = err
   test.state = 'failed'
