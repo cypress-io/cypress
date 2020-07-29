@@ -54,6 +54,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ctrlKey: false,
+      altKey: false,
+      shiftKey: false,
       ...defaultOptions,
     })
 
