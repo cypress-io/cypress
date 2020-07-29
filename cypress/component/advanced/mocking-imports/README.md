@@ -9,9 +9,12 @@ In babel configuration file, add one more plugin
 ```js
 // https://babeljs.io/docs/en/babel-plugin-transform-modules-commonjs
 // loose ES6 modules allow us to dynamically mock imports during tests
-['@babel/plugin-transform-modules-commonjs', {
-  loose: true
-}]
+;[
+  '@babel/plugin-transform-modules-commonjs',
+  {
+    loose: true,
+  },
+]
 ```
 
 The ES6 exports and imports then will be a plain object then
@@ -43,4 +46,25 @@ it('shows mock greeting', () => {
   mount(<Component />)
   cy.contains('h1', 'test greeting').should('be.visible')
 })
+```
+
+## PizzaProps
+
+If the component is using `defaultProps` to pass a method to call, you can stub it, see [PizzaProps.js](PizzaProps.js) and [PizzaProps.spec.js](PizzaProps.spec.js)
+
+```js
+import PizzaProps from './PizzaProps'
+cy.stub(PizzaProps.defaultProps, 'fetchIngredients').resolves(...)
+```
+
+## RemotePizza
+
+Even if the import is renamed, you can stub using the original name, see [RemotePizza.js](RemotePizza.js) and [RemotePizza.spec.js](RemotePizza.spec.js)
+
+```js
+// RemotePizza.js
+import { fetchIngredients as defaultFetchIngredients } from './services'
+// RemotePizza.spec.js
+import * as services from './services'
+cy.stub(services, 'fetchIngredients').resolves(...)
 ```
