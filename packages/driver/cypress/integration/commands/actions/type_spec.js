@@ -177,6 +177,16 @@ describe('src/cy/commands/actions/type - #type', () => {
     .should('have.value', 'foobar')
   })
 
+  // https://github.com/cypress-io/cypress/issues/8111
+  it('can type into an input in an iframe', () => {
+    cy.visit('/fixtures/issue-8111-outer.html')
+    cy.get('iframe')
+    .its('0.contentDocument.body').should('not.be.empty')
+    .then(cy.wrap)
+    .find('input')
+    .type(42)
+  })
+
   describe('actionability', () => {
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()
