@@ -162,7 +162,7 @@ Spec | Description
 [mock-fetch](cypress/component/advanced/mock-fetch) | Test stubs `window.fetch` used by component in `useEffect` hook
 [mocking-axios](cypress/component/advanced/mocking-axios) | Stubbing methods from a 3rd party component like `axios`
 [mocking-component](cypress/component/advanced/mocking-component) | Replaced a child component with dummy component during test
-[mocking-imports](cypress/component/advanced/mocking-imports) | Stub a named ES6 import using `plugin-transform-modules-commonjs` with `loose: true` when transpiled
+[mocking-imports](cypress/component/advanced/mocking-imports) | Stub a named ES6 import in various situations
 [react-router-v6](cypress/component/advanced/react-router-v6) | Example testing a [React Router v6](https://github.com/ReactTraining/react-router)
 [renderless](cypress/component/advanced/renderless) | Testing a component that does not need to render itself into the DOM
 [set-timeout-example](cypress/component/advanced/set-timeout-example) | Control the clock with `cy.tick` and test loading components that use `setTimeout`
