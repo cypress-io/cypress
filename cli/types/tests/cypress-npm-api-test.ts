@@ -40,5 +40,5 @@ const runConfig: Cypress.ConfigOptions = {
 cypress.run({ config: runConfig })
 
 cypress.run({}).then((results) => {
-  results as CypressCmd.CypressRunResult // $ExpectType CypressRunResult
+  results as CypressCommandLine.CypressRunResult // $ExpectType CypressRunResult
 })
