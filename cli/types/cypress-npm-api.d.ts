@@ -6,7 +6,7 @@
 // in the future the NPM module itself will be in TypeScript
 // but for now describe it as an ambient module
 
-declare module 'cypress' {
+declare namespace CypressCommandLine {
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -324,7 +324,9 @@ declare module 'cypress' {
      */
     parseRunArguments(args: string[]): Promise<Partial<CypressRunOptions>>
   }
+}
 
+declare module 'cypress' {
   /**
    * Cypress NPM module interface.
    * @see https://on.cypress.io/module-api
@@ -349,19 +351,19 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult | CypressFailedRunResult>,
+    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>,
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.
      * @see https://on.cypress.io/module-api#cypress-open
      */
-    open(options?: Partial<CypressOpenOptions>): Promise<void>
+    open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
 
     /**
      * Utility functions for parsing CLI arguments the same way
      * Cypress does
      */
-    cli: CypressCliParser
+    cli: CypressCommandLine.CypressCliParser
   }
 
   // export Cypress NPM module interface
