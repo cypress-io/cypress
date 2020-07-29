@@ -65,6 +65,30 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
     }
 
+    const pressModifiers = (release) => {
+      const keys = []
+
+      if (options.ctrlKey) {
+        keys.push('{ctrl}')
+      }
+
+      if (options.altKey) {
+        keys.push('{alt}')
+      }
+
+      if (options.shiftKey) {
+        keys.push('{shift}')
+      }
+
+      keys.forEach((key) => {
+        keyboard.type({
+          $el: options.$el,
+          chars: key,
+          release,
+        })
+      })
+    }
+
     const perform = (el) => {
       let deltaOptions
       const $el = $dom.wrap(el)
@@ -142,6 +166,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         .return(null)
       }
 
+      pressModifiers(false)
+
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchonrously
       // once we establish the coordinates and the element
@@ -158,15 +184,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
 
-          if (options.ctrlKey) {
-            keyboard.type({
-              $el: options.$el,
-              delay: 10,
-              chars: '{ctrl}',
-              release: false,
-            })
-          }
-
           const onReadyProps = onReady(fromElViewport, forceEl)
 
           return createLog({
@@ -176,6 +193,12 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           fromElWindow,
           fromAutWindow)
         },
+      })
+      .then((result) => {
+        // Release pressed modifiers
+        pressModifiers(true)
+
+        return result
       })
       .catch((err) => {
         // snapshot only on click failure

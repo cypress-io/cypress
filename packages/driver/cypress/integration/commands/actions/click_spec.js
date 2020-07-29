@@ -882,6 +882,66 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    describe('modifier options', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/issue-486.html')
+      })
+
+      it('ctrl', () => {
+        cy.get('#button').click({
+          ctrlKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
+
+        // ctrl should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Ctrl}')
+      })
+
+      it('alt', () => {
+        cy.get('#button').click({
+          altKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Alt}')
+
+        // alt should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Alt}')
+      })
+
+      it('shift', () => {
+        cy.get('#button').click({
+          shiftKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Shift}')
+
+        // shift should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Shift}')
+      })
+
+      it('multiple', () => {
+        cy.get('#button').click({
+          ctrlKey: true,
+          altKey: true,
+          shiftKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
+        cy.get('#result').should('contain', '{Alt}')
+        cy.get('#result').should('contain', '{Shift}')
+
+        // modifiers should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Ctrl}')
+        cy.get('#result').should('not.contain', '{Alt}')
+        cy.get('#result').should('not.contain', '{Shift}')
+      })
+    })
+
     describe('pointer-events:none', () => {
       beforeEach(function () {
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
