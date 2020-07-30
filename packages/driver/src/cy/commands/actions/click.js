@@ -68,32 +68,22 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
     }
 
-    const pressModifiers = (release) => {
-      const keys = []
-
+    const flagModifiers = (press) => {
       if (options.ctrlKey) {
-        keys.push('{ctrl}')
+        keyboard.flagModifier({ key: 'Control' }, press)
       }
 
       if (options.altKey) {
-        keys.push('{alt}')
+        keyboard.flagModifier({ key: 'Alt' }, press)
       }
 
       if (options.shiftKey) {
-        keys.push('{shift}')
+        keyboard.flagModifier({ key: 'Shift' }, press)
       }
 
       if (options.metaKey) {
-        keys.push('{meta}')
+        keyboard.flagModifier({ key: 'Meta' }, press)
       }
-
-      keys.forEach((key) => {
-        keyboard.type({
-          $el: options.$el,
-          chars: key,
-          release,
-        })
-      })
     }
 
     const perform = (el) => {
@@ -173,8 +163,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         .return(null)
       }
 
-      pressModifiers(false)
-
       // must use callbacks here instead of .then()
       // because we're issuing the clicks synchonrously
       // once we establish the coordinates and the element
@@ -191,7 +179,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
 
+          flagModifiers(true)
+
           const onReadyProps = onReady(fromElViewport, forceEl)
+
+          flagModifiers(false)
 
           return createLog({
             moveEvents,
@@ -200,12 +192,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           fromElWindow,
           fromAutWindow)
         },
-      })
-      .then((result) => {
-        // Release pressed modifiers
-        pressModifiers(true)
-
-        return result
       })
       .catch((err) => {
         // snapshot only on click failure
