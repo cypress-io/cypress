@@ -2326,7 +2326,7 @@ declare namespace Cypress {
      */
     ctrlKey: boolean
     /**
-     * Press alt key
+     * Press alt key. It's option key in Mac.
      *
      * @default false
      */
@@ -2337,6 +2337,12 @@ declare namespace Cypress {
      * @default false
      */
     shiftKey: boolean
+    /**
+     * Press meta key. It's Windows key in Windows and Command key in Mac.
+     *
+     * @default false
+     */
+    metaKey: boolean
   }
 
   interface ResolvedConfigOptions {

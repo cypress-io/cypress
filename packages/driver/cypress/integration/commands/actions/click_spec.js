@@ -923,22 +923,37 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#result').should('not.contain', '{Shift}')
       })
 
+      it('meta', () => {
+        cy.get('#button').click({
+          metaKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
+
+        // shift should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Meta}')
+      })
+
       it('multiple', () => {
         cy.get('#button').click({
           ctrlKey: true,
           altKey: true,
           shiftKey: true,
+          metaKey: true,
         })
 
         cy.get('#result').should('contain', '{Ctrl}')
         cy.get('#result').should('contain', '{Alt}')
         cy.get('#result').should('contain', '{Shift}')
+        cy.get('#result').should('contain', '{Meta}')
 
         // modifiers should be released
         cy.get('#button').click()
         cy.get('#result').should('not.contain', '{Ctrl}')
         cy.get('#result').should('not.contain', '{Alt}')
         cy.get('#result').should('not.contain', '{Shift}')
+        cy.get('#result').should('not.contain', '{Meta}')
       })
     })
 

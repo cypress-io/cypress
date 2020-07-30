@@ -83,6 +83,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         keys.push('{shift}')
       }
 
+      if (options.metaKey) {
+        keys.push('{meta}')
+      }
+
       keys.forEach((key) => {
         keyboard.type({
           $el: options.$el,
