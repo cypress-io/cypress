@@ -431,14 +431,34 @@ describe('src/cy/commands/assertions', () => {
         cy.noop({}).should('dee.eq', {})
       })
 
-      it('throws err when assertion contains only one language chainer', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('The chainer `be` contains only one language chainer. Please use a valid assertion.')
+      describe('language chainers err', () => {
+        // https://github.com/cypress-io/cypress/issues/883
+        const langChainers = ['to', 'be', 'been', 'is', 'that', 'which', 'and', 'has', 'have', 'with', 'at', 'of', 'same', 'but', 'does', 'still']
+        const langChainerCombos = ['be.and.have.same', 'to.have']
 
-          done()
+        langChainers.forEach((langChainer) => {
+          it(`throws err when assertion contains only one language chainer: ${langChainer}`, (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq(`The chainer \`${langChainer}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
+
+              done()
+            })
+
+            cy.noop(true).should(langChainer, true)
+          })
         })
 
-        cy.noop(true).should('be', true)
+        langChainerCombos.forEach((langChainerCombos) => {
+          it(`throws err when assertion contains only language chainers: ${langChainerCombos}`, (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.eq(`The chainer \`${langChainerCombos}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
+
+              done()
+            })
+
+            cy.noop(true).should(langChainerCombos, true)
+          })
+        })
       })
 
       it('throws err when ends with a non available chainable', (done) => {
