@@ -57,6 +57,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       ctrlKey: false,
       altKey: false,
       shiftKey: false,
+      cmdKey: false,
       ...defaultOptions,
     })
 
@@ -69,11 +70,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     }
 
     const flagModifiers = (press) => {
-      if (options.ctrlKey) {
+      if (options.ctrlKey || options.controlKey) {
         keyboard.flagModifier({ key: 'Control' }, press)
       }
 
-      if (options.altKey) {
+      if (options.altKey || options.optionKey) {
         keyboard.flagModifier({ key: 'Alt' }, press)
       }
 
@@ -81,7 +82,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         keyboard.flagModifier({ key: 'Shift' }, press)
       }
 
-      if (options.metaKey) {
+      if (options.metaKey || options.commandKey || options.cmdKey) {
         keyboard.flagModifier({ key: 'Meta' }, press)
       }
     }

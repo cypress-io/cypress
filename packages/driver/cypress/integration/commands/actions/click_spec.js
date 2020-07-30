@@ -897,6 +897,12 @@ describe('src/cy/commands/actions/click', () => {
         // ctrl should be released
         cy.get('#button').click()
         cy.get('#result').should('not.contain', '{Ctrl}')
+
+        cy.get('#button').click({
+          controlKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
       })
 
       it('alt', () => {
@@ -909,6 +915,12 @@ describe('src/cy/commands/actions/click', () => {
         // alt should be released
         cy.get('#button').click()
         cy.get('#result').should('not.contain', '{Alt}')
+
+        cy.get('#button').click({
+          optionKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Alt}')
       })
 
       it('shift', () => {
@@ -933,6 +945,18 @@ describe('src/cy/commands/actions/click', () => {
         // shift should be released
         cy.get('#button').click()
         cy.get('#result').should('not.contain', '{Meta}')
+
+        cy.get('#button').click({
+          commandKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
+
+        cy.get('#button').click({
+          cmdKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
       })
 
       it('multiple', () => {
