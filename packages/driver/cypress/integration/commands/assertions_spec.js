@@ -440,6 +440,7 @@ describe('src/cy/commands/assertions', () => {
           it(`throws err when assertion contains only one language chainer: ${langChainer}`, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq(`The chainer \`${langChainer}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/assertions')
 
               done()
             })
@@ -452,6 +453,7 @@ describe('src/cy/commands/assertions', () => {
           it(`throws err when assertion contains only language chainers: ${langChainerCombos}`, (done) => {
             cy.on('fail', (err) => {
               expect(err.message).to.eq(`The chainer \`${langChainerCombos}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
+              expect(err.docsUrl).to.eq('https://on.cypress.io/assertions')
 
               done()
             })
