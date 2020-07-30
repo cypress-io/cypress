@@ -973,6 +973,7 @@ describe('lib/gui/events', () => {
             absolute: '/path/to/bar',
             relative: 'to/bar',
             specType: 'integration',
+            specFilter: undefined,
           })
 
           opts.onBrowserOpen()
@@ -990,6 +991,43 @@ describe('lib/gui/events', () => {
           browser: 'foo',
           spec,
           specType: 'integration',
+        }
+
+        return this.handleEvent('launch:browser', arg).then(() => {
+          expect(this.send.getCall(0).args[1].data).to.include({ browserOpened: true })
+
+          expect(this.send.getCall(1).args[1].data).to.include({ browserClosed: true })
+        })
+      })
+
+      it('passes specFilter', function () {
+        sinon.stub(openProject, 'launch').callsFake((browser, spec, opts) => {
+          debug('spec was %o', spec)
+          expect(browser, 'browser').to.eq('foo')
+          expect(spec, 'spec').to.deep.equal({
+            name: 'bar',
+            absolute: '/path/to/bar',
+            relative: 'to/bar',
+            specType: 'integration',
+            specFilter: 'network',
+          })
+
+          opts.onBrowserOpen()
+          opts.onBrowserClose()
+
+          return Promise.resolve()
+        })
+
+        const spec = {
+          name: 'bar',
+          absolute: '/path/to/bar',
+          relative: 'to/bar',
+        }
+        const arg = {
+          browser: 'foo',
+          spec,
+          specType: 'integration',
+          specFilter: 'network',
         }
 
         return this.handleEvent('launch:browser', arg).then(() => {
