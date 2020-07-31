@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
@@ -30,6 +30,7 @@ const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
+const objUtils = require('../util/obj_utils')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -564,6 +565,39 @@ const writeOutput = (outputPath, results) => {
     }
 
     debug('saving output results %o', { outputPath })
+
+    const { each, remapKeys, remove, renameKey, setValue } = objUtils
+
+    remapKeys(results, {
+      runs: each((run) => ({
+        tests: each((test) => ({
+          attempts: each((attempt, i) => ({
+            timings: remove,
+            failedFromHookId: remove,
+            wallClockDuration: renameKey('duration'),
+            wallClockStartedAt: renameKey('startedAt'),
+            wallClockEndedAt: renameKey('endedAt'),
+            screenshots: setValue(
+              _(run.screenshots)
+              .filter({ testId: test.testId, testAttemptIndex: i })
+              .map((screenshot) => _.omit(screenshot,
+                ['screenshotId', 'testId', 'testAttemptIndex']))
+              .value(),
+            ),
+          })),
+          testId: remove,
+        })),
+        hooks: each({
+          hookId: remove,
+        }),
+        stats: {
+          wallClockDuration: renameKey('duration'),
+          wallClockStartedAt: renameKey('startedAt'),
+          wallClockEndedAt: renameKey('endedAt'),
+        },
+        screenshots: remove,
+      })),
+    })
 
     return fs.outputJsonAsync(outputPath, results)
   })
