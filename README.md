@@ -166,6 +166,7 @@ Spec | Description
 [react-router-v6](cypress/component/advanced/react-router-v6) | Example testing a [React Router v6](https://github.com/ReactTraining/react-router)
 [renderless](cypress/component/advanced/renderless) | Testing a component that does not need to render itself into the DOM
 [set-timeout-example](cypress/component/advanced/set-timeout-example) | Control the clock with `cy.tick` and test loading components that use `setTimeout`
+[test-retries](cypress/component/advanced/test-retries) | This component is compatible with [Cypress Test Retries](https://github.com/cypress-io/cypress/pull/3968)
 [testing-lib-example](cypress/component/advanced/testing-lib-example) | A spec adopted from [@testing-library/react](https://testing-library.com/docs/react-testing-library/example-intro) that uses [@testing-library/cypress](https://testing-library.com/docs/cypress-testing-library/intro)
 [timers](cypress/component/advanced/timers) | Testing components that set timers, adopted from [ReactJS Testing recipes](https://reactjs.org/docs/testing-recipes.html#timers)
 [tutorial](cypress/component/advanced/tutorial) | A few tests adopted from [ReactJS Tutorial](https://reactjs.org/tutorial/tutorial.html), including Tic-Tac-Toe game
