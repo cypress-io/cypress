@@ -143,7 +143,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       // must use callbacks here instead of .then()
-      // because we're issuing the clicks synchonrously
+      // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability.verify(cy, $el, options, {
