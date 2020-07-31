@@ -81,7 +81,7 @@
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@cypress/webpack-preprocessor": "5.4.1",
+    "@cypress/webpack-preprocessor": "5.4.2",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@percy/cypress": "2.3.1",
     "@types/bluebird": "3.5.29",
