@@ -348,7 +348,7 @@ describe('Runs List', function () {
 
     describe('click setup project', function () {
       beforeEach(() => {
-        cy.contains('Set up project').click()
+        cy.contains('Connect to Dashboard').click()
       })
 
       it('shows login message', () => {
@@ -728,7 +728,7 @@ describe('Runs List', function () {
       })
 
       it('clears message after setting up to record', function () {
-        cy.contains('.btn', 'Set up project').click()
+        cy.contains('.btn', 'Connect to Dashboard').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
         cy.get('.organizations-select__option')
@@ -736,7 +736,7 @@ describe('Runs List', function () {
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
-        .contains('.btn', 'Set up project').click()
+        .contains('.btn', 'Connect to Dashboard').click()
 
         cy.contains('To record your first')
       })
@@ -807,7 +807,7 @@ describe('Runs List', function () {
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
-        .contains('.btn', 'Set up project').click()
+        .contains('.btn', 'Connect to Dashboard').click()
 
         cy.contains('To record your first')
       })
@@ -824,7 +824,7 @@ describe('Runs List', function () {
           })
         })
 
-        it('displays \'need to set up\' message', () => {
+        it('displays "need to set up" message', () => {
           cy.contains('You have no recorded runs')
         })
       })

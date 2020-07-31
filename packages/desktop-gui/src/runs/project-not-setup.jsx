@@ -51,11 +51,10 @@ export default class ProjectNotSetup extends Component {
         </div>
         <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
         <button
-          className='btn btn-primary'
+          className='btn btn-primary setup-project-btn'
           onClick={this._showSetupProjectModal}
         >
-          <i className='fas fa-wrench'></i>{' '}
-          Set up project to record
+          Connect to Dashboard
         </button>
       </div>
     )

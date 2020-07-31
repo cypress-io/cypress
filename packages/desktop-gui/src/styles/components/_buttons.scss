@@ -12,3 +12,22 @@
     outline: 0
   }
 }
+
+.btn-primary {
+  background-color: #3385d4;
+  border-color: #3385d4;
+
+  &:hover, &:focus {
+    background-color: darken(#3385d4, 10%);
+    border-color: darken(#3385d4, 10%);
+  }
+
+  &:active, &:focus {
+    outline: 0
+  }
+}
+
+.setup-project-btn {
+  padding: 8px 20px;
+  font-weight: 600;
+}
