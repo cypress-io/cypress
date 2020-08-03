@@ -9,4 +9,11 @@ describe('e2e typescript in plugins file', function () {
       project: Fixtures.projectPath('ts-proj-with-module-esnext'),
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/7575
+  it('allows esModuleInterop to be overridden', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('ts-proj-esmoduleinterop-false'),
+    })
+  })
 })

@@ -7,7 +7,6 @@ const getTsNodeOptions = (tsPath) => {
     compiler: tsPath, // use the user's installed typescript
     compilerOptions: {
       module: 'CommonJS',
-      esModuleInterop: true,
     },
     transpileOnly: true, // transpile only (no type-check) for speed
   }
