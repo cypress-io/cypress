@@ -57,7 +57,7 @@ folders.push('componentFolder')
 const configKeys = toWords(`\
 animationDistanceThreshold      fileServerFolder
 baseUrl                         fixturesFolder
-blacklistHosts
+blockHosts
 chromeWebSecurity
 modifyObstructiveCode           integrationFolder
 env                             pluginsFile
@@ -83,14 +83,15 @@ firefoxGcInterval\
 `)
 
 // NOTE: If you add a config value, make sure to update the following
-// - cli/types/index.d.ts (including whitelisted config options on TestOptions)
+// - cli/types/index.d.ts (including allowed config options on TestOptions)
 // - cypress.schema.json
 
 // experimentalComponentTesting
 configKeys.push('componentFolder')
 
-// Deprecated and retired public configuration properties
+// Breaking public configuration properties, will error
 const breakingConfigKeys = toWords(`\
+blacklistHosts
 videoRecording
 screenshotOnHeadlessFailure
 trashAssetsBeforeHeadlessRuns
@@ -125,7 +126,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blacklistHosts: null,
+  blockHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
   socketIoRoute: '/__socket.io',
@@ -182,7 +183,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blacklistHosts: v.isStringOrArrayOfStrings,
+  blockHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
   configFile: v.isStringOrFalse,
@@ -249,6 +250,8 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'blacklistHosts':
+          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blockHosts')
         case 'experimentalGetCookiesSameSite':
           return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
         default:
@@ -372,7 +375,7 @@ module.exports = {
     return _.includes(names, value)
   },
 
-  whitelist (obj = {}) {
+  allowed (obj = {}) {
     const propertyNames = configKeys
     .concat(breakingConfigKeys)
     .concat(systemConfigKeys)
@@ -427,7 +430,7 @@ module.exports = {
     debug('merged config with options, got %o', config)
 
     _
-    .chain(this.whitelist(options))
+    .chain(this.allowed(options))
     .omit('env')
     .omit('browsers')
     .each((val, key) => {
@@ -507,7 +510,7 @@ module.exports = {
   // {value: obj.val, from: "plugin"}
   setPluginResolvedOn (resolvedObj, obj) {
     return _.each(obj, (val, key) => {
-      if (_.isObject(val) && !_.isArray(val)) {
+      if (_.isObject(val) && !_.isArray(val) && resolvedObj[key]) {
         // recurse setting overrides
         // inside of this nested objected
         return this.setPluginResolvedOn(resolvedObj[key], val)

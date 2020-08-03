@@ -153,6 +153,15 @@ module.exports = {
     },
   },
 
+  breaking_change: {
+    blob_util2 (obj) {
+      return {
+        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
+        docsUrl: 'https://on.cypress.io/migration-guide',
+      }
+    },
+  },
+
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
@@ -301,6 +310,11 @@ module.exports = {
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
     },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
+    },
   },
 
   dom: {
@@ -368,11 +382,15 @@ module.exports = {
       message: 'Invalid position argument: `{{position}}`. Position may only be {{validPositions}}.',
       docsUrl: 'https://on.cypress.io/element-cannot-be-interacted-with',
     },
-    not_scrollable: [
-      `${cmd('{{cmd}}')} failed because this element is not scrollable:`,
-      '`{{node}}\`',
-      '',
-    ].join('\n'),
+    not_scrollable: {
+      message: stripIndent`\
+        ${cmd('{{cmd}}')} failed because this element is not scrollable:
+  
+        \`{{node}}\`
+  
+        Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
     not_visible: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not visible:
@@ -1163,6 +1181,10 @@ module.exports = {
       message: `${cmd('scrollTo')} can only be used to scroll 1 element, you tried to scroll {{num}} elements.\n\n`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
+    invalid_ensureScrollable: {
+      message: `${cmd('scrollTo')} \`ensureScrollable\` option must be a boolean. You passed: \`{{ensureScrollable}}\``,
+      docsUrl: 'https://on.cypress.io/scrollto',
+    },
   },
 
   screenshot: {
@@ -1286,6 +1308,7 @@ module.exports = {
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {

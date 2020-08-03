@@ -108,6 +108,16 @@ declare namespace Cypress {
   }
 
   /**
+   * Window type for Application Under Test(AUT)
+   */
+  type AUTWindow = Window & typeof globalThis & ApplicationWindow
+
+  /**
+   * The interface for user-defined properties in Window object under test.
+   */
+  interface ApplicationWindow {} // tslint:disable-line
+
+  /**
    * Several libraries are bundled with Cypress by default.
    *
    * @see https://on.cypress.io/api
@@ -492,6 +502,10 @@ declare namespace Cypress {
   }
 
   type CanReturnChainable = void | Chainable
+  type ThenReturn<S, R> =
+    R extends void ? Chainable<S> :
+    R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
+    Chainable<S>
 
   /**
    * Chainable interface for non-array Subjects
@@ -703,6 +717,18 @@ declare namespace Cypress {
      * This means that when you instantiate new Date in your application,
      * it will have a time of January 1st, 1970.
      *
+     * To restore the real clock call `.restore()`
+     *
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // restore the application clock
+     *  cy.clock().then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.clock().invoke('restore')
+     *
      * @see https://on.cypress.io/clock
      */
     clock(): Chainable<Clock>
@@ -712,15 +738,22 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/clock
      * @example
-     *    // your app code
+     *    // in your app code
      *    $('#date').text(new Date().toJSON())
-     *    // from spec file
-     *    const now = new Date(2017, 3, 14).getTime() // March 14, 2017 timestamp
+     *    // in the spec file
+     *    // March 14, 2017 timestamp or Date object
+     *    const now = new Date(2017, 2, 14).getTime()
      *    cy.clock(now)
      *    cy.visit('/index.html')
      *    cy.get('#date').contains('2017-03-14')
+     *    // to restore the real clock
+     *    cy.clock().then(clock => {
+     *      clock.restore()
+     *    })
+     *    // or use this shortcut
+     *    cy.clock().invoke('restore')
      */
-    clock(now: number, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock but only overrides specific functions.
      *
@@ -729,7 +762,7 @@ declare namespace Cypress {
      *    // keep current date but override "setTimeout" and "clearTimeout"
      *    cy.clock(null, ['setTimeout', 'clearTimeout'])
      */
-    clock(now: number, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
+    clock(now: number|Date, functions?: Array<'setTimeout' | 'clearTimeout' | 'setInterval' | 'clearInterval' | 'Date'>, options?: Loggable): Chainable<Clock>
     /**
      * Mocks global clock and all functions.
      *
@@ -1038,7 +1071,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/go
      */
-    go(direction: HistoryDirection | number, options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    go(direction: HistoryDirection | number, options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Get the current URL hash of the page that is currently active.
@@ -1375,7 +1408,7 @@ declare namespace Cypress {
      * @example
      *    cy.reload()
      */
-    reload(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    reload(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
     /**
      * Reload the page without cache
      *
@@ -1386,7 +1419,7 @@ declare namespace Cypress {
      *    cy.visit('http://localhost:3000/admin')
      *    cy.reload(true)
      */
-    reload(forceReload: boolean): Chainable<Window>
+    reload(forceReload: boolean): Chainable<AUTWindow>
 
     /**
      * Make an HTTP GET request.
@@ -1756,7 +1789,19 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/then
      */
+    then<S>(fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
     then<S extends object | any[] | string | number | boolean>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): Chainable<S>
+    /**
+     * Enables you to work with the subject yielded from the previous command / promise.
+     *
+     * @see https://on.cypress.io/then
+     */
+    then<S>(options: Partial<Timeoutable>, fn: (this: ObjectLike, currentSubject: Subject) => S): ThenReturn<Subject, S>
     /**
      * Enables you to work with the subject yielded from the previous command.
      *
@@ -1781,6 +1826,17 @@ declare namespace Cypress {
      * `cy.clock()` must be called before `cy.tick()`
      *
      * @see https://on.cypress.io/clock
+     * @example
+     *  cy.clock()
+     *  ...
+     *  // advance time by 10 minutes
+     *  cy.tick(600*1000)
+     *  // you can restore the real clock
+     *  cy.tick(1000).then(clock => {
+     *    clock.restore()
+     *  })
+     *  // or use this shortcut
+     *  cy.tick(5000).invoke('restore')
      */
     tick(milliseconds: number): Chainable<Clock>
 
@@ -1929,8 +1985,8 @@ declare namespace Cypress {
      *    })
      *
      */
-    visit(url: string, options?: Partial<VisitOptions>): Chainable<Window>
-    visit(options: Partial<VisitOptions> & { url: string }): Chainable<Window>
+    visit(url: string, options?: Partial<VisitOptions>): Chainable<AUTWindow>
+    visit(options: Partial<VisitOptions> & { url: string }): Chainable<AUTWindow>
 
     /**
      * Wait for a number of milliseconds.
@@ -2001,7 +2057,7 @@ declare namespace Cypress {
     })
     ```
      */
-    window(options?: Partial<Loggable & Timeoutable>): Chainable<Window>
+    window(options?: Partial<Loggable & Timeoutable>): Chainable<AUTWindow>
 
     /**
      * Scopes all subsequent cy commands to within this element.
@@ -2130,7 +2186,7 @@ declare namespace Cypress {
   type Agent<T extends sinon.SinonSpy> = SinonSpyAgent<T> & T
 
   interface CookieDefaults {
-    whitelist: string | string[] | RegExp | ((cookie: any) => boolean)
+    preserve: string | string[] | RegExp | ((cookie: any) => boolean)
   }
 
   interface Failable {
@@ -2474,6 +2530,10 @@ declare namespace Cypress {
     * Absolute path to the root of the project
     */
     projectRoot: string
+    /**
+     * Cypress version.
+     */
+    version: string
   }
 
   interface DebugOptions {
@@ -2585,6 +2645,12 @@ declare namespace Cypress {
      * @default 'swing'
      */
     easing: 'swing' | 'linear',
+    /**
+     * Ensure element is scrollable. Error if element is not scrollable
+     *
+     * @default true
+     */
+    ensureScrollable: boolean,
   }
 
   interface ScrollIntoViewOptions extends ScrollToOptions {
@@ -2616,7 +2682,7 @@ declare namespace Cypress {
     enable: boolean
     force404: boolean
     urlMatchingOptions: object
-    whitelist(xhr: Request): void
+    ignore(xhr: Request): void
     onAnyRequest(route: RouteOptions, proxy: any): void
     onAnyResponse(route: RouteOptions, proxy: any): void
     onAnyAbort(route: RouteOptions, proxy: any): void
@@ -2715,16 +2781,16 @@ declare namespace Cypress {
     /**
      * Called before your page has loaded all of its resources.
      *
-     * @param {Window} contentWindow the remote page's window object
+     * @param {AUTWindow} contentWindow the remote page's window object
      */
-    onBeforeLoad(win: Window): void
+    onBeforeLoad(win: AUTWindow): void
 
     /**
      * Called once your page has fired its load event.
      *
-     * @param {Window} contentWindow the remote page's window object
+     * @param {AUTWindow} contentWindow the remote page's window object
      */
-    onLoad(win: Window): void
+    onLoad(win: AUTWindow): void
 
     /**
      * Cypress will automatically apply the right authorization headers
@@ -4632,12 +4698,12 @@ declare namespace Cypress {
      * Fires as the page begins to load, but before any of your applications JavaScript has executed. This fires at the exact same time as `cy.visit()` `onBeforeLoad` callback. Useful to modify the window on a page transition.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:before:load', fn: (win: Window) => void): void
+    (action: 'window:before:load', fn: (win: AUTWindow) => void): void
     /**
      * Fires after all your resources have finished loading after a page transition. This fires at the exact same time as a `cy.visit()` `onLoad` callback.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'window:load', fn: (win: Window) => void): void
+    (action: 'window:load', fn: (win: AUTWindow) => void): void
     /**
      * Fires when your application is about to navigate away. The real event object is provided to you. Your app may have set a `returnValue` on the event, which is useful to assert on.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -4732,10 +4798,22 @@ declare namespace Cypress {
      * Move the clock the specified number of `milliseconds`.
      * Any timers within the affected range of time will be called.
      * @param time Number in ms to advance the clock
+     * @see https://on.cypress.io/tick
      */
     tick(time: number): void
     /**
-     * Restore all overridden native functions. This is automatically called between tests, so should not generally be needed.
+     * Restore all overridden native functions.
+     * This is automatically called between tests, so should not generally be needed.
+     * @see https://on.cypress.io/clock
+     * @example
+     *   cy.clock()
+     *   cy.visit('/')
+     *   ...
+     *   cy.clock().then(clock => {
+     *     clock.restore()
+     *   })
+     *   // or use this shortcut
+     *   cy.clock().invoke('restore')
      */
     restore(): void
   }
@@ -4806,7 +4884,7 @@ declare namespace Cypress {
 
   interface Server extends RouteOptions {
     enable: boolean
-    whitelist: (xhr: any) => boolean
+    ignore: (xhr: any) => boolean
   }
 
   interface Viewport {

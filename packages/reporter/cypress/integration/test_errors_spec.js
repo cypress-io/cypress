@@ -239,7 +239,14 @@ describe('test errors', function () {
       cy.get('.command-wrapper').should('be.visible')
     })
 
-    itHandlesFileOpening('.runnable-err-stack-trace', {
+    it('displays tooltip on hover', () => {
+      cy.contains('View stack trace').click()
+
+      cy.get('.runnable-err-stack-trace a').first().trigger('mouseover')
+      cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+    })
+
+    itHandlesFileOpening('.runnable-err-stack-trace a', {
       file: '/me/dev/my/app.js',
       line: 2,
       column: 7,
@@ -326,7 +333,12 @@ describe('test errors', function () {
       .should('have.class', 'language-text')
     })
 
-    itHandlesFileOpening('.test-err-code-frame', {
+    it('displays tooltip on hover', () => {
+      cy.get('.test-err-code-frame a').first().trigger('mouseover')
+      cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
+    })
+
+    itHandlesFileOpening('.test-err-code-frame a', {
       file: '/me/dev/my/app.js',
       line: 2,
       column: 7,

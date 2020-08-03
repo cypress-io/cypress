@@ -262,6 +262,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         duration: 0,
         easing: 'swing',
         axis: 'xy',
+        ensureScrollable: true,
         x,
         y,
       })
@@ -274,6 +275,10 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       if (!((options.easing === 'swing') || (options.easing === 'linear'))) {
         $errUtils.throwErrByPath('scrollTo.invalid_easing', { args: { easing: options.easing } })
+      }
+
+      if (!_.isBoolean(options.ensureScrollable)) {
+        $errUtils.throwErrByPath('scrollTo.invalid_ensureScrollable', { args: { ensureScrollable: options.ensureScrollable } })
       }
 
       // if we cannot parse an integer out of y or x
@@ -333,6 +338,12 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       const ensureScrollability = () => {
+        // Some elements are not scrollable, user may opt out of error checking
+        // https://github.com/cypress-io/cypress/issues/1924
+        if (!options.ensureScrollable) {
+          return
+        }
+
         try {
           // make sure our container can even be scrolled
           return cy.ensureScrollability($container, 'scrollTo')
@@ -350,6 +361,7 @@ module.exports = (Commands, Cypress, cy, state) => {
             axis: options.axis,
             easing: options.easing,
             duration: options.duration,
+            ensureScrollable: options.ensureScrollable,
             done () {
               return resolve(options.$el)
             },

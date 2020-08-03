@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import { add } from './math'
 
 it('is true', () => {

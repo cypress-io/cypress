@@ -4,7 +4,7 @@ import _ from 'lodash'
 import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
-import Foxdriver from 'foxdriver'
+import Foxdriver from '@benmalka/foxdriver'
 import * as protocol from './protocol'
 
 const errors = require('../errors')
@@ -176,6 +176,10 @@ export default {
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
     const { browser } = foxdriver
+
+    browser.on('error', (err) => {
+      debug('received error from foxdriver connection, ignoring %o', err)
+    })
 
     forceGcCc = () => {
       let gcDuration; let ccDuration

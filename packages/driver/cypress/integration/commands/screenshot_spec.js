@@ -762,6 +762,12 @@ describe('src/cy/commands/screenshot', () => {
           })
         })
       })
+
+      // https://github.com/cypress-io/cypress/issues/6099
+      it('can screenshot when element height changes on scroll', () => {
+        cy.visit('fixtures/issue-6099.html')
+        cy.get('main').screenshot()
+      })
     })
 
     describe('timeout', () => {

@@ -34,6 +34,7 @@ const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
+const { wrapBlobUtil } = require('./util/breaking_change_warning')
 
 const jqueryProxyFn = function (...args) {
   if (!this.cy) {
@@ -198,7 +199,7 @@ class $Cypress {
     window.cy = this.cy
     this.isCy = this.cy.isCy
     this.log = $Log.create(this, this.cy, this.state, this.config)
-    this.mocha = $Mocha.create(specWindow, this)
+    this.mocha = $Mocha.create(specWindow, this, this.config)
     this.runner = $Runner.create(specWindow, this.mocha, this, this.cy)
 
     // wire up command create to cy
@@ -556,6 +557,11 @@ class $Cypress {
   }
 
   stop () {
+    if (!this.runner) {
+      // the tests have been reloaded
+      return
+    }
+
     this.runner.stop()
     this.cy.stop()
 
@@ -613,7 +619,7 @@ $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
 $Cypress.prototype.moment = moment
-$Cypress.prototype.Blob = blobUtil
+$Cypress.prototype.Blob = wrapBlobUtil(blobUtil)
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
 $Cypress.prototype.sinon = sinon

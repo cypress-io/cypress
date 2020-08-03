@@ -1123,6 +1123,103 @@ describe('src/cy/commands/waiting', () => {
           })
         })
       })
+
+      describe('timeouts', function () {
+        it('sets default requestTimeout', {
+          requestTimeout: 199,
+        }, function (done) {
+          cy.on('command:retry', () => {
+            expect(this.lastLog.get('timeout')).to.eq(199)
+
+            done()
+          })
+
+          cy
+          .server()
+          .route('GET', '*', {}).as('fetch')
+          .wait('@fetch')
+        })
+
+        it('sets custom requestTimeout', function (done) {
+          cy.on('command:retry', () => {
+            expect(this.lastLog.get('timeout')).to.eq(199)
+
+            done()
+          })
+
+          cy
+          .server()
+          .route('GET', '*', {}).as('fetch')
+          .wait('@fetch', { requestTimeout: 199 })
+        })
+
+        it('sets default responseTimeout', {
+          responseTimeout: 299,
+        }, function (done) {
+          cy.on('command:retry', () => {
+            expect(this.lastLog.get('timeout')).to.eq(299)
+
+            done()
+          })
+
+          cy
+          .server({ delay: 100 })
+          .route('GET', '*', {}).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch')
+        })
+
+        it('sets custom responseTimeout', function (done) {
+          cy.on('command:retry', () => {
+            expect(this.lastLog.get('timeout')).to.eq(299)
+
+            done()
+          })
+
+          cy
+          .server({ delay: 100 })
+          .route('GET', '*', {}).as('fetch')
+          .window().then((win) => {
+            xhrGet(win, '/foo')
+
+            return null
+          })
+          .wait('@fetch', { responseTimeout: 299 })
+        })
+
+        it('updates to requestTimeout and responseTimeout at the proper times', function (done) {
+          let log
+          let retryCount = 0
+
+          cy.on('command:retry', () => {
+            log = log || this.lastLog
+            retryCount++
+            if (retryCount === 1) {
+              expect(log.get('timeout')).to.eq(100)
+
+              // trigger request to move onto response timeout verification
+              const win = cy.state('window')
+
+              xhrGet(win, '/foo')
+            }
+
+            if (retryCount === 2) {
+              expect(log.get('timeout')).to.eq(299)
+
+              done()
+            }
+          })
+
+          cy
+          .server({ delay: 100 })
+          .route('GET', '*', {}).as('fetch')
+          .wait('@fetch', { requestTimeout: 100, responseTimeout: 299 })
+        })
+      })
     })
   })
 })

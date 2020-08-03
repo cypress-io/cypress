@@ -417,7 +417,13 @@ const activeElementIsDefault = (activeElement, body: HTMLElement) => {
 
 const isFocused = (el) => {
   try {
-    const doc = $document.getDocumentFromElement(el)
+    let doc
+
+    if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot(el)) {
+      doc = el.getRootNode()
+    } else {
+      doc = $document.getDocumentFromElement(el)
+    }
 
     const { activeElement, body } = doc
 
@@ -597,12 +603,12 @@ const getFirstCommonAncestor = (el1, el2) => {
   return el2
 }
 
+const isShadowRoot = (maybeRoot) => {
+  return maybeRoot?.toString() === '[object ShadowRoot]'
+}
+
 const isWithinShadowRoot = (node: HTMLElement) => {
-  const win = $window.getWindowByElement(node)
-
-  if (!win) return false
-
-  return node.getRootNode() instanceof win.ShadowRoot
+  return isShadowRoot(node.getRootNode())
 }
 
 const getParent = (el) => {
@@ -624,16 +630,15 @@ const getParent = (el) => {
 }
 
 const getAllParents = (el) => {
-  const allParents: Node[] = []
-  let node = el
-  let parent
+  const collectParents = (parents, node) => {
+    const parent = getParent(node)
 
-  while ((parent = getParent(node))) {
-    allParents.push(parent)
-    node = parent
+    if (!parent) return parents
+
+    return collectParents(parents.concat(parent), parent)
   }
 
-  return allParents
+  return collectParents([], el)
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -892,21 +897,20 @@ const isDescendent = ($el1, $el2) => {
   }) === $el1.get(0)
 }
 
-const findParent = (el, fn) => {
-  let node = el
-  let parent
+const findParent = (el, condition) => {
+  const collectParent = (node) => {
+    const parent = getParent(node)
 
-  while ((parent = getParent(node))) {
-    const returnValue = fn(parent, node)
+    if (!parent) return null
 
-    if (returnValue) {
-      return returnValue
-    }
+    const parentMatchingCondition = condition(parent, node)
 
-    node = parent
+    if (parentMatchingCondition) return parentMatchingCondition
+
+    return collectParent(parent)
   }
 
-  return null
+  return collectParent(el)
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -931,8 +935,15 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
 
   return getFirstFocusableEl($el.parent())
 }
-const getActiveElByDocument = (doc: Document): HTMLElement | null => {
-  const activeElement = getNativeProp(doc, 'activeElement')
+
+const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
+  let activeElement
+
+  if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot($el[0])) {
+    activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
+  } else {
+    activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
+  }
 
   if (isFocused(activeElement)) {
     return activeElement as HTMLElement
@@ -1214,41 +1225,43 @@ const stringify = (el, form = 'long') => {
 
 const elementFromPoint = (doc, x, y) => {
   // first try the native elementFromPoint method
-  let immediate = doc.elementFromPoint(x, y)
-  let node = immediate
+  let elFromPoint = doc.elementFromPoint(x, y)
 
   // if the node has a shadow root, we must behave like
   // the browser and find the inner element of the shadow
   // root at that same point.
   if (Cypress.config('experimentalShadowDomSupport')) {
-    while (node?.shadowRoot) {
-      node = node.shadowRoot.elementFromPoint(x, y)
+    const getShadowElementFromPoint = (node) => {
+      const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
+
+      if (!nodeFromPoint || nodeFromPoint === node) return node
+
+      return getShadowElementFromPoint(nodeFromPoint)
     }
+
+    elFromPoint = getShadowElementFromPoint(elFromPoint)
   }
 
-  // if we never found an inner/deep element, use the
-  // initial one we found
-  return node ?? immediate
+  return elFromPoint
 }
 
 const findAllShadowRoots = (root: Node): Node[] => {
-  const nodes: Node[] = []
-  let roots: Node[] = [root]
-  let currentRoot: Node|undefined
+  const collectRoots = (roots, nodes, node) => {
+    const currentRoot = roots.pop()
 
-  // iterate through all shadow roots we find
-  // and try find shadow roots within them, until
-  // there are none left to find.
-  while ((currentRoot = roots.pop())) {
+    if (!currentRoot) return nodes
+
     const childRoots = findShadowRoots(currentRoot)
 
     if (childRoots.length > 0) {
       roots.push(...childRoots)
       nodes.push(...childRoots)
     }
+
+    return collectRoots(roots, nodes, currentRoot)
   }
 
-  return nodes
+  return collectRoots([root], [], root)
 }
 
 const findShadowRoots = (root: Node): Node[] => {
@@ -1268,22 +1281,22 @@ const findShadowRoots = (root: Node): Node[] => {
     },
   })
 
-  const nodes: Node[] = []
-  let currentNode
-
+  const roots: Node[] = []
   const rootAsElement = root as Element
 
   if (rootAsElement.shadowRoot) {
-    nodes.push(rootAsElement.shadowRoot)
+    roots.push(rootAsElement.shadowRoot)
   }
 
-  // walk the tree for nodes with shadow roots and
-  // append the shadow roots to our array
-  while ((currentNode = walker.nextNode())) {
-    nodes.push(currentNode.shadowRoot)
+  const collectRoots = (roots) => {
+    const nextNode = walker.nextNode() as Element
+
+    if (!nextNode) return roots
+
+    return collectRoots(roots.concat(nextNode.shadowRoot))
   }
 
-  return nodes
+  return collectRoots(roots)
 }
 
 export {
@@ -1332,6 +1345,7 @@ export {
   findParent,
   findAllShadowRoots,
   findShadowRoots,
+  isShadowRoot,
   isWithinShadowRoot,
   getElements,
   getFirstFocusableEl,
@@ -1344,4 +1358,5 @@ export {
   getFirstStickyPositionParent,
   getFirstScrollableParent,
   getParent,
+  getAllParents,
 }
