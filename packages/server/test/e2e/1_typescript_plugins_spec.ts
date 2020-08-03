@@ -14,7 +14,6 @@ describe('e2e typescript in plugins file', function () {
   it('allows esModuleInterop to be overridden', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('ts-proj-esmoduleinterop-false'),
-      snapshot: true,
     })
   })
 })
