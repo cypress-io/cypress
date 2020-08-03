@@ -111,6 +111,7 @@
     &.runnable-pending > div > .runnable-wrapper,
     &.runnable-pending > div > .runnable-instruments {
       border-left: 5px solid lighten($pending, 25%);
+      padding-bottom: 0;
     }
 
     &.runnable-passed > div > .runnable-wrapper,

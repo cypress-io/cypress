@@ -25,7 +25,27 @@ const pathsEqual = (path1, path2) => {
   return path1.replace(pathSeparatorRe, '') === path2.replace(pathSeparatorRe, '')
 }
 
+/**
+ * Filters give file objects by spec name substring
+*/
+const filterSpecs = (filter, files) => {
+  if (!filter) {
+    return files
+  }
+
+  const filteredFiles = _.filter(files, (spec) => {
+    return spec.name.toLowerCase().includes(filter.toLowerCase())
+  })
+
+  return filteredFiles
+}
+
 export class SpecsStore {
+  /**
+   * All spec files
+   *
+   * @memberof SpecsStore
+   */
   @observable _files = []
   @observable chosenSpecPath
   @observable error
@@ -75,7 +95,9 @@ export class SpecsStore {
   }
 
   @action setFilter (project, filter = null) {
-    if (!filter) return this.clearFilter(project)
+    if (!filter) {
+      return this.clearFilter(project)
+    }
 
     localData.set(this.getSpecsFilterId(project), filter)
 
@@ -106,12 +128,17 @@ export class SpecsStore {
     return specOrFolder.children.some((child) => child.isFolder)
   }
 
+  /**
+   * Returns only specs matching the current filter
+   *
+   * @memberof SpecsStore
+   */
+  getFilteredSpecs () {
+    return filterSpecs(this.filter, this._files)
+  }
+
   _tree (files) {
-    if (this.filter) {
-      files = _.filter(files, (spec) => {
-        return spec.name.toLowerCase().includes(this.filter.toLowerCase())
-      })
-    }
+    files = filterSpecs(this.filter, files)
 
     const tree = _.reduce(files, (root, file) => {
       const segments = [file.type].concat(file.name.split(pathSeparatorRe))
