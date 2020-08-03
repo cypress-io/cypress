@@ -2320,49 +2320,49 @@ declare namespace Cypress {
      */
     multiple: boolean
     /**
-     * Press ctrl key
+     * Activates the control key during click
      *
      * @default false
      */
     ctrlKey: boolean
     /**
-     * Alias for the ctrl key
+     * Activates the control key during click
      *
      * @default false
      */
     controlKey: boolean
     /**
-     * Press alt key. It's option key in Mac.
+     * Activates the alt key (option key for Mac) during click
      *
      * @default false
      */
     altKey: boolean
     /**
-     * Alias for the alt key.
+     * Activates the alt key (option key for Mac) during click
      *
      * @default false
      */
     optionKey: boolean
     /**
-     * Press shift key
+     * Activates the shift key during click
      *
      * @default false
      */
     shiftKey: boolean
     /**
-     * Press meta key. It's Windows key in Windows and Command key in Mac.
+     * Activates the meta key (Windows key or command key for Mac) during click
      *
      * @default false
      */
     metaKey: boolean
     /**
-     * Alias for the meta key.
+     * Activates the meta key (Windows key or command key for Mac) during click
      *
      * @default false
      */
     commandKey: boolean
     /**
-     * Alias for the meta key.
+     * Activates the meta key (Windows key or command key for Mac) during click
      *
      * @default false
      */
