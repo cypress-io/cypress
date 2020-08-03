@@ -82,6 +82,14 @@ describe('features', () => {
       await runAndEval('typescript_imports_spec.js', options)
     })
 
+    it('handles esModuleInterop: false (default)', async () => {
+      await runAndEval('typescript_esmoduleinterop_false_spec.ts', options)
+    })
+
+    it('handles esModuleInterop: true', async () => {
+      await runAndEval('esmoduleinterop-true/typescript_esmoduleinterop_true_spec.ts', options)
+    })
+
     it('errors when processing .ts file and typescript option is not set', function () {
       return run('ts_spec.ts')
       .then(shouldntResolve)

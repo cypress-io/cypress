@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import React from 'react'
+import * as React from 'react'
 
 // simple example of typescript types
 type SomeType = {

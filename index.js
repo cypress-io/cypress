@@ -56,7 +56,6 @@ const getDefaultWebpackOptions = (file, options = {}) => {
           options: {
             compiler: options.typescript,
             compilerOptions: {
-              esModuleInterop: true,
               inlineSourceMap: true,
               inlineSources: true,
               downlevelIteration: true,
