@@ -541,11 +541,11 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
   return normalizedRunnable
 }
 
-const hookFailed = (hook, err, hookName, getTestFromHookOrFindTest) => {
+const hookFailed = (hook, err, hookName, getTest, getTestFromHookOrFindTest) => {
   // NOTE: sometimes mocha will fail a hook without having emitted on('hook')
   // event, so this hook might not have currentTest set correctly
   // in which case we need to lookup the test
-  const test = getTestFromHookOrFindTest(hook)
+  const test = getTest() || getTestFromHookOrFindTest(hook)
 
   test.err = err
   test.state = 'failed'
@@ -571,7 +571,7 @@ function getTestFromRunnable (runnable) {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest, getHookId, getTestFromHookOrFindTest) => {
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -751,7 +751,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, setTest, ge
       // if a hook fails (such as a before) then the test will never
       // get run and we'll need to make sure we set the test so that
       // the TEST_AFTER_RUN_EVENT fires correctly
-      return hookFailed(runnable, runnable.err, hookName, getTestFromHookOrFindTest)
+      return hookFailed(runnable, runnable.err, hookName, getTest, getTestFromHookOrFindTest)
     }
   })
 }
@@ -928,7 +928,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
         _startTime = moment().toJSON()
       }
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, setTest, getHookId, getTestFromHookOrFindTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)
 
       return _runner.run((failures) => {
         // if we happen to make it all the way through
