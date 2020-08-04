@@ -185,6 +185,7 @@ declare module 'cypress' {
     startedAt: dateTimeISO
     duration: ms
     videoTimestamp: ms
+    screenshots: ScreenshotInformation[]
   }
 
   /**
@@ -200,11 +201,8 @@ declare module 'cypress' {
    * Information about a single screenshot.
    */
   interface ScreenshotInformation {
-    screenshotId: string
     name: string
-    testId: testId
     takenAt: dateTimeISO
-    testAttemptIndex: number
     /**
      * Absolute path to the saved image
      */
@@ -244,7 +242,6 @@ declare module 'cypress' {
     tests: TestResult[]
     error: string | null
     video: string | null
-    screenshots: ScreenshotInformation[]
     /**
      * information about the spec test file.
     */
