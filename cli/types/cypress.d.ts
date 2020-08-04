@@ -5110,7 +5110,7 @@ declare namespace Cypress {
     domain: string
     httpOnly: boolean
     secure: boolean
-    expiry?: string
+    expiry?: number
     sameSite?: SameSiteStatus
   }
 
