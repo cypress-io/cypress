@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-export const remapKeys = (obj, mapObj, parent?, key?) => {
+const traverse = (obj, mapObj, parent?, key?) => {
   if (_.isFunction(mapObj)) {
     mapObj(parent, key, obj)
 
@@ -9,9 +9,17 @@ export const remapKeys = (obj, mapObj, parent?, key?) => {
 
   if (_.isObject(mapObj)) {
     _.each(mapObj, (mapVal, mapKey) => {
-      remapKeys(obj[mapKey], mapVal, obj, mapKey)
+      traverse(obj[mapKey], mapVal, obj, mapKey)
     })
   }
+}
+
+export const remapKeys = (fromObj, toObj) => {
+  fromObj = _.cloneDeep(fromObj)
+
+  traverse(fromObj, toObj)
+
+  return fromObj
 }
 
 export const remove = (obj, key) => delete obj[key]
@@ -34,7 +42,7 @@ export const each = (fn) => {
     return _.each(arr, (val, i) => {
       const mapObj = _.isFunction(fn) ? fn(val, i) : fn
 
-      remapKeys(val, mapObj)
+      traverse(val, mapObj)
     })
   }
 }

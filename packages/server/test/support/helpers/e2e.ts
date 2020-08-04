@@ -442,6 +442,14 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
+    if (options.inspectBrk != null) {
+      throw new Error(`
+      passing { inspectBrk: true } to e2e options is no longer supported
+      Please pass the --cypress-inspect-brk flag to the test command instead
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --cypress-inspect-brk"
+      `)
+    }
+
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
@@ -452,6 +460,7 @@ const e2e = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
+      inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
 
     if (options.exit != null) {

@@ -88,6 +88,9 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
+
+    // TODO: if this remains flaky, increase padding here
+    // and add an additional non-e2e performance test with baseline p95
     expectDurationWithin(
       run,
       'stats.wallClockDuration',

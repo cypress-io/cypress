@@ -160,14 +160,12 @@ declare module 'cypress' {
   // small utility types to better express meaning of other types
   type dateTimeISO = string
   type ms = number
-  type testId = string
   type pixels = number
 
   /**
    * Cypress single test result
    */
   interface TestResult {
-    testId: testId
     title: string[]
     state: string
     body: string
@@ -181,7 +179,6 @@ declare module 'cypress' {
   interface AttemptResult {
     state: string
     error: TestError | null
-    timings: any
     startedAt: dateTimeISO
     duration: ms
     videoTimestamp: ms

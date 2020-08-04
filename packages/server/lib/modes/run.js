@@ -566,39 +566,6 @@ const writeOutput = (outputPath, results) => {
 
     debug('saving output results %o', { outputPath })
 
-    const { each, remapKeys, remove, renameKey, setValue } = objUtils
-
-    remapKeys(results, {
-      runs: each((run) => ({
-        tests: each((test) => ({
-          attempts: each((attempt, i) => ({
-            timings: remove,
-            failedFromHookId: remove,
-            wallClockDuration: renameKey('duration'),
-            wallClockStartedAt: renameKey('startedAt'),
-            wallClockEndedAt: renameKey('endedAt'),
-            screenshots: setValue(
-              _(run.screenshots)
-              .filter({ testId: test.testId, testAttemptIndex: i })
-              .map((screenshot) => _.omit(screenshot,
-                ['screenshotId', 'testId', 'testAttemptIndex']))
-              .value(),
-            ),
-          })),
-          testId: remove,
-        })),
-        hooks: each({
-          hookId: remove,
-        }),
-        stats: {
-          wallClockDuration: renameKey('duration'),
-          wallClockStartedAt: renameKey('startedAt'),
-          wallClockEndedAt: renameKey('endedAt'),
-        },
-        screenshots: remove,
-      })),
-    })
-
     return fs.outputJsonAsync(outputPath, results)
   })
 }
@@ -1294,7 +1261,41 @@ module.exports = {
 
       debug('final results of all runs: %o', results)
 
-      return writeOutput(outputPath, results).return(results)
+      const { each, remapKeys, remove, renameKey, setValue } = objUtils
+
+      // Remap module API result json to remove private props and rename props to make more user-friendly
+      const moduleAPIResults = remapKeys(results, {
+        runs: each((run) => ({
+          tests: each((test) => ({
+            attempts: each((attempt, i) => ({
+              timings: remove,
+              failedFromHookId: remove,
+              wallClockDuration: renameKey('duration'),
+              wallClockStartedAt: renameKey('startedAt'),
+              wallClockEndedAt: renameKey('endedAt'),
+              screenshots: setValue(
+                _(run.screenshots)
+                .filter({ testId: test.testId, testAttemptIndex: i })
+                .map((screenshot) => _.omit(screenshot,
+                  ['screenshotId', 'testId', 'testAttemptIndex']))
+                .value(),
+              ),
+            })),
+            testId: remove,
+          })),
+          hooks: each({
+            hookId: remove,
+          }),
+          stats: {
+            wallClockDuration: renameKey('duration'),
+            wallClockStartedAt: renameKey('startedAt'),
+            wallClockEndedAt: renameKey('endedAt'),
+          },
+          screenshots: remove,
+        })),
+      })
+
+      return writeOutput(outputPath, moduleAPIResults).return(moduleAPIResults)
     })
   },
 
