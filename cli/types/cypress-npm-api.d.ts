@@ -6,8 +6,8 @@
 // in the future the NPM module itself will be in TypeScript
 // but for now describe it as an ambient module
 
-type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
 declare module 'cypress' {
+  type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
   interface TestError {
     name: string
     message: string
