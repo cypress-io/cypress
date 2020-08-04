@@ -2,149 +2,9 @@ const { $, dom } = Cypress
 
 export {}
 
-describe('src/cypress/dom/visibility', () => {
-  beforeEach(() => {
-    cy.visit('/fixtures/generic.html')
-  })
-
-  context('isHidden', () => {
-    it('exposes isHidden', () => {
-      expect(dom.isHidden).to.be.a('function')
-    })
-
-    it('throws when not passed a DOM element', () => {
-      const fn = () => {
-        dom.isHidden(null!)
-      }
-
-      expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
-    })
-  })
-
-  context('isVisible', () => {
-    it('exposes isVisible', () => {
-      expect(dom.isVisible).to.be.a('function')
-    })
-
-    it('throws when not passed a DOM element', () => {
-      const fn = () => {
-        // @ts-ignore
-        dom.isVisible('form')
-      }
-
-      expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
-    })
-  })
-
-  context('#isScrollable', () => {
-    beforeEach(function () {
-      this.add = (el) => {
-        return $(el).appendTo(cy.$$('body'))
-      }
-    })
-
-    it('returns true if window and body > window height', function () {
-      this.add('<div style="height: 1000px; width: 10px;" />')
-      const win = cy.state('window')
-
-      const fn = () => {
-        return dom.isScrollable(win)
-      }
-
-      expect(fn()).to.be.true
-    })
-
-    it('returns false window and body > window height', () => {
-      cy.$$('body').html('<div>foo</div>')
-
-      const win = cy.state('window')
-
-      const fn = () => {
-        return dom.isScrollable(win)
-      }
-
-      expect(fn()).to.be.false
-    })
-
-    it('returns false el is not scrollable', function () {
-      const noScroll = this.add(`\
-<div style="height: 100px; overflow: auto;">
-  <div>No Scroll</div>
-</div>\
-`)
-
-      const fn = () => {
-        return dom.isScrollable(noScroll)
-      }
-
-      expect(fn()).to.be.false
-    })
-
-    it('returns false el has no overflow', function () {
-      const noOverflow = this.add(`\
-<div style="height: 100px; width: 100px; border: 1px solid green;">
-  <div style="height: 150px;">
-    No Overflow Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Etiam porta sem malesuada magna mollis euismod.
-  </div>
-</div>\
-`)
-
-      const fn = () => {
-        return dom.isScrollable(noOverflow)
-      }
-
-      expect(fn()).to.be.false
-    })
-
-    it('returns true when vertically scrollable', function () {
-      const vertScrollable = this.add(`\
-<div style="height: 100px; width: 100px; overflow: auto;">
-  <div style="height: 150px;">Vertical Scroll</div>
-</div>\
-`)
-
-      const fn = () => {
-        return dom.isScrollable(vertScrollable)
-      }
-
-      expect(fn()).to.be.true
-    })
-
-    it('returns true when horizontal scrollable', function () {
-      const horizScrollable = this.add(`\
-<div style="height: 100px; width: 100px; overflow: auto; ">
-  <div style="height: 150px;">Horizontal Scroll</div>
-</div>\
-`)
-
-      const fn = () => {
-        return dom.isScrollable(horizScrollable)
-      }
-
-      expect(fn()).to.be.true
-    })
-
-    it('returns true when overflow scroll forced and content larger', function () {
-      const forcedScroll = this.add(`\
-<div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
-  <div style="height: 300px; width: 300px;">Forced Scroll</div>
-</div>\
-`)
-
-      const fn = () => {
-        return dom.isScrollable(forcedScroll)
-      }
-
-      expect(fn()).to.be.true
-    })
-  })
-
+const overrides = (add) => {
   context('hidden/visible overrides', () => {
     beforeEach(function () {
-      const add = (el) => {
-        return $(el).appendTo(cy.$$('body'))
-      }
-
       // ensure all tests run against a scrollable window
       const scrollThisIntoView = add('<div style=`height: 1000px;` /><div>Should be in view</div>')
 
@@ -1103,6 +963,159 @@ This element \`<div#coveredUpPosFixed>\` is not visible because it has CSS prope
       it('cannot determine why element is not visible', function () {
         this.reasonIs(this.$btnOpacity, 'This element `<button>` is not visible.')
       })
+    })
+  })
+}
+
+describe('src/dom/visibility', () => {
+  beforeEach(() => {
+    cy.visit('/fixtures/generic.html')
+  })
+
+  context('isHidden', () => {
+    it('exposes isHidden', () => {
+      expect(dom.isHidden).to.be.a('function')
+    })
+
+    it('throws when not passed a DOM element', () => {
+      const fn = () => {
+        dom.isHidden(null!)
+      }
+
+      expect(fn).to.throw('`Cypress.dom.isHidden()` failed because it requires a DOM element. The subject received was: `null`')
+    })
+  })
+
+  context('isVisible', () => {
+    it('exposes isVisible', () => {
+      expect(dom.isVisible).to.be.a('function')
+    })
+
+    it('throws when not passed a DOM element', () => {
+      const fn = () => {
+        // @ts-ignore
+        dom.isVisible('form')
+      }
+
+      expect(fn).to.throw('`Cypress.dom.isVisible()` failed because it requires a DOM element. The subject received was: `form`')
+    })
+  })
+
+  context('#isScrollable', () => {
+    beforeEach(function () {
+      this.add = (el) => {
+        return $(el).appendTo(cy.$$('body'))
+      }
+    })
+
+    it('returns true if window and body > window height', function () {
+      this.add('<div style="height: 1000px; width: 10px;" />')
+      const win = cy.state('window')
+
+      const fn = () => {
+        return dom.isScrollable(win)
+      }
+
+      expect(fn()).to.be.true
+    })
+
+    it('returns false window and body > window height', () => {
+      cy.$$('body').html('<div>foo</div>')
+
+      const win = cy.state('window')
+
+      const fn = () => {
+        return dom.isScrollable(win)
+      }
+
+      expect(fn()).to.be.false
+    })
+
+    it('returns false el is not scrollable', function () {
+      const noScroll = this.add(`\
+<div style="height: 100px; overflow: auto;">
+  <div>No Scroll</div>
+</div>\
+`)
+
+      const fn = () => {
+        return dom.isScrollable(noScroll)
+      }
+
+      expect(fn()).to.be.false
+    })
+
+    it('returns false el has no overflow', function () {
+      const noOverflow = this.add(`\
+<div style="height: 100px; width: 100px; border: 1px solid green;">
+  <div style="height: 150px;">
+    No Overflow Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Aenean lacinia bibendum nulla sed consectetur. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor. Etiam porta sem malesuada magna mollis euismod.
+  </div>
+</div>\
+`)
+
+      const fn = () => {
+        return dom.isScrollable(noOverflow)
+      }
+
+      expect(fn()).to.be.false
+    })
+
+    it('returns true when vertically scrollable', function () {
+      const vertScrollable = this.add(`\
+<div style="height: 100px; width: 100px; overflow: auto;">
+  <div style="height: 150px;">Vertical Scroll</div>
+</div>\
+`)
+
+      const fn = () => {
+        return dom.isScrollable(vertScrollable)
+      }
+
+      expect(fn()).to.be.true
+    })
+
+    it('returns true when horizontal scrollable', function () {
+      const horizScrollable = this.add(`\
+<div style="height: 100px; width: 100px; overflow: auto; ">
+  <div style="height: 150px;">Horizontal Scroll</div>
+</div>\
+`)
+
+      const fn = () => {
+        return dom.isScrollable(horizScrollable)
+      }
+
+      expect(fn()).to.be.true
+    })
+
+    it('returns true when overflow scroll forced and content larger', function () {
+      const forcedScroll = this.add(`\
+<div style="height: 100px; width: 100px; overflow: scroll; border: 1px solid yellow;">
+  <div style="height: 300px; width: 300px;">Forced Scroll</div>
+</div>\
+`)
+
+      const fn = () => {
+        return dom.isScrollable(forcedScroll)
+      }
+
+      expect(fn()).to.be.true
+    })
+  })
+
+  overrides((el) => {
+    return $(el).appendTo(cy.$$('body'))
+  })
+
+  describe('shadow dom', () => {
+    beforeEach(() => {
+      cy.visit('fixtures/shadow-dom-wrapper.html')
+    })
+
+    overrides((el) => {
+      // @ts-ignore
+      return $(el).appendTo(cy.$$('#shadow-dom-root')[0].shadowRoot)
     })
   })
 })
