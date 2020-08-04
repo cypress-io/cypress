@@ -1898,6 +1898,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - test-retries
         requires:
           - Mac NPM package upload
           - Mac binary upload
