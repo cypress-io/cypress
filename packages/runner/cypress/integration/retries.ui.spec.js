@@ -83,7 +83,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     cy.percySnapshot()
   })
 
-  it('opens attempt on each attempt failure for the screenshot, and closes after test passes', () => {
+  it('opens attempt on each attempt failure for the screenshot, and closes after test passes', { retries: 2 }, () => {
     let stub
 
     runIsolatedCypress(

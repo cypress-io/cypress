@@ -8,6 +8,11 @@
 
 type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
 declare module 'cypress' {
+  interface TestError {
+    name: string
+    message: string
+    stack: string
+  }
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -166,14 +171,17 @@ declare module 'cypress' {
     title: string[]
     state: string
     body: string
-    /**
-     * Error stack string if there is an error
+     /**
+     * Error string as it's presented in console if the test fails
      */
-    stack: string | null
-    /**
-     * Error message if there is an error
-     */
-    error: string | null
+    displayError: string | null
+    attempts: AttemptResult[]
+  }
+
+  interface AttemptResult {
+    state: string
+    error: TestError | null
+    timings: any
     startedAt: dateTimeISO
     duration: ms
     videoTimestamp: ms
