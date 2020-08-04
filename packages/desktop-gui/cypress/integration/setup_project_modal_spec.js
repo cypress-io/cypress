@@ -46,8 +46,8 @@ describe('Connect to Dashboard', function () {
     })
   })
 
-  it('displays \'need to set up\' message', () => {
-    cy.contains('You have no recorded runs')
+  it('displays "need to set up" message', () => {
+    cy.contains('You could see test recordings here')
   })
 
   describe('when there is a current user', function () {
@@ -67,7 +67,7 @@ describe('Connect to Dashboard', function () {
       })
 
       it('submit button is disabled', () => {
-        cy.get('.modal').contains('.btn', 'Connect to Dashboard')
+        cy.get('.modal').contains('.btn', 'Set up project')
         .should('be.disabled')
       })
 
@@ -249,7 +249,7 @@ describe('Connect to Dashboard', function () {
         it('sends values during submit', function () {
           cy.get('.privacy-radio').find('input').first().check()
           cy.get('.modal-body')
-          .contains('.btn', 'Connect to Dashboard').click()
+          .contains('.btn', 'Set up project').click()
           .then(() => {
             expect(this.ipc.setupDashboardProject).to.be.calledWith({
               projectName: 'my-kitchen-sink',
@@ -317,18 +317,18 @@ describe('Connect to Dashboard', function () {
         cy.get('.privacy-radio').find('input').last().check()
 
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard').click()
+        .contains('.btn', 'Set up project').click()
       })
 
       it('disables button', () => {
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard')
+        .contains('.btn', 'Set up project')
         .should('be.disabled')
       })
 
       it('shows spinner', () => {
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard')
+        .contains('.btn', 'Set up project')
         .find('i')
         .should('be.visible')
       })
@@ -356,7 +356,7 @@ describe('Connect to Dashboard', function () {
         cy.get('.privacy-radio').find('input').first().check()
 
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard').click()
+        .contains('.btn', 'Set up project').click()
         .then(() => {
           expect(this.ipc.setupDashboardProject).to.be.calledWith({
             projectName: 'New Project',
@@ -376,7 +376,7 @@ describe('Connect to Dashboard', function () {
           cy.get('.privacy-radio').find('input').first().check()
 
           cy.get('.modal-body')
-          .contains('.btn', 'Connect to Dashboard').click()
+          .contains('.btn', 'Set up project').click()
         })
 
         it('sends data from form to ipc event', function () {
@@ -397,7 +397,7 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.privacy-radio').find('input').last().check()
           cy.get('.modal-body')
-          .contains('.btn', 'Connect to Dashboard').click()
+          .contains('.btn', 'Set up project').click()
         })
 
         it('sends data from form to ipc event', function () {
@@ -418,7 +418,7 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.privacy-radio').find('input').first().check()
           cy.get('.modal-body')
-          .contains('.btn', 'Connect to Dashboard').click()
+          .contains('.btn', 'Set up project').click()
         })
 
         it('sends data from form to ipc event', function () {
@@ -459,7 +459,7 @@ describe('Connect to Dashboard', function () {
         cy.get('.privacy-radio').find('input').last().check()
 
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard').click()
+        .contains('.btn', 'Set up project').click()
       })
 
       it('logs user out when 401', function () {
@@ -471,12 +471,7 @@ describe('Connect to Dashboard', function () {
       it('displays error name and message when unexpected', function () {
         this.setupDashboardProject.reject({
           name: 'Fatal Error!',
-          message: `\
-{
-  "system": "down",
-  "toxicity": "of the city"
-}\
-`,
+          message: `{ "system": "down", "toxicity": "of the city" }`,
         })
 
         cy.contains('"system": "down"')
@@ -522,7 +517,7 @@ describe('Connect to Dashboard', function () {
 
       it('shows setup', () => {
         cy.get('.login-content > .btn').click()
-        cy.contains('h4', 'Connect to Dashboard')
+        cy.contains('h4', 'Set up project')
       })
     })
   })

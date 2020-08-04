@@ -327,8 +327,8 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays \'need to set up\' message', () => {
-      cy.contains('You have no recorded runs')
+    it('displays "need to set up" message', () => {
+      cy.contains('You could see test recordings here')
     })
   })
 
@@ -342,8 +342,8 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays \'need to set up\' message', () => {
-      cy.contains('You have no recorded runs')
+    it('displays "need to set up" message', () => {
+      cy.contains('You could see test recordings here')
     })
 
     describe('click setup project', function () {
@@ -439,10 +439,10 @@ describe('Runs List', function () {
         cy.contains('Request access')
       })
 
-      it('displays \'need to set up\' message', function () {
+      it('displays "need to set up" message', function () {
         this.ipcError({ type: 'NO_PROJECT_ID' })
 
-        cy.contains('You have no recorded runs')
+        cy.contains('You could see test recordings here')
       })
 
       it('displays old runs if another error', function () {
@@ -558,7 +558,7 @@ describe('Runs List', function () {
               cy.contains('Request sent')
             })
 
-            it('\'persists\' request state (until app is reloaded at least)', function () {
+            it('persists request state (until app is reloaded at least)', function () {
               this.ipc.getRuns.onCall(1).rejects({ name: 'foo', message: 'There\'s an error', statusCode: 403 })
 
               cy.get('.navbar-default a').contains('Tests').click()
@@ -723,11 +723,11 @@ describe('Runs List', function () {
         })
       })
 
-      it('displays \'need to set up\' message', () => {
-        cy.contains('You have no recorded runs')
+      it('displays "need to set up" message', () => {
+        cy.contains('You could see test recordings here')
       })
 
-      it('clears message after setting up to record', function () {
+      it('clears message after setting up to record', () => {
         cy.contains('.btn', 'Connect to Dashboard').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
@@ -736,7 +736,7 @@ describe('Runs List', function () {
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard').click()
+        .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
       })
@@ -747,11 +747,7 @@ describe('Runs List', function () {
         this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
-          this.getRuns.reject({ name: 'foo', message: `\
-{
-  "no runs": "for you"
-}\
-`, type: 'UNKNOWN' })
+          this.getRuns.reject({ name: 'foo', message: `{"no runs": "for you"}`, type: 'UNKNOWN' })
         })
       })
 
@@ -807,7 +803,7 @@ describe('Runs List', function () {
 
         cy.get('.privacy-radio').find('input').last().check()
         cy.get('.modal-body')
-        .contains('.btn', 'Connect to Dashboard').click()
+        .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
       })
@@ -825,7 +821,7 @@ describe('Runs List', function () {
         })
 
         it('displays "need to set up" message', () => {
-          cy.contains('You have no recorded runs')
+          cy.contains('You could see test recordings here')
         })
       })
     })
@@ -843,14 +839,14 @@ describe('Runs List', function () {
         cy.contains('To record your first')
       })
 
-      it('opens project id guide on clicking \'Why?\'', () => {
+      it('opens project id guide on clicking "Why?"', () => {
         cy.contains('Why?').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
         })
       })
 
-      it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
+      it('opens dashboard on clicking "Cypress Dashboard"', () => {
         cy.contains('Cypress Dashboard').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)

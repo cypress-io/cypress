@@ -1,9 +1,9 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
-import ipc from '../lib/ipc'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
 import authStore from '../auth/auth-store'
@@ -42,27 +42,55 @@ export default class ProjectNotSetup extends Component {
   _getStartedWithCI () {
     return (
       <div className='empty-no-runs'>
-        <h4>You have no recorded runs</h4>
-        <p>Cypress can record screenshots, videos and failures when running <code>cypress run</code>.</p>
-        <div className='runs-screenshots'>
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
+        <div className='empty-no-runs-banner'>
+          <div className='left-vector'/>
+          <div className='right-vector'/>
+          <div className='empty-no-runs-banner-db'>
+            {_.map(['pass', 'fail', 'pass'], (test, i) => (
+              <div key={`test-${i}`} className={`empty-no-runs-test ${test}`}>
+                <div className='empty-no-runs-test-left'>
+                  <div className='empty-no-runs-test-title'>
+                    <div className='test-title-top'>
+                      <i className='fas fa-check' />
+                      {_.capitalize(test)}ed test
+                    </div>
+                    <div className='test-title-bottom'>
+                      <div className='fake-text' style={{ width: '45px' }}/>
+                      <div className='fake-text' style={{ width: '60px' }}/>
+                      <div className='fake-text' style={{ width: '20px' }}/>
+                    </div>
+                  </div>
+                </div>
+                <div className='empty-no-runs-test-mid'>
+                  <i className='far fa-clock' />
+                  <div className='fake-text' style={{ width: '70px' }} />
+                </div>
+                <div className='empty-no-runs-test-end'>
+                  <i className='fas fa-hourglass-end'/>
+                  <div className='fake-text' style={{ width: '60px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <p>After runs are recorded, you will see them here and on your <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</p>
+        <h4>You could see test recordings here!</h4>
+        <div className='empty-no-runs-details'>
+          <h5>Connect to Cypress Dashboard for free:</h5>
+          <ul>
+            <li>Record test runs in CI and debug failed tests with ease</li>
+            <li>Understand the health of your tests with test analytics</li>
+            <li>Improve testing efficiency with parallelization, load balancing, and more</li>
+          </ul>
+        </div>
         <button
           className='btn btn-primary setup-project-btn'
           onClick={this._showSetupProjectModal}
         >
           Connect to Dashboard
         </button>
+        <p>After logging in, you'll see recorded test runs here and in your Cypress Dashboard.</p>
       </div>
     )
-  }
-
-  _visitDashboard = (e) => {
-    e.preventDefault()
-    ipc.externalOpen('https://on.cypress.io/dashboard')
   }
 
   _invalidProject () {
