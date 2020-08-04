@@ -289,12 +289,26 @@ const getDimensions = function (details) {
 }
 
 const ensureUniquePath = function (withoutExt, extension, num = 0) {
-  const fullPath = num ? `${withoutExt} (${num}).${extension}` : `${withoutExt}.${extension}`
+  const suffix = `${num ? ` (${num})` : ''}.${extension}`
+  // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
+  // the smallest common denominator of safe filenames, which is 255 bytes
+  // @see https://github.com/cypress-io/cypress/issues/2403
+  // @see https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits
+  const maxSafeBytes = 255 - suffix.length
+  const filenameBuf = Buffer.from(path.basename(withoutExt))
+
+  if (filenameBuf.byteLength > maxSafeBytes) {
+    const truncated = filenameBuf.slice(0, maxSafeBytes).toString()
+
+    withoutExt = path.join(path.dirname(withoutExt), truncated)
+  }
+
+  const fullPath = [withoutExt, suffix].join('')
 
   return fs.pathExists(fullPath)
   .then((found) => {
     if (found) {
-      return ensureUniquePath(withoutExt, extension, (num += 1))
+      return ensureUniquePath(withoutExt, extension, num + 1)
     }
 
     return fullPath
@@ -323,17 +337,7 @@ const getPath = function (data, ext, screenshotsFolder) {
     .value()
   }
 
-  // truncate file names to be less than 220 characters
-  // to accomodate filename size limits
-  const maxFileNameLength = 220
   const index = names.length - 1
-
-  if (names[index].length > maxFileNameLength) {
-    names[index] = _.truncate(names[index], {
-      length: maxFileNameLength,
-      omission: '',
-    })
-  }
 
   // append (failed) to the last name
   if (data.testFailure) {

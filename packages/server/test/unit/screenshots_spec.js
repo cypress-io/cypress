@@ -618,6 +618,24 @@ describe('lib/screenshots', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/2403
+    it('truncates long paths with unicode in them', async () => {
+      const fullPath = await screenshots.getPath({
+        titles: [
+          'WMED: [STORY] Тестовые сценарии для CI',
+          'Сценарии:',
+          'Сценарий 2: Создание обращения, создание медзаписи, привязка обращения к медзаписи',
+          '- Сценарий 2',
+        ],
+        testFailure: true,
+        specName: 'WMED_UAT_Scenarios_For_CI_spec.js',
+      }, 'png', '/jenkins-slave/workspace/test-wmed/qa/cypress/wmed_ci/cypress/screenshots/')
+
+      const basename = path.basename(fullPath)
+
+      expect(Buffer.from(basename).byteLength).to.be.lessThan(255)
+    })
+
     _.each([Infinity, 0 / 0, [], {}, 1, false], (value) => {
       it(`doesn't err and stringifies non-string test title: ${value}`, () => {
         return screenshots.getPath({
@@ -632,7 +650,7 @@ describe('lib/screenshots', () => {
       })
     })
 
-    return _.each([null, undefined], (value) => {
+    _.each([null, undefined], (value) => {
       it(`doesn't err and removes null/undefined test title: ${value}`, () => {
         return screenshots.getPath({
           specName: 'examples$/user/list.js',
