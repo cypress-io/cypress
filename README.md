@@ -2,7 +2,7 @@
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems)
+**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
 
 ## Survey
 
@@ -355,6 +355,10 @@ Currently, this project cannot find Webpack settings used by Next.js, thus it ca
 Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/cypress-react-unit-test/issues/307)
 
 </details>
+
+## Chat
+
+We have a chat workspace at [https://component-testing.slack.com/](https://component-testing.slack.com/), you are welcome to [join us](https://join.slack.com/t/component-testing/shared_invite/zt-g4k6sget-oj2wlswjNTb38s0n7kql1A).
 
 ## Development
 
