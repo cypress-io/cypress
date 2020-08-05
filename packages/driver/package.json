@@ -46,7 +46,7 @@
     "jsdom": "14.1.0",
     "lodash": "4.17.19",
     "lolex": "4.1.0",
-    "md5": "2.2.1",
+    "md5": "2.3.0",
     "method-override": "3.0.0",
     "methods": "1.1.2",
     "minimatch": "3.0.4",
