@@ -1,4 +1,3 @@
-import _ from 'lodash'
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { observer } from 'mobx-react'
@@ -6,6 +5,7 @@ import BootstrapModal from 'react-bootstrap-modal'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SetupProject from './setup-project-modal'
+import DashboardBanner from './dashboard-banner'
 import authStore from '../auth/auth-store'
 
 @observer
@@ -42,37 +42,7 @@ export default class ProjectNotSetup extends Component {
   _getStartedWithCI () {
     return (
       <div className='empty-no-runs'>
-        <div className='empty-no-runs-banner'>
-          <div className='left-vector'/>
-          <div className='right-vector'/>
-          <div className='empty-no-runs-banner-db'>
-            {_.map(['pass', 'fail', 'pass'], (test, i) => (
-              <div key={`test-${i}`} className={`empty-no-runs-test ${test}`}>
-                <div className='empty-no-runs-test-left'>
-                  <div className='empty-no-runs-test-title'>
-                    <div className='test-title-top'>
-                      <i className='fas fa-check' />
-                      {_.capitalize(test)}ed test
-                    </div>
-                    <div className='test-title-bottom'>
-                      <div className='fake-text' style={{ width: '45px' }}/>
-                      <div className='fake-text' style={{ width: '60px' }}/>
-                      <div className='fake-text' style={{ width: '20px' }}/>
-                    </div>
-                  </div>
-                </div>
-                <div className='empty-no-runs-test-mid'>
-                  <i className='far fa-clock' />
-                  <div className='fake-text' style={{ width: '70px' }} />
-                </div>
-                <div className='empty-no-runs-test-end'>
-                  <i className='fas fa-hourglass-end'/>
-                  <div className='fake-text' style={{ width: '60px' }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <DashboardBanner/>
         <h4>You could see test recordings here!</h4>
         <div className='empty-no-runs-details'>
           <h5>Connect to Cypress Dashboard for free:</h5>
@@ -83,7 +53,7 @@ export default class ProjectNotSetup extends Component {
           </ul>
         </div>
         <button
-          className='btn btn-primary setup-project-btn'
+          className='btn btn-primary btn-wide'
           onClick={this._showSetupProjectModal}
         >
           Connect to Dashboard

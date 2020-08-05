@@ -18,6 +18,7 @@ import LoginForm from '../auth/login-form'
 import Run from './runs-list-item'
 import PermissionMessage from './permission-message'
 import ProjectNotSetup from './project-not-setup'
+import DashboardBanner from './dashboard-banner'
 
 @observer
 class RunsList extends Component {
@@ -274,16 +275,9 @@ class RunsList extends Component {
   _loginMessage () {
     return (
       <div className='empty empty-log-in'>
-        <h4>Log in to view runs</h4>
-        <p>
-          After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard Service</a>.
-        </p>
-        <div className='runs-screenshots'>
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-1' />
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-2' />
-          <img width='150' height='150' src='https://on.cypress.io/images/desktop-onboarding-thumb-3' />
-        </div>
-
+        <DashboardBanner/>
+        <h4>Log in to see test recordings here!</h4>
+        <h5>After logging in, you will see recorded runs here and on the <a href='#' onClick={this._visitDashboard}>Cypress Dashboard</a>.</h5>
         <LoginForm utm='Runs Tab Login Button' />
       </div>
     )
