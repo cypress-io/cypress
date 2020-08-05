@@ -195,7 +195,7 @@ describe('Runs List', function () {
         })
       })
 
-      it('shows \'cannot connect to api server\' message', function () {
+      it('shows "cannot connect to api server" message', function () {
         cy.contains('Cannot connect to API server')
         cy.contains('http://api.server')
         cy.contains('ECONNREFUSED')
@@ -541,7 +541,7 @@ describe('Runs List', function () {
             cy.get('@requestAccessBtn').should('be.disabled')
           })
 
-          it('hides \'Request access\' text', () => {
+          it('hides "Request access" text', () => {
             cy.get('@requestAccessBtn').find('span').should('not.be.visible')
           })
 
@@ -613,7 +613,7 @@ describe('Runs List', function () {
                 cy.get('@requestAccessBtn').should('not.be.disabled')
               })
 
-              it('shows \'Request access\' text', () => {
+              it('shows "Request access" text', () => {
                 cy.get('@requestAccessBtn').find('span').should('be.visible')
               })
 
@@ -627,7 +627,7 @@ describe('Runs List', function () {
                 this.requestAccess.reject({ type: 'DENIED', name: 'foo', message: 'There\'s an error' })
               })
 
-              it('shows \'success\' message', () => {
+              it('shows "success" message', () => {
                 cy.contains('Request sent')
               })
             })
@@ -637,7 +637,7 @@ describe('Runs List', function () {
                 this.requestAccess.reject({ type: 'ALREADY_REQUESTED', name: 'foo', message: 'There\'s an error' })
               })
 
-              it('shows \'success\' message', () => {
+              it('shows "success" message', () => {
                 cy.contains('Request sent')
               })
             })
@@ -653,6 +653,7 @@ describe('Runs List', function () {
 
               it('shows login message', () => {
                 cy.get('.empty h4').should('contain', 'Log in')
+                cy.percySnapshot()
               })
 
               it('clicking Log In to Dashboard opens login', () => {
@@ -725,6 +726,7 @@ describe('Runs List', function () {
 
       it('displays "need to set up" message', () => {
         cy.contains('You could see test recordings here')
+        cy.percySnapshot()
       })
 
       it('clears message after setting up to record', () => {
