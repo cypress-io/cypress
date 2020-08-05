@@ -32,7 +32,7 @@
     "enzyme-adapter-react-16": "1.15.2",
     "jsdom": "14.1.0",
     "lodash": "4.17.19",
-    "markdown-it": "8.4.2",
+    "markdown-it": "11.0.0",
     "mobx": "5.15.4",
     "mobx-react": "6.1.8",
     "mocha": "6.2.2",
