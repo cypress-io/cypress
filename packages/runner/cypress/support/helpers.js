@@ -188,9 +188,14 @@ function createCypress () {
             })
           })
 
-          cy.spy(cy.state('window').console, 'log').as('console_log')
-          cy.spy(cy.state('window').console, 'error').as('console_error')
-
+          // TODO: clean this up, sinon doesn't like wrapping things multiple times
+          // and this catches that error
+          try {
+            cy.spy(cy.state('window').console, 'log').as('console_log')
+            cy.spy(cy.state('window').console, 'error').as('console_error')
+          } catch (_e) {
+            // console was already wrapped, noop
+          }
           onInitializedListeners.forEach((fn) => fn(autCypress))
           onInitializedListeners = []
 
