@@ -121,7 +121,7 @@ describe('hooks', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/8189
-  it('can fail in afterEach hook without associated test (due to run restart)', () => {
+  it('can rerun without timeout error leaking into next run (due to run restart)', () => {
     runIsolatedCypress(() => {
       const top = window.parent
 
