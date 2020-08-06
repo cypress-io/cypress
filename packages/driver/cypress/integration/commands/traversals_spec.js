@@ -368,51 +368,6 @@ describe('src/cy/commands/traversals', () => {
       cy.visit('/fixtures/shadow-dom.html')
     })
 
-    describe('#find', () => {
-      it('retrieves a matching element beyond shadow boundaries', () => {
-        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
-
-        cy
-        .get('#parent-of-shadow-container-0')
-        .find('p', { includeShadowDom: true })
-        .then(($element) => {
-          expect($element.length).to.eq(1)
-          expect($element[0]).to.eq(el)
-        })
-      })
-
-      it('retrieves a matching element when no shadow roots', () => {
-        const el = cy.$$('#shadow-element-3')[0]
-
-        cy
-        .get('#parent-of-shadow-container-0')
-        .find('#shadow-element-3', { includeShadowDom: true })
-        .then(($element) => {
-          expect($element.length).to.eq(1)
-          expect($element[0]).to.eq(el)
-        })
-      })
-
-      it('allows traversal when already within a shadow root', () => {
-        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
-
-        cy
-        .get('#shadow-element-3')
-        .shadow()
-        .find('p')
-        .then(($element) => {
-          expect($element.length).to.eq(1)
-          expect($element[0]).to.eq(el)
-        })
-      })
-
-      // https://github.com/cypress-io/cypress/issues/7676
-      it('does not error when querySelectorAll is wrapped and snapshots are off', () => {
-        cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
-        cy.get('#shadow-element-1').find('.shadow-1', { includeShadowDom: true })
-      })
-    })
-
     describe('#closest', () => {
       it('retrieves itself when it is the closest matching element within shadow dom', () => {
         cy
@@ -480,69 +435,48 @@ describe('src/cy/commands/traversals', () => {
       })
     })
 
-    describe('#parents', () => {
-      it('retrieves all parents, including those beyond shadow boundaries', () => {
+    describe('#find', () => {
+      it('retrieves a matching element beyond shadow boundaries', () => {
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
         cy
-        .get('#shadow-element-3')
+        .get('#parent-of-shadow-container-0')
         .find('p', { includeShadowDom: true })
-        .parents()
-        .then(($parents) => {
-          expect($parents.length).to.eq(6)
-          expect($parents[0].className).to.eq('shadow-div')
-          expect($parents[1].id).to.eq('shadow-element-3')
-          expect($parents[2].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[3].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[4].nodeName).to.eq('BODY')
-          expect($parents[5].nodeName).to.eq('HTML')
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
         })
       })
 
-      it('retrieves parents normally when no shadow roots exist', () => {
+      it('retrieves a matching element when no shadow roots', () => {
+        const el = cy.$$('#shadow-element-3')[0]
+
         cy
-        .get('#shadow-element-3')
-        .parents()
-        .then(($parents) => {
-          expect($parents.length).to.eq(4)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[1].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[2].nodeName).to.eq('BODY')
-          expect($parents[3].nodeName).to.eq('HTML')
+        .get('#parent-of-shadow-container-0')
+        .find('#shadow-element-3', { includeShadowDom: true })
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
         })
       })
 
-      it('retrieves parents by selector within shadow root', () => {
+      it('allows traversal when already within a shadow root', () => {
+        const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
+
         cy
         .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('.shadow-div')
-        .then(($parents) => {
-          expect($parents.length).to.eq(1)
-          expect($parents[0].className).to.eq('shadow-div')
+        .shadow()
+        .find('p')
+        .then(($element) => {
+          expect($element.length).to.eq(1)
+          expect($element[0]).to.eq(el)
         })
       })
 
-      it('retrieves parents by selector within and outside of shadow root', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('div')
-        .then(($parents) => {
-          expect($parents.length).to.eq(3)
-          expect($parents[0].className).to.eq('shadow-div')
-          expect($parents[1].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[2].id).to.eq('parent-of-shadow-container-0')
-        })
-      })
-
-      it('retrieves parents by selector outside of shadow root', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('#parent-of-shadow-container-0')
-        .then(($parents) => {
-          expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-0')
-        })
+      // https://github.com/cypress-io/cypress/issues/7676
+      it('does not error when querySelectorAll is wrapped and snapshots are off', () => {
+        cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
+        cy.get('#shadow-element-1').find('.shadow-1', { includeShadowDom: true })
       })
     })
 
@@ -608,6 +542,72 @@ describe('src/cy/commands/traversals', () => {
         .then(($parents) => {
           expect($parents.length).to.eq(1)
           expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+        })
+      })
+    })
+
+    describe('#parents', () => {
+      it('retrieves all parents, including those beyond shadow boundaries', () => {
+        cy
+        .get('#shadow-element-3')
+        .find('p', { includeShadowDom: true })
+        .parents()
+        .then(($parents) => {
+          expect($parents.length).to.eq(6)
+          expect($parents[0].className).to.eq('shadow-div')
+          expect($parents[1].id).to.eq('shadow-element-3')
+          expect($parents[2].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[3].id).to.eq('parent-of-shadow-container-0')
+          expect($parents[4].nodeName).to.eq('BODY')
+          expect($parents[5].nodeName).to.eq('HTML')
+        })
+      })
+
+      it('retrieves parents normally when no shadow roots exist', () => {
+        cy
+        .get('#shadow-element-3')
+        .parents()
+        .then(($parents) => {
+          expect($parents.length).to.eq(4)
+          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[1].id).to.eq('parent-of-shadow-container-0')
+          expect($parents[2].nodeName).to.eq('BODY')
+          expect($parents[3].nodeName).to.eq('HTML')
+        })
+      })
+
+      it('retrieves parents by selector within shadow root', () => {
+        cy
+        .get('#shadow-element-3')
+        .find('p', { includeShadowDom: true })
+        .parents('.shadow-div')
+        .then(($parents) => {
+          expect($parents.length).to.eq(1)
+          expect($parents[0].className).to.eq('shadow-div')
+        })
+      })
+
+      it('retrieves parents by selector within and outside of shadow root', () => {
+        cy
+        .get('#shadow-element-3')
+        .find('p', { includeShadowDom: true })
+        .parents('div')
+        .then(($parents) => {
+          expect($parents.length).to.eq(3)
+          expect($parents[0].className).to.eq('shadow-div')
+          expect($parents[1].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[2].id).to.eq('parent-of-shadow-container-0')
+        })
+      })
+
+      it('retrieves parents by selector outside of shadow root', () => {
+        cy
+        .get('#shadow-element-3')
+        .find('p', { includeShadowDom: true })
+        .parents('#parent-of-shadow-container-0')
+        .then(($parents) => {
+          expect($parents.length).to.eq(1)
+          expect($parents[0].id).to.eq('parent-of-shadow-container-0')
         })
       })
     })
