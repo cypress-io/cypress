@@ -577,6 +577,10 @@ describe('lib/screenshots', () => {
   })
 
   context('.getPath', () => {
+    beforeEach(() => {
+      sinon.stub(fs, 'outputFileAsync').resolves()
+    })
+
     it('concats spec name, screenshotsFolder, and name', () => {
       return screenshots.getPath({
         specName: 'examples/user/list.js',
@@ -624,7 +628,7 @@ describe('lib/screenshots', () => {
         titles: [
           'WMED: [STORY] Тестовые сценарии для CI',
           'Сценарии:',
-          'Сценарий 2: Создание обращения, создание медзаписи, привязка обращения к медзаписи',
+          'Сценарий 2: Создание обращения, создание медзаписи, привязкапривязка обращения к медзаписи',
           '- Сценарий 2',
         ],
         testFailure: true,
@@ -634,6 +638,34 @@ describe('lib/screenshots', () => {
       const basename = path.basename(fullPath)
 
       expect(Buffer.from(basename).byteLength).to.be.lessThan(255)
+    })
+
+    it('reacts to ENAMETOOLONG errors and tries to shorten the filename', async () => {
+      const err = new Error('enametoolong')
+
+      err.code = 'ENAMETOOLONG'
+
+      _.times(50, (i) => fs.outputFileAsync.onCall(i).rejects(err))
+
+      const fullPath = await screenshots.getPath({
+        specName: 'foo.js',
+        name: 'a'.repeat(256),
+      }, 'png', '/tmp')
+
+      expect(path.basename(fullPath)).to.have.length(204)
+    })
+
+    it('rejects with ENAMETOOLONG errors if name goes below MIN_PREFIX_LENGTH', async () => {
+      const err = new Error('enametoolong')
+
+      err.code = 'ENAMETOOLONG'
+
+      _.times(150, (i) => fs.outputFileAsync.onCall(i).rejects(err))
+
+      await expect(screenshots.getPath({
+        specName: 'foo.js',
+        name: 'a'.repeat(256),
+      }, 'png', '/tmp')).to.be.rejectedWith(err)
     })
 
     _.each([Infinity, 0 / 0, [], {}, 1, false], (value) => {

@@ -23,7 +23,7 @@ let __ID__ = null
 // errors are encountered, `maxSafeBytes` will be decremented to at most `MIN_PREFIX_BYTES`, at
 // which point the latest ENAMTOOLONG error will be emitted.
 // @see https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits
-let maxSafeBytes = 255
+let maxSafeBytes = Number(process.env.CYPRESS_MAX_SAFE_FILENAME_BYTES) || 254
 const MIN_PREFIX_BYTES = 64
 
 // TODO: when we parallelize these builds we'll need
