@@ -602,6 +602,18 @@
   .test-title-bottom {
     display: flex;
     margin-left: 20px;
+
+    &>div:nth-child(1) {
+      width: 45px;
+    }
+
+    &>div:nth-child(2) {
+      width: 60px;
+    }
+
+    &>div:nth-child(3) {
+      width: 20px;
+    }
   }
 
   .fake-text {
@@ -643,4 +655,16 @@
 .dashboard-banner-test-mid, .dashboard-banner-test-end {
   display: flex;
   flex-direction: row;
+}
+
+.dashboard-banner-test-mid {
+  &>div:nth-of-type(1) {
+    width: 70px;
+  }
+}
+
+.dashboard-banner-test-end {
+  &>div:nth-of-type(1) {
+    width: 60px;
+  }
 }
