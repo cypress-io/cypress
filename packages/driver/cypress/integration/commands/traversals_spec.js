@@ -368,7 +368,7 @@ describe('src/cy/commands/traversals', () => {
       cy.visit('/fixtures/shadow-dom.html')
     })
 
-    describe('find', () => {
+    describe('#find', () => {
       it('retrieves a matching element beyond shadow boundaries', () => {
         const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
@@ -413,7 +413,7 @@ describe('src/cy/commands/traversals', () => {
       })
     })
 
-    describe('closest', () => {
+    describe('#closest', () => {
       it('retrieves itself when it is the closest matching element within shadow dom', () => {
         cy
         .get('#shadow-element-3')
@@ -546,7 +546,7 @@ describe('src/cy/commands/traversals', () => {
       })
     })
 
-    describe('parent', () => {
+    describe('#parent', () => {
       it('retrieves parent within shadow root', () => {
         cy
         .get('#shadow-element-3')
