@@ -12,8 +12,8 @@
         <cy-test-element id="shadow-element-3" innerClass="shadow-3" content="Shadow Content 3"></cy-test-element>
       </div>
     </div>
-    <cy-test-element id="shadow-element-4" innerClass="shadow-4" content="Shadow Content 4">
-      <cy-test-element id="shadow-element-5" innerClass="shadow-5" content="Shadow Content 5"></cy-test-element>
+    <cy-test-element innerClass="shadow-4" content="Shadow Content 4">
+      <cy-test-element innerClass="shadow-5" content="Shadow Content 5"></cy-test-element>
     </cy-test-element>
     <cy-test-element innerClass="shadow-6" content="Shadow Content 6">
       <div class="in-shadow-slot">In Shadow Slot</div>
@@ -27,10 +27,11 @@
             super()
 
             const root = this.attachShadow({ mode: 'open' })
+            const para = document.createElement('p')
             const content = this.getAttribute('content')
             const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
 
-            root.innerHTML = `<div class="shadow-div"><p class="${className}">${content}</p><input /><slot></slot></div>`
+            root.innerHTML = `<p class="${className}">${content}</p><input /><slot></slot>`
           }
         })
       }
