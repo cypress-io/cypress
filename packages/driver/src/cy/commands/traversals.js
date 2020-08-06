@@ -20,12 +20,16 @@ const optInShadowTraversals = {
 }
 
 const autoShadowTraversals = {
-  parents: (cy, $el, arg1) => {
+  parents: (cy, $el, selector) => {
     const parents = $el.map((i, el) => {
       return $elements.getAllParents(el)
     })
 
-    return cy.$$(parents)
+    if (!selector) {
+      return cy.$$(parents)
+    }
+
+    return cy.$$(parents).filter(selector)
   },
   closest: (cy, $el, arg1) => {
     const nodes = _.reduce($el, (nodes, el) => {

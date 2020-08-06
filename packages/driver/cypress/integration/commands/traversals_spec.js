@@ -480,7 +480,7 @@ describe('src/cy/commands/traversals', () => {
       })
     })
 
-    describe('parents', () => {
+    describe('#parents', () => {
       it('retrieves all parents, including those beyond shadow boundaries', () => {
         cy
         .get('#shadow-element-3')
@@ -527,11 +527,10 @@ describe('src/cy/commands/traversals', () => {
         .find('p', { includeShadowDom: true })
         .parents('div')
         .then(($parents) => {
-          expect($parents.length).to.eq(4)
+          expect($parents.length).to.eq(3)
           expect($parents[0].className).to.eq('shadow-div')
-          expect($parents[1].id).to.eq('shadow-element-3')
-          expect($parents[2].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[3].id).to.eq('parent-of-shadow-container-0')
+          expect($parents[1].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[2].id).to.eq('parent-of-shadow-container-0')
         })
       })
 
