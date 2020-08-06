@@ -832,7 +832,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   // hold onto the _runnables for faster lookup later
-  let _stopped = false
   let _test = null
   let _tests = []
   let _testsById = {}
@@ -932,8 +931,13 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       return _runner.run((failures) => {
         // if we happen to make it all the way through
-        // the run, then just set _stopped to true here
-        _stopped = true
+        // the run, then just set _runner.stopped to true here
+        _runner.stopped = true
+
+        // remove all the listeners
+        // so no more events fire
+        // since a test failure may 'leak' after a run completes
+        _runner.removeAllListeners()
 
         // TODO this functions is not correctly
         // synchronized with the 'end' event that
@@ -1183,11 +1187,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
     },
 
     stop () {
-      if (_stopped) {
+      if (_runner.stopped) {
         return
       }
 
-      _stopped = true
+      _runner.stopped = true
 
       // abort the run
       _runner.abort()
@@ -1200,7 +1204,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // remove all the listeners
       // so no more events fire
-      return _runner.removeAllListeners()
+      _runner.removeAllListeners()
     },
 
     getDisplayPropsForLog: $Log.getDisplayProps,
