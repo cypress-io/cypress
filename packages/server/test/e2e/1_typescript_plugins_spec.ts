@@ -11,9 +11,16 @@ describe('e2e typescript in plugins file', function () {
   })
 
   // https://github.com/cypress-io/cypress/issues/7575
-  it('allows esModuleInterop to be overridden', function () {
+  it('defaults to esModuleInterop: false', function () {
     return e2e.exec(this, {
-      project: Fixtures.projectPath('ts-proj-esmoduleinterop-false'),
+      project: Fixtures.projectPath('ts-proj'),
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/7575
+  it('allows esModuleInterop to be overridden with true via tsconfig.json', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('ts-proj-esmoduleinterop-true'),
     })
   })
 })

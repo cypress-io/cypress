@@ -1784,10 +1784,10 @@
   dependencies:
     css.escape "^1.5.1"
 
-"@cypress/webpack-batteries-included-preprocessor@1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.3.1.tgz#fa2dbb01009b60db317f7575147e3cabf0c15760"
-  integrity sha512-GWTQhxu36s/UNifkpygmAG47RMapmdKhJ1j/ZP1flm/fGPna2Aa32wXWKD6eN3ZjbJPXz2WW3Pn0ei1E9hhEkg==
+"@cypress/webpack-batteries-included-preprocessor@1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-1.3.2.tgz#ed16825fa10599b60d6d8fbf08c79a73a407184c"
+  integrity sha512-0wzPLft4qyF/S5dpIGe1LLUIbFiNGA2W+Qz1d+w8dN4bGmRL8G4BULjm80wB1Q/8xvmKMwcR6WsYTnwOK+SxwA==
   dependencies:
     "@babel/core" "^7.10.5"
     "@babel/plugin-proposal-class-properties" "^7.10.4"
@@ -12538,16 +12538,6 @@ fs-extra@^7.0.0, fs-extra@^7.0.1:
     graceful-fs "^4.1.2"
     jsonfile "^4.0.0"
     universalify "^0.1.0"
-
-fs-extra@^9.0.0, fs-extra@^9.0.1:
-  version "9.0.1"
-  resolved "https://registry.yarnpkg.com/fs-extra/-/fs-extra-9.0.1.tgz#910da0062437ba4c39fedd863f1675ccfefcb9fc"
-  integrity sha512-h2iAoN838FqAFJY2/qVpzFXy+EBxfVE220PalAqQLDVsFOHLJrZvut5puAbCdNv6WJk+B8ihI+k0c7JK5erwqQ==
-  dependencies:
-    at-least-node "^1.0.0"
-    graceful-fs "^4.2.0"
-    jsonfile "^6.0.1"
-    universalify "^1.0.0"
 
 fs-minipass@^1.2.5:
   version "1.2.7"
