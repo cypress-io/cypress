@@ -52,3 +52,17 @@ describe "foo", ->
 
     ## no commands fail async handler should pass
     foo.bar()
+
+  it "quux7 fails", (done) ->
+    ## no commands active, asynchronously emitted error
+    setTimeout ->
+      foo.bar()
+    , 0
+
+  it "quux8 fails", (done) ->
+    ## no commands active, asynchronously emitted error
+    Cypress.Promise.resolve()
+    .then ->
+      foo.bar()
+
+    return
