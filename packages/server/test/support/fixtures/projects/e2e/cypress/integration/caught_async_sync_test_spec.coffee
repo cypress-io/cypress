@@ -54,14 +54,55 @@ describe "foo", ->
     foo.bar()
 
   it "quux7 fails", (done) ->
-    ## no commands active, asynchronously emitted error
     setTimeout ->
       foo.bar()
     , 0
 
+  it "quux7b fails", (done) ->
+    window.top.setTimeout ->
+      foo.bar()
+    , 0
+
+  it "quux7c fails", (done) ->
+    setImmediate ->
+      foo.bar()
+
+  # bad, doesn't log to console, unlike Promiser unhandled rejections
+  it "quux7d fails", (done) ->
+    window.top.setImmediate ->
+      foo.bar()
+
+  # # bad, doesn't log to console, unlike Promiser unhandled rejections
+  # it "quux7d ii fails", (done) ->
+  #   cy.on "uncaught:exception", -> false
+  #   window.top.setImmediate ->
+  #     foo.bar()
+
+  it "quux7e fails", (done) ->
+    requestAnimationFrame ->
+      foo.bar()
+
+  it "quux7f fails", (done) ->
+    window.top.requestAnimationFrame ->
+      foo.bar()
+
+  # bad
   it "quux8 fails", (done) ->
-    ## no commands active, asynchronously emitted error
     Cypress.Promise.resolve()
+    .then ->
+      foo.bar()
+
+    return
+
+  it "quux8b fails", (done) ->
+    Promise.resolve()
+    .then ->
+      foo.bar()
+
+    return
+
+  it "quux8c fails", (done) ->
+    window.top.Promise.resolve()
     .then ->
       foo.bar()
 
