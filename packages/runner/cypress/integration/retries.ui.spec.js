@@ -373,7 +373,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       })
     })
 
-    it('after all hooks are not run on the second attempt when fails outside of afterAll', () => {
+    it('tests do not retry when afterAll fails', () => {
       runIsolatedCypress({
         suites: {
           'suite 1': {
