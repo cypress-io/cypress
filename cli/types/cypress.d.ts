@@ -2353,8 +2353,13 @@ declare namespace Cypress {
      */
     reporter: string
     /**
+     * Some reporters accept [reporterOptions](https://docs.cypress.io/guides/tooling/reporters.html#Reporter-Options) that customize their behavior
+     * @default "spec"
+     */
+    reporterOptions: { [key: string]: any }
+    /**
      * Whether to take a screenshot on test failure when running headlessly or in CI
-     * @default true
+     * @default null
      */
     watchForFileChanges: boolean
     /**
