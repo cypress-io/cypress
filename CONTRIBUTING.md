@@ -117,7 +117,7 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
 - Guide them to existing resources where their questions can be asked like our [community chat](https://on.cypress.io/chat), our [documentation](https://docs.cypress.io), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
-- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option. Cypress also offers screen sharing and workshops with our [premium support options](https://www.cypress.io/support/) if they would like something higher-touch.
+- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
 - Add the `type: question` label to the issue.
 - Close the issue.
 

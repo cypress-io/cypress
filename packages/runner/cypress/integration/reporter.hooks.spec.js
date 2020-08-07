@@ -119,4 +119,35 @@ describe('hooks', function () {
       })
     })
   })
+
+  // https://github.com/cypress-io/cypress/issues/8189
+  it('can rerun without timeout error leaking into next run (due to run restart)', () => {
+    runIsolatedCypress(() => {
+      const top = window.parent
+
+      top.count = top.count || 0
+
+      Cypress.config('defaultCommandTimeout', 50)
+      afterEach(function () {
+        assert(true, `run ${top.count}`)
+      })
+
+      describe('s1', () => {
+        it('foo', () => {
+          cy.once('test:after:run', () => {
+            if (!top.count) {
+              requestAnimationFrame(() => {
+                window.parent.eventManager.reporterBus.emit('runner:restart')
+              })
+            }
+
+            top.count++
+          })
+        })
+      })
+    })
+
+    // wait until spec has run twice (due to one reload)
+    cy.window().its('count').should('eq', 2)
+  })
 })
