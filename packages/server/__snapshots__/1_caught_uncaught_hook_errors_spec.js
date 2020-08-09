@@ -92,7 +92,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_caught_error_failing_spec.     (X second)
-                          coffee.mp4                                                                
+                          coffee (failed).mp4                                                       
 
 
 ====================================================================================================
@@ -185,7 +185,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_failing_spe     (X second)
-                          c.coffee.mp4                                                              
+                          c.coffee (failed).mp4                                                     
 
 
 ====================================================================================================
@@ -269,7 +269,7 @@ Because this error occurred during a \`before each\` hook we are skipping all of
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_root_error_failin     (X second)
-                          g_spec.coffee.mp4                                                         
+                          g_spec.coffee (failed).mp4                                                
 
 
 ====================================================================================================
@@ -362,7 +362,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/hook_uncaught_error_events_fail     (X second)
-                          ing_spec.coffee.mp4                                                       
+                          ing_spec.coffee (failed).mp4                                              
 
 
 ====================================================================================================

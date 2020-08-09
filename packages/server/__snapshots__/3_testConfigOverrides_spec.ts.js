@@ -62,7 +62,7 @@ We dynamically generated a new test to display this failure.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/testConfigOverrides-invalid-bro     (X second)
-                          wser.js.mp4                                                               
+                          wser.js (failed).mp4                                                      
 
 
 ====================================================================================================

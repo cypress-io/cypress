@@ -64,7 +64,8 @@ exports['e2e issue 674 / fails'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.coffee.mp4           (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_674_spec.coffee (failed).     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================

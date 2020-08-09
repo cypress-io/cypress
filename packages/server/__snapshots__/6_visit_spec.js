@@ -153,7 +153,7 @@ Common situations why this would fail:
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_network_error_failin     (X second)
-                          g_spec.coffee.mp4                                                         
+                          g_spec.coffee (failed).mp4                                                
 
 
 ====================================================================================================
@@ -240,7 +240,7 @@ If you do not want status codes to cause failures pass the option: \`failOnStatu
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_500_response_failing     (X second)
-                          _spec.coffee.mp4                                                          
+                          _spec.coffee (failed).mp4                                                 
 
 
 ====================================================================================================
@@ -327,7 +327,7 @@ The internal Cypress web server responded with:
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_file_404_response_failing     (X second)
-                          _spec.coffee.mp4                                                          
+                          _spec.coffee (failed).mp4                                                 
 
 
 ====================================================================================================
@@ -416,7 +416,7 @@ However, you can likely use \`cy.request()\` instead of \`cy.visit()\`.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_non_html_content_type_fai     (X second)
-                          ling_spec.coffee.mp4                                                      
+                          ling_spec.coffee (failed).mp4                                             
 
 
 ====================================================================================================
@@ -517,7 +517,7 @@ When this \`load\` event occurs, Cypress will continue running commands.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_http_timeout_failing_spec     (X second)
-                          .coffee.mp4                                                               
+                          .coffee (failed).mp4                                                      
 
 
 ====================================================================================================
@@ -670,7 +670,7 @@ Common situations why this would fail:
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/visit_response_never_ends_faili     (X second)
-                          ng_spec.js.mp4                                                            
+                          ng_spec.js (failed).mp4                                                   
 
 
 ====================================================================================================

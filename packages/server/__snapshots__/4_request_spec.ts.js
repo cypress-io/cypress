@@ -161,7 +161,7 @@ https://on.cypress.io/request
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_http_network_error_fail     (X second)
-                          ing_spec.js.mp4                                                           
+                          ing_spec.js (failed).mp4                                                  
 
 
 ====================================================================================================
@@ -279,7 +279,7 @@ https://on.cypress.io/request
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_status_code_failing_spe     (X second)
-                          c.js.mp4                                                                  
+                          c.js (failed).mp4                                                         
 
 
 ====================================================================================================
@@ -405,7 +405,7 @@ https://on.cypress.io/request
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/request_long_http_props_failing     (X second)
-                          _spec.js.mp4                                                              
+                          _spec.js (failed).mp4                                                     
 
 
 ====================================================================================================

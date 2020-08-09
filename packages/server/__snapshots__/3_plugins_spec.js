@@ -329,8 +329,8 @@ exports['e2e plugins calls after:screenshot for cy.screenshot() and failure scre
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee.mp     (X second)
-                          4                                                                         
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_spec.coffee (f     (X second)
+                          ailed).mp4                                                                
 
 
 ====================================================================================================
@@ -395,7 +395,7 @@ The following error was thrown by a plugin. We stopped running your tests becaus
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee (failed).mp4        (X second)
 
 
 ====================================================================================================

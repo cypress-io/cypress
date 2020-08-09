@@ -100,7 +100,8 @@ The internal Cypress web server responded with:
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee (fai     (X second)
+                          led).mp4                                                                  
 
 
 ====================================================================================================
@@ -172,7 +173,7 @@ Fix the error in your code and re-run your tests.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_exit_early_failing_spec.     (X second)
-                          js.mp4                                                                    
+                          js (failed).mp4                                                           
 
 
 ====================================================================================================
@@ -507,7 +508,7 @@ exports['e2e stdout / displays assertion errors'] = `
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_assertion_errors_spec.js     (X second)
-                          .mp4                                                                      
+                           (failed).mp4                                                             
 
 
 ====================================================================================================

@@ -123,7 +123,8 @@ exports['e2e config fails 1'] = `
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_failing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_failing_spec.coffee (fai     (X second)
+                          led).mp4                                                                  
 
 
 ====================================================================================================

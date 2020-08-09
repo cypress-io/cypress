@@ -44,7 +44,7 @@ Error: connect ECONNREFUSED 127.0.0.1:7777
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.ts.mp4                         (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.ts (failed).mp4                (X second)
 
 
 ====================================================================================================

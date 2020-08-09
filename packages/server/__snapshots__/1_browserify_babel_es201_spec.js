@@ -119,7 +119,7 @@ Fix the error in your code and re-run your tests.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_babel_es2015_failing     (X second)
-                          _spec.js.mp4                                                              
+                          _spec.js (failed).mp4                                                     
 
 
 ====================================================================================================

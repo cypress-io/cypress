@@ -237,7 +237,7 @@ describe('lib/modes/run', () => {
     })
 
     it('does not call video process when videoCompression is false', () => {
-      return runMode.postProcessRecording('foo', 'foo-compress', false, true)
+      return runMode.postProcessRecording('foo', 'foo-compress', 'foo', false, true)
       .then(() => {
         expect(videoCapture.process).not.to.be.called
       })
@@ -401,14 +401,14 @@ describe('lib/modes/run', () => {
         // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
-        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 'foo (failed).mp4', 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(results)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
 
         expect(obj).to.deep.eq({
           screenshots,
-          video: 'foo.mp4',
+          video: 'foo (failed).mp4',
           error: null,
           hooks: null,
           reporterStats: null,
@@ -464,7 +464,7 @@ describe('lib/modes/run', () => {
         // since video was recording, there was a delay to let video finish
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
-        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 'foo (failed).mp4', 32, true)
 
         expect(runMode.displayResults).to.be.calledWith(obj)
         expect(runMode.displayScreenshots).to.be.calledWith(screenshots)
@@ -472,7 +472,7 @@ describe('lib/modes/run', () => {
         expect(obj).to.deep.eq({
           screenshots,
           error: err.message,
-          video: 'foo.mp4',
+          video: 'foo (failed).mp4',
           hooks: null,
           tests: null,
           reporterStats: null,
@@ -571,7 +571,7 @@ describe('lib/modes/run', () => {
         endVideoCapture,
       })
       .then((obj) => {
-        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, false)
+        expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 'foo.mp4', 32, false)
 
         expect(videoCapture.process).not.to.be.called
       })

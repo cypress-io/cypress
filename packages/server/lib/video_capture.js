@@ -217,7 +217,7 @@ module.exports = {
     })
   },
 
-  process (name, cname, videoCompression, onProgress = function () {}) {
+  process (name, cname, finalName, videoCompression, onProgress = function () {}) {
     let total = null
 
     return new Promise((resolve, reject) => {
@@ -265,12 +265,12 @@ module.exports = {
         // we are done progressing
         onProgress(1)
 
-        // rename and obliterate the original
-        return fs.moveAsync(cname, name, {
-          overwrite: true,
-        })
-        .then(() => {
-          return resolve()
+        // obliterate the original
+        return fs.unlinkAsync(name).then(() => {
+          // rename compressed file to final video name
+          return fs.moveAsync(cname, finalName).then(() => {
+            return resolve()
+          })
         })
       }).save(cname)
     })

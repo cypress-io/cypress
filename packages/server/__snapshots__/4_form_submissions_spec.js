@@ -198,7 +198,7 @@ exports['e2e forms / submissions with jquery XHR POST / failing'] = `
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/form_submission_failing_spec.co     (X second)
-                          ffee.mp4                                                                  
+                          ffee (failed).mp4                                                         
 
 
 ====================================================================================================

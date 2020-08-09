@@ -73,7 +73,7 @@ https://on.cypress.io/cannot-visit-different-origin-domain
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/beforehook-and-test-navigation.     (X second)
-                          js.mp4                                                                    
+                          js (failed).mp4                                                           
 
 
 ====================================================================================================

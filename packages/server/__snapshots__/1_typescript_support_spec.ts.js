@@ -119,7 +119,7 @@ Fix the error in your code and re-run your tests.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_typescript_failing_s     (X second)
-                          pec.ts.mp4                                                                
+                          pec.ts (failed).mp4                                                       
 
 
 ====================================================================================================

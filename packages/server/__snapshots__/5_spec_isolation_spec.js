@@ -219,7 +219,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee (failed).mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",
@@ -344,7 +344,7 @@ exports['e2e spec isolation fails'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee (failed).mp4",
       "screenshots": [
         {
           "screenshotId": "some-random-id",

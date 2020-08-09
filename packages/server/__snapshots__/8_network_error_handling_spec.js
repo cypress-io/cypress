@@ -454,8 +454,8 @@ https://on.cypress.io/request
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling_spec.js.     (X second)
-                          mp4                                                                       
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/network_error_handling_spec.js      (X second)
+                          (failed).mp4                                                              
 
 
 ====================================================================================================

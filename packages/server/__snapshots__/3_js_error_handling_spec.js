@@ -143,7 +143,7 @@ https://on.cypress.io/cross-origin-script-error
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/js_error_handling_failing_spec.     (X second)
-                          coffee.mp4                                                                
+                          coffee (failed).mp4                                                       
 
 
 ====================================================================================================

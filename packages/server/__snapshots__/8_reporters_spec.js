@@ -297,7 +297,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.coffee     (X second)
-                          .mp4                                                                      
+                           (failed).mp4                                                             
 
 
 ====================================================================================================
@@ -477,7 +477,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.coffee     (X second)
-                          .mp4                                                                      
+                           (failed).mp4                                                             
 
 
 ====================================================================================================
@@ -657,7 +657,7 @@ Because this error occurred during a \`after all\` hook we are skipping the rema
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.coffee     (X second)
-                          .mp4                                                                      
+                           (failed).mp4                                                             
 
 
 ====================================================================================================

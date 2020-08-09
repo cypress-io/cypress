@@ -121,7 +121,7 @@ We dynamically generated a new test to display this failure.
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/assertions_failing_outside_of_t     (X second)
-                          est_spec.coffee.mp4                                                       
+                          est_spec.coffee (failed).mp4                                              
 
 
 ====================================================================================================
@@ -211,7 +211,7 @@ https://on.cypress.io/cannot-execute-commands-outside-test
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/commands_outside_of_test_spec.c     (X second)
-                          offee.mp4                                                                 
+                          offee (failed).mp4                                                        
 
 
 ====================================================================================================

@@ -60,7 +60,7 @@ We dynamically generated a new test to display this failure.
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.coffee.mp4                     (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/spec.coffee (failed).mp4            (X second)
 
 
 ====================================================================================================

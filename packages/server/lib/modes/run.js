@@ -813,7 +813,7 @@ module.exports = {
     console.log('')
   },
 
-  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet) {
+  async postProcessRecording (name, cname, finalName, videoCompression, shouldUploadVideo, quiet) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -825,7 +825,7 @@ module.exports = {
     }
 
     function continueProcessing (onProgress = undefined) {
-      return videoCapture.process(name, cname, videoCompression, onProgress)
+      return videoCapture.process(name, cname, finalName, videoCompression, onProgress)
     }
 
     if (quiet) {
@@ -886,7 +886,7 @@ module.exports = {
         table.push([
           gray('-'),
           gray('Finished processing:'),
-          `${formatPath(name, getWidth(table, 2), 'cyan')}`,
+          `${formatPath(finalName, getWidth(table, 2), 'cyan')}`,
           gray(dur),
         ])
 
@@ -1141,9 +1141,22 @@ module.exports = {
       await openProject.closeBrowser()
 
       if (endVideoCapture && !videoCaptureFailed) {
+        // rename video to include "(failed)" if we have any failures
+        const createFinalVideoName = () => {
+          if (!hasFailingTests) return videoName
+
+          const { dir, name, ext } = path.parse(videoName)
+
+          return path.format({ dir, name: `${name} (failed)`, ext })
+        }
+        const videoFinalName = createFinalVideoName()
+
+        obj.video = videoFinalName
+
         await this.postProcessRecording(
           videoName,
           compressedVideoName,
+          videoFinalName,
           videoCompression,
           suv,
           quiet,
