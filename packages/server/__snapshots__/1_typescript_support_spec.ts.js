@@ -95,20 +95,7 @@ You may need an additional loader to handle the result of these loaders.
 | // The code below is ignored by eslint
 | // because it tests failing spec.
 > describe('fail', - > );
-| 
- @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
-
-/foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
-./cypress/integration/typescript_failing_spec.ts
-[tsl] ERROR in /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts(3,19)
-      TS1109: Expression expected.
- @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
-
-/foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
-./cypress/integration/typescript_failing_spec.ts
-[tsl] ERROR in /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts(3,21)
-      TS1109: Expression expected.
- @ multi ./cypress/integration/typescript_failing_spec.ts main[0]
+|
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

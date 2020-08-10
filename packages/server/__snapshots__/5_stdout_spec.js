@@ -148,9 +148,7 @@ SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failin
 
 > 1 | +>
     |  ^
-  2 | 
-
- @ multi ./cypress/integration/stdout_exit_early_failing_spec.js main[0]
+  2 |
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
