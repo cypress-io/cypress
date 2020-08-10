@@ -248,7 +248,7 @@ commands:
       start-script:
         description: Custom npm start script for repo
         type: string
-        default: "start"
+        default: ""
     steps:
       - attach_workspace:
           at: ~/
@@ -283,10 +283,20 @@ commands:
           name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run build --if-present
-      - run:
-          working_directory: /tmp/<<parameters.repo>>
-          command: npm <<parameters.start-script>> --if-present
-          background: true
+      - when:
+          condition: << parameters.start-script >>
+          steps:
+            - run:
+                working_directory: /tmp/<<parameters.repo>>
+                command: npm <<parameters.start-script>> --if-present
+                background: true
+      - unless:
+          condition: << parameters.start-script >>
+          steps:
+            - run:
+                working_directory: /tmp/<<parameters.repo>>
+                command: npm start --if-present
+                background: true
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
