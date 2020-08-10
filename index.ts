@@ -41,6 +41,49 @@ const getDefaultWebpackOptions = (): webpack.Configuration => {
   }
 }
 
+const replaceErrMessage = (err: Error, partToReplace: string, replaceWith = '') => {
+  err.message = _.trim(err.message.replace(partToReplace, replaceWith))
+
+  if (err.stack) {
+    err.stack = _.trim(err.stack.replace(partToReplace, replaceWith))
+  }
+
+  return err
+}
+
+const cleanModuleNotFoundError = (err: Error) => {
+  const message = err.message
+
+  if (!message.includes('Module not found')) return err
+
+  const startIndex = message.lastIndexOf('resolve ')
+  const endIndex = message.lastIndexOf(`doesn't exist`) + `doesn't exist`.length
+  const partToReplace = message.substring(startIndex, endIndex)
+  const newMessagePart = `Looked for and couldn't find the file at the following paths:`
+
+  return replaceErrMessage(err, partToReplace, newMessagePart)
+}
+
+const cleanMultiNonsense = (err: Error) => {
+  const message = err.message
+  const startIndex = message.indexOf('@ multi')
+
+  if (startIndex < 0) return err
+
+  const partToReplace = message.substring(startIndex)
+
+  return replaceErrMessage(err, partToReplace)
+}
+
+const quietErrorMessage = (err: Error) => {
+  if (!err || !err.message) return err
+
+  err = cleanModuleNotFoundError(err)
+  err = cleanMultiNonsense(err)
+
+  return err
+}
+
 /**
  * Configuration object for this Webpack preprocessor
  */
@@ -189,8 +232,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     bundles[filePath] = latestBundle.promise
 
     const rejectWithErr = (err: Error) => {
+      err = quietErrorMessage(err)
+
       // @ts-ignore
       err.filePath = filePath
+
       debug(`errored bundling ${outputPath}`, err.message)
 
       latestBundle.reject(err)

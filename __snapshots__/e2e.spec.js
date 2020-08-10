@@ -33,7 +33,6 @@ SyntaxError: /[cwd]/cypress/tests/e2e/compile-error.js: Unexpected token, expect
      |                            ^
   15 | })
   16 | 
- @ multi ./cypress/tests/e2e/compile-error.js main[0]
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
