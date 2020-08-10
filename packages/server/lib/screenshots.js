@@ -309,6 +309,8 @@ const ensureSafePath = function (withoutExt, extension, num = 0) {
 
   const fullPath = [withoutExt, suffix].join('')
 
+  debug('ensureSafePath %o', { withoutExt, extension, num, maxSafeBytes, maxSafePrefixBytes })
+
   return fs.pathExists(fullPath)
   .then((found) => {
     if (found) {
@@ -319,6 +321,8 @@ const ensureSafePath = function (withoutExt, extension, num = 0) {
     return fs.outputFileAsync(fullPath, '')
     .then(() => fullPath)
     .catch((err) => {
+      debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
+
       if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
         maxSafeBytes -= 1
 
