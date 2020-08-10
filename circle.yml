@@ -1789,7 +1789,15 @@ linux-workflow: &linux-workflow
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-cypress-realworld-app:
-        <<: *testBinaryFirefox
+        filters:
+          branches:
+            only:
+              - develop
+              - kevin-v5.0-release-rwa
+              - v5.0-release
+        requires:
+          - build-npm-package
+          - build-binary
 
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
