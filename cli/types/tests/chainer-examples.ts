@@ -97,7 +97,7 @@ cy.wrap({ x: {a: 1 }}).should('have.deep.property', 'x', { a: 1 })
 cy.wrap([1, 2, 3]).should('have.length', 3)
 cy.wrap('foo').should('have.length', 3)
 
-cy.wrap([1, 2, 3]).should('have.length.greaterThan')
+cy.wrap([1, 2, 3]).should('have.length.greaterThan', 2)
 cy.wrap('foo').should('have.length.greaterThan', 2)
 
 cy.wrap([1, 2, 3]).should('have.length.gt', 2)
@@ -128,19 +128,19 @@ cy.wrap('foobar').should('have.string', 'bar')
 
 cy.wrap('foobar').should('include', 'foo')
 
-cy.wrap('foo').should('contain.value')
-cy.wrap('foo').should('contain.text')
-cy.wrap('foo').should('contain.html')
-cy.wrap('foo').should('not.contain.value')
-cy.wrap('foo').should('not.contain.text')
-cy.wrap('foo').should('not.contain.html')
+cy.wrap('foo').should('contain.value', 'foo')
+cy.wrap('foo').should('contain.text', 'foo')
+cy.wrap('foo').should('contain.html', 'foo')
+cy.wrap('foo').should('not.contain.value', 'foo')
+cy.wrap('foo').should('not.contain.text', 'foo')
+cy.wrap('foo').should('not.contain.html', 'foo')
 
-cy.wrap('foo').should('include.value')
-cy.wrap('foo').should('include.text')
-cy.wrap('foo').should('include.html')
-cy.wrap('foo').should('not.include.value')
-cy.wrap('foo').should('not.include.text')
-cy.wrap('foo').should('not.incldue.html')
+cy.wrap('foo').should('include.value', 'foo')
+cy.wrap('foo').should('include.text', 'foo')
+cy.wrap('foo').should('include.html', 'foo')
+cy.wrap('foo').should('not.include.value', 'foo')
+cy.wrap('foo').should('not.include.text', 'foo')
+cy.wrap('foo').should('not.include.html', 'foo')
 
 // Ensure we've extended chai.Includes correctly
 expect('foo').to.include.value('foo')
@@ -157,6 +157,9 @@ cy.wrap([1, 2, 3]).should('include.members', [1, 2])
   function addTwo() { val += 2 }
   function getVal() { return val }
   cy.wrap(addTwo).should('increase', getVal)
+
+  const myObj = { val: 1 }
+  cy.wrap(addTwo).should('increase', myObj, 'val')
 }
 
 cy.wrap('foobar').should('match', /^foo/)
@@ -226,6 +229,12 @@ cy.wrap(true).should('not.be.undefined')
 
 cy.wrap(3).should('not.be.within', 5, 10)
 
+cy.wrap(null).should('be.null')
+cy.wrap(123).should('not.be.null')
+
+cy.wrap(NaN).should('be.NaN')
+cy.wrap('cypress').should('not.be.NaN')
+
 ;
 () => {
   let dots = ''
@@ -256,7 +265,7 @@ cy.wrap('tester').should('not.contain', 'foo')
   cy.wrap(() => {}).should('not.decrease', myObj, 'val')
 }
 
-cy.wrap({ a: 1 }).should('not.deep.equal', { b: 1 })
+cy.wrap<{a?: number, b?: number }>({ a: 1 }).should('not.deep.equal', { b: 1 })
 
 cy.wrap(null).should('not.exist')
 
@@ -287,12 +296,12 @@ cy.wrap('foo').should('have.length.lessThan', 2)
 cy.wrap([1, 2, 3]).should('not.have.length.lt', 2)
 cy.wrap('foo').should('not.have.length.lt', 2)
 
-cy.wrap([1, 2, 3]).should('not.have.length.let', 2)
+cy.wrap([1, 2, 3]).should('not.have.length.lte', 2)
 cy.wrap('foo').should('not.have.length.lte', 2)
 
 cy.wrap([1, 2, 3]).should('not.have.members', [4, 5, 6])
 
-cy.wrap([1, 2, 3]).should('not. have.ordered.members', [4, 5, 6])
+cy.wrap([1, 2, 3]).should('not.have.ordered.members', [4, 5, 6])
 
 ;
 (Object as any).prototype.b = 2
@@ -361,7 +370,7 @@ cy.get('#result').should('not.be.focused')
 cy.get('#result').should('have.focus')
 cy.get('#result').should('not.have.focus')
 
-cy.get('#result').should('be.contain', 'text')
+cy.get('#result').should('contain', 'text')
 
 cy.get('#result').should('have.attr', 'role')
 cy.get('#result').should('have.attr', 'role', 'menu')
@@ -458,6 +467,9 @@ cy.writeFile('../file.path', '', {
 })
 
 cy.get('foo').click()
+cy.get('foo').click({
+  ctrlKey: true,
+})
 cy.get('foo').rightclick()
 cy.get('foo').dblclick()
 

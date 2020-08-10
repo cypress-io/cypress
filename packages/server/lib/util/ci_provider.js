@@ -30,6 +30,12 @@ const isAzureCi = () => {
   return process.env.TF_BUILD && process.env.AZURE_HTTP_USER_AGENT
 }
 
+const isAWSCodeBuild = () => {
+  return _.some(process.env, (val, key) => {
+    return /^CODEBUILD_/.test(key)
+  })
+}
+
 const isBamboo = () => {
   return process.env.bamboo_buildNumber
 }
@@ -82,6 +88,7 @@ const isWercker = () => {
 const CI_PROVIDERS = {
   'appveyor': 'APPVEYOR',
   'azure': isAzureCi,
+  'awsCodeBuild': isAWSCodeBuild,
   'bamboo': isBamboo,
   'bitbucket': 'BITBUCKET_BUILD_NUMBER',
   'buildkite': 'BUILDKITE',
@@ -138,6 +145,13 @@ const _providerCiParams = () => {
       'BUILD_BUILDNUMBER',
       'BUILD_CONTAINERID',
       'BUILD_REPOSITORY_URI',
+    ]),
+    awsCodeBuild: extract([
+      'CODEBUILD_BUILD_ID',
+      'CODEBUILD_BUILD_NUMBER',
+      'CODEBUILD_RESOLVED_SOURCE_VERSION',
+      'CODEBUILD_SOURCE_REPO_URL',
+      'CODEBUILD_SOURCE_VERSION',
     ]),
     bamboo: extract([
       'bamboo_buildNumber',
@@ -373,6 +387,15 @@ const _providerCommitParams = () => {
       authorName: env.APPVEYOR_REPO_COMMIT_AUTHOR,
       authorEmail: env.APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL,
       // remoteOrigin: ???
+      // defaultBranch: ???
+    },
+    awsCodeBuild: {
+      sha: env.CODEBUILD_RESOLVED_SOURCE_VERSION,
+      // branch: ???,
+      // message: ???
+      // authorName: ???
+      // authorEmail: ???
+      remoteOrigin: env.CODEBUILD_SOURCE_REPO_URL,
       // defaultBranch: ???
     },
     azure: {

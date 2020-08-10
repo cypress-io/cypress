@@ -132,12 +132,18 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'launch:browser':
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
+      debug('full list of options %o', arg)
+
       // the "arg" should have objects for
       //   - browser
       //   - spec (with fields)
       //       name, absolute, relative
       //   - specType: "integration" | "component"
-      const fullSpec = _.merge({}, arg.spec, { specType: arg.specType })
+      //   - specFilter (optional): the string user searched for
+      const fullSpec = _.merge({}, arg.spec, {
+        specType: arg.specType,
+        specFilter: arg.specFilter,
+      })
 
       return openProject.launch(arg.browser, fullSpec, {
         projectRoot: options.projectRoot,

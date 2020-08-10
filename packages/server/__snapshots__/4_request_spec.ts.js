@@ -356,7 +356,7 @@ The response we got was:
 Status: 404 - Not Found
 Headers: {
   "x-powered-by": "Express",
-  "content-security-policy": "default-src 'self'",
+  "content-security-policy": "default-src 'none'",
   "x-content-type-options": "nosniff",
   "content-type": "text/html; charset=utf-8",
   "content-length": "301",
