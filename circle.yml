@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - v5.0-release
+        - install-node-on-circleci-mac
 
 defaults: &defaults
   parallelism: 1
