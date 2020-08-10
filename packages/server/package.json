@@ -170,7 +170,7 @@
     "mochawesome-1.5.2": "npm:mochawesome@1.5.2",
     "mochawesome-2.3.1": "npm:mochawesome@2.3.1",
     "mochawesome-3.0.1": "npm:mochawesome@3.0.1",
-    "mock-fs": "4.10.4",
+    "mock-fs": "4.12.0",
     "mocked-env": "1.2.4",
     "mockery": "2.1.0",
     "multiparty": "4.2.1",

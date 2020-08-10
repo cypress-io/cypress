@@ -20,14 +20,20 @@ describe('redirects + requests', () => {
       expect(cookies[0].secure).to.eq(false)
       expect(cookies[0].expiry).to.be.closeTo(oneMinuteFromNow, 5)
 
-      expect(cookies[1]).to.deep.eq({
+      const expectedCookie = {
         domain: 'localhost',
         name: '2293-session',
         value: 'true',
         httpOnly: false,
         path: '/',
         secure: false,
-      })
+      }
+
+      if (Cypress.isBrowser('firefox')) {
+        expectedCookie.sameSite = 'no_restriction'
+      }
+
+      expect(cookies[1]).to.deep.eq(expectedCookie)
     })
   })
 

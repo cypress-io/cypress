@@ -663,27 +663,27 @@ describe('lib/config', () => {
         })
       })
 
-      context('blacklistHosts', () => {
+      context('blockHosts', () => {
         it('passes if a string', function () {
-          this.setup({ blacklistHosts: 'google.com' })
+          this.setup({ blockHosts: 'google.com' })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an array of strings', function () {
-          this.setup({ blacklistHosts: ['google.com'] })
+          this.setup({ blockHosts: ['google.com'] })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not a string or array', function () {
-          this.setup({ blacklistHosts: 5 })
+          this.setup({ blockHosts: 5 })
 
           return this.expectValidationFails('be a string or an array of strings')
         })
 
         it('fails if not an array of strings', function () {
-          this.setup({ blacklistHosts: [5] })
+          this.setup({ blockHosts: [5] })
           this.expectValidationFails('be a string or an array of strings')
 
           return this.expectValidationFails('the value was: `[5]`')
@@ -731,8 +731,8 @@ describe('lib/config', () => {
       }
     })
 
-    it('includes blacklistHosts', function () {
-      return this.includes('blacklistHosts')
+    it('includes blockHosts', function () {
+      return this.includes('blockHosts')
     })
   })
 
@@ -971,19 +971,19 @@ describe('lib/config', () => {
       return this.defaults('supportFile', false, { supportFile: false })
     })
 
-    it('blacklistHosts=null', function () {
-      return this.defaults('blacklistHosts', null)
+    it('blockHosts=null', function () {
+      return this.defaults('blockHosts', null)
     })
 
-    it('blacklistHosts=[a,b]', function () {
-      return this.defaults('blacklistHosts', ['a', 'b'], {
-        blacklistHosts: ['a', 'b'],
+    it('blockHosts=[a,b]', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
       })
     })
 
-    it('blacklistHosts=a|b', function () {
-      return this.defaults('blacklistHosts', ['a', 'b'], {
-        blacklistHosts: ['a', 'b'],
+    it('blockHosts=a|b', function () {
+      return this.defaults('blockHosts', ['a', 'b'], {
+        blockHosts: ['a', 'b'],
       })
     })
 
@@ -1093,6 +1093,17 @@ describe('lib/config', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/6892
+    it('warns if experimentalGetCookiesSameSite is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalGetCookiesSameSite', true, {
+        experimentalGetCookiesSameSite: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1111,7 +1122,7 @@ describe('lib/config', () => {
             projectId: { value: null, from: 'default' },
             port: { value: 1234, from: 'cli' },
             hosts: { value: null, from: 'default' },
-            blacklistHosts: { value: null, from: 'default' },
+            blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             userAgent: { value: null, from: 'default' },
             reporter: { value: 'json', from: 'cli' },
@@ -1122,7 +1133,6 @@ describe('lib/config', () => {
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalGetCookiesSameSite: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },
@@ -1189,7 +1199,7 @@ describe('lib/config', () => {
             projectId: { value: 'projectId123', from: 'env' },
             port: { value: 2020, from: 'config' },
             hosts: { value: null, from: 'default' },
-            blacklistHosts: { value: null, from: 'default' },
+            blockHosts: { value: null, from: 'default' },
             browsers: { value: [], from: 'default' },
             userAgent: { value: null, from: 'default' },
             reporter: { value: 'spec', from: 'default' },
@@ -1200,7 +1210,6 @@ describe('lib/config', () => {
             requestTimeout: { value: 5000, from: 'default' },
             responseTimeout: { value: 30000, from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
-            experimentalGetCookiesSameSite: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             taskTimeout: { value: 60000, from: 'default' },
             numTestsKeptInMemory: { value: 50, from: 'default' },

@@ -57,7 +57,7 @@ folders.push('componentFolder')
 const configKeys = toWords(`\
 animationDistanceThreshold      fileServerFolder
 baseUrl                         fixturesFolder
-blacklistHosts
+blockHosts
 chromeWebSecurity
 modifyObstructiveCode           integrationFolder
 env                             pluginsFile
@@ -84,17 +84,19 @@ firefoxGcInterval\
 `)
 
 // NOTE: If you add a config value, make sure to update the following
-// - cli/types/index.d.ts (including whitelisted config options on TestOptions)
+// - cli/types/index.d.ts (including allowed config options on TestOptions)
 // - cypress.schema.json
 
 // experimentalComponentTesting
 configKeys.push('componentFolder')
 
-// Deprecated and retired public configuration properties
+// Breaking public configuration properties, will error
 const breakingConfigKeys = toWords(`\
+blacklistHosts
 videoRecording
 screenshotOnHeadlessFailure
-trashAssetsBeforeHeadlessRuns\
+trashAssetsBeforeHeadlessRuns
+experimentalGetCookiesSameSite\
 `)
 
 // Internal configuration properties the user should be able to overwrite
@@ -106,7 +108,6 @@ browsers\
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
 const experimentalConfigKeys = toWords(`\
-experimentalGetCookiesSameSite
 experimentalSourceRewriting
 experimentalComponentTesting
 experimentalShadowDomSupport
@@ -126,7 +127,7 @@ const CONFIG_DEFAULTS = {
   isTextTerminal: false,
   reporter: 'spec',
   reporterOptions: null,
-  blacklistHosts: null,
+  blockHosts: null,
   clientRoute: '/__/',
   xhrRoute: '/xhrs/',
   socketIoRoute: '/__socket.io',
@@ -176,7 +177,6 @@ const CONFIG_DEFAULTS = {
   componentFolder: 'cypress/component',
   // TODO: example for component testing with subkeys
   // experimentalComponentTesting: { componentFolder: 'cypress/component' }
-  experimentalGetCookiesSameSite: false,
   experimentalSourceRewriting: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
@@ -185,7 +185,7 @@ const CONFIG_DEFAULTS = {
 const validationRules = {
   animationDistanceThreshold: v.isNumber,
   baseUrl: v.isFullyQualifiedUrl,
-  blacklistHosts: v.isStringOrArrayOfStrings,
+  blockHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
   configFile: v.isStringOrFalse,
@@ -225,7 +225,6 @@ const validationRules = {
   // validation for component testing experiment
   componentFolder: v.isStringOrFalse,
   // experimental flag validation below
-  experimentalGetCookiesSameSite: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,
@@ -254,7 +253,12 @@ const validateNoBreakingConfig = (cfg) => {
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
         case 'videoRecording':
           return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
+        case 'blacklistHosts':
+          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blockHosts')
+        case 'experimentalGetCookiesSameSite':
+          return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
         default:
+          throw new Error(`unknown breaking config key ${key}`)
       }
     }
   })
@@ -374,7 +378,7 @@ module.exports = {
     return _.includes(names, value)
   },
 
-  whitelist (obj = {}) {
+  allowed (obj = {}) {
     const propertyNames = configKeys
     .concat(breakingConfigKeys)
     .concat(systemConfigKeys)
@@ -429,7 +433,7 @@ module.exports = {
     debug('merged config with options, got %o', config)
 
     _
-    .chain(this.whitelist(options))
+    .chain(this.allowed(options))
     .omit('env')
     .omit('browsers')
     .each((val, key) => {

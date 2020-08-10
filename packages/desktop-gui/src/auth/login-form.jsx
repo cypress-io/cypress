@@ -25,7 +25,7 @@ class LoginForm extends Component {
       <div className='login-content'>
         {this._error()}
         <button
-          className={cs('btn btn-login btn-black btn-block', {
+          className={cs('btn btn-login btn-primary btn-wide', {
             disabled: this.state.isLoggingIn,
           })}
           onClick={this._login}

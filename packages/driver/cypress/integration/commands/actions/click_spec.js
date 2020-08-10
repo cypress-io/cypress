@@ -882,6 +882,105 @@ describe('src/cy/commands/actions/click', () => {
       })
     })
 
+    describe('modifier options', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/issue-486.html')
+      })
+
+      it('ctrl', () => {
+        cy.get('#button').click({
+          ctrlKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
+
+        // ctrl should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Ctrl}')
+
+        cy.get('#button').click({
+          controlKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
+      })
+
+      it('alt', () => {
+        cy.get('#button').click({
+          altKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Alt}')
+
+        // alt should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Alt}')
+
+        cy.get('#button').click({
+          optionKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Alt}')
+      })
+
+      it('shift', () => {
+        cy.get('#button').click({
+          shiftKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Shift}')
+
+        // shift should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Shift}')
+      })
+
+      it('meta', () => {
+        cy.get('#button').click({
+          metaKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
+
+        // shift should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Meta}')
+
+        cy.get('#button').click({
+          commandKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
+
+        cy.get('#button').click({
+          cmdKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Meta}')
+      })
+
+      it('multiple', () => {
+        cy.get('#button').click({
+          ctrlKey: true,
+          altKey: true,
+          shiftKey: true,
+          metaKey: true,
+        })
+
+        cy.get('#result').should('contain', '{Ctrl}')
+        cy.get('#result').should('contain', '{Alt}')
+        cy.get('#result').should('contain', '{Shift}')
+        cy.get('#result').should('contain', '{Meta}')
+
+        // modifiers should be released
+        cy.get('#button').click()
+        cy.get('#result').should('not.contain', '{Ctrl}')
+        cy.get('#result').should('not.contain', '{Alt}')
+        cy.get('#result').should('not.contain', '{Shift}')
+        cy.get('#result').should('not.contain', '{Meta}')
+      })
+    })
+
     describe('pointer-events:none', () => {
       beforeEach(function () {
         cy.$$('<div id="ptr" style="position:absolute;width:200px;height:200px;background-color:#08c18d;">behind #ptrNone</div>').appendTo(cy.$$('#dom'))
