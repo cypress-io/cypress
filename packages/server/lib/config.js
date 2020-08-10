@@ -76,6 +76,7 @@ viewportHeight                  responseTimeout
 video                           taskTimeout
 videoCompression
 videoUploadOnPasses
+screenshotOnRunFailure
 watchForFileChanges
 waitForAnimations               resolvedNodeVersion
 nodeVersion                     resolvedNodePath
@@ -143,6 +144,7 @@ const CONFIG_DEFAULTS = {
   video: true,
   videoCompression: 32,
   videoUploadOnPasses: true,
+  screenshotOnRunFailure: true,
   modifyObstructiveCode: true,
   chromeWebSecurity: true,
   waitForAnimations: true,
@@ -212,6 +214,7 @@ const validationRules = {
   videoCompression: v.isNumberOrFalse,
   videosFolder: v.isString,
   videoUploadOnPasses: v.isBoolean,
+  screenshotOnRunFailure: v.isBoolean,
   viewportHeight: v.isNumber,
   viewportWidth: v.isNumber,
   waitForAnimations: v.isBoolean,

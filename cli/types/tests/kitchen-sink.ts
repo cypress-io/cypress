@@ -62,6 +62,7 @@ expect(stub).to.not.have.been.called
 stub()
 expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
+cy.wrap(stub).should('be.calledOnce')
 
 namespace EventInterfaceTests {
   // window:confirm stubbing

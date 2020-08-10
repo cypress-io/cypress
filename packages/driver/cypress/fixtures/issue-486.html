@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Issue 486</title>
+  </head>
+  <body>
+    <button id="button">modifier test</button>
+    <div id="result">Result</div>
+    <script type="text/javascript">
+      document.getElementById('button').addEventListener('click', (e) => {
+        const result = document.getElementById('result')
+
+        result.innerText = ''
+
+        if (e.ctrlKey) {
+          result.innerText += '{Ctrl}'
+        }
+
+        if (e.altKey) {
+          result.innerText += '{Alt}'
+        }
+
+        if (e.shiftKey) {
+          result.innerText += '{Shift}'
+        }
+
+        if (e.metaKey) {
+          result.innerText += '{Meta}'
+        }
+      })
+    </script>
+  </body>
+</html>
