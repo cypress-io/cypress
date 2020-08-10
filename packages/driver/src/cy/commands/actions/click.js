@@ -34,7 +34,7 @@ const formatMouseEvents = (events) => {
 }
 
 module.exports = (Commands, Cypress, cy, state, config) => {
-  const { mouse } = cy.devices
+  const { mouse, keyboard } = cy.devices
 
   const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
     let position
@@ -54,6 +54,14 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ctrlKey: false,
+      controlKey: false,
+      altKey: false,
+      optionKey: false,
+      shiftKey: false,
+      metaKey: false,
+      commandKey: false,
+      cmdKey: false,
       ...defaultOptions,
     })
 
@@ -63,6 +71,24 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       $errUtils.throwErrByPath('click.multiple_elements', {
         args: { cmd: eventName, num: options.$el.length },
       })
+    }
+
+    const flagModifiers = (press) => {
+      if (options.ctrlKey || options.controlKey) {
+        keyboard.flagModifier({ key: 'Control' }, press)
+      }
+
+      if (options.altKey || options.optionKey) {
+        keyboard.flagModifier({ key: 'Alt' }, press)
+      }
+
+      if (options.shiftKey) {
+        keyboard.flagModifier({ key: 'Shift' }, press)
+      }
+
+      if (options.metaKey || options.commandKey || options.cmdKey) {
+        keyboard.flagModifier({ key: 'Meta' }, press)
+      }
     }
 
     const perform = (el) => {
@@ -143,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       // must use callbacks here instead of .then()
-      // because we're issuing the clicks synchonrously
+      // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability.verify(cy, $el, options, {
@@ -158,7 +184,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
 
+          flagModifiers(true)
+
           const onReadyProps = onReady(fromElViewport, forceEl)
+
+          flagModifiers(false)
 
           return createLog({
             moveEvents,

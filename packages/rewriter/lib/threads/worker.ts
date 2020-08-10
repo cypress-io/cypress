@@ -16,7 +16,7 @@ parentPort!.postMessage(true)
 
 let _idCounter = 0
 
-parentPort!.on('message', (req: RewriteRequest) => {
+parentPort!.on('message', async (req: RewriteRequest) => {
   if (req.shutdown) {
     return process.exit()
   }
@@ -58,7 +58,7 @@ parentPort!.on('message', (req: RewriteRequest) => {
   }
 
   try {
-    const output = _getOutput()
+    const output = await _getOutput()
 
     _reply({ output, threadMs: _getThreadMs() })
   } catch (error) {

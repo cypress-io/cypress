@@ -200,7 +200,7 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onFixtureError (xhr, err) {
-      err = $errUtils.cypressErr(err)
+      err = $errUtils.cypressErr({ message: err })
 
       return this.onError(xhr, err)
     },
@@ -469,6 +469,15 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
             return route()
           })
+        }
+
+        // look ahead to see if fixture exists
+        const fixturesRe = /^(fx:|fixture:)/
+
+        if (hasResponse && fixturesRe.test(options.response)) {
+          const fixtureName = options.response.replace(fixturesRe, '')
+
+          return cy.now('fixture', fixtureName).then(() => route())
         }
 
         return route()

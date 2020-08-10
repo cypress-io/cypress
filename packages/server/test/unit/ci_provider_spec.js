@@ -114,6 +114,30 @@ describe('lib/util/ci_provider', () => {
     })
   })
 
+  it('awsCodeBuild', () => {
+    resetEnv = mockedEnv({
+      CODEBUILD_BUILD_ID: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      CODEBUILD_BUILD_NUMBER: '123',
+      CODEBUILD_RESOLVED_SOURCE_VERSION: 'commit',
+      CODEBUILD_SOURCE_REPO_URL: 'repositoryUrl',
+      CODEBUILD_SOURCE_VERSION: 'commitOrBranchOrTag',
+    }, { clear: true })
+
+    expectsName('awsCodeBuild')
+    expectsCiParams({
+      codebuildBuildId: 'codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE',
+      codebuildBuildNumber: '123',
+      codebuildResolvedSourceVersion: 'commit',
+      codebuildSourceRepoUrl: 'repositoryUrl',
+      codebuildSourceVersion: 'commitOrBranchOrTag',
+    })
+
+    return expectsCommitParams({
+      sha: 'commit',
+      remoteOrigin: 'repositoryUrl',
+    })
+  })
+
   it('bamboo', () => {
     resetEnv = mockedEnv({
       'bamboo_buildNumber': 'bambooBuildNumber',

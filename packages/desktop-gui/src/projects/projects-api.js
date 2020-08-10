@@ -63,7 +63,8 @@ const addProject = (path) => {
   .return(project)
 }
 
-const runSpec = (project, spec, browser) => {
+// TODO: refactor to take options object
+const runSpec = (project, spec, browser, specFilter) => {
   specsStore.setChosenSpec(spec)
   project.setChosenBrowser(browser)
 
@@ -75,6 +76,7 @@ const runSpec = (project, spec, browser) => {
       spec: spec.file,
       specType: spec.specType,
       relative: spec.relative,
+      specFilter,
     }
 
     ipc.launchBrowser(launchOptions, (err, data = {}) => {

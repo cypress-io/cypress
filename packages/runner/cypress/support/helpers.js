@@ -196,8 +196,14 @@ function createCypress (defaultOptions = {}) {
             })
           })
 
-          cy.spy(cy.state('window').console, 'log').as('console_log').log(false)
-          cy.spy(cy.state('window').console, 'error').as('console_error').log(false)
+          // TODO: clean this up, sinon doesn't like wrapping things multiple times
+          // and this catches that error
+          try {
+            cy.spy(cy.state('window').console, 'log').as('console_log').log(false)
+            cy.spy(cy.state('window').console, 'error').as('console_error').log(false)
+          } catch (_e) {
+            // console was already wrapped, noop
+          }
 
           autCypress.run((failed) => {
             resolve({ failed, mochaStubs, autCypress, win })
@@ -321,14 +327,16 @@ const createHooks = (win, hooks = []) => {
     if (fail) {
       const numFailures = fail
 
-      return win[type](() => {
+      return win[type](function () {
+        const message = `${type} - ${this._runnable.parent.title || 'root'}`
+
         if (agents) {
           registerAgents(win)
         }
 
         if (_.isNumber(fail) && fail-- <= 0) {
           debug(`hook pass after (${numFailures}) failures: ${type}`)
-          win.assert(true, type)
+          win.assert(true, message)
 
           return
         }
@@ -338,15 +346,15 @@ const createHooks = (win, hooks = []) => {
         } else {
           debug(`hook fail: ${type}`)
 
-          win.assert(false, type)
+          win.assert(false, message)
 
           throw new Error(`hook failed: ${type}`)
         }
       })
     }
 
-    return win[type](() => {
-      win.assert(true, type)
+    return win[type](function () {
+      win.assert(true, `${type} - ${this._runnable.parent.title || 'root'}`)
       debug(`hook pass: ${type}`)
     })
   })

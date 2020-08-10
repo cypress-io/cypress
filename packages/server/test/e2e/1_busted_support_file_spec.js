@@ -12,6 +12,7 @@ describe('e2e busted support file', () => {
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
+      onStdout: e2e.normalizeWebpackErrors,
     })
   })
 })

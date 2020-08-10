@@ -12,12 +12,39 @@
   }
 }
 
-.empty-no-runs {
-  margin-top: 70px;
+.empty-no-runs, .empty-log-in {
+  h4 {
+    margin-top: 40px;
+    font-size: 22px;
+    color: #000;
+  }
+
+  .empty-no-runs-details {
+    text-align: left;
+    margin: 15px auto 0; 
+    width: 440px;
+  }
+
+  ul {
+    color: #272B2F;
+    padding-left: 25px;
+    font-size: 13px;
+  }
+
+  h5 {
+    color: #272B2F;
+    font-size: 15px;
+  }
+
+  p {
+    font-size: 11px;
+    margin-top: 10px;
+    color: #272B2F;
+    font-weight: 200;
+  }
 }
 
-.empty-no-api-server,
-.empty-log-in {
+.empty-no-api-server {
   padding: 40px 100px 20px;
 }
 

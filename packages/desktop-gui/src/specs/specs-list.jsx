@@ -15,12 +15,56 @@ class SpecsList extends Component {
   constructor (props) {
     super(props)
     this.filterRef = React.createRef()
+    // when the specs are running and the user changes the search filter
+    // we still want to show the previous button label to reflect what
+    // is currently running
+    this.runAllSavedLabel = null
+
+    if (window.Cypress) {
+      // expose project object for testing
+      window.__project = this.props.project
+    }
   }
 
   render () {
     if (specsStore.isLoading) return <Loader color='#888' scale={0.5}/>
 
-    if (!specsStore.filter && !specsStore.specs.length) return this._empty()
+    const filteredSpecs = specsStore.getFilteredSpecs()
+
+    const hasSpecFilter = specsStore.filter
+    const numberOfShownSpecs = filteredSpecs.length
+    const hasNoSpecs = !hasSpecFilter && !numberOfShownSpecs
+
+    if (hasNoSpecs) {
+      return this._empty()
+    }
+
+    const areTestsRunning = this._areTestsRunning()
+    let runSpecsLabel = allSpecsSpec.displayName
+    let runButtonDisabled = false
+
+    if (areTestsRunning && this.runAllSavedLabel) {
+      runSpecsLabel = this.runAllSavedLabel
+    } else {
+      if (hasSpecFilter) {
+        if (numberOfShownSpecs < 1) {
+          runSpecsLabel = 'No specs'
+          runButtonDisabled = true
+        } else {
+          const specLabel = numberOfShownSpecs === 1 ? 'spec' : 'specs'
+
+          runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
+        }
+      }
+    }
+
+    const runTestsButton = (<button onClick={this._selectSpec.bind(this, allSpecsSpec)}
+      disabled={runButtonDisabled}
+      title="Run all integration specs together"
+      className={cs('btn-link all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
+      <i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}
+      {runSpecsLabel}
+    </button>)
 
     return (
       <div className='specs'>
@@ -47,12 +91,7 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-          <a onClick={this._selectSpec.bind(this, allSpecsSpec)}
-            title="Run all integration specs together"
-            className={cs('all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
-            <i className={`fa-fw ${this._allSpecsIcon(specsStore.isChosen(allSpecsSpec))}`} />{' '}
-            {allSpecsSpec.displayName}
-          </a>
+          {runTestsButton}
         </header>
         {this._specsList()}
       </div>
@@ -86,8 +125,17 @@ class SpecsList extends Component {
     return spec.hasChildren ? this._folderContent(spec, nestingLevel) : this._specContent(spec, nestingLevel)
   }
 
-  _allSpecsIcon (allSpecsChosen) {
-    return allSpecsChosen ? 'far fa-dot-circle green' : 'fas fa-play'
+  _allSpecsIcon () {
+    return this._areTestsRunning() ? 'far fa-dot-circle green' : 'fas fa-play'
+  }
+
+  _areTestsRunning () {
+    if (!this.props.project) {
+      return false
+    }
+
+    return this.props.project.browserState === 'opening'
+      || this.props.project.browserState === 'opened'
   }
 
   _specIcon (isChosen) {
@@ -117,7 +165,21 @@ class SpecsList extends Component {
 
     const { project } = this.props
 
-    return projectsApi.runSpec(project, spec, project.chosenBrowser)
+    if (spec.relative === '__all') {
+      if (specsStore.filter) {
+        const filteredSpecs = specsStore.getFilteredSpecs()
+        const numberOfShownSpecs = filteredSpecs.length
+
+        this.runAllSavedLabel = numberOfShownSpecs === 1
+          ? 'Running 1 spec' : `Running ${numberOfShownSpecs} specs`
+      } else {
+        this.runAllSavedLabel = 'Running all specs'
+      }
+    } else {
+      this.runAllSavedLabel = 'Running 1 spec'
+    }
+
+    return projectsApi.runSpec(project, spec, project.chosenBrowser, specsStore.filter)
   }
 
   _setExpandRootFolder (specFolderPath, isExpanded, e) {
