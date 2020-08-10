@@ -24,33 +24,7 @@ The error was:
 Error: Webpack Compilation Error
 ./cypress/support/index.js
 Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
-resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
-  using description file: [..] (relative path: ./.projects/busted-support-file/cypress/support)
-    Field 'browser' doesn't contain a valid alias configuration
-    using description file: [..] (relative path: ./.projects/busted-support-file/cypress/support/does/not/exist)
-      no extension
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist doesn't exist
-      .js
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js doesn't exist
-      .json
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json doesn't exist
-      .jsx
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx doesn't exist
-      .coffee
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee doesn't exist
-      .ts
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts doesn't exist
-      .tsx
-        Field 'browser' doesn't contain a valid alias configuration
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx doesn't exist
-      as directory
-        /foo/bar/.projects/busted-support-file/cypress/support/does/not/exist doesn't exist
+Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
@@ -59,7 +33,6 @@ resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/su
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
  @ ./cypress/support/index.js 3:0-27
- @ multi ./cypress/support/index.js
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
