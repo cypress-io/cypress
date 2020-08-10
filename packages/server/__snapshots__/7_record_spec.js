@@ -2179,7 +2179,7 @@ exports['e2e record passing passes 2'] = [
           "fails 1"
         ],
         "state": "failed",
-        "body": "function () { }",
+        "body": "function() {}",
         "displayError": "Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]",
         "attempts": [
           {
@@ -2213,7 +2213,7 @@ exports['e2e record passing passes 2'] = [
           "is skipped"
         ],
         "state": "skipped",
-        "body": "function () { }",
+        "body": "function() {}",
         "displayError": null,
         "attempts": [
           {
@@ -2237,7 +2237,7 @@ exports['e2e record passing passes 2'] = [
         "title": [
           "\"before each\" hook"
         ],
-        "body": "function () {\n        throw new Error(\"foo\");\n    }"
+        "body": "function() {\n    throw new Error(\"foo\");\n  }"
       }
     ],
     "screenshots": [
@@ -2283,7 +2283,7 @@ exports['e2e record passing passes 2'] = [
           "passes"
         ],
         "state": "passed",
-        "body": "function () {\n        cy.visit(\"/scrollable.html\");\n        return cy.viewport(400, 400).get(\"#box\").screenshot('yay it passes');\n    }",
+        "body": "function() {\n    cy.visit(\"/scrollable.html\");\n    return cy.viewport(400, 400).get(\"#box\").screenshot('yay it passes');\n  }",
         "displayError": null,
         "attempts": [
           {
