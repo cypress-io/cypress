@@ -69,6 +69,11 @@ const isHidden = (el, name = 'isHidden()') => {
     return true
   }
 
+  // a transparent element is hidden
+  if (elHasOpacityZero($el)) {
+    return true
+  }
+
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
   if (elIsHiddenByAncestors($el)) {
@@ -146,6 +151,10 @@ const elHasVisibilityHidden = ($el) => {
 
 const elHasVisibilityCollapse = ($el) => {
   return $el.css('visibility') === 'collapse'
+}
+
+const elHasOpacityZero = ($el) => {
+  return $el.css('opacity') === '0'
 }
 
 const elHasDisplayNone = ($el) => {
@@ -414,6 +423,10 @@ const getReasonIsHidden = function ($el) {
 
   if (elHasVisibilityCollapse($el)) {
     return `This element \`${node}\` is not visible because it has CSS property: \`visibility: collapse\``
+  }
+
+  if (elHasOpacityZero($el)) {
+    return `This element \`${node}\` is not visible because it has CSS property: \`opacity: 0\``
   }
 
   if (elHasNoOffsetWidthOrHeight($el)) {
