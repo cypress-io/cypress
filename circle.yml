@@ -1459,6 +1459,7 @@ jobs:
           repo: cypress-realworld-app
           browser: chrome
           start-script: "start:ci"
+          command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
