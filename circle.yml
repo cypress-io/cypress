@@ -245,6 +245,10 @@ commands:
         description: Whether to use wait-on to wait on a server to be booted
         type: string
         default: ""
+      start-script:
+        description: Custom npm start script for repo
+        type: string
+        default: "start"
     steps:
       - attach_workspace:
           at: ~/
@@ -281,7 +285,7 @@ commands:
           command: npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: npm start --if-present
+          command: npm <<parameters.start-script>> --if-present
           background: true
       - run:
           condition: <<parameters.wait-on>>
@@ -1444,6 +1448,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-realworld-app
           browser: chrome
+          start-script: "start:ci"
           wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
