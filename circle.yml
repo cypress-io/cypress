@@ -60,8 +60,8 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      ## Node 12.12.0 (yarn 1.19.1)
-      xcode: "11.2.1"
+      # Executor should have Node >= required version
+      xcode: "11.3.1"
     environment:
       PLATFORM: mac
 
@@ -355,7 +355,10 @@ jobs:
       - run:
           name: print yarn version
           command: yarn -v
-      - run: yarn check-node-version
+      - run:
+          name: check Node version
+          command: |
+            yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
@@ -925,10 +928,19 @@ jobs:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "30m"
+          # Note 1:
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
-          command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+          # Note 2:
+          # We need to use Node version matching .node-version file
+          command: |
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install v12.14.1
+            nvm alias default v12.14.1
+            node --version
+            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
