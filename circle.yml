@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - investigate-spec-on-mac
+        - v5.0-release
 
 defaults: &defaults
   parallelism: 1
