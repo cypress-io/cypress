@@ -50,6 +50,10 @@ describe('src/cy/commands/fixtures', () => {
       cy.fixture('example').should('deep.eq', { example: true })
     })
 
+    it('works with null.json', () => {
+      cy.fixture('null.json').should('equal', null)
+    })
+
     it('can read a fixture without extension with multiple dots in the name', () => {
       cy.fixture('foo.bar.baz').should('deep.eq', { quux: 'quuz' })
     })

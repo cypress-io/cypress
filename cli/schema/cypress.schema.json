@@ -124,6 +124,11 @@
       "default": "cypress/plugins/index.js",
       "description": "Path to plugins file. (Pass false to disable)"
     },
+    "screenshotOnRunFailure": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will take a screenshot when a test fails during cypress run"
+    },
     "screenshotsFolder": {
       "type": "string",
       "default": "cypress/screenshots",
