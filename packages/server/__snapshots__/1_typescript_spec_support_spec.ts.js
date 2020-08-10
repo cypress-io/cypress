@@ -1,4 +1,4 @@
-exports['e2e typescript spec passes 1'] = `
+exports['e2e typescript in spec and support file spec passes 1'] = `
 
 ====================================================================================================
 
@@ -62,7 +62,7 @@ exports['e2e typescript spec passes 1'] = `
 
 `
 
-exports['e2e typescript spec fails 1'] = `
+exports['e2e typescript in spec and support file spec fails with syntax error 1'] = `
 
 ====================================================================================================
 
@@ -71,23 +71,23 @@ exports['e2e typescript spec fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (typescript_failing_spec.ts)                                               │
-  │ Searched:   cypress/integration/typescript_failing_spec.ts                                     │
+  │ Specs:      1 found (typescript_syntax_error_spec.ts)                                          │
+  │ Searched:   cypress/integration/typescript_syntax_error_spec.ts                                │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  typescript_failing_spec.ts                                                      (1 of 1)
+  Running:  typescript_syntax_error_spec.ts                                                 (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
+  /foo/bar/.projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
 
 The error was:
 
 Error: Webpack Compilation Error
-./cypress/integration/typescript_failing_spec.tsXX:XX
+./cypress/integration/typescript_syntax_error_spec.tsXX:XX
 Module parse failed: Unexpected token (4:19)
 File was processed with these loaders:
  * ../../../../node_modules/@cypress/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
@@ -115,14 +115,15 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     typescript_failing_spec.ts                                                       │
+  │ Spec Ran:     typescript_syntax_error_spec.ts                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_failing_spec.ts.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_syntax_error_spec.ts     (X second)
+                          .mp4                                                                      
 
 
 ====================================================================================================
@@ -132,14 +133,14 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  typescript_failing_spec.ts               XX:XX        -        -        1        -        - │
+  │ ✖  typescript_syntax_error_spec.ts          XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
 
 `
 
-exports['e2e typescript project passes 1'] = `
+exports['e2e typescript in spec and support file project passes 1'] = `
 
 ====================================================================================================
 
@@ -224,23 +225,6 @@ exports['e2e typescript project passes 1'] = `
   │ ✔  math.ts                                  XX:XX        -        -        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
-
-
-`
-
-exports['typescript with tsconfig run'] = `
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  app_spec.ts                              XX:XX        1        1        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  js-spec.js                               XX:XX        2        2        -        -        - │
-  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
-  │ ✔  math.ts                                  XX:XX        -        -        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
 
 
 `

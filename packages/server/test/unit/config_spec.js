@@ -1858,7 +1858,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
 
       const obj = {
         projectRoot,
@@ -1875,7 +1875,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
       const pluginsFolder = `${projectRoot}/cypress/plugins`
       const pluginsFilename = `${pluginsFolder}/index.ts`
 
