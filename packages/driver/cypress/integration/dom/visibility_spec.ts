@@ -654,7 +654,7 @@ describe('src/cypress/dom/visibility', () => {
         cy.wrap(this.$btnOpacityZero).should('not.be.visible')
       })
 
-      it('is visible if opacity is greater than 0 but less than one', function () {
+      it('is visible if opacity is greater than 0 but less than 1', function () {
         expect(this.$btnOpacityHalf.is(':visible')).to.be.true
         expect(this.$btnOpacityHalf.is(':hidden')).to.be.false
 
@@ -1063,7 +1063,7 @@ describe('src/cypress/dom/visibility', () => {
         this.reasonIs(this.$tableVisCollapse.find('tr.collapse td:first'), 'This element `<td>` is not visible because its parent `<tr.collapse>` has CSS property: `visibility: collapse`')
       })
 
-      it('has opacity 0', function () {
+      it('has `opacity: 0`', function () {
         this.reasonIs(this.$btnOpacityZero, 'This element `<button>` is not visible because it has CSS property: `opacity: 0`')
       })
 
