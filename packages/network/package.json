@@ -28,7 +28,7 @@
     "@packages/socket": "*",
     "@packages/ts": "*",
     "@types/concat-stream": "1.6.0",
-    "express": "4.16.4",
+    "express": "4.17.1",
     "mocha": "6.2.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",
