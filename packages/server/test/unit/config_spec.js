@@ -1163,6 +1163,7 @@ describe('lib/config', () => {
             componentFolder: { value: 'cypress/component', from: 'default' },
             experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
           })
         })
       })
@@ -1240,6 +1241,7 @@ describe('lib/config', () => {
             componentFolder: { value: 'cypress/component', from: 'default' },
             experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            retries: { value: { runMode: 0, openMode: 0 }, from: 'default' },
             env: {
               foo: {
                 value: 'foo',
@@ -1856,7 +1858,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
 
       const obj = {
         projectRoot,
@@ -1873,7 +1875,7 @@ describe('lib/config', () => {
     })
 
     it('sets the pluginsFile to index.ts if it exists (without ts require hook)', () => {
-      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj')
+      const projectRoot = path.join(process.cwd(), 'test/support/fixtures/projects/ts-proj-with-module-esnext')
       const pluginsFolder = `${projectRoot}/cypress/plugins`
       const pluginsFilename = `${pluginsFolder}/index.ts`
 

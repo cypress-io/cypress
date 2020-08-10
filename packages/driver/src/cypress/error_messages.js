@@ -884,6 +884,33 @@ module.exports = {
         {{error}}`,
       docsUrl: 'https://on.cypress.io/returning-promise-and-invoking-done-callback',
     },
+    manually_set_retries_test: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    it('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`  
+    
+    https://on.cypress.io/test-retries
+    `,
+    manually_set_retries_suite: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    describe('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`  
+    
+    https://on.cypress.io/test-retries
+    `,
+
   },
 
   navigation: {
@@ -1593,6 +1620,10 @@ module.exports = {
         msg += `the remaining tests in the current suite: \`${_.truncate(t, 20)}\``
       } else {
         msg += 'all of the remaining tests.'
+      }
+
+      if ((obj.hookName === 'after all' || obj.hookName === 'before all') && obj.retries > 0) {
+        msg += `\n\nAlthough you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail`
       }
 
       return msg

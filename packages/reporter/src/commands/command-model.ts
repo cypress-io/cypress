@@ -110,9 +110,6 @@ export default class Command extends Instrument {
 
     if (this._becameNonPending()) {
       clearTimeout(this._pendingTimeout as TimeoutID)
-      action('became:inactive', () => {
-        return this.isLongRunning = false
-      })()
     }
 
     this._prevState = this.state

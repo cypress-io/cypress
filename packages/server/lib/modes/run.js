@@ -916,7 +916,16 @@ module.exports = {
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
-          screenshots.push(this.screenshotMetadata(data, resp))
+          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
+
+          if (existingScreenshot !== -1) {
+            // NOTE: saving screenshots to the same path will overwrite the previous one
+            // so we shouldn't report more screenshots than exist on disk.
+            // this happens when cy.screenshot is used in a retried test
+            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
+          } else {
+            screenshots.push(this.screenshotMetadata(data, resp))
+          }
         }
 
         return resp
@@ -1112,12 +1121,14 @@ module.exports = {
 
       const { tests, stats } = obj
 
+      const attempts = _.flatMap(tests, (test) => test.attempts)
+
       const hasFailingTests = _.get(stats, 'failures') > 0
 
       // if we have a video recording
       if (startedVideoCapture && tests && tests.length) {
         // always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
+        Reporter.setVideoTimestamp(startedVideoCapture, attempts)
       }
 
       // we should upload the video if we upload on passes (by default)
@@ -1160,6 +1171,7 @@ module.exports = {
       screenshotId: random.id(),
       name: data.name || null,
       testId: data.testId,
+      testAttemptIndex: data.testAttemptIndex,
       takenAt: resp.takenAt,
       path: resp.path,
       height: resp.dimensions.height,

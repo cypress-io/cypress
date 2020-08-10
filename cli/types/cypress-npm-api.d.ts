@@ -7,6 +7,11 @@
 // but for now describe it as an ambient module
 
 declare namespace CypressCommandLine {
+  interface TestError {
+    name: string
+    message: string
+    stack: string
+  }
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -166,14 +171,16 @@ declare namespace CypressCommandLine {
     title: string[]
     state: string
     body: string
-    /**
-     * Error stack string if there is an error
+     /**
+     * Error string as it's presented in console if the test fails
      */
-    stack: string | null
-    /**
-     * Error message if there is an error
-     */
-    error: string | null
+    displayError: string | null
+    attempts: AttemptResult[]
+  }
+
+  interface AttemptResult {
+    state: string
+    error: TestError | null
     timings: any
     failedFromHookId: hookId | null
     wallClockStartedAt: dateTimeISO
@@ -199,6 +206,7 @@ declare namespace CypressCommandLine {
     name: string
     testId: testId
     takenAt: dateTimeISO
+    testAttemptIndex: number
     /**
      * Absolute path to the saved image
      */
