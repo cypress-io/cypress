@@ -90,9 +90,12 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
     expectStartToBeBeforeEnd(run, 'stats.wallClockStartedAt', 'stats.wallClockEndedAt')
     expectStartToBeBeforeEnd(run, 'reporterStats.start', 'reporterStats.end')
 
-    // grab all the wallclock durations for all tests
+    // grab all the wallclock durations for all test (and retried attempts)
     // because our duration should be at least this
-    const wallClocks = _.sumBy(run.tests, 'wallClockDuration')
+
+    const attempts = _.flatMap(run.tests, (test) => test.attempts)
+
+    const wallClocks = _.sumBy(attempts, 'wallClockDuration')
 
     // ensure each run's duration is around the sum
     // of all tests wallclock duration
@@ -100,7 +103,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       run,
       'stats.wallClockDuration',
       wallClocks,
-      wallClocks + 200, // add 200ms to account for padding
+      wallClocks + 400, // add 400ms to account for padding
       1234,
     )
 
@@ -108,7 +111,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       run,
       'reporterStats.duration',
       wallClocks,
-      wallClocks + 200, // add 200ms to account for padding
+      wallClocks + 400, // add 400ms to account for padding
       1234,
     )
 
@@ -118,11 +121,17 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
 
     run.spec.absolute = e2e.normalizeStdout(run.spec.absolute)
 
+    _.each(run.tests, (test) => {
+      if (test.displayError) {
+        test.displayError = e2e.normalizeStdout(test.displayError)
+      }
+    })
+
     // now make sure that each tests wallclock duration
     // is around the sum of all of its timings
-    run.tests.forEach((test) => {
+    attempts.forEach((attempt) => {
     // cannot sum an object, must use array of values
-      const timings = _.sumBy(_.values(test.timings), (val) => {
+      const timings = _.sumBy(_.values(attempt.timings), (val) => {
         if (_.isArray(val)) {
         // array for hooks
           return _.sumBy(val, addFnAndAfterFn)
@@ -137,7 +146,7 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       })
 
       expectDurationWithin(
-        test,
+        attempt,
         'wallClockDuration',
         timings,
         timings + 80, // add 80ms to account for padding
@@ -145,21 +154,21 @@ const expectRunsToHaveCorrectStats = (runs = []) => {
       )
 
       // now reset all the test timings
-      normalizeTestTimings(test, 'timings')
+      normalizeTestTimings(attempt, 'timings')
 
       // normalize stack
-      if (test.stack) {
-        test.stack = e2e.normalizeStdout(test.stack)
+      if (attempt.error) {
+        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
       }
 
-      if (test.wallClockStartedAt) {
-        const d = new Date(test.wallClockStartedAt)
+      if (attempt.wallClockStartedAt) {
+        const d = new Date(attempt.wallClockStartedAt)
 
-        expect(d.toJSON()).to.eq(test.wallClockStartedAt)
-        test.wallClockStartedAt = STATIC_DATE
+        expect(d.toJSON()).to.eq(attempt.wallClockStartedAt)
+        attempt.wallClockStartedAt = STATIC_DATE
 
-        expect(test.videoTimestamp).to.be.a('number')
-        test.videoTimestamp = 9999
+        expect(attempt.videoTimestamp).to.be.a('number')
+        attempt.videoTimestamp = 9999
       }
     })
 
@@ -250,6 +259,48 @@ describe('e2e spec_isolation', () => {
           return snapshot('e2e spec isolation fails', json, { allowSharedSnapshot: true })
         })
       })
+    },
+  })
+
+  e2e.it('failing with retries enabled', {
+    spec: 'simple_failing_hook_spec.coffee',
+    outputPath,
+    snapshot: true,
+    expectedExitCode: 3,
+    config: {
+      retries: 1,
+    },
+    async onRun (execFn) {
+      await execFn()
+      const json = await fs.readJsonAsync(outputPath)
+
+      expect(json.config).to.be.an('object')
+      expect(json.config.projectName).to.eq('e2e')
+      expect(json.config.projectRoot).to.eq(e2ePath)
+      json.config = {}
+      expect(json.browserPath).to.be.a('string')
+      expect(json.browserName).to.be.a('string')
+      expect(json.browserVersion).to.be.a('string')
+      expect(json.osName).to.be.a('string')
+      expect(json.osVersion).to.be.a('string')
+      expect(json.cypressVersion).to.be.a('string')
+
+      _.extend(json, {
+        browserPath: 'path/to/browser',
+        browserName: 'FooBrowser',
+        browserVersion: '88',
+        osName: 'FooOS',
+        osVersion: '1234',
+        cypressVersion: '9.9.9',
+      })
+
+      expect(json.totalTests).to.eq(_.sum([json.totalFailed, json.totalPassed, json.totalPending, json.totalSkipped]))
+      expectStartToBeBeforeEnd(json, 'startedTestsAt', 'endedTestsAt')
+      expectDurationWithin(json, 'totalDuration', _.sumBy(json.runs, 'stats.wallClockDuration'), _.sumBy(json.runs, 'stats.wallClockDuration'), 5555)
+      expect(json.runs).to.have.length(1)
+      expectRunsToHaveCorrectStats(json.runs)
+
+      snapshot('failing with retries enabled', json)
     },
   })
 })

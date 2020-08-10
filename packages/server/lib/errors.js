@@ -925,9 +925,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
     case 'EXPERIMENTAL_SAMESITE_REMOVED':
       return stripIndent`\
-        The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version 5.0.0. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
+        The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
 
         You can safely remove this option from your config.`
+    case 'INCOMPATIBLE_PLUGIN_RETRIES':
+      return stripIndent`\
+      We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
+      
+      Test retries is now supported in Cypress version \`5.0.0\`.
+
+      Remove the plugin from your dependencies to silence this warning.
+      
+      https://on.cypress.io/test-retries
+      `
     default:
   }
 }

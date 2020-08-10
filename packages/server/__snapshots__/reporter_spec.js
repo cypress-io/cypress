@@ -27,17 +27,21 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       ],
       "state": "failed",
       "body": "",
-      "stack": [
-        1,
-        2,
-        3
-      ],
-      "error": "foo",
-      "timings": null,
-      "failedFromHookId": null,
-      "wallClockStartedAt": null,
-      "wallClockDuration": null,
-      "videoTimestamp": null
+      "displayError": "at foo:1:1\nat bar:1:1\nat baz:1:1",
+      "attempts": [
+        {
+          "state": "failed",
+          "error": {
+            "message": "foo",
+            "stack": "at foo:1:1\nat bar:1:1\nat baz:1:1"
+          },
+          "timings": null,
+          "failedFromHookId": null,
+          "wallClockStartedAt": null,
+          "wallClockDuration": null,
+          "videoTimestamp": null
+        }
+      ]
     },
     {
       "testId": "r5",
@@ -48,13 +52,18 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       ],
       "state": "pending",
       "body": "",
-      "stack": null,
-      "error": null,
-      "timings": null,
-      "failedFromHookId": null,
-      "wallClockStartedAt": null,
-      "wallClockDuration": null,
-      "videoTimestamp": null
+      "displayError": null,
+      "attempts": [
+        {
+          "state": "pending",
+          "error": null,
+          "timings": null,
+          "failedFromHookId": null,
+          "wallClockStartedAt": null,
+          "wallClockDuration": null,
+          "videoTimestamp": null
+        }
+      ]
     }
   ]
 }

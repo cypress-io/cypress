@@ -619,6 +619,10 @@ const e2e = {
       ctx.skip()
     }
 
+    if (options.stubPackage) {
+      Fixtures.installStubPackage(options.project, options.stubPackage)
+    }
+
     args = ['index.js'].concat(args)
 
     let stdout = ''
@@ -727,8 +731,13 @@ const e2e = {
       // pipe these to our current process
       // so we can see them in the terminal
       // color it so we can tell which is test output
-      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
-      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
+      sp.stdout
+      .pipe(ColorOutput())
+      .pipe(process.stdout)
+
+      sp.stderr
+      .pipe(ColorOutput())
+      .pipe(process.stderr)
 
       sp.stdout.on('data', (buf) => stdout += buf.toString())
       sp.stderr.on('data', (buf) => stderr += buf.toString())

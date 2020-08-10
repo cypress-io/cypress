@@ -11,7 +11,7 @@ exports['e2e record passing passes 1'] = `
   │             e, record_uncaught_spec.coffee)                                                    │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -247,7 +247,7 @@ We dynamically generated a new test to display this failure.
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -348,7 +348,7 @@ exports['e2e record api interaction errors create instance does not update insta
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 Warning: We encountered an error talking to our servers.
@@ -407,7 +407,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -424,7 +424,7 @@ exports['e2e record api interaction errors update instance does not update insta
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -488,7 +488,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -505,7 +505,7 @@ exports['e2e record api interaction errors update instance stdout warns but proc
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -570,7 +570,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -626,7 +626,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -684,7 +684,7 @@ exports['e2e record video recording does not upload when not enabled 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -701,7 +701,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -766,7 +766,7 @@ exports['e2e record api interaction errors uploading assets warns but proceeds 1
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -882,7 +882,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
   │             e, record_uncaught_spec.coffee)                                                    │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -940,7 +940,7 @@ exports['e2e record parallelization passes in parallel with group 1'] = `
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -958,7 +958,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
   │             e, record_uncaught_spec.coffee)                                                    │
   │ Searched:   cypress/integration/record*                                                        │
   │ Params:     Tag: nightly, Group: prod-e2e, Parallel: true                                      │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1152,7 +1152,7 @@ We dynamically generated a new test to display this failure.
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1286,7 +1286,7 @@ exports['e2e record api interaction errors create instance 500 does not proceed 
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -1314,7 +1314,7 @@ exports['e2e record api interaction errors update instance 500 does not proceed 
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1402,7 +1402,7 @@ StatusCodeError: 500 - "Internal Server Error"
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: nightly, Group: foo, Parallel: true                                           │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 We encountered an unexpected error talking to our servers.
@@ -1467,7 +1467,7 @@ StatusCodeError: 500 - "Internal Server Error"
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1611,7 +1611,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1669,7 +1669,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1691,7 +1691,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1749,7 +1749,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1771,7 +1771,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1829,7 +1829,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1851,7 +1851,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1909,7 +1909,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -1931,7 +1931,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -1989,7 +1989,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -2011,7 +2011,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2069,7 +2069,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `
@@ -2095,7 +2095,7 @@ Details:
   │ Specs:      1 found (record_pass_spec.coffee)                                                  │
   │ Searched:   cypress/integration/record_pass*                                                   │
   │ Params:     Tag: false, Group: false, Parallel: false                                          │
-  │ Run URL:    https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                             │
+  │ Run URL:    https://dashboard.cypress.io/projects/cjvoj7/runs/12                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -2153,7 +2153,7 @@ Details:
 
 ───────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                        
-  Recorded Run: https://dashboard.cypress.io/#/projects/cjvoj7/runs/12                                 
+  Recorded Run: https://dashboard.cypress.io/projects/cjvoj7/runs/12                                   
 
 
 `

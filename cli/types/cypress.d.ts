@@ -335,6 +335,11 @@ declare namespace Cypress {
     getFirefoxGcInterval(): number | null | undefined
 
     /**
+     * @returns the number of test retries currently enabled for the run
+     */
+    getTestRetries(): number | null
+
+    /**
      * Checks if a variable is a valid instance of `cy` or a `cy` chainable.
      *
      * @see https://on.cypress.io/iscy
@@ -2563,6 +2568,13 @@ declare namespace Cypress {
      * the `includeShadowDom` option to some DOM commands.
      */
     experimentalShadowDomSupport: boolean
+    /**
+     * Number of times to retry a failed test.
+     * If a number is set, tests will retry in both runMode and openMode.
+     * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
+     * @default null
+     */
+    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {

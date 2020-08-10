@@ -80,7 +80,8 @@ screenshotOnRunFailure
 watchForFileChanges
 waitForAnimations               resolvedNodeVersion
 nodeVersion                     resolvedNodePath
-firefoxGcInterval\
+firefoxGcInterval
+retries
 `)
 
 // NOTE: If you add a config value, make sure to update the following
@@ -180,6 +181,7 @@ const CONFIG_DEFAULTS = {
   experimentalSourceRewriting: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
+  retries: { runMode: 0, openMode: 0 },
 }
 
 const validationRules = {
@@ -228,6 +230,7 @@ const validationRules = {
   experimentalSourceRewriting: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,
+  retries: v.isValidRetriesConfig,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {

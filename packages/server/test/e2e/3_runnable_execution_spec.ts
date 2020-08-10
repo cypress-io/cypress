@@ -24,7 +24,7 @@ describe('e2e runnable execution', () => {
     project: Fixtures.projectPath('hooks-after-rerun'),
     spec: 'beforehook-and-test-navigation.js',
     snapshot: true,
-    expectedExitCode: 1,
+    expectedExitCode: 2,
   })
 
   e2e.it('runnables run correct number of times with navigation', {

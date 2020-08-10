@@ -129,14 +129,22 @@ commands:
       browser:
         description: browser shortname to target
         type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: ~/
       - run:
           command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -211,6 +219,7 @@ commands:
           command: |
             git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
             cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
+
   test-binary-against-repo:
     description: |
       Takes the built binary and NPM package, clones given example repo
@@ -337,6 +346,17 @@ commands:
                 path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
+  wait-on-circle-jobs:
+    description: Polls certain Circle CI jobs until they finish
+    parameters:
+      job-names:
+        description: comma separated list of circle ci job names to wait for
+        type: string
+    steps:
+      - run:
+          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -399,6 +419,37 @@ jobs:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  # a special job that keeps polling Circle and when all
+  # individual jobs are finished, it closes the Percy build
+  percy-finalize:
+    <<: *defaults
+    executor: cy-doc
+    parameters:
+      required_env_var:
+        type: env_var_name
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          # if this is an external pull request, the environment variables
+          # are NOT set for security reasons, thus no need to poll -
+          # and no need to finalize Percy, since there will be no visual tests
+          name: Check if <<parameters.required_env_var>> is set
+          command: |
+            if [[ -v <<parameters.required_env_var>> ]]; then
+              echo "Internal PR, good to go"
+            else
+              echo "This is an external PR, cannot access other services"
+              circleci-agent step halt
+            fi
+      - wait-on-circle-jobs:
+          job-names: >
+            desktop-gui-integration-tests-2x,
+            desktop-gui-component-tests,
+            cli-visual-tests,
+            runner-integration-tests-chrome,
+      - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
@@ -701,6 +752,7 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: chrome
+          percy: true
 
   runner-integration-tests-firefox:
     <<: *defaults
@@ -878,13 +930,6 @@ jobs:
       - run:
           command: node index.js
           working_directory: packages/launcher
-
-  percy-finalize:
-    <<: *defaults
-    steps:
-      - run:
-          name: "finalizes percy builds"
-          command: npx percy finalize --all
 
   build-binary:
     <<: *defaults
@@ -1369,6 +1414,11 @@ jobs:
           command: npm run test:ci
           pull_request_id: 515
           folder: examples/fundamentals__typescript
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm test
+          pull_request_id: 513
+          folder: examples/fundamentals__module-api-wrap
 
   "test-binary-against-kitchensink":
     <<: *defaults
@@ -1491,6 +1541,11 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
+        requires:
+          - build
+    - percy-finalize:
+        context: test-runner:poll-circle-workflow
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
     - lint-types:
@@ -1624,12 +1679,6 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
-    - percy-finalize:
-        requires:
-          - desktop-gui-integration-tests-2x
-          - desktop-gui-component-tests
-          - cli-visual-tests
-
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -1666,6 +1715,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - test-retries
         requires:
           - build-npm-package
     - build-binary:
@@ -1677,6 +1727,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - test-retries
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1733,6 +1784,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - test-retries
         requires:
           - upload-npm-package
           - upload-binary

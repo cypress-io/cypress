@@ -7,6 +7,7 @@ const Promise = require('bluebird')
 const $Screenshot = require('../../cypress/screenshot')
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
+const $utils = require('../../cypress/utils')
 
 const getViewportHeight = (state) => {
   // TODO this doesn't seem correct
@@ -54,6 +55,7 @@ const automateScreenshot = (state, options = {}) => {
     titles,
     testId: runnable.id,
     takenPaths: state('screenshotPaths'),
+    testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry,
   }, _.omit(options, 'runnable', 'timeout', 'log', 'subject'))
 
   const automate = () => {
@@ -304,6 +306,7 @@ const takeScreenshot = (Cypress, state, screenshotConfig, options = {}) => {
   const getOptions = (isOpen) => {
     return {
       id: runnable.id,
+      testAttemptIndex: $utils.getTestFromRunnable(runnable)._currentRetry,
       isOpen,
       appOnly: isAppOnly(screenshotConfig),
       scale: getShouldScale(screenshotConfig),
