@@ -26,7 +26,18 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
+Error: Webpack Compilation Error
+./cypress/integration/record_error_spec.coffee
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+Looked for and couldn't find the file at the following paths:
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
+ @ ./cypress/integration/record_error_spec.coffee 1:0-31
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -962,7 +973,18 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-Error: Cannot find module '../it/does/not/exist' from '/foo/bar/.projects/e2e/cypress/integration'
+Error: Webpack Compilation Error
+./cypress/integration/record_error_spec.coffee
+Module not found: Error: Can't resolve '../it/does/not/exist' in '/foo/bar/.projects/e2e/cypress/integration'
+Looked for and couldn't find the file at the following paths:
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.js]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.json]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.jsx]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.coffee]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.ts]
+[/foo/bar/.projects/e2e/cypress/it/does/not/exist.tsx]
+ @ ./cypress/integration/record_error_spec.coffee 1:0-31
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

@@ -7,14 +7,14 @@ exports['e2e typescript spec passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (browserify_typescript_passing_spec.ts)                                    │
-  │ Searched:   cypress/integration/browserify_typescript_passing_spec.ts                          │
+  │ Specs:      1 found (typescript_passing_spec.ts)                                               │
+  │ Searched:   cypress/integration/typescript_passing_spec.ts                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  browserify_typescript_passing_spec.ts                                           (1 of 1)
+  Running:  typescript_passing_spec.ts                                                      (1 of 1)
 
 
   imports work
@@ -38,15 +38,14 @@ exports['e2e typescript spec passes 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     browserify_typescript_passing_spec.ts                                            │
+  │ Spec Ran:     typescript_passing_spec.ts                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_typescript_passing_s     (X second)
-                          pec.ts.mp4                                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_passing_spec.ts.mp4      (X second)
 
 
 ====================================================================================================
@@ -56,8 +55,7 @@ exports['e2e typescript spec passes 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  browserify_typescript_passing_spec.      XX:XX        4        4        -        -        - │
-  │    ts                                                                                          │
+  │ ✔  typescript_passing_spec.ts               XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
@@ -73,25 +71,31 @@ exports['e2e typescript spec fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (browserify_typescript_failing_spec.ts)                                    │
-  │ Searched:   cypress/integration/browserify_typescript_failing_spec.ts                          │
+  │ Specs:      1 found (typescript_failing_spec.ts)                                               │
+  │ Searched:   cypress/integration/typescript_failing_spec.ts                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  browserify_typescript_failing_spec.ts                                           (1 of 1)
+  Running:  typescript_failing_spec.ts                                                      (1 of 1)
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts
+  /foo/bar/.projects/e2e/cypress/integration/typescript_failing_spec.ts
 
 The error was:
 
-/foo/bar/.projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts:3
-describe('fail', - > );
-                   ^
-ParseError: Unexpected token
+Error: Webpack Compilation Error
+./cypress/integration/typescript_failing_spec.tsXX:XX
+Module parse failed: Unexpected token (4:19)
+File was processed with these loaders:
+ * ../../../../node_modules/@cypress/webpack-batteries-included-preprocessor/node_modules/ts-loader/index.js
+You may need an additional loader to handle the result of these loaders.
+| // The code below is ignored by eslint
+| // because it tests failing spec.
+> describe('fail', - > );
+|
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
@@ -111,15 +115,14 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     browserify_typescript_failing_spec.ts                                            │
+  │ Spec Ran:     typescript_failing_spec.ts                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/browserify_typescript_failing_s     (X second)
-                          pec.ts.mp4                                                                
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/typescript_failing_spec.ts.mp4      (X second)
 
 
 ====================================================================================================
@@ -129,8 +132,7 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  browserify_typescript_failing_spec.      XX:XX        -        -        1        -        - │
-  │    ts                                                                                          │
+  │ ✖  typescript_failing_spec.ts               XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 

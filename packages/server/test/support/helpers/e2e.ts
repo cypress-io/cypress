@@ -762,6 +762,12 @@ const e2e = {
 `)
     }
   },
+
+  normalizeWebpackErrors (stdout) {
+    return stdout
+    .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
+    .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
+  },
 }
 
 export {
