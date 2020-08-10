@@ -21,7 +21,7 @@ let __ID__ = null
 // many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
 // the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
 // errors are encountered, `maxSafeBytes` will be decremented to at most `MIN_PREFIX_BYTES`, at
-// which point the latest ENAMTOOLONG error will be emitted.
+// which point the latest ENAMETOOLONG error will be emitted.
 // @see https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits
 let maxSafeBytes = Number(process.env.CYPRESS_MAX_SAFE_FILENAME_BYTES) || 254
 const MIN_PREFIX_BYTES = 64
