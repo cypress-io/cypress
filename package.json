@@ -22,7 +22,6 @@
     "@babel/preset-env": "7.10.4",
     "@babel/preset-react": "7.10.4",
     "@babel/runtime": "7.10.5",
-    "@cypress/webpack-preprocessor": "5.4.2",
     "babel-loader": "8.1.0",
     "babel-plugin-add-module-exports": "1.0.2",
     "coffee-loader": "0.9.0",
@@ -34,6 +33,7 @@
   },
   "devDependencies": {
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "@cypress/webpack-preprocessor": "5.4.2",
     "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/mocha": "8.0.0",
     "@types/webpack": "4.41.21",
@@ -52,6 +52,9 @@
     "react": "16.13.1",
     "semantic-release": "17.1.1",
     "typescript": "3.9.7"
+  },
+  "peerDependencies": {
+    "@cypress/webpack-preprocessor": "^5.4.2"
   },
   "files": [
     "index.js"
