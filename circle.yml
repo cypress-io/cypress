@@ -1444,6 +1444,8 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-realworld-app
           browser: chrome
+          command: "yarn start:ci"
+          wait-on: http://localhost:3000
 
   test-binary-as-specific-user:
     <<: *defaults
