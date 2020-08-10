@@ -89,9 +89,12 @@ const create = (state) => {
 
     const win = $window.getWindowByElement(el)
 
-    // store the current focused element
-    // since when we call .focus() it will change
-    const $focused = getFocused()
+    // store the current focused element, since it will change when we call .focus()
+    //
+    // need to pass in el.ownerDocument to get the correct focused element
+    // when el is in an iframe and the browser is not
+    // in focus (https://github.com/cypress-io/cypress/issues/8111)
+    const $focused = getFocused(el.ownerDocument)
 
     let hasFocused = false
 
@@ -220,8 +223,8 @@ const create = (state) => {
     return false
   }
 
-  const getFocused = () => {
-    const { activeElement } = state('document')
+  const getFocused = (document = state('document')) => {
+    const { activeElement } = document
 
     if ($dom.isFocused(activeElement)) {
       return $dom.wrap(activeElement)

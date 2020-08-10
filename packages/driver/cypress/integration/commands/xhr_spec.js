@@ -2031,6 +2031,19 @@ describe('src/cy/commands/xhr', () => {
         .wrap({ foo: 'bar' }).as('foo')
         .route(/foo/, '@bar')
       })
+
+      // https://github.com/cypress-io/cypress/issues/7818
+      it('throws when fixture cannot be found', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contains('A fixture file could not be found at any of the following paths:')
+          done()
+        })
+
+        cy.route(/foo/, 'fx:NOT_EXISTING_FILE_FIXTURE')
+        cy.window().then((win) => {
+          win.$.get('/foo')
+        })
+      })
     })
 
     describe('.log', () => {

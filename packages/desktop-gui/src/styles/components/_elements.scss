@@ -22,6 +22,7 @@ a {
 
   &:hover, &:focus, &:active {
     cursor: pointer;
+    color: darken($brand-primary, 10%);
   }
 }
 

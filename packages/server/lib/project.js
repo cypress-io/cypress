@@ -501,6 +501,8 @@ class Project extends EE {
   }
 
   getSpecUrl (absoluteSpecPath, specType) {
+    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+
     return this.getConfig()
     .then((cfg) => {
       // if we don't have a absoluteSpecPath or its __all

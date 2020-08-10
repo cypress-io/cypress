@@ -166,4 +166,28 @@ describe('driver/src/cy/snapshots', () => {
       })
     })
   })
+
+  context('custom elements', () => {
+    beforeEach(() => {
+      cy.visit('/fixtures/custom-elements.html')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7187
+    it('does not trigger constructor', () => {
+      const constructor = cy.stub(cy.state('window'), 'shadowScreenshotConstructor')
+
+      cy.createSnapshot()
+
+      expect(constructor).not.to.be.called
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7187
+    it('does not trigger attributeChangedCallback', () => {
+      const attributeChanged = cy.stub(cy.state('window'), 'shadowScreenshotAttributeChanged')
+
+      cy.createSnapshot()
+
+      expect(attributeChanged).not.to.be.called
+    })
+  })
 })
