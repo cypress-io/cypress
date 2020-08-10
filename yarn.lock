@@ -19937,10 +19937,10 @@ print-arch@1.0.0:
   resolved "https://registry.yarnpkg.com/print-arch/-/print-arch-1.0.0.tgz#2141cb9f08c6f70725ff40f55886675ef2666594"
   integrity sha512-JOBS+nICjbwLT9JU0IjQY2uES+U57Y7P8KAcaakkoJlS/6Wc7rRuZMnV2pT0iPdQMbXF68GnzNeNikh6bl6cHA==
 
-prismjs@1.16.0:
-  version "1.16.0"
-  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.16.0.tgz#406eb2c8aacb0f5f0f1167930cb83835d10a4308"
-  integrity sha512-OA4MKxjFZHSvZcisLGe14THYsug/nF6O1f0pAJc0KN0wTyAcLqmsbE+lTGKSpyh+9pEW57+k6pg2AfYR+coyHA==
+prismjs@1.21.0:
+  version "1.21.0"
+  resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.21.0.tgz#36c086ec36b45319ec4218ee164c110f9fc015a3"
+  integrity sha512-uGdSIu1nk3kej2iZsLyDoJ7e9bnPzIgY0naW/HdknGj61zScaprVEVGHrPoXqI+M9sP0NDnTK2jpkvmldpuqDw==
   optionalDependencies:
     clipboard "^2.0.0"
 
