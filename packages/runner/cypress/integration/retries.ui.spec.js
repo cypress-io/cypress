@@ -230,7 +230,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   })
 
   describe('beforeEach', () => {
-    it('beforeEach hooks retry, but only run same-level afterEach hooks', () => {
+    it('beforeEach hooks retry on failure, but only run same-level afterEach hooks', () => {
       runIsolatedCypress({
         hooks: [{ type: 'beforeEach', fail: 1 }],
         suites: {
@@ -291,7 +291,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
   })
 
   describe('afterEach', () => {
-    it('afterEach hooks retry, but do not continue to run after one fails', () => {
+    it('afterEach hooks retry on failure, but only run higher-level afterEach hooks', () => {
       runIsolatedCypress({
         hooks: [{ type: 'afterEach', fail: 2 }],
         suites: {
