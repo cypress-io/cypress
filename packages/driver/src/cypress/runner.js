@@ -859,13 +859,18 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     const suite = hook.parent
 
+    let foundTest
+
     if (hook.hookName === 'after all') {
-      return findLastTestInSuite(suite, isNotAlreadyRunTest)
+      foundTest = findLastTestInSuite(suite, isNotAlreadyRunTest)
+    } else if (hook.hookName === 'before all') {
+      foundTest = findTestInSuite(suite, isNotAlreadyRunTest)
     }
 
-    if (hook.hookName === 'before all') {
-      return findTestInSuite(suite, isNotAlreadyRunTest)
-    }
+    // if test has retried, we getTestById will give us the last attempt
+    foundTest = foundTest && getTestById(foundTest.id)
+
+    return foundTest
   }
 
   const onScriptError = (err) => {
