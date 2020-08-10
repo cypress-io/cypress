@@ -8,16 +8,17 @@ describe('e2e typescript', function () {
 
   it('spec passes', function () {
     return e2e.exec(this, {
-      spec: 'browserify_typescript_passing_spec.ts',
+      spec: 'typescript_passing_spec.ts',
       snapshot: true,
     })
   })
 
   it('spec fails', function () {
     return e2e.exec(this, {
-      spec: 'browserify_typescript_failing_spec.ts',
+      spec: 'typescript_failing_spec.ts',
       snapshot: true,
       expectedExitCode: 1,
+      onStdout: e2e.normalizeWebpackErrors,
     })
   })
 
@@ -27,6 +28,12 @@ describe('e2e typescript', function () {
     return e2e.exec(this, {
       project: projPath,
       snapshot: true,
+    })
+  })
+
+  it('respects tsconfig paths', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('ts-proj-with-paths'),
     })
   })
 
