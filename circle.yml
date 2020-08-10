@@ -1438,6 +1438,13 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
+  "test-binary-against-cypress-realworld-app":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-realworld-app
+          browser: chrome
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1778,6 +1785,8 @@ linux-workflow: &linux-workflow
     - test-binary-against-realworld-firefox:
         <<: *testBinaryFirefox
     - test-binary-against-piechopper-firefox:
+        <<: *testBinaryFirefox
+    - test-binary-against-cypress-realworld-app:
         <<: *testBinaryFirefox
 
     - test-binary-as-specific-user:
