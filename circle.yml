@@ -288,7 +288,7 @@ commands:
           steps:
             - run:
                 working_directory: /tmp/<<parameters.repo>>
-                command: npm <<parameters.start-script>>
+                command: npm run <<parameters.start-script>>
                 background: true
       - unless:
           condition: << parameters.start-script >>
