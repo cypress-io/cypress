@@ -216,6 +216,10 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')
       })
 
+      it('can trigger on elements with `opacity: 0`', () => {
+        cy.get('#opacity-0').trigger('mousedown')
+      })
+
       it('can trigger on readonly inputs', () => {
         cy.get('#readonly-attr').trigger('mousedown')
       })
