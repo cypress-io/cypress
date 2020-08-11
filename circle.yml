@@ -397,7 +397,11 @@ jobs:
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: yarn check-terminal
+      - run:
+          name: Check terminal
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-terminal
 
       - run: yarn stop-only-all
 
