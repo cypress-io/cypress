@@ -254,10 +254,10 @@ commands:
         description: Whether to use wait-on to wait on a server to be booted
         type: string
         default: ""
-      start-script:
-        description: Custom npm start script for repo
+      server-start-command:
+        description: Server start command for repo
         type: string
-        default: ""
+        default: "npm start --if-present"
     steps:
       - attach_workspace:
           at: ~/
@@ -292,20 +292,10 @@ commands:
           name: Build 🏗 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run build --if-present
-      - when:
-          condition: << parameters.start-script >>
-          steps:
-            - run:
-                working_directory: /tmp/<<parameters.repo>>
-                command: npm run <<parameters.start-script>>
-                background: true
-      - unless:
-          condition: << parameters.start-script >>
-          steps:
-            - run:
-                working_directory: /tmp/<<parameters.repo>>
-                command: npm start --if-present
-                background: true
+      - run:
+          working_directory: /tmp/<<parameters.repo>>
+          command: <<parameters.server-start-command>>
+          background: true
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
@@ -1508,7 +1498,7 @@ jobs:
       - test-binary-against-repo:
           repo: cypress-realworld-app
           browser: chrome
-          start-script: "start:ci"
+          server-start-command: "npm run start:ci"
           command: "npm run cypress:run"
           wait-on: http://localhost:3000
 
