@@ -72,12 +72,12 @@ commands:
     steps:
       - run:
           name: Install Node
-          # TODO: read the Node verison from .node-version file
           command: |
             export NVM_DIR="/opt/circleci/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install v12.14.1
-            nvm alias default v12.14.1
+            NODE_VERSION=$(cat .node-version)
+            nvm install $NODE_VERSION
+            nvm alias default $NODE_VERSION
             node --version
 
   install-latest-chrome:
