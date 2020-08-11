@@ -74,6 +74,9 @@ commands:
       - run:
           name: Install Node
           command: |
+            ls -la /opt
+            ls -la /opt/circleci
+            ls -la /opt/circleci/.nvm
             export NVM_DIR="/opt/circleci/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
             NODE_VERSION=$(cat .node-version)
