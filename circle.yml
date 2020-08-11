@@ -440,8 +440,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-required-node
       ## this will catch ".only"s in js/coffee as well
-      - run: yarn lint
+      - run:
+          name: Linting 🧹
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
@@ -522,6 +527,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-required-node
       - run:
           name: Mocha tests
           command: |
@@ -1018,6 +1024,7 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
+      - install-required-node
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - run:
@@ -1083,6 +1090,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - install-required-node
       - run:
           name: Check next dev version
           command: |
