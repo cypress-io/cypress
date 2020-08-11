@@ -379,7 +379,7 @@ jobs:
       - run:
           name: print Node version
           command: |
-            ./scripts/load-nvm.sh
+            . ./scripts/load-nvm.sh
             echo "nvm use default"
             nvm use default
             node -v
