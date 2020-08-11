@@ -254,6 +254,10 @@ commands:
         description: Whether to use wait-on to wait on a server to be booted
         type: string
         default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "npm start --if-present"
     steps:
       - attach_workspace:
           at: ~/
@@ -290,7 +294,7 @@ commands:
           command: npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: npm start --if-present
+          command: <<parameters.server-start-command>>
           background: true
       - run:
           condition: <<parameters.wait-on>>
@@ -1488,6 +1492,16 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
+  "test-binary-against-cypress-realworld-app":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-realworld-app
+          browser: chrome
+          server-start-command: "npm run start:ci"
+          command: "npm run cypress:run"
+          wait-on: http://localhost:3000
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1831,6 +1845,16 @@ linux-workflow: &linux-workflow
         <<: *testBinaryFirefox
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
+    - test-binary-against-cypress-realworld-app:
+        filters:
+          branches:
+            only:
+              - develop
+              - kevin-v5.0-release-rwa
+              - v5.0-release
+        requires:
+          - build-npm-package
+          - build-binary
 
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
