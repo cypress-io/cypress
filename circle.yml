@@ -382,6 +382,9 @@ jobs:
           command: |
             echo "NVM_DIR is $NVM_DIR"
             ls $NVM_DIR
+            echo "Home .nvm has"
+            ls $HOME/.nvm
+            echo "nvm use default"
             nvm use default
             node -v
       - run:
