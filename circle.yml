@@ -73,8 +73,10 @@ commands:
     steps:
       - run:
           name: Install NVM
+          # TODO: determine why we get the missing .nvmrc file error
+          # NODE_VERSION=$(cat .node-version)
           command: |
-            NODE_VERSION=$(cat .node-version)
+            NODE_VERSION=v12.14.1
             echo "Installing Node $NODE_VERSION"
             curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
       - run:
@@ -82,8 +84,11 @@ commands:
           command: |
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install $NODE_VERSION
-            nvm alias default $NODE_VERSION
+            cp .node-version .nvmrc
+            echo "before nvm install"
+            nvm install
+            echo "before nvm use"
+            nvm use
             node --version
 
   install-latest-chrome:
