@@ -1,4 +1,3 @@
-const $ = require('jquery')
 const _ = require('lodash')
 
 const $dom = require('../../dom')
@@ -20,6 +19,14 @@ const optInShadowTraversals = {
   },
 }
 
+const sortedUnique = (cy, $el) => {
+  // we want _.uniq() to keep the elements with higher indexes instead of lower
+  // so we reverse, uniq, then reverse again
+  // so [div1, body, html, div2, body, html]
+  // becomes [div1, div2, body, html] and not [div1, body, html, div2]
+  return cy.$$(_($el).reverse().uniq().reverse().value())
+}
+
 const autoShadowTraversals = {
   closest: (cy, $el, selector) => {
     const nodes = _.reduce($el, (nodes, el) => {
@@ -38,14 +45,14 @@ const autoShadowTraversals = {
       return getClosest(el)
     }, [])
 
-    return $.uniqueSort(nodes)
+    return sortedUnique(cy, nodes)
   },
   parent: (cy, $el) => {
     const parents = $el.map((i, el) => {
       return $elements.getParent(el)
     })
 
-    return $.uniqueSort(parents)
+    return sortedUnique(cy, parents)
   },
   parents: (cy, $el, selector) => {
     let $parents = $el.map((i, el) => {
@@ -53,7 +60,7 @@ const autoShadowTraversals = {
     })
 
     if ($el.length > 1) {
-      $parents = $.uniqueSort($parents)
+      $parents = sortedUnique(cy, $parents)
     }
 
     if (!selector) {
@@ -68,7 +75,7 @@ const autoShadowTraversals = {
     })
 
     if ($el.length > 1) {
-      $parents = $.uniqueSort($parents)
+      $parents = sortedUnique(cy, $parents)
     }
 
     if (!filter) {
