@@ -89,6 +89,8 @@ commands:
             nvm install
             echo "before nvm use"
             nvm use
+            echo "before nvm alias default"
+            nvm alias default
             node --version
 
   install-latest-chrome:
