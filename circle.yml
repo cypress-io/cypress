@@ -67,6 +67,19 @@ executors:
       PLATFORM: mac
 
 commands:
+  install-required-node:
+    description: Install Node version matching .node-version
+    steps:
+      - run:
+          name: Install Node
+          # TODO: read the Node verison from .node-version file
+          command: |
+            export NVM_DIR="/opt/circleci/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install v12.14.1
+            nvm alias default v12.14.1
+            node --version
+
   install-latest-chrome:
     description: Install latest Google Chrome (stable)
     parameters:
@@ -344,6 +357,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - install-required-node
       - run:
           name: Print working folder
           command: echo $PWD
@@ -924,22 +938,16 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(yarn bin)/print-arch
+      - install-required-node
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "30m"
-          # Note 1:
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
-          # Note 2:
-          # We need to use Node version matching .node-version file
           command: |
-            export NVM_DIR="/opt/circleci/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            nvm install v12.14.1
-            nvm alias default v12.14.1
             node --version
             yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: yarn binary-zip --platform $PLATFORM
