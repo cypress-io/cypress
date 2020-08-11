@@ -379,7 +379,11 @@ jobs:
           command: echo $(yarn global bin)
       - run:
           name: print Node version
-          command: node -v
+          command: |
+            echo "NVM_DIR is $NVM_DIR"
+            ls $NVM_DIR
+            nvm use default
+            node -v
       - run:
           name: print yarn version
           command: yarn -v
