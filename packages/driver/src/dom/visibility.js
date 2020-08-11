@@ -17,7 +17,7 @@ const isVisible = (el) => {
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
-const isHidden = (el, name = 'isHidden()') => {
+const isHidden = (el, name = 'isHidden()', ignoreOpacity = false) => {
   if (!$elements.isElement(el)) {
     throw new Error(`\`Cypress.dom.${name}\` failed because it requires a DOM element. The subject received was: \`${el}\``)
   }
@@ -70,7 +70,7 @@ const isHidden = (el, name = 'isHidden()') => {
   }
 
   // a transparent element is hidden
-  if (elHasOpacityZero($el)) {
+  if (elHasOpacityZero($el) && !ignoreOpacity) {
     return true
   }
 
@@ -379,7 +379,7 @@ const parentHasVisibilityCollapse = function ($el) {
 }
 
 /* eslint-disable no-cond-assign */
-const getReasonIsHidden = function ($el) {
+const getReasonIsHidden = function ($el, ignoreOpacity) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
@@ -425,7 +425,7 @@ const getReasonIsHidden = function ($el) {
     return `This element \`${node}\` is not visible because it has CSS property: \`visibility: collapse\``
   }
 
-  if (elHasOpacityZero($el)) {
+  if (elHasOpacityZero($el) && !ignoreOpacity) {
     return `This element \`${node}\` is not visible because it has CSS property: \`opacity: 0\``
   }
 

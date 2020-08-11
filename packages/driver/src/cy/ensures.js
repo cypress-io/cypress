@@ -162,8 +162,10 @@ const create = (state, expect) => {
     // packages/driver/src/config/jquery.coffee#L51
     // So that this effectively calls our logic
     // for $dom.isVisible aka !$dom.isHidden
-    if (subject.length !== subject.filter(':visible').length) {
-      const reason = $dom.getReasonIsHidden(subject)
+    if (subject.length !== subject.filter(function () {
+      return !$dom.isHidden(this, 'isVisible()', true)
+    }).length) {
+      const reason = $dom.getReasonIsHidden(subject, true)
       const node = $dom.stringify(subject)
 
       return $errUtils.throwErrByPath('dom.not_visible', {
