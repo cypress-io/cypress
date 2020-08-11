@@ -243,6 +243,18 @@
       "type": "boolean",
       "default": false,
       "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
+    },
+    "retries": {
+      "type": [
+        "object",
+        "number",
+        "null"
+      ],
+      "default": {
+        "runMode": 0,
+        "openMode": 0
+      },
+      "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
     }
   }
 }

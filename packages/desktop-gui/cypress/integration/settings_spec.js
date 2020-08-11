@@ -116,8 +116,16 @@ describe('Settings', () => {
         .should('not.contain', '0:Chrome')
 
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        // make sure the main collapsible content
+        // has finished animating and that it has
+        // an empty inline style attribute
+        cy.get('.rc-collapse-content')
+        .should('not.have.class', 'rc-collapse-anim')
+        .should('have.attr', 'style', '')
 
         cy.percySnapshot()
       })

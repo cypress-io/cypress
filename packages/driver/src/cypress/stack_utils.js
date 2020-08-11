@@ -3,6 +3,7 @@ const { codeFrameColumns } = require('@babel/code-frame')
 const errorStackParser = require('error-stack-parser')
 const path = require('path')
 
+const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
 const $sourceMapUtils = require('./source_map_utils')
 const $utils = require('./utils')
 
@@ -10,36 +11,6 @@ const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
 const customProtocolRegex = /^[^:\/]+:\/+/
 const STACK_REPLACEMENT_MARKER = '__stackReplacementMarker'
-
-// returns tuple of [message, stack]
-const splitStack = (stack) => {
-  const lines = stack.split('\n')
-
-  return _.reduce(lines, (memo, line) => {
-    if (memo.messageEnded || stackLineRegex.test(line)) {
-      memo.messageEnded = true
-      memo[1].push(line)
-    } else {
-      memo[0].push(line)
-    }
-
-    return memo
-  }, [[], []])
-}
-
-const unsplitStack = (messageLines, stackLines) => {
-  return _.castArray(messageLines).concat(stackLines).join('\n')
-}
-
-const getStackLines = (stack) => {
-  const [, stackLines] = splitStack(stack)
-
-  return stackLines
-}
-
-const stackWithoutMessage = (stack) => {
-  return getStackLines(stack).join('\n')
-}
 
 const hasCrossFrameStacks = (specWindow) => {
   // get rid of the top lines since they naturally have different line:column
@@ -321,17 +292,6 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)
-}
-
-const replacedStack = (err, newStack) => {
-  // if err already lacks a stack or we've removed the stack
-  // for some reason, keep it stackless
-  if (!err.stack) return err.stack
-
-  const errString = err.toString()
-  const stackLines = getStackLines(newStack)
-
-  return unsplitStack(errString, stackLines)
 }
 
 module.exports = {

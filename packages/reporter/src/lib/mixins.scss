@@ -1,0 +1,32 @@
+@mixin runnable-state-active {
+    @extend .#{$fa-css-prefix}-sync-alt;
+    @extend .#{$fa-css-prefix}-spin;
+}
+
+@mixin runnable-state-processing {
+    @extend .far;
+    @extend .#{$fa-css-prefix}-square;
+    color: #888;
+    line-height: 18px; // @extend .far overrides line-height, so we need to set it again
+
+}
+
+@mixin runnable-state-skipped {
+    @extend .#{$fa-css-prefix}-ban;
+    color: #888;
+}
+
+@mixin runnable-state-failed {
+    @extend .#{$fa-css-prefix}-times;
+    color: $fail;
+}
+
+@mixin runnable-state-passed {
+    @extend .#{$fa-css-prefix}-check;
+    color: $pass;
+}
+
+@mixin runnable-state-pending {
+    @extend .#{$fa-css-prefix}-circle-notch;
+    color: lighten($pending, 20%);
+}

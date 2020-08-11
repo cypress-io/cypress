@@ -26,7 +26,7 @@ packages/server/lib/scaffold/plugins/index.js
 packages/server/lib/scaffold/support/index.js
 packages/server/lib/scaffold/support/commands.js
 packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
-packages/server/test/support/fixtures/projects/e2e/cypress/integration/browserify_typescript_failing_spec.ts
+packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
 
 **/.projects
 **/*.d.ts

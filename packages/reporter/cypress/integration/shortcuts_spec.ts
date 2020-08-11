@@ -90,7 +90,7 @@ describe('controls', function () {
         // need to add an input since this environment is isolated
         $body.append('<input id="temp-input" />')
       })
-      .get('#temp-input').type('r')
+      .get('#temp-input').type('r', { force: true })
       .then(() => {
         expect(runner.emit).not.to.have.been.calledWith('runner:restart')
       })

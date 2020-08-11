@@ -6,8 +6,6 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const tsnode = require('ts-node')
-const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -31,7 +29,7 @@ const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
 const { escapeFilenameInUrl } = require('./util/escape_filename')
-const tsNodeOptions = require('./util/ts-node-options')
+const { registerTsNode } = require('./util/ts-node')
 
 const localCwd = cwd()
 
@@ -103,21 +101,7 @@ class Project extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     }).then((cfg) => {
-      try {
-        const tsPath = resolve.sync('typescript', {
-          basedir: this.projectRoot,
-        })
-
-        const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
-
-        debug('typescript path: %s', tsPath)
-        debug('registering project TS with options %o', tsOptions)
-
-        tsnode.register(tsOptions)
-      } catch (e) {
-        debug(`typescript doesn't exist. ts-node setup failed.`)
-        debug('error message %s', e.message)
-      }
+      registerTsNode(this.projectRoot)
 
       return cfg
     }).then((cfg) => {

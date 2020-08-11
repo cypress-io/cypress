@@ -117,7 +117,7 @@ describe('e2e reporters', () => {
             .then((xml) => {
               expect(xml).to.include('<h3 class="suite-title">simple failing hook spec</h3>')
 
-              expect(xml).to.include('<div class="status-item status-item-hooks danger">3 Failed Hooks</div>')
+              expect(xml).to.not.include('.status-item-hooks')
             })
           }
 
@@ -125,10 +125,12 @@ describe('e2e reporters', () => {
           .then((json) => {
             // mochawesome does not consider hooks to be
             // 'failures' but it does collect them in 'other'
+            // HOWEVER we now change how mocha events fire to make mocha stats reflect ours
             expect(json.stats).to.be.an('object')
-            expect(json.stats.failures).to.eq(0)
-
-            expect(json.stats.other).to.eq(3)
+            expect(json.stats.passes).to.eq(1)
+            expect(json.stats.failures).to.eq(3)
+            expect(json.stats.skipped).to.eq(1)
+            expect(json.stats.other).to.eq(0)
           })
         })
       })

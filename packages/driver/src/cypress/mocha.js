@@ -1,5 +1,8 @@
+/* eslint-disable prefer-rest-params */
+
 const _ = require('lodash')
 const $errUtils = require('./error_utils')
+const { getTestFromRunnable } = require('./utils')
 const $stackUtils = require('./stack_utils')
 
 // in the browser mocha is coming back
@@ -7,13 +10,19 @@ const $stackUtils = require('./stack_utils')
 const mocha = require('mocha')
 
 const Mocha = mocha.Mocha != null ? mocha.Mocha : mocha
-const { Test, Runner, Runnable } = Mocha
+const { Test, Runner, Runnable, Hook, Suite } = Mocha
 
 const runnerRun = Runner.prototype.run
 const runnerFail = Runner.prototype.fail
+const runnerRunTests = Runner.prototype.runTests
 const runnableRun = Runnable.prototype.run
 const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
+const testRetries = Test.prototype.retries
+const testClone = Test.prototype.clone
+const suiteAddTest = Suite.prototype.addTest
+const suiteRetries = Suite.prototype.retries
+const hookRetries = Hook.prototype.retries
 
 // don't let mocha polute the global namespace
 delete window.mocha
@@ -241,6 +250,62 @@ const restoreRunnableRun = () => {
   Runnable.prototype.run = runnableRun
 }
 
+const restoreSuiteRetries = () => {
+  Suite.prototype.retries = suiteRetries
+}
+
+function restoreTestClone () {
+  Test.prototype.clone = testClone
+}
+
+function restoreRunnerRunTests () {
+  Runner.prototype.runTests = runnerRunTests
+}
+
+function restoreSuiteAddTest () {
+  Mocha.Suite.prototype.addTest = suiteAddTest
+}
+const restoreHookRetries = () => {
+  Hook.prototype.retries = hookRetries
+}
+
+const patchSuiteRetries = () => {
+  Suite.prototype.retries = function (...args) {
+    if (args[0] !== undefined && args[0] > -1) {
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {
+        args: {
+          title: this.title,
+          numRetries: args[0] ?? 2,
+        },
+      })
+
+      throw err
+    }
+
+    return suiteRetries.apply(this, args)
+  }
+}
+
+const patchHookRetries = () => {
+  Hook.prototype.retries = function (...args) {
+    if (args[0] !== undefined && args[0] > -1) {
+      const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_suite', {
+        args: {
+          title: this.parent.title,
+          numRetries: args[0] ?? 2,
+        },
+      })
+
+      // so this error doesn't cause a retry
+      getTestFromRunnable(this)._retries = -1
+
+      throw err
+    }
+
+    return hookRetries.apply(this, args)
+  }
+}
+
 // matching the current Runner.prototype.fail except
 // changing the logic for determing whether this is a valid err
 const patchRunnerFail = () => {
@@ -274,12 +339,84 @@ const patchRunnableRun = (Cypress) => {
   }
 }
 
+function patchTestClone () {
+  Test.prototype.clone = function () {
+    if (this._retriesBeforeEachFailedTestFn) {
+      this.fn = this._retriesBeforeEachFailedTestFn
+    }
+
+    const ret = testClone.apply(this, arguments)
+
+    // carry over testConfigOverrides
+    ret.cfg = this.cfg
+
+    // carry over test.id
+    ret.id = this.id
+
+    return ret
+  }
+}
+
+function patchRunnerRunTests () {
+  Runner.prototype.runTests = function () {
+    const suite = arguments[0]
+
+    const _slice = suite.tests.slice
+
+    // HACK: we need to dynamically enqueue tests to suite.tests during a test run
+    // however Mocha calls `.slice` on this property and thus we no longer have a reference
+    // to the internal test queue. So we replace the .slice method
+    // in a way that we keep a reference to the returned array. we name it suite.testsQueue
+    suite.tests.slice = function () {
+      this.slice = _slice
+
+      const ret = _slice.apply(this, arguments)
+
+      suite.testsQueue = ret
+
+      return ret
+    }
+
+    const ret = runnerRunTests.apply(this, arguments)
+
+    return ret
+  }
+}
+
 const patchRunnableClearTimeout = () => {
   Runnable.prototype.clearTimeout = function (...args) {
     // call the original
     runnableClearTimeout.apply(this, args)
 
     this.timer = null
+  }
+}
+
+function patchSuiteAddTest (Cypress) {
+  Mocha.Suite.prototype.addTest = function (...args) {
+    const test = args[0]
+
+    const ret = suiteAddTest.apply(this, args)
+
+    test.retries = function (...args) {
+      if (args[0] !== undefined && args[0] > -1) {
+        const err = $errUtils.cypressErrByPath('mocha.manually_set_retries_test', {
+          args: {
+            title: test.title,
+            numRetries: args[0] ?? 2,
+          },
+        })
+
+        // so this error doesn't cause a retry
+        test._retries = -1
+
+        throw err
+      }
+
+      return testRetries.apply(this, args)
+    }
+
+    return ret
   }
 }
 
@@ -319,6 +456,11 @@ const restore = () => {
   restoreRunnableRun()
   restoreRunnableClearTimeout()
   restoreRunnableResetTimeout()
+  restoreSuiteRetries()
+  restoreHookRetries()
+  restoreRunnerRunTests()
+  restoreTestClone()
+  restoreSuiteAddTest()
 }
 
 const override = (Cypress) => {
@@ -326,6 +468,11 @@ const override = (Cypress) => {
   patchRunnableRun(Cypress)
   patchRunnableClearTimeout()
   patchRunnableResetTimeout()
+  patchSuiteRetries()
+  patchHookRetries()
+  patchRunnerRunTests()
+  patchTestClone()
+  patchSuiteAddTest(Cypress)
 }
 
 const create = (specWindow, Cypress, config) => {
