@@ -82,9 +82,8 @@ commands:
       - run:
           name: Install Node
           command: |
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-            cp .node-version .nvmrc
+            ./scripts/load-nvm.sh
+            cp .node-version $HOME/.nvmrc
             echo "before nvm install"
             nvm install
             echo "before nvm use"
@@ -380,10 +379,7 @@ jobs:
       - run:
           name: print Node version
           command: |
-            echo "NVM_DIR is $NVM_DIR"
-            ls $NVM_DIR
-            echo "Home .nvm has"
-            ls $HOME/.nvm
+            ./scripts/load-nvm.sh
             echo "nvm use default"
             nvm use default
             node -v
@@ -393,6 +389,7 @@ jobs:
       - run:
           name: check Node version
           command: |
+            ./scripts/load-nvm.sh
             yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
