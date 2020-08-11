@@ -368,7 +368,7 @@ describe('src/cy/commands/traversals', () => {
       cy.visit('/fixtures/shadow-dom.html')
     })
 
-    describe('#closest', () => {
+    context('#closest', () => {
       it('retrieves itself when it is the closest matching element within shadow dom', () => {
         cy
         .get('#shadow-element-3')
@@ -376,7 +376,7 @@ describe('src/cy/commands/traversals', () => {
         .closest('p')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].className).to.eq('shadow-3')
+          expect($parent[0]).to.have.class('shadow-3')
         })
       })
 
@@ -387,7 +387,7 @@ describe('src/cy/commands/traversals', () => {
         .closest('#parent-of-shadow-container-0')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+          expect($parent[0]).to.have.id('parent-of-shadow-container-0')
         })
       })
 
@@ -397,7 +397,7 @@ describe('src/cy/commands/traversals', () => {
         .closest('#parent-of-shadow-container-0')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].id).to.eq('parent-of-shadow-container-0')
+          expect($parent[0]).to.have.id('parent-of-shadow-container-0')
         })
       })
 
@@ -408,7 +408,7 @@ describe('src/cy/commands/traversals', () => {
         .closest('#shadow-element-3')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].id).to.eq('shadow-element-3')
+          expect($parent[0]).to.have.id('shadow-element-3')
         })
       })
 
@@ -419,7 +419,7 @@ describe('src/cy/commands/traversals', () => {
         .closest('div')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].className).to.eq('shadow-div')
+          expect($parent[0]).to.have.class('shadow-div')
         })
       })
 
@@ -430,12 +430,35 @@ describe('src/cy/commands/traversals', () => {
         .closest('#shadow-element-4')
         .then(($parent) => {
           expect($parent.length).to.eq(1)
-          expect($parent[0].id).to.eq('shadow-element-4')
+          expect($parent[0]).to.have.id('shadow-element-4')
+        })
+      })
+
+      it('handles multiple elements in subject when parents are different', () => {
+        cy
+        .get('#shadow-element-1, #shadow-element-2')
+        .find('div', { includeShadowDom: true })
+        .closest('cy-test-element')
+        .then(($parents) => {
+          expect($parents.length).to.eq(2)
+          expect($parents[0]).to.have.id('shadow-element-1')
+          expect($parents[1]).to.have.id('shadow-element-2')
+        })
+      })
+
+      it('handles multiple elements in subject when parents are same', () => {
+        cy
+        .get('#shadow-element-9')
+        .find('.shadow-div', { includeShadowDom: true })
+        .closest('cy-test-element')
+        .then(($parents) => {
+          expect($parents.length).to.eq(1)
+          expect($parents[0]).to.have.id('shadow-element-9')
         })
       })
     })
 
-    describe('#find', () => {
+    context('#find', () => {
       it('retrieves a matching element beyond shadow boundaries', () => {
         const el = cy.$$('#shadow-element-3')[0].shadowRoot.querySelector('p')
 
@@ -480,7 +503,7 @@ describe('src/cy/commands/traversals', () => {
       })
     })
 
-    describe('#parent', () => {
+    context('#parent', () => {
       it('retrieves parent within shadow root', () => {
         cy
         .get('#shadow-element-3')
@@ -488,7 +511,7 @@ describe('src/cy/commands/traversals', () => {
         .parent()
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].className).to.eq('shadow-div')
+          expect($parents[0]).to.have.class('shadow-div')
         })
       })
 
@@ -499,7 +522,7 @@ describe('src/cy/commands/traversals', () => {
         .parent('.shadow-div')
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].className).to.eq('shadow-div')
+          expect($parents[0]).to.have.class('shadow-div')
         })
       })
 
@@ -510,7 +533,7 @@ describe('src/cy/commands/traversals', () => {
         .parent()
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('shadow-element-3')
+          expect($parents[0]).to.have.id('shadow-element-3')
         })
       })
 
@@ -521,7 +544,7 @@ describe('src/cy/commands/traversals', () => {
         .parent('#shadow-element-3')
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('shadow-element-3')
+          expect($parents[0]).to.have.id('shadow-element-3')
         })
       })
 
@@ -531,7 +554,7 @@ describe('src/cy/commands/traversals', () => {
         .parent()
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[0]).to.have.id('parent-of-shadow-container-1')
         })
       })
 
@@ -541,73 +564,550 @@ describe('src/cy/commands/traversals', () => {
         .parent('#parent-of-shadow-container-1')
         .then(($parents) => {
           expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
+          expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+        })
+      })
+
+      it('handles multiple elements in subject when parents are different', () => {
+        cy
+        .get('#shadow-element-1, #shadow-element-2')
+        .find('div', { includeShadowDom: true })
+        .parent()
+        .then(($parents) => {
+          expect($parents.length).to.eq(2)
+          expect($parents[0]).to.have.id('shadow-element-1')
+          expect($parents[1]).to.have.id('shadow-element-2')
+        })
+      })
+
+      it('handles multiple elements in subject when parents are same', () => {
+        cy
+        .get('#shadow-element-9')
+        .find('.shadow-div', { includeShadowDom: true })
+        .parent()
+        .then(($parents) => {
+          expect($parents.length).to.eq(1)
+          expect($parents[0]).to.have.id('shadow-element-9')
         })
       })
     })
 
-    describe('#parents', () => {
-      it('retrieves all parents, including those beyond shadow boundaries', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents()
-        .then(($parents) => {
-          expect($parents.length).to.eq(6)
-          expect($parents[0].className).to.eq('shadow-div')
-          expect($parents[1].id).to.eq('shadow-element-3')
-          expect($parents[2].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[3].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[4].nodeName).to.eq('BODY')
-          expect($parents[5].nodeName).to.eq('HTML')
+    context('#parents', () => {
+      describe('parents()', () => {
+        it('retrieves all parents, including those beyond shadow boundaries', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parents()
+          .then(($parents) => {
+            expect($parents.length).to.eq(6)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.have.id('shadow-element-3')
+            expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[3]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[4]).to.match('body')
+            expect($parents[5]).to.match('html')
+          })
+        })
+
+        it('retrieves parents normally when no shadow roots exist', () => {
+          cy
+          .get('#shadow-element-3')
+          .parents()
+          .then(($parents) => {
+            expect($parents.length).to.eq(4)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[2]).to.match('body')
+            expect($parents[3]).to.match('html')
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-3, #shadow-element-8')
+          .find('p', { includeShadowDom: true })
+          .parents()
+          .then(($parents) => {
+            expect($parents.length).to.eq(10)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.match('html')
+            expect($parents[2]).to.match('body')
+            expect($parents[3]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[4]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[5]).to.have.id('shadow-element-3')
+            expect($parents[6]).to.have.class('shadow-div')
+            expect($parents[7]).to.have.id('parent-of-shadow-container-2')
+            expect($parents[8]).to.have.id('parent-of-shadow-container-3')
+            expect($parents[9]).to.have.id('shadow-element-8')
+          })
         })
       })
 
-      it('retrieves parents normally when no shadow roots exist', () => {
-        cy
-        .get('#shadow-element-3')
-        .parents()
-        .then(($parents) => {
-          expect($parents.length).to.eq(4)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[1].id).to.eq('parent-of-shadow-container-0')
-          expect($parents[2].nodeName).to.eq('BODY')
-          expect($parents[3].nodeName).to.eq('HTML')
+      describe('parents(selector) - ', () => {
+        it('retrieves parents by selector within shadow root', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parents('.shadow-div')
+          .then(($parents) => {
+            expect($parents.length).to.eq(1)
+            expect($parents[0]).to.have.class('shadow-div')
+          })
+        })
+
+        it('retrieves parents by selector within and outside of shadow root', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parents('div')
+          .then(($parents) => {
+            expect($parents.length).to.eq(3)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[2]).to.have.id('parent-of-shadow-container-0')
+          })
+        })
+
+        it('retrieves parents by selector outside of shadow root', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parents('#parent-of-shadow-container-0')
+          .then(($parents) => {
+            expect($parents.length).to.eq(1)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-0')
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-3, #shadow-element-8')
+          .find('p', { includeShadowDom: true })
+          .parents('.filter-me')
+          .then(($parents) => {
+            expect($parents.length).to.eq(2)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-3')
+          })
+        })
+      })
+    })
+
+    context('#parentsUntil', () => {
+      describe('parentsUntil()', () => {
+        it('retrieves all parents, including those beyond shadow boundaries', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parentsUntil()
+          .then(($parents) => {
+            expect($parents.length).to.eq(6)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.have.id('shadow-element-3')
+            expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[3]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[4]).to.match('body')
+            expect($parents[5]).to.match('html')
+          })
+        })
+
+        it('retrieves parents normally when no shadow roots exist', () => {
+          cy
+          .get('#shadow-element-3')
+          .parentsUntil()
+          .then(($parents) => {
+            expect($parents.length).to.eq(4)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[2]).to.match('body')
+            expect($parents[3]).to.match('html')
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-3, #shadow-element-8')
+          .find('p', { includeShadowDom: true })
+          .parentsUntil()
+          .then(($parents) => {
+            expect($parents.length).to.eq(10)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.match('html')
+            expect($parents[2]).to.match('body')
+            expect($parents[3]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[4]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[5]).to.have.id('shadow-element-3')
+            expect($parents[6]).to.have.class('shadow-div')
+            expect($parents[7]).to.have.id('parent-of-shadow-container-2')
+            expect($parents[8]).to.have.id('parent-of-shadow-container-3')
+            expect($parents[9]).to.have.id('shadow-element-8')
+          })
         })
       })
 
-      it('retrieves parents by selector within shadow root', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('.shadow-div')
-        .then(($parents) => {
-          expect($parents.length).to.eq(1)
-          expect($parents[0].className).to.eq('shadow-div')
+      describe('parentsUntil(selector)', () => {
+        it('retrieves parents until selector within shadow root', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-8-nested-3', { includeShadowDom: true })
+          .parentsUntil('.shadow-div')
+          .then(($parents) => {
+            expect($parents.length).to.eq(3)
+            expect($parents[0]).to.have.class('shadow-8-nested-2')
+            expect($parents[1]).to.have.class('shadow-8-nested-1')
+            expect($parents[2]).to.have.class('shadow-content')
+          })
+        })
+
+        it('retrieves parents until selector within and outside of shadow root', () => {
+          cy
+          .get('#shadow-element-3')
+          .find('p', { includeShadowDom: true })
+          .parentsUntil('#parent-of-shadow-container-0')
+          .then(($parents) => {
+            expect($parents.length).to.eq(3)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.have.id('shadow-element-3')
+            expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+          })
+        })
+
+        it('retrieves parents until selector normally when no shadow roots exist', () => {
+          cy
+          .get('#shadow-element-3')
+          .parentsUntil('#parent-of-shadow-container-0')
+          .then(($parents) => {
+            expect($parents.length).to.eq(1)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-3, #shadow-element-8')
+          .find('p', { includeShadowDom: true })
+          .parentsUntil('body')
+          .then(($parents) => {
+            expect($parents.length).to.eq(8)
+            expect($parents[0]).to.have.class('shadow-div')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-0')
+            expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[3]).to.have.id('shadow-element-3')
+            expect($parents[4]).to.have.class('shadow-div')
+            expect($parents[5]).to.have.id('parent-of-shadow-container-2')
+            expect($parents[6]).to.have.id('parent-of-shadow-container-3')
+            expect($parents[7]).to.have.id('shadow-element-8')
+          })
         })
       })
 
-      it('retrieves parents by selector within and outside of shadow root', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('div')
-        .then(($parents) => {
-          expect($parents.length).to.eq(3)
-          expect($parents[0].className).to.eq('shadow-div')
-          expect($parents[1].id).to.eq('parent-of-shadow-container-1')
-          expect($parents[2].id).to.eq('parent-of-shadow-container-0')
+      describe('parentsUntil(selector, filter)', () => {
+        it('retrieves parents until selector within shadow root and filters result', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-8-nested-3', { includeShadowDom: true })
+          .parentsUntil('.shadow-div', '.filter-me')
+          .then(($parents) => {
+            expect($parents.length).to.eq(1)
+            expect($parents[0]).to.have.class('shadow-8-nested-1')
+          })
+        })
+
+        it('retrieves parents until selector within and outside of shadow root and filters result', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-8-nested-3', { includeShadowDom: true })
+          .parentsUntil('#parent-of-shadow-container-0', '.filter-me')
+          .then(($parents) => {
+            expect($parents.length).to.eq(2)
+            expect($parents[0]).to.have.class('shadow-8-nested-1')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-3')
+          })
+        })
+
+        it('retrieves parents until selector normally when no shadow roots exist and filters result', () => {
+          cy
+          .get('#shadow-element-3')
+          .parentsUntil('body', '.filter-me')
+          .then(($parents) => {
+            expect($parents.length).to.eq(1)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-3, #shadow-element-8')
+          .find('p', { includeShadowDom: true })
+          .parentsUntil('body', '.filter-me')
+          .then(($parents) => {
+            expect($parents.length).to.eq(2)
+            expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            expect($parents[1]).to.have.id('parent-of-shadow-container-3')
+          })
         })
       })
 
-      it('retrieves parents by selector outside of shadow root', () => {
-        cy
-        .get('#shadow-element-3')
-        .find('p', { includeShadowDom: true })
-        .parents('#parent-of-shadow-container-0')
-        .then(($parents) => {
-          expect($parents.length).to.eq(1)
-          expect($parents[0].id).to.eq('parent-of-shadow-container-0')
+      describe('parentsUntil(element)', () => {
+        it('retrieves parents until element within shadow root', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl[0])
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-8-nested-2')
+              expect($parents[1]).to.have.class('shadow-8-nested-1')
+              expect($parents[2]).to.have.class('shadow-content')
+            })
+          })
+        })
+
+        it('retrieves parents until element within and outside of shadow root', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .find('p', { includeShadowDom: true })
+            .parentsUntil($untilEl[0])
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-div')
+              expect($parents[1]).to.have.id('shadow-element-3')
+              expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('retrieves parents until element normally when no shadow roots exist', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .parentsUntil($untilEl[0])
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('.shadow-8-nested-3, .shadow-8-nested-4', { includeShadowDom: true })
+            .parentsUntil($untilEl[0])
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-content')
+              expect($parents[1]).to.have.class('shadow-8-nested-1')
+              expect($parents[2]).to.have.class('shadow-8-nested-2')
+            })
+          })
+        })
+      })
+
+      describe('parentsUntil(element, filter)', () => {
+        it('retrieves parents until element within shadow root and filters result', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl[0], '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+            })
+          })
+        })
+
+        it('retrieves parents until element within and outside of shadow root and filters result', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl[0], '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(2)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+              expect($parents[1]).to.have.id('parent-of-shadow-container-3')
+            })
+          })
+        })
+
+        it('retrieves parents until element normally when no shadow roots exist and filters result', () => {
+          cy
+          .get('body')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .parentsUntil($untilEl[0], '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('.shadow-8-nested-3, .shadow-8-nested-4', { includeShadowDom: true })
+            .parentsUntil($untilEl[0], '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+            })
+          })
+        })
+      })
+
+      describe('parentsUntil(jQueryElement)', () => {
+        it('retrieves parents until jquery element within shadow root', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl)
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-8-nested-2')
+              expect($parents[1]).to.have.class('shadow-8-nested-1')
+              expect($parents[2]).to.have.class('shadow-content')
+            })
+          })
+        })
+
+        it('retrieves parents until jquery element within and outside of shadow root', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .find('p', { includeShadowDom: true })
+            .parentsUntil($untilEl)
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-div')
+              expect($parents[1]).to.have.id('shadow-element-3')
+              expect($parents[2]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('retrieves parents until jquery element normally when no shadow roots exist', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .parentsUntil($untilEl)
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('.shadow-8-nested-3, .shadow-8-nested-4', { includeShadowDom: true })
+            .parentsUntil($untilEl)
+            .then(($parents) => {
+              expect($parents.length).to.eq(3)
+              expect($parents[0]).to.have.class('shadow-content')
+              expect($parents[1]).to.have.class('shadow-8-nested-1')
+              expect($parents[2]).to.have.class('shadow-8-nested-2')
+            })
+          })
+        })
+      })
+
+      describe('parentsUntil(jQueryElement, filter)', () => {
+        it('retrieves parents until jquery element within shadow root and filters result', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl, '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+            })
+          })
+        })
+
+        it('retrieves parents until jquery element within and outside of shadow root and filters result', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-8')
+            .find('.shadow-8-nested-3', { includeShadowDom: true })
+            .parentsUntil($untilEl, '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(2)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+              expect($parents[1]).to.have.id('parent-of-shadow-container-3')
+            })
+          })
+        })
+
+        it('retrieves parents until jquery element normally when no shadow roots exist and filters result', () => {
+          cy
+          .get('body')
+          .then(($untilEl) => {
+            cy
+            .get('#shadow-element-3')
+            .parentsUntil($untilEl, '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.id('parent-of-shadow-container-1')
+            })
+          })
+        })
+
+        it('handles multiple elements in subject', () => {
+          cy
+          .get('#shadow-element-8')
+          .find('.shadow-div', { includeShadowDom: true })
+          .then(($untilEl) => {
+            cy
+            .get('.shadow-8-nested-3, .shadow-8-nested-4', { includeShadowDom: true })
+            .parentsUntil($untilEl, '.filter-me')
+            .then(($parents) => {
+              expect($parents.length).to.eq(1)
+              expect($parents[0]).to.have.class('shadow-8-nested-1')
+            })
+          })
         })
       })
     })

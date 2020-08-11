@@ -1,3 +1,4 @@
+const $ = require('jquery')
 const _ = require('lodash')
 
 const $dom = require('../../dom')
@@ -20,10 +21,10 @@ const optInShadowTraversals = {
 }
 
 const autoShadowTraversals = {
-  closest: (cy, $el, arg1) => {
+  closest: (cy, $el, selector) => {
     const nodes = _.reduce($el, (nodes, el) => {
       const getClosest = (node) => {
-        const closestNode = node.closest(arg1)
+        const closestNode = node.closest(selector)
 
         if (closestNode) return nodes.concat(closestNode)
 
@@ -37,23 +38,44 @@ const autoShadowTraversals = {
       return getClosest(el)
     }, [])
 
-    return cy.$$(nodes)
+    return $.uniqueSort(nodes)
   },
   parent: (cy, $el) => {
-    const parent = $elements.getParent($el[0])
+    const parents = $el.map((i, el) => {
+      return $elements.getParent(el)
+    })
 
-    return cy.$$(parent)
+    return $.uniqueSort(parents)
   },
   parents: (cy, $el, selector) => {
-    const parents = $el.map((i, el) => {
+    let $parents = $el.map((i, el) => {
       return $elements.getAllParents(el)
     })
 
-    if (!selector) {
-      return cy.$$(parents)
+    if ($el.length > 1) {
+      $parents = $.uniqueSort($parents)
     }
 
-    return cy.$$(parents).filter(selector)
+    if (!selector) {
+      return $parents
+    }
+
+    return $parents.filter(selector)
+  },
+  parentsUntil: (cy, $el, selector, filter) => {
+    let $parents = $el.map((i, el) => {
+      return $elements.getAllParents(el, selector)
+    })
+
+    if ($el.length > 1) {
+      $parents = $.uniqueSort($parents)
+    }
+
+    if (!filter) {
+      return $parents
+    }
+
+    return $parents.filter(filter)
   },
 }
 
