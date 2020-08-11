@@ -389,7 +389,7 @@ jobs:
       - run:
           name: check Node version
           command: |
-            ./scripts/load-nvm.sh
+            . ./scripts/load-nvm.sh
             yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
@@ -410,7 +410,11 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn --frozen-lockfile || yarn --frozen-lockfile
+      - run:
+          name: install and build
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn --frozen-lockfile || yarn --frozen-lockfile
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -428,7 +432,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      ## this will catch .only's in js/coffee as well
+      ## this will catch ".only"s in js/coffee as well
       - run: yarn lint
       - run:
           name: cypress info (dev)
@@ -965,6 +969,7 @@ jobs:
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
           command: |
+            . ./scripts/load-nvm.sh
             node --version
             yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run: yarn binary-zip --platform $PLATFORM
