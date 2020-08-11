@@ -522,10 +522,17 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      # make sure mocha runs
-      - run: yarn test-mocha
+      - run:
+          name: Mocha tests
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-mocha
       # test binary build code
-      - run: yarn test-scripts
+      - run:
+          name: Test scripts
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-scripts
 
   server-unit-tests:
     <<: *defaults
@@ -1024,7 +1031,9 @@ jobs:
           background: true
       - run:
           name: Run Kitchensink example project
-          command: yarn cypress:run --project /tmp/cypress-example-kitchensink
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
           path: /tmp/cypress-example-kitchensink/cypress/screenshots
       - store_artifacts:
@@ -1074,7 +1083,11 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn check-next-dev-version
+      - run:
+          name: Check next dev version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-next-dev-version
       - run:
           name: bump NPM version
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
