@@ -2157,3 +2157,268 @@ Details:
 
 
 `
+
+exports['e2e record passing passes 2'] = [
+  {
+    "stats": {
+      "suites": 1,
+      "tests": 2,
+      "passes": 0,
+      "pending": 0,
+      "skipped": 1,
+      "failures": 1,
+      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockDuration": 1234
+    },
+    "tests": [
+      {
+        "testId": "r3",
+        "title": [
+          "record fails",
+          "fails 1"
+        ],
+        "state": "failed",
+        "body": "function() {}",
+        "displayError": "Error: foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`\n      [stack trace lines]",
+        "attempts": [
+          {
+            "state": "failed",
+            "error": {
+              "name": "Error",
+              "message": "foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`",
+              "stack": "[stack trace lines]"
+            },
+            "timings": {
+              "lifecycle": 100,
+              "before each": [
+                {
+                  "hookId": "h1",
+                  "fnDuration": 400,
+                  "afterFnDuration": 200
+                }
+              ]
+            },
+            "failedFromHookId": "h1",
+            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+            "wallClockDuration": 1234,
+            "videoTimestamp": 9999
+          }
+        ]
+      },
+      {
+        "testId": "r4",
+        "title": [
+          "record fails",
+          "is skipped"
+        ],
+        "state": "skipped",
+        "body": "function() {}",
+        "displayError": null,
+        "attempts": [
+          {
+            "state": "skipped",
+            "error": null,
+            "timings": null,
+            "failedFromHookId": null,
+            "wallClockStartedAt": null,
+            "wallClockDuration": null,
+            "videoTimestamp": null
+          }
+        ]
+      }
+    ],
+    "error": null,
+    "video": true,
+    "hooks": [
+      {
+        "hookId": "h1",
+        "hookName": "before each",
+        "title": [
+          "\"before each\" hook"
+        ],
+        "body": "function() {\n    throw new Error(\"foo\");\n  }"
+      }
+    ],
+    "screenshots": [
+      {
+        "screenshotId": "some-random-id",
+        "name": null,
+        "testId": "r3",
+        "testAttemptIndex": 0,
+        "takenAt": "2018-02-01T20:14:19.323Z",
+        "height": 720,
+        "width": 1280
+      }
+    ],
+    "cypressConfig": {},
+    "reporterStats": {
+      "suites": 1,
+      "tests": 1,
+      "passes": 0,
+      "pending": 0,
+      "failures": 1,
+      "start": "2018-02-01T20:14:19.323Z",
+      "end": "2018-02-01T20:14:19.323Z",
+      "duration": 1234
+    }
+  },
+  {
+    "stats": {
+      "suites": 1,
+      "tests": 2,
+      "passes": 1,
+      "pending": 1,
+      "skipped": 0,
+      "failures": 0,
+      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockDuration": 1234
+    },
+    "tests": [
+      {
+        "testId": "r3",
+        "title": [
+          "record pass",
+          "passes"
+        ],
+        "state": "passed",
+        "body": "function() {\n    cy.visit(\"/scrollable.html\");\n    return cy.viewport(400, 400).get(\"#box\").screenshot('yay it passes');\n  }",
+        "displayError": null,
+        "attempts": [
+          {
+            "state": "passed",
+            "error": null,
+            "timings": {
+              "lifecycle": 100,
+              "test": {
+                "fnDuration": 400,
+                "afterFnDuration": 200
+              }
+            },
+            "failedFromHookId": null,
+            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+            "wallClockDuration": 1234,
+            "videoTimestamp": 9999
+          }
+        ]
+      },
+      {
+        "testId": "r4",
+        "title": [
+          "record pass",
+          "is pending"
+        ],
+        "state": "pending",
+        "body": "",
+        "displayError": null,
+        "attempts": [
+          {
+            "state": "pending",
+            "error": null,
+            "timings": null,
+            "failedFromHookId": null,
+            "wallClockStartedAt": null,
+            "wallClockDuration": null,
+            "videoTimestamp": null
+          }
+        ]
+      }
+    ],
+    "error": null,
+    "video": true,
+    "hooks": [],
+    "screenshots": [
+      {
+        "screenshotId": "some-random-id",
+        "name": "yay it passes",
+        "testId": "r3",
+        "testAttemptIndex": 0,
+        "takenAt": "2018-02-01T20:14:19.323Z",
+        "height": 1002,
+        "width": 202
+      }
+    ],
+    "cypressConfig": {},
+    "reporterStats": {
+      "suites": 1,
+      "tests": 2,
+      "passes": 1,
+      "pending": 1,
+      "failures": 0,
+      "start": "2018-02-01T20:14:19.323Z",
+      "end": "2018-02-01T20:14:19.323Z",
+      "duration": 1234
+    }
+  },
+  {
+    "stats": {
+      "suites": 0,
+      "tests": 1,
+      "passes": 0,
+      "pending": 0,
+      "skipped": 0,
+      "failures": 1,
+      "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
+      "wallClockDuration": 1234
+    },
+    "tests": [
+      {
+        "testId": "r2",
+        "title": [
+          "An uncaught error was detected outside of a test"
+        ],
+        "state": "failed",
+        "body": "function throwErr() {\n      throw err;\n    }",
+        "displayError": "Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]",
+        "attempts": [
+          {
+            "state": "failed",
+            "error": {
+              "name": "Error",
+              "message": "The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.",
+              "stack": "[stack trace lines]"
+            },
+            "timings": {
+              "lifecycle": 100,
+              "test": {
+                "fnDuration": 400,
+                "afterFnDuration": 200
+              }
+            },
+            "failedFromHookId": null,
+            "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
+            "wallClockDuration": 1234,
+            "videoTimestamp": 9999
+          }
+        ]
+      }
+    ],
+    "error": null,
+    "video": true,
+    "hooks": [],
+    "screenshots": [
+      {
+        "screenshotId": "some-random-id",
+        "name": null,
+        "testId": "r2",
+        "testAttemptIndex": 0,
+        "takenAt": "2018-02-01T20:14:19.323Z",
+        "height": 720,
+        "width": 1280
+      }
+    ],
+    "cypressConfig": {},
+    "reporterStats": {
+      "suites": 0,
+      "tests": 1,
+      "passes": 0,
+      "pending": 0,
+      "failures": 1,
+      "start": "2018-02-01T20:14:19.323Z",
+      "end": "2018-02-01T20:14:19.323Z",
+      "duration": 1234
+    }
+  }
+]

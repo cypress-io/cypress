@@ -17,9 +17,9 @@ exports['e2e spec isolation fails'] = {
         "pending": 1,
         "skipped": 1,
         "failures": 3,
-        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockDuration": 1234
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
       },
       "reporter": "spec",
       "reporterStats": {
@@ -34,7 +34,6 @@ exports['e2e spec isolation fails'] = {
       },
       "hooks": [
         {
-          "hookId": "h1",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -42,7 +41,6 @@ exports['e2e spec isolation fails'] = {
           "body": "function() {\n      throw new Error(\"fail1\");\n    }"
         },
         {
-          "hookId": "h2",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -50,7 +48,6 @@ exports['e2e spec isolation fails'] = {
           "body": "function() {\n      throw new Error(\"fail2\");\n    }"
         },
         {
-          "hookId": "h3",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -60,7 +57,6 @@ exports['e2e spec isolation fails'] = {
       ],
       "tests": [
         {
-          "testId": "r4",
           "title": [
             "simple failing hook spec",
             "beforeEach hooks",
@@ -77,25 +73,22 @@ exports['e2e spec isolation fails'] = {
                 "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h1",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h1",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             }
           ]
         },
         {
-          "testId": "r6",
           "title": [
             "simple failing hook spec",
             "pending",
@@ -108,16 +101,14 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "pending",
               "error": null,
-              "timings": null,
-              "failedFromHookId": null,
-              "wallClockStartedAt": null,
-              "wallClockDuration": null,
-              "videoTimestamp": null
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r8",
           "title": [
             "simple failing hook spec",
             "afterEach hooks",
@@ -134,29 +125,22 @@ exports['e2e spec isolation fails'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h2",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             }
           ]
         },
         {
-          "testId": "r9",
           "title": [
             "simple failing hook spec",
             "afterEach hooks",
@@ -169,16 +153,14 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "skipped",
               "error": null,
-              "timings": null,
-              "failedFromHookId": null,
-              "wallClockStartedAt": null,
-              "wallClockDuration": null,
-              "videoTimestamp": null
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r11",
           "title": [
             "simple failing hook spec",
             "after hooks",
@@ -191,22 +173,14 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                }
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r12",
           "title": [
             "simple failing hook spec",
             "after hooks",
@@ -223,62 +197,24 @@ exports['e2e spec isolation fails'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after all": [
-                  {
-                    "hookId": "h3",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h3",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             }
           ]
         }
       ],
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
-      "screenshots": [
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r4",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r8",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r12",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
-          "height": 720,
-          "width": 1280
-        }
-      ],
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -295,9 +231,9 @@ exports['e2e spec isolation fails'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 2,
-        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockDuration": 1234
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
       },
       "reporter": "spec",
       "reporterStats": {
@@ -313,7 +249,6 @@ exports['e2e spec isolation fails'] = {
       "hooks": [],
       "tests": [
         {
-          "testId": "r3",
           "title": [
             "simple failing spec",
             "fails1"
@@ -329,22 +264,22 @@ exports['e2e spec isolation fails'] = {
                 "message": "Timed out retrying: expected true to be false",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
+                  "height": 720,
+                  "width": 1280
                 }
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              ]
             }
           ]
         },
         {
-          "testId": "r4",
           "title": [
             "simple failing spec",
             "fails2"
@@ -360,45 +295,24 @@ exports['e2e spec isolation fails'] = {
                 "message": "fails2",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
+                  "height": 720,
+                  "width": 1280
                 }
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              ]
             }
           ]
         }
       ],
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
-      "screenshots": [
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r3",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r4",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
-          "height": 720,
-          "width": 1280
-        }
-      ],
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
@@ -415,9 +329,9 @@ exports['e2e spec isolation fails'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 0,
-        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockDuration": 1234
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
       },
       "reporter": "spec",
       "reporterStats": {
@@ -432,7 +346,6 @@ exports['e2e spec isolation fails'] = {
       },
       "hooks": [
         {
-          "hookId": "h1",
           "hookName": "before all",
           "title": [
             "\"before all\" hook"
@@ -440,7 +353,6 @@ exports['e2e spec isolation fails'] = {
           "body": "function() {\n    return cy.wait(100);\n  }"
         },
         {
-          "hookId": "h2",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -448,7 +360,6 @@ exports['e2e spec isolation fails'] = {
           "body": "function() {\n    return cy.wait(200);\n  }"
         },
         {
-          "hookId": "h4",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -456,7 +367,6 @@ exports['e2e spec isolation fails'] = {
           "body": "function() {\n    return cy.wait(200);\n  }"
         },
         {
-          "hookId": "h3",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -466,7 +376,6 @@ exports['e2e spec isolation fails'] = {
       ],
       "tests": [
         {
-          "testId": "r3",
           "title": [
             "simple hooks spec",
             "t1"
@@ -478,43 +387,14 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "before all": [
-                  {
-                    "hookId": "h1",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "before each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h4",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r4",
           "title": [
             "simple hooks spec",
             "t2"
@@ -526,36 +406,14 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h4",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r5",
           "title": [
             "simple hooks spec",
             "t3"
@@ -567,45 +425,16 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h4",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "after all": [
-                  {
-                    "hookId": "h3",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         }
       ],
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
-      "screenshots": [],
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
@@ -622,9 +451,9 @@ exports['e2e spec isolation fails'] = {
         "pending": 0,
         "skipped": 0,
         "failures": 0,
-        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockDuration": 1234
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
       },
       "reporter": "spec",
       "reporterStats": {
@@ -639,7 +468,6 @@ exports['e2e spec isolation fails'] = {
       },
       "hooks": [
         {
-          "hookId": "h1",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -649,7 +477,6 @@ exports['e2e spec isolation fails'] = {
       ],
       "tests": [
         {
-          "testId": "r3",
           "title": [
             "simple passing spec",
             "passes"
@@ -661,31 +488,16 @@ exports['e2e spec isolation fails'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h1",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                }
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         }
       ],
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
-      "screenshots": [],
       "spec": {
         "name": "simple_passing_spec.coffee",
         "relative": "cypress/integration/simple_passing_spec.coffee",
@@ -841,9 +653,9 @@ exports['failing with retries enabled'] = {
         "pending": 1,
         "skipped": 1,
         "failures": 3,
-        "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockEndedAt": "2018-02-01T20:14:19.323Z",
-        "wallClockDuration": 1234
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
       },
       "reporter": "spec",
       "reporterStats": {
@@ -858,7 +670,6 @@ exports['failing with retries enabled'] = {
       },
       "hooks": [
         {
-          "hookId": "h1",
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
@@ -866,7 +677,6 @@ exports['failing with retries enabled'] = {
           "body": "function() {\n      throw new Error(\"fail1\");\n    }"
         },
         {
-          "hookId": "h2",
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
@@ -874,7 +684,6 @@ exports['failing with retries enabled'] = {
           "body": "function() {\n      throw new Error(\"fail2\");\n    }"
         },
         {
-          "hookId": "h3",
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
@@ -884,7 +693,6 @@ exports['failing with retries enabled'] = {
       ],
       "tests": [
         {
-          "testId": "r4",
           "title": [
             "simple failing hook spec",
             "beforeEach hooks",
@@ -901,20 +709,18 @@ exports['failing with retries enabled'] = {
                 "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h1",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h1",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             },
             {
               "state": "failed",
@@ -923,29 +729,22 @@ exports['failing with retries enabled'] = {
                 "message": "fail1",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "before each": [
-                  {
-                    "hookId": "h1",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ],
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
+                  "height": 720,
+                  "width": 1280
                 }
-              },
-              "failedFromHookId": "h1",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              ]
             }
           ]
         },
         {
-          "testId": "r6",
           "title": [
             "simple failing hook spec",
             "pending",
@@ -958,16 +757,14 @@ exports['failing with retries enabled'] = {
             {
               "state": "pending",
               "error": null,
-              "timings": null,
-              "failedFromHookId": null,
-              "wallClockStartedAt": null,
-              "wallClockDuration": null,
-              "videoTimestamp": null
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r8",
           "title": [
             "simple failing hook spec",
             "afterEach hooks",
@@ -984,24 +781,18 @@ exports['failing with retries enabled'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h2",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             },
             {
               "state": "failed",
@@ -1010,29 +801,22 @@ exports['failing with retries enabled'] = {
                 "message": "fail2",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after each": [
-                  {
-                    "hookId": "h2",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h2",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             }
           ]
         },
         {
-          "testId": "r9",
           "title": [
             "simple failing hook spec",
             "afterEach hooks",
@@ -1045,16 +829,14 @@ exports['failing with retries enabled'] = {
             {
               "state": "skipped",
               "error": null,
-              "timings": null,
-              "failedFromHookId": null,
-              "wallClockStartedAt": null,
-              "wallClockDuration": null,
-              "videoTimestamp": null
+              "videoTimestamp": null,
+              "duration": null,
+              "startedAt": null,
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r11",
           "title": [
             "simple failing hook spec",
             "after hooks",
@@ -1067,22 +849,14 @@ exports['failing with retries enabled'] = {
             {
               "state": "passed",
               "error": null,
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                }
-              },
-              "failedFromHookId": null,
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
             }
           ]
         },
         {
-          "testId": "r12",
           "title": [
             "simple failing hook spec",
             "after hooks",
@@ -1099,82 +873,24 @@ exports['failing with retries enabled'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail",
                 "stack": "[stack trace lines]"
               },
-              "timings": {
-                "lifecycle": 100,
-                "test": {
-                  "fnDuration": 400,
-                  "afterFnDuration": 200
-                },
-                "after all": [
-                  {
-                    "hookId": "h3",
-                    "fnDuration": 400,
-                    "afterFnDuration": 200
-                  }
-                ]
-              },
-              "failedFromHookId": "h3",
-              "wallClockStartedAt": "2018-02-01T20:14:19.323Z",
-              "wallClockDuration": 1234,
-              "videoTimestamp": 9999
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
             }
           ]
         }
       ],
       "error": null,
       "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
-      "screenshots": [
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r4",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r4",
-          "testAttemptIndex": 1,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r8",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r8",
-          "testAttemptIndex": 1,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
-          "height": 720,
-          "width": 1280
-        },
-        {
-          "screenshotId": "some-random-id",
-          "name": null,
-          "testId": "r12",
-          "testAttemptIndex": 0,
-          "takenAt": "2018-02-01T20:14:19.323Z",
-          "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
-          "height": 720,
-          "width": 1280
-        }
-      ],
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",

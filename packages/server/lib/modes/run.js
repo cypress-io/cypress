@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
@@ -30,6 +30,7 @@ const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
+const objUtils = require('../util/obj_utils')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -1260,7 +1261,41 @@ module.exports = {
 
       debug('final results of all runs: %o', results)
 
-      return writeOutput(outputPath, results).return(results)
+      const { each, remapKeys, remove, renameKey, setValue } = objUtils
+
+      // Remap module API result json to remove private props and rename props to make more user-friendly
+      const moduleAPIResults = remapKeys(results, {
+        runs: each((run) => ({
+          tests: each((test) => ({
+            attempts: each((attempt, i) => ({
+              timings: remove,
+              failedFromHookId: remove,
+              wallClockDuration: renameKey('duration'),
+              wallClockStartedAt: renameKey('startedAt'),
+              wallClockEndedAt: renameKey('endedAt'),
+              screenshots: setValue(
+                _(run.screenshots)
+                .filter({ testId: test.testId, testAttemptIndex: i })
+                .map((screenshot) => _.omit(screenshot,
+                  ['screenshotId', 'testId', 'testAttemptIndex']))
+                .value(),
+              ),
+            })),
+            testId: remove,
+          })),
+          hooks: each({
+            hookId: remove,
+          }),
+          stats: {
+            wallClockDuration: renameKey('duration'),
+            wallClockStartedAt: renameKey('startedAt'),
+            wallClockEndedAt: renameKey('endedAt'),
+          },
+          screenshots: remove,
+        })),
+      })
+
+      return writeOutput(outputPath, moduleAPIResults).return(moduleAPIResults)
     })
   },
 

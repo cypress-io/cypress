@@ -7,6 +7,7 @@
 // but for now describe it as an ambient module
 
 declare namespace CypressCommandLine {
+  type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
   interface TestError {
     name: string
     message: string
@@ -159,15 +160,12 @@ declare namespace CypressCommandLine {
   // small utility types to better express meaning of other types
   type dateTimeISO = string
   type ms = number
-  type hookId = string
-  type testId = string
   type pixels = number
 
   /**
    * Cypress single test result
    */
   interface TestResult {
-    testId: testId
     title: string[]
     state: string
     body: string
@@ -181,19 +179,17 @@ declare namespace CypressCommandLine {
   interface AttemptResult {
     state: string
     error: TestError | null
-    timings: any
-    failedFromHookId: hookId | null
-    wallClockStartedAt: dateTimeISO
-    wallClockDuration: ms
+    startedAt: dateTimeISO
+    duration: ms
     videoTimestamp: ms
+    screenshots: ScreenshotInformation[]
   }
 
   /**
    * Information about a single "before", "beforeEach", "afterEach" and "after" hook.
   */
   interface HookInformation {
-    hookId: hookId
-    hookName: 'before' | 'beforeEach' | 'afterEach' | 'after'
+    hookName: HookName
     title: string[]
     body: string
   }
@@ -202,11 +198,8 @@ declare namespace CypressCommandLine {
    * Information about a single screenshot.
    */
   interface ScreenshotInformation {
-    screenshotId: string
     name: string
-    testId: testId
     takenAt: dateTimeISO
-    testAttemptIndex: number
     /**
      * Absolute path to the saved image
      */
@@ -229,9 +222,9 @@ declare namespace CypressCommandLine {
       pending: number
       skipped: number
       failures: number
-      wallClockStartedAt: dateTimeISO
-      wallClockEndedAt: dateTimeISO
-      wallClockDuration: ms
+      startedAt: dateTimeISO
+      endedAt: dateTimeISO
+      duration: ms
     },
     /**
      * Reporter name like "spec"
@@ -246,7 +239,6 @@ declare namespace CypressCommandLine {
     tests: TestResult[]
     error: string | null
     video: string | null
-    screenshots: ScreenshotInformation[]
     /**
      * information about the spec test file.
     */
