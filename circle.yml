@@ -403,7 +403,11 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn check-terminal
 
-      - run: yarn stop-only-all
+      - run:
+          name: Stop .only
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn stop-only-all
 
       - restore_cache:
           name: Restore yarn cache
