@@ -173,9 +173,12 @@ describe('src/cy/commands/cookies', () => {
 
     describe('.log', () => {
       beforeEach(function () {
+        this.logs = []
+
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookies') {
             this.lastLog = log
+            this.logs.push(log)
           }
         })
 
@@ -207,6 +210,14 @@ describe('src/cy/commands/cookies', () => {
 
           expect(lastLog.get('snapshots').length).to.eq(1)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
+        })
+      })
+
+      it('logs once', () => {
+        cy.getCookies().then(function () {
+          const { logs } = this
+
+          expect(logs.length).to.eq(1)
         })
       })
 

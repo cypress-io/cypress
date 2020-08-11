@@ -84,8 +84,6 @@ module.exports = function (Commands, Cypress, cy, state) {
 
             throw err
           }
-        } else {
-          return memo[value]
         }
       } else {
         return memo[value]
