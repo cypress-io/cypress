@@ -45,6 +45,7 @@ describe('Selecting by React props and state', () => {
       // <AProduct name={'Second item'} />
       cy.react('AProduct', { name: 'Second item' })
         .should('be.visible')
+        .find('.name')
         .and('have.text', 'Second item')
     })
 
@@ -61,7 +62,7 @@ describe('Selecting by React props and state', () => {
       cy.log('**.getCurrentState**')
       cy.getReact('AProduct', { name: 'Second item' })
         .getCurrentState()
-        .should('deep.equal', { myName: 'Second item' })
+        .should('include', { myName: 'Second item' })
 
       // find component using state
       cy.getReact('AProduct', null, { myName: 'Second item' }).should('exist')
@@ -81,6 +82,43 @@ describe('Selecting by React props and state', () => {
         .getReact('AProduct', { name: 'First item' })
         .getProps('name')
         .should('eq', 'First item')
+    })
+
+    // SKIP: https://github.com/bahmutov/cypress-react-unit-test/issues/381
+    it.skip('finds components by props and state', () => {
+      // by clicking on the Order button we change the
+      // internal state of that component
+      cy.contains('.product', 'First item')
+        .find('button.order')
+        .click()
+        .wait(1000)
+
+      // the component is there for sure, since the DOM has updated
+      cy.contains('.product', '1')
+        .find('.name')
+        .should('have.text', 'First item')
+
+      // now find that component using the state value
+      // DOES NOT WORK FOR SOME REASON
+      cy.react('AProduct', null, { orderCount: 1 })
+        .should('not.be.empty')
+        .find('.name')
+        .should('have.text', 'First item')
+    })
+
+    // SKIP: https://github.com/bahmutov/cypress-react-unit-test/issues/381
+    it.skip('finds components by props and state (click twice)', () => {
+      // by clicking on the Order button we change the
+      // internal state of that component
+      cy.contains('.product', 'First item')
+        .find('button.order')
+        .click()
+        .click()
+
+      // now find that component using the state value
+      cy.react('AProduct', null, { orderCount: 2 })
+        .find('.name')
+        .should('have.text', 'First item')
     })
   })
 

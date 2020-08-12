@@ -6,11 +6,26 @@ class AProduct extends React.Component {
     super(props)
     this.state = {
       myName: props.name,
+      orderCount: 0,
     }
   }
 
+  order() {
+    this.setState({
+      orderCount: this.state.orderCount + 1,
+    })
+  }
+
   render() {
-    return <div className="product">{this.state.myName}</div>
+    return (
+      <div className="product">
+        <span className="name">{this.state.myName}</span>
+        <span className="ordered">{this.state.orderCount}</span>
+        <button className="order" onClick={this.order.bind(this)}>
+          Order
+        </button>
+      </div>
+    )
   }
 }
 
