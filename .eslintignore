@@ -13,3 +13,4 @@ examples/use-babelrc/cypress/integration/spec.js
 dist
 tsconfig.json
 .vscode/
+.history
