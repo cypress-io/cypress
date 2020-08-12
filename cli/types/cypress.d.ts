@@ -107,10 +107,7 @@ declare namespace Cypress {
     fromAutWindow: WindowPosition & { x: number, y: number }
   }
   
-  enum CypressTestTypes {
-    integration = "integration",
-    component = "component"
-  }
+  type CypressSpecType = "integration" | "component";
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -224,7 +221,7 @@ declare namespace Cypress {
       relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
       absolute: string
       specFilter?: string // optional spec filter used by the user
-      specType: CypressTestTypes
+      specType: CypressSpecType
     }
 
     /**
