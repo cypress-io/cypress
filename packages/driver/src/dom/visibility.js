@@ -17,6 +17,8 @@ const isVisible = (el) => {
 // TODO: we should prob update dom
 // to be passed in $utils as a dependency
 // because of circular references
+// the ignoreOpacity option exists for checking actionability
+// as elements with `opacity: 0` are hidden yet actionable
 const isHidden = (el, name = 'isHidden()', ignoreOpacity = false) => {
   if (!$elements.isElement(el)) {
     throw new Error(`\`Cypress.dom.${name}\` failed because it requires a DOM element. The subject received was: \`${el}\``)

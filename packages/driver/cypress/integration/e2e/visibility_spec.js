@@ -36,4 +36,14 @@ describe('visibility', () => {
       cy.get('.container-2').should('be.visible')
     })
   })
+
+  describe('CSS opacity', () => {
+    it('correctly detects visibility when opacity changes', () => {
+      cy.visit('/fixtures/opacity.html')
+      cy.get('#opacity')
+      .should('be.visible')
+      .click()
+      .should('not.be.visible')
+    })
+  })
 })
