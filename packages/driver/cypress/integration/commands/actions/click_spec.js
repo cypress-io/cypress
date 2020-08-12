@@ -2054,6 +2054,18 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#three-buttons button').click({ multiple: true })
       })
 
+      it('throws when the element has `opacity: 0` but is not visible', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).not.to.contain('CSS property: `opacity: 0`')
+          expect(err.message).to.contain('`cy.click()` failed because this element is not visible')
+
+          done()
+        })
+
+        cy.get('#opacity-0-hidden').click()
+      })
+
       it('throws when subject is disabled', function (done) {
         cy.$$('#button').prop('disabled', true)
 
