@@ -900,7 +900,15 @@ export class Keyboard {
 
       // or is IE
     } else {
-      event = new win[eventConstructor](eventType, eventOptions)
+      let constructor = win[eventConstructor]
+
+      // When event constructor doesn't exist, fallback to KeyboardEvent.
+      // It's necessary because FireFox doesn't support InputEvent.
+      if (typeof constructor !== 'function') {
+        constructor = win['KeyboardEvent']
+      }
+
+      event = new constructor(eventType, eventOptions)
       _.extend(event, eventOptions)
     }
 
