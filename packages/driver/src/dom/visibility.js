@@ -78,7 +78,7 @@ const isHidden = (el, name = 'isHidden()', ignoreOpacity = false) => {
 
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
-  if (elIsHiddenByAncestors($el, $el, ignoreOpacity)) {
+  if (elIsHiddenByAncestors($el, ignoreOpacity)) {
     return true // is hidden
   }
 
@@ -292,7 +292,7 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent
   return elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor.parent())
 }
 
-const elIsHiddenByAncestors = function ($el, $origEl = $el, ignoreOpacity) {
+const elIsHiddenByAncestors = function ($el, ignoreOpacity, $origEl = $el) {
   // walk up to each parent until we reach the body
   // if any parent has opacity: 0
   // or has an effective offsetHeight of 0
@@ -324,7 +324,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el, ignoreOpacity) {
   }
 
   // continue to recursively walk up the chain until we reach body or html
-  return elIsHiddenByAncestors($parent, $origEl, ignoreOpacity)
+  return elIsHiddenByAncestors($parent, ignoreOpacity, $origEl)
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
