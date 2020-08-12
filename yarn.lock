@@ -1823,10 +1823,10 @@
     debug "4.1.1"
     lodash "4.17.19"
 
-"@cypress/webpack-preprocessor@5.4.3":
-  version "5.4.3"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.3.tgz#16cd450f15a7e95523a4e4e48b7ced3e318c4957"
-  integrity sha512-WomyLH7mtCkRpN6unHUfZcX/tl8lfL3MqSniSvlg6wTtQLmlYM3VPDUQjZ4mywQ+TOE9TkSEQyVeJT7SRksxUg==
+"@cypress/webpack-preprocessor@5.4.4":
+  version "5.4.4"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.4.tgz#20adaa338799485aeb67227a9784991c420acd31"
+  integrity sha512-aNOS4J7vilVO6CgzYUnMCraZTCF+SvQtGTlG0HKdqbpI4+dzCWGRFpwpqiSsCb83m+WAP2gfuGQVaFTCM43JcA==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
