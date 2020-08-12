@@ -21,9 +21,7 @@
     "titleBar.inactiveForeground": "#15202b99",
     "statusBar.background": "#7e9c00",
     "statusBarItem.hoverBackground": "#556900",
-    "statusBar.foreground": "#15202b",
-    "statusBar.border": "#7e9c00",
-    "titleBar.border": "#7e9c00"
+    "statusBar.foreground": "#15202b"
   },
   "peacock.color": "#7e9c00",
   "javascript.updateImportsOnFileMove.enabled": "never",
