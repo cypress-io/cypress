@@ -37,7 +37,7 @@ describe('visibility', () => {
     })
   })
 
-  describe('CSS opacity', () => {
+  describe('css opacity', () => {
     it('correctly detects visibility when opacity changes', () => {
       cy.visit('/fixtures/opacity.html')
       cy.get('#opacity')

@@ -78,7 +78,7 @@ const isHidden = (el, name = 'isHidden()', ignoreOpacity = false) => {
 
   // we do some calculations taking into account the parents
   // to see if its hidden by a parent
-  if (elIsHiddenByAncestors($el)) {
+  if (elIsHiddenByAncestors($el, $el, ignoreOpacity)) {
     return true // is hidden
   }
 
@@ -292,9 +292,10 @@ const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $el.parent
   return elIsOutOfBoundsOfAncestorsOverflow($el, $ancestor.parent())
 }
 
-const elIsHiddenByAncestors = function ($el, $origEl = $el) {
+const elIsHiddenByAncestors = function ($el, $origEl = $el, ignoreOpacity) {
   // walk up to each parent until we reach the body
-  // if any parent has an effective offsetHeight of 0
+  // if any parent has opacity: 0
+  // or has an effective offsetHeight of 0
   // and its set overflow: hidden then our child element
   // is effectively hidden
   // -----UNLESS------
@@ -309,6 +310,13 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
     return false
   }
 
+  // a child can never have a computed opacity
+  // greater than that of its parent
+  // so if the parent has an opacity of 0, so does the child
+  if (elHasOpacityZero($parent) && !ignoreOpacity) {
+    return true
+  }
+
   if (elHasOverflowHidden($parent) && elHasNoEffectiveWidthOrHeight($parent)) {
     // if any of the elements between the parent and origEl
     // have fixed or position absolute
@@ -316,7 +324,7 @@ const elIsHiddenByAncestors = function ($el, $origEl = $el) {
   }
 
   // continue to recursively walk up the chain until we reach body or html
-  return elIsHiddenByAncestors($parent, $origEl)
+  return elIsHiddenByAncestors($parent, $origEl, ignoreOpacity)
 }
 
 const parentHasNoOffsetWidthOrHeightAndOverflowHidden = function ($el) {
@@ -380,8 +388,23 @@ const parentHasVisibilityCollapse = function ($el) {
   return parentHasVisibilityCollapse($el.parent())
 }
 
+const parentHasOpacityZero = function ($el) {
+  // if we've walked all the way up to document then return false
+  if (!$el.length || $document.isDocument($el)) {
+    return false
+  }
+
+  // if we have opacity: 0 then return the $el
+  if (elHasOpacityZero($el)) {
+    return $el
+  }
+
+  // continue walking
+  return parentHasOpacityZero($el.parent())
+}
+
 /* eslint-disable no-cond-assign */
-const getReasonIsHidden = function ($el, ignoreOpacity) {
+const getReasonIsHidden = function ($el, ignoreOpacity = false) {
   // TODO: need to add in the reason an element
   // is hidden when its fixed position and its
   // either being covered or there is no el
@@ -429,6 +452,12 @@ const getReasonIsHidden = function ($el, ignoreOpacity) {
 
   if (elHasOpacityZero($el) && !ignoreOpacity) {
     return `This element \`${node}\` is not visible because it has CSS property: \`opacity: 0\``
+  }
+
+  if (($parent = parentHasOpacityZero($el.parent())) && !ignoreOpacity) {
+    parentNode = $elements.stringify($parent, 'short')
+
+    return `This element \`${node}\` is not visible because its parent \`${parentNode}\` has CSS property: \`opacity: 0\``
   }
 
   if (elHasNoOffsetWidthOrHeight($el)) {

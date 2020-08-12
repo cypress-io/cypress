@@ -220,6 +220,10 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('#opacity-0').trigger('mousedown')
       })
 
+      it('can trigger on elements with parents that have `opacity: 0`', () => {
+        cy.get('#opacity-0-parent').trigger('mousedown')
+      })
+
       it('can trigger on readonly inputs', () => {
         cy.get('#readonly-attr').trigger('mousedown')
       })

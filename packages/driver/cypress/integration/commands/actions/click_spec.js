@@ -1073,6 +1073,10 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#opacity-0').click()
       })
 
+      it('can click on elements with parents that have `opacity: 0`', () => {
+        cy.get('#opacity-0-parent').click()
+      })
+
       // readonly should only limit typing, not clicking
       it('can click on readonly inputs', () => {
         cy.get('#readonly-attr').click()
