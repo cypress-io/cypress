@@ -11,9 +11,13 @@ const debug = require('debug')('cypress:webpack')
 const debugStats = require('debug')('cypress:webpack:stats')
 
 type FilePath = string
+interface BundleObject {
+  promise: Promise<FilePath>
+  initial: boolean
+}
 
 // bundle promises from input spec filename to output bundled file paths
-let bundles: {[key: string]: Promise<FilePath>} = {}
+let bundles: {[key: string]: BundleObject} = {}
 
 // we don't automatically load the rules, so that the babel dependencies are
 // not required if a user passes in their own configuration
@@ -164,7 +168,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     if (bundles[filePath]) {
       debug(`already have bundle for ${filePath}`)
 
-      return bundles[filePath]
+      return bundles[filePath].promise
     }
 
     const defaultWebpackOptions = getDefaultWebpackOptions()
@@ -229,7 +233,10 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     // cache the bundle promise, so it can be returned if this function
     // is invoked again with the same filePath
-    bundles[filePath] = latestBundle.promise
+    bundles[filePath] = {
+      promise: latestBundle.promise,
+      initial: true,
+    }
 
     const rejectWithErr = (err: Error) => {
       err = quietErrorMessage(err)
@@ -294,19 +301,24 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
       // we overwrite the latest bundle, so that a new call to this function
       // returns a promise that resolves when the bundling is finished
       latestBundle = createDeferred<string>()
-      bundles[filePath] = latestBundle.promise
+      bundles[filePath].promise = latestBundle.promise
 
-      bundles[filePath].finally(() => {
-        debug('- compile finished for', filePath)
+      bundles[filePath].promise.finally(() => {
+        debug('- compile finished for %s, initial? %s', filePath, bundles[filePath].initial)
         // when the bundling is finished, emit 'rerun' to let Cypress
-        // know to rerun the spec
-        file.emit('rerun')
+        // know to rerun the spec, but NOT when it is the initial
+        // bundling of the file
+        if (!bundles[filePath].initial) {
+          file.emit('rerun')
+        }
+
+        bundles[filePath].initial = false
       })
       // we suppress unhandled rejections so they don't bubble up to the
       // unhandledRejection handler and crash the process. Cypress will
       // eventually take care of the rejection when the file is requested.
       // note that this does not work if attached to latestBundle.promise
-      // for some reason. it only works when attached after .tap  ¯\_(ツ)_/¯
+      // for some reason. it only works when attached after .finally  ¯\_(ツ)_/¯
       .suppressUnhandledRejections()
     }
 
@@ -341,7 +353,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
     // return the promise, which will resolve with the outputPath or reject
     // with any error encountered
-    return bundles[filePath]
+    return bundles[filePath].promise
   }
 }
 

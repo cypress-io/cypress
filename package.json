@@ -14,13 +14,13 @@
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
-    "pretest": "yarn lint && yarn build",
     "test": "yarn test-unit && yarn test-e2e",
     "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
     "test-e2e": "mocha test/e2e/*.spec.*",
     "test-unit": "mocha test/unit/*.spec.*",
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
-    "types": "tsc --noEmit"
+    "types": "tsc --noEmit",
+    "watch": "yarn build --watch"
   },
   "husky": {
     "hooks": {
@@ -37,6 +37,7 @@
     "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
     "@babel/preset-env": "^7.0.0",
     "@cypress/eslint-plugin-dev": "5.0.0",
+    "@fellow/eslint-plugin-coffee": "0.4.13",
     "@types/webpack": "4.41.12",
     "@typescript-eslint/eslint-plugin": "2.31.0",
     "@typescript-eslint/parser": "2.31.0",

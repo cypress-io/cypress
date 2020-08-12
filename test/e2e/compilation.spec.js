@@ -19,24 +19,19 @@ const normalizeErrMessage = (message) => {
 const fixturesDir = path.join(__dirname, '..', 'fixtures')
 const outputDir = path.join(__dirname, '..', '_test-output')
 
+const createFile = ({ name = 'example_spec.js', shouldWatch = false } = {}) => {
+  return Object.assign(new EventEmitter(), {
+    filePath: path.join(outputDir, name),
+    outputPath: path.join(outputDir, name.replace('.', '_output.')),
+    shouldWatch,
+  })
+}
+
 describe('webpack preprocessor - e2e', () => {
-  let run
   let file
 
   beforeEach(async () => {
     preprocessor.__reset()
-
-    run = ({ options, keepFile, shouldWatch = false, fileName = 'example_spec.js' } = {}) => {
-      if (!keepFile) {
-        file = Object.assign(new EventEmitter(), {
-          filePath: path.join(outputDir, fileName),
-          outputPath: path.join(outputDir, fileName.replace('.', '_output.')),
-          shouldWatch,
-        })
-      }
-
-      return preprocessor(options)(file)
-    }
 
     await fs.remove(outputDir)
     await fs.copy(fixturesDir, outputDir)
@@ -54,14 +49,17 @@ describe('webpack preprocessor - e2e', () => {
     const options = preprocessor.defaultOptions
 
     options.webpackOptions.mode = 'production' // snapshot will be minified
+    file = createFile()
 
-    return run({ options }).then((outputPath) => {
+    return preprocessor(options)(file).then((outputPath) => {
       snapshot(fs.readFileSync(outputPath).toString())
     })
   })
 
   it('has less verbose "Module not found" error', () => {
-    return run({ fileName: 'imports_nonexistent_file_spec.js' })
+    file = createFile({ name: 'imports_nonexistent_file_spec.js' })
+
+    return preprocessor()(file)
     .then(() => {
       throw new Error('Should not resolve')
     })
@@ -71,7 +69,9 @@ describe('webpack preprocessor - e2e', () => {
   })
 
   it('has less verbose syntax error', () => {
-    return run({ fileName: 'syntax_error_spec.js' })
+    file = createFile({ name: 'syntax_error_spec.js' })
+
+    return preprocessor()(file)
     .then(() => {
       throw new Error('Should not resolve')
     })
@@ -87,12 +87,14 @@ describe('webpack preprocessor - e2e', () => {
       throw new Error('Should not have trigger unhandled rejection')
     })
 
-    await run({ shouldWatch: true })
+    file = createFile({ shouldWatch: true })
+
+    await preprocessor()(file)
     await fs.outputFile(file.filePath, '{')
 
     await new Promise((resolve) => {
       setTimeout(() => {
-        run({ keepFile: true, shouldWatch: true })
+        preprocessor()(file)
         .catch((err) => {
           expect(err.stack).to.include('Unexpected token')
           resolve()
@@ -102,11 +104,26 @@ describe('webpack preprocessor - e2e', () => {
   })
 
   it('triggers rerun on syntax error', async () => {
-    await run({ shouldWatch: true })
+    file = createFile({ shouldWatch: true })
+
+    await preprocessor()(file)
 
     const _emit = sinon.spy(file, 'emit')
 
     await fs.outputFile(file.filePath, '{')
+
+    await retry(() => expect(_emit).calledWith('rerun'))
+  })
+
+  it('does not call rerun on initial build, but on subsequent builds', async () => {
+    file = createFile({ shouldWatch: true })
+    const _emit = sinon.spy(file, 'emit')
+
+    await preprocessor()(file)
+
+    expect(_emit).not.to.be.calledWith('rerun')
+
+    await fs.outputFile(file.filePath, 'console.log()')
 
     await retry(() => expect(_emit).calledWith('rerun'))
   })
