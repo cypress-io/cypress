@@ -9,6 +9,7 @@ macBuildFilters: &macBuildFilters
       only:
         - develop
         - v5.0-release
+        - install-node-on-circleci-mac
 
 defaults: &defaults
   parallelism: 1
@@ -60,12 +61,37 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      ## Node 12.12.0 (yarn 1.19.1)
+      # Executor should have Node >= required version
       xcode: "11.2.1"
     environment:
       PLATFORM: mac
 
 commands:
+  install-required-node:
+    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
+    description: Install Node version matching .node-version
+    steps:
+      - run:
+          name: Install NVM
+          # TODO: determine why we get the missing .nvmrc file error
+          command: |
+            export NODE_VERSION=$(cat .node-version)
+            echo "Installing Node $NODE_VERSION"
+            cp .node-version .nvmrc
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
+      - run:
+          # https://github.com/nvm-sh/nvm#nvmrc
+          name: Install Node
+          command: |
+            . ./scripts/load-nvm.sh
+            echo "before nvm install"
+            nvm install
+            echo "before nvm use"
+            nvm use
+            echo "before nvm alias default"
+            nvm alias default
+            node --version
+
   install-latest-chrome:
     description: Install latest Google Chrome (stable)
     parameters:
@@ -254,6 +280,10 @@ commands:
         description: Whether to use wait-on to wait on a server to be booted
         type: string
         default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "npm start --if-present"
     steps:
       - attach_workspace:
           at: ~/
@@ -290,7 +320,7 @@ commands:
           command: npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: npm start --if-present
+          command: <<parameters.server-start-command>>
           background: true
       - run:
           condition: <<parameters.wait-on>>
@@ -363,6 +393,7 @@ jobs:
     <<: *defaults
     steps:
       - checkout
+      - install-required-node
       - run:
           name: Print working folder
           command: echo $PWD
@@ -371,20 +402,36 @@ jobs:
           command: echo $(yarn global bin)
       - run:
           name: print Node version
-          command: node -v
+          command: |
+            . ./scripts/load-nvm.sh
+            echo "nvm use default"
+            nvm use default
+            node -v
       - run:
           name: print yarn version
           command: yarn -v
-      - run: yarn check-node-version
+      - run:
+          name: check Node version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: yarn check-terminal
+      - run:
+          name: Check terminal
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-terminal
 
-      - run: yarn stop-only-all
+      - run:
+          name: Stop .only
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn stop-only-all
 
       - restore_cache:
           name: Restore yarn cache
@@ -395,7 +442,11 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn --frozen-lockfile || yarn --frozen-lockfile
+      - run:
+          name: install and build
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn --frozen-lockfile || yarn --frozen-lockfile
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -413,8 +464,13 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      ## this will catch .only's in js/coffee as well
-      - run: yarn lint
+      - install-required-node
+      ## this will catch ".only"s in js/coffee as well
+      - run:
+          name: Linting 🧹
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
@@ -526,10 +582,18 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      # make sure mocha runs
-      - run: yarn test-mocha
+      - install-required-node
+      - run:
+          name: Mocha tests
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-mocha
       # test binary build code
-      - run: yarn test-scripts
+      - run:
+          name: Test scripts
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-scripts
 
   server-unit-tests:
     <<: *defaults
@@ -965,6 +1029,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(yarn bin)/print-arch
+      - install-required-node
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -973,8 +1038,15 @@ jobs:
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
-          command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run: yarn binary-zip --platform $PLATFORM
+          command: |
+            . ./scripts/load-nvm.sh
+            node --version
+            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+      - run:
+          name: Zip the binary
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
       - store-npm-logs
@@ -1007,6 +1079,7 @@ jobs:
     steps:
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
+      - install-required-node
       - run:
           name: Install prod dependencies
           command: yarn --production
@@ -1018,7 +1091,9 @@ jobs:
           background: true
       - run:
           name: Run Kitchensink example project
-          command: yarn cypress:run --project /tmp/cypress-example-kitchensink
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
           path: /tmp/cypress-example-kitchensink/cypress/screenshots
       - store_artifacts:
@@ -1068,13 +1143,20 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn check-next-dev-version
+      - install-required-node
+      - run:
+          name: Check next dev version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-next-dev-version
       - run:
           name: bump NPM version
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          command: yarn build --scope cypress
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -1488,6 +1570,16 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
+  "test-binary-against-cypress-realworld-app":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-realworld-app
+          browser: chrome
+          server-start-command: "npm run start:ci"
+          command: "npm run cypress:run"
+          wait-on: http://localhost:3000
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1831,6 +1923,16 @@ linux-workflow: &linux-workflow
         <<: *testBinaryFirefox
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
+    - test-binary-against-cypress-realworld-app:
+        filters:
+          branches:
+            only:
+              - develop
+              - kevin-v5.0-release-rwa
+              - v5.0-release
+        requires:
+          - build-npm-package
+          - build-binary
 
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"
