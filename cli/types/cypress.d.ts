@@ -2319,6 +2319,54 @@ declare namespace Cypress {
      * @default false
      */
     multiple: boolean
+    /**
+     * Activates the control key during click
+     *
+     * @default false
+     */
+    ctrlKey: boolean
+    /**
+     * Activates the control key during click
+     *
+     * @default false
+     */
+    controlKey: boolean
+    /**
+     * Activates the alt key (option key for Mac) during click
+     *
+     * @default false
+     */
+    altKey: boolean
+    /**
+     * Activates the alt key (option key for Mac) during click
+     *
+     * @default false
+     */
+    optionKey: boolean
+    /**
+     * Activates the shift key during click
+     *
+     * @default false
+     */
+    shiftKey: boolean
+    /**
+     * Activates the meta key (Windows key or command key for Mac) during click
+     *
+     * @default false
+     */
+    metaKey: boolean
+    /**
+     * Activates the meta key (Windows key or command key for Mac) during click
+     *
+     * @default false
+     */
+    commandKey: boolean
+    /**
+     * Activates the meta key (Windows key or command key for Mac) during click
+     *
+     * @default false
+     */
+    cmdKey: boolean
   }
 
   interface ResolvedConfigOptions {

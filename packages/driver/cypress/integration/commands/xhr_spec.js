@@ -2158,10 +2158,12 @@ describe('src/cy/commands/xhr', () => {
           done()
         })
 
-        cy.route(/foo/, 'fx:NOT_EXISTING_FILE_FIXTURE')
+        cy.route(/foo/, 'fx:NOT_EXISTING_FILE_FIXTURE').as('stub')
         cy.window().then((win) => {
           win.$.get('/foo')
         })
+
+        cy.wait('@stub')
       })
     })
 

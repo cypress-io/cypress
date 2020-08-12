@@ -195,7 +195,7 @@ describe('Runs List', function () {
         })
       })
 
-      it('shows \'cannot connect to api server\' message', function () {
+      it('shows "cannot connect to api server" message', function () {
         cy.contains('Cannot connect to API server')
         cy.contains('http://api.server')
         cy.contains('ECONNREFUSED')
@@ -327,8 +327,8 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays \'need to set up\' message', () => {
-      cy.contains('You have no recorded runs')
+    it('displays "need to set up" message', () => {
+      cy.contains('You could see test recordings here')
     })
   })
 
@@ -342,13 +342,13 @@ describe('Runs List', function () {
       this.goToRuns()
     })
 
-    it('displays \'need to set up\' message', () => {
-      cy.contains('You have no recorded runs')
+    it('displays "need to set up" message', () => {
+      cy.contains('You could see test recordings here')
     })
 
     describe('click setup project', function () {
       beforeEach(() => {
-        cy.contains('Set up project').click()
+        cy.contains('Connect to Dashboard').click()
       })
 
       it('shows login message', () => {
@@ -439,10 +439,10 @@ describe('Runs List', function () {
         cy.contains('Request access')
       })
 
-      it('displays \'need to set up\' message', function () {
+      it('displays "need to set up" message', function () {
         this.ipcError({ type: 'NO_PROJECT_ID' })
 
-        cy.contains('You have no recorded runs')
+        cy.contains('You could see test recordings here')
       })
 
       it('displays old runs if another error', function () {
@@ -541,7 +541,7 @@ describe('Runs List', function () {
             cy.get('@requestAccessBtn').should('be.disabled')
           })
 
-          it('hides \'Request access\' text', () => {
+          it('hides "Request access" text', () => {
             cy.get('@requestAccessBtn').find('span').should('not.be.visible')
           })
 
@@ -558,7 +558,7 @@ describe('Runs List', function () {
               cy.contains('Request sent')
             })
 
-            it('\'persists\' request state (until app is reloaded at least)', function () {
+            it('persists request state (until app is reloaded at least)', function () {
               this.ipc.getRuns.onCall(1).rejects({ name: 'foo', message: 'There\'s an error', statusCode: 403 })
 
               cy.get('.navbar-default a').contains('Tests').click()
@@ -613,7 +613,7 @@ describe('Runs List', function () {
                 cy.get('@requestAccessBtn').should('not.be.disabled')
               })
 
-              it('shows \'Request access\' text', () => {
+              it('shows "Request access" text', () => {
                 cy.get('@requestAccessBtn').find('span').should('be.visible')
               })
 
@@ -627,7 +627,7 @@ describe('Runs List', function () {
                 this.requestAccess.reject({ type: 'DENIED', name: 'foo', message: 'There\'s an error' })
               })
 
-              it('shows \'success\' message', () => {
+              it('shows "success" message', () => {
                 cy.contains('Request sent')
               })
             })
@@ -637,7 +637,7 @@ describe('Runs List', function () {
                 this.requestAccess.reject({ type: 'ALREADY_REQUESTED', name: 'foo', message: 'There\'s an error' })
               })
 
-              it('shows \'success\' message', () => {
+              it('shows "success" message', () => {
                 cy.contains('Request sent')
               })
             })
@@ -653,6 +653,7 @@ describe('Runs List', function () {
 
               it('shows login message', () => {
                 cy.get('.empty h4').should('contain', 'Log in')
+                cy.percySnapshot()
               })
 
               it('clicking Log In to Dashboard opens login', () => {
@@ -723,12 +724,13 @@ describe('Runs List', function () {
         })
       })
 
-      it('displays \'need to set up\' message', () => {
-        cy.contains('You have no recorded runs')
+      it('displays "need to set up" message', () => {
+        cy.contains('You could see test recordings here')
+        cy.percySnapshot()
       })
 
-      it('clears message after setting up to record', function () {
-        cy.contains('.btn', 'Set up project').click()
+      it('clears message after setting up to record', () => {
+        cy.contains('.btn', 'Connect to Dashboard').click()
         cy.get('.organizations-select__dropdown-indicator').click()
         cy.get('.organizations-select__menu').should('be.visible')
         cy.get('.organizations-select__option')
@@ -747,11 +749,7 @@ describe('Runs List', function () {
         this.openProject.resolve(this.config)
 
         this.goToRuns().then(() => {
-          this.getRuns.reject({ name: 'foo', message: `\
-{
-  "no runs": "for you"
-}\
-`, type: 'UNKNOWN' })
+          this.getRuns.reject({ name: 'foo', message: `{"no runs": "for you"}`, type: 'UNKNOWN' })
         })
       })
 
@@ -824,8 +822,8 @@ describe('Runs List', function () {
           })
         })
 
-        it('displays \'need to set up\' message', () => {
-          cy.contains('You have no recorded runs')
+        it('displays "need to set up" message', () => {
+          cy.contains('You could see test recordings here')
         })
       })
     })
@@ -843,14 +841,14 @@ describe('Runs List', function () {
         cy.contains('To record your first')
       })
 
-      it('opens project id guide on clicking \'Why?\'', () => {
+      it('opens project id guide on clicking "Why?"', () => {
         cy.contains('Why?').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-project-id')
         })
       })
 
-      it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
+      it('opens dashboard on clicking "Cypress Dashboard"', () => {
         cy.contains('Cypress Dashboard').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)

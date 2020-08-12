@@ -147,11 +147,11 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
      y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                                          
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                        
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
      y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                                      
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                        
 
 
   (Video)
