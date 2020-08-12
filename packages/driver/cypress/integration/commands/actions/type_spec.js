@@ -177,6 +177,13 @@ describe('src/cy/commands/actions/type - #type', () => {
     .should('have.value', 'foobar')
   })
 
+  // https://github.com/cypress-io/cypress/issues/6125
+  it('works even if Event class is overridden', () => {
+    cy.visit('fixtures/issue-6125.html')
+    cy.get('#login_username')
+    .type('foobar')
+  })
+
   describe('actionability', () => {
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()

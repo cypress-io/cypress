@@ -902,8 +902,8 @@ export class Keyboard {
     } else {
       // For some reason we can't set certain props on Keyboard Events in chrome < 63.
       // So we'll use the plain Event constructor
-      // event = new win[eventConstructor](eventType, eventOptions)
-      event = new win['Event'](eventType, eventOptions)
+      event = new win[eventConstructor](eventType, eventOptions)
+      // event = new win['KeyboardEvent'](eventType, eventOptions)
       _.extend(event, eventOptions)
     }
 
