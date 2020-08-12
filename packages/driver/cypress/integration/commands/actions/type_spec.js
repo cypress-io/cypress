@@ -184,6 +184,14 @@ describe('src/cy/commands/actions/type - #type', () => {
     .type('foobar')
   })
 
+  // https://github.com/cypress-io/cypress/issues/5650
+  it('should trigger KeyboardEvent, not Event, for event listeners', () => {
+    cy.visit('fixtures/issue-5650.html')
+
+    cy.get('#test-input').type('A')
+    cy.get('#result').contains('isKeyboardEvent: true')
+  })
+
   describe('actionability', () => {
     it('can forcibly type + click even when element is invisible', () => {
       const $txt = cy.$$(':text:first').hide()
