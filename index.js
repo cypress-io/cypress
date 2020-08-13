@@ -40,6 +40,22 @@ const getDefaultWebpackOptions = (file, options = {}) => {
     },
     resolve: {
       extensions: ['.js', '.json', '.jsx', '.coffee'],
+      alias: {
+        'child_process': require.resolve('./empty'),
+        'cluster': require.resolve('./empty'),
+        'console': require.resolve('./empty'),
+        'dgram': require.resolve('./empty'),
+        'dns': require.resolve('./empty'),
+        'fs': require.resolve('./empty'),
+        'http2': require.resolve('./empty'),
+        'inspector': require.resolve('./empty'),
+        'module': require.resolve('./empty'),
+        'net': require.resolve('./empty'),
+        'perf_hooks': require.resolve('./empty'),
+        'readline': require.resolve('./empty'),
+        'repl': require.resolve('./empty'),
+        'tls': require.resolve('./empty'),
+      },
     },
   }
 
