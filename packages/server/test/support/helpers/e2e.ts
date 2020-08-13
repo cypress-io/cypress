@@ -697,6 +697,8 @@ const e2e = {
           LINES: 24,
         })
         .defaults({
+          // match CircleCI's filesystem limits, so screenshot names in snapshots match
+          CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
           FAKE_CWD_PATH: '/XXX/XXX/XXX',
           DEBUG_COLORS: '1',
           // prevent any Compression progress

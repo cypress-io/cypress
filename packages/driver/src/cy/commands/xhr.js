@@ -471,15 +471,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           })
         }
 
-        // look ahead to see if fixture exists
-        const fixturesRe = /^(fx:|fixture:)/
-
-        if (hasResponse && fixturesRe.test(options.response)) {
-          const fixtureName = options.response.replace(fixturesRe, '')
-
-          return cy.now('fixture', fixtureName).then(() => route())
-        }
-
         return route()
       }
 
