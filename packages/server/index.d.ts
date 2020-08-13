@@ -5,7 +5,7 @@ export namespace CyServer {
 
   // TODO: pull this from main types
   export interface Config {
-    blacklistHosts: string | string[]
+    blockHosts: string | string[]
     clientRoute: string
     experimentalSourceRewriting: boolean
     modifyObstructiveCode: boolean
