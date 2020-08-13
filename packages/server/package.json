@@ -184,7 +184,8 @@
   },
   "files": [
     "config",
-    "lib"
+    "lib",
+    "patches"
   ],
   "productName": "Cypress",
   "workspaces": {
