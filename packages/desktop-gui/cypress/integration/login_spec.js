@@ -2,7 +2,7 @@ describe('Login', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
 
-    return cy.visitIndex().then(function (win) {
+    cy.visitIndex().then(function (win) {
       let start = win.App.start
 
       this.win = win
@@ -75,21 +75,26 @@ describe('Login', function () {
         })
       })
 
-      it('disables login button', () => {
+      it('shows spinner with Opening browser and disables button', () => {
         cy.get('@loginBtn').should('be.disabled')
-      })
+        .invoke('text').should('contain', 'Opening browser...')
 
-      it('shows spinner with Opening browser', () => {
-        cy.get('@loginBtn').invoke('text').should('contain', 'Opening browser...')
+        cy.percySnapshot()
       })
 
       context('on begin:auth', function () {
-        beforeEach(function () {
-          cy.get('@loginBtn')
-        })
+        it('when browser opened, shows spinner with Waiting...', function () {
+          this.onAuthMessageCb(null, {
+            name: '',
+            message: '',
+            stack: '',
+            browserOpened: true,
+          })
 
-        it('displays spinner with Opening browser... and disables button', function () {
-          cy.contains('Opening browser...').should('be.disabled')
+          cy.get('@loginBtn').should('be.disabled')
+          .invoke('text').should('contain', 'Waiting for browser login...')
+
+          cy.percySnapshot()
         })
 
         describe('on ipc begin:auth success', function () {
