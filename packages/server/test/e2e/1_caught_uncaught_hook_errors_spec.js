@@ -8,35 +8,27 @@ describe('e2e caught and uncaught hooks errors', () => {
     },
   })
 
-  it('failing1', function () {
-    return e2e.exec(this, {
-      spec: 'hook_caught_error_failing_spec.coffee',
-      snapshot: true,
-      expectedExitCode: 3,
-    })
+  e2e.it('failing1', {
+    spec: 'hook_caught_error_failing_spec.coffee',
+    snapshot: true,
+    expectedExitCode: 3,
   })
 
-  it('failing2', function () {
-    return e2e.exec(this, {
-      spec: 'hook_uncaught_error_failing_spec.coffee',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
+  e2e.it('failing2', {
+    spec: 'hook_uncaught_error_failing_spec.coffee',
+    snapshot: true,
+    expectedExitCode: 1,
   })
 
-  it('failing3', function () {
-    return e2e.exec(this, {
-      spec: 'hook_uncaught_root_error_failing_spec.coffee',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
+  e2e.it('failing3', {
+    spec: 'hook_uncaught_root_error_failing_spec.coffee',
+    snapshot: true,
+    expectedExitCode: 1,
   })
 
-  it('failing4', function () {
-    return e2e.exec(this, {
-      spec: 'hook_uncaught_error_events_failing_spec.coffee',
-      snapshot: true,
-      expectedExitCode: 1,
-    })
+  e2e.it('failing4', {
+    spec: 'hook_uncaught_error_events_failing_spec.coffee',
+    snapshot: true,
+    expectedExitCode: 1,
   })
 })

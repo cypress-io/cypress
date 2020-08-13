@@ -121,8 +121,8 @@
     "debug": "4.1.1",
     "decaffeinate": "6.0.9",
     "del": "3.0.0",
-    "electron-builder": "22.6.1",
-    "electron-notarize": "0.2.1",
+    "electron-builder": "22.8.0",
+    "electron-notarize": "1.0.0",
     "enzyme-adapter-react-16": "1.12.1",
     "eslint": "6.8.0",
     "eslint-plugin-cypress": "2.11.1",
@@ -136,6 +136,7 @@
     "fs-extra": "8.1.0",
     "gift": "0.10.2",
     "globby": "10.0.1",
+    "got": "11.5.1",
     "gulp": "4.0.2",
     "gulp-awspublish": "4.0.0",
     "gulp-debug": "4.0.0",
@@ -163,7 +164,7 @@
     "mocha-multi-reporters": "1.1.7",
     "mock-fs": "4.9.0",
     "parse-github-repo-url": "1.4.1",
-    "patch-package": "6.2.0",
+    "patch-package": "6.2.2",
     "percy": "0.26.9",
     "plist": "3.0.1",
     "pluralize": "8.0.0",
@@ -187,7 +188,7 @@
     "typescript": "3.7.4"
   },
   "engines": {
-    "node": ">=12.8.1",
+    "node": ">=12.14.1",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
