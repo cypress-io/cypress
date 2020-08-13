@@ -53,6 +53,26 @@ describe('Enzyme', () => {
           }).to.throw()
         })
     })
+
+    it('mounts component with new props', () => {
+      mount(<Foo id="foo" foo="initial" />)
+      cy.contains('initial').should('be.visible')
+
+      mount(<Foo id="foo" foo="second" />)
+      cy.contains('second').should('be.visible')
+    })
+
+    it('mounts cloned component', () => {
+      const cmp = <Foo id="foo" foo="initial" />
+      mount(cmp)
+      cy.contains('initial').should('be.visible')
+
+      const cloned = Cypress._.cloneDeep(cmp)
+      // change a property, leaving the rest unchanged
+      cloned.props.foo = 'second'
+      mount(cloned)
+      cy.contains('.foo', 'second').should('be.visible')
+    })
   })
 
   context('setState', () => {
