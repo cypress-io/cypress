@@ -173,12 +173,9 @@ describe('src/cy/commands/cookies', () => {
 
     describe('.log', () => {
       beforeEach(function () {
-        this.logs = []
-
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookies') {
             this.lastLog = log
-            this.logs.push(log)
           }
         })
 
@@ -210,14 +207,6 @@ describe('src/cy/commands/cookies', () => {
 
           expect(lastLog.get('snapshots').length).to.eq(1)
           expect(lastLog.get('snapshots')[0]).to.be.an('object')
-        })
-      })
-
-      it('logs once', () => {
-        cy.getCookies().then(function () {
-          const { logs } = this
-
-          expect(logs.length).to.eq(1)
         })
       })
 
@@ -371,9 +360,17 @@ describe('src/cy/commands/cookies', () => {
 
     describe('.log', () => {
       beforeEach(function () {
+        this.logs = []
+        this.asserts = []
+
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookie') {
             this.lastLog = log
+            this.logs.push(log)
+          }
+
+          if (attrs.name === 'assert') {
+            this.asserts.push(log)
           }
         })
 
@@ -389,6 +386,12 @@ describe('src/cy/commands/cookies', () => {
       it('can turn off logging', () => {
         cy.getCookie('foo', { log: false }).then(function () {
           expect(this.log).to.be.undefined
+        })
+      })
+
+      it('only logs assertion once when should is invoked', () => {
+        cy.getCookie('foo').should('exist').then(function () {
+          expect(this.asserts.length).to.eq(1)
         })
       })
 
