@@ -75,6 +75,13 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     res.sendFile(file, { etag: false })
   })
 
+  // special fallback - serve our service worker script
+  app.get('/__sw.js', (req, res) => {
+    const file = path.join(config.projectRoot, 'cypress', 'sw.js')
+
+    res.sendFile(file, { etag: false })
+  })
+
   // special fallback - serve dist'd (bundled/static) files from the project path folder
   app.get('/__cypress/bundled/*', (req, res) => {
     const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
