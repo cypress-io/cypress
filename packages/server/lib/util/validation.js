@@ -105,7 +105,7 @@ const isValidBrowserList = (key, browsers) => {
 
 const isValidRetriesConfig = (key, value) => {
   const optionalKeys = ['runMode', 'openMode']
-  const isValidRetryValue = (val) => _.isNull(val) || (_.isNumber(val) && val >= 0)
+  const isValidRetryValue = (val) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
   const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
 
   if (isValidRetryValue(value)) {

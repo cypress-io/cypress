@@ -696,12 +696,13 @@ describe('lib/config', () => {
         // need to keep the const here or it'll get stripped by the build
         // eslint-disable-next-line no-unused-vars
         const cases = [
+          [{ retries: null }, 'with null', true],
           [{ retries: 3 }, 'when a number', true],
+          [{ retries: 3.2 }, 'when a float', false],
+          [{ retries: -1 }, 'with a negative number', false],
           [{ retries: true }, 'when true', false],
           [{ retries: false }, 'when false', false],
-          [{ retries: -1 }, 'with a negative number', false],
           [{ retries: {} }, 'with an empty object', true],
-          [{ retries: null }, 'with null', true],
           [{ retries: { runMode: 3 } }, 'when runMode is a positive number', true],
           [{ retries: { runMode: -1 } }, 'when runMode is a negative number', false],
           [{ retries: { openMode: 3 } }, 'when openMode is a positive number', true],
