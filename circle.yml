@@ -35,7 +35,7 @@ testBinaryFirefox: &testBinaryFirefox
   filters:
     branches:
       only:
-        - develop
+        - add-patches-to-packages
   requires:
     - build-npm-package
     - build-binary
