@@ -251,7 +251,7 @@ describe('lib/util/args', () => {
       const config = {
         pageLoadTimeout: 10000,
         waitForAnimations: false,
-        blacklistHosts: ['one.com', 'www.two.io'],
+        blockHosts: ['one.com', 'www.two.io'],
         hosts: {
           'foobar.com': '127.0.0.1',
         },
@@ -264,7 +264,7 @@ describe('lib/util/args', () => {
 
       // as mixed usage
       const hosts = JSON.stringify(config.hosts)
-      const blacklistHosts = JSON.stringify(config.blacklistHosts)
+      const blockHosts = JSON.stringify(config.blockHosts)
 
       options = this.setup(
         '--config',
@@ -272,7 +272,7 @@ describe('lib/util/args', () => {
           'pageLoadTimeout=10000',
           'waitForAnimations=false',
           `hosts=${hosts}`,
-          `blacklistHosts=${blacklistHosts}`,
+          `blockHosts=${blockHosts}`,
         ].join(','),
 
       )
@@ -280,7 +280,7 @@ describe('lib/util/args', () => {
       expect(options.config).to.deep.eq(config)
     })
 
-    it('whitelists config properties', function () {
+    it('allows config properties', function () {
       const options = this.setup('--config', 'foo=bar,port=1111,supportFile=path/to/support_file')
 
       expect(options.config.port).to.eq(1111)
@@ -329,7 +329,7 @@ describe('lib/util/args', () => {
   context('.toObject', () => {
     beforeEach(function () {
       this.hosts = { a: 'b', b: 'c' }
-      this.blacklistHosts = ['a.com', 'b.com']
+      this.blockHosts = ['a.com', 'b.com']
       this.specs = [
         path.join(cwd, 'foo'),
         path.join(cwd, 'bar'),
@@ -346,7 +346,7 @@ describe('lib/util/args', () => {
         env: this.env,
         hosts: this.hosts,
         requestTimeout: 1234,
-        blacklistHosts: this.blacklistHosts,
+        blockHosts: this.blockHosts,
         reporterOptions: {
           foo: 'bar',
         },
@@ -360,7 +360,7 @@ describe('lib/util/args', () => {
         '--get-key',
         '--env=foo=bar,baz=quux,bar=foo=quz',
         '--config',
-        `requestTimeout=1234,blacklistHosts=${s(this.blacklistHosts)},hosts=${s(this.hosts)}`,
+        `requestTimeout=1234,blockHosts=${s(this.blockHosts)},hosts=${s(this.hosts)}`,
         '--reporter-options=foo=bar',
         '--spec=foo,bar,baz',
       )
@@ -387,7 +387,7 @@ describe('lib/util/args', () => {
     it('can transpose back to an array', function () {
       const mergedConfig = JSON.stringify({
         requestTimeout: this.config.requestTimeout,
-        blacklistHosts: this.blacklistHosts,
+        blockHosts: this.blockHosts,
         hosts: this.hosts,
         env: this.env,
         reporterOptions: {

@@ -153,6 +153,15 @@ module.exports = {
     },
   },
 
+  breaking_change: {
+    blob_util2 (obj) {
+      return {
+        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
+        docsUrl: 'https://on.cypress.io/migration-guide',
+      }
+    },
+  },
+
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
@@ -300,6 +309,11 @@ module.exports = {
           - \`cy.setCookie()\`
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
+    },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
     },
   },
 
@@ -870,6 +884,33 @@ module.exports = {
         {{error}}`,
       docsUrl: 'https://on.cypress.io/returning-promise-and-invoking-done-callback',
     },
+    manually_set_retries_test: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    it('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`  
+    
+    https://on.cypress.io/test-retries
+    `,
+    manually_set_retries_suite: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    describe('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`  
+    
+    https://on.cypress.io/test-retries
+    `,
+
   },
 
   navigation: {
@@ -1294,6 +1335,7 @@ module.exports = {
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {
@@ -1578,6 +1620,10 @@ module.exports = {
         msg += `the remaining tests in the current suite: \`${_.truncate(t, 20)}\``
       } else {
         msg += 'all of the remaining tests.'
+      }
+
+      if ((obj.hookName === 'after all' || obj.hookName === 'before all') && obj.retries > 0) {
+        msg += `\n\nAlthough you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail`
       }
 
       return msg

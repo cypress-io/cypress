@@ -263,7 +263,7 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
 
       if (!(numberRe.test(potentialValue))) {
         debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
-        // when typing in a number input, only certain whitelisted chars will insert text
+        // when typing in a number input, only certain allowed chars will insert text
         if (!key.text.match(isValidNumberInputChar)) {
           // https://github.com/cypress-io/cypress/issues/6055
           // Should not remove old valid values when a new one is not a valid number char, just dismiss it with return

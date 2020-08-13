@@ -116,8 +116,16 @@ describe('Settings', () => {
         .should('not.contain', '0:Chrome')
 
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        // make sure the main collapsible content
+        // has finished animating and that it has
+        // an empty inline style attribute
+        cy.get('.rc-collapse-content')
+        .should('not.have.class', 'rc-collapse-anim')
+        .should('have.attr', 'style', '')
 
         cy.percySnapshot()
       })
@@ -154,7 +162,7 @@ describe('Settings', () => {
         cy.get('@config-vars')
         .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
 
-        cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
+        cy.contains('span', 'blockHosts').parents('div').first().find('span').first().click()
         cy.get('@config-vars')
         .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
 
@@ -207,8 +215,8 @@ describe('Settings', () => {
         cy.get('.line').contains('*.foobar.com, *.bazqux.com')
       })
 
-      it('displays "array" values for blacklistHosts', () => {
-        cy.contains('.line', 'blacklistHosts').contains('www.google-analytics.com, hotjar.com')
+      it('displays "array" values for blockHosts', () => {
+        cy.contains('.line', 'blockHosts').contains('www.google-analytics.com, hotjar.com')
       })
 
       it('opens help link on click', () => {

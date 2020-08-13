@@ -8,7 +8,8 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - investigate-spec-on-mac
+        - v5.0-release
+        - install-node-on-circleci-mac
 
 defaults: &defaults
   parallelism: 1
@@ -43,14 +44,14 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.13.0-chrome80-ff74
+      - image: cypress/browsers:node12.14.1-chrome83-ff77
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.13.0-chrome80-ff74
+      - image: cypress/browsers:node12.14.1-chrome83-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -60,12 +61,37 @@ executors:
   # https://circleci.com/docs/2.0/testing-ios/#supported-xcode-versions
   mac:
     macos:
-      ## Node 12.10.0 (yarn 1.17.3)
-      xcode: "11.0.0"
+      # Executor should have Node >= required version
+      xcode: "11.2.1"
     environment:
       PLATFORM: mac
 
 commands:
+  install-required-node:
+    # https://discuss.circleci.com/t/switch-nodejs-version-on-machine-executor-solved/26675/2
+    description: Install Node version matching .node-version
+    steps:
+      - run:
+          name: Install NVM
+          # TODO: determine why we get the missing .nvmrc file error
+          command: |
+            export NODE_VERSION=$(cat .node-version)
+            echo "Installing Node $NODE_VERSION"
+            cp .node-version .nvmrc
+            curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.35.3/install.sh | bash
+      - run:
+          # https://github.com/nvm-sh/nvm#nvmrc
+          name: Install Node
+          command: |
+            . ./scripts/load-nvm.sh
+            echo "before nvm install"
+            nvm install
+            echo "before nvm use"
+            nvm use
+            echo "before nvm alias default"
+            nvm alias default
+            node --version
+
   install-latest-chrome:
     description: Install latest Google Chrome (stable)
     parameters:
@@ -77,14 +103,14 @@ commands:
       - run:
           name: Install latest Google Chrome (stable)
           command: |
-            if [ << parameters.browser >> == "chrome" ]; then
+            if [ <<parameters.browser>> == "chrome" ]; then
               echo "**** Running Chrome tests.  Installing latest stable version of Google Chrome. ****"
               apt-get update
               apt-get install google-chrome-stable -y
               echo "**** Location of Google Chrome Installation: "`which google-chrome`" ****"
               echo "**** Google Chrome Version: "`google-chrome --version`" ****"
             else
-              echo "**** Not updating Chrome. Running tests in '<< parameters.browser >>' ****"
+              echo "**** Not updating Chrome. Running tests in '<<parameters.browser>>' ****"
             fi
 
   run-driver-integration-tests:
@@ -105,7 +131,7 @@ commands:
             if [[ -v PACKAGES_RECORD_KEY ]]; then
               # internal PR
               CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-              yarn cypress:run --record --parallel --group 5x-driver-<< parameters.browser >> --browser << parameters.browser >>
+              yarn cypress:run --record --parallel --group 5x-driver-<<parameters.browser>> --browser <<parameters.browser>>
             else
               # external PR
               TESTFILES=$(circleci tests glob "cypress/integration/**/*_spec.*" | circleci tests split --total=$CIRCLE_NODE_TOTAL)
@@ -114,7 +140,7 @@ commands:
               if [[ -z "$TESTFILES" ]]; then
                 echo "Empty list of test files"
               fi
-              yarn cypress:run --browser << parameters.browser >> --spec $TESTFILES
+              yarn cypress:run --browser <<parameters.browser>> --spec $TESTFILES
             fi
           working_directory: packages/driver
       - verify-mocha-results
@@ -129,14 +155,22 @@ commands:
       browser:
         description: browser shortname to target
         type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
     steps:
       - attach_workspace:
           at: ~/
       - run:
           command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
-            yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<< parameters.browser >> --browser <<parameters.browser>>
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            $cmd yarn workspace @packages/runner cypress:run --record --parallel --group runner-integration-<<parameters.browser>> --browser <<parameters.browser>>
       - store_test_results:
           path: /tmp/cypress
       - store_artifacts:
@@ -156,7 +190,7 @@ commands:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/<< parameters.chunk >>*spec* --browser << parameters.browser >>
+          command: yarn workspace @packages/server test ./test/e2e/<<parameters.chunk>>*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -194,7 +228,23 @@ commands:
         ## by default, assert that at least 1 test ran
         default: 0
     steps:
-      - run: yarn verify:mocha:results << parameters.expectedResultCount >>
+      - run: yarn verify:mocha:results <<parameters.expectedResultCount>>
+
+  clone-repo-and-checkout-release-branch:
+    description: |
+      Clones an external repo and then checks out the branch that matches NEXT_DEV_VERSION otherwise uses 'master' branch.
+    parameters:
+      repo:
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: "Cloning test project: <<parameters.repo>>"
+          command: |
+            git clone --depth 1 --no-single-branch https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+            cd /tmp/<<parameters.repo>> && (git checkout $NEXT_DEV_VERSION || true)
 
   test-binary-against-repo:
     description: |
@@ -202,7 +252,7 @@ commands:
       and runs the new version of Cypress against it.
     parameters:
       repo:
-        description: Name of the repo like "cypress-example-kitchensink"
+        description: "Name of the github repo to clone like: cypress-example-kitchensink"
         type: string
       browser:
         description: Name of the browser to use, like "electron", "chrome", "firefox"
@@ -230,24 +280,27 @@ commands:
         description: Whether to use wait-on to wait on a server to be booted
         type: string
         default: ""
+      server-start-command:
+        description: Server start command for repo
+        type: string
+        default: "npm start --if-present"
     steps:
       - attach_workspace:
           at: ~/
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning project <<parameters.repo>>
-          command: git clone --depth 1 https://github.com/cypress-io/<<parameters.repo>>.git /tmp/<<parameters.repo>>
+      - clone-repo-and-checkout-release-branch:
+          repo: <<parameters.repo>>
       - when:
-          condition: << parameters.pull_request_id >>
+          condition: <<parameters.pull_request_id>>
           steps:
             - run:
-                name: Check out PR << parameters.pull_request_id >>
+                name: Check out PR <<parameters.pull_request_id>>
                 working_directory: /tmp/<<parameters.repo>>
                 command: |
-                  git fetch origin pull/<< parameters.pull_request_id >>/head:pr-<< parameters.pull_request_id >>
-                  git checkout pr-<< parameters.pull_request_id >>
+                  git fetch origin pull/<<parameters.pull_request_id>>/head:pr-<<parameters.pull_request_id>>
+                  git checkout pr-<<parameters.pull_request_id>>
                   git log -n 2
       - run:
           command: npm install
@@ -267,49 +320,49 @@ commands:
           command: npm run build --if-present
       - run:
           working_directory: /tmp/<<parameters.repo>>
-          command: npm start --if-present
+          command: <<parameters.server-start-command>>
           background: true
       - run:
           condition: <<parameters.wait-on>>
           name: "Waiting on server to boot: <<parameters.wait-on>>"
           command: "npx wait-on <<parameters.wait-on>> --timeout 120000"
       - when:
-          condition: << parameters.folder >>
+          condition: <<parameters.folder>>
           steps:
             - when:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
-                      name: Run tests using browser "<< parameters.browser >>"
-                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      name: Run tests using browser "<<parameters.browser>>"
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: |
                         <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
-                      working_directory: /tmp/<<parameters.repo>>/<< parameters.folder >>
+                      working_directory: /tmp/<<parameters.repo>>/<<parameters.folder>>
                       command: <<parameters.command>>
 
             - store_artifacts:
                 name: screenshots
-                path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/screenshots
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/screenshots
             - store_artifacts:
                 name: videos
-                path: /tmp/<<parameters.repo>>/<< parameters.folder >>/cypress/videos
+                path: /tmp/<<parameters.repo>>/<<parameters.folder>>/cypress/videos
       - unless:
-          condition: << parameters.folder >>
+          condition: <<parameters.folder>>
           steps:
             - when:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
-                      name: Run tests using browser "<< parameters.browser >>"
+                      name: Run tests using browser "<<parameters.browser>>"
                       working_directory: /tmp/<<parameters.repo>>
                       command: <<parameters.command>> -- --browser <<parameters.browser>>
             - unless:
-                condition: << parameters.browser >>
+                condition: <<parameters.browser>>
                 steps:
                   - run:
                       name: Run tests using command
@@ -323,12 +376,24 @@ commands:
                 path: /tmp/<<parameters.repo>>/cypress/videos
       - store-npm-logs
 
+  wait-on-circle-jobs:
+    description: Polls certain Circle CI jobs until they finish
+    parameters:
+      job-names:
+        description: comma separated list of circle ci job names to wait for
+        type: string
+    steps:
+      - run:
+          name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
 jobs:
   ## code checkout and yarn installs
   build:
     <<: *defaults
     steps:
       - checkout
+      - install-required-node
       - run:
           name: Print working folder
           command: echo $PWD
@@ -337,20 +402,36 @@ jobs:
           command: echo $(yarn global bin)
       - run:
           name: print Node version
-          command: node -v
+          command: |
+            . ./scripts/load-nvm.sh
+            echo "nvm use default"
+            nvm use default
+            node -v
       - run:
           name: print yarn version
           command: yarn -v
-      - run: yarn check-node-version
+      - run:
+          name: check Node version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-node-version
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
       ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
-      - run: yarn check-terminal
+      - run:
+          name: Check terminal
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-terminal
 
-      - run: yarn stop-only-all
+      - run:
+          name: Stop .only
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn stop-only-all
 
       - restore_cache:
           name: Restore yarn cache
@@ -361,7 +442,11 @@ jobs:
       - run: ls $(yarn global bin)/../lib/node_modules
 
       # try several times, because flaky NPM installs ...
-      - run: yarn --frozen-lockfile || yarn --frozen-lockfile
+      - run:
+          name: install and build
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn --frozen-lockfile || yarn --frozen-lockfile
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -379,12 +464,48 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      ## this will catch .only's in js/coffee as well
-      - run: yarn lint
+      - install-required-node
+      ## this will catch ".only"s in js/coffee as well
+      - run:
+          name: Linting 🧹
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  # a special job that keeps polling Circle and when all
+  # individual jobs are finished, it closes the Percy build
+  percy-finalize:
+    <<: *defaults
+    executor: cy-doc
+    parameters:
+      required_env_var:
+        type: env_var_name
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          # if this is an external pull request, the environment variables
+          # are NOT set for security reasons, thus no need to poll -
+          # and no need to finalize Percy, since there will be no visual tests
+          name: Check if <<parameters.required_env_var>> is set
+          command: |
+            if [[ -v <<parameters.required_env_var>> ]]; then
+              echo "Internal PR, good to go"
+            else
+              echo "This is an external PR, cannot access other services"
+              circleci-agent step halt
+            fi
+      - wait-on-circle-jobs:
+          job-names: >
+            desktop-gui-integration-tests-2x,
+            desktop-gui-component-tests,
+            cli-visual-tests,
+            runner-integration-tests-chrome,
+      - run: npx percy finalize --all
 
   cli-visual-tests:
     <<: *defaults
@@ -406,7 +527,8 @@ jobs:
       - run:
           name: Upload CLI snapshots for diffing
           command: |
-            PERCY_TOKEN=$PERCY_TOKEN_CLI \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
             yarn percy snapshot ./cli/visual-snapshots
 
   unit-tests:
@@ -460,12 +582,20 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      # make sure mocha runs
-      - run: yarn test-mocha
+      - install-required-node
+      - run:
+          name: Mocha tests
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-mocha
       # test binary build code
-      - run: yarn test-scripts
+      - run:
+          name: Test scripts
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn test-scripts
 
-  "server-unit-tests":
+  server-unit-tests:
     <<: *defaults
     parallelism: 2
     steps:
@@ -478,7 +608,7 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  "server-integration-tests":
+  server-integration-tests:
     <<: *defaults
     parallelism: 2
     steps:
@@ -491,7 +621,7 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
-  "server-performance-tests":
+  server-performance-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -506,216 +636,217 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "server-e2e-tests-chrome-1":
+  server-e2e-tests-chrome-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "1"
 
-  "server-e2e-tests-chrome-2":
+  server-e2e-tests-chrome-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "2"
 
-  "server-e2e-tests-chrome-3":
+  server-e2e-tests-chrome-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "3"
 
-  "server-e2e-tests-chrome-4":
+  server-e2e-tests-chrome-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "4"
 
-  "server-e2e-tests-chrome-5":
+  server-e2e-tests-chrome-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "5"
 
-  "server-e2e-tests-chrome-6":
+  server-e2e-tests-chrome-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "6"
 
-  "server-e2e-tests-chrome-7":
+  server-e2e-tests-chrome-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "7"
 
-  "server-e2e-tests-chrome-8":
+  server-e2e-tests-chrome-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: chrome
           chunk: "8"
 
-  "server-e2e-tests-electron-1":
+  server-e2e-tests-electron-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "1"
 
-  "server-e2e-tests-electron-2":
+  server-e2e-tests-electron-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "2"
 
-  "server-e2e-tests-electron-3":
+  server-e2e-tests-electron-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "3"
 
-  "server-e2e-tests-electron-4":
+  server-e2e-tests-electron-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "4"
 
-  "server-e2e-tests-electron-5":
+  server-e2e-tests-electron-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "5"
 
-  "server-e2e-tests-electron-6":
+  server-e2e-tests-electron-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "6"
 
-  "server-e2e-tests-electron-7":
+  server-e2e-tests-electron-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "7"
 
-  "server-e2e-tests-electron-8":
+  server-e2e-tests-electron-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: electron
           chunk: "8"
 
-  "server-e2e-tests-non-root":
+  server-e2e-tests-non-root:
     <<: *defaults
     steps:
       - run-e2e-tests:
           chunk: non_root
 
-  "server-e2e-tests-firefox-1":
+  server-e2e-tests-firefox-1:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "1"
 
-  "server-e2e-tests-firefox-2":
+  server-e2e-tests-firefox-2:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "2"
 
-  "server-e2e-tests-firefox-3":
+  server-e2e-tests-firefox-3:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "3"
 
-  "server-e2e-tests-firefox-4":
+  server-e2e-tests-firefox-4:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "4"
 
-  "server-e2e-tests-firefox-5":
+  server-e2e-tests-firefox-5:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "5"
 
-  "server-e2e-tests-firefox-6":
+  server-e2e-tests-firefox-6:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "6"
 
-  "server-e2e-tests-firefox-7":
+  server-e2e-tests-firefox-7:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "7"
 
-  "server-e2e-tests-firefox-8":
+  server-e2e-tests-firefox-8:
     <<: *defaults
     steps:
       - run-e2e-tests:
           browser: firefox
           chunk: "8"
 
-  "runner-integration-tests-chrome":
+  runner-integration-tests-chrome:
     <<: *defaults
     parallelism: 2
     steps:
       - run-runner-integration-tests:
           browser: chrome
+          percy: true
 
-  "runner-integration-tests-firefox":
+  runner-integration-tests-firefox:
     <<: *defaults
     parallelism: 2
     steps:
       - run-runner-integration-tests:
           browser: firefox
 
-  "driver-integration-tests-chrome":
+  driver-integration-tests-chrome:
     <<: *defaults
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: chrome
 
-  # "driver-integration-tests-electron":
+  # driver-integration-tests-electron:
   #   <<: *defaults
   #   parallelism: 5
   #   steps:
   #     - run-driver-integration-tests:
   #         browser: electron
 
-  "driver-integration-tests-firefox":
+  driver-integration-tests-firefox:
     <<: *defaults
     parallelism: 5
     steps:
       - run-driver-integration-tests:
           browser: firefox
 
-  "desktop-gui-integration-tests-2x":
+  desktop-gui-integration-tests-2x:
     <<: *defaults
     parallelism: 2
     steps:
@@ -733,6 +864,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group 2x-desktop-gui
           working_directory: packages/desktop-gui
       - verify-mocha-results
@@ -802,7 +936,7 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
+            PERCY_PARALLEL_TOTAL=-1 \
             yarn percy exec -- \
             yarn cypress:run --spec 'src/**/*_spec.jsx'
           working_directory: packages/desktop-gui
@@ -810,7 +944,7 @@ jobs:
       # we don't really need any artifacts - we are only interested in visual screenshots
       - store-npm-logs
 
-  "reporter-integration-tests":
+  reporter-integration-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -831,7 +965,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "ui-components-integration-tests":
+  ui-components-integration-tests:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -852,7 +986,7 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  "run-launcher":
+  run-launcher:
     <<: *defaults
     steps:
       - attach_workspace:
@@ -895,6 +1029,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - run: $(yarn bin)/print-arch
+      - install-required-node
       - run:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
@@ -903,8 +1038,15 @@ jobs:
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
-          command: yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
-      - run: yarn binary-zip --platform $PLATFORM
+          command: |
+            . ./scripts/load-nvm.sh
+            node --version
+            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+      - run:
+          name: Zip the binary
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn binary-zip --platform $PLATFORM
       # Cypress binary file should be zipped to cypress.zip
       - run: ls -l *.zip
       - store-npm-logs
@@ -935,45 +1077,42 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-example-kitchensink
+      - install-required-node
       - run:
           name: Install prod dependencies
           command: yarn --production
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
           background: true
       - run:
           name: Run Kitchensink example project
-          command: yarn cypress:run --project /tmp/repo
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn cypress:run --project /tmp/cypress-example-kitchensink
       - store_artifacts:
-          path: /tmp/repo/cypress/screenshots
+          path: /tmp/cypress-example-kitchensink/cypress/screenshots
       - store_artifacts:
-          path: /tmp/repo/cypress/videos
+          path: /tmp/cypress-example-kitchensink/cypress/videos
       - store-npm-logs
 
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-example-kitchensink.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-example-kitchensink
       - run:
           name: Install prod dependencies
           command: yarn --production
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
       - run:
           name: Example server
           command: yarn start
-          working_directory: /tmp/repo
+          working_directory: /tmp/cypress-example-kitchensink
           background: true
       - run:
           name: Run Kitchensink example project
@@ -982,24 +1121,21 @@ jobs:
             CYPRESS_RECORD_KEY=$TEST_KITCHENSINK_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
             CYPRESS_video=false \
-            yarn cypress:run --project /tmp/repo --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
   "test-against-staging":
     <<: *defaults
     steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/repo
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-test-tiny
       - run:
           name: Run test project
           command: |
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/repo --record
+            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
       - store-npm-logs
 
   build-npm-package:
@@ -1007,13 +1143,20 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: yarn check-next-dev-version
+      - install-required-node
+      - run:
+          name: Check next dev version
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn check-next-dev-version
       - run:
           name: bump NPM version
           command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
       - run:
           name: build NPM package
-          command: yarn build --scope cypress
+          command: |
+            . ./scripts/load-nvm.sh
+            yarn build --scope cypress
       - run:
           command: ls -la types
           working_directory: cli/build
@@ -1144,7 +1287,7 @@ jobs:
   test-npm-module-on-minimum-node-version:
     <<: *defaults
     docker:
-      - image: cypress/base:8.0.0
+      - image: cypress/base:10.0.0
     steps:
       - attach_workspace:
           at: ~/
@@ -1192,16 +1335,16 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
@@ -1211,7 +1354,7 @@ jobs:
               typescript jest @types/jest enzyme @types/enzyme
       - run:
           name: Test types clash ⚔️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: |
             echo "console.log('hello world')" > hello.ts
             npx tsc hello.ts --noEmit
@@ -1235,16 +1378,16 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           # let's install Cypress, Jest and any other package that might conflict
@@ -1254,7 +1397,7 @@ jobs:
               typescript jest @types/jest enzyme @types/enzyme
       - run:
           name: Scaffold and test examples 🏗
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INTERNAL_FORCE_SCAFFOLD: "1"
           command: |
@@ -1278,27 +1421,27 @@ jobs:
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
-      - run: mkdir << parameters.wd >>
+      - run: mkdir <<parameters.wd>>
       - run: node --version
       - run: npm --version
       - run:
           name: Create new NPM package ⚗️
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npm init -y
       - run:
           name: Install dependencies 📦
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           environment:
             CYPRESS_INSTALL_BINARY: /root/cypress/cypress.zip
           command: |
             npm install /root/cypress/cypress.tgz typescript
       - run:
           name: Scaffold full TypeScript project 🏗
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npx @bahmutov/cly@1 init --typescript
       - run:
           name: Run project tests 🗳
-          working_directory: << parameters.wd >>
+          working_directory: <<parameters.wd>>
           command: npx cypress run
 
   # install NPM + binary zip and run against staging API
@@ -1310,9 +1453,8 @@ jobs:
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
-      - run:
-          name: Cloning test project
-          command: git clone https://github.com/cypress-io/cypress-test-tiny.git /tmp/cypress-test-tiny
+      - clone-repo-and-checkout-release-branch:
+          repo: cypress-test-tiny
       - run:
           name: Install Cypress
           working_directory: /tmp/cypress-test-tiny
@@ -1348,6 +1490,12 @@ jobs:
   test-binary-against-recipe-pull-request:
     <<: *defaults
     steps:
+      # test a specific pull request by number from cypress-example-recipes
+      - test-binary-against-repo:
+          repo: cypress-example-recipes
+          command: npm run test:ci
+          pull_request_id: 515
+          folder: examples/fundamentals__typescript
       - test-binary-against-repo:
           repo: cypress-example-recipes
           command: npm test
@@ -1422,6 +1570,16 @@ jobs:
           browser: firefox
           command: "npm run cypress:run"
 
+  "test-binary-against-cypress-realworld-app":
+    <<: *defaults
+    steps:
+      - test-binary-against-repo:
+          repo: cypress-realworld-app
+          browser: chrome
+          server-start-command: "npm run start:ci"
+          command: "npm run cypress:run"
+          wait-on: http://localhost:3000
+
   test-binary-as-specific-user:
     <<: *defaults
     steps:
@@ -1475,6 +1633,11 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
+        requires:
+          - build
+    - percy-finalize:
+        context: test-runner:poll-circle-workflow
+        required_env_var: PERCY_TOKEN # skips job if not defined (external PR)
         requires:
           - build
     - lint-types:
@@ -1595,9 +1758,6 @@ linux-workflow: &linux-workflow
     - desktop-gui-integration-tests-2x:
         requires:
           - build
-    - desktop-gui-visual-tests:
-        requires:
-          - build
     - desktop-gui-component-tests:
         requires:
           - build
@@ -1610,6 +1770,7 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
     # various testing scenarios, like building full binary
     # and testing it on a real project
     - test-against-staging:
@@ -1623,6 +1784,12 @@ linux-workflow: &linux-workflow
     - test-kitchensink:
         requires:
           - build
+        filters:
+          branches:
+            ignore:
+              ## TODO: remove this upon merging the PR
+              - rename-blacklisthosts
+              - pull/7622
     - test-kitchensink-against-staging:
         context: test-runner:record-tests
         filters:
@@ -1640,6 +1807,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v5.0-release
         requires:
           - build-npm-package
     - build-binary:
@@ -1651,6 +1819,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v5.0-release
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1673,6 +1842,12 @@ linux-workflow: &linux-workflow
         requires:
           - build-binary
           - build-npm-package
+        filters:
+          branches:
+            ignore:
+              ## TODO: remove this upon merging the PR
+              - rename-blacklisthosts
+              - pull/7622
     # when working on a feature or a fix,
     # you are probably working in a branch
     # and you want to run a specific PR in the cypress-example-recipes
@@ -1701,6 +1876,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v5.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1747,6 +1923,16 @@ linux-workflow: &linux-workflow
         <<: *testBinaryFirefox
     - test-binary-against-piechopper-firefox:
         <<: *testBinaryFirefox
+    - test-binary-against-cypress-realworld-app:
+        filters:
+          branches:
+            only:
+              - develop
+              - kevin-v5.0-release-rwa
+              - v5.0-release
+        requires:
+          - build-npm-package
+          - build-binary
 
     - test-binary-as-specific-user:
         name: "test binary as a non-root user"

@@ -6,6 +6,7 @@ const http = require('http')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
+const { useFixedFirefoxResolution } = require('../../../utils')
 
 module.exports = (on, config) => {
   let performance = {
@@ -45,13 +46,7 @@ module.exports = (on, config) => {
   })
 
   on('before:browser:launch', (browser, options) => {
-    if (browser.family === 'firefox' && !config.env['NO_RESIZE']) {
-      // this is needed to ensure correct error screenshot / video recording
-      // resolution of exactly 1280x720 (height must account for firefox url bar)
-      options.args = options.args.concat(
-        ['-width', '1280', '-height', '794'],
-      )
-    }
+    useFixedFirefoxResolution(browser, options, config)
 
     if (browser.family === 'firefox' && process.env.FIREFOX_FORCE_STRICT_SAMESITE) {
       // @see https://www.jardinesoftware.net/2019/10/28/samesite-by-default-in-2020/

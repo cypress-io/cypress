@@ -35,11 +35,12 @@ const baseEmitter = new EE()
 let fileObjects = {}
 let fileProcessors = {}
 
-const createBrowserifyPreprocessor = function (options) {
-  debug('creating browserify preprocessor with options %o', options)
-  const browserify = require('@cypress/browserify-preprocessor')
+const createPreprocessor = function (options) {
+  debug('creating webpack preprocessor with options %o', options)
 
-  return browserify(options)
+  const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+  return webpackPreprocessor(options)
 }
 
 const setDefaultPreprocessor = function (config) {
@@ -51,7 +52,7 @@ const setDefaultPreprocessor = function (config) {
     typescript: tsPath,
   }
 
-  return plugins.register('file:preprocessor', API.createBrowserifyPreprocessor(options))
+  return plugins.register('file:preprocessor', API.createPreprocessor(options))
 }
 
 plugins.registerHandler((ipc) => {
@@ -76,7 +77,7 @@ const API = {
 
   setDefaultPreprocessor,
 
-  createBrowserifyPreprocessor,
+  createPreprocessor,
 
   emitter: baseEmitter,
 

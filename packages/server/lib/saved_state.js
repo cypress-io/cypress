@@ -9,7 +9,7 @@ const fs = require('./util/fs')
 
 const stateFiles = {}
 
-const whitelist = `
+const allowed = `
 appWidth
 appHeight
 appX
@@ -64,7 +64,7 @@ const formStatePath = (projectRoot) => {
   })
 }
 
-const normalizeAndWhitelistSet = (set, key, value) => {
+const normalizeAndAllowSet = (set, key, value) => {
   const valueObject = (() => {
     if (_.isString(key)) {
       const tmp = {}
@@ -78,15 +78,15 @@ const normalizeAndWhitelistSet = (set, key, value) => {
   })()
 
   const invalidKeys = _.filter(_.keys(valueObject), (key) => {
-    return !_.includes(whitelist, key)
+    return !_.includes(allowed, key)
   })
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.js`)
+    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
-  return set(_.pick(valueObject, whitelist))
+  return set(_.pick(valueObject, allowed))
 }
 
 const create = (projectRoot, isTextTerminal) => {
@@ -110,7 +110,7 @@ const create = (projectRoot, isTextTerminal) => {
       path: fullStatePath,
     })
 
-    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndWhitelistSet)
+    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
     stateFiles[fullStatePath] = stateFile
 
