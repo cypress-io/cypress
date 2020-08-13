@@ -50,6 +50,8 @@ describe('Login', function () {
 
     it('has dashboard login button', function () {
       cy.get('.login').contains('button', 'Log In to Dashboard')
+
+      cy.percySnapshot()
     })
 
     it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
@@ -112,6 +114,8 @@ describe('Login', function () {
 
           it('displays username in success dialog', () => {
             cy.get('.modal').contains('Jane Lane')
+
+            cy.percySnapshot()
           })
 
           it('can close modal by clicking Continue', () => {
@@ -164,6 +168,8 @@ describe('Login', function () {
           it('displays error in ui', () => {
             cy.get('.alert-danger').should('be.visible')
             .contains('There\'s an error')
+
+            cy.percySnapshot()
           })
 
           it('login button should be enabled', () => {
@@ -182,6 +188,8 @@ describe('Login', function () {
           it('displays warning in ui', () => {
             cy.get('.warning').should('be.visible')
             .contains('some warning here')
+
+            cy.percySnapshot()
           })
 
           it('login button should be disabled', () => {
@@ -198,6 +206,8 @@ describe('Login', function () {
             cy.get('.login-content .btn-login')
             .should('be.disabled')
             .should('have.text', ' Could not open browser.')
+
+            cy.percySnapshot()
           })
 
           it('<pre> can be click-selected', function () {
@@ -257,6 +267,8 @@ describe('Login', function () {
       cy.contains('http://api.server')
 
       cy.contains('ECONNREFUSED')
+
+      cy.percySnapshot()
     })
 
     describe('trying again', function () {
