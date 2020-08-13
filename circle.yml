@@ -1135,7 +1135,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+            yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
   build-npm-package:
