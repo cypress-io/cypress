@@ -903,7 +903,7 @@ export class Keyboard {
       let constructor = win[eventConstructor]
 
       // When event constructor doesn't exist, fallback to KeyboardEvent.
-      // It's necessary because FireFox doesn't support InputEvent.
+      // It's necessary because Firefox doesn't support InputEvent.
       if (typeof constructor !== 'function') {
         constructor = win['KeyboardEvent']
       }
