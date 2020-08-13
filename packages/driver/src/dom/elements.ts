@@ -633,11 +633,13 @@ const getParent = ($el: JQuery): JQuery => {
   return $(getParentNode($el[0]))
 }
 
-const getAllParents = (el) => {
+const getAllParents = (el: HTMLElement, untilSelector?: string) => {
   const collectParents = (parents, node) => {
     const parent = getParentNode(node)
 
-    if (!parent) return parents
+    if (!parent || untilSelector && $(parent).is(untilSelector)) {
+      return parents
+    }
 
     return collectParents(parents.concat(parent), parent)
   }
