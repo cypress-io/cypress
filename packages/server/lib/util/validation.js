@@ -104,18 +104,19 @@ const isValidBrowserList = (key, browsers) => {
 }
 
 const isValidRetriesConfig = (key, value) => {
-  const isNullOrNumber = isOneOf([_.isNumber, _.isNull])
+  const optionalKeys = ['runMode', 'openMode']
+  const isValidRetryValue = (val) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
+  const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
 
-  if (
-    isNullOrNumber(value)
-    || (_.isEqual(_.keys(value), ['runMode', 'openMode']))
-      && isNullOrNumber(value.runMode)
-      && isNullOrNumber(value.openMode)
-  ) {
+  if (isValidRetryValue(value)) {
     return true
   }
 
-  return errMsg(key, value, 'a number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
+  if (_.isObject(value) && _.every(value, optionalKeysAreValid)) {
+    return true
+  }
+
+  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
 }
 
 const isValidFirefoxGcInterval = (key, value) => {
