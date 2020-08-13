@@ -60,6 +60,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 
 - appveyor
 - azure
+- awsCodeBuild
 - bamboo
 - bitbucket
 - buildkite
@@ -95,6 +96,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 
 - appveyor
 - azure
+- awsCodeBuild
 - bamboo
 - bitbucket
 - buildkite
@@ -131,6 +133,7 @@ The ciBuildId is automatically detected if you are running Cypress in any of the
 
 - appveyor
 - azure
+- awsCodeBuild
 - bamboo
 - bitbucket
 - buildkite

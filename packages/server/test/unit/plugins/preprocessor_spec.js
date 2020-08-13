@@ -89,28 +89,18 @@ describe('lib/plugins/preprocessor', () => {
       plugins._reset()
       sinon.stub(plugins, 'register')
       sinon.stub(plugins, 'execute').returns(() => {})
-      const browserifyFn = function () {}
-      const browserify = sinon.stub().returns(browserifyFn)
 
-      // mock default options
-      browserify.defaultOptions = {
-        browserifyOptions: {
-          extensions: [],
-          transform: [
-            [],
-            ['babelify', {
-              presets: [],
-              extensions: [],
-            }],
-          ],
-        },
-      }
+      const userPreprocessorFn = function () {}
+      const userPreprocessor = sinon.stub().returns(userPreprocessorFn)
 
-      mockery.registerMock('@cypress/browserify-preprocessor', browserify)
+      userPreprocessor.defaultOptions = {}
+
+      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', userPreprocessor)
+
       preprocessor.getFile(this.filePath, this.config)
-      expect(plugins.register).to.be.calledWith('file:preprocessor', browserifyFn)
 
-      expect(browserify).to.be.called
+      expect(plugins.register).to.be.calledWith('file:preprocessor', userPreprocessorFn)
+      expect(userPreprocessor).to.be.called
     })
   })
 
@@ -224,7 +214,7 @@ describe('lib/plugins/preprocessor', () => {
       const mockPlugin = {}
 
       sinon.stub(plugins, 'register')
-      sinon.stub(preprocessor, 'createBrowserifyPreprocessor').returns(mockPlugin)
+      sinon.stub(preprocessor, 'createPreprocessor').returns(mockPlugin)
 
       preprocessor.setDefaultPreprocessor(this.config)
 
@@ -236,14 +226,14 @@ describe('lib/plugins/preprocessor', () => {
         basedir: monorepoRoot,
       })
 
-      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript })
+      expect(preprocessor.createPreprocessor).to.be.calledWith({ typescript })
     })
 
     it('does not have typescript if not found', function () {
       const mockPlugin = {}
 
       sinon.stub(plugins, 'register')
-      sinon.stub(preprocessor, 'createBrowserifyPreprocessor').returns(mockPlugin)
+      sinon.stub(preprocessor, 'createPreprocessor').returns(mockPlugin)
       sinon.stub(resolve, 'sync')
       .withArgs('typescript', { basedir: this.todosPath })
       .throws(new Error('TypeScript not found'))
@@ -252,7 +242,7 @@ describe('lib/plugins/preprocessor', () => {
 
       expect(plugins.register).to.be.calledWithExactly('file:preprocessor', mockPlugin)
 
-      expect(preprocessor.createBrowserifyPreprocessor).to.be.calledWith({ typescript: null })
+      expect(preprocessor.createPreprocessor).to.be.calledWith({ typescript: null })
     })
   })
 })

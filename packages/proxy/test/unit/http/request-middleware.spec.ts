@@ -9,7 +9,7 @@ describe('http/request-middleware', function () {
       'MaybeEndRequestWithBufferedResponse',
       'InterceptRequest',
       'RedirectToClientRouteIfUnloaded',
-      'EndRequestsToBlacklistedHosts',
+      'EndRequestsToBlockedHosts',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',
       'SendRequestOutgoing',

@@ -40,7 +40,7 @@
         padding: 4px 0;
 
         &:focus {
-          outline: 1px dotted #6c6c6c;
+          outline: none;
         }
 
         > .collapsible-header-inner:focus {
@@ -222,6 +222,7 @@
 
   .command-state-pending .command-number {
     i {
+      line-height: 18px;
       display: inline-block;
     }
 

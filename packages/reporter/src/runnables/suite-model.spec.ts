@@ -2,7 +2,7 @@ import Suite from './suite-model'
 import TestModel from '../test/test-model'
 
 const suiteWithChildren = (children: Array<Partial<TestModel>>) => {
-  const suite = new Suite({ id: 1, title: '', hooks: [] }, 0)
+  const suite = new Suite({ id: '1', title: '', hooks: [] }, 0)
 
   suite.children = children as Array<TestModel>
 

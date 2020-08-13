@@ -37,6 +37,18 @@ const mochaEventCleanseMap = {
   end: match.date,
 }
 
+const cleanseRunStateMap = {
+  ...eventCleanseMap,
+  'err.stack': '[err stack]',
+  wallClockStartedAt: new Date(0),
+  wallClockDuration: 1,
+  fnDuration: 1,
+  afterFnDuration: 1,
+  lifecycle: 1,
+  duration: 1,
+  startTime: new Date(0),
+}
+
 const spyOn = (obj, prop, fn) => {
   const _fn = obj[prop]
 
@@ -49,7 +61,7 @@ const spyOn = (obj, prop, fn) => {
   }
 }
 
-function createCypress () {
+function createCypress (defaultOptions = {}) {
   /**
    * @type {sinon.SinonStub}
    */
@@ -84,19 +96,13 @@ function createCypress () {
     window.Cypress = backupCypress
   })
 
-  let onInitializedListeners = []
-
-  const onInitialized = function (fn) {
-    onInitializedListeners.push(fn)
-  }
-
   /**
    * Spawns an isolated Cypress runner as the AUT, with provided spec/fixture and optional state/config
    * @param {string | ()=>void | {[key:string]: any}} mochaTestsOrFile
    * @param {{state?: any, config?: any}} opts
    */
   const runIsolatedCypress = (mochaTestsOrFile, opts = {}) => {
-    _.defaultsDeep(opts, {
+    _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
       onBeforeRun () {},
@@ -106,9 +112,9 @@ function createCypress () {
     .then({ timeout: 60000 }, (win) => {
       win.runnerWs.destroy()
 
-      allStubs = cy.stub().snapshot(enableStubSnapshots)
-      mochaStubs = cy.stub().snapshot(enableStubSnapshots)
-      setRunnablesStub = cy.stub().snapshot(enableStubSnapshots)
+      allStubs = cy.stub().snapshot(enableStubSnapshots).log(false)
+      mochaStubs = cy.stub().snapshot(enableStubSnapshots).log(false)
+      setRunnablesStub = cy.stub().snapshot(enableStubSnapshots).log(false)
 
       return new Promise((resolve) => {
         const runIsolatedCypress = () => {
@@ -118,7 +124,7 @@ function createCypress () {
           const emitMap = autCypress.emitMap
           const emitThen = autCypress.emitThen
 
-          cy.stub(autCypress, 'automation').snapshot(enableStubSnapshots)
+          cy.stub(autCypress, 'automation').log(false).snapshot(enableStubSnapshots)
           .callThrough()
           .withArgs('clear:cookies')
           .resolves({
@@ -177,7 +183,9 @@ function createCypress () {
 
           spyOn(autCypress.mocha.getRunner(), 'fail', (...args) => {
             Cypress.log({
-              name: 'Runner Fail',
+              name: 'Runner (fail event)',
+              ended: true,
+              event: true,
               message: `${args[1]}`,
               state: 'failed',
               consoleProps: () => {
@@ -188,26 +196,29 @@ function createCypress () {
             })
           })
 
-          cy.spy(cy.state('window').console, 'log').as('console_log')
-          cy.spy(cy.state('window').console, 'error').as('console_error')
-
-          onInitializedListeners.forEach((fn) => fn(autCypress))
-          onInitializedListeners = []
+          // TODO: clean this up, sinon doesn't like wrapping things multiple times
+          // and this catches that error
+          try {
+            cy.spy(cy.state('window').console, 'log').as('console_log').log(false)
+            cy.spy(cy.state('window').console, 'error').as('console_error').log(false)
+          } catch (_e) {
+            // console was already wrapped, noop
+          }
 
           autCypress.run((failed) => {
             resolve({ failed, mochaStubs, autCypress, win })
           })
         }
 
-        cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).as('reporterBus')
-        cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).as('localBus')
+        cy.spy(win.eventManager.reporterBus, 'emit').snapshot(enableStubSnapshots).log(false).as('reporterBus')
+        cy.spy(win.eventManager.localBus, 'emit').snapshot(enableStubSnapshots).log(false).as('localBus')
 
-        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots)
+        cy.stub(win.runnerWs, 'emit').snapshot(enableStubSnapshots).log(false)
         .withArgs('watch:test:file')
         .callsFake(() => {
           autCypress = win.Cypress
 
-          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).callsFake((specWindow) => {
+          cy.stub(autCypress, 'onSpecWindow').snapshot(enableStubSnapshots).log(false).callsFake((specWindow) => {
             autCypress.onSpecWindow.restore()
 
             opts.onBeforeRun({ specWindow, win, autCypress })
@@ -233,7 +244,7 @@ function createCypress () {
             specWindow.describe = () => {}
           })
 
-          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).callsFake(runIsolatedCypress)
+          cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(false).callsFake(runIsolatedCypress)
         })
         .withArgs('is:automation:client:connected')
         .yieldsAsync(true)
@@ -266,16 +277,17 @@ function createCypress () {
         .yieldsAsync({ response: {} })
 
         const c = _.extend({}, Cypress.config(), {
-          isTextTerminal: true,
+          isTextTerminal: false,
           spec: {
             relative: 'relative/path/to/spec.js',
             absolute: '/absolute/path/to/spec.js',
+            name: 'empty_spec.js',
           },
         }, opts.config)
 
         c.state = {}
 
-        cy.stub(win.runnerWs, 'on').snapshot(enableStubSnapshots)
+        cy.stub(win.runnerWs, 'on').snapshot(enableStubSnapshots).log(false)
 
         win.Runner.start(win.document.getElementById('app'), window.btoa(JSON.stringify(c)))
       })
@@ -285,7 +297,6 @@ function createCypress () {
   return {
     runIsolatedCypress,
     snapshotMochaEvents,
-    onInitialized,
     getAutCypress,
   }
 }
@@ -296,7 +307,7 @@ const createHooks = (win, hooks = []) => {
       hook = { type: hook }
     }
 
-    let { type, fail, fn } = hook
+    let { type, fail, fn, agents } = hook
 
     if (fn) {
       if (hook.eval) {
@@ -316,24 +327,34 @@ const createHooks = (win, hooks = []) => {
     if (fail) {
       const numFailures = fail
 
-      return win[type](() => {
+      return win[type](function () {
+        const message = `${type} - ${this._runnable.parent.title || 'root'}`
+
+        if (agents) {
+          registerAgents(win)
+        }
+
         if (_.isNumber(fail) && fail-- <= 0) {
           debug(`hook pass after (${numFailures}) failures: ${type}`)
-          win.assert(true, type)
+          win.assert(true, message)
 
           return
         }
 
-        debug(`hook fail: ${type}`)
+        if (agents) {
+          failCypressCommand(win, type)
+        } else {
+          debug(`hook fail: ${type}`)
 
-        win.assert(false, type)
+          win.assert(false, message)
 
-        throw new Error(`hook failed: ${type}`)
+          throw new Error(`hook failed: ${type}`)
+        }
       })
     }
 
-    return win[type](() => {
-      win.assert(true, type)
+    return win[type](function () {
+      win.assert(true, `${type} - ${this._runnable.parent.title || 'root'}`)
       debug(`hook pass: ${type}`)
     })
   })
@@ -345,7 +366,7 @@ const createTests = (win, tests = []) => {
       test = { name: test }
     }
 
-    let { name, pending, fail, fn, only } = test
+    let { name, pending, fail, fn, only, agents } = test
 
     let it = win.it
 
@@ -374,6 +395,10 @@ const createTests = (win, tests = []) => {
 
     if (fail) {
       return it(name, () => {
+        if (agents) {
+          registerAgents(win)
+        }
+
         if (_.isNumber(fail) && fail-- === 0) {
           debug(`test pass after retry: ${name}`)
           win.assert(true, name)
@@ -381,10 +406,14 @@ const createTests = (win, tests = []) => {
           return
         }
 
-        debug(`test fail: ${name}`)
-        win.assert(false, name)
+        if (agents) {
+          failCypressCommand(win, name)
+        } else {
+          debug(`test fail: ${name}`)
+          win.assert(false, name)
 
-        throw new Error(`test fail: ${name}`)
+          throw new Error(`test fail: ${name}`)
+        }
       })
     }
 
@@ -393,6 +422,16 @@ const createTests = (win, tests = []) => {
       win.assert(true, name)
     })
   })
+}
+
+const failCypressCommand = (win, name) => win.cy.wrap(name).then(() => win.assert(false, name))
+const registerAgents = (win) => {
+  const obj = { foo: 'bar' }
+
+  win.cy.stub(obj, 'foo')
+  win.cy.wrap(obj).should('exist')
+  win.cy.server()
+  win.cy.route('https://example.com')
 }
 
 const createSuites = (win, suites = {}) => {
@@ -429,27 +468,13 @@ const evalFn = (win, fn) => {
   }
 }
 
-const cleanseRunStateMap = {
-  wallClockStartedAt: new Date(0),
-  wallClockDuration: 1,
-  fnDuration: 1,
-  afterFnDuration: 1,
-  lifecycle: 1,
-  duration: 1,
-  startTime: new Date(0),
-  'err.stack': '[err stack]',
-  sourceMappedStack: match.string,
-  parsedStack: match.array,
-  invocationDetails: stringifyShort,
-}
-
-const shouldHaveTestResults = (expPassed, expFailed) => {
-  return ({ failed }) => {
-    expect(failed, 'resolve with failure count').eq(failed)
+const shouldHaveTestResults = (expPassed, expFailed, expPending) => {
+  return () => {
     expPassed = expPassed || '--'
     expFailed = expFailed || '--'
     cy.get('header .passed .num').should('have.text', `${expPassed}`)
     cy.get('header .failed .num').should('have.text', `${expFailed}`)
+    if (expPending) cy.get('header .pending .num').should('have.text', `${expPending}`)
   }
 }
 

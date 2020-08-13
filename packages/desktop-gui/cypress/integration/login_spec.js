@@ -2,7 +2,7 @@ describe('Login', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
 
-    return cy.visitIndex().then(function (win) {
+    cy.visitIndex().then(function (win) {
       let start = win.App.start
 
       this.win = win
@@ -50,6 +50,8 @@ describe('Login', function () {
 
     it('has dashboard login button', function () {
       cy.get('.login').contains('button', 'Log In to Dashboard')
+
+      cy.percySnapshot()
     })
 
     it('opens dashboard on clicking \'Cypress Dashboard\'', () => {
@@ -75,21 +77,26 @@ describe('Login', function () {
         })
       })
 
-      it('disables login button', () => {
+      it('shows spinner with Opening browser and disables button', () => {
         cy.get('@loginBtn').should('be.disabled')
-      })
+        .invoke('text').should('contain', 'Opening browser...')
 
-      it('shows spinner with Opening browser', () => {
-        cy.get('@loginBtn').invoke('text').should('contain', 'Opening browser...')
+        cy.percySnapshot()
       })
 
       context('on begin:auth', function () {
-        beforeEach(function () {
-          cy.get('@loginBtn')
-        })
+        it('when browser opened, shows spinner with Waiting...', function () {
+          this.onAuthMessageCb(null, {
+            name: '',
+            message: '',
+            stack: '',
+            browserOpened: true,
+          })
 
-        it('displays spinner with Opening browser... and disables button', function () {
-          cy.contains('Opening browser...').should('be.disabled')
+          cy.get('@loginBtn').should('be.disabled')
+          .invoke('text').should('contain', 'Waiting for browser login...')
+
+          cy.percySnapshot()
         })
 
         describe('on ipc begin:auth success', function () {
@@ -107,6 +114,8 @@ describe('Login', function () {
 
           it('displays username in success dialog', () => {
             cy.get('.modal').contains('Jane Lane')
+
+            cy.percySnapshot()
           })
 
           it('can close modal by clicking Continue', () => {
@@ -159,6 +168,8 @@ describe('Login', function () {
           it('displays error in ui', () => {
             cy.get('.alert-danger').should('be.visible')
             .contains('There\'s an error')
+
+            cy.percySnapshot()
           })
 
           it('login button should be enabled', () => {
@@ -177,6 +188,8 @@ describe('Login', function () {
           it('displays warning in ui', () => {
             cy.get('.warning').should('be.visible')
             .contains('some warning here')
+
+            cy.percySnapshot()
           })
 
           it('login button should be disabled', () => {
@@ -193,6 +206,8 @@ describe('Login', function () {
             cy.get('.login-content .btn-login')
             .should('be.disabled')
             .should('have.text', ' Could not open browser.')
+
+            cy.percySnapshot()
           })
 
           it('<pre> can be click-selected', function () {
@@ -252,6 +267,8 @@ describe('Login', function () {
       cy.contains('http://api.server')
 
       cy.contains('ECONNREFUSED')
+
+      cy.percySnapshot()
     })
 
     describe('trying again', function () {

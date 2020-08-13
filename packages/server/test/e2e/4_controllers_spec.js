@@ -20,14 +20,8 @@ describe('e2e plugins', () => {
     })
   })
 
-  it('handles specs with $, &, ? in file name', function () {
-    let relativeSpecPath = path.join('d?ir&1%', '%di?r2&', 's%pec&?.js')
-
-    // windows doesn't support ? in file names
-    if (process.platform === 'win32') {
-      relativeSpecPath = specPath.replace(/\?/, '')
-    }
-
+  it('handles specs with $, &, and + in file name', function () {
+    const relativeSpecPath = path.join('dir&1%', '%dir2&', 's%p+ec&.js')
     const specPath = path.join(e2eProject, 'cypress', 'integration', relativeSpecPath)
 
     return fs.outputFile(specPath, 'it(\'passes\', () => {})')

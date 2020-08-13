@@ -1134,6 +1134,14 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
+    it('sets ignore as function by default', () => {
+      cy.server()
+      cy.route('*', {})
+      .then(() => {
+        expect(cy.state('server').getRoutes()[0].ignore).to.be.a('function')
+      })
+    })
+
     it('passes down options.delay to routes', () => {
       cy
       .server({ delay: 100 })
@@ -1800,6 +1808,16 @@ describe('src/cy/commands/xhr', () => {
         cy.route()
       })
 
+      it('throws on use of whitelist option', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('The `cy.server()` `whitelist` option has been renamed to `ignore`. Please rename `whitelist` to `ignore`.')
+
+          done()
+        })
+
+        cy.server({ whitelist: () => { } })
+      })
+
       it('url must be a string or regexp', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.route()` was called with an invalid `url`. `url` must be either a string or regular expression.')
@@ -2013,6 +2031,21 @@ describe('src/cy/commands/xhr', () => {
         .wrap({ foo: 'bar' }).as('foo')
         .route(/foo/, '@bar')
       })
+
+      // https://github.com/cypress-io/cypress/issues/7818
+      it('throws when fixture cannot be found', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contains('A fixture file could not be found at any of the following paths:')
+          done()
+        })
+
+        cy.route(/foo/, 'fx:NOT_EXISTING_FILE_FIXTURE').as('stub')
+        cy.window().then((win) => {
+          win.$.get('/foo')
+        })
+
+        cy.wait('@stub')
+      })
     })
 
     describe('.log', () => {
@@ -2176,8 +2209,8 @@ describe('src/cy/commands/xhr', () => {
       })
     })
 
-    describe('whitelisting', () => {
-      it('does not send back 404s on whitelisted routes', () => {
+    describe('ignored routes', () => {
+      it('does not send back 404s on allowed routes', () => {
         cy
         .server()
         .window().then((win) => {
@@ -2189,7 +2222,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7280
-      it('ignores query params when whitelisting routes', () => {
+      it('ignores query params when filtering routes', () => {
         cy.server()
         cy.route(/url-with-query-param/, { foo: 'bar' }).as('getQueryParam')
         cy.window().then((win) => {
@@ -2203,7 +2236,7 @@ describe('src/cy/commands/xhr', () => {
       })
 
       // https://github.com/cypress-io/cypress/issues/7280
-      it('ignores hashes when whitelisting routes', () => {
+      it('ignores hashes when filtering routes', () => {
         cy.server()
         cy.route(/url-with-hash/, { foo: 'bar' }).as('getHash')
         cy.window().then((win) => {
@@ -2214,6 +2247,30 @@ describe('src/cy/commands/xhr', () => {
 
         cy.wait('@getHash').its('response.body')
         .should('deep.equal', { foo: 'bar' })
+      })
+
+      it('overrides ignoring resources when passed as option', () => {
+        cy.server({ ignore: () => false })
+        cy.route('app.js', { foo: 'bar' }).as('getJSResource')
+        cy.route('index.html', '<html></html>').as('getHTMLResource')
+        cy.route('style.css', 'body: {color: red;}').as('getCSSResource')
+        cy.window().then((win) => {
+          win.$.get('/fixtures/app.js')
+          win.$.get('/fixtures/style.css')
+
+          return win.$.get('/fixtures/index.html')
+        })
+
+        // normally these resources would be ignored
+        // but overwriting ignore to return false allows all resources
+        cy.wait('@getJSResource').its('response.body')
+        .should('deep.equal', { foo: 'bar' })
+
+        cy.wait('@getHTMLResource').its('response.body')
+        .should('deep.equal', '<html></html>')
+
+        cy.wait('@getCSSResource').its('response.body')
+        .should('deep.equal', 'body: {color: red;}')
       })
     })
 

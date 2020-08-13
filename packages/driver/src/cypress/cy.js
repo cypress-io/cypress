@@ -1282,6 +1282,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       state('runnable', runnable)
 
+      state('test', $utils.getTestFromRunnable(runnable))
+
       state('ctx', runnable.ctx)
 
       const { fn } = runnable

@@ -24,9 +24,12 @@ exports['e2e runnable execution / cannot navigate in before hook and test'] = `
     ✓ test
     1) causes domain navigation
 
+  navigation error in beforeEach
+    2) "before each" hook for "never gets here"
+
 
   2 passing
-  1 failing
+  2 failing
 
   1) suite
        causes domain navigation:
@@ -51,15 +54,40 @@ You may need to restructure some of your test code to avoid this problem.
 https://on.cypress.io/cannot-visit-different-origin-domain
       [stack trace lines]
 
+  2) navigation error in beforeEach
+       "before each" hook for "never gets here":
+     CypressError: \`cy.visit()\` failed because you are attempting to visit a URL that is of a different origin.
+
+The new URL is considered a different origin because the following parts of the URL are different:
+
+  > port
+
+You may only \`cy.visit()\` same-origin URLs within a single test.
+
+The previous URL you visited was:
+
+  > 'http://localhost:4545'
+
+You're attempting to visit this URL:
+
+  > 'http://localhost:5656'
+
+You may need to restructure some of your test code to avoid this problem.
+
+https://on.cypress.io/cannot-visit-different-origin-domain
+
+Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`navigation error in beforeEach\`
+      [stack trace lines]
+
 
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
+  │ Tests:        4                                                                                │
   │ Passing:      2                                                                                │
-  │ Failing:      1                                                                                │
+  │ Failing:      2                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
@@ -83,9 +111,9 @@ https://on.cypress.io/cannot-visit-different-origin-domain
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  beforehook-and-test-navigation.js        XX:XX        3        2        1        -        - │
+  │ ✖  beforehook-and-test-navigation.js        XX:XX        4        2        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        3        2        1        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        2        2        -        -  
 
 
 `

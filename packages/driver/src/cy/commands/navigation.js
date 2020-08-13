@@ -842,6 +842,9 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         if (previousDomainVisited && (remote.originPolicy !== existing.originPolicy)) {
           // if we've already visited a new superDomain
           // then die else we'd be in a terrible endless loop
+          // we also need to disable retries to prevent the endless loop
+          $utils.getTestFromRunnable(state('runnable'))._retries = 0
+
           return cannotVisitDifferentOrigin(remote.origin, previousDomainVisited, remote, existing, options._log)
         }
 

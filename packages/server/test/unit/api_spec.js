@@ -568,7 +568,7 @@ describe('lib/api', () => {
 
     it('PUTs /instances/:id', function () {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '2')
+      .matchHeader('x-route-version', '3')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123', this.putProps)
@@ -579,7 +579,7 @@ describe('lib/api', () => {
 
     it('PUT /instances/:id failure formatting', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '2')
+      .matchHeader('x-route-version', '3')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123')
@@ -609,7 +609,7 @@ describe('lib/api', () => {
 
     it('handles timeouts', () => {
       nock(API_BASEURL)
-      .matchHeader('x-route-version', '2')
+      .matchHeader('x-route-version', '3')
       .matchHeader('x-os-name', 'linux')
       .matchHeader('x-cypress-version', pkg.version)
       .put('/instances/instance-id-123')
