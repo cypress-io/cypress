@@ -39,6 +39,11 @@ export namespace CyHttpMessages {
 
   export type IncomingRequest = BaseMessage & {
     responseTimeout?: number
+    /**
+     * Set if redirects should be followed when this request is made. By default, requests will
+     * not follow redirects before yielding the response (the 3xx redirect is yielded)
+     */
+    followRedirect?: boolean
   }
 
   export interface IncomingHttpRequest extends IncomingRequest {
