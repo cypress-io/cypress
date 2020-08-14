@@ -215,7 +215,7 @@ describe('Project Nav', function () {
         })
 
         it('saves chosen browser in local storage', () => {
-          expect(localStorage.getItem('chosenBrowser')).to.eq('chromium')
+          expect(localStorage.getItem('chosenBrowser')).to.eq(JSON.stringify({ name: 'chromium', channel: 'stable' }))
         })
       })
 
@@ -318,8 +318,15 @@ describe('Project Nav', function () {
     })
 
     describe('local storage saved browser', function () {
+      // deliberately not the default 'chrome' browser
+      // @see https://github.com/cypress-io/cypress/issues/8281
+      const canaryJson = JSON.stringify({
+        name: 'chrome',
+        channel: 'canary',
+      })
+
       beforeEach(function () {
-        localStorage.setItem('chosenBrowser', 'chromium')
+        localStorage.setItem('chosenBrowser', canaryJson)
 
         this.openProject.resolve(this.config)
       })
@@ -330,13 +337,13 @@ describe('Project Nav', function () {
 
       it('displays local storage browser name in chosen', () => {
         cy.get('.browsers-list .dropdown-chosen')
-        .should('contain', 'Chromium')
+        .should('contain', 'Canary').and('not.contain', 'Edge')
       })
 
       it('displays local storage browser icon in chosen', () => {
         cy.get('.browsers-list .dropdown-chosen .browser-icon')
         .should('have.attr', 'src')
-        .and('include', './img/chromium')
+        .and('include', './img/chrome-canary')
       })
     })
 
