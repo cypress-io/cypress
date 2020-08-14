@@ -2,6 +2,12 @@
 
 This folder shows several examples from [Enzyme docs](https://enzymejs.github.io/enzyme/). Find the tests in the [spec.js](spec.js) file.
 
+In general if you are migrating from Enzyme to `cypress-react-unit-test`:
+
+- there is no shallow mounting, only the full mounting. Thus `cypress-react-unit-test` has `mount` which is similar to the Enzyme's `mount`
+- you can mock [children components](https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/advanced/mocking-component) if you want to avoid running "expensive" components during tests
+- the test is running as a "mini" web application. Thus if you want to set a context around component, then set the [context around the component](https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/advanced/context)
+
 ## setState
 
 If you want to change the component's internal state, use the component reference. You can get it by using the special property `ref` when mounting.
@@ -45,3 +51,26 @@ it('mounts cloned component', () => {
   cy.contains('.foo', 'second').should('be.visible')
 })
 ```
+
+## context
+
+Enzyme's `mount` method allows passing the [React context](https://reactjs.org/docs/context.html) as the second argument to the JSX component like `SimpleComponent` below.
+
+```js
+function SimpleComponent(props, context) {
+  const { name } = context
+  return <div>{name || 'not set'}</div>
+}
+```
+
+Since the above syntax is [deprecated](https://reactjs.org/docs/legacy-context.html), `cypress-react-unit-test` does not support it. Instead use `createContext` and `Context.Provider` to surround the mounted component, just like you would do in a regular application code.
+
+```js
+mount(
+  <SimpleContext.Provider value={{ name: 'test context' }}>
+    <SimpleComponent />
+  </SimpleContext.Provider>,
+)
+```
+
+See [context-spec.js](context-spec.js) for more examples.
