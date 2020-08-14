@@ -12,17 +12,10 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
-// @ts-ignore
-import ansiToHtml from 'ansi-to-html'
 
 const md = new Markdown('zero')
 
 md.enable(['backticks', 'emphasis', 'escape'])
-
-const ansiConvert = new ansiToHtml({
-  newline: false,
-  stream: false,
-})
 
 interface DocsUrlProps {
   url: string | string[]
@@ -58,11 +51,7 @@ const TestError = observer((props: TestErrorProps) => {
   }
 
   const formattedMessage = (message?: string) => {
-    const mdResult = message ? md.renderInline(message) : ''
-
-    const ansiResult = ansiConvert.toHtml(mdResult)
-
-    return ansiResult
+    return message ? md.renderInline(message) : ''
   }
 
   const { err } = props.model

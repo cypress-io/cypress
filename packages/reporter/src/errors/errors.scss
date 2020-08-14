@@ -79,6 +79,10 @@
     padding: 5px 10px;
     font-weight: bold;
 
+    .hook-failed-message {
+      display: none;
+    }
+
     .error-hookname {
       text-transform: uppercase;
       color: #959595;
@@ -113,10 +117,6 @@
     color: $err-text;
     font-size: 1em;
 
-    p {
-      line-height: 1.5;
-    }
-
     code {
       background-color: $err-code-background;
       border-radius: 5px;
@@ -126,14 +126,6 @@
     strong {
       color: $err-text;
       font-weight: bold;
-    }
-
-    .ansi-dim {
-      color: #612d30
-    }
-
-    .ansi-normal {
-      color: $err-text;
     }
   }
 

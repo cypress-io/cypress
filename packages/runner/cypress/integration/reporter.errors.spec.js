@@ -710,8 +710,7 @@ describe('errors ui', () => {
 
   describe('multiple errors', {
     // see more of the errors
-    viewportHeight: 2000,
-    viewportWidth: 600,
+    viewportHeight: 1000,
   }, () => {
     const file = 'multiple_errors_spec.js'
 
