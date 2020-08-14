@@ -1,195 +1,205 @@
 import _ from 'lodash'
-import { action, autorun, computed, observable, observe } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import { FileDetails } from '@packages/ui-components'
 
+import Attempt from '../attempts/attempt-model'
 import Err from '../errors/err-model'
-import Hook, { HookName } from '../hooks/hook-model'
+import { HookProps } from '../hooks/hook-model'
 import Runnable, { RunnableProps } from '../runnables/runnable-model'
-import Command, { CommandProps } from '../commands/command-model'
-import Agent, { AgentProps } from '../agents/agent-model'
-import Route, { RouteProps } from '../routes/route-model'
+import { CommandProps } from '../commands/command-model'
+import { AgentProps } from '../agents/agent-model'
+import { RouteProps } from '../routes/route-model'
+import { RunnablesStore, LogProps } from '../runnables/runnables-store'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
 export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
-  state: TestState
+  state: TestState | null
   err?: Err
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
   routes?: Array<RouteProps>
+  hooks: Array<HookProps>
+  prevAttempts?: Array<TestProps>
+  currentRetry: number
+  retries?: number
+  final?: boolean
   invocationDetails?: FileDetails
 }
 
 export interface UpdatableTestProps {
+  id: TestProps['id']
   state?: TestProps['state']
   err?: TestProps['err']
   hookId?: string
   isOpen?: TestProps['isOpen']
+  currentRetry?: TestProps['currentRetry']
+  retries?: TestProps['retries']
 }
 
 export default class Test extends Runnable {
-  @observable agents: Array<Agent> = []
-  @observable commands: Array<Command> = []
-  @observable err = new Err({})
-  @observable hooks: Array<Hook> = []
-  // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
-  @observable isActive: boolean | null = null
-  @observable isLongRunning = false
-  @observable isOpen = false
-  @observable routes: Array<Route> = []
-  @observable _state?: TestState | null = null
-  @observable _invocationCount: number = 0
-  @observable invocationDetails?: FileDetails
-  @observable hookCount: { [name in HookName]: number } = {
-    'before all': 0,
-    'before each': 0,
-    'after all': 0,
-    'after each': 0,
-    'test body': 0,
-  }
   type = 'test'
 
-  callbackAfterUpdate: (() => void) | null = null
+  _callbackAfterUpdate: UpdateTestCallback | null = null
+  hooks: HookProps[]
+  invocationDetails?: FileDetails
 
-  constructor (props: TestProps, level: number) {
+  @observable attempts: Attempt[] = []
+  @observable _isOpen: boolean | null = null
+  @observable isOpenWhenActive: Boolean | null = null
+  @observable _isFinished = false
+
+  constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
-
-    this._state = props.state
-    this.err.update(props.err)
 
     this.invocationDetails = props.invocationDetails
 
-    this.hooks = _.map(props.hooks, (hook) => new Hook(hook))
-    this.hooks.push(new Hook({
-      hookId: this.id.toString(),
+    this.hooks = [...props.hooks, {
+      hookId: props.id.toString(),
       hookName: 'test body',
-      invocationDetails: this.invocationDetails,
-    }))
+      invocationDetails: props.invocationDetails,
+    }]
 
-    autorun(() => {
-      // if at any point, a command goes long running, set isLongRunning
-      // to true until the test becomes inactive
-      if (!this.isActive) {
-        action('became:inactive', () => {
-          return this.isLongRunning = false
-        })()
-      } else if (this._hasLongRunningCommand) {
-        action('became:long:running', () => {
-          return this.isLongRunning = true
-        })()
-      }
+    _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
+
+    this._addAttempt(props)
+  }
+
+  @computed get isLongRunning () {
+    return _.some(this.attempts, (attempt: Attempt) => {
+      return attempt.isLongRunning
     })
   }
 
-  @computed get _hasLongRunningCommand () {
-    return _.some(this.commands, (command) => {
-      return command.isLongRunning
-    })
+  @computed get isOpen () {
+    if (this._isOpen === null) {
+      return Boolean(this.state === 'failed'
+      || this.isLongRunning
+      || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
+      || this.store.hasSingleTest)
+    }
+
+    return this._isOpen
   }
 
   @computed get state () {
-    return this._state || (this.isActive ? 'active' : 'processing')
+    return this.lastAttempt ? this.lastAttempt.state : 'active'
   }
 
-  addAgent (agent: Agent) {
-    this.agents.push(agent)
+  @computed get err () {
+    return this.lastAttempt ? this.lastAttempt.err : new Err({})
   }
 
-  addRoute (route: Route) {
-    this.routes.push(route)
+  @computed get lastAttempt () {
+    return _.last(this.attempts) as Attempt
   }
 
-  addCommand (command: Command) {
-    this.commands.push(command)
-
-    const hookIndex = _.findIndex(this.hooks, { hookId: command.hookId })
-
-    const hook = this.hooks[hookIndex]
-
-    hook.addCommand(command)
-
-    // make sure that hooks are in order of invocation
-    if (hook.invocationOrder === undefined) {
-      hook.invocationOrder = this._invocationCount++
-
-      if (hook.invocationOrder !== hookIndex) {
-        this.hooks[hookIndex] = this.hooks[hook.invocationOrder]
-        this.hooks[hook.invocationOrder] = hook
-      }
-    }
-
-    // assign number if non existent
-    if (hook.hookNumber === undefined) {
-      hook.hookNumber = ++this.hookCount[hook.hookName]
-    }
+  @computed get hasMultipleAttempts () {
+    return this.attempts.length > 1
   }
 
-  start () {
-    this.isActive = true
+  @computed get hasRetried () {
+    return this.state === 'passed' && this.hasMultipleAttempts
   }
 
-  update ({ state, err, hookId, isOpen }: UpdatableTestProps, cb?: UpdateTestCallback) {
-    let hadChanges = false
+  // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
+  @computed get isActive (): boolean {
+    return _.some(this.attempts, { isActive: true })
+  }
 
-    const disposer = observe(this, (change) => {
-      hadChanges = true
+  @computed get currentRetry () {
+    return this.attempts.length - 1
+  }
 
-      disposer()
+  isLastAttempt (attemptModel: Attempt) {
+    return this.lastAttempt === attemptModel
+  }
 
-      // apply change as-is
-      return change
+  addLog = (props: LogProps) => {
+    return this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+      return attempt.addLog(props)
     })
+  }
 
-    if (cb) {
-      this.callbackAfterUpdate = () => {
-        this.callbackAfterUpdate = null
-        cb()
+  updateLog (props: LogProps) {
+    this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+      attempt.updateLog(props)
+    })
+  }
+
+  @action start (props: TestProps) {
+    let attempt = this.getAttemptByIndex(props.currentRetry)
+
+    if (!attempt) {
+      attempt = this._addAttempt(props)
+    }
+
+    attempt.start()
+  }
+
+  @action update (props: UpdatableTestProps, cb: UpdateTestCallback) {
+    if (props.isOpen != null) {
+      this.setIsOpenWhenActive(props.isOpen)
+
+      if (this.isOpen !== props.isOpen) {
+        this._callbackAfterUpdate = cb
+
+        return
       }
     }
 
-    this._state = state
-    this.err.update(err)
-    if (isOpen != null) {
-      this.isOpen = isOpen
-    }
+    cb()
+  }
 
-    if (hookId) {
-      const hook = _.find(this.hooks, { hookId })
+  // this is called to sync up the command log UI for the sake of
+  // screenshots, so we only ever need to open the last attempt
+  setIsOpenWhenActive (isOpen: boolean) {
+    this.isOpenWhenActive = isOpen
+  }
 
-      if (hook) {
-        hook.failed = true
-      }
-    }
-
-    // if we had no changes then react will
-    // never fire componentDidUpdate and
-    // so we need to manually call our callback
-    // https://github.com/cypress-io/cypress/issues/674#issuecomment-366495057
-    if (!hadChanges) {
-      // unbind the listener if no changes
-      disposer()
-
-      // if we had a callback, invoke it
-      if (this.callbackAfterUpdate) {
-        this.callbackAfterUpdate()
-      }
+  callbackAfterUpdate () {
+    if (this._callbackAfterUpdate) {
+      this._callbackAfterUpdate()
+      this._callbackAfterUpdate = null
     }
   }
 
-  finish (props: UpdatableTestProps) {
-    this.update(props)
-    this.isActive = false
+  @action finish (props: UpdatableTestProps) {
+    this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
+
+    this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
+      attempt.finish(props)
+    })
+  }
+
+  getAttemptByIndex (attemptIndex: number) {
+    if (attemptIndex >= this.attempts.length) return
+
+    return this.attempts[attemptIndex || 0]
   }
 
   commandMatchingErr () {
-    return _(this.hooks)
-    .map((hook) => {
-      return hook.commandMatchingErr(this.err)
-    })
-    .compact()
-    .last()
+    return this.lastAttempt.commandMatchingErr()
+  }
+
+  _addAttempt = (props: TestProps) => {
+    props.invocationDetails = this.invocationDetails
+    props.hooks = this.hooks
+    const attempt = new Attempt(props, this)
+
+    this.attempts.push(attempt)
+
+    return attempt
+  }
+
+  _withAttempt<T> (attemptIndex: number, cb: (attempt: Attempt) => T) {
+    const attempt = this.getAttemptByIndex(attemptIndex)
+
+    if (attempt) return cb(attempt)
+
+    return null
   }
 }

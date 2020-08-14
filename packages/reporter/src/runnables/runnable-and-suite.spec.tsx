@@ -104,7 +104,7 @@ describe('<Runnable />', () => {
     })
 
     it('renders a runnable for each child', () => {
-      const component = shallow(<Suite model={model({ children: [{ id: 1 }, { id: 2 }] } as SuiteModel)} />)
+      const component = shallow(<Suite model={model({ children: [{ id: 1 }, { id: 2 }] } as unknown as SuiteModel)} />)
 
       expect(component.find(Runnable).length).to.equal(2)
     })

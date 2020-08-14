@@ -224,15 +224,13 @@ exports['e2e reporters mochawesome fails with mochawesome-1.5.2 npm custom repor
     pending
       - is pending
     afterEach hooks
-      ✓ runs this
       2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
-      ✓ fails on this
       3) "after all" hook for "fails on this"
 
 
-  3 passing
+  1 passing
   1 pending
   3 failing
 
@@ -404,15 +402,13 @@ exports['e2e reporters mochawesome fails with mochawesome-2.3.1 npm custom repor
     pending
       - is pending
     afterEach hooks
-      ✓ runs this
       2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
-      ✓ fails on this
       3) "after all" hook for "fails on this"
 
 
-  3 passing
+  1 passing
   1 pending
   3 failing
 
@@ -584,15 +580,13 @@ exports['e2e reporters mochawesome fails with mochawesome-3.0.1 npm custom repor
     pending
       - is pending
     afterEach hooks
-      ✓ runs this
       2) "after each" hook for "runs this"
     after hooks
       ✓ runs this
-      ✓ fails on this
       3) "after all" hook for "fails on this"
 
 
-  3 passing
+  1 passing
   1 pending
   3 failing
 

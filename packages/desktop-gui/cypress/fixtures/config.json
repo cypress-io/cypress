@@ -109,7 +109,7 @@
   "cypressHostUrl": "http://localhost:2020",
   "cypressEnv": "development",
   "env": {},
-  "blacklistHosts": [
+  "blockHosts": [
     "www.google-analytics.com",
     "hotjar.com"
   ],
@@ -376,7 +376,7 @@
       "from": "default",
       "value": true
     },
-    "blacklistHosts": {
+    "blockHosts": {
       "from": "config",
       "value": [
         "www.google-analytics.com",

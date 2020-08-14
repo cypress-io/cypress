@@ -18,13 +18,17 @@ Cypress.Commands.add 'setFile', { prevSubject: "element" }, (element, filePath) 
     return cy.fixture(filePath, "base64")
 
   return fixtureOrReadFile(filePath).then (image) ->
-    return Blob.base64StringToBlob(image).then (blob) ->
+    return new Promise((resolve) => 
+      blob = Blob.base64StringToBlob(image)
       elementNode = element[0]
       file = new File([ blob ], filePath, type: mimeType)
       dataTransfer = new DataTransfer
       dataTransfer.items.add(file)
       elementNode.files = dataTransfer.files
-      elementNode.dispatchEvent new Event("change", { bubbles: true })
+      result = elementNode.dispatchEvent new Event("change", { bubbles: true })
+
+      resolve(result)
+    )  
 
 describe "<form> submissions", ->
   it "can submit a form correctly", ->

@@ -63,9 +63,10 @@ describe('e2e screenshots', () => {
   // the test title as the file name
   e2e.it('passes', {
     spec: 'screenshots_spec.js',
-    expectedExitCode: 4,
+    expectedExitCode: 5,
     snapshot: true,
     timeout: 180000,
+    onStdout: e2e.normalizeWebpackErrors,
     onRun (exec, browser) {
       return exec()
       .then(() => {

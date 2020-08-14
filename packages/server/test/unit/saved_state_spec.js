@@ -62,7 +62,7 @@ describe('lib/saved_state', () => {
       })
     })
 
-    it('only saves whitelisted keys', () => {
+    it('only saves allowed keys', () => {
       return savedState.create()
       .then((state) => {
         return state.set({ foo: 'bar', appWidth: 20 })
@@ -81,7 +81,7 @@ describe('lib/saved_state', () => {
       .then((state) => {
         return state.set({ foo: 'bar', baz: 'qux' })
       }).then(() => {
-        expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-whitelisted key(s): foo, baz. All keys must be whitelisted in server/lib/saved_state.js')
+        expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.js')
       })
     })
   })

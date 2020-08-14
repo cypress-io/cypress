@@ -12,11 +12,11 @@ Cypress.on('window:alert', (text) => {
 })
 
 Cypress.on('window:before:load', (win) => {
-  win // $ExpectType Window
+  win // $ExpectType AUTWindow
 })
 
 Cypress.on('window:load', (win) => {
-  win // $ExpectType Window
+  win // $ExpectType AUTWindow
 })
 
 Cypress.on('window:before:unload', (event) => {

@@ -889,25 +889,31 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when using an old configuration option: trashAssetsBeforeHeadlessRuns', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=trashAssetsBeforeHeadlessRuns=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeHeadlessRuns')
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'trashAssetsBeforeRuns')
-      })
-    })
+    const renamedConfigs = [
+      {
+        old: 'trashAssetsBeforeHeadlessRuns',
+        new: 'trashAssetsBeforeRuns',
+      },
+      {
+        old: 'videoRecording',
+        new: 'video',
+      },
+      {
+        old: 'blacklistHosts',
+        new: 'blockHosts',
+      },
+    ]
 
-    it('logs error and exits when using an old configuration option: videoRecording', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=videoRecording=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'videoRecording')
-        this.expectExitWithErr('RENAMED_CONFIG_OPTION', 'video')
+    renamedConfigs.forEach(function (config) {
+      it(`logs error and exits when using an old configuration option: ${config.old}`, function () {
+        return cypress.start([
+          `--run-project=${this.todosPath}`,
+          `--config=${config.old}=''`,
+        ])
+        .then(() => {
+          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
+          this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
+        })
       })
     })
 

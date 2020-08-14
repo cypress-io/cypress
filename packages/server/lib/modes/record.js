@@ -227,7 +227,6 @@ const updateInstance = (options = {}) => {
       error,
       video,
       hooks,
-      stdout: null, // don't send stdout with the instance payload to prevent requests that are too large. stdout will later get uploaded separately anyway.
       instanceId,
       screenshots,
       reporterStats,

@@ -3,7 +3,7 @@ const sinon = require('sinon')
 const helpers = require('../support/helpers')
 
 const { cleanseRunStateMap, shouldHaveTestResults, getRunState } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, onInitialized, getAutCypress } = helpers.createCypress()
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
 
 const simpleSingleTest = {
   suites: { 'suite 1': { tests: [{ name: 'test 1' }] } },
@@ -239,17 +239,24 @@ describe('src/cypress/runner', () => {
       })
     })
 
-    describe('screenshots', () => {
-      let onAfterScreenshotListener
-
-      beforeEach(() => {
-        onInitialized((autCypress) => {
-          autCypress.Screenshot.onAfterScreenshot = cy.stub()
-          onAfterScreenshotListener = cy.stub()
-          autCypress.on('after:screenshot', onAfterScreenshotListener)
-        })
+    it('buffer mocha pass event when fail in afterEach hooks', () => {
+      runIsolatedCypress({
+        suites: {
+          'suite 1': {
+            suites: {
+              'suite 1-1': {
+                hooks: [{ type: 'afterEach', fail: true }],
+                tests: ['test 1'],
+              },
+            },
+          },
+        },
+      }).then(({ mochaStubs }) => {
+        expect(_.find(mochaStubs.args, { 1: 'pass' })).not.exist
       })
+    })
 
+    describe('screenshots', () => {
       it('screenshot after failed test', () => {
         runIsolatedCypress({
           suites: {
