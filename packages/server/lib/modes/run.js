@@ -411,10 +411,17 @@ const iterateThroughSpecs = function (options = {}) {
       // find the actual spec object amongst
       // our specs array since the API sends us
       // the relative name
-      spec = _.find(specs, { relative: spec })
+      const localSpec = _.find(specs, { relative: spec })
+
+      debug('next spec to run: %s', localSpec)
+
+      // if no local spec is found matching, something is wrong
+      if (!localSpec) {
+        errors.throw('NO_LOCAL_SPEC_FOUND', spec)
+      }
 
       return runEachSpec(
-        spec,
+        localSpec,
         claimedInstances - 1,
         totalInstances,
         estimated,
@@ -422,7 +429,7 @@ const iterateThroughSpecs = function (options = {}) {
       .tap((results) => {
         runs.push(results)
 
-        return afterSpecRun(spec, results, config)
+        return afterSpecRun(localSpec, results, config)
       })
       .then(() => {
         // recurse

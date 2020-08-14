@@ -524,7 +524,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We searched for any files matching this glob pattern:
 
         ${chalk.blue(arg2)}`
+    case 'NO_LOCAL_SPEC_FOUND':
+      // no glob provided, searched all specs
+      return stripIndent`\
+        Can't run because no spec file was found.
 
+        We searched for any files matching this pattern:
+
+        ${chalk.blue(arg1)}`
     case 'RENDERER_CRASHED':
       return stripIndent`\
         We detected that the Chromium Renderer process just crashed.
