@@ -41,6 +41,10 @@ Stubbing clock | ✅ | ✅
 Code coverage | ✅ | ✅
 <!-- prettier-ignore-end -->
 
+If you are coming from Jest + RTL world, read [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/).
+
+If you are coming from Enzyme world, check out the [enzyme](cypress/component/basic/enzyme) example.
+
 ## Blog posts
 
 - [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/)
@@ -126,6 +130,8 @@ Spec | Description
 [alert-spec.js](cypress/component/basic/alert-spec.js) | Component tries to use `window.alert`
 [counter-set-state](cypress/component/basic/counter-set-state) | Counter component that uses `this.state`
 [counter-use-hooks](cypress/component/basic/counter-use-hooks) | Counter component that uses `useState` hook
+[document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
+[enzyme](cypress/component/basic/enzyme) | Several specs showing how to recreate Enzyme's `setProps`, `setState`, and `setContext` methods.
 [emotion-spec.js](cypress/component/basic/emotion-spec.js) | Confirms the component is using `@emotion/core` and styles are set
 [error-boundary-spec.js](cypress/component/basic/error-boundary-spec.js) | Checks if an error boundary component works
 [pure-component-spec.js](cypress/component/basic/pure-component.spec.js) | Tests stateless component
@@ -142,7 +148,6 @@ Spec | Description
 [typescript](cypress/component/basic/typescript) | A spec written in TypeScript
 [unmount](cypress/component/basic/unmount) | Verifies the component's behavior when it is unmounted from the DOM
 [use-lodash-fp](cypress/component/basic/use-lodash-fp) | Imports and tests methods from `lodash/fp` dependency
-[document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
 [styled-components](cypress/component/basic/styled-components) | Test components that use [styled-components](https://www.styled-components.com/)
 <!-- prettier-ignore-end -->
 
