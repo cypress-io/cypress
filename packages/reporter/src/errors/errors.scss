@@ -79,6 +79,16 @@
     padding: 5px 10px;
     font-weight: bold;
 
+    .error-hookname {
+      text-transform: uppercase;
+      color: #959595;
+      display: inline-block;
+      flex-grow: 1;
+      font-size: 11px;
+      margin-left: 4px;
+      padding: 4px 0;
+    }
+
     .runnable-err-name {
       flex-grow: 2;
       font-size: 13px;
@@ -103,6 +113,10 @@
     color: $err-text;
     font-size: 1em;
 
+    p {
+      line-height: 1.5;
+    }
+
     code {
       background-color: $err-code-background;
       border-radius: 5px;
@@ -112,6 +126,14 @@
     strong {
       color: $err-text;
       font-weight: bold;
+    }
+
+    .ansi-dim {
+      color: #612d30
+    }
+
+    .ansi-normal {
+      color: $err-text;
     }
   }
 

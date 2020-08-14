@@ -1,0 +1,30 @@
+diff --git a/node_modules/ansi-to-html/lib/ansi_to_html.js b/node_modules/ansi-to-html/lib/ansi_to_html.js
+index fa171bb..b4d8a2d 100644
+--- a/node_modules/ansi-to-html/lib/ansi_to_html.js
++++ b/node_modules/ansi-to-html/lib/ansi_to_html.js
+@@ -175,6 +175,9 @@ function handleDisplay(stack, code, options) {
+     1: function _() {
+       return pushTag(stack, 'b');
+     },
++    2: function() {
++      return pushTag(stack,'span','','ansi-dim')
++    },
+     3: function _() {
+       return pushTag(stack, 'i');
+     },
+@@ -320,13 +323,13 @@ function pushText(text, options) {
+  */
+ 
+ 
+-function pushTag(stack, tag, style) {
++function pushTag(stack, tag, style, className) {
+   if (!style) {
+     style = '';
+   }
+ 
+   stack.push(tag);
+-  return ['<' + tag, style ? ' style="' + style + '"' : void 0, '>'].join('');
++  return ['<' + tag,style ? ' style="' + style + '"' : void 0,className ? ' class="' + className + '"' : void 0,'>'].join('');
+ }
+ /**
+  * @param {Array} stack

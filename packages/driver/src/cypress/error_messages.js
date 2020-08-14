@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
+const colors = require('ansi-colors')
 const capitalize = require('underscore.string/capitalize')
 
 const divider = (num, char) => {
@@ -1626,7 +1627,7 @@ module.exports = {
         msg += `\n\nAlthough you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail`
       }
 
-      return msg
+      return colors.dim(msg)
     },
     error (obj) {
       const { message, source, lineno } = obj
@@ -1634,14 +1635,14 @@ module.exports = {
       return message + (source && lineno ? ` (${source}:${lineno})` : '')
     },
     fromApp: {
-      message: stripIndent`\
+      message: colors.dim(stripIndent`\
         The following error originated from your application code, not from Cypress.
 
-          > {{errMsg}}
+          > ${colors.reset('{{errMsg}}')}
 
         When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
 
-        This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.`,
+        This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.`),
       docsUrl: 'https://on.cypress.io/uncaught-exception-from-application',
     },
     fromSpec: {

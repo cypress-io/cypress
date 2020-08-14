@@ -6,11 +6,23 @@ import Markdown from 'markdown-it'
 import Collapsible from '../collapsible/collapsible'
 import ErrorCodeFrame from '../errors/error-code-frame'
 import ErrorStack from '../errors/error-stack'
+import { HookHeader } from '../hooks/hooks'
 
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
 import Attempt from '../attempts/attempt-model'
+// @ts-ignore
+import ansiToHtml from 'ansi-to-html'
+
+const md = new Markdown('zero')
+
+md.enable(['backticks', 'emphasis', 'escape'])
+
+const ansiConvert = new ansiToHtml({
+  newline: false,
+  stream: false,
+})
 
 interface DocsUrlProps {
   url: string | string[]
@@ -32,14 +44,9 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
 interface TestErrorProps {
   model: Attempt
-  isTestError?: boolean
 }
 
 const TestError = observer((props: TestErrorProps) => {
-  const md = new Markdown('zero')
-
-  md.enable(['backticks', 'emphasis', 'escape'])
-
   const onPrint = () => {
     events.emit('show:error', props.model)
   }
@@ -51,7 +58,11 @@ const TestError = observer((props: TestErrorProps) => {
   }
 
   const formattedMessage = (message?: string) => {
-    return message ? md.renderInline(message) : ''
+    const mdResult = message ? md.renderInline(message) : ''
+
+    const ansiResult = ansiConvert.toHtml(mdResult)
+
+    return ansiResult
   }
 
   const { err } = props.model
@@ -59,21 +70,26 @@ const TestError = observer((props: TestErrorProps) => {
 
   if (!err.displayMessage) return null
 
-  return (
-    <div className='runnable-err-wrapper'>
-      <div className='runnable-err'>
-        <div className='runnable-err-header'>
-          <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle' />
-            {err.name}
+  const allErrs = [err].concat(props.model.errs || [])
+
+  return allErrs.map((err, i) => {
+    const hook = err.failedFromHookId && _.find(props.model.hooks, { hookId: err.failedFromHookId })
+
+    return (
+      <div key={i} className='runnable-err-wrapper'>
+        <div className='runnable-err'>
+          <div className='runnable-err-header'>
+            <div className='runnable-err-name'>
+              <i className='fas fa-exclamation-circle' />
+              {err.name} {hook && <span className="error-hookname" ><HookHeader name={hook.hookName} number={hook.hookNumber}/></span>}
+            </div>
           </div>
-        </div>
-        <div className='runnable-err-message'>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
-          <DocsUrl url={err.docsUrl} />
-        </div>
-        {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
-        {err.stack &&
+          <div className='runnable-err-message'>
+            <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
+            <DocsUrl url={err.docsUrl} />
+          </div>
+          {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
+          {err.stack &&
           <Collapsible
             header='View stack trace'
             headerClass='runnable-err-stack-expander'
@@ -93,10 +109,11 @@ const TestError = observer((props: TestErrorProps) => {
           >
             <ErrorStack err={err} />
           </Collapsible>
-        }
+          }
+        </div>
       </div>
-    </div>
-  )
+    )
+  })
 })
 
 export default TestError

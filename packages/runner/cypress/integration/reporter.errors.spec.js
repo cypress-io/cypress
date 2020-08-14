@@ -707,4 +707,20 @@ describe('errors ui', () => {
       method: 'cy.expect',
     })
   })
+
+  describe('multiple errors', {
+    // see more of the errors
+    viewportHeight: 2000,
+    viewportWidth: 600,
+  }, () => {
+    const file = 'multiple_errors_spec.js'
+
+    verify.it('t1', {
+      file,
+      verifyFn () {
+        cy.get('.runnable-err').should('have.length', 3)
+        // TODO: write more assertions
+      },
+    })
+  })
 })

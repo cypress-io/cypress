@@ -18,7 +18,7 @@ const TEST_BEFORE_RUN_EVENT = 'runner:test:before:run'
 const TEST_AFTER_RUN_EVENT = 'runner:test:after:run'
 
 const RUNNABLE_LOGS = 'routes agents commands hooks'.split(' ')
-const RUNNABLE_PROPS = 'id order title root hookName hookId err state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
+const RUNNABLE_PROPS = 'id order title root hookName hookId err errs state failedFromHookId body speed type duration wallClockStartedAt wallClockDuration timings file originalTitle invocationDetails final currentRetry retries'.split(' ')
 
 const debug = require('debug')('cypress:driver:runner')
 
@@ -605,11 +605,22 @@ const setHookFailureProps = (test, hook, err) => {
   err = $errUtils.wrapErr(err)
   const hookName = getHookName(hook)
 
-  test.err = err
+  // also put failedFromHookId on error instance
+  err.failedFromHookId = hook.hookId
+
+  if (test.err) {
+    err.failedFromHookId = hook.hookId
+
+    test.errs = test.errs || []
+    test.errs = test.errs.concat(err)
+  } else {
+    test.err = err
+    test.failedFromHookId = hook.hookId
+    test.hookName = hookName // TODO: why are we doing this?
+  }
+
   test.state = 'failed'
   test.duration = hook.duration // TODO: nope (?)
-  test.hookName = hookName // TODO: why are we doing this?
-  test.failedFromHookId = hook.hookId
 }
 
 function getTestFromRunnable (runnable) {
@@ -744,7 +755,7 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
      * https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
      */
   _runner.on('retry', (test, err) => {
-    test.err = $errUtils.wrapErr(err)
+    $errUtils.wrapRunnableErrs(test)
     Cypress.action('runner:retry', wrap(test), test.err)
   })
 
