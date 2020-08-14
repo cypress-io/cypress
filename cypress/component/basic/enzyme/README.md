@@ -1,6 +1,6 @@
 # Enzyme examples
 
-This folder shows several examples from [Enzyme docs](https://enzymejs.github.io/enzyme/). Find the tests in the [spec.js](spec.js) file.
+This folder shows several examples from [Enzyme docs](https://enzymejs.github.io/enzyme/).
 
 In general if you are migrating from Enzyme to `cypress-react-unit-test`:
 
@@ -21,6 +21,8 @@ cy.wrap(c)
   .its('instance')
   .invoke('setState', { count: 10 })
 ```
+
+See [state-spec.js](state-spec.js) file.
 
 ## setProps
 
@@ -52,6 +54,8 @@ it('mounts cloned component', () => {
 })
 ```
 
+See [props-spec.js](props-spec.js) file.
+
 ## context
 
 Enzyme's `mount` method allows passing the [React context](https://reactjs.org/docs/context.html) as the second argument to the JSX component like `SimpleComponent` below.
@@ -69,6 +73,24 @@ Since the above syntax is [deprecated](https://reactjs.org/docs/legacy-context.h
 mount(
   <SimpleContext.Provider value={{ name: 'test context' }}>
     <SimpleComponent />
+  </SimpleContext.Provider>,
+)
+```
+
+Instead of setting a new context, mount the same component but surround it with a different context provider
+
+```js
+const cmp = <SimpleComponent id="0x123" />
+mount(
+  <SimpleContext.Provider value={{ name: 'first context' }}>
+    {cmp}
+  </SimpleContext.Provider>,
+)
+
+// same component, different provider
+mount(
+  <SimpleContext.Provider value={{ name: 'second context' }}>
+    {cmp}
   </SimpleContext.Provider>,
 )
 ```
