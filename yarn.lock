@@ -1965,15 +1965,6 @@
     tsconfig-paths-webpack-plugin "^3.3.0"
     webpack "^4.44.1"
 
-"@cypress/webpack-preprocessor@5.4.1":
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.1.tgz#eb58f6cd02932a95653c1a674cfd769da2409806"
-  integrity sha512-1E2BdVVXQ4wDQ7f3mXCvS9xmfTVwEoT3oqKhjAr1iNlTJpBq10Z0VNBZd3VZ3nmCTFwTuUvs735QGnRE1gQ1BA==
-  dependencies:
-    bluebird "3.7.1"
-    debug "4.1.1"
-    lodash "4.17.15"
-
 "@cypress/webpack-preprocessor@5.4.2":
   version "5.4.2"
   resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.2.tgz#d40fed6375b09dd16b266a045f4577e9c7a0299a"
@@ -9754,18 +9745,19 @@ cypress-multi-reporters@1.4.0:
     debug "^4.1.1"
     lodash "^4.17.15"
 
-cypress-react-unit-test@4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-4.8.0.tgz#d05a294dff23977ed6a76f6ca67f6551755eefe4"
-  integrity sha512-PqsX238ic0wO43Jp8zrJ/B6WJcgoB5okld8WR0HZiVatOCyIWj78X1Bzd4A/LNbU8yAYQHnc6+Pf7PlW4QzBIw==
+cypress-react-unit-test@4.11.2:
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-4.11.2.tgz#2034baa1ee186a33219c0e1ca6730df0462f143b"
+  integrity sha512-73GhdPywzfEUv1hDRws8z5KUtx3a0T3cP0LZ6Gb7UIfMbxx3QRityKBgeNK/Pehq5diIRmR5QAl4nI5/oHsqOA==
   dependencies:
     "@babel/plugin-transform-modules-commonjs" "7.10.1"
     "@cypress/code-coverage" "3.8.1"
-    "@cypress/webpack-preprocessor" "5.4.1"
+    "@cypress/webpack-preprocessor" "5.4.2"
     babel-plugin-istanbul "6.0.0"
     debug "4.1.1"
     find-webpack "2.0.0"
     mime-types "2.1.26"
+    unfetch "4.1.0"
 
 d@1, d@^1.0.1:
   version "1.0.1"
@@ -13789,6 +13781,12 @@ has-ansi@^2.0.0:
   dependencies:
     ansi-regex "^2.0.0"
 
+has-binary2@cypress-io/has-binary#8580a33df21e8b36a43f57872a82c60829636a92:
+  version "1.0.2"
+  resolved "https://codeload.github.com/cypress-io/has-binary/tar.gz/8580a33df21e8b36a43f57872a82c60829636a92"
+  dependencies:
+    isarray "2.0.1"
+
 has-binary2@~1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/has-binary2/-/has-binary2-1.0.3.tgz#7776ac627f3ea77250cfc332dab7ddf5e4f5d11d"
@@ -16979,11 +16977,6 @@ lodash@4.17.11:
   version "4.17.11"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha512-cQKh8igo5QUhZ7lg38DYWAxMvjSAKG0A8wGSVimP07SIUEK2UO+arSRKbRZWtelMtN5V0Hkwh5ryOto/SshYIg==
-
-lodash@4.17.15:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
 
 lodash@4.17.19, lodash@^4.0.0, lodash@^4.13.1, lodash@^4.14.0, lodash@^4.15.0, lodash@^4.16.4, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14, lodash@^4.17.15, lodash@^4.17.16, lodash@^4.17.19, lodash@^4.17.3, lodash@^4.17.4, lodash@^4.17.5, lodash@^4.2.1, lodash@^4.3.0, lodash@^4.8.0, lodash@~4.17.10, lodash@~4.17.2:
   version "4.17.19"
