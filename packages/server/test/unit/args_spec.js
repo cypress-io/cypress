@@ -169,6 +169,15 @@ describe('lib/util/args', () => {
         hash: '769e98018',
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/6810
+    it('handles values that are arrays', function () {
+      const options = this.setup('--env', 'foo="[bar1,bar2,bar3]"')
+
+      expect(options.config.env).to.deep.eq({
+        foo: '[bar1|bar2|bar3]',
+      })
+    })
   })
 
   context('--reporterOptions', () => {
