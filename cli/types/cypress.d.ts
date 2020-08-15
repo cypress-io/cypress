@@ -2353,7 +2353,7 @@ declare namespace Cypress {
      */
     reporter: string
     /**
-     * Some reporters accept [reporterOptions](https://docs.cypress.io/guides/tooling/reporters.html#Reporter-Options) that customize their behavior
+     * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
      * @default "spec"
      */
     reporterOptions: { [key: string]: any }
