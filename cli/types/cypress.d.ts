@@ -2358,7 +2358,7 @@ declare namespace Cypress {
      */
     reporterOptions: { [key: string]: any }
     /**
-     * Whether to take a screenshot on test failure when running headlessly or in CI
+     * Customize reporter behavior by passing options
      * @default null
      */
     watchForFileChanges: boolean
