@@ -6,7 +6,7 @@ const fs = require('../../lib/util/fs')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 const { expectCorrectModuleApiResult } = require('../support/helpers/resultsUtils')
-
+const it = e2e.it
 const e2ePath = Fixtures.projectPath('e2e')
 
 const outputPath = path.join(e2ePath, 'output.json')
@@ -21,7 +21,7 @@ const specs = [
 describe('e2e spec_isolation', () => {
   e2e.setup()
 
-  e2e.it('fails', {
+  it('fails', {
     spec: specs,
     outputPath,
     snapshot: false,
@@ -42,7 +42,7 @@ describe('e2e spec_isolation', () => {
     },
   })
 
-  e2e.it.only('failing with retries enabled', {
+  it('failing with retries enabled', {
     spec: 'simple_failing_hook_spec.coffee,simple_retrying_spec.js',
     outputPath,
     snapshot: true,
