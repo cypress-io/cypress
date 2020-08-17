@@ -268,7 +268,7 @@ module.exports = {
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
-        'x-route-version': '2',
+        'x-route-version': '3',
       },
       body: _.pick(options, [
         'stats',

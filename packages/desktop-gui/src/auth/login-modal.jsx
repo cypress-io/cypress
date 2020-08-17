@@ -83,7 +83,7 @@ class LoginContent extends Component {
         <p>You are now logged in{authStore.user ? ` as ${authStore.user.name}` : ''}.</p>
         <div className='login-content'>
           <button
-            className='btn btn-login btn-black btn-block'
+            className='btn btn-login btn-primary btn-wide'
             onClick={close}
           >
             Continue

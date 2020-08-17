@@ -150,6 +150,15 @@ describe('e2e plugins', function () {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/8079
+  it('does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot', function () {
+    return e2e.exec(this, {
+      spec: 'after_screenshot_overwrite_spec.coffee',
+      project: pluginAfterScreenshot,
+      snapshot: true,
+    })
+  })
+
   it('fails when invalid event is registered', function () {
     return e2e.exec(this, {
       spec: 'app_spec.js',
@@ -167,6 +176,12 @@ describe('e2e plugins', function () {
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,
+    })
+  })
+
+  it('supports node builtins', function () {
+    return e2e.exec(this, {
+      spec: 'node_builtins_spec.js',
     })
   })
 

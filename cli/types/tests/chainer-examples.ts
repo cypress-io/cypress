@@ -467,6 +467,9 @@ cy.writeFile('../file.path', '', {
 })
 
 cy.get('foo').click()
+cy.get('foo').click({
+  ctrlKey: true,
+})
 cy.get('foo').rightclick()
 cy.get('foo').dblclick()
 

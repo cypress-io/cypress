@@ -23,3 +23,15 @@ describe('suite', () => {
     cy.visit(urls[2])
   })
 })
+
+describe('navigation error in beforeEach', () => {
+  before(() => {
+    cy.visit(urls[1])
+  })
+
+  beforeEach(() => {
+    cy.visit(urls[2])
+  })
+
+  it('never gets here', () => {})
+})

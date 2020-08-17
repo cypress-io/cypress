@@ -17,6 +17,7 @@ describe('e2e stdout', () => {
       spec: 'stdout_exit_early_failing_spec.js',
       snapshot: true,
       expectedExitCode: 1,
+      onStdout: e2e.normalizeWebpackErrors,
     })
   })
 

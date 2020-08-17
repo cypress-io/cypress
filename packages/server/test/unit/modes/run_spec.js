@@ -360,7 +360,7 @@ describe('lib/modes/run', () => {
       const screenshots = [{}, {}, {}]
       const endVideoCapture = sinon.stub().resolves()
       const results = {
-        tests: [4, 5, 6],
+        tests: [{ attempts: [1] }, { attempts: [2] }, { attempts: [3] }],
         stats: {
           tests: 1,
           passes: 2,
@@ -371,9 +371,6 @@ describe('lib/modes/run', () => {
       }
 
       sinon.stub(Reporter, 'setVideoTimestamp')
-      .withArgs(startedVideoCapture, results.tests)
-      .returns([1, 2, 3])
-
       sinon.stub(runMode, 'postProcessRecording').resolves()
       sinon.spy(runMode, 'displayResults')
       sinon.spy(runMode, 'displayScreenshots')
@@ -399,6 +396,7 @@ describe('lib/modes/run', () => {
       })
       .then((obj) => {
         // since video was recording, there was a delay to let video finish
+        expect(Reporter.setVideoTimestamp).calledWith(startedVideoCapture, [1, 2, 3])
         expect(runMode.getVideoRecordingDelay).to.have.returned(1000)
         expect(Promise.prototype.delay).to.be.calledWith(1000)
         expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, true)
@@ -413,7 +411,7 @@ describe('lib/modes/run', () => {
           hooks: null,
           reporterStats: null,
           shouldUploadVideo: true,
-          tests: [1, 2, 3],
+          tests: results.tests,
           spec: {
             path: 'cypress/integration/spec.js',
           },

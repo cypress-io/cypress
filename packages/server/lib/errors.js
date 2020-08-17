@@ -137,9 +137,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       if (arg1 === 'canary') {
         str += '\n\n'
         str += stripIndent`\
-          Note: In Cypress 4.0, Canary must be launched as \`chrome:canary\`, not \`canary\`.
+          Note: In Cypress version 4.0.0, Canary must be launched as \`chrome:canary\`, not \`canary\`.
 
-          See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.`
+          See https://on.cypress.io/migration-guide for more information on breaking changes in 4.0.0.`
       }
 
       return str
@@ -648,7 +648,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${chalk.yellow(arg1)}`
     case 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED':
       return stripIndent`\
-        In Cypress v3.0.0 we removed the configuration option ${chalk.yellow('\`screenshotOnHeadlessFailure\`')}
+        In Cypress version 3.0.0 we removed the configuration option ${chalk.yellow('\`screenshotOnHeadlessFailure\`')}
 
         You now configure this behavior in your test code.
 
@@ -664,7 +664,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Learn more at https://on.cypress.io/screenshot-api`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
-        A configuration option you have supplied has been renamed.
+        The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.
 
         Please rename ${chalk.yellow(arg1)} to ${chalk.blue(arg2)}`
     case 'CANNOT_CONNECT_BASE_URL':
@@ -923,6 +923,21 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         Enable write permissions to this directory to ensure screenshots and videos are stored.
 
         If you don't require screenshots or videos to be stored you can safely ignore this warning.`
+    case 'EXPERIMENTAL_SAMESITE_REMOVED':
+      return stripIndent`\
+        The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
+
+        You can safely remove this option from your config.`
+    case 'INCOMPATIBLE_PLUGIN_RETRIES':
+      return stripIndent`\
+      We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
+      
+      Test retries is now supported in Cypress version \`5.0.0\`.
+
+      Remove the plugin from your dependencies to silence this warning.
+      
+      https://on.cypress.io/test-retries
+      `
     default:
   }
 }
