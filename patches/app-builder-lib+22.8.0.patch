@@ -1,0 +1,12 @@
+diff --git a/node_modules/app-builder-lib/out/macPackager.js b/node_modules/app-builder-lib/out/macPackager.js
+index fad3541..743001b 100644
+--- a/node_modules/app-builder-lib/out/macPackager.js
++++ b/node_modules/app-builder-lib/out/macPackager.js
+@@ -339,6 +339,7 @@ class MacPackager extends _platformPackager().PlatformPackager {
+     }
+ 
+     const signOptions = {
++      "strict-verify": false,
+       "identity-validation": false,
+       // https://github.com/electron-userland/electron-builder/issues/1699
+       // kext are signed by the chipset manufacturers. You need a special certificate (only available on request) from Apple to be able to sign kext.
