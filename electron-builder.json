@@ -10,9 +10,7 @@
     "entitlements": "./scripts/entitlements.mac.inherit.plist",
     "entitlementsInherit": "./scripts/entitlements.mac.inherit.plist",
     "type": "distribution",
-    "binaries": [
-      "./build/mac/Cypress.app/Contents/Resources/app/packages/server/node_modules/@ffmpeg-installer/darwin-x64/ffmpeg"
-    ]
+    "binaries": []
   },
   "linux": {
     "target": "dir",
