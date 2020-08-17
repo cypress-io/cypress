@@ -706,7 +706,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
+                "message": "fail1",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -726,7 +726,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail1",
+                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -778,7 +778,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
+                "message": "fail2",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -798,7 +798,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail2",
+                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,

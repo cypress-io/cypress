@@ -357,7 +357,7 @@ class Reporter {
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),
-      attempts: _.map([test].concat(test.prevAttempts || []), (attempt) => {
+      attempts: _.map((test.prevAttempts || []).concat([test]), (attempt) => {
         const err = attempt.err && {
           name: attempt.err.name,
           message: attempt.err.message,
