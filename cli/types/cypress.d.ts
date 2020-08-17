@@ -2416,7 +2416,12 @@ declare namespace Cypress {
      */
     reporter: string
     /**
-     * Whether to take a screenshot on test failure when running headlessly or in CI
+     * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
+     * @default "spec"
+     */
+    reporterOptions: { [key: string]: any }
+    /**
+     * Whether Cypress will watch and restart tests on test file changes
      * @default true
      */
     watchForFileChanges: boolean
