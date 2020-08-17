@@ -42,11 +42,11 @@ describe('e2e spec_isolation', () => {
     },
   })
 
-  e2e.it('failing with retries enabled', {
-    spec: 'simple_failing_hook_spec.coffee',
+  e2e.it.only('failing with retries enabled', {
+    spec: 'simple_failing_hook_spec.coffee,simple_retrying_spec.js',
     outputPath,
     snapshot: true,
-    expectedExitCode: 3,
+    expectedExitCode: 4,
     config: {
       retries: 1,
     },
@@ -55,7 +55,7 @@ describe('e2e spec_isolation', () => {
       const json = await fs.readJsonAsync(outputPath)
 
       // also mutates into normalized obj ready for snapshot
-      expectCorrectModuleApiResult(json, { e2ePath, runs: 1 })
+      expectCorrectModuleApiResult(json, { e2ePath, runs: 2 })
 
       snapshot('failing with retries enabled', json)
     },
