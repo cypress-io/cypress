@@ -1035,7 +1035,7 @@ exports['failing with retries enabled'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function () {}",
+          "body": "function () {// pass\n  }",
           "displayError": null,
           "attempts": [
             {
