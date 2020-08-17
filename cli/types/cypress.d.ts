@@ -2358,8 +2358,8 @@ declare namespace Cypress {
      */
     reporterOptions: { [key: string]: any }
     /**
-     * Customize reporter behavior by passing options
-     * @default null
+     * Whether Cypress will watch and restart tests on test file changes
+     * @default true
      */
     watchForFileChanges: boolean
     /**
