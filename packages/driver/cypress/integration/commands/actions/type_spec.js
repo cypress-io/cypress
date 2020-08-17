@@ -185,11 +185,18 @@ describe('src/cy/commands/actions/type - #type', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/5650
-  it('should trigger KeyboardEvent, not Event, for event listeners', () => {
-    cy.visit('fixtures/issue-5650.html')
+  it('should trigger KeyboardEvent, not Event, for event listeners', (done) => {
+    cy.$$('input:first').on('keydown', (e) => {
+      if (e.originalEvent instanceof e.currentTarget.ownerDocument.defaultView.KeyboardEvent) {
+        done()
 
-    cy.get('#test-input').type('A')
-    cy.get('#result').contains('isKeyboardEvent: true')
+        return
+      }
+
+      throw new Error('event was not instanceOf KeyboardEvent')
+    })
+
+    cy.get('input:first').type('A')
   })
 
   describe('actionability', () => {
