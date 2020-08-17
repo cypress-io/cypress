@@ -6,8 +6,8 @@ const fs = require('../../lib/util/fs')
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 const { expectCorrectModuleApiResult } = require('../support/helpers/resultsUtils')
-const it = e2e.it
 const e2ePath = Fixtures.projectPath('e2e')
+const it = e2e.it
 
 const outputPath = path.join(e2ePath, 'output.json')
 
