@@ -10784,13 +10784,13 @@ electron-is-dev@^1.0.1:
   resolved "https://registry.yarnpkg.com/electron-is-dev/-/electron-is-dev-1.2.0.tgz#2e5cea0a1b3ccf1c86f577cee77363ef55deb05e"
   integrity sha512-R1oD5gMBPS7PVU8gJwH6CtT0e6VSoD0+SzSnYpNm+dBkcijgA+K7VAMHDfnRq/lkKPZArpzplTW6jfiMYosdzw==
 
-electron-notarize@1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/electron-notarize/-/electron-notarize-1.0.0.tgz#bc925b1ccc3f79e58e029e8c4706572b01a9fd8f"
-  integrity sha512-dsib1IAquMn0onCrNMJ6gtEIZn/azG8hZMCYOuZIMVMUeRMgBYHK1s5TK9P8xAcrAjh/2aN5WYHzgVSWX314og==
+electron-notarize@0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/electron-notarize/-/electron-notarize-0.3.0.tgz#b93c606306eac558b250c78ff95273ddb9fedf0a"
+  integrity sha512-tuDw8H0gcDOalNLv6RM2CwGvUXU60MPGZRDEmd0ppX+yP5XqL8Ec2DuXyz9J7WQSA3aRCfzIgH8C5CAivDYWMw==
   dependencies:
     debug "^4.1.1"
-    fs-extra "^9.0.1"
+    fs-extra "^8.1.0"
 
 electron-notarize@^0.2.0:
   version "0.2.1"
