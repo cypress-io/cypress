@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-import 'cypress-react-selector'
 import { mount } from 'cypress-react-unit-test'
 import React from 'react'
 import ProductsList from './ProductsList.jsx'
@@ -21,9 +20,8 @@ describe('Selecting by React props and state', () => {
         })
       mount(<ProductsList />)
 
-      // use https://github.com/abhinaba-ghosh/cypress-react-selector
       // to find DOM elements by React component constructor name, props, or state
-      cy.waitForReact(1000, '#cypress-root')
+      cy.waitForReact()
     })
 
     it('renders products', () => {
@@ -36,15 +34,15 @@ describe('Selecting by React props and state', () => {
       cy.log('**cy.react**')
       // find the top level <ProductsContainer> that we have mounted
       // under imported name "ProductsList"
-      cy.react('ProductsContainer').should('have.class', 'product-container')
-      // for more ways to find components, see
-      // https://github.com/abhinaba-ghosh/cypress-react-selector#how-to-use-react-selector
+      cy.react('ProductsContainer')
+        .first()
+        .should('have.class', 'product-container')
       // find all instances of <AProduct> component
       cy.react('AProduct').should('have.length', 2)
       // find a single instance with prop
       // <AProduct name={'Second item'} />
-      cy.react('AProduct', { name: 'Second item' })
-        .should('be.visible')
+      cy.react('AProduct', { props: { name: 'Second item' } })
+        .first()
         .find('.name')
         .and('have.text', 'Second item')
     })
@@ -52,40 +50,38 @@ describe('Selecting by React props and state', () => {
     it('find React components', () => {
       cy.log('**cy.getReact**')
       // returns React component wrapper with props
-      cy.getReact('AProduct', { name: 'Second item' })
+      cy.getReact('AProduct', { props: { name: 'Second item' } })
         .getProps()
         .should('deep.equal', { name: 'Second item' })
-      cy.getReact('AProduct', { name: 'First item' })
+      cy.getReact('AProduct', { props: { name: 'First item' } })
         // get single prop
         .getProps('name')
         .should('eq', 'First item')
       cy.log('**.getCurrentState**')
-      cy.getReact('AProduct', { name: 'Second item' })
+      cy.getReact('AProduct', { props: { name: 'Second item' } })
         .getCurrentState()
         .should('include', { myName: 'Second item' })
 
       // find component using state
-      cy.getReact('AProduct', null, { myName: 'Second item' }).should('exist')
+      cy.getReact('AProduct', { state: { myName: 'Second item' } }).should(
+        'exist',
+      )
     })
 
-    // SKIP: https://github.com/bahmutov/cypress-react-unit-test/issues/378
-    it.skip('chains getReact', () => {
+    it('chains getReact', () => {
       // note that by itself, the component is found
-      cy.getReact('AProduct', { name: 'First item' })
+      cy.getReact('AProduct', { props: { name: 'First item' } })
         .getProps('name')
         .should('eq', 'First item')
 
       // chaining getReact
       cy.getReact('ProductsContainer')
-        .should('not.be.empty')
-        // the second .getReact returns nothing
-        .getReact('AProduct', { name: 'First item' })
+        .getReact('AProduct', { props: { name: 'First item' } })
         .getProps('name')
         .should('eq', 'First item')
     })
 
-    // SKIP: https://github.com/bahmutov/cypress-react-unit-test/issues/381
-    it.skip('finds components by props and state', () => {
+    it('finds components by props and state', () => {
       // by clicking on the Order button we change the
       // internal state of that component
       cy.contains('.product', 'First item')
@@ -99,15 +95,12 @@ describe('Selecting by React props and state', () => {
         .should('have.text', 'First item')
 
       // now find that component using the state value
-      // DOES NOT WORK FOR SOME REASON
-      cy.react('AProduct', null, { orderCount: 1 })
-        .should('not.be.empty')
+      cy.react('AProduct', { state: { orderCount: 1 } })
         .find('.name')
         .should('have.text', 'First item')
     })
 
-    // SKIP: https://github.com/bahmutov/cypress-react-unit-test/issues/381
-    it.skip('finds components by props and state (click twice)', () => {
+    it('finds components by props and state (click twice)', () => {
       // by clicking on the Order button we change the
       // internal state of that component
       cy.contains('.product', 'First item')
@@ -116,15 +109,14 @@ describe('Selecting by React props and state', () => {
         .click()
 
       // now find that component using the state value
-      cy.react('AProduct', null, { orderCount: 2 })
+      cy.react('AProduct', { state: { orderCount: 2 } })
         .find('.name')
         .should('have.text', 'First item')
     })
   })
 
   context('with delay', () => {
-    // SKIP https://github.com/bahmutov/cypress-react-unit-test/issues/379
-    it.skip('retries until component is found', () => {
+    it('retries until component is found', () => {
       // or the command times out
       const products = [
         { id: 1, name: 'First item' },
@@ -142,13 +134,14 @@ describe('Selecting by React props and state', () => {
         .resolves(Cypress.Promise.resolve(response).delay(1000))
       mount(<ProductsList />)
 
-      // use https://github.com/abhinaba-ghosh/cypress-react-selector
       // to find DOM elements by React component constructor name, props, or state
-      cy.waitForReact(1000, '#cypress-root')
+      cy.waitForReact()
       // cy.react should requery the elements until
       // the assertions that follow it are satisfied,
       // or, if there are no assertions, that an element is found
-      cy.react('AProduct').should('have.length', 2)
+      cy.react('AProduct', {
+        props: { name: 'Second item' },
+      }).should('have.length', '1')
     })
   })
 })
