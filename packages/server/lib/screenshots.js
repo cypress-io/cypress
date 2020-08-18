@@ -18,6 +18,14 @@ const pathSeparatorRe = /[\\\/]/g
 // internal id incrementor
 let __ID__ = null
 
+// many filesystems limit filename length to 255 bytes/characters, so truncate the filename to
+// the smallest common denominator of safe filenames, which is 255 bytes. when ENAMETOOLONG
+// errors are encountered, `maxSafeBytes` will be decremented to at most `MIN_PREFIX_BYTES`, at
+// which point the latest ENAMETOOLONG error will be emitted.
+// @see https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits
+let maxSafeBytes = Number(process.env.CYPRESS_MAX_SAFE_FILENAME_BYTES) || 254
+const MIN_PREFIX_BYTES = 64
+
 // TODO: when we parallelize these builds we'll need
 // a semaphore to access the file system when we write
 // screenshots since its possible two screenshots with
@@ -288,16 +296,41 @@ const getDimensions = function (details) {
   return pick(details.image.bitmap)
 }
 
-const ensureUniquePath = function (withoutExt, extension, num = 0) {
-  const fullPath = num ? `${withoutExt} (${num}).${extension}` : `${withoutExt}.${extension}`
+const ensureSafePath = function (withoutExt, extension, num = 0) {
+  const suffix = `${num ? ` (${num})` : ''}.${extension}`
+  const maxSafePrefixBytes = maxSafeBytes - suffix.length
+  const filenameBuf = Buffer.from(path.basename(withoutExt))
+
+  if (filenameBuf.byteLength > maxSafePrefixBytes) {
+    const truncated = filenameBuf.slice(0, maxSafePrefixBytes).toString()
+
+    withoutExt = path.join(path.dirname(withoutExt), truncated)
+  }
+
+  const fullPath = [withoutExt, suffix].join('')
+
+  debug('ensureSafePath %o', { withoutExt, extension, num, maxSafeBytes, maxSafePrefixBytes })
 
   return fs.pathExists(fullPath)
   .then((found) => {
     if (found) {
-      return ensureUniquePath(withoutExt, extension, (num += 1))
+      return ensureSafePath(withoutExt, extension, num + 1)
     }
 
-    return fullPath
+    // path does not exist, attempt to create it to check for an ENAMETOOLONG error
+    return fs.outputFileAsync(fullPath, '')
+    .then(() => fullPath)
+    .catch((err) => {
+      debug('received error when testing path %o', { err, fullPath, maxSafePrefixBytes, maxSafeBytes })
+
+      if (err.code === 'ENAMETOOLONG' && maxSafePrefixBytes >= MIN_PREFIX_BYTES) {
+        maxSafeBytes -= 1
+
+        return ensureSafePath(withoutExt, extension, num)
+      }
+
+      throw err
+    })
   })
 }
 
@@ -323,26 +356,20 @@ const getPath = function (data, ext, screenshotsFolder) {
     .value()
   }
 
-  // truncate file names to be less than 220 characters
-  // to accomodate filename size limits
-  const maxFileNameLength = 220
   const index = names.length - 1
-
-  if (names[index].length > maxFileNameLength) {
-    names[index] = _.truncate(names[index], {
-      length: maxFileNameLength,
-      omission: '',
-    })
-  }
 
   // append (failed) to the last name
   if (data.testFailure) {
     names[index] = `${names[index]} (failed)`
   }
 
+  if (data.testAttemptIndex > 0) {
+    names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
+  }
+
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
 
-  return ensureUniquePath(withoutExt, ext)
+  return ensureSafePath(withoutExt, ext)
 }
 
 const getPathToScreenshot = function (data, details, screenshotsFolder) {
@@ -484,7 +511,7 @@ module.exports = {
     const duration = new Date() - new Date(data.startTime)
 
     details = _.extend({}, data, details, { duration })
-    details = _.pick(details, 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
+    details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
 
     if (!plugins.has('after:screenshot')) {
       return Promise.resolve(details)

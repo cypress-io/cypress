@@ -244,6 +244,12 @@ describe('src/cypress/dom/visibility', () => {
   <button style='position: fixed; top: 0;'>position: fixed</button>
 </div>`)
 
+      this.$childPointerEventsNone = add(`\
+<div style="position: fixed; top: 60px;">
+  <span style="pointer-events: none;">child pointer-events: none</span>
+</div>\
+`)
+
       this.$descendentPosAbs = add(`\
 <div style='width: 0; height: 100px; overflow: hidden;'>
   <div style='height: 500px; width: 500px; position: absolute;'>
@@ -288,6 +294,27 @@ describe('src/cypress/dom/visibility', () => {
       this.$parentDisplayNone = add(`\
 <div id="none" style='display: none;'>
   <span>parent display: none</span>
+</div>\
+`)
+
+      this.$parentPointerEventsNone = add(`\
+<div style="pointer-events: none;">
+  <span style="position: fixed; top: 20px;">parent pointer-events: none</span>
+</div>\
+`)
+
+      this.$parentPointerEventsNoneCovered = add(`\
+<div style="pointer-events: none;">
+  <span style="position: fixed; top: 40px;">parent pointer-events: none</span>
+</div>
+<span style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</span>\
+`)
+
+      this.$parentDisplayInlineChildDisplayBlock = add(`\
+<div>
+  <span>
+    <label style="display: block;">display: block</label>
+  </span>
 </div>\
 `)
 
@@ -688,7 +715,7 @@ describe('src/cypress/dom/visibility', () => {
         expect(this.$coveredUpPosFixed.find('#coveredUpPosFixed')).not.to.be.visible
       })
 
-      it('is hidden if position: fixed and off screent', function () {
+      it('is hidden if position: fixed and off screen', function () {
         expect(this.$offScreenPosFixed).to.be.hidden
         expect(this.$offScreenPosFixed).not.to.be.visible
       })
@@ -701,6 +728,29 @@ describe('src/cypress/dom/visibility', () => {
       it('is hidden if only the parent has position absolute', function () {
         expect(this.$parentPosAbs.find('span')).to.be.hidden
         expect(this.$parentPosAbs.find('span')).to.not.be.visible
+      })
+
+      it('is visible if position: fixed and parent has pointer-events: none', function () {
+        expect(this.$parentPointerEventsNone.find('span')).to.be.visible
+        expect(this.$parentPointerEventsNone.find('span')).to.not.be.hidden
+      })
+
+      it('is not visible if covered when position: fixed and parent has pointer-events: none', function () {
+        expect(this.$parentPointerEventsNoneCovered.find('span')).to.be.hidden
+        expect(this.$parentPointerEventsNoneCovered.find('span')).to.not.be.visible
+      })
+
+      it('is visible if pointer-events: none and parent has position: fixed', function () {
+        expect(this.$childPointerEventsNone.find('span')).to.be.visible
+        expect(this.$childPointerEventsNone.find('span')).to.not.be.hidden
+      })
+    })
+
+    describe('css display', function () {
+      // https://github.com/cypress-io/cypress/issues/6183
+      it('parent is visible if display inline and child has display block', function () {
+        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.be.visible
+        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.not.be.hidden
       })
     })
 

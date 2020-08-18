@@ -36,6 +36,11 @@ const nullifyUnserializableValues = (obj) => {
 const handleEvent = function (options, bus, event, id, type, arg) {
   debug('got request for event: %s, %o', type, arg)
 
+  _.defaults(options, {
+    windowOpenFn: Windows.open,
+    getWindowByWebContentsFn: Windows.getByWebContents,
+  })
+
   const sendResponse = function (originalData = {}) {
     try {
       const data = nullifyUnserializableValues(originalData)
@@ -127,12 +132,18 @@ const handleEvent = function (options, bus, event, id, type, arg) {
     case 'launch:browser':
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
+      debug('full list of options %o', arg)
+
       // the "arg" should have objects for
       //   - browser
       //   - spec (with fields)
       //       name, absolute, relative
       //   - specType: "integration" | "component"
-      const fullSpec = _.merge({}, arg.spec, { specType: arg.specType })
+      //   - specFilter (optional): the string user searched for
+      const fullSpec = _.merge({}, arg.spec, {
+        specType: arg.specType,
+        specFilter: arg.specFilter,
+      })
 
       return openProject.launch(arg.browser, fullSpec, {
         projectRoot: options.projectRoot,
@@ -161,12 +172,12 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .catch(sendErr)
 
     case 'window:open':
-      return Windows.open(options.projectRoot, arg)
+      return options.windowOpenFn(options.projectRoot, arg)
       .then(send)
       .catch(sendErr)
 
     case 'window:close':
-      return Windows.getByWebContents(event.sender).destroy()
+      return options.getWindowByWebContentsFn(event.sender).destroy()
 
     case 'open:file':
       return fileOpener.openFile(arg)

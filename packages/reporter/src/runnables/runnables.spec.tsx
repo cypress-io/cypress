@@ -46,7 +46,7 @@ describe('<Runnables />', () => {
   it('renders <RunnablesList /> when there are runnables', () => {
     const component = shallow(
       <Runnables
-        runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] as TestModel[] })}
+        runnablesStore={runnablesStoreStub({ runnables: [{ id: '1' }] as TestModel[] })}
         scroller={scrollerStub()}
         spec={specStub}
       />,
@@ -134,7 +134,7 @@ describe('<Runnables />', () => {
 
   context('<RunnablesList />', () => {
     it('renders a runnable for each runnable in model', () => {
-      const component = shallow(<RunnablesList runnables={[{ id: 1 } as TestModel, { id: 2 } as TestModel]} />)
+      const component = shallow(<RunnablesList runnables={[{ id: '1' } as TestModel, { id: '2' } as TestModel]} />)
 
       expect(component.find('Runnable').length).to.equal(2)
     })

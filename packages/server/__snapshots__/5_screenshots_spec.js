@@ -29,8 +29,11 @@ exports['e2e screenshots / passes'] = `
     ✓ accepts screenshot after multiple tries if somehow app has pixels that match helper pixels
     ✓ can capture element screenshots
     ✓ retries each screenshot for up to  XX:XX
+    (Attempt 1 of 3) screenshots in a retried test
+    (Attempt 2 of 3) screenshots in a retried test
+    2) screenshots in a retried test
     ✓ ensures unique paths for non-named screenshots
-    2) ensures unique paths when there's a non-named screenshot and a failure
+    3) ensures unique paths when there's a non-named screenshot and a failure
     ✓ properly resizes the AUT iframe
     - does not take a screenshot for a pending test
     ✓ adds padding to element screenshot when specified
@@ -41,10 +44,10 @@ exports['e2e screenshots / passes'] = `
       ✓ can clip fullPage screenshots
       ✓ can clip element screenshots
     before hooks
-      3) "before all" hook for "empty test 1"
+      4) "before all" hook for "empty test 1"
     each hooks
-      4) "before each" hook for "empty test 2"
-      5) "after each" hook for "empty test 2"
+      5) "before each" hook for "empty test 2"
+      6) "after each" hook for "empty test 2"
     really long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
       ✓ takes a screenshot
       ✓ takes another screenshot
@@ -52,7 +55,7 @@ exports['e2e screenshots / passes'] = `
 
   20 passing
   1 pending
-  5 failing
+  6 failing
 
   1) taking screenshots
        generates pngs on failure:
@@ -60,11 +63,16 @@ exports['e2e screenshots / passes'] = `
       [stack trace lines]
 
   2) taking screenshots
+       screenshots in a retried test:
+     Error: fail
+      [stack trace lines]
+
+  3) taking screenshots
        ensures unique paths when there's a non-named screenshot and a failure:
      Error: failing on purpose
       [stack trace lines]
 
-  3) taking screenshots
+  4) taking screenshots
        before hooks
          "before all" hook for "empty test 1":
      Error: before hook failing
@@ -72,7 +80,7 @@ exports['e2e screenshots / passes'] = `
 Because this error occurred during a \`before all\` hook we are skipping the remaining tests in the current suite: \`before hooks\`
       [stack trace lines]
 
-  4) taking screenshots
+  5) taking screenshots
        each hooks
          "before each" hook for "empty test 2":
      Error: before each hook failed
@@ -80,7 +88,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`each hooks\`
       [stack trace lines]
 
-  5) taking screenshots
+  6) taking screenshots
        each hooks
          "after each" hook for "empty test 2":
      Error: after each hook failed
@@ -94,12 +102,12 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        25                                                                               │
+  │ Tests:        26                                                                               │
   │ Passing:      20                                                                               │
-  │ Failing:      4                                                                                │
+  │ Failing:      5                                                                                │
   │ Pending:      1                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  28                                                                               │
+  │ Screenshots:  34                                                                               │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     screenshots_spec.js                                                              │
@@ -121,6 +129,17 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/element.png                      (400x300)
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- retri     (200x1300)
      es each screenshot for up to  XX:XX.png                                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/retrying-test.png              (1000x1316)
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- scree     (1280x720)
+     nshots in a retried test (failed).png                                                          
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/retrying-test (attempt 2).p    (1000x1316)
+     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- scree     (1280x720)
+     nshots in a retried test (failed) (attempt 2).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/retrying-test (attempt 3).p    (1000x1316)
+     ng                                                                                             
+  -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- scree     (1280x720)
+     nshots in a retried test (failed) (attempt 3).png                                              
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
      es unique paths for non-named screenshots.png                                                  
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- ensur     (1280x720)
@@ -147,11 +166,11 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
      y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                                          
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.png                                        
   -  /XXX/XXX/XXX/cypress/screenshots/screenshots_spec.js/taking screenshots -- reall     (1000x660)
      y long test title aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
      aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa               
-     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                                      
+     aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa (1).png                                        
 
 
   (Video)
@@ -167,9 +186,9 @@ Because this error occurred during a \`after each\` hook we are skipping the rem
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  screenshots_spec.js                      XX:XX       25       20        4        1        - │
+  │ ✖  screenshots_spec.js                      XX:XX       26       20        5        1        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX       25       20        4        1        -  
+    ✖  1 of 1 failed (100%)                     XX:XX       26       20        5        1        -  
 
 
 `

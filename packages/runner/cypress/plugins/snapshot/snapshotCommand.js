@@ -21,7 +21,7 @@ function throwErr (e, message, exp, ctx) {
   }
 }
 
-function getMatchDeepMessage ({ act, exp }) {
+function getMatchDeepMessage (act, exp) {
   return `Expected **${chai.util.objDisplay(act)}** to deep match: **${chai.util.objDisplay(exp)}**`
 }
 

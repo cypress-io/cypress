@@ -193,7 +193,7 @@ const defaultPreferences = {
   // Do not wait for the notification button security delay
   'security.notification_enable_delay': 0,
 
-  // Ensure blocklist updates do not hit the network
+  // Ensure blocked updates do not hit the network
   'services.settings.server': '',
 
   // Do not automatically fill sign-in forms with known usernames and

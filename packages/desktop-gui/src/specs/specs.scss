@@ -17,6 +17,8 @@ $max-nesting-level: 14;
     height: 42px;
     background: #f5f5f5;
     border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
   }
 
   .search {
@@ -24,7 +26,7 @@ $max-nesting-level: 14;
     margin-right: 15px;
     display: inline-block;
     position: relative;
-    width: calc(100% - 140px);
+    width: calc(100% - 160px);
 
     label {
       position: absolute;
@@ -91,8 +93,12 @@ $max-nesting-level: 14;
         pointer-events: none;
         color: #4c4e63;
         text-decoration: none;
-
       }
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      color: #ddd;
     }
 
     i {

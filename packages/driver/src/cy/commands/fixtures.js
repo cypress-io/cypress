@@ -58,10 +58,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return Cypress.backend('get:fixture', fixture, _.pick(options, 'encoding'))
       .timeout(timeout)
       .then((response) => {
-        const err = response.__error
-
-        if (err) {
-          return $errUtils.throwErr(err)
+        if (response && response.__error) {
+          return $errUtils.throwErr(response.__error)
         }
 
         // add the fixture to the cache

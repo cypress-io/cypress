@@ -6,7 +6,8 @@
     "plugin:@cypress/dev/general"
   ],
   "rules": {
-    "prefer-spread": "off"
+    "prefer-spread": "off",
+    "prefer-rest-params": "off"
   },
   "settings": {
     "react": {
