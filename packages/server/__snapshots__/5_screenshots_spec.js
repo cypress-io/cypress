@@ -64,8 +64,9 @@ exports['e2e screenshots / passes'] = `
 
   2) taking screenshots
        screenshots in a retried test:
-     Error: fail
+     (Attempt 1-2) Error: fail
       [stack trace lines]
+  
 
   3) taking screenshots
        ensures unique paths when there's a non-named screenshot and a failure:

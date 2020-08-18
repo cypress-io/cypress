@@ -34,7 +34,8 @@ describe('lib/reporter', () => {
                   sync: true,
                   err: {
                     message: 'foo',
-                    stack: 'at foo:1:1\nat bar:1:1\nat baz:1:1',
+                    stack: 'SomeError: foo\nat foo:1:1\nat bar:1:1\nat baz:1:1',
+                    name: 'SomeError',
                   },
                 },
                 {
@@ -166,21 +167,24 @@ describe('lib/reporter', () => {
     it('combines mulitple attempts into composite error', function () {
       const testObj = this.root.suites[0].suites[0].tests[0]
 
-      this.reporter.emit('test:before:run', { ...testObj, state: 'failed', currentRetry: 0, err: { message: 'fail attempt 1', name: 'SomeError', stack: 'SomeError: fail attempt 1\n  at foo bar' } })
-      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 1, err: { message: 'fail attempt 2', name: 'SomeError', stack: 'SomeError: fail attempt 2\n  at bar baz' } })
-      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 2, err: { message: 'fail attempt 3', name: 'SomeError', stack: 'SomeError: fail attempt 3\n  at baz quux' } })
+      const finalErr = { message: 'fail attempt 3', name: 'SomeError', stack: 'SomeError: fail attempt 3\n  at baz' }
+
+      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 0, err: { message: 'fail attempt 1', name: 'SomeError', stack: 'SomeError: fail attempt 1\n  at foo' } })
+      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 1, err: { message: 'fail attempt 2', name: 'SomeError', stack: 'SomeError: fail attempt 2\n  at bar' } })
+      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 2, err: finalErr })
+      this.reporter.emit('fail', { ...testObj, currentRetry: 2, err: finalErr })
 
       const results = this.reporter.results()
 
       expect(results.tests[0].displayError).eq(stripIndent`\
         (Attempt 1) SomeError: fail attempt 1
-          at foo bar
+          at foo
 
-        (Attempt 2) SomeError: fail attempt 2
-          at bar baz
+             (Attempt 2) SomeError: fail attempt 2
+          at bar
 
-        (Attempt 3) SomeError: fail attempt 3
-          at baz quux
+             (Attempt 3) SomeError: fail attempt 3
+          at baz
         `)
     })
   })

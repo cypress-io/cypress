@@ -190,7 +190,7 @@ const mergeErr = function (runnable, runnables, stats) {
 
     test.err = {
       message: compositeErr,
-      stack: '',
+      stack: compositeErr,
     }
   }
 
