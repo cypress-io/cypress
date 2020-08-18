@@ -15,6 +15,7 @@ export default class Attempt {
   @observable agents: Agent[] = []
   @observable commands: Command[] = []
   @observable err = new Err({})
+  @observable errs = []
   @observable hooks: Hook[] = []
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
@@ -128,6 +129,10 @@ export default class Attempt {
   @action update (props: UpdatableTestProps) {
     if (props.state) {
       this._state = props.state
+    }
+
+    if (props.errs) {
+      this.errs = props.errs
     }
 
     this.err.update(props.err)
