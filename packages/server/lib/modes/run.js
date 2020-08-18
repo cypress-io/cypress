@@ -1295,7 +1295,7 @@ module.exports = {
         })),
       })
 
-      return writeOutput(outputPath, moduleAPIResults).return(moduleAPIResults)
+      return writeOutput(outputPath, moduleAPIResults).return(results)
     })
   },
 

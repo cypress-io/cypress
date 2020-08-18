@@ -49,7 +49,7 @@ const autoShadowTraversals = {
   },
   parent: (cy, $el) => {
     const parents = $el.map((i, el) => {
-      return $elements.getParent(el)
+      return $elements.getParentNode(el)
     })
 
     return sortedUnique(cy, parents)
