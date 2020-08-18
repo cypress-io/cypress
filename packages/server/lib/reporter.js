@@ -184,6 +184,16 @@ const mergeErr = function (runnable, runnables, stats) {
     test.failedFromHookId = runnable.hookId
   }
 
+  if (test._currentRetry !== 0) {
+    test.originalErr = test.err
+    const compositeErr = createCompositeErrorFromAttempts((test.prevAttempts || []).concat([runnable]))
+
+    test.err = {
+      message: compositeErr,
+      stack: '',
+    }
+  }
+
   // dont mutate the test, and merge in the runnable title
   // in the case its a hook so that we emit the right 'fail'
   // event for reporters
@@ -236,6 +246,27 @@ const events = {
 const reporters = {
   teamcity: 'mocha-teamcity-reporter',
   junit: 'mocha-junit-reporter',
+}
+
+function createCompositeErrorFromAttempts (attempts, errorIndent = '     ') {
+  if (attempts.length < 2) return _.get(attempts[0], 'err.stack')
+
+  const compactErrs = []
+
+  for (let i = 0; i < attempts.length; i++) {
+    const _i = i
+    const err = _.get(attempts[i], 'err.stack')
+
+    while (_.get(attempts[i + 1], 'err.stack') === err) {
+      i++
+    }
+
+    const errPrefix = _i === i ? `(Attempt ${i + 1})` : `(Attempt ${_i + 1}-${i})`
+
+    compactErrs.push(`${errPrefix} ${err}`)
+  }
+
+  return compactErrs.join(`\n\n${errorIndent}`)
 }
 
 class Reporter {
@@ -351,17 +382,21 @@ class Reporter {
   }
 
   normalizeTest (test = {}) {
+    const attempts = (test.prevAttempts || []).concat([test])
     const normalizedTest = {
       testId: orNull(test.id),
       title: getParentTitle(test),
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),
-      attempts: _.map([test].concat(test.prevAttempts || []), (attempt) => {
-        const err = attempt.err && {
-          name: attempt.err.name,
-          message: attempt.err.message,
-          stack: stackUtils.stackWithoutMessage(attempt.err.stack),
+      attempts: _.map(attempts, (attempt) => {
+        let err = attempt.originalErr || attempt.err
+
+        err = err && {
+          name: err.name,
+          message: err.message,
+          stack: stackUtils.stackWithoutMessage(err.stack),
+
         }
 
         return {

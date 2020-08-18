@@ -1,7 +1,9 @@
 require('../spec_helper')
 
-const Reporter = require(`${root}lib/reporter`)
 const snapshot = require('snap-shot-it')
+const { stripIndent } = require('common-tags')
+
+const Reporter = require(`${root}lib/reporter`)
 
 describe('lib/reporter', () => {
   beforeEach(function () {
@@ -157,6 +159,29 @@ describe('lib/reporter', () => {
       expect(this.emit.getCall(0).args[1].state).to.eq('passed')
 
       expect(this.emit.getCall(0).args[1].tests.length).to.equal(2)
+    })
+  })
+
+  context('composte error', () => {
+    it('combines mulitple attempts into composite error', function () {
+      const testObj = this.root.suites[0].suites[0].tests[0]
+
+      this.reporter.emit('test:before:run', { ...testObj, state: 'failed', currentRetry: 0, err: { message: 'fail attempt 1', name: 'SomeError', stack: 'SomeError: fail attempt 1\n  at foo bar' } })
+      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 1, err: { message: 'fail attempt 2', name: 'SomeError', stack: 'SomeError: fail attempt 2\n  at bar baz' } })
+      this.reporter.emit('test:before:run', { ...testObj, currentRetry: 2, err: { message: 'fail attempt 3', name: 'SomeError', stack: 'SomeError: fail attempt 3\n  at baz quux' } })
+
+      const results = this.reporter.results()
+
+      expect(results.tests[0].displayError).eq(stripIndent`\
+        (Attempt 1) SomeError: fail attempt 1
+          at foo bar
+
+        (Attempt 2) SomeError: fail attempt 2
+          at bar baz
+
+        (Attempt 3) SomeError: fail attempt 3
+          at baz quux
+        `)
     })
   })
 })

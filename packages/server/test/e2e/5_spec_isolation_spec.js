@@ -42,7 +42,7 @@ describe('e2e spec_isolation', () => {
     },
   })
 
-  e2e.it('failing with retries enabled', {
+  e2e.it.only('failing with retries enabled', {
     spec: 'simple_failing_hook_spec.coffee',
     outputPath,
     snapshot: true,
