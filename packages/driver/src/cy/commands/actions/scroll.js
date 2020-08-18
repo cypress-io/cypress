@@ -7,7 +7,7 @@ const $utils = require('../../../cypress/utils')
 const $errUtils = require('../../../cypress/error_utils')
 
 const findScrollableParent = ($el, win) => {
-  const $parent = $el.parent()
+  const $parent = $dom.getParent($el)
 
   // if we're at the body, we just want to pass in
   // window into jQuery scrollTo

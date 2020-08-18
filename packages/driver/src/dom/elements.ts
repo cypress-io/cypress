@@ -611,7 +611,7 @@ const isWithinShadowRoot = (node: HTMLElement) => {
   return isShadowRoot(node.getRootNode())
 }
 
-const getParent = (el) => {
+const getParentNode = (el) => {
   // if the element has a direct parent element,
   // simply return it.
   if (el.parentElement) {
@@ -629,9 +629,13 @@ const getParent = (el) => {
   return null
 }
 
+const getParent = ($el: JQuery): JQuery => {
+  return $(getParentNode($el[0]))
+}
+
 const getAllParents = (el: HTMLElement, untilSelector?: string) => {
   const collectParents = (parents, node) => {
-    const parent = getParent(node)
+    const parent = getParentNode(node)
 
     if (!parent || untilSelector && $(parent).is(untilSelector)) {
       return parents
@@ -901,7 +905,7 @@ const isDescendent = ($el1, $el2) => {
 
 const findParent = (el, condition) => {
   const collectParent = (node) => {
-    const parent = getParent(node)
+    const parent = getParentNode(node)
 
     if (!parent) return null
 
@@ -925,17 +929,17 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
     return $el
   }
 
-  const parent = $el.parent()
+  const $parent = getParent($el)
 
   // if we have no parent then just return
   // the window since that can receive focus
-  if (!parent.length) {
+  if (!$parent.length) {
     const win = $window.getWindowByElement($el.get(0))
 
     return $(win)
   }
 
-  return getFirstFocusableEl($el.parent())
+  return getFirstFocusableEl(getParent($el))
 }
 
 const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
@@ -1247,6 +1251,12 @@ const elementFromPoint = (doc, x, y) => {
   return elFromPoint
 }
 
+const getShadowRoot = ($el: JQuery): JQuery<Node> => {
+  const root = $el[0].getRootNode()
+
+  return $(root)
+}
+
 const findAllShadowRoots = (root: Node): Node[] => {
   const collectRoots = (roots, nodes, node) => {
     const currentRoot = roots.pop()
@@ -1360,5 +1370,7 @@ export {
   getFirstStickyPositionParent,
   getFirstScrollableParent,
   getParent,
+  getParentNode,
   getAllParents,
+  getShadowRoot,
 }

@@ -35,6 +35,10 @@
     <cy-test-element id="shadow-element-9" content="Shadow Content 9" rootAddition="
       <div class='shadow-div'>Shadow Content 9</div>
     "></cy-test-element>
+    <div class="focusable" tabindex="1">
+      <cy-test-element innerClass="inside-focusable" content="Inside Focusable"></cy-test-element>
+    </div>
+    <cy-test-element id="shadow-element-10" innerClass="inside-non-visible" content="Not Visible" style="display:block; transform-style: preserve-3d; backface-visibility: hidden; transform: rotateY(180deg);"></cy-test-element>
 
     <script type="text/javascript">
       if (window.customElements) {
@@ -43,7 +47,7 @@
             super()
 
             const root = this.attachShadow({ mode: 'open' })
-            const content = this.getAttribute('content')
+            const content = this.getAttribute('content') || 'Shadow Content'
             const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
             const rootAddition = this.hasAttribute('rootAddition') ? this.getAttribute('rootAddition') : 'shadow-content'
 
