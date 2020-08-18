@@ -49,7 +49,6 @@ describe('lib/controllers/spec', () => {
     return this.handle(specName).then(() => {
       expect(this.res.send).to.be.called
       expect(this.res.send.firstCall.args[0]).to.include('(function')
-
       expect(this.res.send.firstCall.args[0]).to.include('Reason request failed')
     })
   })
@@ -60,7 +59,6 @@ describe('lib/controllers/spec', () => {
     return this.handle(specName, { isTextTerminal: true }).then(() => {
       expect(this.onError).to.be.called
       expect(this.onError.lastCall.args[0].message).to.include('Oops...we found an error preparing this test file')
-
       expect(this.onError.lastCall.args[0].message).to.include('Reason request failed')
     })
   })
@@ -72,8 +70,27 @@ describe('lib/controllers/spec', () => {
 
     return this.handle(specName).then(() => {
       expect(this.res.send.firstCall.args[0]).to.include('(function')
-
       expect(this.res.send.firstCall.args[0]).to.include('ENOENT')
     })
+  })
+
+  it('ignores ECONNABORTED errors', function () {
+    const sendFileErr = new Error('ECONNABORTED')
+
+    sendFileErr.code = 'ECONNABORTED'
+
+    this.res.sendFile.yields(sendFileErr)
+
+    return this.handle(specName) // should resolve, not error
+  })
+
+  it('ignores EPIPE errors', function () {
+    const sendFileErr = new Error('EPIPE')
+
+    sendFileErr.code = 'EPIPE'
+
+    this.res.sendFile.yields(sendFileErr)
+
+    return this.handle(specName) // should resolve, not error
   })
 })

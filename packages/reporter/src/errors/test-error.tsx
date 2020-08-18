@@ -10,7 +10,7 @@ import ErrorStack from '../errors/error-stack'
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
-import TestModel from '../test/test-model'
+import Attempt from '../attempts/attempt-model'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -31,7 +31,8 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: TestModel
+  model: Attempt
+  isTestError?: boolean
 }
 
 const TestError = observer((props: TestErrorProps) => {
@@ -40,7 +41,7 @@ const TestError = observer((props: TestErrorProps) => {
   md.enable(['backticks', 'emphasis', 'escape'])
 
   const onPrint = () => {
-    events.emit('show:error', props.model.id)
+    events.emit('show:error', props.model)
   }
 
   const _onPrintClick = (e: MouseEvent) => {

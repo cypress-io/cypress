@@ -215,7 +215,7 @@ describe('Project Nav', function () {
         })
 
         it('saves chosen browser in local storage', () => {
-          expect(localStorage.getItem('chosenBrowser')).to.eq('chromium')
+          expect(localStorage.getItem('chosenBrowser')).to.eq(JSON.stringify({ name: 'chromium', channel: 'stable' }))
         })
       })
 
@@ -318,25 +318,42 @@ describe('Project Nav', function () {
     })
 
     describe('local storage saved browser', function () {
-      beforeEach(function () {
-        localStorage.setItem('chosenBrowser', 'chromium')
-
-        this.openProject.resolve(this.config)
-      })
-
       afterEach(() => {
         cy.clearLocalStorage()
       })
 
-      it('displays local storage browser name in chosen', () => {
+      it('displays chosen browser in localStorage', function () {
+        // deliberately not the default 'chrome' browser
+        // @see https://github.com/cypress-io/cypress/issues/8281
+        localStorage.setItem('chosenBrowser', JSON.stringify({
+          name: 'chrome',
+          channel: 'canary',
+        }))
+
+        this.openProject.resolve(this.config)
+
         cy.get('.browsers-list .dropdown-chosen')
-        .should('contain', 'Chromium')
+        .should('contain', 'Canary').and('not.contain', 'Edge')
+        .get('.dropdown-chosen .browser-icon')
+        .should('have.attr', 'src').and('include', './img/chrome-canary')
       })
 
-      it('displays local storage browser icon in chosen', () => {
-        cy.get('.browsers-list .dropdown-chosen .browser-icon')
-        .should('have.attr', 'src')
-        .and('include', './img/chromium')
+      it('displays chosen browser with old string-style id in localStorage', function () {
+        localStorage.setItem('chosenBrowser', 'chrome')
+
+        this.openProject.resolve(this.config)
+
+        cy.get('.browsers-list .dropdown-chosen')
+        .should('contain', 'Chrome')
+      })
+
+      it('displays default browser with null localStorage', function () {
+        localStorage.removeItem('chosenBrowser')
+
+        this.openProject.resolve(this.config)
+
+        cy.get('.browsers-list .dropdown-chosen')
+        .should('contain', this.config.browsers[0].displayName)
       })
     })
 

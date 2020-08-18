@@ -8,7 +8,7 @@ You can see a list of the modules exported from this package in [./lib/index.ts]
 
 * `agent` is a HTTP/HTTPS [agent][1] with support for HTTP/HTTPS proxies and keepalive whenever possible
 * `allowDestroy` can be used to wrap a `net.Server` to add a `.destroy()` method
-* `blacklist` is a utility for matching glob blacklists
+* `blocked` is a utility for matching blocked globs
 * `concatStream` is a wrapper around [`concat-stream@1.6.2`][2] that makes it always yield a `Buffer`
 * `connect` contains utilities for making network connections, including `createRetryingSocket`
 * `cors` contains utilities for Cross-Origin Resource Sharing

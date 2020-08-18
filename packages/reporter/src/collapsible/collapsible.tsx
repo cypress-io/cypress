@@ -11,7 +11,6 @@ interface Props {
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
-  toggleOpen?: (isOpen: boolean) => any
 }
 
 interface State {

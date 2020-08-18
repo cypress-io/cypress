@@ -42,7 +42,7 @@ describe "subdomains", ->
     cy
       .visit("http://domain.foobar.com:2292")
       .getCookies().should("have.length", 1)
-      .getCookie("nomnom").should("deep.eq", {
+      .getCookie("nomnom").should("include", {
         domain: ".foobar.com"
         name: "nomnom"
         value: "good"

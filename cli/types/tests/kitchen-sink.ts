@@ -35,7 +35,7 @@ cy.visit('https://www.acme.com/', {
 
 const serverOptions: Partial<Cypress.ServerOptions> = {
   delay: 100,
-  whitelist: () => true
+  ignore: () => true
 }
 
 cy.server(serverOptions)
@@ -143,3 +143,9 @@ namespace BlobTests {
       dateUrl // $ExpectType string
   })
 }
+
+cy.window().then(window => {
+  window // $ExpectType AUTWindow
+
+  window.eval('1')
+})

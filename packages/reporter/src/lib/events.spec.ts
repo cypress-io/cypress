@@ -217,9 +217,14 @@ describe('events', () => {
       expect(runnablesStore.runnableFinished).to.have.been.calledWith('the runnable')
     })
 
-    it('increments the stats count on test:after:run', () => {
-      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+    it('increments the stats count on test:after:run if final: true', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed', final: true })
       expect(statsStore.incrementCount).to.have.been.calledWith('passed')
+    })
+
+    it('does not increment the stats count on test:after:run if not final: true', () => {
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed' })
+      expect(statsStore.incrementCount).not.to.have.been.called
     })
 
     it('pauses the appState with next command name on paused', () => {
@@ -303,12 +308,12 @@ describe('events', () => {
     })
 
     it('emits runner:console:error with test id on show:error', () => {
-      const err = { isCommandErr: false }
+      const test = { err: { isCommandErr: false } }
 
-      runnablesStore.testById.returns({ err })
-      events.emit('show:error', 'test id')
+      runnablesStore.testById.returns(test)
+      events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
-        err,
+        err: test.err,
         commandId: undefined,
       })
     })
@@ -319,7 +324,7 @@ describe('events', () => {
       } }
 
       runnablesStore.testById.returns(test)
-      events.emit('show:error', 'test id')
+      events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
         commandId: 'matching command id',
@@ -332,7 +337,7 @@ describe('events', () => {
       } }
 
       runnablesStore.testById.returns(test)
-      events.emit('show:error', 'test id')
+      events.emit('show:error', test)
       expect(runner.emit).to.have.been.calledWith('runner:console:error', {
         err: test.err,
         commandId: undefined,

@@ -85,7 +85,7 @@ export const verify = (ctx, options) => {
       // code frames will show `fail(this,()=>` as the 1st line
       cy.get('.test-err-code-frame pre span').should('include.text', 'fail(this,()=>')
 
-      cy.contains('.test-err-code-frame .runnable-err-file-path', openInIdePath.relative)
+      cy.contains('.test-err-code-frame .runnable-err-file-path span', openInIdePath.relative)
       .click()
       .should(() => {
         expect(runnerWs.emit.withArgs('open:file')).to.be.calledTwice
