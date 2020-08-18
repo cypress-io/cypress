@@ -91,6 +91,8 @@ const replaceCypressVersion = (str, p1, p2) => {
 // when swapping out the duration, ensure we pad the
 // full length of the duration so it doesn't shift content
 const replaceDurationInTables = (str, p1, p2) => {
+  expect(str, 'duration should always be greater than 0ms').not.contain(' 0ms')
+
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
