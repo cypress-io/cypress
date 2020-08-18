@@ -557,18 +557,26 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   1) simple failing hook spec
        beforeEach hooks
          "before each" hook for "never gets here":
-     Error: fail1
+     (Attempt 1) Error: fail1
+      [stack trace lines]
+
+     (Attempt 2) Error: fail1
 
 Because this error occurred during a \`before each\` hook we are skipping the remaining tests in the current suite: \`beforeEach hooks\`
       [stack trace lines]
+  
 
   2) simple failing hook spec
        afterEach hooks
          "after each" hook for "runs this":
-     Error: fail2
+     (Attempt 1) Error: fail2
+      [stack trace lines]
+
+     (Attempt 2) Error: fail2
 
 Because this error occurred during a \`after each\` hook we are skipping the remaining tests in the current suite: \`afterEach hooks\`
       [stack trace lines]
+  
 
   3) simple failing hook spec
        after hooks
@@ -637,8 +645,12 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
   1) simple retrying spec
        t1:
-     Error: t1 attempt #1
+     (Attempt 1) Error: t1 attempt #0
       [stack trace lines]
+
+     (Attempt 2) Error: t1 attempt #1
+      [stack trace lines]
+  
 
 
 
