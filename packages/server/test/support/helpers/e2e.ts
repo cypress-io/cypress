@@ -44,6 +44,8 @@ const availableBrowsersRe = /(Available browsers found on your system are:)([\s\
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 
+export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
+
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -91,8 +93,6 @@ const replaceCypressVersion = (str, p1, p2) => {
 // when swapping out the duration, ensure we pad the
 // full length of the duration so it doesn't shift content
 const replaceDurationInTables = (str, p1, p2) => {
-  expect(str, 'duration should always be greater than 0ms').not.contain(' 0ms')
-
   return _.padStart('XX:XX', p1.length + p2.length)
 }
 
@@ -155,7 +155,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, '')
   // 12:35 -> XX:XX
-  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
+  .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
