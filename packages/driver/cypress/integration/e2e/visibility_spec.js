@@ -36,9 +36,13 @@ describe('visibility', () => {
       cy.get('.container-2').should('be.visible')
     })
 
+    // TODO: move with tests added in this PR when it merges: https://github.com/cypress-io/cypress/pull/8166
     it('non-visible ancestor causes element to not be visible', () => {
       cy.visit('/fixtures/shadow-dom.html')
-      cy.get('.inside-non-visible', { includeShadowDom: true }).should('not.be.visible')
+      cy
+      .get('#shadow-element-10')
+      .find('.shadow-div', { includeShadowDom: true })
+      .should('not.be.visible')
     })
   })
 })
