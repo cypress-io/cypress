@@ -396,7 +396,6 @@ class Reporter {
           name: err.name,
           message: err.message,
           stack: stackUtils.stackWithoutMessage(err.stack),
-
         }
 
         return {
@@ -409,6 +408,7 @@ class Reporter {
           videoTimestamp: null,
         }
       }),
+
     }
 
     return normalizedTest

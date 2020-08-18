@@ -179,6 +179,12 @@ describe('e2e plugins', function () {
     })
   })
 
+  it('supports node builtins', function () {
+    return e2e.exec(this, {
+      spec: 'node_builtins_spec.js',
+    })
+  })
+
   describe('projectRoot and configFile', function () {
     it('passes projectRoot and default configFile to plugins function', function () {
       return e2e.exec(this, {

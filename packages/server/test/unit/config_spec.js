@@ -690,6 +690,34 @@ describe('lib/config', () => {
         })
       })
 
+      context('retries', () => {
+        const retriesError = 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls'
+
+        // need to keep the const here or it'll get stripped by the build
+        // eslint-disable-next-line no-unused-vars
+        const cases = [
+          [{ retries: null }, 'with null', true],
+          [{ retries: 3 }, 'when a number', true],
+          [{ retries: 3.2 }, 'when a float', false],
+          [{ retries: -1 }, 'with a negative number', false],
+          [{ retries: true }, 'when true', false],
+          [{ retries: false }, 'when false', false],
+          [{ retries: {} }, 'with an empty object', true],
+          [{ retries: { runMode: 3 } }, 'when runMode is a positive number', true],
+          [{ retries: { runMode: -1 } }, 'when runMode is a negative number', false],
+          [{ retries: { openMode: 3 } }, 'when openMode is a positive number', true],
+          [{ retries: { openMode: -1 } }, 'when openMode is a negative number', false],
+          [{ retries: { openMode: 3, TypoRunMode: 3 } }, 'when there is an additional unknown key', false],
+          [{ retries: { openMode: 3, runMode: 3 } }, 'when both runMode and openMode are positive numbers', true],
+        ].forEach(([config, expectation, shouldPass]) => {
+          it(`${shouldPass ? 'passes' : 'fails'} ${expectation}`, function () {
+            this.setup(config)
+
+            return shouldPass ? this.expectValidationPasses() : this.expectValidationFails(retriesError)
+          })
+        })
+      })
+
       context('firefoxGcInterval', () => {
         it('passes if a number', function () {
           this.setup({ firefoxGcInterval: 1 })

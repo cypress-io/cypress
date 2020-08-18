@@ -180,8 +180,10 @@ export default class Project {
         return this.setChosenBrowser(customBrowser, { save: false })
       }
 
-      if (localStorage.getItem('chosenBrowser')) {
-        return this.setChosenBrowserByName(localStorage.getItem('chosenBrowser'))
+      const ls = localStorage.getItem('chosenBrowser')
+
+      if (ls) {
+        return this.setChosenBrowserFromLocalStorage(ls)
       }
 
       return this.setChosenBrowser(this.defaultBrowser)
@@ -194,7 +196,7 @@ export default class Project {
     })
 
     if (save !== false) {
-      localStorage.setItem('chosenBrowser', browser.name)
+      localStorage.setItem('chosenBrowser', JSON.stringify(_.pick(browser, 'name', 'channel')))
     }
 
     browser.isChosen = true
@@ -250,8 +252,17 @@ export default class Project {
     this.apiError = err
   }
 
-  @action setChosenBrowserByName (name) {
-    const browser = _.find(this.browsers, { name }) || this.defaultBrowser
+  @action setChosenBrowserFromLocalStorage (ls) {
+    let filter = {}
+
+    try {
+      _.merge(filter, JSON.parse(ls))
+    } catch (err) {
+      // localStorage pre-dates JSON filter, assume "name"
+      filter.name = ls
+    }
+
+    const browser = _.find(this.browsers, filter) || this.defaultBrowser
 
     this.setChosenBrowser(browser)
   }

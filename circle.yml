@@ -904,7 +904,7 @@ jobs:
             PERCY_PARALLEL_TOTAL=1 \
             yarn percy exec -- \
             yarn cypress:run \
-              --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js,cypress/integration/runs_list_spec.js
+              --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js,cypress/integration/runs_list_spec.js,cypress/integration/login_spec.js
           working_directory: packages/desktop-gui
       - verify-mocha-results
       # we don't really need any artifacts - we are only interested in visual screenshots
@@ -1135,7 +1135,7 @@ jobs:
             CYPRESS_PROJECT_ID=$TEST_TINY_PROJECT_ID \
             CYPRESS_RECORD_KEY=$TEST_TINY_RECORD_KEY \
             CYPRESS_INTERNAL_ENV=staging \
-            yarn cypress:run --project /tmp/cypress-example-kitchensink --record
+            yarn cypress:run --project /tmp/cypress-test-tiny --record
       - store-npm-logs
 
   build-npm-package:
