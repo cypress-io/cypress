@@ -27,12 +27,11 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
       ],
       "state": "failed",
       "body": "",
-      "displayError": "SomeError: foo\nat foo:1:1\nat bar:1:1\nat baz:1:1",
+      "displayError": "at foo:1:1\nat bar:1:1\nat baz:1:1",
       "attempts": [
         {
           "state": "failed",
           "error": {
-            "name": "SomeError",
             "message": "foo",
             "stack": "at foo:1:1\nat bar:1:1\nat baz:1:1"
           },
