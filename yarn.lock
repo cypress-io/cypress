@@ -1799,16 +1799,6 @@
   resolved "https://registry.yarnpkg.com/@cypress/icons/-/icons-0.7.0.tgz#415d3729a8dc8c7eb5cd24f79f2404a65751d303"
   integrity sha1-QV03KajcjH61zST3nyQEpldR0wM=
 
-"@cypress/json-schemas@5.34.2":
-  version "5.34.2"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.34.2.tgz#0b5b6c8519573c99faedfa22b9c0a410b86aad7c"
-  integrity sha512-T3QQgoYQ8Ols4GLMgdAsELa13obSODc80q6AH8doPHpjzGJypKZeboxRKZ1NFuqwd8oqQzcTG6kbzbu4b93TAQ==
-  dependencies:
-    "@cypress/schema-tools" "4.7.4"
-    lodash.clonedeep "^4.5.0"
-    lodash.merge "^4.6.2"
-    lodash.omit "^4.5.0"
-
 "@cypress/json-schemas@5.35.0":
   version "5.35.0"
   resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.35.0.tgz#9a699f680a7c58809f743b951f02107fd7b29b80"
