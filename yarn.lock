@@ -4131,12 +4131,13 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chrome@0.0.101":
-  version "0.0.101"
-  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.101.tgz#8b6f7d4f1d4890ba7d950f8492725fa7ba9ab910"
-  integrity sha512-9GpAt3fBVPdzEIwdgDrxqCaURyJqOVz+oIWB+iDE2FD0ZeGQhkMwTqJIW+Ok/lnie6tt6DwVMZkOS8x6QkmWsQ==
+"@types/chrome@0.0.122":
+  version "0.0.122"
+  resolved "https://registry.yarnpkg.com/@types/chrome/-/chrome-0.0.122.tgz#65265d3854f511c2c1e779148e97982ee00b460f"
+  integrity sha512-xHmT1AlBwKAVpQmv+/5gUsB1FXLUiizIZI6bIM52DJDtEhv97FkryHkohjw2HZqAGLOxuJ3kae7YfgWIZ+hMrg==
   dependencies:
     "@types/filesystem" "*"
+    "@types/har-format" "*"
 
 "@types/classnames@2.2.9":
   version "2.2.9"
@@ -4288,6 +4289,11 @@
   dependencies:
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/har-format@*":
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/@types/har-format/-/har-format-1.2.4.tgz#3275842095abb60d14b47fa798cc9ff708dab6d4"
+  integrity sha512-iUxzm1meBm3stxUMzRqgOVHjj4Kgpgu5w9fm4X7kPRfSgVRzythsucEN7/jtOo8SQzm+HfcxWWzJS0mJDH/3DQ==
 
 "@types/html-minifier@*":
   version "4.0.0"
