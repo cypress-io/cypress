@@ -17,9 +17,8 @@ const openProject = require(`${root}../lib/open_project`)
 const open = require(`${root}../lib/util/open`)
 const auth = require(`${root}../lib/gui/auth`)
 const logs = require(`${root}../lib/gui/logs`)
-const events = require(`${root}../lib/gui/events`)
+const events = require(`../../../lib/gui/events`)
 const dialog = require(`${root}../lib/gui/dialog`)
-const Windows = require(`${root}../lib/gui/windows`)
 const ensureUrl = require(`${root}../lib/util/ensure-url`)
 const konfig = require(`${root}../lib/konfig`)
 
@@ -206,11 +205,11 @@ describe('lib/gui/events', () => {
           loadURL () {},
           webContents: {},
         })
-
-        return sinon.stub(Windows, 'create').withArgs(this.options.projectRoot).returns(this.win)
       })
 
-      it('calls Windows#open with args and resolves with return of Windows.open', function () {
+      it('calls windowOpenFn with args and resolves with return', function () {
+        this.options.windowOpenFn = sinon.stub().rejects().withArgs({ type: 'INDEX ' }).resolves(this.win)
+
         return this.handleEvent('window:open', { type: 'INDEX' })
         .then((assert) => {
           return assert.sendCalledWith(events.nullifyUnserializableValues(this.win))
@@ -220,7 +219,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Windows, 'open').withArgs(this.options.projectRoot, { foo: 'bar' }).rejects(err)
+        this.options.windowOpenFn = sinon.stub().withArgs(this.options.projectRoot, { foo: 'bar' }).rejects(err)
 
         return this.handleEvent('window:open', { foo: 'bar' }).then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -230,11 +229,14 @@ describe('lib/gui/events', () => {
 
     describe('window:close', () => {
       it('calls destroy on Windows#getByWebContents', function () {
-        this.destroy = sinon.stub()
-        sinon.stub(Windows, 'getByWebContents').withArgs(this.event.sender).returns({ destroy: this.destroy })
+        const win = {
+          destroy: sinon.stub(),
+        }
+
+        this.options.getWindowByWebContentsFn = sinon.stub().withArgs(this.event.sender).returns(win)
         this.handleEvent('window:close')
 
-        expect(this.destroy).to.be.calledOnce
+        expect(win.destroy).to.be.calledOnce
       })
     })
   })

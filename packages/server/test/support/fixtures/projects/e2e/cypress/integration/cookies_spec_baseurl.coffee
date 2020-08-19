@@ -35,10 +35,10 @@ describe "cookies", ->
   beforeEach ->
     cy.wrap({foo: "bar"})
 
-  context "with whitelist", ->
+  context "with preserve", ->
     before ->
       Cypress.Cookies.defaults({
-        whitelist: "foo1"
+        preserve: "foo1"
       })
 
     it "can get all cookies", ->
@@ -104,10 +104,10 @@ describe "cookies", ->
     it "handles undefined cookies", ->
       cy.visit("/cookieWithNoName")
 
-  context "without whitelist", ->
+  context "without preserve", ->
     before ->
       Cypress.Cookies.defaults({
-        whitelist: []
+        preserve: []
       })
 
     it "sends set cookies to path", ->

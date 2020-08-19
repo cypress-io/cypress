@@ -354,7 +354,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
             compiler: projTsPath,
             compilerOptions: {
               module: 'CommonJS',
-              esModuleInterop: true,
             },
           })
         })

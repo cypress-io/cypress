@@ -3,7 +3,7 @@
 // so that Cypress can get and use the Blob type
 
 // tslint:disable-next-line:no-implicit-dependencies
-import * as blobUtil from './blob-util'
+import * as blobUtil from 'blob-util'
 
 export = BlobUtil
 export as namespace BlobUtil

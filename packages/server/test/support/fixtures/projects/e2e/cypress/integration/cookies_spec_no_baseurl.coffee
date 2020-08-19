@@ -5,13 +5,18 @@ describe "cookies", ->
   beforeEach ->
     cy.wrap({foo: "bar"})
 
-  context "with whitelist", ->
+  context "with preserve", ->
     before ->
       Cypress.Cookies.defaults({
-        whitelist: "foo1"
+        preserve: "foo1"
       })
 
     it "can get all cookies", ->
+      expectedKeys = ["domain", "name", "value", "path", "secure", "httpOnly", "expiry"]
+
+      if Cypress.isBrowser('firefox')
+        expectedKeys.push('sameSite')
+
       cy
         .clearCookie("foo1")
         .setCookie("foo", "bar").then (c) ->
@@ -23,9 +28,7 @@ describe "cookies", ->
           expect(c.secure).to.eq(false)
           expect(c.expiry).to.be.a("number")
 
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+          expect(c).to.have.keys(expectedKeys)
         .getCookies()
           .should("have.length", 1)
           .then (cookies) ->
@@ -39,9 +42,7 @@ describe "cookies", ->
             expect(c.secure).to.eq(false)
             expect(c.expiry).to.be.a("number")
 
-            expect(c).to.have.keys(
-              "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-            )
+            expect(c).to.have.keys(expectedKeys)
         .clearCookies()
           .should("be.null")
         .setCookie("wtf", "bob", {httpOnly: true, path: "/foo", secure: true})
@@ -54,9 +55,7 @@ describe "cookies", ->
           expect(c.secure).to.eq(true)
           expect(c.expiry).to.be.a("number")
 
-          expect(c).to.have.keys(
-            "domain", "name", "value", "path", "secure", "httpOnly", "expiry"
-          )
+          expect(c).to.have.keys(expectedKeys)
         .clearCookie("wtf")
           .should("be.null")
         .getCookie("doesNotExist")
@@ -80,10 +79,10 @@ describe "cookies", ->
     it "handles undefined cookies", ->
       cy.visit("#{httpUrl}/cookieWithNoName")
 
-  context "without whitelist", ->
+  context "without preserve", ->
     before ->
       Cypress.Cookies.defaults({
-        whitelist: []
+        preserve: []
       })
 
     it "sends cookies to localhost:2121", ->

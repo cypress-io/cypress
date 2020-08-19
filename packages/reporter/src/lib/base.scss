@@ -4,10 +4,15 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 
 .reporter {
   background-color: #F6F6F6;
+  bottom: 0;
   color: #555;
   display: flex;
   flex-direction: column;
   font-size: 12px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
 
   * {
     box-sizing: border-box;

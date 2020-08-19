@@ -1,14 +1,15 @@
 require('../../spec_helper')
 
-import { expect } from 'chai'
-import sinon from 'sinon'
 import 'chai-as-promised'
-import firefoxUtil from '../../../lib/browsers/firefox-util'
-import * as firefox from '../../../lib/browsers/firefox'
+import { expect } from 'chai'
 import { EventEmitter } from 'events'
-import Marionette from 'marionette-client'
 import Foxdriver from '@benmalka/foxdriver'
+import Marionette from 'marionette-client'
 import os from 'os'
+import sinon from 'sinon'
+import * as firefox from '../../../lib/browsers/firefox'
+import firefoxUtil from '../../../lib/browsers/firefox-util'
+
 const mockfs = require('mock-fs')
 const FirefoxProfile = require('firefox-profile')
 const utils = require('../../../lib/browsers/utils')
