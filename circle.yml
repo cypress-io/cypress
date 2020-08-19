@@ -17,7 +17,7 @@ workflows:
       # then the workspace will be passed to other jobs
       - cypress/install:
           name: Install
-          executor: cypress/base-12
+          executor: cypress/base-14
           build: npm run transpile
           post-steps:
             - run:
