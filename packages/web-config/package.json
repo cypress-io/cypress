@@ -7,7 +7,7 @@
     "@babel/plugin-proposal-decorators": "7.8.3",
     "@babel/plugin-proposal-object-rest-spread": "7.9.0",
     "@babel/preset-env": "7.9.0",
-    "@babel/preset-react": "7.9.4",
+    "@babel/preset-react": "7.10.4",
     "@babel/preset-typescript": "7.9.0",
     "@babel/register": "7.9.0",
     "@types/copy-webpack-plugin": "5.0.0",
