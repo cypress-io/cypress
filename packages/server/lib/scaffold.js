@@ -79,8 +79,6 @@ const isNewProject = (integrationFolder) => {
   // 4. the files are named the same as the example files
   // 5. the bytes of the files match the example files
 
-  debug('determine if new project by component testing enabled')
-
   debug('determine if new project by globbing files in %o', { integrationFolder })
 
   // checks for file up to 3 levels deep
