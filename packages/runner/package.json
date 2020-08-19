@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
-    "@fortawesome/fontawesome-free": "5.12.1",
+    "@fortawesome/fontawesome-free": "5.14.0",
     "@packages/driver": "*",
     "@packages/reporter": "*",
     "@packages/socket": "*",
