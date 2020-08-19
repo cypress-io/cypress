@@ -61,7 +61,7 @@
   },
   "devDependencies": {
     "@babel/cli": "7.8.4",
-    "@babel/preset-env": "7.9.5",
+    "@babel/preset-env": "7.11.0",
     "@cypress/sinon-chai": "1.1.0",
     "@packages/root": "*",
     "@types/bluebird": "3.5.29",
