@@ -4453,10 +4453,10 @@
   resolved "https://registry.yarnpkg.com/@types/parse-json/-/parse-json-4.0.0.tgz#2f8bb441434d163b35fb8ffdccd7138927ffb8c0"
   integrity sha512-//oorEZjL6sbPcKUaCdIGlIUeH26mgzimjBB77G6XRgnDl/L5wOnpyBGRe/Mmf5CVW3PwEBE1NjiMZ/ssFh4wA==
 
-"@types/parse5-html-rewriting-stream@5.1.1":
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/@types/parse5-html-rewriting-stream/-/parse5-html-rewriting-stream-5.1.1.tgz#a53feb6070b02193b5fc64e3cd81937a0f2503a9"
-  integrity sha512-mjD4nx8WudMCR8EQVlU7Trc2uwKND7LMuftzgsbMmiFTeeW+viKjeqg7VnE0TNjSSQv3z9588K8BsT+N1EBLlg==
+"@types/parse5-html-rewriting-stream@5.1.2":
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/@types/parse5-html-rewriting-stream/-/parse5-html-rewriting-stream-5.1.2.tgz#919d5bbf69ef61e11d873e7195891c3811491a03"
+  integrity sha512-7CHY6QlayurvYRST5xatE/ipIueph5V+EW2xU12P0CsNucuwygnuiE4foYsdQUEkhnKrTU62KmikANPnoxiGrg==
   dependencies:
     "@types/parse5-sax-parser" "*"
 
