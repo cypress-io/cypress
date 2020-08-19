@@ -1,13 +1,6 @@
 version: 2.1
 orbs:
-  cypress: cypress-io/cypress@1.21.0
-
-executors:
-  base-12-16-2:
-    docker:
-      - image: 'cypress/base:12.16.2'
-    environment:
-      DEBUG: find-webpack,cypress-react-unit-test
+  cypress: cypress-io/cypress@1.26.0
 
 workflows:
   build:
@@ -17,7 +10,7 @@ workflows:
       # then the workspace will be passed to other jobs
       - cypress/install:
           name: Install
-          executor: cypress/base-14
+          executor: cypress/base-12
           build: npm run transpile
           post-steps:
             - run:
@@ -40,6 +33,7 @@ workflows:
           name: Example A11y
           requires:
             - Install
+          executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           install-command: npm install
           verify-command: echo 'Already verified'
@@ -52,6 +46,7 @@ workflows:
           name: Example Babel
           requires:
             - Install
+          executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           install-command: npm install
           verify-command: echo 'Already verified'
@@ -64,6 +59,7 @@ workflows:
           name: Example React Scripts
           requires:
             - Install
+          executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           install-command: npm install
           verify-command: echo 'Already verified'
@@ -106,6 +102,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
           install-command: npm install
           verify-command: echo 'Already verified'
           no-workspace: true
@@ -124,10 +121,10 @@ workflows:
 
       - cypress/run:
           name: Example Webpack file
-          executor: base-12-16-2
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
           install-command: npm install
           verify-command: echo 'Already verified'
           no-workspace: true
@@ -144,10 +141,10 @@ workflows:
 
       - cypress/run:
           name: Example Webpack options
-          executor: cypress/base-12
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
           install-command: npm install
           verify-command: echo 'Already verified'
           no-workspace: true
@@ -215,7 +212,7 @@ workflows:
 
       - cypress/run:
           name: Visual with Applitools
-          executor: base-12-16-2
+          executor: cypress/base-12
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
@@ -237,7 +234,7 @@ workflows:
 
       - cypress/run:
           name: Visual with Percy
-          executor: base-12-16-2
+          executor: cypress/base-12
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
