@@ -121,7 +121,7 @@
     "winston": "2.4.4"
   },
   "devDependencies": {
-    "@babel/core": "7.9.0",
+    "@babel/core": "7.11.1",
     "@babel/preset-env": "7.9.0",
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.35.0",
