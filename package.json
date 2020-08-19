@@ -87,7 +87,7 @@
     "@types/bluebird": "3.5.29",
     "@types/classnames": "2.2.9",
     "@types/debug": "4.1.5",
-    "@types/enzyme": "3.9.1",
+    "@types/enzyme": "3.10.5",
     "@types/enzyme-adapter-react-16": "1.0.5",
     "@types/execa": "0.9.0",
     "@types/fs-extra": "^8.0.1",
