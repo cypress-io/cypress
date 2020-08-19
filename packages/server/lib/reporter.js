@@ -382,14 +382,13 @@ class Reporter {
   }
 
   normalizeTest (test = {}) {
-    const attempts = (test.prevAttempts || []).concat([test])
     const normalizedTest = {
       testId: orNull(test.id),
       title: getParentTitle(test),
       state: orNull(test.state),
       body: orNull(test.body),
       displayError: orNull(test.err && test.err.stack),
-      attempts: _.map(attempts, (attempt) => {
+      attempts: _.map((test.prevAttempts || []).concat([test]), (attempt) => {
         let err = attempt.originalErr || attempt.err
 
         err = err && {
@@ -408,7 +407,6 @@ class Reporter {
           videoTimestamp: null,
         }
       }),
-
     }
 
     return normalizedTest

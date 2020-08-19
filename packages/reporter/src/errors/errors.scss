@@ -79,20 +79,6 @@
     padding: 5px 10px;
     font-weight: bold;
 
-    .hook-failed-message {
-      display: none;
-    }
-
-    .error-hookname {
-      text-transform: uppercase;
-      color: #959595;
-      display: inline-block;
-      flex-grow: 1;
-      font-size: 11px;
-      margin-left: 4px;
-      padding: 4px 0;
-    }
-
     .runnable-err-name {
       flex-grow: 2;
       font-size: 13px;

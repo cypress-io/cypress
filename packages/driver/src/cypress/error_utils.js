@@ -20,16 +20,6 @@ const wrapErr = (err) => {
   return $utils.reduceProps(err, ERROR_PROPS)
 }
 
-const wrapRunnableErrs = (r) => {
-  if (r.err) {
-    r.err = wrapErr(r.err)
-  }
-
-  if (r.errs) {
-    r.errs = r.errs.map((err) => wrapErr(err))
-  }
-}
-
 const isAssertionErr = (err = {}) => {
   return err.name === 'AssertionError'
 }
@@ -348,5 +338,4 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
-  wrapRunnableErrs,
 }

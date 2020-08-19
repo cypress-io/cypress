@@ -2427,7 +2427,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "order": 1,
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -2485,8 +2485,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
       "actual": null,
-      "showDiff": false,
-      "failedFromHookId": "h1"
+      "showDiff": false
     }
   ],
   [
@@ -2515,7 +2514,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "order": 1,
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -3638,7 +3637,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "order": 4,
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -3677,8 +3676,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
       "actual": null,
-      "showDiff": false,
-      "failedFromHookId": "h7"
+      "showDiff": false
     }
   ],
   [
@@ -3743,7 +3741,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "order": 4,
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -3816,7 +3814,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -3854,8 +3852,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "sourceMappedStack": "match.string",
       "parsedStack": "match.array",
       "actual": null,
-      "showDiff": false,
-      "failedFromHookId": "h7"
+      "showDiff": false
     }
   ],
   [
@@ -3919,7 +3916,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r7",
       "title": "test 1",
       "hookName": "after each",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h7",
       "body": "[body]",
@@ -4517,7 +4514,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "order": 1,
       "title": "test 1",
       "hookName": "before all",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -4556,7 +4553,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "order": 1,
       "title": "test 1",
       "hookName": "before all",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h1",
       "body": "[body]",
@@ -4936,7 +4933,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "order": 1,
       "title": "test 1",
       "hookName": "after all",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h4",
       "body": "[body]",
@@ -5015,7 +5012,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "order": 1,
       "title": "test 1",
       "hookName": "after all",
-      "err": "{Object 10}",
+      "err": "{Object 9}",
       "state": "failed",
       "failedFromHookId": "h4",
       "body": "[body]",
