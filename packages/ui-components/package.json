@@ -16,7 +16,7 @@
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/plugin-proposal-class-properties": "7.8.3",
-    "@babel/plugin-proposal-decorators": "7.8.3",
+    "@babel/plugin-proposal-decorators": "7.10.5",
     "@babel/preset-env": "7.9.0",
     "@babel/preset-react": "7.9.4",
     "@fortawesome/fontawesome-free": "5.12.1",
