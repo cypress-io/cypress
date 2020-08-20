@@ -1031,8 +1031,9 @@ jobs:
       - run: $(yarn bin)/print-arch
       - install-required-node
       - run:
-          environment:
-            DEBUG: electron-builder,electron-osx-sign*
+          # environment:
+            # verbose binary building logs
+            # DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
           no_output_timeout: "30m"
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
