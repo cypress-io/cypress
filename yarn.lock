@@ -3830,15 +3830,12 @@
   resolved "https://registry.yarnpkg.com/@reach/utils/-/utils-0.6.4.tgz#be268e1a7d04f921596b3672888a932c1832074a"
   integrity sha512-jUWNb1STgR69WGkV4O/N4XOcUvM0u5LP1b9SR6VZsPRazpmzM8HUl3WsBVgMOnSCefZtk+wM4ig2/iYgdElwPw==
 
-"@reach/visually-hidden@0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.6.1.tgz#6ce4e2829c282e3d046495983d2898b439f3ad96"
-  integrity sha512-Y9CXRk5mQ4dm6TRzjcF0qb08KVBYf6tr8ee0TxuAFcA5pV92T+y1SnEd2CuzY9XqsAUyxf4LgVgvkgwzzsO03A==
-
-"@reach/visually-hidden@0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.6.2.tgz#36744201d0464bcaedc6163b379844612341a1dc"
-  integrity sha512-YI2IMink8kn3vcugOKjFcQgF+GUd1p3kMWtLVxvEr1oj8iOyNASBP4j9ouYR9ZqIEO8SZhk9O+IHdXQhs0csxg==
+"@reach/visually-hidden@0.10.4":
+  version "0.10.4"
+  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.10.4.tgz#ab390db0adf759393af4d856f84375468b1df676"
+  integrity sha512-GnuPuTRCf+Ih47BoKvGyB+jP8EVWLb04GfbGa5neOrjdp90qrb4zr7pMSL4ZvTsrxt9MRooJA2BhSxs5DbyqCQ==
+  dependencies:
+    tslib "^2.0.0"
 
 "@resugar/codemod-declarations-block-scope@^1.0.2":
   version "1.0.2"
@@ -24461,6 +24458,11 @@ tslib@^1, tslib@^1.0.0, tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.13.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.13.0.tgz#c881e13cc7015894ed914862d276436fa9a47043"
   integrity sha512-i/6DQjL8Xf3be4K/E6Wgpekn5Qasl1usyw++dAA35Ue5orEn65VIxOA+YvNNl9HV3qv70T7CNwjODHZrLwvd1Q==
+
+tslib@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.0.1.tgz#410eb0d113e5b6356490eec749603725b021b43e"
+  integrity sha512-SgIkNheinmEBgx1IUNirK0TUD4X9yjjBRTqqjggWCU3pUEqIk3/Uwl3yRixYKT6WjQuGiwDv4NomL3wqRCj+CQ==
 
 tslint@5.14.0:
   version "5.14.0"
