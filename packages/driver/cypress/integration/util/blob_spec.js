@@ -14,5 +14,19 @@ describe('blob-util 2.x', () => {
         Promise.try(() => Blob[method](value)),
       ])
     })
+
+    it(`Cypress.Blob.${method} does not error with 5.0.0 workaround`, () => {
+      // this is the 5.0.0 workaround that the cypress-file-upload plugin uses
+      const wrapBlob = (blob) => {
+        delete blob.then
+
+        return Cypress.Promise.resolve(blob)
+      }
+
+      return Promise.all([
+        Promise.resolve(wrapBlob(Blob[method](value))),
+        Promise.try(() => wrapBlob(Blob[method](value))),
+      ])
+    })
   })
 })
