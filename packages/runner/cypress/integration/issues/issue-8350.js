@@ -10,7 +10,7 @@ describe('issue-8350', () => {
         })
       })
 
-      describe('ae inside be', () => {
+      describe('s1', () => {
         it('t1', () => {
           //
         })
