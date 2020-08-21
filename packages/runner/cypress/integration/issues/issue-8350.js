@@ -1,4 +1,4 @@
-const { createCypress } = require('../support/helpers')
+const { createCypress } = require('../../support/helpers')
 const { runIsolatedCypress } = createCypress()
 
 // https://github.com/cypress-io/cypress/issues/8350
