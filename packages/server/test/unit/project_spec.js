@@ -349,13 +349,15 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         const { proj, register } = setupProject('default', tsProjPath)
 
         return proj.open().then(() => {
-          expect(register).to.be.calledWith({
+          expect(register).to.be.calledWithMatch({
             transpileOnly: true,
             compiler: projTsPath,
             compilerOptions: {
               module: 'CommonJS',
             },
           })
+
+          expect(register.lastCall.args[0].dir).to.include('ts-installed/cypress/plugins')
         })
       })
 
