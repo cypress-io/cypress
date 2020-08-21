@@ -101,7 +101,7 @@ class Project extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     }).then((cfg) => {
-      registerTsNode(this.projectRoot)
+      registerTsNode(this.projectRoot, cfg.pluginsFile)
 
       return cfg
     }).then((cfg) => {

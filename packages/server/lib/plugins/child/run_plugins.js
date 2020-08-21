@@ -181,7 +181,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   })
 
   if (!tsRegistered) {
-    registerTsNode(projectRoot)
+    registerTsNode(projectRoot, pluginsFile)
 
     // ensure typescript is only registered once
     tsRegistered = true

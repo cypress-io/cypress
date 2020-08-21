@@ -23,4 +23,10 @@ describe('e2e typescript in plugins file', function () {
       project: Fixtures.projectPath('ts-proj-esmoduleinterop-true'),
     })
   })
+
+  it('loads tsconfig.json from plugins directory', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('ts-proj-tsconfig-in-plugins'),
+    })
+  })
 })
