@@ -3829,15 +3829,12 @@
     tslib "^2.0.0"
     warning "^4.0.3"
 
-"@reach/visually-hidden@0.6.1":
-  version "0.6.1"
-  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.6.1.tgz#6ce4e2829c282e3d046495983d2898b439f3ad96"
-  integrity sha512-Y9CXRk5mQ4dm6TRzjcF0qb08KVBYf6tr8ee0TxuAFcA5pV92T+y1SnEd2CuzY9XqsAUyxf4LgVgvkgwzzsO03A==
-
-"@reach/visually-hidden@0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.6.2.tgz#36744201d0464bcaedc6163b379844612341a1dc"
-  integrity sha512-YI2IMink8kn3vcugOKjFcQgF+GUd1p3kMWtLVxvEr1oj8iOyNASBP4j9ouYR9ZqIEO8SZhk9O+IHdXQhs0csxg==
+"@reach/visually-hidden@0.10.4":
+  version "0.10.4"
+  resolved "https://registry.yarnpkg.com/@reach/visually-hidden/-/visually-hidden-0.10.4.tgz#ab390db0adf759393af4d856f84375468b1df676"
+  integrity sha512-GnuPuTRCf+Ih47BoKvGyB+jP8EVWLb04GfbGa5neOrjdp90qrb4zr7pMSL4ZvTsrxt9MRooJA2BhSxs5DbyqCQ==
+  dependencies:
+    tslib "^2.0.0"
 
 "@resugar/codemod-declarations-block-scope@^1.0.2":
   version "1.0.2"
