@@ -27,14 +27,14 @@ module.exports = async function (params) {
 
   console.log('copying node_modules to', outputFolder)
 
-  packages.forEach(async (packageNodeModules) => {
+  for await (const packageNodeModules of packages) {
     console.log('copying', packageNodeModules)
 
     const sourceFolder = join(params.packager.info._appDir, packageNodeModules)
     const destinationFolder = join(outputFolder, packageNodeModules)
 
     await fs.copy(sourceFolder, destinationFolder)
-  })
+  }
 
   console.log('all node_modules subfolders copied to', outputFolder)
 }
