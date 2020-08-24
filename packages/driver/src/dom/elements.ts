@@ -929,11 +929,11 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
     return $el
   }
 
-  const parent = getParent($el)
+  const $parent = getParent($el)
 
   // if we have no parent then just return
   // the window since that can receive focus
-  if (!parent.length) {
+  if (!$parent.length) {
     const win = $window.getWindowByElement($el.get(0))
 
     return $(win)
@@ -1370,6 +1370,7 @@ export {
   getFirstStickyPositionParent,
   getFirstScrollableParent,
   getParent,
+  getParentNode,
   getAllParents,
   getShadowRoot,
 }
