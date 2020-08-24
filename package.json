@@ -47,6 +47,7 @@
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-react": "^7.20.6",
     "fs-extra": "^9.0.1",
+    "graphql": "14.0.0",
     "lint-staged": "^10.2.11",
     "mocha": "^8.1.1",
     "react": "^16.13.1",
