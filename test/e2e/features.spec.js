@@ -40,6 +40,10 @@ describe('features', () => {
     await runAndEval('jsx_spec.jsx')
   })
 
+  it('handles mjs', async () => {
+    await runAndEval('mjs_spec.mjs')
+  })
+
   it('handles coffeescript', async () => {
     await runAndEval('coffee_spec.coffee')
   })
@@ -48,7 +52,7 @@ describe('features', () => {
     await runAndEval('coffee_imports_spec.coffee')
   })
 
-  it('handles importing .js, .json, .jsx, and .coffee', async () => {
+  it('handles importing .js, .json, .jsx, .mjs, and .coffee', async () => {
     await runAndEval('various_imports_spec.js')
   })
 

@@ -11,7 +11,7 @@ const getDefaultWebpackOptions = (file, options = {}) => {
     },
     module: {
       rules: [{
-        test: /\.jsx?$/,
+        test: /(\.jsx?|\.mjs)$/,
         exclude: [/node_modules/],
         use: [{
           loader: require.resolve('babel-loader'),
@@ -39,7 +39,7 @@ const getDefaultWebpackOptions = (file, options = {}) => {
       }],
     },
     resolve: {
-      extensions: ['.js', '.json', '.jsx', '.coffee'],
+      extensions: ['.js', '.json', '.jsx', '.mjs', '.coffee'],
       alias: {
         'child_process': require.resolve('./empty'),
         'cluster': require.resolve('./empty'),
