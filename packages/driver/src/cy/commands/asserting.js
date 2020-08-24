@@ -111,7 +111,7 @@ module.exports = function (Commands, Cypress, cy, state) {
         }
 
         if (chainers.length < 2 && !_.isFunction(memo[value]) && !isCheckingExistence) {
-          err = $errUtils.cypressErrByPath('should.language_chainer', { args: { chainer: value } })
+          err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
           err.retry = false
           throwAndLogErr(err)
         }

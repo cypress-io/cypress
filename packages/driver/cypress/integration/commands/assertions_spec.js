@@ -434,7 +434,6 @@ describe('src/cy/commands/assertions', () => {
       describe('language chainers err', () => {
         // https://github.com/cypress-io/cypress/issues/883
         const langChainers = ['to', 'be', 'been', 'is', 'that', 'which', 'and', 'has', 'have', 'with', 'at', 'of', 'same', 'but', 'does', 'still']
-        const langChainerCombos = ['be.and.have.same', 'to.have']
 
         langChainers.forEach((langChainer) => {
           it(`throws err when assertion contains only one language chainer: ${langChainer}`, (done) => {
@@ -446,19 +445,6 @@ describe('src/cy/commands/assertions', () => {
             })
 
             cy.noop(true).should(langChainer, true)
-          })
-        })
-
-        langChainerCombos.forEach((langChainerCombos) => {
-          it(`throws err when assertion contains only language chainers: ${langChainerCombos}`, (done) => {
-            cy.on('fail', (err) => {
-              expect(err.message).to.eq(`The chainer \`${langChainerCombos}\` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.`)
-              expect(err.docsUrl).to.eq('https://on.cypress.io/assertions')
-
-              done()
-            })
-
-            cy.noop(true).should(langChainerCombos, true)
           })
         })
       })
