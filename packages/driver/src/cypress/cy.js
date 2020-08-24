@@ -732,8 +732,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     if (!userInvocationStack) return
 
     if (
-      $errUtils.isCypressErr(err)
-      || $errUtils.isAssertionErr(err)
+      $errUtils.isAssertionErr(err)
       || $errUtils.isChaiValidationErr(err)
     ) {
       return userInvocationStack

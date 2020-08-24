@@ -32,8 +32,8 @@ const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
 }
 
-const mergeErrProps = (origErr, ...newProps) => {
-  return _.extend(origErr, ...newProps)
+const mergeErrProps = (origErr, newProps) => {
+  return _.extend(origErr, { ...newProps, stack: newProps.stack, message: newProps.message })
 }
 
 const stackWithReplacedProps = (err, props) => {
@@ -245,6 +245,17 @@ const errByPath = (msgPath, args) => {
     msgObj = {
       message: msgObj,
     }
+  }
+
+  // create error from provided window so our stack contains that window's frames.
+  if (args.window) {
+    const err = new args.window.Error(replaceErrMsgTokens(msgObj.message, args))
+
+    err.docsUrl = msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined
+
+    const newErr = cypressErr(err)
+
+    return newErr
   }
 
   return cypressErr({

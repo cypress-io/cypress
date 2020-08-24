@@ -131,6 +131,7 @@ const wrapAll = (runnable) => {
 }
 
 const condenseHooks = (runnable, getHookId) => {
+  runnable._compressedHooks = true
   const hooks = _.compact(_.concat(
     runnable._beforeAll,
     runnable._beforeEach,
@@ -674,6 +675,14 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
   })
 
   _runner.on('hook', (hook) => {
+    if (hook.hookId == null) {
+      hook.hookId = getHookId()
+    }
+
+    if (hook.hookName == null) {
+      hook.hookName = getHookName(hook)
+    }
+
     // mocha incorrectly sets currentTest on before/after all's.
     // if there is a nested suite with a before, then
     // currentTest will refer to the previous test run

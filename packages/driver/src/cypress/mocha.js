@@ -121,6 +121,12 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
     const _createHook = this._createHook
 
     this._createHook = function (title, fn) {
+      if (this._compressedHooks) {
+        const err = $errUtils.errByPath('mocha.hook_registered_late', { window: specWindow, hookTitle: fnName })
+
+        throw err
+      }
+
       const hook = _createHook.call(this, title, fn)
 
       if (!hook.invocationDetails) {
