@@ -175,6 +175,13 @@ describe('e2e plugins', function () {
         spec: 'node_builtins_spec.js',
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/8361
+    it('supports .mjs files', function () {
+      return e2e.exec(this, {
+        spec: 'mjs_spec.mjs',
+      })
+    })
   })
 
   describe('projectRoot and configFile', function () {
