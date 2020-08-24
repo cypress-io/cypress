@@ -248,7 +248,7 @@ const errByPath = (msgPath, args) => {
   }
 
   // create error from provided window so our stack contains that window's frames.
-  if (args.window) {
+  if (args && args.window) {
     const err = new args.window.Error(replaceErrMsgTokens(msgObj.message, args))
 
     err.docsUrl = msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined
