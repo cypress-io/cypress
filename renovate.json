@@ -16,5 +16,6 @@
   "labels": [
     "type: dependencies",
     "renovate"
-  ]
+  ],
+  "rangeStrategy": "bump"
 }

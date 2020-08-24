@@ -28,9 +28,9 @@
     }
   },
   "dependencies": {
-    "bluebird": "3.7.1",
-    "debug": "4.1.1",
-    "lodash": "4.17.20"
+    "bluebird": "^3.7.1",
+    "debug": "^4.1.1",
+    "lodash": "^4.17.20"
   },
   "devDependencies": {
     "@babel/core": "^7.0.1",
