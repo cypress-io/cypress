@@ -12,6 +12,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
 
           // @ts-ignore
           this.attachShadow({ mode: 'open' })
+          this.style.display = 'block'
         }
       })
 
@@ -25,7 +26,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
       }
 
       // ensure all tests run against a scrollable window
-      const scrollThisIntoView = $('<div style=`height: 1000px;` /><div>Should be in view</div>').appendTo(cy.$$('body'))
+      const scrollThisIntoView = $(`<div style='height: 1000px; width: 10px;' /><div>Should be in view</div>`).appendTo(cy.$$('body'))
 
       // scroll the 2nd element into view so that
       // there is always a scrollTop so we ensure
@@ -78,7 +79,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
   })
 
   describe('width and height', () => {
-    it('is visible if parent is shadow root and has overflow: hidden and no width', () => {
+    it('is hidden if parent is shadow root and has overflow: hidden and no width', () => {
       const $shadowRootNoWidth = add(
         `<shadow-root id="shadow-root-no-width" style='width: 0; height: 100px; overflow: hidden;'></shadow-root>`,
         `<div style='height: 500px; width: 500px;'>
@@ -87,8 +88,8 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         '#shadow-root-no-width',
       )
 
-      cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should('be.visible')
-      cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should('not.be.hidden')
+      cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should('be.hidden')
+      cy.wrap($shadowRootNoWidth).find('span', { includeShadowDom: true }).should('not.be.visible')
     })
 
     it('is hidden if parent outside of shadow dom has overflow: hidden and no width', () => {
@@ -106,7 +107,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
       cy.wrap($outsideParentNoWidth).find('span', { includeShadowDom: true }).should('not.be.visible')
     })
 
-    it('is visible if parent is shadow root and has overflow: hidden and no height', () => {
+    it('is hidden if parent is shadow root and has overflow: hidden and no height', () => {
       const $shadowRootNoHeight = add(
         `<shadow-root id="shadow-root-no-height" style='width: 100px; height: 0; overflow: hidden;'></shadow-root>`,
         `<div style='height: 500px; width: 500px;'>
@@ -115,8 +116,8 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
         '#shadow-root-no-height',
       )
 
-      cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should('be.visible')
-      cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should('not.be.hidden')
+      cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should('be.hidden')
+      cy.wrap($shadowRootNoHeight).find('span', { includeShadowDom: true }).should('not.be.visible')
     })
 
     it('is hidden if parent outside of shadow dom has overflow: hidden and no height', () => {
@@ -434,12 +435,14 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
 
     it('is hidden when parent absolutely positioned and overflow hidden and out of bounds', () => {
       const $elOutOfPosAbsParentBounds = add(
-        `<div style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
-          <div style='position: absolute;'>
-            <shadow-root id="el-out-of-pos-abs-parent-bounds"></shadow-root>
+        `<div id="ancestor-el" style='width: 100px; height: 100px; overflow: hidden; position: relative; top: 700px; left: 700px;'>
+          <div>
+            <div id="parent-el" style='position: absolute;'>
+              <shadow-root id="el-out-of-pos-abs-parent-bounds"></shadow-root>
+            </div>
           </div>
         </div>`,
-        `<span style='position: absolute; left: -350px; top: 0;'>out of bounds, position: absolute</span>`,
+        `<span id="el-under-test" style='position: absolute; left: -350px; top: 0;'>out of bounds, position: absolute</span>`,
         '#el-out-of-pos-abs-parent-bounds',
       )
 
@@ -588,7 +591,7 @@ describe('src/cypress/dom/visibility - shadow dom', () => {
 
     it('is visible when inside parent outside of shadow dom transform scale', () => {
       const $parentWithTransformScaleElInsideScale = add(
-        `<div style="transform: scale(0,0)">
+        `<div style="transform: scale(1,1)">
           <shadow-root id="parent-with-transform-scale-el-inside-scale"></shadow-root>
         </div>`,
         `<span>TRANSFORMERS</span>`,

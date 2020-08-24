@@ -188,7 +188,7 @@ const canClipContent = function ($el, $ancestor) {
   }
 
   // the closest parent with position relative, absolute, or fixed
-  const $offsetParent = $jquery.wrap($el.offsetParent()[0])
+  const $offsetParent = $el.offsetParent()
 
   // even if ancestors' overflow is clippable, if the element's offset parent
   // is a parent of the ancestor, the ancestor will not clip the element
@@ -232,7 +232,8 @@ const elDescendentsHavePositionFixedOrAbsolute = function ($parent, $child) {
   // create an array of all elements between $parent and $child
   // including child but excluding parent
   // and check if these have position fixed|absolute
-  const $els = $child.parentsUntil($parent).add($child)
+  const parents = $elements.getAllParents($child[0], $parent)
+  const $els = $jquery.wrap(parents).add($child)
 
   return _.some($els.get(), (el) => {
     return fixedOrAbsoluteRe.test($jquery.wrap(el).css('position'))
