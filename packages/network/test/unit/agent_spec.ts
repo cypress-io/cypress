@@ -74,6 +74,11 @@ describe('lib/agent', function () {
       context(testCase.name, function () {
         beforeEach(function () {
           if (testCase.proxyUrl) {
+            // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+            // @see https://github.com/cypress-io/cypress/pull/8295
+            process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+            process.env.npm_config_noproxy = 'just,some,nonsense'
+
             process.env.HTTP_PROXY = process.env.HTTPS_PROXY = testCase.proxyUrl
             process.env.NO_PROXY = ''
           }

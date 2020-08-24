@@ -1,26 +1,22 @@
 const resolve = require('resolve')
-const env = require('../util/env')
+const env = require('./env')
 const debug = require('debug')('cypress:server:plugins')
 
 module.exports = {
   /**
    * Resolves the path to 'typescript' module.
    *
-   * @param {Config} cypress config object
+   * @param {projectRoot} path to the project root
    * @returns {string|null} path if typescript exists, otherwise null
    */
-  typescript: (config) => {
-    if (env.get('CYPRESS_INTERNAL_NO_TYPESCRIPT') === '1') {
+  typescript: (projectRoot) => {
+    if (env.get('CYPRESS_INTERNAL_NO_TYPESCRIPT') === '1' || !projectRoot) {
       return null
     }
 
     try {
       const options = {
-        basedir: config.projectRoot,
-      }
-
-      if (!config.projectRoot) {
-        throw new Error('Config is missing projet root')
+        basedir: projectRoot,
       }
 
       debug('resolving typescript with options %o', options)
