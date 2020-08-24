@@ -237,11 +237,6 @@ function createCypress (defaultOptions = {}) {
             if (testsInOwnFile) return
 
             generateMochaTestsForWin(specWindow, mochaTestsOrFile)
-            specWindow.before = () => {}
-            specWindow.beforeEach = () => {}
-            specWindow.afterEach = () => {}
-            specWindow.after = () => {}
-            specWindow.describe = () => {}
           })
 
           cy.stub(autCypress, 'run').snapshot(enableStubSnapshots).log(false).callsFake(runIsolatedCypress)
