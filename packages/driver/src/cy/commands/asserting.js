@@ -85,26 +85,6 @@ module.exports = function (Commands, Cypress, cy, state) {
             throw err
           }
         } else {
-          const validLastLanguageChainers = [
-            'visible',
-            'hidden',
-            'selected',
-            'checked',
-            'enabled',
-            'disabled',
-            'focus',
-            'focused',
-            'true',
-            'false',
-          ]
-
-          // https://github.com/cypress-io/cypress/issues/883
-          if (!validLastLanguageChainers.find((chainer) => chainer === value) && !isCheckingExistence) {
-            err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
-            err.retry = false
-            throwAndLogErr(err)
-          }
-
           return memo[value]
         }
       } else {
@@ -126,6 +106,12 @@ module.exports = function (Commands, Cypress, cy, state) {
       const newExp = _.reduce(chainers, (memo, value) => {
         if (!(value in memo)) {
           err = $errUtils.cypressErrByPath('should.chainer_not_found', { args: { chainer: value } })
+          err.retry = false
+          throwAndLogErr(err)
+        }
+
+        if (chainers.length < 2 && !_.isFunction(memo[value]) && !isCheckingExistence) {
+          err = $errUtils.cypressErrByPath('should.language_chainer', { args: { chainer: value } })
           err.retry = false
           throwAndLogErr(err)
         }
