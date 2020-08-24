@@ -157,10 +157,10 @@ const create = (state, expect) => {
 
   const ensureVisibility = (subject, onFail) => {
     if (subject.length !== subject.filter(function () {
-      return !$dom.isHidden(this, 'isVisible()', true)
+      return !$dom.isHidden(this, 'isVisible()', { checkOpacity: false })
     }).length) {
       const cmd = state('current').get('name')
-      const reason = $dom.getReasonIsHidden(subject, true)
+      const reason = $dom.getReasonIsHidden(subject, { checkOpacity: false })
       const node = $dom.stringify(subject)
 
       return $errUtils.throwErrByPath('dom.not_visible', {
