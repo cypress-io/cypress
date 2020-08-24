@@ -1149,8 +1149,8 @@ const getFirstDeepestElement = ($el: JQuery, index = 0) => {
 
   // else once we find the first deepest element then return its priority
   // parent if it has one and it exists in the elements chain
-  const parents = getAllParents($current[0], priorityElement)
-  const $priorities = $el.filter(parents)
+  const $parents = $jquery.wrap(getAllParents($current[0])).filter(priorityElement)
+  const $priorities = $el.filter($parents)
 
   if ($priorities.length) {
     return $priorities.last()
