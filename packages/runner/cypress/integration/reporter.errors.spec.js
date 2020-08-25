@@ -1,89 +1,6 @@
 const helpers = require('../support/helpers')
 
-const _ = Cypress._
-const { runIsolatedCypress } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
-
-export const verifyFailure = (options) => {
-  const {
-    hasCodeFrame = true,
-    verifyOpenInIde = true,
-    column,
-    codeFrameText,
-    message,
-    stack,
-    file,
-    win,
-  } = options
-  let { regex, line } = options
-
-  regex = regex || new RegExp(`${file}:${line || '\\d+'}:${column}`)
-
-  const testOpenInIde = () => {
-    expect(win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include(file)
-  }
-
-  win.runnerWs.emit.withArgs('get:user:editor')
-  .yields({
-    preferredOpener: {
-      id: 'foo-editor',
-      name: 'Foo',
-      openerId: 'foo-editor',
-      isOther: false,
-    },
-  })
-
-  win.runnerWs.emit.withArgs('open:file')
-
-  cy.contains('View stack trace').click()
-
-  _.each([].concat(message), (msg) => {
-    cy.get('.runnable-err-message')
-    .should('include.text', msg)
-
-    cy.get('.runnable-err-stack-trace')
-    .should('not.include.text', msg)
-  })
-
-  cy.get('.runnable-err-stack-trace')
-  .invoke('text')
-  .should('match', regex)
-
-  if (stack) {
-    _.each([].concat(stack), (stackLine) => {
-      cy.get('.runnable-err-stack-trace')
-      .should('include.text', stackLine)
-    })
-  }
-
-  cy.get('.runnable-err-stack-trace')
-  .should('not.include.text', '__stackReplacementMarker')
-
-  if (verifyOpenInIde) {
-    cy.contains('.runnable-err-stack-trace .runnable-err-file-path a', file)
-    .click()
-    .should(() => {
-      testOpenInIde()
-    })
-  }
-
-  if (!hasCodeFrame) return
-
-  cy
-  .get('.test-err-code-frame .runnable-err-file-path')
-  .invoke('text')
-  .should('match', regex)
-
-  cy.get('.test-err-code-frame pre span').should('include.text', codeFrameText)
-
-  if (verifyOpenInIde) {
-    cy.contains('.test-err-code-frame .runnable-err-file-path a', file)
-    .click()
-    .should(() => {
-      expect(win.runnerWs.emit.withArgs('open:file')).to.be.calledTwice
-      testOpenInIde()
-    })
-  }
-}
+const { verify } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
 
 const verifyInternalFailure = (props) => {
   const { method } = props
@@ -99,38 +16,6 @@ const verifyInternalFailure = (props) => {
   cy.get('.test-err-code-frame')
   .should('not.exist')
 }
-
-// eslint-disable-next-line
-const createVerifyTest = (modifier) => (title, props) => {
-  const verifyFn = props.verifyFn || verifyFailure
-
-  ;(modifier ? it[modifier] : it)(title, () => {
-    return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
-      onBeforeRun ({ specWindow, win, autCypress }) {
-        specWindow.testToRun = title
-        specWindow.autWindow = win
-        specWindow.autCypress = autCypress
-
-        if (props.onBeforeRun) {
-          props.onBeforeRun({ specWindow, win })
-        }
-      },
-    })
-    .then(({ win }) => {
-      props.codeFrameText = props.codeFrameText || title
-      props.win = win
-
-      verifyFn(props)
-    })
-  })
-}
-
-const verify = {
-  it: createVerifyTest(),
-}
-
-verify.it['only'] = createVerifyTest('only')
-verify.it['skip'] = createVerifyTest('skip')
 
 describe('errors ui', () => {
   describe('assertion failures', () => {

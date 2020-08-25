@@ -32,8 +32,8 @@ const isCypressErr = (err = {}) => {
   return err.name === 'CypressError'
 }
 
-const mergeErrProps = (origErr, newProps) => {
-  return _.extend(origErr, { ...newProps, stack: newProps.stack, message: newProps.message })
+const mergeErrProps = (origErr, ...newProps) => {
+  return _.extend(origErr, ...newProps)
 }
 
 const stackWithReplacedProps = (err, props) => {
@@ -187,6 +187,16 @@ class CypressError extends Error {
       Error.captureStackTrace(this, CypressError)
     }
   }
+
+  setUserInvocationStack (specWindow) {
+    this.userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
+
+    return this
+  }
+}
+
+const getUserInvocationStack = (err) => {
+  return err.userInvocationStack
 }
 
 const internalErr = (err) => {
@@ -245,17 +255,6 @@ const errByPath = (msgPath, args) => {
     msgObj = {
       message: msgObj,
     }
-  }
-
-  // create error from provided window so our stack contains that window's frames.
-  if (args && args.window) {
-    const err = new args.window.Error(replaceErrMsgTokens(msgObj.message, args))
-
-    err.docsUrl = msgObj.docsUrl ? replaceErrMsgTokens(msgObj.docsUrl, args) : undefined
-
-    const newErr = cypressErr(err)
-
-    return newErr
   }
 
   return cypressErr({
@@ -349,4 +348,5 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
+  getUserInvocationStack,
 }

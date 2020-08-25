@@ -111,6 +111,14 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
   }
 }
 
+const captureUserInvocationStack = (Error, userInvocationStack) => {
+  userInvocationStack = userInvocationStack || (new Error('userInvocationStack')).stack
+
+  userInvocationStack = normalizedUserInvocationStack(userInvocationStack)
+
+  return userInvocationStack
+}
+
 const getCodeFrameStackLine = (err, stackIndex) => {
   // if a specific index is not specified, use the first line with a file in it
   if (stackIndex == null) return _.find(err.parsedStack, (line) => !!line.fileUrl)
@@ -308,4 +316,5 @@ module.exports = {
   stackWithoutMessage,
   stackWithReplacementMarkerLineRemoved,
   stackWithUserInvocationStackSpliced,
+  captureUserInvocationStack,
 }

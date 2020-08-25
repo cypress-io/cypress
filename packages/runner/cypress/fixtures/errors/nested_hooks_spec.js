@@ -1,22 +1,17 @@
 /// <reference types="cypress" />
 const log = function(){
   const r = cy.state('runnable')
- assert(true, `${r.type} - ${r.parent.title || 'root'}`)
+  assert(true, `${r.type} - ${r.parent.title || 'root'}`)
 }
-
-
 
 describe('nested_hooks', ()=>{
   describe('nested beforeEach', ()=>{
     before(() => {
-      // throw new Error('foooo')
       log()
-      beforeEach(()=>{
+      beforeEach(() => {
         log()
-    })
-  })
-      it('test', ()=>{
-        
       })
-})
+    })
+    it('test', log)
+  })
 })
