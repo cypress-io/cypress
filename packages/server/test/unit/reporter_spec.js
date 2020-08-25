@@ -32,7 +32,7 @@ describe('lib/reporter', () => {
                   sync: true,
                   err: {
                     message: 'foo',
-                    stack: [1, 2, 3],
+                    stack: 'at foo:1:1\nat bar:1:1\nat baz:1:1',
                   },
                 },
                 {

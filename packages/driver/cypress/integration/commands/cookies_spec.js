@@ -474,9 +474,7 @@ describe('src/cy/commands/cookies', () => {
       })
     })
 
-    it('can set cookies with sameSite', {
-      experimentalGetCookiesSameSite: true,
-    }, () => {
+    it('can set cookies with sameSite', () => {
       Cypress.automation.restore()
       Cypress.utils.addTwentyYears.restore()
 
@@ -1245,6 +1243,20 @@ describe('src/cy/commands/cookies', () => {
           expect(c['Cleared Cookies']).to.be.undefined
           expect(c['Note']).to.eq('No cookies were found or removed.')
         })
+      })
+    })
+  })
+
+  context('Cypress.cookies.defaults', () => {
+    it('throws error on use of renamed whitelist option', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`Cypress.Cookies.defaults` `whitelist` option has been renamed to `preserve`. Please rename `whitelist` to `preserve`.')
+
+        done()
+      })
+
+      Cypress.Cookies.defaults({
+        whitelist: 'session_id',
       })
     })
   })

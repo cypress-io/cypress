@@ -32,6 +32,10 @@ export default class Suite extends Runnable {
     return _.map(this.children, 'state')
   }
 
+  @computed get hasRetried (): boolean {
+    return _.some(this.children, (v) => v.hasRetried)
+  }
+
   @computed get _anyChildrenFailed () {
     return _.some(this._childStates, (state) => {
       return state === 'failed'

@@ -363,6 +363,10 @@ const getPath = function (data, ext, screenshotsFolder) {
     names[index] = `${names[index]} (failed)`
   }
 
+  if (data.testAttemptIndex > 0) {
+    names[index] = `${names[index]} (attempt ${data.testAttemptIndex + 1})`
+  }
+
   const withoutExt = path.join(screenshotsFolder, ...specNames, ...names)
 
   return ensureSafePath(withoutExt, ext)
@@ -507,7 +511,7 @@ module.exports = {
     const duration = new Date() - new Date(data.startTime)
 
     details = _.extend({}, data, details, { duration })
-    details = _.pick(details, 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
+    details = _.pick(details, 'testAttemptIndex', 'size', 'takenAt', 'dimensions', 'multipart', 'pixelRatio', 'name', 'specName', 'testFailure', 'path', 'scaled', 'blackout', 'duration')
 
     if (!plugins.has('after:screenshot')) {
       return Promise.resolve(details)

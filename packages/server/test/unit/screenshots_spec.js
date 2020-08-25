@@ -729,7 +729,7 @@ describe('lib/screenshots', () => {
       return sinon.stub(plugins, 'execute')
     })
 
-    it('resolves whitelisted details if no after:screenshot plugin registered', function () {
+    it('resolves allowed details if no after:screenshot plugin registered', function () {
       plugins.has.returns(false)
 
       return screenshots.afterScreenshot(this.data, this.details).then((result) => {

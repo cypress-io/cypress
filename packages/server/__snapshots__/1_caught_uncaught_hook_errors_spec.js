@@ -1,4 +1,4 @@
-exports['e2e caught and uncaught hooks errors failing1 1'] = `
+exports['e2e caught and uncaught hooks errors / failing1'] = `
 
 ====================================================================================================
 
@@ -110,7 +110,7 @@ Because this error occurred during a \`before all\` hook we are skipping the rem
 
 `
 
-exports['e2e caught and uncaught hooks errors failing2 1'] = `
+exports['e2e caught and uncaught hooks errors / failing2'] = `
 
 ====================================================================================================
 
@@ -203,7 +203,7 @@ Because this error occurred during a \`before each\` hook we are skipping the re
 
 `
 
-exports['e2e caught and uncaught hooks errors failing3 1'] = `
+exports['e2e caught and uncaught hooks errors / failing3'] = `
 
 ====================================================================================================
 
@@ -287,7 +287,7 @@ Because this error occurred during a \`before each\` hook we are skipping all of
 
 `
 
-exports['e2e caught and uncaught hooks errors failing4 1'] = `
+exports['e2e caught and uncaught hooks errors / failing4'] = `
 
 ====================================================================================================
 

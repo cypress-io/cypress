@@ -310,6 +310,14 @@ describe('src/cypress/dom/visibility', () => {
 <span style="position: fixed; top: 40px; background: red;">covering the element with pointer-events: none</span>\
 `)
 
+      this.$parentDisplayInlineChildDisplayBlock = add(`\
+<div>
+  <span>
+    <label style="display: block;">display: block</label>
+  </span>
+</div>\
+`)
+
       this.$elOutOfParentBoundsToLeft = add(`\
 <div style='width: 100px; height: 100px; overflow: hidden; position: relative;'>
   <span style='position: absolute; left: -400px; top: 0px;'>position: absolute, out of bounds left</span>
@@ -735,6 +743,14 @@ describe('src/cypress/dom/visibility', () => {
       it('is visible if pointer-events: none and parent has position: fixed', function () {
         expect(this.$childPointerEventsNone.find('span')).to.be.visible
         expect(this.$childPointerEventsNone.find('span')).to.not.be.hidden
+      })
+    })
+
+    describe('css display', function () {
+      // https://github.com/cypress-io/cypress/issues/6183
+      it('parent is visible if display inline and child has display block', function () {
+        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.be.visible
+        expect(this.$parentDisplayInlineChildDisplayBlock.find('span')).to.not.be.hidden
       })
     })
 

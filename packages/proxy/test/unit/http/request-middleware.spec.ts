@@ -8,7 +8,7 @@ describe('http/request-middleware', function () {
       'LogRequest',
       'RedirectToClientRouteIfUnloaded',
       'RedirectToClientRouteIfNotProxied',
-      'EndRequestsToBlacklistedHosts',
+      'EndRequestsToBlockedHosts',
       'MaybeEndRequestWithBufferedResponse',
       'StripUnsupportedAcceptEncoding',
       'MaybeSetBasicAuthHeaders',

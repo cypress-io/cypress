@@ -71,7 +71,7 @@ export const loadSystemProxySettings = () => {
   debug('found proxy environment variables %o', _.pick(process.env, [
     'NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY',
     'no_proxy', 'http_proxy', 'https_proxy',
-    'npm_config_proxy', 'npm_config_https_proxy',
+    'npm_config_proxy', 'npm_config_https_proxy', 'npm_config_noproxy',
   ]))
 
   ;['NO_PROXY', 'HTTP_PROXY', 'HTTPS_PROXY'].forEach(copyLowercaseEnvToUppercase)

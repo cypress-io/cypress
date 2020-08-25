@@ -2,6 +2,7 @@ const _ = require('lodash')
 const cp = require('child_process')
 const path = require('path')
 const debug = require('debug')('cypress:server:plugins')
+const resolve = require('resolve')
 const Promise = require('bluebird')
 const errors = require('../errors')
 const util = require('./util')
@@ -37,6 +38,17 @@ const registerHandler = (handler) => {
 
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
+
+  // test and warn for incompatible plugin
+  try {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+      basedir: options.projectRoot,
+    }))
+
+    options.onWarning(errors.get('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(options.projectRoot, retriesPluginPath)))
+  } catch (e) {
+    // noop, incompatible plugin not installed
+  }
 
   return new Promise((_resolve, _reject) => {
     // provide a safety net for fulfilling the promise because the

@@ -18,7 +18,7 @@
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
     "lodash": "4.17.19",
-    "proxy-from-env": "1.1.0"
+    "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
