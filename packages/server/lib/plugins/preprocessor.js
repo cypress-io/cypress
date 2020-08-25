@@ -7,7 +7,7 @@ const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
-const resolve = require('./resolve')
+const resolve = require('../util/resolve')
 
 const errorMessage = function (err = {}) {
   return (err.stack || err.annotated || err.message || err.toString())
@@ -46,8 +46,7 @@ const createPreprocessor = function (options) {
 const setDefaultPreprocessor = function (config) {
   debug('set default preprocessor')
 
-  const tsPath = resolve.typescript(config)
-
+  const tsPath = resolve.typescript(config.projectRoot)
   const options = {
     typescript: tsPath,
   }
