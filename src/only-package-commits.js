@@ -5,7 +5,7 @@ const path = require('path');
 const pLimit = require('p-limit');
 const debug = require('debug')('semantic-release:monorepo');
 const { getCommitFiles, getRoot } = require('./git-utils');
-const { getPackages } = require('./lerna-utils');
+const { getPackageInfo, getDependencyGraph } = require('./lerna-utils');
 const { mapCommits } = require('./options-transforms');
 
 const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
@@ -33,20 +33,29 @@ const getUsedLocalPrivatePackages = async () => {
     return [];
   }
 
-  const lernaPackages = await getPackages();
+  const lernaPackages = await getPackageInfo();
   const privatePackages = lernaPackages.filter(propEq('private', true));
+  const dependencyGraph = await getDependencyGraph();
 
-  // filter and transform dependencies
-  // to include only the paths to local private packages
-  return Promise.all(
-    Object.keys(dependencies)
-      .map(dep => {
-        const lernaDep = privatePackages.find(propEq('name', dep));
+  // build a list of private local packages
+  // including all children
+  const localPackages = [];
 
-        return lernaDep && normalizedPath(lernaDep.location);
-      })
-      .filter(identity)
-  );
+  const addLocalDependency = dep => {
+    const dependency = privatePackages.find(propEq('name', dep));
+
+    if (dependency && !localPackages.includes(dependency)) {
+      localPackages.push(dependency);
+
+      const dependencies = dependencyGraph[dep];
+      dependencies.forEach(addLocalDependency);
+    }
+  };
+
+  Object.keys(dependencies).forEach(addLocalDependency);
+
+  // return paths to packages relative to git root
+  return Promise.all(localPackages.map(dep => normalizedPath(dep.location)));
 };
 
 const withFiles = async commits => {

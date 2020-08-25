@@ -9,8 +9,16 @@ const lerna = async (args, options = {}) => {
  * @async
  * @return {Promise<Object>} Registered lerna packages
  */
-const getPackages = async () => JSON.parse(await lerna(['la', '--json']));
+const getPackageInfo = async () => JSON.parse(await lerna(['la', '--json']));
+
+/**
+ * @async
+ * @return {Promise<Object>} Registered lerna packages and their lerna dependencies
+ */
+const getDependencyGraph = async () =>
+  JSON.parse(await lerna(['la', '--graph']));
 
 module.exports = {
-  getPackages,
+  getPackageInfo,
+  getDependencyGraph,
 };
