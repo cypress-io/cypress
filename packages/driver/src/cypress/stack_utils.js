@@ -296,7 +296,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
   const winnowedStackLines = _.reject(stackLines, (line) => {
-    return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
+    return line.includes('cypress:///')
   }).join('\n')
 
   return normalizeStackIndentation(winnowedStackLines)
