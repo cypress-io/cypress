@@ -14,7 +14,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -25,7 +26,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -39,7 +41,25 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -57,7 +77,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"before all\" hook",
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -77,7 +99,40 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before all",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -107,7 +162,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -118,7 +176,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -146,7 +205,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -157,7 +217,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -170,7 +231,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -184,7 +247,25 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -202,7 +283,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"before each\" hook",
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -216,13 +299,46 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "before each",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "before each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -252,7 +368,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -263,7 +382,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -291,7 +411,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -302,7 +423,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -315,67 +437,25 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
     "mocha",
-    "pass",
+    "test:before:run",
     {
       "id": "r3",
       "order": 1,
       "title": "test 1",
-      "state": "passed",
       "body": "[body]",
       "type": "test",
-      "duration": "match.number",
       "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after each": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -389,7 +469,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -407,7 +489,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"after each\" hook",
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -421,13 +505,50 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "hookName": "after each",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after each": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -461,7 +582,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -472,7 +596,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -500,7 +625,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -511,7 +637,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -524,7 +651,25 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -547,7 +692,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -570,7 +718,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -594,7 +745,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -607,67 +761,25 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
     "mocha",
-    "pass",
+    "test:before:run",
     {
       "id": "r4",
       "order": 2,
       "title": "test 2",
-      "state": "passed",
       "body": "[body]",
       "type": "test",
-      "duration": "match.number",
       "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "test end",
-    {
-      "id": "r4",
-      "order": 2,
-      "title": "test 2",
-      "state": "passed",
-      "body": "[body]",
-      "type": "test",
-      "duration": "match.number",
-      "wallClockStartedAt": "match.date",
-      "timings": {
-        "lifecycle": "match.number",
-        "test": {
-          "fnDuration": "match.number",
-          "afterFnDuration": "match.number"
-        },
-        "after all": [
-          {
-            "hookId": "h1",
-            "fnDuration": "match.number",
-            "afterFnDuration": "match.number"
-          }
-        ]
-      },
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -681,7 +793,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -699,7 +813,9 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "duration": "match.number",
       "file": null,
       "originalTitle": "\"after all\" hook",
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     },
     {
       "message": "[error message]",
@@ -713,13 +829,50 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
   ],
   [
     "mocha",
+    "test end",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "hookName": "after all",
+      "err": "{Object 9}",
+      "state": "failed",
+      "failedFromHookId": "h1",
+      "body": "[body]",
+      "type": "test",
+      "duration": "match.number",
+      "wallClockStartedAt": "match.date",
+      "timings": {
+        "lifecycle": "match.number",
+        "test": {
+          "fnDuration": "match.number",
+          "afterFnDuration": "match.number"
+        },
+        "after all": [
+          {
+            "hookId": "h1",
+            "fnDuration": "match.number",
+            "afterFnDuration": "match.number"
+          }
+        ]
+      },
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
+    }
+  ],
+  [
+    "mocha",
     "suite end",
     {
       "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -753,7 +906,10 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -764,7 +920,8 @@ exports['src/cypress/runner tests finish with correct state hook failures fail i
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -792,7 +949,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -803,7 +961,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -817,7 +976,25 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -832,7 +1009,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -840,6 +1019,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
@@ -880,7 +1060,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -894,7 +1076,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -909,7 +1093,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -917,6 +1103,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "fail",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "err": "{Object 9}",
       "state": "failed",
@@ -960,7 +1147,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": 0
     },
     {
       "message": "[error message]",
@@ -974,9 +1163,76 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
   ],
   [
     "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
     "test end",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "err": "{Object 9}",
       "state": "failed",
@@ -1020,65 +1276,22 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
     "mocha",
-    "hook",
+    "suite end",
     {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
+      "id": "r4",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "retries": -1
     }
   ],
   [
@@ -1086,6 +1299,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
     "test:after:run",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "err": "{Object 9}",
       "state": "failed",
@@ -1130,18 +1344,10 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r4",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1152,7 +1358,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep fail with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1180,7 +1387,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1191,7 +1399,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1205,7 +1414,25 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1220,7 +1447,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1228,6 +1457,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
@@ -1268,7 +1498,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1282,7 +1514,9 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1297,7 +1531,75 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1305,6 +1607,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "pass",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1347,7 +1650,10 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1355,6 +1661,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test end",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1397,65 +1704,22 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
     "mocha",
-    "hook",
+    "suite end",
     {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
+      "id": "r4",
+      "title": "suite 1",
+      "root": false,
+      "type": "suite",
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "retries": -1
     }
   ],
   [
@@ -1463,6 +1727,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
     "test:after:run",
     {
       "id": "r5",
+      "order": 2,
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1506,18 +1771,10 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "suite end",
-    {
-      "id": "r4",
-      "title": "suite 1",
-      "root": false,
-      "type": "suite",
-      "file": null
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1528,7 +1785,8 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1542,78 +1800,7 @@ exports['src/cypress/runner tests finish with correct state mocha grep pass with
 
 exports['serialize state - hooks'] = {
   "currentId": "r6",
-  "tests": {
-    "r3": {
-      "id": "r3",
-      "order": 1,
-      "title": "test 1",
-      "state": "passed",
-      "body": "stub",
-      "type": "test",
-      "duration": 1,
-      "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-      "wallClockDuration": 1,
-      "timings": {
-        "lifecycle": 1,
-        "before all": [
-          {
-            "hookId": "h1",
-            "fnDuration": 1,
-            "afterFnDuration": 1
-          }
-        ],
-        "before each": [
-          {
-            "hookId": "h2",
-            "fnDuration": 1,
-            "afterFnDuration": 1
-          }
-        ],
-        "test": {
-          "fnDuration": 1,
-          "afterFnDuration": 1
-        },
-        "after each": [
-          {
-            "hookId": "h4",
-            "fnDuration": 1,
-            "afterFnDuration": 1
-          }
-        ],
-        "after all": [
-          {
-            "hookId": "h3",
-            "fnDuration": 1,
-            "afterFnDuration": 1
-          }
-        ]
-      },
-      "file": null,
-      "invocationDetails": "{Object 8}",
-      "hooks": []
-    },
-    "r5": {
-      "id": "r5",
-      "order": 2,
-      "title": "test 1",
-      "state": "passed",
-      "body": "stub",
-      "type": "test",
-      "duration": 1,
-      "wallClockStartedAt": "1970-01-01T00:00:00.000Z",
-      "wallClockDuration": 1,
-      "timings": {
-        "lifecycle": 1,
-        "test": {
-          "fnDuration": 1,
-          "afterFnDuration": 1
-        }
-      },
-      "file": null,
-      "invocationDetails": "{Object 8}",
-      "hooks": []
-    }
-  },
+  "tests": "{Object 2}",
   "startTime": "1970-01-01T00:00:00.000Z",
   "emissions": {
     "started": {
@@ -1645,6 +1832,7 @@ exports['src/cypress/runner other specs screenshots screenshot after failed test
         "test 1"
       ],
       "testId": "r3",
+      "testAttemptIndex": 0,
       "simple": true,
       "testFailure": true,
       "capture": "runner",
@@ -1681,7 +1869,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1692,7 +1881,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1705,7 +1895,25 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1728,7 +1936,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1751,7 +1962,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1762,7 +1976,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1786,7 +2001,10 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
         }
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1797,7 +2015,8 @@ exports['src/cypress/runner mocha events simple single test #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1825,7 +2044,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [
@@ -1836,7 +2056,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -1850,7 +2071,25 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r3",
+      "order": 1,
+      "title": "test 1",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1865,7 +2104,9 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1907,7 +2148,9 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -1921,7 +2164,9 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "body": "[body]",
       "type": "hook",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1936,7 +2181,42 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r3",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -1980,7 +2260,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2024,36 +2307,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r3",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2098,7 +2355,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2111,7 +2371,9 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2126,7 +2388,25 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r4",
+      "order": 2,
+      "title": "test 2",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2141,7 +2421,43 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r4",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2178,7 +2494,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2215,37 +2534,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r4",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2283,7 +2575,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2296,7 +2591,9 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "body": "[body]",
       "type": "test",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2311,7 +2608,25 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "test:before:run",
+    {
+      "id": "r5",
+      "order": 3,
+      "title": "test 3",
+      "body": "[body]",
+      "type": "test",
+      "wallClockStartedAt": "match.date",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2326,7 +2641,76 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "type": "hook",
       "duration": "match.number",
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after each\" hook",
+      "hookName": "after each",
+      "hookId": "h4",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
+    }
+  ],
+  [
+    "mocha",
+    "hook end",
+    {
+      "id": "r5",
+      "title": "\"after all\" hook",
+      "hookName": "after all",
+      "hookId": "h3",
+      "body": "[body]",
+      "type": "hook",
+      "duration": "match.number",
+      "file": null,
+      "invocationDetails": "{Object 8}",
+      "currentRetry": 0,
+      "retries": -1
     }
   ],
   [
@@ -2370,7 +2754,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2414,66 +2801,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after each\" hook",
-      "hookName": "after each",
-      "hookId": "h4",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "file": null,
-      "invocationDetails": "{Object 8}"
-    }
-  ],
-  [
-    "mocha",
-    "hook end",
-    {
-      "id": "r5",
-      "title": "\"after all\" hook",
-      "hookName": "after all",
-      "hookId": "h3",
-      "body": "[body]",
-      "type": "hook",
-      "duration": "match.number",
-      "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2484,7 +2815,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "title": "suite 1",
       "root": false,
       "type": "suite",
-      "file": null
+      "file": null,
+      "retries": -1
     }
   ],
   [
@@ -2529,7 +2861,10 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
         ]
       },
       "file": null,
-      "invocationDetails": "{Object 8}"
+      "invocationDetails": "{Object 8}",
+      "final": true,
+      "currentRetry": 0,
+      "retries": 0
     }
   ],
   [
@@ -2540,7 +2875,8 @@ exports['src/cypress/runner mocha events simple three tests #1'] = [
       "title": "",
       "root": true,
       "type": "suite",
-      "file": "relative/path/to/spec.js"
+      "file": "relative/path/to/spec.js",
+      "retries": -1
     }
   ],
   [

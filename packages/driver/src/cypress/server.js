@@ -65,7 +65,13 @@ const warnOnForce404Default = (obj) => {
   }
 }
 
-const whitelist = (xhr) => {
+const warnOnWhitelistRenamed = (obj, type) => {
+  if (obj.whitelist) {
+    return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type } })
+  }
+}
+
+const ignore = (xhr) => {
   const url = new URL(xhr.url)
 
   // https://github.com/cypress-io/cypress/issues/7280
@@ -74,7 +80,7 @@ const whitelist = (xhr) => {
   url.search = ''
   url.hash = ''
 
-  // whitelist if we're GET + looks like we're fetching regular resources
+  // allow if we're GET + looks like we're fetching regular resources
   return xhr.method === 'GET' && regularResourcesRe.test(url.href)
 }
 
@@ -95,7 +101,7 @@ const serverDefaults = {
   urlMatchingOptions: { matchBase: true },
   stripOrigin: _.identity,
   getUrlOptions: _.identity,
-  whitelist, // function whether to allow a request to go out (css/js/html/templates) etc
+  ignore, // function whether to allow a request to go out (css/js/html/templates) etc
   onOpen () {},
   onSend () {},
   onXhrAbort () {},
@@ -209,8 +215,8 @@ const create = (options = {}) => {
       return routes
     },
 
-    isWhitelisted (xhr) {
-      return options.whitelist(xhr)
+    isIgnored (xhr) {
+      return options.ignore(xhr)
     },
 
     shouldApplyStub (route) {
@@ -257,9 +263,9 @@ const create = (options = {}) => {
       // return the 404 stub if we dont have any stubs
       // but we are stubbed - meaning we havent added any routes
       // but have started the server
-      // and this request shouldnt be whitelisted
+      // and this request shouldnt be allowed
       if (!routes.length && hasEnabledStubs &&
-          options.force404 !== false && !server.isWhitelisted(xhr)) {
+        options.force404 !== false && !server.isIgnored(xhr)) {
         return get404Route()
       }
 
@@ -268,8 +274,8 @@ const create = (options = {}) => {
         return nope()
       }
 
-      // bail if this xhr matches our whitelist
-      if (server.isWhitelisted(xhr)) {
+      // bail if this xhr matches our ignore list
+      if (server.isIgnored(xhr)) {
         return nope()
       }
 
@@ -414,6 +420,7 @@ const create = (options = {}) => {
     set (obj) {
       warnOnStubDeprecation(obj, 'server')
       warnOnForce404Default(obj)
+      warnOnWhitelistRenamed(obj, 'server')
 
       // handle enable=true|false
       if (obj.enable != null) {
@@ -648,8 +655,8 @@ const create = (options = {}) => {
         proxy._setRequestBody(requestBody)
 
         // log this out now since it's being sent officially
-        // unless its been whitelisted
-        if (!server.isWhitelisted(this)) {
+        // unless its not been ignored
+        if (!server.isIgnored(this)) {
           options.onSend(proxy, sendStack, route)
         }
 

@@ -180,7 +180,7 @@
       "default": null,
       "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See User-Agent MDN Documentation for example user agent values here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
     },
-    "blacklistHosts": {
+    "blockHosts": {
       "type": [
         "string",
         "array"
@@ -189,7 +189,7 @@
         "type": "string"
       },
       "default": null,
-      "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
+      "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blockHosts"
     },
     "modifyObstructiveCode": {
       "type": "boolean",
@@ -229,11 +229,6 @@
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     },
-    "experimentalGetCookiesSameSite": {
-      "type": "boolean",
-      "default": false,
-      "description": "If `true`, Cypress will add `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0."
-    },
     "experimentalSourceRewriting": {
       "type": "boolean",
       "default": false,
@@ -248,6 +243,18 @@
       "type": "boolean",
       "default": false,
       "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
+    },
+    "retries": {
+      "type": [
+        "object",
+        "number",
+        "null"
+      ],
+      "default": {
+        "runMode": 0,
+        "openMode": 0
+      },
+      "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
     }
   }
 }

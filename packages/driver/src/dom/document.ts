@@ -4,13 +4,15 @@ const docNode = window.Node.DOCUMENT_NODE
 const docFragmentNode = window.Node.DOCUMENT_FRAGMENT_NODE
 
 //TODO: make this not allow jquery
-const isDocument = (obj: Node): obj is Document => {
+const isDocument = (obj: Node | JQuery): obj is Document => {
   try {
+    let node = obj as Node
+
     if ($jquery.isJquery(obj)) {
-      obj = obj[0]
+      node = obj[0]
     }
 
-    return obj?.nodeType === docNode || obj?.nodeType === docFragmentNode
+    return node?.nodeType === docNode || node?.nodeType === docFragmentNode
   } catch (error) {
     return false
   }

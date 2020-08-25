@@ -1,17 +1,13 @@
-// Copied an example from https://docs.cypress.io/api/plugins/browser-launch-api.html#Use-fake-video-for-webcam-testing
-
 /// <reference types="cypress" />
 
+import * as fn from './commonjs-export-function'
+
+// if esModuleInterop is forced to be true, this will error // with 'fn is
+// not a function'. instead, we allow the tsconfig.json to determine the value
+// of esModuleInterop
+fn()
+
+// Default Cypress plugin function
 export default (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
-  on('before:browser:launch', (browser, launchOptions) => {
-    if (browser.family === 'chromium' && browser.name !== 'electron') {
-      // Mac/Linux
-      //launchOptions.args.push('--use-file-for-fake-video-capture=cypress/fixtures/my-video.y4m')
 
-      // Windows
-      // launchOptions.args.push('--use-file-for-fake-video-capture=c:\\path\\to\\video\\my-video.y4m')
-    }
-
-    return launchOptions
-  })
 }

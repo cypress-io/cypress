@@ -19,18 +19,19 @@ const optInShadowTraversals = {
   },
 }
 
-const autoShadowTraversals = {
-  parents: (cy, $el, arg1) => {
-    const parents = $el.map((i, el) => {
-      return $elements.getAllParents(el)
-    })
+const sortedUnique = (cy, $el) => {
+  // we want _.uniq() to keep the elements with higher indexes instead of lower
+  // so we reverse, uniq, then reverse again
+  // so [div1, body, html, div2, body, html]
+  // becomes [div1, div2, body, html] and not [div1, body, html, div2]
+  return cy.$$(_($el).reverse().uniq().reverse().value())
+}
 
-    return cy.$$(parents)
-  },
-  closest: (cy, $el, arg1) => {
+const autoShadowTraversals = {
+  closest: (cy, $el, selector) => {
     const nodes = _.reduce($el, (nodes, el) => {
       const getClosest = (node) => {
-        const closestNode = node.closest(arg1)
+        const closestNode = node.closest(selector)
 
         if (closestNode) return nodes.concat(closestNode)
 
@@ -44,7 +45,44 @@ const autoShadowTraversals = {
       return getClosest(el)
     }, [])
 
-    return cy.$$(nodes)
+    return sortedUnique(cy, nodes)
+  },
+  parent: (cy, $el) => {
+    const parents = $el.map((i, el) => {
+      return $elements.getParentNode(el)
+    })
+
+    return sortedUnique(cy, parents)
+  },
+  parents: (cy, $el, selector) => {
+    let $parents = $el.map((i, el) => {
+      return $elements.getAllParents(el)
+    })
+
+    if ($el.length > 1) {
+      $parents = sortedUnique(cy, $parents)
+    }
+
+    if (!selector) {
+      return $parents
+    }
+
+    return $parents.filter(selector)
+  },
+  parentsUntil: (cy, $el, selector, filter) => {
+    let $parents = $el.map((i, el) => {
+      return $elements.getAllParents(el, selector)
+    })
+
+    if ($el.length > 1) {
+      $parents = sortedUnique(cy, $parents)
+    }
+
+    if (!filter) {
+      return $parents
+    }
+
+    return $parents.filter(filter)
   },
 }
 

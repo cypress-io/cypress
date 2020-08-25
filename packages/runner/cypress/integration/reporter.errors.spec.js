@@ -1,7 +1,7 @@
 const helpers = require('../support/helpers')
 
 const _ = Cypress._
-const { runIsolatedCypress } = helpers.createCypress()
+const { runIsolatedCypress } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
 
 export const verifyFailure = (options) => {
   const {

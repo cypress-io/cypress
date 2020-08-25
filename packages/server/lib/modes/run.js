@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
 const la = require('lazy-ass')
 const pkg = require('@packages/root')
@@ -30,6 +30,7 @@ const electronApp = require('../util/electron-app')
 const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
+const objUtils = require('../util/obj_utils')
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -916,7 +917,16 @@ module.exports = {
     browserOpts.automationMiddleware = {
       onAfterResponse: (message, data, resp) => {
         if (message === 'take:screenshot' && resp) {
-          screenshots.push(this.screenshotMetadata(data, resp))
+          const existingScreenshot = _.findIndex(screenshots, { path: resp.path })
+
+          if (existingScreenshot !== -1) {
+            // NOTE: saving screenshots to the same path will overwrite the previous one
+            // so we shouldn't report more screenshots than exist on disk.
+            // this happens when cy.screenshot is used in a retried test
+            screenshots.splice(existingScreenshot, 1, this.screenshotMetadata(data, resp))
+          } else {
+            screenshots.push(this.screenshotMetadata(data, resp))
+          }
         }
 
         return resp
@@ -1112,12 +1122,14 @@ module.exports = {
 
       const { tests, stats } = obj
 
+      const attempts = _.flatMap(tests, (test) => test.attempts)
+
       const hasFailingTests = _.get(stats, 'failures') > 0
 
       // if we have a video recording
       if (startedVideoCapture && tests && tests.length) {
         // always set the video timestamp on tests
-        obj.tests = Reporter.setVideoTimestamp(startedVideoCapture, tests)
+        Reporter.setVideoTimestamp(startedVideoCapture, attempts)
       }
 
       // we should upload the video if we upload on passes (by default)
@@ -1160,6 +1172,7 @@ module.exports = {
       screenshotId: random.id(),
       name: data.name || null,
       testId: data.testId,
+      testAttemptIndex: data.testAttemptIndex,
       takenAt: resp.takenAt,
       path: resp.path,
       height: resp.dimensions.height,
@@ -1248,7 +1261,41 @@ module.exports = {
 
       debug('final results of all runs: %o', results)
 
-      return writeOutput(outputPath, results).return(results)
+      const { each, remapKeys, remove, renameKey, setValue } = objUtils
+
+      // Remap module API result json to remove private props and rename props to make more user-friendly
+      const moduleAPIResults = remapKeys(results, {
+        runs: each((run) => ({
+          tests: each((test) => ({
+            attempts: each((attempt, i) => ({
+              timings: remove,
+              failedFromHookId: remove,
+              wallClockDuration: renameKey('duration'),
+              wallClockStartedAt: renameKey('startedAt'),
+              wallClockEndedAt: renameKey('endedAt'),
+              screenshots: setValue(
+                _(run.screenshots)
+                .filter({ testId: test.testId, testAttemptIndex: i })
+                .map((screenshot) => _.omit(screenshot,
+                  ['screenshotId', 'testId', 'testAttemptIndex']))
+                .value(),
+              ),
+            })),
+            testId: remove,
+          })),
+          hooks: each({
+            hookId: remove,
+          }),
+          stats: {
+            wallClockDuration: renameKey('duration'),
+            wallClockStartedAt: renameKey('startedAt'),
+            wallClockEndedAt: renameKey('endedAt'),
+          },
+          screenshots: remove,
+        })),
+      })
+
+      return writeOutput(outputPath, moduleAPIResults).return(results)
     })
   },
 

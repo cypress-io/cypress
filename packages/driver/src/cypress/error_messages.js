@@ -301,6 +301,11 @@ module.exports = {
           - \`cy.clearCookie()\`
           - \`cy.clearCookies()\``,
     },
+    whitelist_renamed (obj) {
+      return {
+        message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
+      }
+    },
   },
 
   dom: {
@@ -371,9 +376,9 @@ module.exports = {
     not_scrollable: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not scrollable:
-  
+
         \`{{node}}\`
-  
+
         Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
@@ -870,6 +875,33 @@ module.exports = {
         {{error}}`,
       docsUrl: 'https://on.cypress.io/returning-promise-and-invoking-done-callback',
     },
+    manually_set_retries_test: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    it('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`
+
+    https://on.cypress.io/test-retries
+    `,
+    manually_set_retries_suite: stripIndent`\
+    Mocha \`this.retries()\` syntax is not supported.
+
+    To configure retries use the following syntax:
+
+    \`\`\`
+    describe('{{title}}', { retries: {{numRetries}} }, () => {
+      ...
+    })
+    \`\`\`
+
+    https://on.cypress.io/test-retries
+    `,
+
   },
 
   navigation: {
@@ -1294,6 +1326,7 @@ module.exports = {
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
+    whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
   setCookie: {
@@ -1580,6 +1613,10 @@ module.exports = {
         msg += 'all of the remaining tests.'
       }
 
+      if ((obj.hookName === 'after all' || obj.hookName === 'before all') && obj.retries > 0) {
+        msg += `\n\nAlthough you have test retries enabled, we do not retry tests when \`before all\` or \`after all\` hooks fail`
+      }
+
       return msg
     },
     error (obj) {
@@ -1810,9 +1847,9 @@ module.exports = {
     timed_out: {
       message: stripIndent`
       ${cmd('wrap')} timed out waiting \`{{timeout}}ms\` to complete.
-      
+
       You called \`cy.wrap()\` with a promise that never resolved.
-      
+
       To increase the timeout, use \`{ timeout: number }\`
       `,
       docsUrl: 'https://on.cypress.io/wrap',

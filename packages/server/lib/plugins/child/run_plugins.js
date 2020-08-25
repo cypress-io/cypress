@@ -4,15 +4,13 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
-const tsnode = require('ts-node')
-const resolve = require('resolve')
 
 const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
-const tsNodeOptions = require('../../util/ts-node-options')
+const { registerTsNode } = require('../../util/ts-node')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -159,7 +157,7 @@ const execute = (ipc, event, ids, args = []) => {
 
 let tsRegistered = false
 
-module.exports = (ipc, pluginsFile, projectRoot) => {
+const runPlugins = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
   debug('project root:', projectRoot)
   if (!projectRoot) {
@@ -183,21 +181,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   })
 
   if (!tsRegistered) {
-    try {
-      const tsPath = resolve.sync('typescript', {
-        basedir: projectRoot,
-      })
-
-      const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
-
-      debug('typescript path: %s', tsPath)
-      debug('registering plugins TS with options %o', tsOptions)
-
-      tsnode.register(tsOptions)
-    } catch (e) {
-      debug(`typescript doesn't exist. ts-node setup failed.`)
-      debug('error message: %s', e.message)
-    }
+    registerTsNode(projectRoot, pluginsFile)
 
     // ensure typescript is only registered once
     tsRegistered = true
@@ -235,3 +219,10 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
     execute(ipc, event, ids, args)
   })
 }
+
+// for testing purposes
+runPlugins.__reset = () => {
+  tsRegistered = false
+}
+
+module.exports = runPlugins

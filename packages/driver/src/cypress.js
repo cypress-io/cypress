@@ -164,6 +164,19 @@ class $Cypress {
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
     this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this.config)
+    this.getTestRetries = function () {
+      const testRetries = this.config('retries')
+
+      if (_.isNumber(testRetries)) {
+        return testRetries
+      }
+
+      if (_.isObject(testRetries)) {
+        return testRetries[this.config('isInteractive') ? 'openMode' : 'runMode']
+      }
+
+      return null
+    }
 
     this.Cookies = $Cookies.create(config.namespace, d)
 
@@ -268,11 +281,6 @@ class $Cypress {
 
         break
 
-      case 'runner:set:runnable':
-        // when there is a hook / test (runnable) that
-        // is about to be invoked
-        return this.cy.setRunnable(...args)
-
       case 'runner:suite:start':
         // mocha runner started processing a suite
         if (this.config('isTextTerminal')) {
@@ -322,6 +330,8 @@ class $Cypress {
 
       case 'runner:pass':
         // mocha runner calculated a pass
+        // this is delayed from when mocha would normally fire it
+        // since we fire it after all afterEach hooks have ran
         if (this.config('isTextTerminal')) {
           return this.emit('mocha', 'pass', ...args)
         }
@@ -358,6 +368,16 @@ class $Cypress {
 
         break
       }
+      // retry event only fired in mocha version 6+
+      // https://github.com/mochajs/mocha/commit/2a76dd7589e4a1ed14dd2a33ab89f182e4c4a050
+      case 'runner:retry': {
+        // mocha runner calculated a pass
+        if (this.config('isTextTerminal')) {
+          this.emit('mocha', 'retry', ...args)
+        }
+
+        break
+      }
 
       case 'mocha:runnable:run':
         return this.runner.onRunnableRun(...args)
@@ -366,7 +386,14 @@ class $Cypress {
         // get back to a clean slate
         this.cy.reset(...args)
 
-        return this.emit('test:before:run', ...args)
+        if (this.config('isTextTerminal')) {
+          // needed for handling test retries
+          this.emit('mocha', 'test:before:run', args[0])
+        }
+
+        this.emit('test:before:run', ...args)
+
+        break
 
       case 'runner:test:before:run:async':
         // TODO: handle timeouts here? or in the runner?
