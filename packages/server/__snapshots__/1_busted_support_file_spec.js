@@ -29,6 +29,7 @@ Looked for and couldn't find the file at the following paths:
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
 [/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]

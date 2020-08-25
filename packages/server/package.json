@@ -27,7 +27,7 @@
     "@cypress/mocha-teamcity-reporter": "1.0.0",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@cypress/webpack-batteries-included-preprocessor": "2.0.1",
+    "@cypress/webpack-batteries-included-preprocessor": "2.1.1",
     "@cypress/webpack-preprocessor": "5.4.4",
     "@ffmpeg-installer/ffmpeg": "1.0.20",
     "ansi_up": "4.0.4",
