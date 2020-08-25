@@ -106,8 +106,14 @@ declare namespace Cypress {
     fromElWindow: WindowPosition & { x: number, y: number }
     fromAutWindow: WindowPosition & { x: number, y: number }
   }
-  
-  type CypressSpecType = "integration" | "component";
+
+  /**
+   * Spec type for the given test. "integration" is the default, but
+   * test run with the experimentalComponentTesting tests will be "component"
+   * 
+   * @see https://docs.cypress.io/guides/references/experiments.html#Component-Testing
+   */
+  type CypressSpecType = "integration" | "component"
 
   /**
    * Several libraries are bundled with Cypress by default.
@@ -213,6 +219,7 @@ declare namespace Cypress {
     //  name: "config_passing_spec.coffee",
     //  relative: "cypress/integration/config_passing_spec.coffee",
     //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+    //  specType: "integration"
     // }
     ```
      */
