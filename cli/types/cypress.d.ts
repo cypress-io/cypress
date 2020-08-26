@@ -109,9 +109,9 @@ declare namespace Cypress {
 
   /**
    * Spec type for the given test. "integration" is the default, but
-   * test run with the experimentalComponentTesting tests will be "component"
+   * tests run using experimentalComponentTesting will be "component"
    *
-   * @see https://docs.cypress.io/guides/references/experiments.html#Component-Testing
+   * @see https://on.cypress.io/experiments
    */
   type CypressSpecType = "integration" | "component"
 
