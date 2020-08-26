@@ -303,6 +303,7 @@ const localItFn = function (title, opts = {}) {
   const DEFAULT_OPTIONS = {
     only: false,
     skip: false,
+    retries: null,
     browser: [],
     snapshot: false,
     spec: 'no spec name supplied!',
@@ -340,6 +341,10 @@ const localItFn = function (title, opts = {}) {
       }
 
       const originalTitle = this.test.parent.titlePath().concat(title).join(' / ')
+
+      if (options.retries) {
+        this.test.retries(options.retries)
+      }
 
       const ctx = this
 

@@ -65,6 +65,7 @@ describe('e2e screenshots', () => {
     spec: 'screenshots_spec.js',
     expectedExitCode: 5,
     snapshot: true,
+    retries: 1,
     timeout: 180000,
     onStdout: e2e.normalizeWebpackErrors,
     onRun (exec, browser) {
