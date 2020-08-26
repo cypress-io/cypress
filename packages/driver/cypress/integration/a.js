@@ -12,7 +12,7 @@ describe('page', () => {
     const testString = 'Hello world'
 
     cy.get('[data-slate-editor="true"]')//.type('a')
-    .type('{enter}')
+    .type('{ctrl}{shift}{backspace}', { release: false })
     .type(testString)
 
     cy.contains('[data-slate-string="true"]', testString)
