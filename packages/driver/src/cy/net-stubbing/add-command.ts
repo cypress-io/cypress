@@ -91,26 +91,34 @@ function isNumberMatcher (obj): obj is NumberMatcher {
   return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
-function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): void {
-  if (_.isEmpty(routeMatcher)) {
-    throw new Error('The RouteMatcher does not contain any keys. You must pass something to match on.')
+function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
+  const err = (message) => {
+    return { isValid: false, message }
   }
 
-  getAllStringMatcherFields(routeMatcher).forEach((path) => {
+  if (_.isEmpty(routeMatcher)) {
+    return err('The RouteMatcher does not contain any keys. You must pass something to match on.')
+  }
+
+  const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
+
+  for (const path of stringMatcherFields) {
     const v = _.get(routeMatcher, path)
 
     if (_.has(routeMatcher, path) && !isStringMatcher(v)) {
-      throw new Error(`\`${path}\` must be a string or a regular expression.`)
+      return err(`\`${path}\` must be a string or a regular expression.`)
     }
-  })
+  }
 
   if (_.has(routeMatcher, 'https') && !_.isBoolean(routeMatcher.https)) {
-    throw new Error('`https` must be a boolean.')
+    return err('`https` must be a boolean.')
   }
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
-    throw new Error('`port` must be a number or a list of numbers.')
+    return err('`port` must be a number or a list of numbers.')
   }
+
+  return { isValid: true }
 }
 
 export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, state: Cypress.State) {
@@ -265,11 +273,10 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     const routeMatcherOptions = getMatcherOptions()
+    const { isValid, message } = validateRouteMatcherOptions(routeMatcherOptions)
 
-    try {
-      validateRouteMatcherOptions(routeMatcherOptions)
-    } catch (err) {
-      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { err, matcher: routeMatcherOptions } })
+    if (!isValid) {
+      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
     }
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)

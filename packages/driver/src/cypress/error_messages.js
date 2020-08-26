@@ -386,9 +386,9 @@ module.exports = {
     not_scrollable: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not scrollable:
-  
+
         \`{{node}}\`
-  
+
         Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
@@ -894,8 +894,8 @@ module.exports = {
     it('{{title}}', { retries: {{numRetries}} }, () => {
       ...
     })
-    \`\`\`  
-    
+    \`\`\`
+
     https://on.cypress.io/test-retries
     `,
     manually_set_retries_suite: stripIndent`\
@@ -907,8 +907,8 @@ module.exports = {
     describe('{{title}}', { retries: {{numRetries}} }, () => {
       ...
     })
-    \`\`\`  
-    
+    \`\`\`
+
     https://on.cypress.io/test-retries
     `,
 
@@ -972,9 +972,9 @@ module.exports = {
 
           You passed: ${format(staticResponse)}`
       },
-      invalid_route_matcher: ({ err, matcher }) => {
+      invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
-          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${err.message}
+          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${message}
 
           You passed: ${format(matcher)}`
       },
