@@ -27,25 +27,24 @@ import $errUtils from '../../cypress/error_utils'
  * DICT_STRING_MATCHER_FIELDS objects
  */
 function getAllStringMatcherFields (options: RouteMatcherOptions): string[] {
-  return STRING_MATCHER_FIELDS
-  .concat(
-    // add the nested DictStringMatcher values to the list of fields to annotate
-    _.flatten(
-      _.filter(
-        DICT_STRING_MATCHER_FIELDS.map((field) => {
-          const value = options[field]
+  // add the nested DictStringMatcher values to the list of fields to annotate
+  return _.chain(DICT_STRING_MATCHER_FIELDS)
+  .map((field): string[] | string => {
+    const value = options[field]
 
-          if (value) {
-            return _.keys(value).map((key) => {
-              return `${field}.${key}`
-            })
-          }
+    if (value) {
+      // if this DICT_STRING_MATCHER is set, return a list of the prop paths
+      return _.keys(value).map((key) => {
+        return `${field}.${key}`
+      })
+    }
 
-          return ''
-        }),
-      ),
-    ),
-  )
+    return ''
+  })
+  .compact()
+  .flatten()
+  .concat(STRING_MATCHER_FIELDS)
+  .value()
 }
 
 /**
