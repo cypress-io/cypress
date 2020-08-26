@@ -13,7 +13,7 @@ import {
   getBackendStaticResponse,
   parseStaticResponseShorthand,
 } from '../static-response-utils'
-import $errUtils from '@packages/driver/src/cypress/error_utils'
+import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn } from './'
 import Bluebird from 'bluebird'
 
