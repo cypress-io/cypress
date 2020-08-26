@@ -1361,6 +1361,10 @@ module.exports = {
 
   should: {
     chainer_not_found: 'The chainer `{{chainer}}` was not found. Could not build assertion.',
+    language_chainer: {
+      message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
+      docsUrl: 'https://on.cypress.io/assertions',
+    },
     eventually_deprecated: 'The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.',
   },
 
