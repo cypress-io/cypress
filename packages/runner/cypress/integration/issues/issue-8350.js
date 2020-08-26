@@ -1,13 +1,11 @@
 const { createCypress } = require('../../support/helpers')
 const { verify } = createCypress()
 
+// https://github.com/cypress-io/cypress/issues/8214
+// https://github.com/cypress-io/cypress/issues/8288
 // https://github.com/cypress-io/cypress/issues/8350
 describe('issue-8350', { viewportHeight: 900 }, () => {
   const file = 'nested_hooks_spec.js'
-
-  // createVerifyTest(file)
-  // cy.contains('Cypress detected you registered a beforeEach')
-  // TODO: add assertion for codeFrame
 
   verify.it('test', {
     file,
