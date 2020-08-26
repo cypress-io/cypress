@@ -490,7 +490,7 @@ function _getEndIndex (str, substr) {
 const simulatedDefaultKeyMap: { [key: string]: SimulatedDefault } = {
   Enter: (el, key, options) => {
     // if input element, Enter key does not insert text
-    if (!$elements.isInput(el)) {
+    if (!options.noUpdate && !$elements.isInput(el)) {
       $selection.replaceSelectionContents(el, '\n')
     }
 
@@ -594,6 +594,7 @@ export interface typeOptions {
   release?: boolean
   _log?: any
   delay?: number
+  noUpdate?: boolean
   onError?: Function
   onEvent?: Function
   onBeforeEvent?: Function
@@ -1155,10 +1156,12 @@ export class Keyboard {
         return
       }
 
-      // noop if not in a text-editable
-      const ret = $selection.replaceSelectionContents(el, key.text)
+      if (!options.noUpdate) {
+        // noop if not in a text-editable
+        const ret = $selection.replaceSelectionContents(el, key.text)
 
-      debug('replaceSelectionContents:', key.text, ret)
+        debug('replaceSelectionContents:', key.text, ret)
+      }
     }
   }
 

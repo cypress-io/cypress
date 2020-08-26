@@ -27,6 +27,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       delay: 10,
       release: true,
       parseSpecialCharSequences: true,
+      noUpdate: false,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
     })
@@ -248,6 +249,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         parseSpecialCharSequences: options.parseSpecialCharSequences,
         window: win,
         force: options.force,
+        noUpdate: options.noUpdate,
         onFail: options._log,
 
         updateValue (el, key, charsToType) {

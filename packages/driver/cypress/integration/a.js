@@ -11,9 +11,9 @@ describe('page', () => {
 
     const testString = 'Hello world'
 
-    cy.get('[data-slate-editor="true"]')//.type('a')
-    .type('{ctrl}{shift}{backspace}', { release: false })
-    .type(testString)
+    cy.get('[data-slate-editor="true"]')
+    .type('{ctrl}{shift}{backspace}', { release: false, noUpdate: true })
+    .type(testString, { noUpdate: true })
 
     cy.contains('[data-slate-string="true"]', testString)
     .should('be.visible')

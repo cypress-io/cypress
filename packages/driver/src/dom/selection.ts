@@ -77,7 +77,7 @@ const _replaceSelectionContentsContentEditable = function (el, text) {
     nativeUI = false
   }
 
-  // $elements.callNativeMethod(doc, 'execCommand', 'insertText', nativeUI, text)
+  $elements.callNativeMethod(doc, 'execCommand', 'insertText', nativeUI, text)
 }
 
 // Keeping around native implementation
