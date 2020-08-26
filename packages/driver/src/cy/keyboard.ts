@@ -101,6 +101,7 @@ export type KeyEventType =
   | 'keypress'
   | 'input'
   | 'textInput'
+  | 'beforeinput'
 
 const toModifiersEventOptions = (modifiers: KeyboardModifiers) => {
   return {
@@ -801,6 +802,7 @@ export class Keyboard {
     let eventConstructor = 'KeyboardEvent'
     let cancelable = true
     let addModifiers = true
+    let inputType = ''
 
     switch (eventType) {
       case 'keydown':
@@ -832,6 +834,14 @@ export class Keyboard {
         data = text
         break
 
+      case 'beforeinput':
+        eventConstructor = 'InputEvent'
+        addModifiers = false
+        data = text
+        location = undefined
+        cancelable = false
+        inputType = 'insertText'
+        break
       case 'input':
         eventConstructor = 'InputEvent'
         addModifiers = false
@@ -875,6 +885,7 @@ export class Keyboard {
           data,
           detail: 0,
           view: win,
+          inputType,
         },
         _.isUndefined,
       ),
@@ -902,8 +913,8 @@ export class Keyboard {
     } else {
       // For some reason we can't set certain props on Keyboard Events in chrome < 63.
       // So we'll use the plain Event constructor
-      // event = new win[eventConstructor](eventType, eventOptions)
-      event = new win['Event'](eventType, eventOptions)
+      event = new win[eventConstructor](eventType, eventOptions)
+      // event = new win['Event'](eventType, eventOptions)
       _.extend(event, eventOptions)
     }
 
@@ -1018,11 +1029,23 @@ export class Keyboard {
         this.fireSimulatedEvent(elToType, 'keypress', key, options)
       ) {
         if (
-          shouldIgnoreEvent('textInput', key.events) ||
-          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+          shouldIgnoreEvent('beforeinput', key.events) ||
+          this.fireSimulatedEvent(elToType, 'beforeinput', key, options)
         ) {
-          return this.performSimulatedDefault(elToType, key, options)
+          if (
+            shouldIgnoreEvent('textInput', key.events) ||
+          this.fireSimulatedEvent(elToType, 'textInput', key, options)
+          ) {
+            return this.performSimulatedDefault(elToType, key, options)
+          }
         }
+
+        // if (
+        //   shouldIgnoreEvent('textInput', key.events) ||
+        // this.fireSimulatedEvent(elToType, 'textInput', key, options)
+        // ) {
+        //   return this.performSimulatedDefault(elToType, key, options)
+        // }
       }
     }
   }
