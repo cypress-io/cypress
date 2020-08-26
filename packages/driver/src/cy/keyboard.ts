@@ -1090,13 +1090,6 @@ export class Keyboard {
             return this.performSimulatedDefault(elToType, key, options)
           }
         }
-
-        // if (
-        //   shouldIgnoreEvent('textInput', key.events) ||
-        // this.fireSimulatedEvent(elToType, 'textInput', key, options)
-        // ) {
-        //   return this.performSimulatedDefault(elToType, key, options)
-        // }
       }
     }
   }
