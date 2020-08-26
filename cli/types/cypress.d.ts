@@ -2583,7 +2583,7 @@ declare namespace Cypress {
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
-    // retries?: number
+    retries?: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
