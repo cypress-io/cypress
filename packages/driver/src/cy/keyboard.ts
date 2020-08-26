@@ -840,7 +840,7 @@ export class Keyboard {
         data = text
         location = undefined
         cancelable = false
-        inputType = 'insertText'
+        inputType = this.getInputType(keyDetails.code)
         break
       case 'input':
         eventConstructor = 'InputEvent'
@@ -926,6 +926,56 @@ export class Keyboard {
     options.onEvent(options.id, formattedKeyString, event, dispatched)
 
     return dispatched
+  }
+
+  getInputType (code) {
+    const { shift, ctrl } = this.getActiveModifiers()
+
+    if (shift && ctrl && code === 'Delete') {
+      return 'deleteHardLineForward'
+    }
+
+    if (ctrl && code === 'Delete') {
+      return 'deleteWordForward'
+    }
+
+    if (code === 'Delete') {
+      return 'deleteContentForward'
+    }
+
+    if (shift && ctrl && code === 'Backspace') {
+      return 'deleteHardLineBackward'
+    }
+
+    if (ctrl && code === 'Backspace') {
+      return 'deleteWordBackward'
+    }
+
+    if (code === 'Backspace') {
+      return 'deleteContentBackward'
+    }
+
+    if (code === 'Enter') {
+      return 'insertLineBreak'
+    }
+
+    if (ctrl && code === 'KeyV') {
+      return 'insertFromPaste'
+    }
+
+    if (ctrl && code === 'KeyX') {
+      return 'deleteByCut'
+    }
+
+    if (ctrl && code === 'KeyZ') {
+      return 'historyUndo'
+    }
+
+    if (ctrl && code === 'KeyY') {
+      return 'historyRedo'
+    }
+
+    return 'insertText'
   }
 
   getActiveModifiers () {
