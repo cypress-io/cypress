@@ -1759,7 +1759,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction warnings create run warnings grace period - over tests limit warns when over test recordings 1'] = `
 You've exceeded the limit of test recordings under your free plan this month. The limit is 500 test recordings.
 
-Your plan is now in a grace period, which means you will have a full benefits of a paid plan until 2999-12-31. 
+Your plan is now in a grace period, which means you will have the full benefits of your current plan until 2999-12-31. 
 
 Please visit your billing to upgrade your plan.
 
@@ -1921,7 +1921,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction warnings create run warnings paid plan - over private tests limit warns when over private test recordings 1'] = `
 You've exceeded the limit of test recordings under your current billing plan this month. The limit is 500 private test recordings.
 
-Please visit your billing to upgrade your plan.
+To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
@@ -2001,7 +2001,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction warnings create run warnings paid plan - over tests limit warns when over test recordings 1'] = `
 You've exceeded the limit of test recordings under your current billing plan this month. The limit is 500 test recordings.
 
-Please visit your billing to upgrade your plan.
+To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 
@@ -2430,7 +2430,7 @@ exports['e2e record passing passes 2'] = [
 exports['e2e record api interaction warnings create run warnings free plan - over tests limit v2 warns when over test recordings 1'] = `
 You've exceeded the limit of test recordings under your free billing plan this month. The limit is 500 test recordings.
 
-Please visit your billing to upgrade your plan.
+To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
 https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 

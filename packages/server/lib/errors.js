@@ -756,7 +756,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
-        Your plan is now in a grace period, which means you will have a full benefits of a paid plan until ${arg1.gracePeriodMessage}. 
+        Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}. 
         
         Please visit your billing to upgrade your plan.
 
@@ -765,14 +765,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         You've exceeded the limit of test recordings under your ${arg1.planType} billing plan this month. ${arg1.usedTestsMessage}
 
-        Please visit your billing to upgrade your plan.
-
-        ${arg1.link}`
-    case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
-      return stripIndent`\
-        You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
-
-        Please visit your billing to upgrade your plan.
+        To continue getting the full benefits of your current plan, please visit your billing to upgrade.
 
         ${arg1.link}`
     case 'FREE_PLAN_IN_GRACE_PERIOD_PARALLEL_FEATURE':
