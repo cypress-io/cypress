@@ -953,6 +953,12 @@ module.exports = {
   },
 
   net_stubbing: {
+    invalid_static_response: ({ cmd, message, staticResponse }) => {
+      return stripIndent`\
+        An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
+
+        You passed: ${format(staticResponse)}`
+    },
     route2: {
       needs_experimental: stripIndent`\
         ${cmd('route2')} requires experimental network mocking to be enabled.
@@ -965,12 +971,6 @@ module.exports = {
           ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
           You passed: ${format(handler)}`
-      },
-      invalid_static_response: ({ err, staticResponse }) => {
-        return stripIndent`\
-          An invalid StaticResponse was supplied to ${cmd('route2')}. ${err.message}
-
-          You passed: ${format(staticResponse)}`
       },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\

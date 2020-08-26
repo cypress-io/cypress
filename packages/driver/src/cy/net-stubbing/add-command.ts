@@ -207,11 +207,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
           }
         }
 
-        try {
-          validateStaticResponse(<StaticResponse>handler)
-        } catch (err) {
-          return $errUtils.throwErrByPath('net_stubbing.route2.invalid_static_response', { args: { err, staticResponse: handler } })
-        }
+        validateStaticResponse('cy.route2', <StaticResponse>handler)
 
         staticResponse = handler as StaticResponse
         break

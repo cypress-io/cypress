@@ -135,7 +135,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
       if (!_.isUndefined(responseHandler)) {
         // `replyHandler` is a StaticResponse
-        validateStaticResponse(responseHandler)
+        validateStaticResponse('req.reply', responseHandler)
+
         continueFrame.staticResponse = getBackendStaticResponse(responseHandler as StaticResponse)
       }
 

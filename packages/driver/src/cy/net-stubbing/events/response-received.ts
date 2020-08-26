@@ -65,7 +65,8 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
       }
 
       if (staticResponse) {
-        validateStaticResponse(staticResponse)
+        validateStaticResponse('res.send', staticResponse)
+
         continueFrame.staticResponse = getBackendStaticResponse(
           // arguments to res.send() are merged with the existing response
           _.defaultsDeep({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS)),
