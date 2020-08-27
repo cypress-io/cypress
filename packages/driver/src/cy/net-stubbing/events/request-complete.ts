@@ -1,3 +1,4 @@
+import { get } from 'lodash'
 import { NetEventFrames } from '@packages/net-stubbing/lib/types'
 import { errByPath, makeErrFromObj } from '../../../cypress/error_utils'
 import { HandlerFn } from './'
@@ -16,7 +17,7 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
     const err = errByPath(`net_stubbing.request_error.${errorName}`, {
       innerErr: makeErrFromObj(frame.error),
       req: request.request,
-      route: getRoute(frame.routeHandlerId),
+      route: get(getRoute(frame.routeHandlerId), 'options'),
     })
 
     request.state = 'Errored'

@@ -1296,7 +1296,7 @@ describe('network stubbing', function () {
       it('fails test if network error occurs retrieving response and response is intercepted', function (done) {
         cy.on('fail', (err) => {
           expect(err.message)
-          .to.contain('req.reply() was provided a callback to intercept the upstream response, but a network error occurred while making the request:')
+          .to.contain('\`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:')
           .and.contain('Error: connect ECONNREFUSED 127.0.0.1:3333')
 
           done()

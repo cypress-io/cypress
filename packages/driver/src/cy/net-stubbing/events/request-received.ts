@@ -107,11 +107,11 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     ...req,
     reply (responseHandler, maybeBody?, maybeHeaders?) {
       if (resolved) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved', { args: { route: route.options, req } })
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.reply_called_after_resolved')
       }
 
       if (replyCalled) {
-        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_reply_calls', { args: { route: route.options, req } })
+        return $errUtils.throwErrByPath('net_stubbing.request_handling.multiple_reply_calls')
       }
 
       replyCalled = true

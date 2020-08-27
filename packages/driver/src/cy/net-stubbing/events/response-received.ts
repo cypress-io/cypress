@@ -124,13 +124,13 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
       },
     })
   })
-  .finally(() => {
-    resolved = true
-  })
   .then(() => {
     if (!sendCalled) {
       // user did not call send, send response
       userRes.send()
     }
+  })
+  .finally(() => {
+    resolved = true
   })
 }
