@@ -3806,6 +3806,11 @@ describe('shadow dom', () => {
     .rightclick()
   })
 
+  it('focuses the correct ancestor when it is outside shadow dom', () => {
+    cy.get('.inside-focusable', { includeShadowDom: true }).click()
+    cy.get('.focusable').should('be.focused')
+  })
+
   // https://github.com/cypress-io/cypress/issues/7679
   it('does not hang when experimentalShadowDomSupport is false and clicking on custom element', () => {
     Cypress.config('experimentalShadowDomSupport', false)

@@ -145,7 +145,6 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   if (options.show === false) {
     options.frame = false
-    options.webPreferences.offscreen = true
   }
 
   options.webPreferences.webSecurity = !!options.chromeWebSecurity

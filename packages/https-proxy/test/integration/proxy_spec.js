@@ -229,8 +229,13 @@ describe('Proxy', () => {
 
   context('with an upstream proxy', () => {
     beforeEach(function () {
+      // PROXY vars should override npm_config vars, so set them to cause failures if they are used
+      // @see https://github.com/cypress-io/cypress/pull/8295
+      process.env.npm_config_proxy = process.env.npm_config_https_proxy = 'http://erroneously-used-npm-proxy.invalid'
+      process.env.npm_config_noproxy = 'just,some,nonsense'
+
       process.env.NO_PROXY = ''
-      process.env.HTTP_PROXY = (process.env.HTTPS_PROXY = 'http://localhost:9001')
+      process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://localhost:9001'
 
       this.upstream = new DebugProxy({
         keepRequests: true,

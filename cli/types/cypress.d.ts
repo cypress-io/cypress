@@ -109,6 +109,14 @@ declare namespace Cypress {
   }
 
   /**
+   * Spec type for the given test. "integration" is the default, but
+   * tests run using experimentalComponentTesting will be "component"
+   *
+   * @see https://on.cypress.io/experiments
+   */
+  type CypressSpecType = "integration" | "component"
+
+  /**
    * Window type for Application Under Test(AUT)
    */
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
@@ -222,6 +230,7 @@ declare namespace Cypress {
     //  name: "config_passing_spec.coffee",
     //  relative: "cypress/integration/config_passing_spec.coffee",
     //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+    //  specType: "integration"
     // }
     ```
      */
@@ -230,6 +239,7 @@ declare namespace Cypress {
       relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
       absolute: string
       specFilter?: string // optional spec filter used by the user
+      specType?: CypressSpecType
     }
 
     /**
@@ -2417,7 +2427,12 @@ declare namespace Cypress {
      */
     reporter: string
     /**
-     * Whether to take a screenshot on test failure when running headlessly or in CI
+     * Some reporters accept [reporterOptions](https://on.cypress.io/reporters) that customize their behavior
+     * @default "spec"
+     */
+    reporterOptions: { [key: string]: any }
+    /**
+     * Whether Cypress will watch and restart tests on test file changes
      * @default true
      */
     watchForFileChanges: boolean
@@ -2584,8 +2599,7 @@ declare namespace Cypress {
     retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout'>> {
-    // retries?: number
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
@@ -5307,39 +5321,39 @@ declare namespace Cypress {
 declare namespace Mocha {
   interface TestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
@@ -5347,7 +5361,7 @@ declare namespace Mocha {
 
   interface SuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites.
      */
     (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
@@ -5355,7 +5369,7 @@ declare namespace Mocha {
 
   interface ExclusiveSuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
     (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite

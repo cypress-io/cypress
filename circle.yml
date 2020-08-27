@@ -10,6 +10,7 @@ macBuildFilters: &macBuildFilters
         - develop
         - v5.0-release
         - install-node-on-circleci-mac
+        - stop-before-code-sign
 
 defaults: &defaults
   parallelism: 1

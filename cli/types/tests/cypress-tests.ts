@@ -538,6 +538,22 @@ namespace CypressTestConfigOverridesTests {
     browser: {foo: 'bar'} // $ExpectError
   }, () => {})
 
+  it('test', {
+    retries: null
+  }, () => { })
+  it('test', {
+    retries: 3
+  }, () => { })
+  it('test', {
+    retries: {
+      runMode: 3,
+      openMode: null
+    }
+  }, () => { })
+  it('test', {
+    retries: { run: 3 } // $ExpectError
+  }, () => { })
+
   it.skip('test', {}, () => {})
   it.only('test', {}, () => {})
   xit('test', {}, () => {})

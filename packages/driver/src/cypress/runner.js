@@ -1010,12 +1010,15 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
 
   const maybeHandleRetry = (runnable, err) => {
+    if (!err) return
+
     const r = runnable
     const isHook = r.type === 'hook'
     const isTest = r.type === 'test'
     const test = getTest() || getTestFromHook(runnable, getTestById)
-    const isBeforeEachHook = isHook && !!r.hookName.match(/before each/)
-    const isAfterEachHook = isHook && !!r.hookName.match(/after each/)
+    const hookName = isHook && getHookName(r)
+    const isBeforeEachHook = isHook && !!hookName.match(/before each/)
+    const isAfterEachHook = isHook && !!hookName.match(/after each/)
     const retryAbleRunnable = isTest || isBeforeEachHook || isAfterEachHook
     const willRetry = (test._currentRetry < test._retries) && retryAbleRunnable
 
@@ -1196,8 +1199,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       const isHook = runnable.type === 'hook'
 
-      const isAfterEachHook = isHook && runnable.hookName.match(/after each/)
-      const isBeforeEachHook = isHook && runnable.hookName.match(/before each/)
+      const isAfterEachHook = isHook && hookName.match(/after each/)
+      const isBeforeEachHook = isHook && hookName.match(/before each/)
 
       // if we've been told to skip hooks at a certain nested level
       // this happens if we're handling a runnable that is going to retry due to failing in a hook

@@ -157,7 +157,7 @@ const execute = (ipc, event, ids, args = []) => {
 
 let tsRegistered = false
 
-module.exports = (ipc, pluginsFile, projectRoot) => {
+const runPlugins = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
   debug('project root:', projectRoot)
   if (!projectRoot) {
@@ -181,7 +181,7 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
   })
 
   if (!tsRegistered) {
-    registerTsNode(projectRoot)
+    registerTsNode(projectRoot, pluginsFile)
 
     // ensure typescript is only registered once
     tsRegistered = true
@@ -219,3 +219,10 @@ module.exports = (ipc, pluginsFile, projectRoot) => {
     execute(ipc, event, ids, args)
   })
 }
+
+// for testing purposes
+runPlugins.__reset = () => {
+  tsRegistered = false
+}
+
+module.exports = runPlugins

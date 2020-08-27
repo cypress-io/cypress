@@ -525,14 +525,15 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_failing_hook_spec.coffee)                                          │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee                                │
+  │ Specs:      2 found (simple_failing_hook_spec.coffee, simple_retrying_spec.js)                 │
+  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee, cypress/integration/simple_re │
+  │             trying_spec.js                                                                     │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_failing_hook_spec.coffee                                                 (1 of 1)
+  Running:  simple_failing_hook_spec.coffee                                                 (1 of 2)
 
 
   simple failing hook spec
@@ -620,6 +621,57 @@ Although you have test retries enabled, we do not retry tests when \`before all\
                           .mp4                                                                      
 
 
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  simple_retrying_spec.js                                                         (2 of 2)
+
+
+  simple retrying spec
+    (Attempt 1 of 2) t1
+    1) t1
+    ✓ t2
+
+
+  1 passing
+  1 failing
+
+  1) simple retrying spec
+       t1:
+     Error: t1 attempt #1
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  2                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     simple_retrying_spec.js                                                          │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying_spec.js/simple retrying spec --     (1280x720)
+      t1 (failed).png                                                                               
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying_spec.js/simple retrying spec --     (1280x720)
+      t1 (failed) (attempt 2).png                                                                   
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_retrying_spec.js.mp4         (X second)
+
+
 ====================================================================================================
 
   (Run Finished)
@@ -628,8 +680,10 @@ Although you have test retries enabled, we do not retry tests when \`before all\
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ ✖  simple_failing_hook_spec.coffee          XX:XX        6        1        3        1        1 │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✖  simple_retrying_spec.js                  XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        6        1        3        1        1  
+    ✖  2 of 2 failed (100%)                     XX:XX        8        2        4        1        1  
 
 
 `
@@ -638,10 +692,10 @@ exports['failing with retries enabled'] = {
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
-  "totalSuites": 5,
-  "totalTests": 6,
-  "totalFailed": 3,
-  "totalPassed": 1,
+  "totalSuites": 6,
+  "totalTests": 8,
+  "totalFailed": 4,
+  "totalPassed": 2,
   "totalPending": 1,
   "totalSkipped": 1,
   "runs": [
@@ -706,7 +760,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
+                "message": "fail1",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -726,7 +780,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail1",
+                "message": "fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -778,7 +832,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
+                "message": "fail2",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -798,7 +852,7 @@ exports['failing with retries enabled'] = {
               "state": "failed",
               "error": {
                 "name": "Error",
-                "message": "fail2",
+                "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]"
               },
               "videoTimestamp": 9999,
@@ -895,6 +949,112 @@ exports['failing with retries enabled'] = {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "specType": "integration"
+      },
+      "shouldUploadVideo": true
+    },
+    {
+      "stats": {
+        "suites": 1,
+        "tests": 2,
+        "passes": 1,
+        "pending": 0,
+        "skipped": 0,
+        "failures": 1,
+        "duration": 1234,
+        "startedAt": "2018-02-01T20:14:19.323Z",
+        "endedAt": "2018-02-01T20:14:19.323Z"
+      },
+      "reporter": "spec",
+      "reporterStats": {
+        "suites": 1,
+        "tests": 2,
+        "passes": 1,
+        "pending": 0,
+        "failures": 1,
+        "start": "2018-02-01T20:14:19.323Z",
+        "end": "2018-02-01T20:14:19.323Z",
+        "duration": 1234
+      },
+      "hooks": [],
+      "tests": [
+        {
+          "title": [
+            "simple retrying spec",
+            "t1"
+          ],
+          "state": "failed",
+          "body": "function () {\n    var test = cy.state('test');\n    throw new Error(\"\".concat(test.title, \" attempt #\").concat(cy.state('test').currentRetry()));\n  }",
+          "displayError": "Error: t1 attempt #1\n      [stack trace lines]",
+          "attempts": [
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "t1 attempt #0",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_retrying_spec.js/simple retrying spec -- t1 (failed).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            },
+            {
+              "state": "failed",
+              "error": {
+                "name": "Error",
+                "message": "t1 attempt #1",
+                "stack": "[stack trace lines]"
+              },
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": [
+                {
+                  "name": null,
+                  "takenAt": "2018-02-01T20:14:19.323Z",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_retrying_spec.js/simple retrying spec -- t1 (failed) (attempt 2).png",
+                  "height": 720,
+                  "width": 1280
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": [
+            "simple retrying spec",
+            "t2"
+          ],
+          "state": "passed",
+          "body": "function () {// pass\n  }",
+          "displayError": null,
+          "attempts": [
+            {
+              "state": "passed",
+              "error": null,
+              "videoTimestamp": 9999,
+              "duration": 1234,
+              "startedAt": "2018-02-01T20:14:19.323Z",
+              "screenshots": []
+            }
+          ]
+        }
+      ],
+      "error": null,
+      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_retrying_spec.js.mp4",
+      "spec": {
+        "name": "simple_retrying_spec.js",
+        "relative": "cypress/integration/simple_retrying_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true

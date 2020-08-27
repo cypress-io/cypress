@@ -29,7 +29,6 @@ const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
 const { escapeFilenameInUrl } = require('./util/escape_filename')
-const { registerTsNode } = require('./util/ts-node')
 
 const localCwd = cwd()
 
@@ -100,10 +99,6 @@ class Project extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
-    }).then((cfg) => {
-      registerTsNode(this.projectRoot)
-
-      return cfg
     }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {
