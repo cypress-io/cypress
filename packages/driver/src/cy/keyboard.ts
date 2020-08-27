@@ -1044,8 +1044,13 @@ export class Keyboard {
     if (!key.text) {
       key.events.keypress = false
       key.events.textInput = false
+      key.events.beforeinput = false
       if (key.key !== 'Backspace' && key.key !== 'Delete') {
         key.events.input = false
+      }
+
+      if (key.key === 'Backspace' || key.key === 'Delete') {
+        key.events.beforeinput = true
       }
     }
 
