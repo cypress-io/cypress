@@ -238,7 +238,7 @@ declare namespace Cypress {
       relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
       absolute: string
       specFilter?: string // optional spec filter used by the user
-      specType?: CypressSpecType
+      specType: CypressSpecType // "integration" is the default
     }
 
     /**
