@@ -5314,39 +5314,39 @@ declare namespace Cypress {
 declare namespace Mocha {
   interface TestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface ExclusiveTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
   }
   interface PendingTestFunction {
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: Func): Test
 
         /**
-         * Describe a specification or test-case with the given `title`, TestCptions, and callback `fn` acting
+         * Describe a specification or test-case with the given `title`, TestOptions, and callback `fn` acting
          * as a thunk.
          */
         (title: string, config: Cypress.TestConfigOverrides, fn?: AsyncFunc): Test
@@ -5354,7 +5354,7 @@ declare namespace Mocha {
 
   interface SuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites.
      */
     (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
@@ -5362,7 +5362,7 @@ declare namespace Mocha {
 
   interface ExclusiveSuiteFunction {
     /**
-     * Describe a "suite" with the given `title`, TestCptions, and callback `fn` containing
+     * Describe a "suite" with the given `title`, TestOptions, and callback `fn` containing
      * nested suites. Indicates this suite should be executed exclusively.
      */
     (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite
