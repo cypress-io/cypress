@@ -8,7 +8,7 @@ const { getCommandLogWithText,
   shouldBeCalled,
   shouldBeCalledOnce,
   shouldNotBeCalled,
-  getCaretPosition,
+  expectCaret,
 } = require('../../../support/utils')
 
 const fail = function (str) {
@@ -801,28 +801,20 @@ describe('src/cy/commands/actions/click', () => {
     it('places cursor at the end of [contenteditable]', () => {
       cy.get('[contenteditable]:first')
       .invoke('html', '<div><br></div>').click()
-      .then(($el) => {
-        expect(getCaretPosition($el.get(0))).to.eq(0)
-      })
+      .then(expectCaret(0))
 
       cy.get('[contenteditable]:first')
       .invoke('html', 'foo').click()
-      .then(($el) => {
-        expect(getCaretPosition($el.get(0))).to.eq(3)
-      })
+      .then(expectCaret(3))
 
       cy.get('[contenteditable]:first')
       .invoke('html', '<div>foo</div>').click()
-      .then(($el) => {
-        expect(getCaretPosition($el.get(0))).to.eq(3)
-      })
+      .then(expectCaret(3))
 
       cy.get('[contenteditable]:first')
       // firefox headless: prevent contenteditable from disappearing (dont set to empty)
       .invoke('html', '<br>').click()
-      .then(($el) => {
-        expect(getCaretPosition($el.get(0))).to.eq(0)
-      })
+      .then(expectCaret(0))
     })
 
     it('can click SVG elements', () => {

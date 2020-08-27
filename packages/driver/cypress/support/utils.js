@@ -105,18 +105,11 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
-// Copied and adapted from https://jsfiddle.net/cpatik/3QAeC/
-export function getCaretPosition (element) {
-  let caretOffset = 0
-
-  let range = element.ownerDocument.getSelection().getRangeAt(0)
-  let preCaretRange = range.cloneRange()
-
-  preCaretRange.selectNodeContents(element)
-  preCaretRange.setEnd(range.endContainer, range.endOffset)
-  caretOffset = preCaretRange.toString().length
-
-  return caretOffset
+export const expectCaret = (start, end) => {
+  return ($el) => {
+    end = end == null ? start : end
+    expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
+  }
 }
 
 Cypress.Commands.add('getAll', getAllFn)
