@@ -2811,8 +2811,8 @@ declare namespace Cypress {
      */
     release: boolean
     /**
-     * An event object is sent but the text field isn't updated by Cypress. 
-     * It is necessary with some editor libraries like slate.js that 
+     * An event object is sent but the text field isn't updated by Cypress.
+     * It is necessary with some editor libraries like slate.js that
      * updates its own text state.
      *
      * @default false
