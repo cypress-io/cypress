@@ -65,12 +65,19 @@ const filesSizesAreSame = (files, index) => {
   })
 }
 
+const componentTestingEnabled = (config) => {
+  const experimentalComponentTestingEnabled = _.get(config, 'resolved.experimentalComponentTesting.value', false)
+
+  return experimentalComponentTestingEnabled && !isDefault(config, 'componentFolder')
+}
+
 const isNewProject = (integrationFolder) => {
   // logic to determine if new project
-  // 1. there are no files in 'integrationFolder'
-  // 2. there is a different number of files in 'integrationFolder'
-  // 3. the files are named the same as the example files
-  // 4. the bytes of the files match the example files
+  // 1. component testing is not enabled
+  // 2. there are no files in 'integrationFolder'
+  // 3. there is a different number of files in 'integrationFolder'
+  // 4. the files are named the same as the example files
+  // 5. the bytes of the files match the example files
 
   debug('determine if new project by globbing files in %o', { integrationFolder })
 
@@ -122,7 +129,8 @@ module.exports = {
     debug(`integration folder ${folder}`)
 
     // skip if user has explicitly set integrationFolder
-    if (!isDefault(config, 'integrationFolder')) {
+    // or if user has set up component testing
+    if (!isDefault(config, 'integrationFolder') || componentTestingEnabled(config)) {
       return Promise.resolve()
     }
 
@@ -233,9 +241,13 @@ module.exports = {
 
     return getExampleSpecs()
     .then((specs) => {
-      let files = _.map(specs.shortPaths, (file) => {
-        return getFilePath(config.integrationFolder, file)
-      })
+      let files = []
+
+      if (!componentTestingEnabled(config)) {
+        files = _.map(specs.shortPaths, (file) => {
+          return getFilePath(config.integrationFolder, file)
+        })
+      }
 
       if (config.fixturesFolder) {
         files = files.concat([
