@@ -153,15 +153,6 @@ module.exports = {
     },
   },
 
-  breaking_change: {
-    blob_util2 (obj) {
-      return {
-        message: `\`${obj.functionName}()\` no longer returns a \`Promise\`. Update the use of \`${obj.functionName}()\` to expect a returned \`Blob\`.`,
-        docsUrl: 'https://on.cypress.io/migration-guide',
-      }
-    },
-  },
-
   browser: {
     invalid_arg: '{{prefix}} must be passed a string, object, or an array. You passed: `{{obj}}`',
   },
@@ -385,9 +376,9 @@ module.exports = {
     not_scrollable: {
       message: stripIndent`\
         ${cmd('{{cmd}}')} failed because this element is not scrollable:
-  
+
         \`{{node}}\`
-  
+
         Make sure you're targeting the correct element or use \`{ensureScrollable: false}\` to disable the scrollable check.`,
       docsUrl: 'https://on.cypress.io/scrollto',
     },
@@ -893,8 +884,8 @@ module.exports = {
     it('{{title}}', { retries: {{numRetries}} }, () => {
       ...
     })
-    \`\`\`  
-    
+    \`\`\`
+
     https://on.cypress.io/test-retries
     `,
     manually_set_retries_suite: stripIndent`\
@@ -906,8 +897,8 @@ module.exports = {
     describe('{{title}}', { retries: {{numRetries}} }, () => {
       ...
     })
-    \`\`\`  
-    
+    \`\`\`
+
     https://on.cypress.io/test-retries
     `,
 
@@ -1370,6 +1361,10 @@ module.exports = {
 
   should: {
     chainer_not_found: 'The chainer `{{chainer}}` was not found. Could not build assertion.',
+    language_chainer: {
+      message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
+      docsUrl: 'https://on.cypress.io/assertions',
+    },
     eventually_deprecated: 'The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.',
   },
 
@@ -1856,9 +1851,9 @@ module.exports = {
     timed_out: {
       message: stripIndent`
       ${cmd('wrap')} timed out waiting \`{{timeout}}ms\` to complete.
-      
+
       You called \`cy.wrap()\` with a promise that never resolved.
-      
+
       To increase the timeout, use \`{ timeout: number }\`
       `,
       docsUrl: 'https://on.cypress.io/wrap',

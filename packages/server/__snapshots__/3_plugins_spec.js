@@ -1,4 +1,4 @@
-exports['e2e plugins passes with working preprocessor 1'] = `
+exports['e2e plugins preprocessor passes with working preprocessor 1'] = `
 
 ====================================================================================================
 
