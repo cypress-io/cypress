@@ -44,6 +44,8 @@ const availableBrowsersRe = /(Available browsers found on your system are:)([\s\
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
 
+export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
+
 // this captures an entire stack trace and replaces it with [stack trace lines]
 // so that the stdout can contain stack traces of different lengths
 // '@' will be present in firefox stack trace lines
@@ -153,7 +155,7 @@ const normalizeStdout = function (str, options: any = {}) {
   // numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, '')
   // 12:35 -> XX:XX
-  .replace(/(\s+?)(\d+ms|\d+:\d+:?\d+)/g, replaceDurationInTables)
+  .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
@@ -442,6 +444,14 @@ const e2e = {
   },
 
   options (ctx, options = {}) {
+    if (options.inspectBrk != null) {
+      throw new Error(`
+      passing { inspectBrk: true } to e2e options is no longer supported
+      Please pass the --cypress-inspect-brk flag to the test command instead
+      e.g. "yarn test test/e2e/1_async_timeouts_spec.js --cypress-inspect-brk"
+      `)
+    }
+
     _.defaults(options, {
       browser: 'electron',
       headed: process.env.HEADED || false,
@@ -452,6 +462,7 @@ const e2e = {
       sanitizeScreenshotDimensions: false,
       normalizeStdoutAvailableBrowsers: true,
       noExit: process.env.NO_EXIT,
+      inspectBrk: process.env.CYPRESS_INSPECT_BRK,
     })
 
     if (options.exit != null) {
@@ -619,6 +630,10 @@ const e2e = {
       ctx.skip()
     }
 
+    if (options.stubPackage) {
+      Fixtures.installStubPackage(options.project, options.stubPackage)
+    }
+
     args = ['index.js'].concat(args)
 
     let stdout = ''
@@ -697,6 +712,8 @@ const e2e = {
           LINES: 24,
         })
         .defaults({
+          // match CircleCI's filesystem limits, so screenshot names in snapshots match
+          CYPRESS_MAX_SAFE_FILENAME_BYTES: 242,
           FAKE_CWD_PATH: '/XXX/XXX/XXX',
           DEBUG_COLORS: '1',
           // prevent any Compression progress
@@ -727,8 +744,13 @@ const e2e = {
       // pipe these to our current process
       // so we can see them in the terminal
       // color it so we can tell which is test output
-      sp.stdout.pipe(ColorOutput()).pipe(process.stdout)
-      sp.stderr.pipe(ColorOutput()).pipe(process.stderr)
+      sp.stdout
+      .pipe(ColorOutput())
+      .pipe(process.stdout)
+
+      sp.stderr
+      .pipe(ColorOutput())
+      .pipe(process.stderr)
 
       sp.stdout.on('data', (buf) => stdout += buf.toString())
       sp.stderr.on('data', (buf) => stderr += buf.toString())
@@ -752,6 +774,12 @@ const e2e = {
 </html>\
 `)
     }
+  },
+
+  normalizeWebpackErrors (stdout) {
+    return stdout
+    .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
+    .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
   },
 }
 

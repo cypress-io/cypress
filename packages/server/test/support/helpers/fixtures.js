@@ -49,6 +49,14 @@ module.exports = {
     return fs.removeSync(tmpDir)
   },
 
+  async installStubPackage (projectPath, pkgName) {
+    const pathToPkg = path.join(projectPath, 'node_modules', pkgName)
+
+    await fs.outputJSON(path.join(projectPath, 'package.json'), { name: 'some-project' })
+    await fs.mkdirp(pathToPkg)
+    await fs.outputFile(path.join(pathToPkg, 'index.js'), '')
+  },
+
   // returns the path to project fixture
   // in the tmpDir
   project (...args) {

@@ -48,11 +48,7 @@
   button {
     display: block;
     margin: 0 auto 1em;
-    width: 250px;
-  }
-
-  a {
-    color: $brand-primary;
+    width: auto;
   }
 
   .message {
@@ -69,16 +65,17 @@
   }
 
   .terms {
-    color: #aaa;
-    font-size: 0.9em;
-    line-height: 1.5em;
+    font-size: 11px;
+    margin-top: 10px;
+    color: #272B2F;
+    font-weight: 200;
 
     a {
-      color: #aaa;
+      color: #272B2F;
       border-bottom: 1px solid #ddd;
 
       &:hover, &:focus, &:active {
-        color: #888;
+        color: #272B2F;
         border-bottom: 1px solid #888;
         text-decoration: none;
       }

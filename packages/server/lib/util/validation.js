@@ -103,6 +103,22 @@ const isValidBrowserList = (key, browsers) => {
   return true
 }
 
+const isValidRetriesConfig = (key, value) => {
+  const optionalKeys = ['runMode', 'openMode']
+  const isValidRetryValue = (val) => _.isNull(val) || (Number.isInteger(val) && val >= 0)
+  const optionalKeysAreValid = (val, k) => optionalKeys.includes(k) && isValidRetryValue(val)
+
+  if (isValidRetryValue(value)) {
+    return true
+  }
+
+  if (_.isObject(value) && _.every(value, optionalKeysAreValid)) {
+    return true
+  }
+
+  return errMsg(key, value, 'a positive number or null or an object with keys "openMode" and "runMode" with values of numbers or nulls')
+}
+
 const isValidFirefoxGcInterval = (key, value) => {
   const isIntervalValue = (val) => {
     if (isNumber(val)) {
@@ -122,12 +138,32 @@ const isValidFirefoxGcInterval = (key, value) => {
   return errMsg(key, value, 'a positive number or null or an object with "openMode" and "runMode" as keys and positive numbers or nulls as values')
 }
 
+const isOneOf = (...values) => {
+  return (key, value) => {
+    if (values.some((v) => {
+      if (typeof value === 'function') {
+        return value(v)
+      }
+
+      return v === value
+    })) {
+      return true
+    }
+
+    const strings = values.map(str).join(', ')
+
+    return errMsg(key, value, `one of these values: ${strings}`)
+  }
+}
+
 module.exports = {
   isValidBrowser,
 
   isValidBrowserList,
 
   isValidFirefoxGcInterval,
+
+  isValidRetriesConfig,
 
   isNumber (key, value) {
     if (value == null || isNumber(value)) {
@@ -214,17 +250,5 @@ module.exports = {
     validate("example", "else") // error message string
     ```
    */
-  isOneOf (...values) {
-    return (key, value) => {
-      if (values.some((v) => {
-        return v === value
-      })) {
-        return true
-      }
-
-      const strings = values.map(str).join(', ')
-
-      return errMsg(key, value, `one of these values: ${strings}`)
-    }
-  },
+  isOneOf,
 }

@@ -201,12 +201,15 @@ describe('Specs List', function () {
 
         it('triggers browser launch on click of button', () => {
           cy.contains('.all-tests', 'Run all specs').click()
+          .find('.fa-dot-circle')
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
-            expect(launchArgs[0].browser.name).to.eq('chrome')
+            expect(launchArgs[0].browser.name, 'browser name').to.eq('chrome')
 
-            expect(launchArgs[0].spec.name).to.eq('All Specs')
+            expect(launchArgs[0].spec.name, 'spec name').to.eq('All Specs')
+
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq(null)
           })
         })
 
@@ -406,13 +409,23 @@ describe('Specs List', function () {
           this.ipc.getSpecs.yields(null, this.specs)
           this.openProject.resolve(this.config)
 
+          cy.contains('.all-tests', 'Run all specs')
           cy.get('.filter').type('new')
         })
 
-        it('displays only matching spec', () => {
+        it('displays only matching spec', function () {
           cy.get('.specs-list .file')
           .should('have.length', 1)
           .and('contain', 'account_new_spec.coffee')
+
+          cy.contains('.all-tests', 'Run 1 spec').click()
+          .find('.fa-dot-circle')
+          .then(() => {
+            expect(this.ipc.launchBrowser).to.have.property('called').equal(true)
+            const launchArgs = this.ipc.launchBrowser.lastCall.args
+
+            expect(launchArgs[0].specFilter, 'spec filter').to.eq('new')
+          })
         })
 
         it('only shows matching folders', () => {
@@ -427,6 +440,8 @@ describe('Specs List', function () {
 
           cy.get('.specs-list .file')
           .should('have.length', this.numSpecs)
+
+          cy.contains('.all-tests', 'Run all specs')
         })
 
         it('clears the filter if the user press ESC key', function () {
@@ -435,6 +450,9 @@ describe('Specs List', function () {
 
           cy.get('.specs-list .file')
           .should('have.length', this.numSpecs)
+
+          cy.contains('.all-tests', 'Run all specs')
+          .find('.fa-play')
         })
 
         it('shows empty message if no results', function () {
@@ -442,6 +460,17 @@ describe('Specs List', function () {
           cy.get('.specs-list').should('not.exist')
 
           cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
+
+          cy.contains('.all-tests', 'No specs')
+        })
+
+        it('disables run all tests if no results', function () {
+          cy.get('.filter').clear().type('foobarbaz')
+
+          cy.contains('.all-tests', 'No specs').should('be.disabled').click({ force: true })
+          .then(function () {
+            expect(this.ipc.launchBrowser).to.have.property('called').equal(false)
+          })
         })
 
         it('clears and focuses the filter field when clear search is clicked', function () {
@@ -460,6 +489,29 @@ describe('Specs List', function () {
             expect(JSON.parse(win.localStorage[`specsFilter-${this.config.projectId}-/foo/bar`])).to.equal('new')
           })
         })
+
+        it('does not update run button label while running', function () {
+          cy.contains('.all-tests', 'Run 1 spec').click()
+          // mock opened browser and running tests
+          // to force "Stop" button to show up
+          cy.window().its('__project').then((project) => {
+            project.browserOpened()
+          })
+
+          // the button has its its label reflect the running specs
+          cy.contains('.all-tests', 'Running 1 spec')
+          .should('have.class', 'active')
+
+          // the button has its label unchanged while the specs are running
+          cy.get('.filter').clear()
+          cy.contains('.all-tests', 'Running 1 spec')
+          .should('have.class', 'active')
+
+          // but once the project stops running tests, the button gets updated
+          cy.get('.close-browser').click()
+          cy.contains('.all-tests', 'Run all specs')
+          .should('not.have.class', 'active')
+        })
       })
 
       describe('when there\'s a saved filter', function () {
@@ -475,6 +527,7 @@ describe('Specs List', function () {
           this.openProject.resolve(this.config)
 
           cy.get('.filter').should('have.value', 'app')
+          cy.contains('.all-tests', 'Run 1 spec')
         })
 
         it('does not apply it for a different project', function () {
@@ -525,7 +578,7 @@ describe('Specs List', function () {
         cy.get('@firstSpec')
         .click()
         .then(function () {
-          expect(this.ipc.closeBrowser).to.be.called
+          expect(this.ipc.closeBrowser).to.have.property('called', true)
 
           const launchArgs = this.ipc.launchBrowser.lastCall.args
 
@@ -542,6 +595,12 @@ describe('Specs List', function () {
         cy.get('@firstSpec').click()
         .parent()
         .should('have.class', 'active')
+      })
+
+      it('shows the running spec label', () => {
+        cy.get('@firstSpec').click()
+        cy.contains('.all-tests', 'Running 1 spec')
+        .find('.fa-dot-circle')
       })
 
       it('maintains active selection if specs change', function () {
@@ -682,7 +741,8 @@ describe('Specs List', function () {
         })
 
         it('opens in preferred opener', function () {
-          cy.get('@button').click().then(() => {
+          cy.get('@button').click()
+          .then(() => {
             expect(this.ipc.openFile).to.be.calledWith({
               where: this.availableEditors[4],
               file: '/user/project/cypress/integration/app_spec.coffee',
@@ -708,6 +768,7 @@ describe('Specs List', function () {
           })
 
           cy.contains('Set preference and open file')
+          cy.percySnapshot()
         })
 
         it('closes modal when cancel is clicked', function () {

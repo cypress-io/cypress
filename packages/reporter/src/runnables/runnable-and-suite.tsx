@@ -48,6 +48,7 @@ class Runnable extends Component<RunnableProps> {
     return (
       <li
         className={cs(`${model.type} runnable runnable-${model.state}`, {
+          'runnable-retried': model.hasRetried,
           hover: this.isHovering,
         })}
         onMouseOver={this._hover(true)}

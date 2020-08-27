@@ -141,10 +141,14 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-/foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js:1
-+ >
-  ^
-ParseError: Unexpected token
+Error: Webpack Compilation Error
+./cypress/integration/stdout_exit_early_failing_spec.js
+Module build failed (from [..]):
+SyntaxError: /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js: Unexpected token (1:1)
+
+> 1 | +>
+    |  ^
+  2 |
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

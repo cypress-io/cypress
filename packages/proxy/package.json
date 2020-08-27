@@ -15,7 +15,7 @@
     "common-tags": "1.8.0",
     "debug": "4.1.1",
     "grapheme-splitter": "1.0.4",
-    "iconv-lite": "0.5.0",
+    "iconv-lite": "0.6.2",
     "lodash": "4.17.19",
     "pumpify": "1.5.1",
     "through": "2.3.8",

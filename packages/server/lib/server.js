@@ -15,7 +15,7 @@ const compression = require('compression')
 const debug = require('debug')('cypress:server:server')
 const {
   agent,
-  blacklist,
+  blocked,
   concatStream,
   cors,
   uri,
@@ -28,7 +28,7 @@ const appData = require('./util/app_data')
 const statusCode = require('./util/status_code')
 const headersUtil = require('./util/headers')
 const allowDestroy = require('./util/server_destroy')
-const { SocketWhitelist } = require('./util/socket_whitelist')
+const { SocketAllowed } = require('./util/socket_allowed')
 const errors = require('./errors')
 const logger = require('./logger')
 const Socket = require('./socket')
@@ -59,7 +59,7 @@ const _forceProxyMiddleware = function (clientRoute) {
     const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
 
     if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
-      // this request is non-proxied and non-whitelisted, redirect to the runner error page
+      // this request is non-proxied and non-allowed, redirect to the runner error page
       return res.redirect(clientRoute)
     }
 
@@ -115,7 +115,7 @@ class Server {
       return new Server()
     }
 
-    this._socketWhitelist = new SocketWhitelist()
+    this._socketAllowed = new SocketAllowed()
     this._request = null
     this._middleware = null
     this._server = null
@@ -238,7 +238,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Promise((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, blacklistHosts } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl, blockHosts } = config
 
       this._server = http.createServer(app)
 
@@ -276,7 +276,7 @@ class Server {
       this._server.on('connect', (req, socket, head) => {
         debug('Got CONNECT request from %s', req.url)
 
-        socket.once('upstream-connected', this._socketWhitelist.add)
+        socket.once('upstream-connected', this._socketAllowed.add)
 
         return this._httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) => {
@@ -291,16 +291,17 @@ class Server {
             // if we are currently matching then we're
             // not making a direct connection anyway
             // so we only need to check this if we
-            // have blacklist hosts and are not matching.
+            // have blocked hosts and are not matching.
             //
-            // if we have blacklisted hosts lets
+            // if we have blocked hosts lets
             // see if this matches - if so then
             // we cannot allow it to make a direct
             // connection
-            if (blacklistHosts && !isMatching) {
-              isMatching = blacklist.matches(urlToCheck, blacklistHosts)
 
-              debug(`HTTPS request ${urlToCheck} matches blacklist?`, isMatching)
+            if (blockHosts && !isMatching) {
+              isMatching = blocked.matches(urlToCheck, blockHosts)
+
+              debug(`HTTPS request ${urlToCheck} matches blockHosts?`, isMatching)
             }
 
             // make a direct connection only if
@@ -759,7 +760,7 @@ class Server {
     let host; let remoteOrigin
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this._socketWhitelist.isRequestWhitelisted(req)) {
+      if (!this._socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }

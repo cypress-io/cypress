@@ -2,11 +2,13 @@ require('../../../spec_helper')
 
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
+const tsnode = require('ts-node')
 
 const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
 const task = require(`${root}../../lib/plugins/child/task`)
 const runPlugins = require(`${root}../../lib/plugins/child/run_plugins`)
 const util = require(`${root}../../lib/plugins/util`)
+const resolve = require(`${root}../../lib/util/resolve`)
 const browserUtils = require(`${root}../../lib/browsers/utils`)
 const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
 
@@ -31,8 +33,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
   afterEach(() => {
     mockery.deregisterMock('plugins-file')
-
-    return mockery.deregisterSubstitute('plugins-file')
+    mockery.deregisterSubstitute('plugins-file')
   })
 
   it('sends error message if pluginsFile is missing', function () {
@@ -77,6 +78,43 @@ describe('lib/plugins/child/run_plugins', () => {
     return snapshot(JSON.stringify(this.ipc.send.lastCall.args[3]))
   })
 
+  describe('typescript registration', () => {
+    beforeEach(function () {
+      runPlugins.__reset()
+
+      this.register = sinon.stub(tsnode, 'register')
+      sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+    })
+
+    it('registers ts-node if typescript is installed', function () {
+      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
+
+      expect(this.register).to.be.calledWith({
+        transpileOnly: true,
+        compiler: '/path/to/typescript.js',
+        dir: '/path/to/plugins',
+        compilerOptions: {
+          module: 'CommonJS',
+        },
+      })
+    })
+
+    it('only registers ts-node once', function () {
+      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
+      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
+
+      expect(this.register).to.be.calledOnce
+    })
+
+    it('does not register ts-node if typescript is not installed', function () {
+      resolve.typescript.returns(null)
+
+      runPlugins(this.ipc, '/path/to/plugins/file.js', 'proj-root')
+
+      expect(this.register).not.to.be.called
+    })
+  })
+
   describe('on \'load\' message', () => {
     it('sends error if pluginsFile function rejects the promise', function (done) {
       const err = new Error('foo')
@@ -118,7 +156,7 @@ describe('lib/plugins/child/run_plugins', () => {
       })
 
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
-      this.ipc.on.withArgs('load').yield()
+      this.ipc.on.withArgs('load').yield({})
 
       this.ipc.send = _.once((event, errorType, pluginsFile, stack) => {
         expect(event).to.eq('load:error')
@@ -150,7 +188,7 @@ describe('lib/plugins/child/run_plugins', () => {
 
       runPlugins(this.ipc, 'plugins-file', 'proj-root')
 
-      return this.ipc.on.withArgs('load').yield()
+      return this.ipc.on.withArgs('load').yield({})
     })
 
     context('file:preprocessor', () => {

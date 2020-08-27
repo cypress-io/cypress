@@ -9,7 +9,13 @@ let isDebuggingVerbose = false
 const preserved = {}
 
 const defaults = {
-  whitelist: null,
+  preserve: null,
+}
+
+const warnOnWhitelistRenamed = (obj, type) => {
+  if (obj.whitelist) {
+    return $errUtils.throwErrByPath('cookies.whitelist_renamed', { args: { type } })
+  }
 }
 
 const $Cookies = (namespace, domain) => {
@@ -17,8 +23,8 @@ const $Cookies = (namespace, domain) => {
     return _.startsWith(name, namespace)
   }
 
-  const isWhitelisted = (cookie) => {
-    const w = defaults.whitelist
+  const isAllowed = (cookie) => {
+    const w = defaults.preserve
 
     if (w) {
       if (_.isString(w)) {
@@ -76,7 +82,7 @@ const $Cookies = (namespace, domain) => {
 
     getClearableCookies (cookies = []) {
       return _.filter(cookies, (cookie) => {
-        return !isWhitelisted(cookie) && !removePreserved(cookie.name)
+        return !isAllowed(cookie) && !removePreserved(cookie.name)
       })
     },
 
@@ -132,6 +138,8 @@ const $Cookies = (namespace, domain) => {
     },
 
     defaults (obj = {}) {
+      warnOnWhitelistRenamed(obj, 'Cypress.Cookies.defaults')
+
       // merge obj into defaults
       return _.extend(defaults, obj)
     },

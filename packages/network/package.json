@@ -18,7 +18,7 @@
     "concat-stream": "1.6.2",
     "debug": "4.1.1",
     "lodash": "4.17.19",
-    "proxy-from-env": "1.1.0"
+    "proxy-from-env": "1.0.0"
   },
   "devDependencies": {
     "@cypress/debugging-proxy": "2.0.1",
@@ -28,7 +28,7 @@
     "@packages/socket": "*",
     "@packages/ts": "*",
     "@types/concat-stream": "1.6.0",
-    "express": "4.16.4",
+    "express": "4.17.1",
     "mocha": "6.2.2",
     "sinon": "7.3.1",
     "sinon-chai": "3.3.0",

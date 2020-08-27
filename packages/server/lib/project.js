@@ -6,8 +6,6 @@ const Promise = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
-const tsnode = require('ts-node')
-const resolve = require('resolve')
 const scaffoldDebug = require('debug')('cypress:server:scaffold')
 const debug = require('debug')('cypress:server:project')
 const cwd = require('./cwd')
@@ -31,7 +29,6 @@ const keys = require('./util/keys')
 const settings = require('./util/settings')
 const specsUtil = require('./util/specs')
 const { escapeFilenameInUrl } = require('./util/escape_filename')
-const tsNodeOptions = require('./util/ts-node-options')
 
 const localCwd = cwd()
 
@@ -103,24 +100,6 @@ class Project extends EE {
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
     }).then((cfg) => {
-      try {
-        const tsPath = resolve.sync('typescript', {
-          basedir: this.projectRoot,
-        })
-
-        const tsOptions = tsNodeOptions.getTsNodeOptions(tsPath)
-
-        debug('typescript path: %s', tsPath)
-        debug('registering project TS with options %o', tsOptions)
-
-        tsnode.register(tsOptions)
-      } catch (e) {
-        debug(`typescript doesn't exist. ts-node setup failed.`)
-        debug('error message %s', e.message)
-      }
-
-      return cfg
-    }).then((cfg) => {
       return this._initPlugins(cfg, options)
       .then((modifiedCfg) => {
         debug('plugin config yielded: %o', modifiedCfg)
@@ -173,10 +152,10 @@ class Project extends EE {
 
   _initPlugins (cfg, options) {
     // only init plugins with the
-    // whitelisted config values to
+    // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    cfg = config.whitelist(cfg)
+    cfg = config.allowed(cfg)
 
     return plugins.init(cfg, {
       projectRoot: this.projectRoot,
@@ -501,6 +480,8 @@ class Project extends EE {
   }
 
   getSpecUrl (absoluteSpecPath, specType) {
+    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+
     return this.getConfig()
     .then((cfg) => {
       // if we don't have a absoluteSpecPath or its __all

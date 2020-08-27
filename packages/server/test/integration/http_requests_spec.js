@@ -11,10 +11,6 @@ const path = require('path')
 const url = require('url')
 let zlib = require('zlib')
 const str = require('underscore.string')
-const browserify = require('browserify')
-const babelify = require('babelify')
-const coffeeify = require('coffeeify')
-const streamToPromise = require('stream-to-promise')
 const evilDns = require('evil-dns')
 const Promise = require('bluebird')
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
@@ -27,12 +23,11 @@ const Project = require(`${root}lib/project`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const resolve = require(`${root}lib/plugins/resolve`)
+const resolve = require(`${root}lib/util/resolve`)
 const fs = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const CacheBuster = require(`${root}lib/util/cache_buster`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
-const simple_tsify = require(`${root}test/support/helpers/simple_tsify`)
 
 zlib = Promise.promisifyAll(zlib)
 
@@ -46,10 +41,6 @@ const replaceAbsolutePaths = (content) => {
   return content.replace(absolutePathRegex, '"/<path-to-project>')
 }
 
-const removeSourceMap = (content) => {
-  return content.replace(sourceMapRegex, ';')
-}
-
 const removeWhitespace = function (c) {
   c = str.clean(c)
   c = str.lines(c).join(' ')
@@ -59,36 +50,6 @@ const removeWhitespace = function (c) {
 
 const cleanResponseBody = (body) => {
   return replaceAbsolutePaths(removeWhitespace(body))
-}
-
-const browserifyFile = (filePath) => {
-  return streamToPromise(
-    browserify({
-      entries: [filePath],
-      extensions: ['.js', '.jsx', '.coffee'],
-      cache: {},
-      packageCache: {},
-      transform: [
-        [coffeeify, {}],
-        [babelify, {
-          plugins: ['add-module-exports', '@babel/plugin-proposal-class-properties', '@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime'],
-          presets: ['@babel/preset-env', '@babel/preset-react'],
-        }],
-      ],
-    })
-    .bundle(),
-  )
-}
-
-const browserifyFileTs = (filePath) => {
-  return streamToPromise(
-    browserify(filePath)
-    .transform(coffeeify)
-    .transform(simple_tsify, {
-      typescript: require('typescript'),
-    })
-    .bundle(),
-  )
 }
 
 describe('Routes', () => {
@@ -159,7 +120,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          const project = new Project('/path/to/project')
+          this.project = new Project('/path/to/project')
 
           return Promise.all([
             // open our https server
@@ -168,7 +129,7 @@ describe('Routes', () => {
             // and open our cypress server
             (this.server = new Server(new Watchers())),
 
-            this.server.open(cfg, project)
+            this.server.open(cfg, this.project)
             .spread((port) => {
               if (initialUrl) {
                 this.server._onDomainSet(initialUrl)
@@ -202,6 +163,7 @@ describe('Routes', () => {
     Fixtures.remove()
     this.session.destroy()
     preprocessor.close()
+    this.project = null
 
     return Promise.join(
       this.server.close(),
@@ -604,22 +566,11 @@ describe('Routes', () => {
         })
       })
 
-      const checkTranspilation = function (body, file) {
-        const b = removeSourceMap(body).replace(/\n/g, '')
-        const f = file.toString().replace(/\n/g, '')
-
-        expect(b).to.equal(f)
-      }
-
       it('processes foo.coffee spec', function () {
         return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/foo.coffee')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-
-          return browserifyFileTs(Fixtures.path('projects/ids/cypress/integration/foo.coffee'))
-          .then((file) => {
-            return checkTranspilation(res.body, file)
-          })
+          expect(res.body).to.include('expect("foo.coffee")')
         })
       })
 
@@ -627,13 +578,7 @@ describe('Routes', () => {
         return this.rp('http://localhost:2020/__cypress/tests?p=cypress/integration/baz.js')
         .then((res) => {
           expect(res.statusCode).to.eq(200)
-
-          return browserifyFileTs(Fixtures.path('projects/ids/cypress/integration/baz.js'))
-          .then((file) => {
-            checkTranspilation(res.body, file)
-
-            expect(res.body).to.include('React.createElement(')
-          })
+          expect(res.body).to.include('React.createElement(')
         })
       })
 
@@ -642,8 +587,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('Cannot find module')
+          expect(res.body).to.include('Module not found')
         })
       })
     })
@@ -652,8 +596,6 @@ describe('Routes', () => {
       beforeEach(function () {
         Fixtures.scaffold('ids')
 
-        // remove cached options
-        delete require.cache[require.resolve('@cypress/browserify-preprocessor')]
         sinon.stub(resolve, 'typescript').callsFake(() => {
           return null
         })
@@ -668,11 +610,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
-
-          return browserifyFile(Fixtures.path('projects/ids/cypress/integration/foo.coffee'))
-          .then((file) => {
-            expect(removeSourceMap(res.body)).to.equal(file.toString())
-          })
+          expect(res.body).to.include('expect("foo.coffee")')
         })
       })
 
@@ -681,13 +619,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
-
-          return browserifyFile(Fixtures.path('projects/ids/cypress/integration/baz.js'))
-          .then((file) => {
-            expect(removeSourceMap(res.body)).to.equal(file.toString())
-
-            expect(res.body).to.include('React.createElement(')
-          })
+          expect(res.body).to.include('React.createElement(')
         })
       })
 
@@ -696,8 +628,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('Cannot find module')
+          expect(res.body).to.include('Module not found')
         })
       })
     })
@@ -716,8 +647,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.include('Cypress.action("spec:script:error", {')
-
-          expect(res.body).to.include('ParseError')
+          expect(res.body).to.include('Unexpected token')
         })
       })
     })
@@ -740,11 +670,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
-
-          return browserifyFileTs(Fixtures.path('projects/no-server/my-tests/test1.js'))
-          .then((file) => {
-            expect(removeSourceMap(res.body)).to.equal(file.toString())
-          })
+          expect(res.body).to.include(`expect('no-server')`)
         })
       })
 
@@ -753,11 +679,7 @@ describe('Routes', () => {
         .then((res) => {
           expect(res.statusCode).to.eq(200)
           expect(res.body).to.match(sourceMapRegex)
-
-          return browserifyFileTs(Fixtures.path('projects/no-server/helpers/includes.js'))
-          .then((file) => {
-            expect(removeSourceMap(res.body)).to.equal(file.toString())
-          })
+          expect(res.body).to.include(`console.log('includes')`)
         })
       })
     })
@@ -1133,6 +1055,26 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           const body = cleanResponseBody(res.body)
+
+          expect(body).to.eq(contents)
+        })
+      })
+
+      it('can send back tests matching spec filter', function () {
+        // only returns tests with "sub_test" in their names
+        const contents = removeWhitespace(Fixtures.get('server/expected_todos_filtered_tests_iframe.html'))
+
+        this.project.spec = {
+          specFilter: 'sub_test',
+        }
+
+        return this.rp('http://localhost:2020/__cypress/iframes/__all')
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          const body = cleanResponseBody(res.body)
+
+          console.log(body)
 
           expect(body).to.eq(contents)
         })
@@ -3727,11 +3669,11 @@ describe('Routes', () => {
       })
     })
 
-    context('blacklisted hosts', () => {
+    context('blocked hosts', () => {
       beforeEach(function () {
         return this.setup({
           config: {
-            blacklistHosts: [
+            blockHosts: [
               '*.google.com',
               'shop.apple.com',
               'cypress.io',
@@ -3744,7 +3686,7 @@ describe('Routes', () => {
 
       it('returns 503 and custom headers for all hosts', function () {
         const expectedHeader = (res, val) => {
-          expect(res.headers['x-cypress-matched-blacklisted-host']).to.eq(val)
+          expect(res.headers['x-cypress-matched-blocked-host']).to.eq(val)
         }
 
         return Promise.all([

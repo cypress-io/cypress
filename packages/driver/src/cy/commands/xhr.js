@@ -200,7 +200,7 @@ const startXhrServer = (cy, state, config) => {
     },
 
     onFixtureError (xhr, err) {
-      err = $errUtils.cypressErr(err)
+      err = $errUtils.cypressErr({ message: err })
 
       return this.onError(xhr, err)
     },
