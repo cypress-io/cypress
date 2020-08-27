@@ -57,7 +57,7 @@
       }
     }
 
-    &.test.hover {
+    .attempt-item:hover {
       > .runnable-wrapper .runnable-controls i.fa-redo {
         visibility: visible !important;
       }
@@ -69,12 +69,11 @@
 
     &.runnable-active {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-sync-alt;
-        @extend .#{$fa-css-prefix}-spin;
+        @include runnable-state-active;
       }
     }
 
-    .runnable-state {
+    .runnable-state,.attempt-state {
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
@@ -90,12 +89,10 @@
       color: #bbbcbd;
     }
 
-    &.test.runnable-processing {
+
+    &.test.runnable-processing  {
       .runnable-state {
-        @extend .far;
-        line-height: 18px; // @extend .far overrides line-height, so we need to set it again
-        @extend .#{$fa-css-prefix}-square;
-        color: #888;
+        @include runnable-state-processing;
       }
     }
 
@@ -119,10 +116,14 @@
       border-left: 5px solid $pass;
     }
 
+    .runnable-retried > div > .runnable-wrapper,
+    .runnable-retried > div > .runnable-instruments {
+      border-left: 5px solid $retried;
+    }
+
     &.runnable-skipped > .runnable-wrapper {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-ban;
-        color: #888;
+        @include runnable-state-skipped;
       }
 
       .runnable-title {
@@ -137,8 +138,7 @@
 
     &.test.runnable-failed {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-times;
-        color: $fail;
+        @include runnable-state-failed;
       }
     }
 
@@ -152,19 +152,16 @@
 
     &.test.runnable-passed {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-check;
-        color: $pass;
+        @include runnable-state-passed;
       }
     }
 
     &.test.runnable-pending {
+      .runnable-state {
+        @include runnable-state-pending;
+      }
       .runnable-title {
         color: lighten($pending, 25%);
-      }
-
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-circle-notch;
-        color: lighten($pending, 20%);
       }
 
       .runnable-commands-region {

@@ -53,7 +53,6 @@ interface StringValues {
 const _summaries: StringValues = {
   experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
-  experimentalGetCookiesSameSite: 'Adds `sameSite` values to the objects yielded from `cy.setCookie()`, `cy.getCookie()`, and `cy.getCookies()`. This will become the default behavior in Cypress 5.0.',
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing',
   experimentalShadowDomSupport: 'Enables support for shadow DOM traversal, introduces the `shadow()` command and the `includeShadowDom` option to traversal commands.',
 }
@@ -71,7 +70,6 @@ const _summaries: StringValues = {
 const _names: StringValues = {
   experimentalComponentTesting: 'Component Testing',
   experimentalSourceRewriting: 'Improved source rewriting',
-  experimentalGetCookiesSameSite: 'Set `sameSite` property when retrieving cookies',
   experimentalShadowDomSupport: 'Shadow DOM Support',
   experimentalFetchPolyfill: 'Fetch polyfill',
 }

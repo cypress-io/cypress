@@ -54,6 +54,11 @@ const isHidden = (el, methodName = 'isHidden()', options = { checkOpacity: true 
   // either its offsetHeight or offsetWidth is 0 because
   // it is impossible for the user to interact with this element
   if (elHasNoEffectiveWidthOrHeight($el)) {
+    // https://github.com/cypress-io/cypress/issues/6183
+    if (elHasDisplayInline($el)) {
+      return !elHasVisibleChild($el)
+    }
+
     return true // is hidden
   }
 
@@ -163,6 +168,10 @@ const elHasDisplayNone = ($el) => {
   return $el.css('display') === 'none'
 }
 
+const elHasDisplayInline = ($el) => {
+  return $el.css('display') === 'inline'
+}
+
 const elHasOverflowHidden = function ($el) {
   const cssOverflow = [$el.css('overflow'), $el.css('overflow-y'), $el.css('overflow-x')]
 
@@ -238,6 +247,12 @@ const elDescendentsHavePositionFixedOrAbsolute = function ($parent, $child) {
 
   return _.some($els.get(), (el) => {
     return fixedOrAbsoluteRe.test($jquery.wrap(el).css('position'))
+  })
+}
+
+const elHasVisibleChild = function ($el) {
+  return _.some($el.children(), (el) => {
+    return isVisible(el)
   })
 }
 

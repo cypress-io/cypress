@@ -2,13 +2,13 @@ import { observable } from 'mobx'
 import { HookProps } from '../hooks/hook-model'
 
 export interface RunnableProps {
-  id: number
+  id: string
   title?: string
   hooks: Array<HookProps>
 }
 
 export default class Runnable {
-  @observable id: number
+  @observable id: string
   @observable shouldRender: boolean = false
   @observable title?: string
   @observable level: number

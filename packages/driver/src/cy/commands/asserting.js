@@ -110,6 +110,14 @@ module.exports = function (Commands, Cypress, cy, state) {
           throwAndLogErr(err)
         }
 
+        // https://github.com/cypress-io/cypress/issues/883
+        // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
+        if (chainers.length < 2 && !_.isFunction(memo[value]) && !isCheckingExistence) {
+          err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
+          err.retry = false
+          throwAndLogErr(err)
+        }
+
         return applyChainer(memo, value)
       }, exp)
 

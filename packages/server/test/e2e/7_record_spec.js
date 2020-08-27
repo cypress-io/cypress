@@ -3,10 +3,11 @@ const path = require('path')
 const Promise = require('bluebird')
 const bodyParser = require('body-parser')
 const jsonSchemas = require('@cypress/json-schemas').api
+const snapshot = require('snap-shot-it')
 const e2e = require('../support/helpers/e2e').default
 const fs = require('../../lib/util/fs')
 const Fixtures = require('../support/helpers/fixtures')
-
+const { expectRunsToHaveCorrectTimings } = require('../support/helpers/resultsUtils')
 const postRunResponseWithWarnings = jsonSchemas.getExample('postRunResponse')('2.2.0')
 const postRunResponse = _.assign({}, postRunResponseWithWarnings, { warnings: [] })
 const postRunInstanceResponse = jsonSchemas.getExample('postRunInstanceResponse')('2.1.0')
@@ -192,7 +193,7 @@ const defaultRoutes = [
   }, {
     method: 'put',
     url: '/instances/:id',
-    req: 'putInstanceRequest@2.0.0',
+    req: 'putInstanceRequest@3.0.0',
     resSchema: 'putInstanceResponse@2.0.0',
     res: sendUploadUrls,
   }, {
@@ -228,8 +229,8 @@ describe('e2e record', () => {
   context('passing', () => {
     setup(defaultRoutes)
 
-    it('passes', function () {
-      return e2e.exec(this, {
+    it('passes', async function () {
+      const { stdout } = await e2e.exec(this, {
         key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
         spec: 'record*',
         record: true,
@@ -237,174 +238,179 @@ describe('e2e record', () => {
         outputPath,
         expectedExitCode: 3,
       })
-      .get('stdout')
-      .then((stdout) => {
-        expect(stdout).to.include('Run URL:')
-        expect(stdout).to.include(runUrl)
 
-        const urls = getRequestUrls()
+      console.log(stdout)
+      expect(stdout).to.include('Run URL:')
+      expect(stdout).to.include(runUrl)
 
-        // first create run request
-        expect(urls[0]).to.eq('POST /runs')
+      const urls = getRequestUrls()
 
-        // grab the first set of 4
-        const firstInstanceSet = urls.slice(1, 5)
+      // first create run request
+      expect(urls[0]).to.eq('POST /runs')
 
-        expect(firstInstanceSet).to.deep.eq([
-          `POST /runs/${runId}/instances`,
-          `PUT /instances/${instanceId}`,
-          'PUT /videos/video.mp4',
-          `PUT /instances/${instanceId}/stdout`,
-        ])
+      // grab the first set of 4
+      const firstInstanceSet = urls.slice(1, 5)
 
-        // grab the second set of 5
-        const secondInstanceSet = urls.slice(5, 10)
+      expect(firstInstanceSet).to.deep.eq([
+        `POST /runs/${runId}/instances`,
+        `PUT /instances/${instanceId}`,
+        'PUT /videos/video.mp4',
+        `PUT /instances/${instanceId}/stdout`,
+      ])
 
-        expect(secondInstanceSet).to.have.members([
-          `POST /runs/${runId}/instances`,
-          `PUT /instances/${instanceId}`,
-          'PUT /videos/video.mp4',
-          'PUT /screenshots/1.png',
-          `PUT /instances/${instanceId}/stdout`,
-        ])
+      // grab the second set of 5
+      const secondInstanceSet = urls.slice(5, 10)
 
-        // grab the third set of 5
-        const thirdInstanceSet = urls.slice(10, 14)
+      console.log(secondInstanceSet)
+      expect(secondInstanceSet).to.have.members([
+        `POST /runs/${runId}/instances`,
+        `PUT /instances/${instanceId}`,
+        'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/stdout`,
+      ])
 
-        // no video because no tests failed
-        expect(thirdInstanceSet).to.deep.eq([
-          `POST /runs/${runId}/instances`,
-          `PUT /instances/${instanceId}`,
-          'PUT /screenshots/1.png',
-          `PUT /instances/${instanceId}/stdout`,
-        ])
+      // grab the third set of 5
+      const thirdInstanceSet = urls.slice(10, 14)
 
-        // grab the forth set of 5
-        const forthInstanceSet = urls.slice(14, 19)
+      // no video because no tests failed
+      expect(thirdInstanceSet).to.deep.eq([
+        `POST /runs/${runId}/instances`,
+        `PUT /instances/${instanceId}`,
+        'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/stdout`,
+      ])
 
-        expect(forthInstanceSet).to.have.members([
-          `POST /runs/${runId}/instances`,
-          `PUT /instances/${instanceId}`,
-          'PUT /videos/video.mp4',
-          'PUT /screenshots/1.png',
-          `PUT /instances/${instanceId}/stdout`,
-        ])
+      // grab the forth set of 5
+      const forthInstanceSet = urls.slice(14, 19)
 
-        const postRun = requests[0]
+      expect(forthInstanceSet).to.have.members([
+        `POST /runs/${runId}/instances`,
+        `PUT /instances/${instanceId}`,
+        'PUT /videos/video.mp4',
+        'PUT /screenshots/1.png',
+        `PUT /instances/${instanceId}/stdout`,
+      ])
 
-        // ensure its relative to projectRoot
-        expect(postRun.body.specs).to.deep.eq([
-          'cypress/integration/record_error_spec.coffee',
-          'cypress/integration/record_fail_spec.coffee',
-          'cypress/integration/record_pass_spec.coffee',
-          'cypress/integration/record_uncaught_spec.coffee',
-        ])
+      const postRun = requests[0]
 
-        expect(postRun.body.projectId).to.eq('pid123')
-        expect(postRun.body.recordKey).to.eq('f858a2bc-b469-4e48-be67-0876339ee7e1')
-        expect(postRun.body.specPattern).to.eq('cypress/integration/record*')
+      // ensure its relative to projectRoot
+      expect(postRun.body.specs).to.deep.eq([
+        'cypress/integration/record_error_spec.coffee',
+        'cypress/integration/record_fail_spec.coffee',
+        'cypress/integration/record_pass_spec.coffee',
+        'cypress/integration/record_uncaught_spec.coffee',
+      ])
 
-        const firstInstance = requests[1]
+      expect(postRun.body.projectId).to.eq('pid123')
+      expect(postRun.body.recordKey).to.eq('f858a2bc-b469-4e48-be67-0876339ee7e1')
+      expect(postRun.body.specPattern).to.eq('cypress/integration/record*')
 
-        expect(firstInstance.body.groupId).to.eq(groupId)
-        expect(firstInstance.body.machineId).to.eq(machineId)
-        expect(firstInstance.body.spec).to.eq(
-          'cypress/integration/record_error_spec.coffee',
-        )
+      const firstInstance = requests[1]
 
-        const firstInstancePut = requests[2]
+      expect(firstInstance.body.groupId).to.eq(groupId)
+      expect(firstInstance.body.machineId).to.eq(machineId)
+      expect(firstInstance.body.spec).to.eq(
+        'cypress/integration/record_error_spec.coffee',
+      )
 
-        expect(firstInstancePut.body.error).to.include('Oops...we found an error preparing this test file')
-        expect(firstInstancePut.body.tests).to.be.null
-        expect(firstInstancePut.body.hooks).to.be.null
-        expect(firstInstancePut.body.screenshots).to.have.length(0)
-        expect(firstInstancePut.body.stats.tests).to.eq(0)
-        expect(firstInstancePut.body.stats.failures).to.eq(1)
-        expect(firstInstancePut.body.stats.passes).to.eq(0)
+      const firstInstancePut = requests[2]
 
-        const firstInstanceStdout = requests[4]
+      expect(firstInstancePut.body.error).to.include('Oops...we found an error preparing this test file')
+      expect(firstInstancePut.body.tests).to.be.null
+      expect(firstInstancePut.body.hooks).to.be.null
+      expect(firstInstancePut.body.screenshots).to.have.length(0)
+      expect(firstInstancePut.body.stats.tests).to.eq(0)
+      expect(firstInstancePut.body.stats.failures).to.eq(1)
+      expect(firstInstancePut.body.stats.passes).to.eq(0)
 
-        expect(firstInstanceStdout.body.stdout).to.include('record_error_spec.coffee')
+      const firstInstanceStdout = requests[4]
 
-        const secondInstance = requests[5]
+      expect(firstInstanceStdout.body.stdout).to.include('record_error_spec.coffee')
 
-        expect(secondInstance.body.groupId).to.eq(groupId)
-        expect(secondInstance.body.machineId).to.eq(machineId)
-        expect(secondInstance.body.spec).to.eq(
-          'cypress/integration/record_fail_spec.coffee',
-        )
+      const secondInstance = requests[5]
 
-        const secondInstancePut = requests[6]
+      expect(secondInstance.body.groupId).to.eq(groupId)
+      expect(secondInstance.body.machineId).to.eq(machineId)
+      expect(secondInstance.body.spec).to.eq(
+        'cypress/integration/record_fail_spec.coffee',
+      )
 
-        expect(secondInstancePut.body.error).to.be.null
-        expect(secondInstancePut.body.tests).to.have.length(2)
-        expect(secondInstancePut.body.hooks).to.have.length(2)
-        expect(secondInstancePut.body.screenshots).to.have.length(1)
-        expect(secondInstancePut.body.stats.tests).to.eq(2)
-        expect(secondInstancePut.body.stats.failures).to.eq(1)
-        expect(secondInstancePut.body.stats.passes).to.eq(0)
-        expect(secondInstancePut.body.stats.skipped).to.eq(1)
+      const secondInstancePut = requests[6]
 
-        const secondInstanceStdout = requests[9]
+      expect(secondInstancePut.body.error).to.be.null
+      expect(secondInstancePut.body.tests).to.have.length(2)
+      expect(secondInstancePut.body.hooks).to.have.length(1)
+      expect(secondInstancePut.body.screenshots).to.have.length(1)
+      expect(secondInstancePut.body.stats.tests).to.eq(2)
+      expect(secondInstancePut.body.stats.failures).to.eq(1)
+      expect(secondInstancePut.body.stats.passes).to.eq(0)
+      expect(secondInstancePut.body.stats.skipped).to.eq(1)
 
-        expect(secondInstanceStdout.body.stdout).to.include('record_fail_spec.coffee')
-        expect(secondInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
+      const secondInstanceStdout = requests[9]
 
-        const thirdInstance = requests[10]
+      expect(secondInstanceStdout.body.stdout).to.include('record_fail_spec.coffee')
+      expect(secondInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
 
-        expect(thirdInstance.body.groupId).to.eq(groupId)
-        expect(thirdInstance.body.machineId).to.eq(machineId)
-        expect(thirdInstance.body.spec).to.eq(
-          'cypress/integration/record_pass_spec.coffee',
-        )
+      const thirdInstance = requests[10]
 
-        const thirdInstancePut = requests[11]
+      expect(thirdInstance.body.groupId).to.eq(groupId)
+      expect(thirdInstance.body.machineId).to.eq(machineId)
+      expect(thirdInstance.body.spec).to.eq(
+        'cypress/integration/record_pass_spec.coffee',
+      )
 
-        expect(thirdInstancePut.body.error).to.be.null
-        expect(thirdInstancePut.body.tests).to.have.length(2)
-        expect(thirdInstancePut.body.hooks).to.have.length(1)
-        expect(thirdInstancePut.body.screenshots).to.have.length(1)
-        expect(thirdInstancePut.body.stats.tests).to.eq(2)
-        expect(thirdInstancePut.body.stats.passes).to.eq(1)
-        expect(thirdInstancePut.body.stats.failures).to.eq(0)
-        expect(thirdInstancePut.body.stats.pending).to.eq(1)
+      const thirdInstancePut = requests[11]
 
-        const thirdInstanceStdout = requests[13]
+      expect(thirdInstancePut.body.error).to.be.null
+      expect(thirdInstancePut.body.tests).to.have.length(2)
+      expect(thirdInstancePut.body.hooks).to.have.length(0)
+      expect(thirdInstancePut.body.screenshots).to.have.length(1)
+      expect(thirdInstancePut.body.stats.tests).to.eq(2)
+      expect(thirdInstancePut.body.stats.passes).to.eq(1)
+      expect(thirdInstancePut.body.stats.failures).to.eq(0)
+      expect(thirdInstancePut.body.stats.pending).to.eq(1)
 
-        expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.coffee')
-        expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
-        expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
+      const thirdInstanceStdout = requests[13]
 
-        const fourthInstance = requests[14]
+      expect(thirdInstanceStdout.body.stdout).to.include('record_pass_spec.coffee')
+      expect(thirdInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
+      expect(thirdInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
 
-        expect(fourthInstance.body.groupId).to.eq(groupId)
-        expect(fourthInstance.body.machineId).to.eq(machineId)
-        expect(fourthInstance.body.spec).to.eq(
-          'cypress/integration/record_uncaught_spec.coffee',
-        )
+      const fourthInstance = requests[14]
 
-        const fourthInstancePut = requests[15]
+      expect(fourthInstance.body.groupId).to.eq(groupId)
+      expect(fourthInstance.body.machineId).to.eq(machineId)
+      expect(fourthInstance.body.spec).to.eq(
+        'cypress/integration/record_uncaught_spec.coffee',
+      )
 
-        expect(fourthInstancePut.body.error).to.be.null
-        expect(fourthInstancePut.body.tests).to.have.length(1)
-        expect(fourthInstancePut.body.hooks).to.have.length(1)
-        expect(fourthInstancePut.body.screenshots).to.have.length(1)
-        expect(fourthInstancePut.body.stats.tests).to.eq(1)
-        expect(fourthInstancePut.body.stats.failures).to.eq(1)
-        expect(fourthInstancePut.body.stats.passes).to.eq(0)
+      const fourthInstancePut = requests[15]
 
-        const forthInstanceStdout = requests[18]
+      expect(fourthInstancePut.body.error).to.be.null
+      expect(fourthInstancePut.body.tests).to.have.length(1)
+      expect(fourthInstancePut.body.hooks).to.have.length(0)
+      expect(fourthInstancePut.body.screenshots).to.have.length(1)
+      expect(fourthInstancePut.body.stats.tests).to.eq(1)
+      expect(fourthInstancePut.body.stats.failures).to.eq(1)
+      expect(fourthInstancePut.body.stats.passes).to.eq(0)
 
-        expect(forthInstanceStdout.body.stdout).to.include('record_uncaught_spec.coffee')
-        expect(forthInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
-        expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
-        expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.coffee')
+      const forthInstanceStdout = requests[18]
 
-        return fs.readJsonAsync(outputPath)
-        .then((results) => {
-          expect(results.runUrl).to.equal(runUrl)
-        })
-      })
+      expect(forthInstanceStdout.body.stdout).to.include('record_uncaught_spec.coffee')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_error_spec.coffee')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
+      expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.coffee')
+
+      const runs = requests.filter((v) => v.body.tests).map((v) => v.body)
+
+      expectRunsToHaveCorrectTimings(runs)
+
+      snapshot(runs)
+
+      const results = await fs.readJsonAsync(outputPath)
+
+      expect(results.runUrl).to.equal(runUrl)
     })
   })
 
@@ -869,7 +875,7 @@ describe('e2e record', () => {
       routes[2] = {
         method: 'put',
         url: '/instances/:id',
-        req: 'putInstanceRequest@2.0.0',
+        req: 'putInstanceRequest@3.0.0',
         res (req, res) {
           return res.sendStatus(500)
         },
@@ -1169,7 +1175,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@3.0.0',
           res (req, res) {
             return res.sendStatus(500)
           },
@@ -1216,7 +1222,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@3.0.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
@@ -1287,7 +1293,7 @@ describe('e2e record', () => {
         }, {
           method: 'put',
           url: '/instances/:id',
-          req: 'putInstanceRequest@2.0.0',
+          req: 'putInstanceRequest@3.0.0',
           resSchema: 'putInstanceResponse@2.0.0',
           res: sendUploadUrls,
         }, {
@@ -1642,6 +1648,45 @@ describe('e2e record', () => {
                 name: 'foo',
                 message: 'foo',
                 code: 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS',
+                used: 700,
+                limit: 500,
+                orgId: 'org-id-1234',
+              }],
+            })
+          },
+        }
+
+        setup(routes)
+
+        it('warns when over test recordings', function () {
+          return e2e.exec(this, {
+            key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',
+            spec: 'record_pass*',
+            record: true,
+            snapshot: true,
+          })
+        })
+      })
+
+      describe('free plan - over tests limit v2', () => {
+        const routes = defaultRoutes.slice()
+
+        routes[0] = {
+          method: 'post',
+          url: '/runs',
+          req: 'postRunRequest@2.2.0',
+          resSchema: 'postRunResponse@2.2.0',
+          res (req, res) {
+            return res.status(200).json({
+              runId,
+              groupId,
+              machineId,
+              runUrl,
+              tags,
+              warnings: [{
+                name: 'FreePlanExceedsMonthlyTests',
+                message: 'Warning from Cypress Dashboard: Organization with free plan has exceeded monthly test recordings limit.',
+                code: 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2',
                 used: 700,
                 limit: 500,
                 orgId: 'org-id-1234',

@@ -7,7 +7,7 @@ const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
-const resolve = require('./resolve')
+const resolve = require('../util/resolve')
 
 const errorMessage = function (err = {}) {
   return (err.stack || err.annotated || err.message || err.toString())
@@ -35,23 +35,23 @@ const baseEmitter = new EE()
 let fileObjects = {}
 let fileProcessors = {}
 
-const createBrowserifyPreprocessor = function (options) {
-  debug('creating browserify preprocessor with options %o', options)
-  const browserify = require('@cypress/browserify-preprocessor')
+const createPreprocessor = function (options) {
+  debug('creating webpack preprocessor with options %o', options)
 
-  return browserify(options)
+  const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+  return webpackPreprocessor(options)
 }
 
 const setDefaultPreprocessor = function (config) {
   debug('set default preprocessor')
 
-  const tsPath = resolve.typescript(config)
-
+  const tsPath = resolve.typescript(config.projectRoot)
   const options = {
     typescript: tsPath,
   }
 
-  return plugins.register('file:preprocessor', API.createBrowserifyPreprocessor(options))
+  return plugins.register('file:preprocessor', API.createPreprocessor(options))
 }
 
 plugins.registerHandler((ipc) => {
@@ -76,7 +76,7 @@ const API = {
 
   setDefaultPreprocessor,
 
-  createBrowserifyPreprocessor,
+  createPreprocessor,
 
   emitter: baseEmitter,
 

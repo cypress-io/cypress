@@ -227,7 +227,6 @@ const updateInstance = (options = {}) => {
       error,
       video,
       hooks,
-      stdout: null, // don't send stdout with the instance payload to prevent requests that are too large. stdout will later get uploaded separately anyway.
       instanceId,
       screenshots,
       reporterStats,
@@ -385,13 +384,21 @@ const createRun = Promise.method((options = {}) => {
             gracePeriodMessage: gracePeriodMessage(warning.gracePeriodEnds),
             link: billingLink(warning.orgId),
           })
+        case 'FREE_PLAN_EXCEEDS_MONTHLY_TESTS_V2':
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'free',
+            usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
+            link: billingLink(warning.orgId),
+          })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS':
-          return errors.warning('PAID_PLAN_EXCEEDS_MONTHLY_PRIVATE_TESTS', {
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'current',
             usedTestsMessage: usedTestsMessage(warning.limit, 'private test'),
             link: billingLink(warning.orgId),
           })
         case 'PAID_PLAN_EXCEEDS_MONTHLY_TESTS':
-          return errors.warning('PAID_PLAN_EXCEEDS_MONTHLY_TESTS', {
+          return errors.warning('PLAN_EXCEEDS_MONTHLY_TESTS', {
+            planType: 'current',
             usedTestsMessage: usedTestsMessage(warning.limit, 'test'),
             link: billingLink(warning.orgId),
           })

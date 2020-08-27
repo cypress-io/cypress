@@ -3,7 +3,6 @@ require('../spec_helper')
 const mockedEnv = require('mocked-env')
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
-const tsnode = require('ts-node')
 const Fixtures = require('../support/helpers/fixtures')
 const api = require(`${root}lib/api`)
 const user = require(`${root}lib/user`)
@@ -314,58 +313,6 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         ])
 
         expect(config).ok
-      })
-    })
-
-    describe('out-of-the-box typescript setup', () => {
-      const tsProjPath = Fixtures.projectPath('ts-installed')
-      // Root path is used because resolve finds server typescript path when we use a project under `suppert/projects` folder.
-      const rootPath = path.join(__dirname, '../../../../..')
-      const projTsPath = path.join(tsProjPath, 'node_modules/typescript/index.js')
-
-      let cfg
-
-      beforeEach(() => {
-        return config.get(tsProjPath, {})
-        .then((c) => {
-          cfg = c
-        })
-      })
-
-      const setupProject = (typescript, projectRoot) => {
-        const proj = new Project(projectRoot)
-
-        sinon.stub(proj, 'watchSettingsAndStartWebsockets').resolves()
-        sinon.stub(proj, 'checkSupportFile').resolves()
-        sinon.stub(proj, 'scaffold').resolves()
-        sinon.stub(proj, 'getConfig').resolves({ ...cfg, typescript })
-
-        const register = sinon.stub(tsnode, 'register')
-
-        return { proj, register }
-      }
-
-      it('ts installed', () => {
-        const { proj, register } = setupProject('default', tsProjPath)
-
-        return proj.open().then(() => {
-          expect(register).to.be.calledWith({
-            transpileOnly: true,
-            compiler: projTsPath,
-            compilerOptions: {
-              module: 'CommonJS',
-              esModuleInterop: true,
-            },
-          })
-        })
-      })
-
-      it('ts not installed', () => {
-        const { proj, register } = setupProject('default', rootPath)
-
-        return proj.open().then(() => {
-          expect(register).not.called
-        })
       })
     })
   })

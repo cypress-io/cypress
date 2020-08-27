@@ -21,7 +21,19 @@ Oops...we found an error preparing this test file:
 
 The error was:
 
-Error: Cannot find module './does/not/exist' from '/foo/bar/.projects/busted-support-file/cypress/support'
+Error: Webpack Compilation Error
+./cypress/support/index.js
+Module not found: Error: Can't resolve './does/not/exist' in '/foo/bar/.projects/busted-support-file/cypress/support'
+Looked for and couldn't find the file at the following paths:
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.js]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.json]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.jsx]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.mjs]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.coffee]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.ts]
+[/foo/bar/.projects/busted-support-file/cypress/support/does/not/exist.tsx]
+ @ ./cypress/support/index.js 3:0-27
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 

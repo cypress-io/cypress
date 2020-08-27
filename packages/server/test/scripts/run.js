@@ -155,6 +155,10 @@ if (options.exit === false) {
   env.NO_EXIT = '1'
 }
 
+if (options['cypress-inspect-brk']) {
+  env.CYPRESS_INSPECT_BRK = '1'
+}
+
 const cmd = `${commandAndArguments.command} ${
   commandAndArguments.args.join(' ')}`
 

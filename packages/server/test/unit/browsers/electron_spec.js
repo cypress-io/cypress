@@ -135,15 +135,15 @@ describe('lib/browsers/electron', () => {
       plugins.has.returns(true)
       plugins.execute.resolves({ extensions: ['foo', 'bar'] })
 
-      Windows.installExtension.withArgs('bar').throws()
+      Windows.installExtension.withArgs(sinon.match.any, 'bar').throws()
 
       return electron.open('electron', this.url, this.options, this.automation)
       .then(() => {
         expect(Windows.removeAllExtensions).to.be.calledOnce
 
         expect(Windows.installExtension).to.be.calledTwice
-        expect(Windows.installExtension).to.be.calledWith('foo')
-        expect(Windows.installExtension).to.be.calledWith('bar')
+        expect(Windows.installExtension).to.be.calledWith(sinon.match.any, 'foo')
+        expect(Windows.installExtension).to.be.calledWith(sinon.match.any, 'bar')
 
         expect(this.options.onWarning).to.be.calledOnce
 
