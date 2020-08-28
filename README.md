@@ -9,7 +9,7 @@
 
 > A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
-**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage)
+**Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
 ## TLDR
 
@@ -664,10 +664,19 @@ To see all local tests, install dependencies, build the code and open Cypress in
 ```sh
 npm install
 npm run build
+```
+
+The build is done using `tsc` that transpiles all files from [src](src) to the `dist` folder. You can then run component tests by opening Cypress
+
+```sh
 npm run cy:open
 ```
 
-The build is done using `tsc` that transpiles all files from [src](src) to `dist` folder.
+and clicking on any component spec
+
+![Component specs](images/component-specs.png)
+
+Larger tests that use full application and run on CI (see [circle.yml](circle.yml)) are located in the folder [examples](examples).
 
 ### Debugging
 
