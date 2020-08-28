@@ -742,6 +742,75 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
+    describe('dispatches correct Event objects', () => {
+      it('should trigger KeyboardEvent with .trigger inside Cypress event listener', (done) => {
+        cy.window().then((win) => {
+          cy.get('input:first').then((jQueryElement) => {
+            let elemHtml = jQueryElement.get(0)
+
+            elemHtml.addEventListener('keydown', (event) => {
+              expect(event instanceof win['KeyboardEvent']).to.be.true
+              done()
+            })
+          })
+        })
+
+        cy.get('input:first').trigger('keydown', {
+          eventType: 'KeyboardEvent',
+          keyCode: 65,
+          which: 65,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+      })
+
+      it('should trigger KeyboardEvent with .trigger inside html script event listener', () => {
+        cy.visit('fixtures/issue-5650.html')
+
+        cy.get('#test-input').trigger('keydown', {
+          eventType: 'KeyboardEvent',
+          keyCode: 65,
+          which: 65,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+
+        cy.get('#result').contains('isKeyboardEvent: true')
+      })
+
+      it('should trigger MouseEvent with .trigger inside Cypress event listener', (done) => {
+        cy.window().then((win) => {
+          cy.get('input:first').then((jQueryElement) => {
+            let elem = jQueryElement.get(0)
+
+            elem.addEventListener('mousedown', (event) => {
+              expect(event instanceof win['MouseEvent']).to.be.true
+              done()
+            })
+          })
+        })
+
+        cy.get('input:first').trigger('mousedown', {
+          eventType: 'MouseEvent',
+          button: 0,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+      })
+
+      it('should trigger MouseEvent with .trigger inside html script event listener', () => {
+        cy.visit('fixtures/issue-5650.html')
+        cy.get('#test-input').trigger('mousedown', {
+          eventType: 'MouseEvent',
+          button: 0,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+
+        cy.get('#result').contains('isMouseEvent: true')
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
@@ -862,6 +931,19 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('button:first').trigger('mouseover', 'foo')
+      })
+
+      it('throws when provided invalid event type', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).to.eq(2)
+          expect(err.message).to.eq('Timed out retrying: Event type, FooEvent, is invalid.')
+
+          done()
+        })
+
+        cy.get('button:first').trigger('mouseover', {
+          eventType: 'FooEvent',
+        })
       })
 
       it('throws when element animation exceeds timeout', (done) => {

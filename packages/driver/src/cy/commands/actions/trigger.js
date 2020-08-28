@@ -5,8 +5,20 @@ const $dom = require('../../../dom')
 const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
 
-const dispatch = (target, eventName, options) => {
-  const event = new Event(eventName, options)
+const dispatch = (target, window, eventName, options) => {
+  const eventType = options.eventType ?? 'Event'
+  const ctor = window[eventType]
+
+  if (typeof ctor !== 'function') {
+    $errUtils.throwErrByPath('trigger.invalid_event_type', {
+      args: { eventType },
+    })
+  }
+
+  // eventType property should not be added to event instance.
+  delete options.eventType
+
+  const event = new ctor(eventName, options)
 
   // some options, like clientX & clientY, must be set on the
   // instance instead of passing them into the constructor
@@ -85,7 +97,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
       const trigger = () => {
         if (dispatchEarly) {
-          return dispatch(subject, eventName, eventOptions)
+          return dispatch(subject, state('window'), eventName, eventOptions)
         }
 
         return $actionability.verify(cy, subject, options, {
@@ -112,7 +124,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
               pageY: fromElWindow.y,
             }, eventOptions)
 
-            return dispatch($elToClick.get(0), eventName, eventOptions)
+            return dispatch($elToClick.get(0), state('window'), eventName, eventOptions)
           },
         })
       }

@@ -1509,6 +1509,10 @@ module.exports = {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/trigger',
     },
+    invalid_event_type: {
+      message: `Event type, {{eventType}}, is invalid.`,
+      docsUrl: 'https://on.cypress.io/trigger',
+    },
   },
 
   type: {
