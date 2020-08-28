@@ -1,13 +1,19 @@
+import _ from 'lodash'
 import cs from 'classnames'
 import React, { Component, CSSProperties, MouseEvent, ReactNode, RefObject } from 'react'
 
 import { onEnterOrSpace } from '../lib/util'
 
+interface HeaderText {
+  collapsed: ReactNode
+  expanded: ReactNode
+}
+
 interface Props {
   isOpen?: boolean
   headerClass?: string
   headerStyle?: CSSProperties
-  header?: ReactNode
+  header?: ReactNode | HeaderText
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
@@ -38,6 +44,8 @@ class Collapsible extends Component<Props, State> {
   }
 
   render () {
+    const { header } = this.props
+
     return (
       <div className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
         <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
@@ -56,7 +64,13 @@ class Collapsible extends Component<Props, State> {
             >
               <i className='collapsible-indicator fa-fw fas' />
               <span className='collapsible-header-text'>
-                {this.props.header}
+                {
+                  (header as HeaderText).expanded && (header as HeaderText).collapsed
+                    ? this.state.isOpen
+                      ? (this.props.header as HeaderText).expanded
+                      : (this.props.header as HeaderText).collapsed
+                    : this.props.header
+                }
               </span>
             </div>
           </div>

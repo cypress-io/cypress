@@ -1,19 +1,27 @@
 import React from 'react'
 import _ from 'lodash'
+import Collapsible from '../collapsible/collapsible'
 
 interface ObjectViewerProps {
   obj: Record<any, any>
 }
 
 export const ObjectViewer = ({ obj }: ObjectViewerProps) => {
-  return Object.keys(obj).length === 1
+  return Object.keys(obj).length === 1 && !_.isObject(obj)
     ? (
       <div className="object-viewer">
         {`{ ${Object.keys(obj).map((key) => `${key}: ${encode(obj[key])}`).join('')} }`}
       </div>
     )
     : (
-      <div>Show options</div>
+      <Collapsible
+        header={{
+          collapsed: 'Show options',
+          expanded: 'Hide options',
+        }}
+      >
+        <pre>{JSON.stringify(obj, null, 4)}</pre>
+      </Collapsible>
     )
 }
 
