@@ -2914,7 +2914,7 @@ declare namespace Cypress {
      *
      * @default 'Event'
      */
-    eventType: string
+    constructor: string
   }
 
   /** Options to change the default behavior of .writeFile */
