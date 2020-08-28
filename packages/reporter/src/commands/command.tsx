@@ -1,6 +1,5 @@
 import _ from 'lodash'
 import cs from 'classnames'
-import Markdown from 'markdown-it'
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
@@ -15,12 +14,10 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import CommandModel from './command-model'
-
-const md = new Markdown()
+import { Message } from './message'
 
 const displayName = (model: CommandModel) => model.displayName || model.name
 const nameClassName = (name: string) => name.replace(/(\s+)/g, '-')
-const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
 const visibleMessage = (model: CommandModel) => {
   if (model.visible) return ''
 
@@ -97,24 +94,6 @@ const Aliases = observer(({ model, aliasesWithDuplicates }: AliasesProps) => {
     </span>
   )
 })
-
-interface MessageProps {
-  model: CommandModel
-}
-
-const Message = observer(({ model }: MessageProps) => (
-  <span>
-    <i className={`fas fa-circle ${model.renderProps.indicator}`} />
-    <span
-      className='command-message-text'
-      dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
-    />
-    { model.options && Object.keys(model.options).length > 0
-      ? <span>{JSON.stringify(model.options)}</span>
-      : null
-    }
-  </span>
-))
 
 interface ProgressProps {
   model: CommandModel
