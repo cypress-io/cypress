@@ -211,6 +211,27 @@ describe('src/cy/commands/actions/trigger', () => {
       cy.window().should('have.length.gt', 1).trigger('click')
     })
 
+    // https://github.com/cypress-io/cypress/issues/3686
+    it('view should be AUT window', (done) => {
+      cy.window().then((win) => {
+        cy.get('input:first').then((jQueryElement) => {
+          let elem = jQueryElement.get(0)
+
+          elem.addEventListener('mousedown', (event) => {
+            expect(event.view).to.eql(win)
+            done()
+          })
+        })
+      })
+
+      cy.get('input:first').trigger('mousedown', {
+        eventType: 'MouseEvent',
+        button: 0,
+        shiftKey: false,
+        ctrlKey: false,
+      })
+    })
+
     describe('actionability', () => {
       it('can trigger on elements which are hidden until scrolled within parent container', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')

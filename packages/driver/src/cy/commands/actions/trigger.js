@@ -18,6 +18,15 @@ const dispatch = (target, window, eventName, options) => {
   // eventType property should not be added to event instance.
   delete options.eventType
 
+  // https://github.com/cypress-io/cypress/issues/3686
+  // UIEvent and its derived events like MouseEvent, KeyboardEvent
+  // has a property, view, which is the window object where the event happened.
+  // Logic below checks the ctor function is UIEvent itself or its children
+  // and adds view to the instance init object.
+  if (ctor === window['UIEvent'] || ctor.prototype instanceof window['UIEvent']) {
+    options.view = window
+  }
+
   const event = new ctor(eventName, options)
 
   // some options, like clientX & clientY, must be set on the
