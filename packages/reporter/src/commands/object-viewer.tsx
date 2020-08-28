@@ -6,13 +6,15 @@ interface ObjectViewerProps {
 }
 
 export const ObjectViewer = ({ obj }: ObjectViewerProps) => {
-  return (
-    <div className="object-viewer">
-      {Object.keys(obj).map((key) => {
-        return <div>{`- ${key}: ${encode(obj[key])}`}</div>
-      })}
-    </div>
-  )
+  return Object.keys(obj).length === 1
+    ? (
+      <div className="object-viewer">
+        {`{ ${Object.keys(obj).map((key) => `${key}: ${encode(obj[key])}`).join('')} }`}
+      </div>
+    )
+    : (
+      <div>Show options</div>
+    )
 }
 
 const encode = (val: any) => {
