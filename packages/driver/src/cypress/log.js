@@ -159,7 +159,11 @@ const defaults = function (state, config, obj) {
     if (obj.message || obj.message === '') {
       obj.message = $utils.stringify(obj.message)
     } else {
-      let args = current != null ? current.get('args') : undefined
+      // Sometimes, option argument isn't at the end of the list.
+      // The code below removes that option argument from the list and
+      // generates message.
+
+      let args = current?.get('args')
 
       if (args) {
         const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
