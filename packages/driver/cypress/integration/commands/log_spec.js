@@ -261,8 +261,10 @@ describe('log options on success', () => {
     cy.get('#a').trigger('mouseenter', 'top', options)
   })
 
-  testLog('type', { delay: 10,
-    force: true }, (options) => {
+  testLog('type', {
+    delay: 10,
+    force: true,
+  }, (options) => {
     cy.get('#a').type('hi?', options)
   })
 
