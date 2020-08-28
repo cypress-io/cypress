@@ -5,9 +5,9 @@ const $dom = require('../../../dom')
 const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
 
-const dispatch = (target, window, eventName, options) => {
+const dispatch = (target, appWindow, eventName, options) => {
   const eventType = options.eventType ?? 'Event'
-  const ctor = window[eventType]
+  const ctor = appWindow[eventType]
 
   if (typeof ctor !== 'function') {
     $errUtils.throwErrByPath('trigger.invalid_event_type', {
@@ -23,8 +23,8 @@ const dispatch = (target, window, eventName, options) => {
   // has a property, view, which is the window object where the event happened.
   // Logic below checks the ctor function is UIEvent itself or its children
   // and adds view to the instance init object.
-  if (ctor === window['UIEvent'] || ctor.prototype instanceof window['UIEvent']) {
-    options.view = window
+  if (ctor === appWindow['UIEvent'] || ctor.prototype instanceof appWindow['UIEvent']) {
+    options.view = appWindow
   }
 
   const event = new ctor(eventName, options)
