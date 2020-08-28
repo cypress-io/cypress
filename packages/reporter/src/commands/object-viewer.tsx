@@ -7,7 +7,7 @@ interface ObjectViewerProps {
 }
 
 export const ObjectViewer = ({ obj }: ObjectViewerProps) => {
-  return Object.keys(obj).length === 1 && !_.isObject(obj)
+  return Object.keys(obj).length === 1 && !_.isObject(obj[Object.keys(obj)[0]])
     ? (
       <div className="object-viewer">
         {`{ ${Object.keys(obj).map((key) => `${key}: ${encode(obj[key])}`).join('')} }`}
