@@ -119,6 +119,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: getSelector(),
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },

@@ -1855,7 +1855,11 @@ describe('src/cy/commands/actions/click', () => {
 
         cy.on('log:changed', (log, attr) => {
           if (log.name === 'click' && attr._emittedAttrs.coords) {
-            const args = attr._emittedAttrs.message.split(', ').map((i) => parseInt(i))
+            const args = attr._emittedAttrs.message.split(', ').map((text) => {
+              const parts = text.split(':')
+
+              return parseInt(parts[1])
+            })
             const coords = attr._emittedAttrs.coords
             const position = Cypress.dom.getElementPositioning($btn).fromAutWindow
 
@@ -2478,7 +2482,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('span').invoke('slice', 0, 2).click({ multiple: true, timeout: 1000 }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{multiple: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ multiple: true, timeout: 1000 })
         })
@@ -2953,7 +2957,7 @@ describe('src/cy/commands/actions/click', () => {
         .then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+          expect(lastLog.get('message')).to.eq('')
 
           expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
         })

@@ -63,6 +63,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         options._log = Cypress.log({
           message: arg,
           timeout: options.timeout,
+          options: userOptions,
         })
 
         if ($dom.isElement(arg)) {

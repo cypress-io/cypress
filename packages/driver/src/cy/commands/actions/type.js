@@ -84,7 +84,8 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       options._log = Cypress.log({
-        message: [chars, deltaOptions],
+        message: chars,
+        options: userOptions,
         $el: options.$el,
         timeout: options.timeout,
         consoleProps () {
@@ -487,7 +488,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         const deltaOptions = $utils.filterOutOptions(options)
 
         options._log = Cypress.log({
-          message: deltaOptions,
+          options: userOptions,
           $el,
           timeout: options.timeout,
           consoleProps () {

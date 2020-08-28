@@ -1,7 +1,6 @@
 const _ = require('lodash')
 
 const $dom = require('../../../dom')
-const $utils = require('../../../cypress/utils')
 const $errUtils = require('../../../cypress/error_utils')
 const $elements = require('../../../dom/elements')
 
@@ -30,6 +29,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           $el: options.$el,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return { 'Applied To': $dom.getElements(options.$el) }
           },
@@ -110,13 +110,10 @@ module.exports = (Commands, Cypress, cy) => {
       const isBody = options.$el.is('body')
 
       if (options.log) {
-        // figure out the options which actually change the behavior of clicks
-        const deltaOptions = $utils.filterOutOptions(options)
-
         options._log = Cypress.log({
           $el: options.$el,
-          message: deltaOptions,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return { 'Applied To': $dom.getElements(options.$el) }
           },

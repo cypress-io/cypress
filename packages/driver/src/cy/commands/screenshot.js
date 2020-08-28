@@ -456,6 +456,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: name,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },

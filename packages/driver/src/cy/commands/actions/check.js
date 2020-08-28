@@ -84,7 +84,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
       const deltaOptions = $utils.filterOutOptions(options)
 
       options._log = Cypress.log({
-        message: deltaOptions,
+        options: userOptions,
         $el,
         timeout: options.timeout,
         consoleProps () {

@@ -155,7 +155,8 @@ describe('src/cy/commands/fixtures', () => {
           expect(lastLog.get('error')).to.eq(err)
           expect(lastLog.get('state')).to.eq('failed')
           expect(lastLog.get('name')).to.eq('fixture')
-          expect(lastLog.get('message')).to.eq('foo, {timeout: 50}')
+          expect(lastLog.get('message')).to.eq('foo')
+          expect(lastLog.get('options')).to.deep.eq({ timeout: 50 })
           expect(err.message).to.eq('`cy.fixture()` timed out waiting `50ms` to receive a fixture. No fixture was ever sent by the server.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/fixture')
 

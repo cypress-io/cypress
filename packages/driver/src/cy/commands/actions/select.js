@@ -26,7 +26,7 @@ module.exports = (Commands, Cypress, cy) => {
         const deltaOptions = $utils.filterOutOptions(options)
 
         options._log = Cypress.log({
-          message: deltaOptions,
+          options: userOptions,
           $el: options.$el,
           timeout: options.timeout,
           consoleProps () {

@@ -502,7 +502,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           }
 
           if (options.log) {
-            options._log = Cypress.log({ timeout: options.timeout })
+            options._log = Cypress.log({
+              timeout: options.timeout,
+              options: userOptions,
+            })
 
             options._log.snapshot('before', { next: 'after' })
           }
@@ -544,7 +547,10 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       })
 
       if (options.log) {
-        options._log = Cypress.log({ timeout: options.timeout })
+        options._log = Cypress.log({
+          timeout: options.timeout,
+          options: userOptions,
+        })
       }
 
       const win = state('window')
@@ -716,6 +722,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           message,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },

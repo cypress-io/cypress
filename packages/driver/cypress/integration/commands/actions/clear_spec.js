@@ -490,11 +490,12 @@ describe('src/cy/commands/actions/type - #clear', () => {
       })
     })
 
-    it('logs deltaOptions', () => {
+    it('logs options', () => {
       cy.get('input:first').clear({ force: true, timeout: 1000 }).then(function () {
         const { lastLog } = this
 
-        expect(lastLog.get('message')).to.eq('{force: true, timeout: 1000}')
+        expect(lastLog.get('message')).to.eq('')
+        expect(lastLog.get('options')).to.deep.eq({ force: true, timeout: 1000 })
 
         expect(lastLog.invoke('consoleProps').Options).to.deep.eq({ force: true, timeout: 1000 })
       })

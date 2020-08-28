@@ -7,13 +7,14 @@ const $Events = require('./events')
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const { getIndexOfUserOptions } = require('../cy/options')
 
 // adds class methods for command, route, and agent logging
 // including the intermediate $Log interface
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses options referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -155,9 +156,21 @@ const defaults = function (state, config, obj) {
       },
     })
 
-    // if obj.isCurrent
-    // stringify the obj.message (if it exists) or current.get("args")
-    obj.message = $utils.stringify(obj.message != null ? obj.message : (current != null ? current.get('args') : undefined))
+    if (obj.message || obj.message === '') {
+      obj.message = $utils.stringify(obj.message)
+    } else {
+      let args = current != null ? current.get('args') : undefined
+
+      if (args) {
+        const optionsIndex = getIndexOfUserOptions(current.get('name'), args)
+
+        if (optionsIndex !== -1 && optionsIndex < args.length) {
+          args = args.filter((v, i) => i !== optionsIndex)
+        }
+      }
+
+      obj.message = $utils.stringify(args)
+    }
 
     // allow type to by a dynamic function
     // so it can conditionally return either
@@ -195,6 +208,7 @@ const defaults = function (state, config, obj) {
     message: undefined,
     timeout: undefined,
     wallClockStartedAt: new Date().toJSON(),
+    options: null,
     renderProps () {
       return {}
     },

@@ -225,6 +225,7 @@ module.exports = function (Commands, Cypress, cy, state) {
     if (options.log) {
       options._log = Cypress.log({
         message,
+        options: userOptions,
         $el: $dom.isElement(subject) ? subject : null,
         timeout: options.timeout,
         consoleProps () {

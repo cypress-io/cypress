@@ -5246,6 +5246,8 @@ declare namespace Cypress {
     name: string
     /** Override *name* for display purposes only */
     displayName: string
+    /** Show user-provided options */
+    options: ObjectLike
     message: any
     /** Return an object that will be printed in the dev tools console */
     consoleProps(): ObjectLike

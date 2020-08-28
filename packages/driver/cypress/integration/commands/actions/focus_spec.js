@@ -728,11 +728,12 @@ describe('src/cy/commands/actions/focus', () => {
         })
       })
 
-      it('logs delta options for {force: true}', () => {
+      it('relays options object to Cypress.log()', () => {
         cy.get('input:first').blur({ force: true }).then(function () {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true}')
+          expect(lastLog.get('message')).to.eq('')
+          expect(lastLog.get('options')).to.deep.eq({ force: true })
         })
       })
 
@@ -832,7 +833,7 @@ describe('src/cy/commands/actions/focus', () => {
         cy.get('#button').blur()
       })
 
-      it('logs delta options on error', function (done) {
+      it('relays options object to Cypress.log() on error', function (done) {
         cy.$$('button:first').click(function () {
           $(this).remove()
         })
@@ -840,7 +841,8 @@ describe('src/cy/commands/actions/focus', () => {
         cy.on('fail', () => {
           const { lastLog } = this
 
-          expect(lastLog.get('message')).to.eq('{force: true}')
+          expect(lastLog.get('message')).to.eq('')
+          expect(lastLog.get('options')).to.deep.eq({ force: true })
 
           done()
         })
