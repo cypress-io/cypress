@@ -109,6 +109,10 @@ const Message = observer(({ model }: MessageProps) => (
       className='command-message-text'
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
     />
+    { model.options && Object.keys(model.options).length > 0
+      ? <span>{JSON.stringify(model.options)}</span>
+      : null
+    }
   </span>
 ))
 
