@@ -58,31 +58,70 @@ describe('last arg can be an object, but not an option', () => {
     cy.wrap({}).invoke({ log: true }, 'non-exist')
   })
 
-  it('nextUntil', () => {
-    cy.on('log:added', () => {
-      cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.deep.eq({})
+  it('nextUntil - jquery', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'nextUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
     })
 
     cy.get('div').nextUntil(cy.$$('.warning'))
   })
 
-  it('parentsUntil', () => {
-    cy.on('log:added', () => {
-      cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.deep.eq({})
+  it('nextUntil - DOM', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'nextUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
+    })
+
+    cy.get('div').nextUntil(document.getElementsByClassName('warning')[0])
+  })
+
+  it('parentsUntil - jquery', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'parentsUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
     })
 
     cy.get('div').parentsUntil(cy.$$('.warning'))
   })
 
-  it('prevsUntil', () => {
-    cy.on('log:added', () => {
-      cy.removeAllListeners('log:added')
-      expect(this.logs[0].get('options')).to.deep.eq({})
+  it('parentsUntil - DOM', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'parentsUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
+    })
+
+    cy.get('div').parentsUntil(document.getElementsByClassName('warning')[0])
+  })
+
+  it('prevUntil - jquery', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'prevUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
     })
 
     cy.get('div').prevUntil(cy.$$('.warning'))
+  })
+
+  it('prevUntil - DOM', () => {
+    cy.on('log:added', (attrs, log) => {
+      if (log.get('name') === 'prevUntil') {
+        cy.removeAllListeners('log:added')
+        expect(log.get('options')).to.deep.eq({})
+      }
+    })
+
+    cy.get('div').prevUntil(document.getElementsByClassName('warning')[0])
   })
 
   it('select', () => {
