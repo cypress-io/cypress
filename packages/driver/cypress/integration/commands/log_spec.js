@@ -112,7 +112,7 @@ describe('log options on success', () => {
     cy.focused(options)
   })
 
-  testLog('get', { withinSubject: document.forms[0] }, (options) => {
+  testLog('get', { withinSubject: null }, (options) => {
     cy.get('#a', options)
   })
 

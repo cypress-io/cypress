@@ -5,6 +5,7 @@ import Markdown from 'markdown-it'
 
 import appState from '../lib/app-state'
 import CommandModel from './command-model'
+import { ObjectViewer } from './object-viewer'
 
 const md = new Markdown()
 const formattedMessage = (message: string) => message ? md.renderInline(message) : ''
@@ -21,7 +22,10 @@ export const Message = observer(({ model }: MessageProps) => (
       dangerouslySetInnerHTML={{ __html: formattedMessage(model.displayMessage || '') }}
     />
     { model.options && Object.keys(model.options).length > 0
-      ? <span className="command-message-options">{JSON.stringify(model.options)}</span>
+      ?
+      <span className="command-message-options">
+        <ObjectViewer obj={model.options} />
+      </span>
       : null
     }
   </span>

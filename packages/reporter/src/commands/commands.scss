@@ -329,6 +329,11 @@
     white-space: initial;
     font-size: 0.85em;
     opacity: 0.9;
+
+    .object-viewer {
+      line-height: 1.2;
+      margin: 4px 8px;
+    }
   }
 
   .command-wrapper .fa-circle {
