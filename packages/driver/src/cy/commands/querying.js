@@ -103,6 +103,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         if (options._log == null) {
           options._log = Cypress.log({
             message: selector,
+            options: userOptions,
             referencesAlias: (aliasObj != null && aliasObj.alias) ? { name: aliasObj.alias } : undefined,
             aliasType,
             timeout: options.timeout,
