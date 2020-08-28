@@ -763,6 +763,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/5650
     describe('dispatches correct Event objects', () => {
       it('should trigger KeyboardEvent with .trigger inside Cypress event listener', (done) => {
         cy.window().then((win) => {
