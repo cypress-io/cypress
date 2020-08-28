@@ -1510,7 +1510,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/trigger',
     },
     invalid_event_type: {
-      message: `Event type, {{eventType}}, is invalid.`,
+      message: `${cmd('trigger')} \`eventType\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventType}}\``,
       docsUrl: 'https://on.cypress.io/trigger',
     },
   },

@@ -958,7 +958,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('Timed out retrying: Event type, FooEvent, is invalid.')
+          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventType` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
         })
