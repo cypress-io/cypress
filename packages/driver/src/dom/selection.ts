@@ -36,13 +36,19 @@ const _getSelectionBoundsFromInput = function (el) {
   }
 }
 
-const _getSelectionBoundsFromContentEditable = function (el) {
+const _getSelectionBoundsFromContentEditable = (el) => {
   const pos = {
     start: 0,
     end: 0,
   }
 
-  let range = _getSelectionByEl(el).getRangeAt(0)
+  const sel = _getSelectionByEl(el)
+
+  if (!sel.rangeCount) {
+    return pos
+  }
+
+  const range = sel.getRangeAt(0)
   let preCaretRange = range.cloneRange()
 
   preCaretRange.selectNodeContents(el)
@@ -120,18 +126,18 @@ const _hasContenteditableAttr = (el) => {
   return attr !== undefined && attr !== null && attr !== 'false'
 }
 
-const getHostContenteditable = function (el) {
+const getHostContenteditable = function (el: HTMLElement) {
   let curEl = el
 
   while (curEl.parentElement && !_hasContenteditableAttr(curEl)) {
     curEl = curEl.parentElement
   }
 
-  // if there's no host contenteditable, we must be in designmode
+  // if there's no host contenteditable, we must be in designMode
   // so act as if the documentElement (html element) is the host contenteditable
   if (!_hasContenteditableAttr(curEl)) {
     if ($document.isDocument(curEl)) {
-      return curEl.documentElement
+      return (curEl as Document).documentElement
     }
 
     return el.ownerDocument.documentElement
@@ -554,6 +560,43 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   }
 
   if ($elements.isContentEditable(el)) {
+    // FireFox doesn't treat a selectall+arrow the same as clicking the start/end of a contenteditable
+    // so we
+    if (Cypress.isBrowser({ family: 'firefox' })) {
+      const root = getHostContenteditable(el)
+
+      let elToSelect = root.childNodes[toStart ? 0 : root.childNodes.length - 1]
+
+      if (!elToSelect) {
+        // we must be in an empty contenteditable, so we're already at both the start and end
+        return
+      }
+
+      // el can be undefined when content editable is empty, or a <br> element
+      if ($elements.getTagName(elToSelect) === 'br') {
+        if (root.childNodes.length < 2) {
+          // an empty contenteditable can sometimes just be a single <br> node
+          return
+        }
+
+        elToSelect = toStart ? root.childNodes[1] : root.childNodes[root.childNodes.length - 2]
+      }
+
+      const selection = _getSelectionByEl(el)
+
+      if (!selection) {
+        return
+      }
+
+      const range = selection.getRangeAt(0)
+
+      range.selectNodeContents(elToSelect)
+
+      toStart ? selection.collapseToStart() : selection.collapseToEnd()
+
+      return
+    }
+
     $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     const selection = doc.getSelection()
 
@@ -563,8 +606,9 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
 
     // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
     // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
+    const direction = toStart ? 'backward' : 'forward'
 
-    toStart ? selection.collapseToStart() : selection.collapseToEnd()
+    selection.modify('move', direction, 'line')
 
     return
   }
