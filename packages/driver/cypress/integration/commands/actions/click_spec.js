@@ -1255,6 +1255,28 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('can forcibly click when being covered by element with `opacity: 0`', () => {
+        const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+
+        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+
+        let retried = false
+        let clicked = false
+
+        cy.on('command:retry', () => {
+          retried = true
+        })
+
+        $btn.on('click', () => {
+          clicked = true
+        })
+
+        cy.get('#button-covered-in-span').click({ force: true }).then(() => {
+          expect(retried).to.be.false
+          expect(clicked).to.be.true
+        })
+      })
+
       it('eventually clicks when covered up', () => {
         const $btn = $('<button>button covered</button>')
         .attr('id', 'button-covered-in-span')
@@ -2068,6 +2090,20 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('#opacity-0-hidden').click()
+      })
+
+      it('throws when element with `opacity: 0` is covering element', function (done) {
+        const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+
+        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).to.include('is being covered by another element')
+          done()
+        })
+
+        cy.get('#button-covered-in-span').click()
       })
 
       it('throws when subject is disabled', function (done) {
