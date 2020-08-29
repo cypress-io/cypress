@@ -87,7 +87,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "5.4.2",
+    "@cypress/webpack-preprocessor": "5.4.5",
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
