@@ -26,8 +26,7 @@ const getPackagePath = async () => {
 };
 
 const getUsedLocalPrivatePackages = async () => {
-  const packagePath = await pkgUp();
-  const { dependencies } = require(packagePath);
+  const { dependencies } = await readPkg();
 
   if (!dependencies) {
     return [];
