@@ -254,7 +254,8 @@ const errByPath = (msgPath, args) => {
 }
 
 const createUncaughtException = (type, err) => {
-  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
+  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
   })

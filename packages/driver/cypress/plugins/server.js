@@ -35,6 +35,15 @@ ports.forEach((port) => {
     })
   })
 
+  app.get('/custom-headers', (req, res) => {
+    return res.set('x-foo', 'bar')
+    .send('<html><body>hello there</body></html>')
+  })
+
+  app.get('/redirect', (req, res) => {
+    res.redirect(301, req.query.href)
+  })
+
   // allows us to serve the testrunner into an iframe for testing
   app.use('/isolated-runner', express.static(path.join(__dirname, '../../../runner/dist')))
 
@@ -58,6 +67,10 @@ ports.forEach((port) => {
 
       return res.send(bytes)
     })
+  })
+
+  app.get('/1mb', (req, res) => {
+    return res.type('text').send('X'.repeat(1024 * 1024))
   })
 
   app.get('/basic_auth', (req, res) => {

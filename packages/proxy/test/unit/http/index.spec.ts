@@ -10,6 +10,7 @@ describe('http', function () {
     let incomingRequest
     let incomingResponse
     let error
+    let httpOpts
 
     beforeEach(function () {
       config = {}
@@ -24,6 +25,8 @@ describe('http', function () {
         [HttpStages.IncomingResponse]: [incomingResponse],
         [HttpStages.Error]: [error],
       }
+
+      httpOpts = { config, getRemoteState, middleware }
     })
 
     it('calls IncomingRequest stack, then IncomingResponse stack', function () {
@@ -43,11 +46,11 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http({ config, getRemoteState, middleware })
+      return new Http(httpOpts)
       .handle({}, {})
       .then(function () {
-        expect(incomingRequest).to.be.calledOnce
-        expect(incomingResponse).to.be.calledOnce
+        expect(incomingRequest, 'incomingRequest').to.be.calledOnce
+        expect(incomingResponse, 'incomingResponse').to.be.calledOnce
         expect(error).to.not.be.called
       })
     })
@@ -60,7 +63,7 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http({ config, getRemoteState, middleware })
+      return new Http(httpOpts)
       .handle({}, {})
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
@@ -82,7 +85,7 @@ describe('http', function () {
         this.end()
       })
 
-      return new Http({ config, getRemoteState, middleware })
+      return new Http(httpOpts)
       .handle({}, {})
       .then(function () {
         expect(incomingRequest).to.be.calledOnce
@@ -144,7 +147,7 @@ describe('http', function () {
       middleware[HttpStages.IncomingResponse].push(incomingResponse2)
       middleware[HttpStages.Error].push(error2)
 
-      return new Http({ config, getRemoteState, middleware })
+      return new Http(httpOpts)
       .handle({}, {})
       .then(function () {
         [
