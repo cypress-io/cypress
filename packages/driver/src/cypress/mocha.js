@@ -156,7 +156,7 @@ function overloadMochaTest (suite, specWindow, config) {
 
   suite.addTest = function (test) {
     if (!test.invocationDetails) {
-      test.invocationDetails = getInvocationDetails(specWindow, config)
+      test.invocationDetails = getInvocationDetails(specWindow, config).details
     }
 
     return _fn.call(this, test)
