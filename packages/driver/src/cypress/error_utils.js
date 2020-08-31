@@ -1,3 +1,5 @@
+// See: ./errorScenarios.md for details about error messages and stack traces
+
 const _ = require('lodash')
 
 const $errorMessages = require('./error_messages')
