@@ -113,7 +113,7 @@ const experimentalConfigKeys = [
   'experimentalComponentTesting',
   'experimentalShadowDomSupport',
   'experimentalFetchPolyfill',
-  'experimentalNetworkMocking',
+  'experimentalNetworkStubbing',
 ]
 
 const CONFIG_DEFAULTS = {
@@ -178,7 +178,7 @@ const CONFIG_DEFAULTS = {
   // experimental keys (should all start with "experimental" prefix)
   experimentalComponentTesting: false,
   experimentalSourceRewriting: false,
-  experimentalNetworkMocking: false,
+  experimentalNetworkStubbing: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
   retries: { runMode: 0, openMode: 0 },
@@ -226,7 +226,7 @@ const validationRules = {
   // experimental flag validation below
   experimentalComponentTesting: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
-  experimentalNetworkMocking: v.isBoolean,
+  experimentalNetworkStubbing: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,
   retries: v.isValidRetriesConfig,

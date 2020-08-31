@@ -878,7 +878,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         }
 
         // hack to make cy.visits interceptable by network stubbing
-        if (Cypress.config('experimentalNetworkMocking')) {
+        if (Cypress.config('experimentalNetworkStubbing')) {
           options.selfProxy = true
         }
 
