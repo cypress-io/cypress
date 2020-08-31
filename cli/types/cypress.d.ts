@@ -26,6 +26,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/firefox-gc-issue
      */
     (task: 'firefox:force:gc'): Promise<void>
+    (task: 'net', eventName: string, frame: any): Promise<void>
   }
 
   type BrowserName = 'electron' | 'chrome' | 'chromium' | 'firefox' | 'edge' | string
@@ -2579,8 +2580,14 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
+     * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
+     * @default false
+     */
+    experimentalNetworkMocking: boolean
+    /**
      * Enables shadow DOM support. Adds the `cy.shadow()` command and
      * the `includeShadowDom` option to some DOM commands.
+     * @default false
      */
     experimentalShadowDomSupport: boolean
     /**
