@@ -27,7 +27,7 @@ const debug = Debug('cypress:net-stubbing:server:intercept-request')
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
-// TOOD: optimize to short-circuit on route not match
+// TODO: optimize to short-circuit on route not match
 export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: CypressIncomingRequest) {
   const matchable = _getMatchableForRequest(req)
 
