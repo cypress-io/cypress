@@ -2916,6 +2916,12 @@ declare namespace Cypress {
      * @default true
      */
     cancelable: boolean
+    /**
+     * The type of the event you want to trigger
+     *
+     * @default 'Event'
+     */
+    eventConstructor: string
   }
 
   /** Options to change the default behavior of .writeFile */

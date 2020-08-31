@@ -1623,6 +1623,10 @@ module.exports = {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/trigger',
     },
+    invalid_event_type: {
+      message: `${cmd('trigger')} \`eventConstructor\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventConstructor}}\``,
+      docsUrl: 'https://on.cypress.io/trigger',
+    },
   },
 
   type: {

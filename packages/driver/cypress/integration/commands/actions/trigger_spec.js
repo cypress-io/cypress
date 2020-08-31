@@ -211,6 +211,27 @@ describe('src/cy/commands/actions/trigger', () => {
       cy.window().should('have.length.gt', 1).trigger('click')
     })
 
+    // https://github.com/cypress-io/cypress/issues/3686
+    it('view should be AUT window', (done) => {
+      cy.window().then((win) => {
+        cy.get('input:first').then((jQueryElement) => {
+          let elem = jQueryElement.get(0)
+
+          elem.addEventListener('mousedown', (event) => {
+            expect(event.view).to.eql(win)
+            done()
+          })
+        })
+      })
+
+      cy.get('input:first').trigger('mousedown', {
+        eventConstructor: 'MouseEvent',
+        button: 0,
+        shiftKey: false,
+        ctrlKey: false,
+      })
+    })
+
     describe('actionability', () => {
       it('can trigger on elements which are hidden until scrolled within parent container', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')
@@ -742,6 +763,76 @@ describe('src/cy/commands/actions/trigger', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/5650
+    describe('dispatches correct Event objects', () => {
+      it('should trigger KeyboardEvent with .trigger inside Cypress event listener', (done) => {
+        cy.window().then((win) => {
+          cy.get('input:first').then((jQueryElement) => {
+            let elemHtml = jQueryElement.get(0)
+
+            elemHtml.addEventListener('keydown', (event) => {
+              expect(event instanceof win['KeyboardEvent']).to.be.true
+              done()
+            })
+          })
+        })
+
+        cy.get('input:first').trigger('keydown', {
+          eventConstructor: 'KeyboardEvent',
+          keyCode: 65,
+          which: 65,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+      })
+
+      it('should trigger KeyboardEvent with .trigger inside html script event listener', () => {
+        cy.visit('fixtures/issue-5650.html')
+
+        cy.get('#test-input').trigger('keydown', {
+          eventConstructor: 'KeyboardEvent',
+          keyCode: 65,
+          which: 65,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+
+        cy.get('#result').contains('isKeyboardEvent: true')
+      })
+
+      it('should trigger MouseEvent with .trigger inside Cypress event listener', (done) => {
+        cy.window().then((win) => {
+          cy.get('input:first').then((jQueryElement) => {
+            let elem = jQueryElement.get(0)
+
+            elem.addEventListener('mousedown', (event) => {
+              expect(event instanceof win['MouseEvent']).to.be.true
+              done()
+            })
+          })
+        })
+
+        cy.get('input:first').trigger('mousedown', {
+          eventConstructor: 'MouseEvent',
+          button: 0,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+      })
+
+      it('should trigger MouseEvent with .trigger inside html script event listener', () => {
+        cy.visit('fixtures/issue-5650.html')
+        cy.get('#test-input').trigger('mousedown', {
+          eventConstructor: 'MouseEvent',
+          button: 0,
+          shiftKey: false,
+          ctrlKey: false,
+        })
+
+        cy.get('#result').contains('isMouseEvent: true')
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 100,
     }, () => {
@@ -862,6 +953,19 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('button:first').trigger('mouseover', 'foo')
+      })
+
+      it('throws when provided invalid event type', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).to.eq(2)
+          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
+
+          done()
+        })
+
+        cy.get('button:first').trigger('mouseover', {
+          eventConstructor: 'FooEvent',
+        })
       })
 
       it('throws when element animation exceeds timeout', (done) => {
