@@ -8,11 +8,11 @@
   "scripts": {
     "test": "cypress run",
     "percy:test": "percy exec -- cypress run",
-    "build": "npm run transpile",
+    "build": "yarn transpile",
     "cy:open": "cypress open",
     "transpile": "tsc",
     "watch": "tsc -w",
-    "pretest": "npm run lint && npm run transpile",
+    "pretest": "yarn lint && yarn transpile",
     "lint": "standard --verbose --fix *.js src cypress/integration",
     "semantic-release": "semantic-release",
     "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
@@ -22,8 +22,8 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged && npm run warn-only",
-      "pre-push": "npm run stop-only"
+      "pre-commit": "lint-staged && yarn warn-only",
+      "pre-push": "yarn stop-only"
     }
   },
   "lint-staged": {
@@ -135,14 +135,5 @@
     "find-webpack": "2.0.0",
     "mime-types": "2.1.26",
     "unfetch": "4.1.0"
-  },
-  "release": {
-    "branches": [
-      "main",
-      {
-        "name": "feature/cypress-mount-mode",
-        "prerelease": "cypress-mount-mode"
-      }
-    ]
   }
 }
