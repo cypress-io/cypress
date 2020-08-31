@@ -563,18 +563,23 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   }
 
   if ($elements.isContentEditable(el)) {
-    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+    // Select all in contenteditable.
+    let range = doc.createRange()
+
+    range.selectNodeContents(el)
     const selection = doc.getSelection()
 
-    if (!selection) {
-      return
+    selection!.removeAllRanges()
+    selection!.addRange(range)
+
+    if (toStart) {
+      // in FireFox, the character at 0 is `\n`.
+      // Because of that, newline is added after new text when the cursor is move to the start.
+      // Number 1 below is the measure to avoid that.
+      selection!.collapse(el, Cypress.browser.family === 'firefox' ? 1 : 0)
+    } else {
+      selection!.collapseToEnd()
     }
-
-    // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
-    // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
-    const direction = toStart ? 'backward' : 'forward'
-
-    selection.modify('move', direction, 'line')
 
     return
   }
