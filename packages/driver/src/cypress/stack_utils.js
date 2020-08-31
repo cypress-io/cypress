@@ -301,6 +301,11 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
   const winnowedStackLines = _.reject(stackLines, (line) => {
+    // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTOIN
+    // stacks in developemnt builds look like:
+    //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
+    // stacks in prod builds look like:
+    //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
     return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
   }).join('\n')
 
