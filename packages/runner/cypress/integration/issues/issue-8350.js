@@ -12,7 +12,7 @@ describe('issue-8350', { viewportHeight: 900 }, () => {
     // firefox points to col 18, chrome 7
     column: '(7|18)',
     codeFrameText: 'beforeEach(()=>',
-    message: `Cypress detected you registered a beforeEach hook while a test was running`,
+    message: `Cypress detected you registered a(n) beforeEach hook while a test was running`,
   })
 
   afterEach(() => {
