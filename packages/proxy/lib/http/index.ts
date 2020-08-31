@@ -1,8 +1,14 @@
 import _ from 'lodash'
+import CyServer from '@packages/server'
+import {
+  CypressIncomingRequest,
+  CypressOutgoingResponse,
+} from '@packages/proxy'
 import debugModule from 'debug'
 import ErrorMiddleware from './error-middleware'
 import { HttpBuffers } from './util/buffers'
 import { IncomingMessage } from 'http'
+import { NetStubbingState } from '@packages/net-stubbing'
 import Bluebird from 'bluebird'
 import { Readable } from 'stream'
 import { Request, Response } from 'express'
@@ -20,38 +26,36 @@ export enum HttpStages {
 
 export type HttpMiddleware<T> = (this: HttpMiddlewareThis<T>) => void
 
-export type CypressRequest = Request & {
-  // TODO: what's this difference from req.url? is it only for non-proxied requests?
-  proxiedUrl: string
-  abort: () => void
-}
-
-type MiddlewareStacks = {
+export type HttpMiddlewareStacks = {
   [stage in HttpStages]: {
     [name: string]: HttpMiddleware<any>
   }
 }
 
-export type CypressResponse = Response & {
-  isInitial: null | boolean
-  wantsInjection: 'full' | 'partial' | false
-  wantsSecurityRemoved: null | boolean
-}
-
 type HttpMiddlewareCtx<T> = {
-  req: CypressRequest
-  res: CypressResponse
+  req: CypressIncomingRequest
+  res: CypressOutgoingResponse
 
-  middleware: MiddlewareStacks
+  middleware: HttpMiddlewareStacks
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
 } & T
+
+export type ServerCtx = Readonly<{
+  config: CyServer.Config
+  getFileServerToken: () => string
+  getRemoteState: CyServer.getRemoteState
+  netStubbingState: NetStubbingState
+  middleware: HttpMiddlewareStacks
+  socket: CyServer.Socket
+  request: any
+}>
 
 const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'buffers',
   'config',
   'getFileServerToken',
   'getRemoteState',
-  'request',
+  'netStubbingState',
   'next',
   'end',
   'onResponse',
@@ -59,19 +63,15 @@ const READONLY_MIDDLEWARE_KEYS: (keyof HttpMiddlewareThis<{}>)[] = [
   'skipMiddleware',
 ]
 
-type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & Readonly<{
+type HttpMiddlewareThis<T> = HttpMiddlewareCtx<T> & ServerCtx & Readonly<{
   buffers: HttpBuffers
-  config: any
-  getFileServerToken: () => string
-  getRemoteState: () => any
-  request: any
 
   next: () => void
   /**
    * Call to completely end the stage, bypassing any remaining middleware.
    */
   end: () => void
-  onResponse: (incomingRes: Response, resStream: Readable) => void
+  onResponse: (incomingRes: IncomingMessage, resStream: Readable) => void
   onError: (error: Error) => void
   skipMiddleware: (name: string) => void
 }>
@@ -134,7 +134,7 @@ export function _runStage (type: HttpStages, ctx: any) {
           _end(runMiddlewareStack())
         },
         end: () => _end(),
-        onResponse: (incomingRes: IncomingMessage, resStream: Readable) => {
+        onResponse: (incomingRes: Response, resStream: Readable) => {
           ctx.incomingRes = incomingRes
           ctx.incomingResStream = resStream
 
@@ -175,26 +175,25 @@ export function _runStage (type: HttpStages, ctx: any) {
 
 export class Http {
   buffers: HttpBuffers
+  config: CyServer.Config
   deferredSourceMapCache: DeferredSourceMapCache
-  config: any
   getFileServerToken: () => string
   getRemoteState: () => any
-  middleware: MiddlewareStacks
+  middleware: HttpMiddlewareStacks
+  netStubbingState: NetStubbingState
   request: any
+  socket: CyServer.Socket
 
-  constructor (opts: {
-    config: any
-    getFileServerToken: () => string
-    getRemoteState: () => any
-    middleware?: MiddlewareStacks
-    request: any
-  }) {
+  constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
     this.deferredSourceMapCache = new DeferredSourceMapCache(opts.request)
 
     this.config = opts.config
     this.getFileServerToken = opts.getFileServerToken
     this.getRemoteState = opts.getRemoteState
+    this.middleware = opts.middleware
+    this.netStubbingState = opts.netStubbingState
+    this.socket = opts.socket
     this.request = opts.request
 
     if (typeof opts.middleware === 'undefined') {
@@ -203,8 +202,6 @@ export class Http {
         [HttpStages.IncomingResponse]: ResponseMiddleware,
         [HttpStages.Error]: ErrorMiddleware,
       }
-    } else {
-      this.middleware = opts.middleware
     }
   }
 
@@ -219,6 +216,8 @@ export class Http {
       getRemoteState: this.getRemoteState,
       request: this.request,
       middleware: _.cloneDeep(this.middleware),
+      netStubbingState: this.netStubbingState,
+      socket: this.socket,
       deferSourceMapRewrite: (opts) => {
         this.deferredSourceMapCache.defer({
           resHeaders: ctx.incomingRes.headers,
