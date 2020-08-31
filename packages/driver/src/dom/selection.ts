@@ -140,7 +140,7 @@ const getHostContenteditable = function (el: HTMLElement) {
       return (curEl as Document).documentElement
     }
 
-    return el.ownerDocument.documentElement
+    return el.ownerDocument!.documentElement
   }
 
   return curEl
