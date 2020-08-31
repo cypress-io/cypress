@@ -48,12 +48,22 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
       .should('have.value', '456123789')
     })
 
-    it('contenteditable', () => {
-      cy.get('[contenteditable]:first')
-      .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
-      .then(($div) => {
-        // trim() is added for Firefox. It adds \n at the back as default.
-        expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789\nabcghi')
+    describe('contenteditable', () => {
+      it('basic tests', () => {
+        cy.get('[contenteditable]:first')
+        .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
+        .then(($div) => {
+          expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789\nabcghi')
+        })
+      })
+
+      it('bare text in front and back of an element', () => {
+        cy.get('[contenteditable]:first')
+        .invoke('html', '123<div>456</div>789')
+        .type('abc{moveToStart}def{moveToEnd}ghi')
+        .then(($div) => {
+          expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789abcghi')
+        })
       })
     })
 
