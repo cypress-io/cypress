@@ -7,7 +7,7 @@ const { verify } = createCypress()
 describe('issue-8350', { viewportHeight: 900 }, () => {
   const file = 'nested_hooks_spec.js'
 
-  verify.it('test', {
+  verify.it('errors when nested hook', {
     file,
     // firefox points to col 18, chrome 7
     column: '(7|18)',

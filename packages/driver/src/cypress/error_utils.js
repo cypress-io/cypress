@@ -188,8 +188,8 @@ class CypressError extends Error {
     }
   }
 
-  setUserInvocationStack (specWindow) {
-    this.userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
+  setUserInvocationStack (stack) {
+    this.userInvocationStack = stack
 
     return this
   }
