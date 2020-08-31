@@ -1365,6 +1365,7 @@ export {
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getTagName,
   getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,

@@ -53,12 +53,7 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
         cy.get('[contenteditable]:first')
         .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
         .then(($div) => {
-          expect($div.get(0).innerText.trim()).to.eql(
-            // NOTE: for some reason firefox will insert a '\n' after you moveToStart and type,
-            // but this is what the browser does if you selectall + leftarrow
-            // so we'll say it's technically correct.
-            Cypress.isBrowser('firefox') ? 'def\n123\n456\n789\nabcghi' : 'def123\n456\n789\nabcghi',
-          )
+          expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789\nabcghi')
         })
       })
 
