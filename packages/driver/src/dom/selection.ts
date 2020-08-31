@@ -608,7 +608,7 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
     // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
     const direction = toStart ? 'backward' : 'forward'
 
-    selection.modify('move', direction, 'line')
+    selection.modify('move', direction, 'documentboundary')
 
     return
   }
