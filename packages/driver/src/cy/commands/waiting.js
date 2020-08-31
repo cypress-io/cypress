@@ -72,7 +72,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       options.type = type
 
-      if (Cypress.config('experimentalNetworkMocking')) {
+      if (Cypress.config('experimentalNetworkStubbing')) {
         const req = waitForRoute(alias, state, type)
 
         if (req) {

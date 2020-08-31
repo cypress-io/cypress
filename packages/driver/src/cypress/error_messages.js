@@ -954,7 +954,7 @@ module.exports = {
       needs_experimental: stripIndent`\
         ${cmd('route2')} requires experimental network mocking to be enabled.
 
-        Set the \`experimentalNetworkMocking\` config value to \`true\` to access this command.
+        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
 
         Read more: https://on.cypress.io/experiments`,
       invalid_handler: ({ handler }) => {
