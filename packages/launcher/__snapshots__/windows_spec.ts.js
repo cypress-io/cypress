@@ -176,3 +176,9 @@ exports['windows browser detection detects browsers as expected 1'] = [
     }
   }
 ]
+
+exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
+  "name": "chrome",
+  "version": "4.4.4",
+  "path": "C:/Program Files/Google/Chrome/Application/chrome.exe"
+}
