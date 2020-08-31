@@ -36,34 +36,25 @@ const _getSelectionBoundsFromInput = function (el) {
   }
 }
 
-const _getSelectionRange = (doc: Document) => {
-  const sel = doc.getSelection()
-
-  // selection has at least one range (most always 1; only 0 at page load)
-  if (sel && sel.rangeCount) {
-    // get the first (usually only) range obj
-    return sel.getRangeAt(0)
-  }
-
-  return doc.createRange()
-}
-
 const _getSelectionBoundsFromContentEditable = function (el) {
-  const doc = $document.getDocumentFromElement(el)
-  const range = _getSelectionRange(doc)
-  const hostContenteditable = getHostContenteditable(range.commonAncestorContainer)
-
-  if (hostContenteditable === el) {
-    return {
-      start: range.startOffset,
-      end: range.endOffset,
-    }
-  }
-
-  return {
+  const pos = {
     start: 0,
     end: 0,
   }
+
+  let range = _getSelectionByEl(el).getRangeAt(0)
+  let preCaretRange = range.cloneRange()
+
+  preCaretRange.selectNodeContents(el)
+  preCaretRange.setEnd(range.endContainer, range.endOffset)
+  pos.end = preCaretRange.toString().length
+
+  preCaretRange.selectNodeContents(el)
+  preCaretRange.setEnd(range.startContainer, range.startOffset)
+
+  pos.start = preCaretRange.toString().length
+
+  return pos
 }
 
 // TODO get ACTUAL caret position in contenteditable, not line
@@ -563,78 +554,17 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   }
 
   if ($elements.isContentEditable(el)) {
-    if (doc.designMode === 'on') {
-      // When designMode is 'on', we don't have to find the root content editable,
-      // because everything is editable. And the entire document should be selected.
-      el = doc.getElementsByTagName('body')[0]
-
-      // When there is no body element.
-      if (!el) {
-        el = doc.documentElement
-      }
-    } else {
-      // When el is contentEditable, it is usually not a whole content editable element.
-      // It's a small element inside the big content editable div.
-      // So, we need to find the root contentEditable that contains the entire editable text.
-      const rootContentEditable = (el: HTMLElement): HTMLElement => {
-        return $elements.isContentEditable(el.parentElement as HTMLElement)
-          ? rootContentEditable(el.parentElement as HTMLElement)
-          : el
-      }
-
-      const root = rootContentEditable(el)
-
-      // FireFox doesn't clear empty <br> in the content editable.
-      if (Cypress.browser.family === 'firefox' && root.innerText === '\n') {
-        root.innerText = ''
-      }
-
-      // When we select the wrapper content editable div in FireFox,
-      // it appends text after HTML elements like <div>foo</div>bar.
-      // Because of that, we need to select the last element manually here.
-      if (toStart) {
-        const firstEl = root.children[0] as HTMLElement
-
-        if (firstEl) {
-          // If root's innerText doesn't start with firstEl's innerText,
-          // it means that bare text is in front of that element like 123<div>456</div>
-          el = root.innerText.startsWith(firstEl.innerText) ? firstEl : root
-        } else {
-          el = root
-        }
-      } else {
-        const lastEl = root.children[root.children.length - 1] as HTMLElement
-
-        if (lastEl) {
-          // If root's innerText doesn't end with lastEl's innerText,
-          // it means that bare text is in the behind of that element like <div>123</div>456
-          el = root.innerText.endsWith(lastEl.innerText) ? lastEl : root
-        } else {
-          el = root
-        }
-      }
-
-      // el can be undefined when content editable is empty.
-      // el can be <br> in FireFox with the simple text input like 123{Enter}456.
-      if (!el || el.tagName.toLowerCase() === 'br') {
-        el = root
-      }
-    }
-
-    // Select all in contenteditable.
-    let range = doc.createRange()
-
-    range.selectNodeContents(el)
+    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     const selection = doc.getSelection()
 
-    selection!.removeAllRanges()
-    selection!.addRange(range)
-
-    if (toStart) {
-      selection!.collapse(el, 0)
-    } else {
-      selection!.collapseToEnd()
+    if (!selection) {
+      return
     }
+
+    // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
+    // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
+
+    toStart ? selection.collapseToStart() : selection.collapseToEnd()
 
     return
   }
