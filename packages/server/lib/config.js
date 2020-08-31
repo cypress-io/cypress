@@ -190,11 +190,13 @@ const validationRules = {
   blockHosts: v.isStringOrArrayOfStrings,
   browsers: v.isValidBrowserList,
   chromeWebSecurity: v.isBoolean,
+  componentFolder: v.isStringOrFalse,
   configFile: v.isStringOrFalse,
   defaultCommandTimeout: v.isNumber,
   env: v.isPlainObject,
   execTimeout: v.isNumber,
   fileServerFolder: v.isString,
+  firefoxGcInterval: v.isValidFirefoxGcInterval,
   fixturesFolder: v.isStringOrFalse,
   ignoreTestFiles: v.isStringOrArrayOfStrings,
   integrationFolder: v.isString,
@@ -207,6 +209,7 @@ const validationRules = {
   reporter: v.isString,
   requestTimeout: v.isNumber,
   responseTimeout: v.isNumber,
+  retries: v.isValidRetriesConfig,
   supportFile: v.isStringOrFalse,
   taskTimeout: v.isNumber,
   testFiles: v.isStringOrArrayOfStrings,
@@ -221,15 +224,13 @@ const validationRules = {
   viewportWidth: v.isNumber,
   waitForAnimations: v.isBoolean,
   watchForFileChanges: v.isBoolean,
-  firefoxGcInterval: v.isValidFirefoxGcInterval,
-  componentFolder: v.isStringOrFalse,
+
   // experimental flag validation below
   experimentalComponentTesting: v.isBoolean,
-  experimentalSourceRewriting: v.isBoolean,
+  experimentalFetchPolyfill: v.isBoolean,
   experimentalNetworkMocking: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
-  experimentalFetchPolyfill: v.isBoolean,
-  retries: v.isValidRetriesConfig,
+  experimentalSourceRewriting: v.isBoolean,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
