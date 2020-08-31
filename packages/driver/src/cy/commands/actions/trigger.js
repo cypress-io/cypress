@@ -6,17 +6,17 @@ const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
 
 const dispatch = (target, appWindow, eventName, options) => {
-  const eventType = options.eventType ?? 'Event'
-  const ctor = appWindow[eventType]
+  const eventConstructor = options.eventConstructor ?? 'Event'
+  const ctor = appWindow[eventConstructor]
 
   if (typeof ctor !== 'function') {
     $errUtils.throwErrByPath('trigger.invalid_event_type', {
-      args: { eventType },
+      args: { eventConstructor },
     })
   }
 
-  // eventType property should not be added to event instance.
-  delete options.eventType
+  // eventConstructor property should not be added to event instance.
+  delete options.eventConstructor
 
   // https://github.com/cypress-io/cypress/issues/3686
   // UIEvent and its derived events like MouseEvent, KeyboardEvent

@@ -225,7 +225,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       cy.get('input:first').trigger('mousedown', {
-        eventType: 'MouseEvent',
+        eventConstructor: 'MouseEvent',
         button: 0,
         shiftKey: false,
         ctrlKey: false,
@@ -778,7 +778,7 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('input:first').trigger('keydown', {
-          eventType: 'KeyboardEvent',
+          eventConstructor: 'KeyboardEvent',
           keyCode: 65,
           which: 65,
           shiftKey: false,
@@ -790,7 +790,7 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.visit('fixtures/issue-5650.html')
 
         cy.get('#test-input').trigger('keydown', {
-          eventType: 'KeyboardEvent',
+          eventConstructor: 'KeyboardEvent',
           keyCode: 65,
           which: 65,
           shiftKey: false,
@@ -813,7 +813,7 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('input:first').trigger('mousedown', {
-          eventType: 'MouseEvent',
+          eventConstructor: 'MouseEvent',
           button: 0,
           shiftKey: false,
           ctrlKey: false,
@@ -823,7 +823,7 @@ describe('src/cy/commands/actions/trigger', () => {
       it('should trigger MouseEvent with .trigger inside html script event listener', () => {
         cy.visit('fixtures/issue-5650.html')
         cy.get('#test-input').trigger('mousedown', {
-          eventType: 'MouseEvent',
+          eventConstructor: 'MouseEvent',
           button: 0,
           shiftKey: false,
           ctrlKey: false,
@@ -958,13 +958,13 @@ describe('src/cy/commands/actions/trigger', () => {
       it('throws when provided invalid event type', function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventType` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
+          expect(err.message).to.eq('Timed out retrying: `cy.trigger()` `eventConstructor` option must be a valid event (e.g. \'MouseEvent\', \'KeyboardEvent\'). You passed: `FooEvent`')
 
           done()
         })
 
         cy.get('button:first').trigger('mouseover', {
-          eventType: 'FooEvent',
+          eventConstructor: 'FooEvent',
         })
       })
 
