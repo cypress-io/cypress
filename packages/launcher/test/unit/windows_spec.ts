@@ -65,6 +65,14 @@ describe('windows browser detection', () => {
     snapshot(detected)
   })
 
+  // @see https://github.com/cypress-io/cypress/issues/8425
+  it('detects new Chrome 64-bit app path', async () => {
+    stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
+    const chrome = _.find(browsers, { name: 'chrome', channel: 'stable' })
+
+    snapshot(await windowsHelper.detect(chrome))
+  })
+
   context('#getVersionString', () => {
     it('runs wmic and returns output', async () => {
       stubBrowser('foo', 'bar')

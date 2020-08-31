@@ -959,7 +959,7 @@ module.exports = {
       needs_experimental: stripIndent`\
         ${cmd('route2')} requires experimental network mocking to be enabled.
 
-        Set the \`experimentalNetworkMocking\` config value to \`true\` to access this command.
+        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
 
         Read more: https://on.cypress.io/experiments`,
       invalid_handler: ({ handler }) => {
@@ -1626,6 +1626,10 @@ module.exports = {
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/trigger',
+    },
+    invalid_event_type: {
+      message: `${cmd('trigger')} \`eventConstructor\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventConstructor}}\``,
       docsUrl: 'https://on.cypress.io/trigger',
     },
   },

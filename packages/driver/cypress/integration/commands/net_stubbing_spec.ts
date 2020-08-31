@@ -277,10 +277,10 @@ describe('network stubbing', function () {
         })
       })
 
-      it('if experimentalNetworkMocking is falsy', function (done) {
+      it('if experimentalNetworkStubbing is falsy', function (done) {
         sinon.stub(Cypress, 'config').callThrough()
         // @ts-ignore
-        .withArgs('experimentalNetworkMocking').returns(false)
+        .withArgs('experimentalNetworkStubbing').returns(false)
 
         cy.on('fail', (err) => {
           expect(err.message).to.contain('`cy.route2()` requires experimental network mocking to be enabled.')

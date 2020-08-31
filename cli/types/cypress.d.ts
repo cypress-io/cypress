@@ -2583,7 +2583,7 @@ declare namespace Cypress {
      * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
      * @default false
      */
-    experimentalNetworkMocking: boolean
+    experimentalNetworkStubbing: boolean
     /**
      * Enables shadow DOM support. Adds the `cy.shadow()` command and
      * the `includeShadowDom` option to some DOM commands.
@@ -2916,6 +2916,12 @@ declare namespace Cypress {
      * @default true
      */
     cancelable: boolean
+    /**
+     * The type of the event you want to trigger
+     *
+     * @default 'Event'
+     */
+    eventConstructor: string
   }
 
   /** Options to change the default behavior of .writeFile */
