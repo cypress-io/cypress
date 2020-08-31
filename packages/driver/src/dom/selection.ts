@@ -563,6 +563,17 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   }
 
   if ($elements.isContentEditable(el)) {
+    // When el is contentEditable, it is usually not a whole content editable element.
+    // It's a small one inside the big editor.
+    // So, we need to find the root contentEditable that contains the entire editable text.
+    const rootContentEditable = (el) => {
+      return $elements.isContentEditable(el.parentElement)
+        ? rootContentEditable(el.parentElement)
+        : el
+    }
+
+    el = rootContentEditable(el)
+
     // Select all in contenteditable.
     let range = doc.createRange()
 
