@@ -105,6 +105,20 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
+// Copied and adapted from https://jsfiddle.net/cpatik/3QAeC/
+export function getCaretPosition (element) {
+  let caretOffset = 0
+
+  let range = element.ownerDocument.getSelection().getRangeAt(0)
+  let preCaretRange = range.cloneRange()
+
+  preCaretRange.selectNodeContents(element)
+  preCaretRange.setEnd(range.endContainer, range.endOffset)
+  caretOffset = preCaretRange.toString().length
+
+  return caretOffset
+}
+
 Cypress.Commands.add('getAll', getAllFn)
 
 const chaiSubset = require('chai-subset')
