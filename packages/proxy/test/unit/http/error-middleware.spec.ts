@@ -14,6 +14,7 @@ describe('http/error-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(ErrorMiddleware)).to.have.ordered.members([
       'LogError',
+      'InterceptError',
       'AbortRequest',
       'UnpipeResponse',
       'DestroyResponse',

@@ -8,5 +8,6 @@
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
   },
+  "experimentalNetworkMocking": true,
   "experimentalShadowDomSupport": true
 }

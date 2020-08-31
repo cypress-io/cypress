@@ -68,3 +68,7 @@ makeReferenceTypesCommentRelative('sinon', '../sinon/index.d.ts', sinonChaiFilen
 
 // and an import sinon line to be changed to relative path
 shell.sed('-i', 'from \'sinon\';', 'from \'../sinon\';', sinonChaiFilename)
+
+// copy experimental network stubbing type definitions
+// so users can import: `import 'cypress/types/net-stubbing'`
+shell.cp(resolvePkg('@packages/net-stubbing/lib/external-types.ts'), 'types/net-stubbing.ts')

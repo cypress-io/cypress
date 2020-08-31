@@ -84,13 +84,6 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     res.sendFile(file, { etag: false })
   })
 
-  // we've namespaced the initial sending down of our cypress
-  // app as '__'  this route shouldn't ever be used by servers
-  // and therefore should not conflict
-  // ---
-  // TODO: we should additionally send config for the socket.io route, etc
-  // and any other __cypress namespaced files so that the runner does
-  // not have to be aware of anything
   la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
 
   app.get(config.clientRoute, (req, res) => {

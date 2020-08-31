@@ -149,6 +149,18 @@ describe('lib/scaffold', () => {
       })
     })
 
+    it('does not create any files if using component testing', function () {
+      this.cfg.resolved.experimentalComponentTesting.value = true
+      this.cfg.resolved.componentFolder.from = 'config'
+
+      return scaffold.integration(this.integrationFolder, this.cfg)
+      .then(() => {
+        return glob('**/*', { cwd: this.integrationFolder })
+      }).then((files) => {
+        expect(files.length).to.eq(0)
+      })
+    })
+
     it('does not create example specs if integrationFolder already exists', function () {
       // create the integrationFolder ourselves manually
       return fs.ensureDirAsync(this.integrationFolder)
@@ -396,6 +408,13 @@ describe('lib/scaffold', () => {
     })
 
     it('returns tree-like structure of scaffolded', function () {
+      return scaffold.fileTree(this.cfg).then(snapshot)
+    })
+
+    it('leaves out integration tests if using component testing', function () {
+      this.cfg.resolved.experimentalComponentTesting.value = true
+      this.cfg.resolved.componentFolder.from = 'config'
+
       return scaffold.fileTree(this.cfg).then(snapshot)
     })
 
