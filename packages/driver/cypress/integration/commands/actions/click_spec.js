@@ -818,7 +818,8 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       cy.get('[contenteditable]:first')
-      .invoke('html', '').click()
+      // firefox headless: prevent contenteditable from disappearing (dont set to empty)
+      .invoke('html', '<br>').click()
       .then(($el) => {
         expect(getCaretPosition($el.get(0))).to.eq(0)
       })
