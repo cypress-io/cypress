@@ -902,6 +902,11 @@ module.exports = {
 
     https://on.cypress.io/test-retries
     `,
+    hook_registered_late: stripIndent`\
+    Cypress detected you registered a(n) \`{{hookTitle}}\` hook while a test was running (possibly a hook nested inside another hook). All hooks must be registered before a test begins executing.
+    
+    Move the \`{{hookTitle}}\` into a suite callback or the global scope.
+    `,
 
   },
 

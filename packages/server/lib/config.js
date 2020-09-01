@@ -3,6 +3,7 @@ const R = require('ramda')
 const path = require('path')
 const Promise = require('bluebird')
 const deepDiff = require('return-deep-diff')
+
 const errors = require('./errors')
 const scaffold = require('./scaffold')
 const fs = require('./util/fs')
@@ -10,10 +11,11 @@ const keys = require('./util/keys')
 const origin = require('./util/origin')
 const coerce = require('./util/coerce')
 const settings = require('./util/settings')
-const v = require('./util/validation')
 const debug = require('debug')('cypress:server:config')
 const pathHelpers = require('./util/path_helpers')
 const findSystemNode = require('./util/find_system_node')
+
+const { options, breakingOptions } = require('./config_options')
 
 const CYPRESS_ENV_PREFIX = 'CYPRESS_'
 const CYPRESS_ENV_PREFIX_LENGTH = 'CYPRESS_'.length
@@ -26,11 +28,23 @@ const CYPRESS_SPECIAL_ENV_VARS = [
 ]
 
 const dashesOrUnderscoresRe = /^(_-)+/
-const oneOrMoreSpacesRe = /\s+/
 
-const toWords = (str) => {
-  return str.trim().split(oneOrMoreSpacesRe)
+// takes an array and creates an index object of [keyKey]: [valueKey]
+const createIndex = (arr, keyKey, valueKey) => {
+  return _.reduce(arr, (memo, item) => {
+    if (item[valueKey] !== undefined) {
+      memo[item[keyKey]] = item[valueKey]
+    }
+
+    return memo
+  }, {})
 }
+
+const publicConfigKeys = _(options).reject({ isInternal: true }).map('name').value()
+const breakingKeys = _.map(breakingOptions, 'name')
+const folders = _(options).filter({ isFolder: true }).map('name').value()
+const validationRules = createIndex(options, 'name', 'validation')
+const defaultValues = createIndex(options, 'name', 'defaultValue')
 
 const isCypressEnvLike = (key) => {
   return _.chain(key)
@@ -42,194 +56,6 @@ const isCypressEnvLike = (key) => {
 
 const removeEnvPrefix = (key) => {
   return key.slice(CYPRESS_ENV_PREFIX_LENGTH)
-}
-
-const folders = toWords(`\
-fileServerFolder   fixturesFolder   integrationFolder   pluginsFile
-screenshotsFolder  supportFile      supportFolder       unitFolder
-videosFolder\
-`)
-
-// for experimentalComponentTesting
-folders.push('componentFolder')
-
-// Public configuration properties, like "cypress.json" fields
-const configKeys = toWords(`\
-animationDistanceThreshold      fileServerFolder
-baseUrl                         fixturesFolder
-blockHosts
-chromeWebSecurity
-modifyObstructiveCode           integrationFolder
-env                             pluginsFile
-hosts                           screenshotsFolder
-numTestsKeptInMemory            supportFile
-port                            supportFolder
-projectId                       videosFolder
-reporter
-reporterOptions
-ignoreTestFiles
-testFiles                       defaultCommandTimeout
-trashAssetsBeforeRuns           execTimeout
-userAgent                       pageLoadTimeout
-viewportWidth                   requestTimeout
-viewportHeight                  responseTimeout
-video                           taskTimeout
-videoCompression
-videoUploadOnPasses
-screenshotOnRunFailure
-watchForFileChanges
-waitForAnimations               resolvedNodeVersion
-nodeVersion                     resolvedNodePath
-firefoxGcInterval
-retries
-`)
-
-// NOTE: If you add a config value, make sure to update the following
-// - cli/types/index.d.ts (including allowed config options on TestOptions)
-// - cypress.schema.json
-
-// experimentalComponentTesting
-configKeys.push('componentFolder')
-
-// Breaking public configuration properties, will error
-const breakingConfigKeys = toWords(`\
-blacklistHosts
-videoRecording
-screenshotOnHeadlessFailure
-trashAssetsBeforeHeadlessRuns
-experimentalGetCookiesSameSite\
-`)
-
-// Internal configuration properties the user should be able to overwrite
-const systemConfigKeys = toWords(`\
-browsers\
-`)
-
-// Know experimental flags / values
-// each should start with "experimental" and be camel cased
-// example: experimentalComponentTesting
-const experimentalConfigKeys = [
-  'experimentalSourceRewriting',
-  'experimentalComponentTesting',
-  'experimentalShadowDomSupport',
-  'experimentalFetchPolyfill',
-  'experimentalNetworkStubbing',
-]
-
-const CONFIG_DEFAULTS = {
-  port: null,
-  hosts: null,
-  morgan: true,
-  baseUrl: null,
-  // will be replaced by detected list of browsers
-  browsers: [],
-  socketId: null,
-  projectId: null,
-  userAgent: null,
-  isTextTerminal: false,
-  reporter: 'spec',
-  reporterOptions: null,
-  blockHosts: null,
-  clientRoute: '/__/',
-  xhrRoute: '/xhrs/',
-  socketIoRoute: '/__socket.io',
-  socketIoCookie: '__socket.io',
-  reporterRoute: '/__cypress/reporter',
-  ignoreTestFiles: '*.hot-update.js',
-  testFiles: '**/*.*',
-  defaultCommandTimeout: 4000,
-  requestTimeout: 5000,
-  responseTimeout: 30000,
-  pageLoadTimeout: 60000,
-  execTimeout: 60000,
-  taskTimeout: 60000,
-  video: true,
-  videoCompression: 32,
-  videoUploadOnPasses: true,
-  screenshotOnRunFailure: true,
-  modifyObstructiveCode: true,
-  chromeWebSecurity: true,
-  waitForAnimations: true,
-  animationDistanceThreshold: 5,
-  numTestsKeptInMemory: 50,
-  watchForFileChanges: true,
-  trashAssetsBeforeRuns: true,
-  autoOpen: false,
-  viewportWidth: 1000,
-  viewportHeight: 660,
-  fileServerFolder: '',
-  videosFolder: 'cypress/videos',
-  supportFile: 'cypress/support',
-  fixturesFolder: 'cypress/fixtures',
-  integrationFolder: 'cypress/integration',
-  screenshotsFolder: 'cypress/screenshots',
-  namespace: '__cypress',
-  pluginsFile: 'cypress/plugins',
-  nodeVersion: 'default',
-  configFile: 'cypress.json',
-  firefoxGcInterval: { runMode: 1, openMode: null },
-
-  // deprecated
-  javascripts: [],
-
-  // setting related to component testing experiments
-  componentFolder: 'cypress/component',
-
-  // experimental keys (should all start with "experimental" prefix)
-  experimentalComponentTesting: false,
-  experimentalSourceRewriting: false,
-  experimentalNetworkStubbing: false,
-  experimentalShadowDomSupport: false,
-  experimentalFetchPolyfill: false,
-  retries: { runMode: 0, openMode: 0 },
-}
-
-const validationRules = {
-  animationDistanceThreshold: v.isNumber,
-  baseUrl: v.isFullyQualifiedUrl,
-  blockHosts: v.isStringOrArrayOfStrings,
-  browsers: v.isValidBrowserList,
-  chromeWebSecurity: v.isBoolean,
-  configFile: v.isStringOrFalse,
-  defaultCommandTimeout: v.isNumber,
-  env: v.isPlainObject,
-  execTimeout: v.isNumber,
-  fileServerFolder: v.isString,
-  fixturesFolder: v.isStringOrFalse,
-  ignoreTestFiles: v.isStringOrArrayOfStrings,
-  integrationFolder: v.isString,
-  modifyObstructiveCode: v.isBoolean,
-  nodeVersion: v.isOneOf('default', 'bundled', 'system'),
-  numTestsKeptInMemory: v.isNumber,
-  pageLoadTimeout: v.isNumber,
-  pluginsFile: v.isStringOrFalse,
-  port: v.isNumber,
-  reporter: v.isString,
-  requestTimeout: v.isNumber,
-  responseTimeout: v.isNumber,
-  supportFile: v.isStringOrFalse,
-  taskTimeout: v.isNumber,
-  testFiles: v.isStringOrArrayOfStrings,
-  trashAssetsBeforeRuns: v.isBoolean,
-  userAgent: v.isString,
-  video: v.isBoolean,
-  videoCompression: v.isNumberOrFalse,
-  videosFolder: v.isString,
-  videoUploadOnPasses: v.isBoolean,
-  screenshotOnRunFailure: v.isBoolean,
-  viewportHeight: v.isNumber,
-  viewportWidth: v.isNumber,
-  waitForAnimations: v.isBoolean,
-  watchForFileChanges: v.isBoolean,
-  firefoxGcInterval: v.isValidFirefoxGcInterval,
-  componentFolder: v.isStringOrFalse,
-  // experimental flag validation below
-  experimentalComponentTesting: v.isBoolean,
-  experimentalSourceRewriting: v.isBoolean,
-  experimentalNetworkStubbing: v.isBoolean,
-  experimentalShadowDomSupport: v.isBoolean,
-  experimentalFetchPolyfill: v.isBoolean,
-  retries: v.isValidRetriesConfig,
 }
 
 const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
@@ -246,36 +72,25 @@ const convertRelativeToAbsolutePaths = (projectRoot, obj, defaults = {}) => {
 }
 
 const validateNoBreakingConfig = (cfg) => {
-  return _.each(breakingConfigKeys, (key) => {
-    if (_.has(cfg, key)) {
-      switch (key) {
-        case 'screenshotOnHeadlessFailure':
-          return errors.throw('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED')
-        case 'trashAssetsBeforeHeadlessRuns':
-          return errors.throw('RENAMED_CONFIG_OPTION', key, 'trashAssetsBeforeRuns')
-        case 'videoRecording':
-          return errors.throw('RENAMED_CONFIG_OPTION', key, 'video')
-        case 'blacklistHosts':
-          return errors.throw('RENAMED_CONFIG_OPTION', key, 'blockHosts')
-        case 'experimentalGetCookiesSameSite':
-          return errors.warning('EXPERIMENTAL_SAMESITE_REMOVED')
-        default:
-          throw new Error(`unknown breaking config key ${key}`)
+  return _.each(breakingOptions, ({ name, errorKey, newName, isWarning }) => {
+    if (_.has(cfg, name)) {
+      if (isWarning) {
+        return errors.warning(errorKey, name, newName)
       }
+
+      return errors.throw(errorKey, name, newName)
     }
   })
 }
 
 const validate = (cfg, onErr) => {
   return _.each(cfg, (value, key) => {
-  // does this key have a validation rule?
-    let validationFn
+    const validationFn = validationRules[key]
 
-    validationFn = validationRules[key]
-
+    // does this key have a validation rule?
     if (validationFn) {
-    // and is the value different from the default?
-      if (value !== CONFIG_DEFAULTS[key]) {
+      // and is the value different from the default?
+      if (value !== defaultValues[key]) {
         const result = validationFn(key, value)
 
         if (result !== true) {
@@ -370,7 +185,7 @@ module.exports = {
   utils,
 
   getConfigKeys () {
-    return configKeys.concat(experimentalConfigKeys)
+    return publicConfigKeys
   },
 
   isValidCypressInternalEnvValue (value) {
@@ -381,10 +196,7 @@ module.exports = {
   },
 
   allowed (obj = {}) {
-    const propertyNames = configKeys
-    .concat(breakingConfigKeys)
-    .concat(systemConfigKeys)
-    .concat(experimentalConfigKeys)
+    const propertyNames = publicConfigKeys.concat(breakingKeys)
 
     return _.pick(obj, propertyNames)
   },
@@ -428,7 +240,6 @@ module.exports = {
   },
 
   mergeDefaults (config = {}, options = {}) {
-    let url
     const resolved = {}
 
     _.extend(config, _.pick(options, 'configFile', 'morgan', 'isTextTerminal', 'socketId', 'report', 'browsers'))
@@ -443,7 +254,7 @@ module.exports = {
       config[key] = val
     }).value()
 
-    url = config.baseUrl
+    let url = config.baseUrl
 
     if (url) {
       // replace multiple slashes at the end of string to single slash
@@ -452,7 +263,7 @@ module.exports = {
       config.baseUrl = url.replace(/\/\/+$/, '/')
     }
 
-    _.defaults(config, CONFIG_DEFAULTS)
+    _.defaults(config, defaultValues)
 
     // split out our own app wide env from user env variables
     // and delete envFile
@@ -476,13 +287,13 @@ module.exports = {
       config.numTestsKeptInMemory = 0
     }
 
-    config = this.setResolvedConfigValues(config, CONFIG_DEFAULTS, resolved)
+    config = this.setResolvedConfigValues(config, defaultValues, resolved)
 
     if (config.port) {
       config = this.setUrls(config)
     }
 
-    config = this.setAbsolutePaths(config, CONFIG_DEFAULTS)
+    config = this.setAbsolutePaths(config, defaultValues)
 
     config = this.setParentTestsPaths(config)
 
@@ -611,7 +422,7 @@ module.exports = {
     // pick out only known configuration keys
     return _
     .chain(config)
-    .pick(configKeys.concat(systemConfigKeys).concat(experimentalConfigKeys))
+    .pick(publicConfigKeys)
     .mapValues((val, key) => {
       let r
       const source = (s) => {
@@ -708,7 +519,7 @@ module.exports = {
         return fs.pathExists(obj.supportFile)
         .then((found) => {
           if (!found) {
-            errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || CONFIG_DEFAULTS.configFile)
+            errors.throw('SUPPORT_FILE_NOT_FOUND', obj.supportFile, obj.configFile || defaultValues.configFile)
           }
 
           return debug('switching to found file %s', obj.supportFile)
@@ -717,7 +528,7 @@ module.exports = {
     }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
       debug('support JS module %s does not load', sf)
 
-      const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, CONFIG_DEFAULTS.supportFile)
+      const loadingDefaultSupportFile = sf === path.resolve(obj.projectRoot, defaultValues.supportFile)
 
       return utils.discoverModuleFile({
         filename: sf,
@@ -726,7 +537,7 @@ module.exports = {
       })
       .then((result) => {
         if (result === null) {
-          const configFile = obj.configFile || CONFIG_DEFAULTS.configFile
+          const configFile = obj.configFile || defaultValues.configFile
 
           return errors.throw('SUPPORT_FILE_NOT_FOUND', path.resolve(obj.projectRoot, sf), configFile)
         }
@@ -785,7 +596,7 @@ module.exports = {
     }).catch({ code: 'MODULE_NOT_FOUND' }, () => {
       debug('plugins module does not exist %o', { pluginsFile })
 
-      const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, CONFIG_DEFAULTS.pluginsFile)
+      const isLoadingDefaultPluginsFile = pluginsFile === path.resolve(obj.projectRoot, defaultValues.pluginsFile)
 
       return utils.discoverModuleFile({
         filename: pluginsFile,
@@ -881,14 +692,14 @@ module.exports = {
     envCLI = envCLI != null ? envCLI : {}
 
     const matchesConfigKey = function (key) {
-      if (_.has(CONFIG_DEFAULTS, key)) {
+      if (_.has(defaultValues, key)) {
         return key
       }
 
       key = key.toLowerCase().replace(dashesOrUnderscoresRe, '')
       key = _.camelCase(key)
 
-      if (_.has(CONFIG_DEFAULTS, key)) {
+      if (_.has(defaultValues, key)) {
         return key
       }
     }
