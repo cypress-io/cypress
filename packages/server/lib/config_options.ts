@@ -73,7 +73,7 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalNetworkMocking',
+    name: 'experimentalNetworkStubbing',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,

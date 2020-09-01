@@ -1,3 +1,5 @@
+// See: ./errorScenarios.md for details about error messages and stack traces
+
 const _ = require('lodash')
 
 const $errorMessages = require('./error_messages')
@@ -187,6 +189,16 @@ class CypressError extends Error {
       Error.captureStackTrace(this, CypressError)
     }
   }
+
+  setUserInvocationStack (stack) {
+    this.userInvocationStack = stack
+
+    return this
+  }
+}
+
+const getUserInvocationStack = (err) => {
+  return err.userInvocationStack
 }
 
 const internalErr = (err) => {
@@ -339,4 +351,5 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
+  getUserInvocationStack,
 }
