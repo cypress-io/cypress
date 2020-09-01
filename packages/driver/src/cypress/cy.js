@@ -713,7 +713,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     // attached to the error thrown from chai
     // command errors and command assertion errors (default assertion or cy.should)
     // have the invocation stack attached to the current command
-    let userInvocationStack = state('currentAssertionUserInvocationStack')
+    // prefer err.userInvocation stack if it's been set
+    let userInvocationStack = $errUtils.getUserInvocationStack(err) || state('currentAssertionUserInvocationStack')
 
     // if there is no user invocation stack from an assertion or it is the default
     // assertion, meaning it came from a command (e.g. cy.get), prefer the
@@ -1044,9 +1045,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
-        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
-          (new specWindow.Error('command invocation stack')).stack,
-        )
+        const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
 
         let ret
 
