@@ -168,12 +168,8 @@ export const options = [
     validation: v.isNumber,
   }, {
     name: 'resolvedNodePath',
-    defaultValue: null,
-    isInternal: true,
   }, {
     name: 'resolvedNodeVersion',
-    defaultValue: null,
-    isInternal: true,
   }, {
     name: 'responseTimeout',
     defaultValue: 30000,
