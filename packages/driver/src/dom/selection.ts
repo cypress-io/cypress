@@ -136,11 +136,7 @@ const getHostContenteditable = function (el: HTMLElement) {
   // if there's no host contenteditable, we must be in designMode
   // so act as if the documentElement (html element) is the host contenteditable
   if (!_hasContenteditableAttr(curEl)) {
-    if ($document.isDocument(curEl)) {
-      return (curEl as Document).documentElement
-    }
-
-    return el.ownerDocument.documentElement
+    return $document.getDocumentFromElement(el).documentElement
   }
 
   return curEl
