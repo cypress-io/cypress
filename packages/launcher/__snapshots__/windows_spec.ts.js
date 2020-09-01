@@ -182,3 +182,45 @@ exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
   "version": "4.4.4",
   "path": "C:/Program Files/Google/Chrome/Application/chrome.exe"
 }
+
+exports['windows browser detection detects local Firefox installs 1'] = [
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "stable",
+    "displayName": "Firefox",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
+    "versionRegex": {},
+    "binary": "firefox",
+    "version": "100",
+    "path": "C:/Users/flotwig/AppData/Local/Mozilla Firefox/firefox.exe"
+  },
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
+    "versionRegex": {},
+    "binary": [
+      "firefox-developer-edition",
+      "firefox"
+    ],
+    "version": "300",
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe"
+  },
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "nightly",
+    "displayName": "Firefox Nightly",
+    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
+    "versionRegex": {},
+    "binary": [
+      "firefox-nightly",
+      "firefox-trunk"
+    ],
+    "version": "200",
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe"
+  }
+]

@@ -42,6 +42,13 @@ function getFirefoxPaths (editionFolder) {
     .map((programFiles) => {
       return normalize(`C:/${programFiles}/${editionFolder}/firefox.exe`)
     })
+    .concat(normalize(join(
+      os.homedir(),
+      'AppData',
+      'Local',
+      editionFolder,
+      'firefox.exe',
+    )))
   }
 }
 
