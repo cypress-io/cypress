@@ -192,8 +192,14 @@ exports['windows browser detection detects local Firefox installs 1'] = [
     "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Mozilla Firefox/firefox.exe",
     "version": "100",
-    "path": "C:/Users/flotwig/AppData/Local/Mozilla Firefox/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefox",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "firefox",
@@ -206,8 +212,14 @@ exports['windows browser detection detects local Firefox installs 1'] = [
       "firefox-developer-edition",
       "firefox"
     ],
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
     "version": "300",
-    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox Developer Edition.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefoxdeveloperedition",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   },
   {
     "name": "firefox",
@@ -220,7 +232,13 @@ exports['windows browser detection detects local Firefox installs 1'] = [
       "firefox-nightly",
       "firefox-trunk"
     ],
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe",
     "version": "200",
-    "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe"
+    "findAppParams": {
+      "appName": "Firefox Nightly.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.nightly",
+      "versionProperty": "CFBundleShortVersionString"
+    }
   }
 ]
