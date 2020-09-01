@@ -108,12 +108,13 @@ browsers\
 // Know experimental flags / values
 // each should start with "experimental" and be camel cased
 // example: experimentalComponentTesting
-const experimentalConfigKeys = toWords(`\
-experimentalSourceRewriting
-experimentalComponentTesting
-experimentalShadowDomSupport
-experimentalFetchPolyfill\
-`)
+const experimentalConfigKeys = [
+  'experimentalSourceRewriting',
+  'experimentalComponentTesting',
+  'experimentalShadowDomSupport',
+  'experimentalFetchPolyfill',
+  'experimentalNetworkStubbing',
+]
 
 const CONFIG_DEFAULTS = {
   port: null,
@@ -171,14 +172,13 @@ const CONFIG_DEFAULTS = {
   // deprecated
   javascripts: [],
 
-  // experimental keys (should all start with "experimental" prefix)
-  experimentalComponentTesting: false,
-
   // setting related to component testing experiments
   componentFolder: 'cypress/component',
-  // TODO: example for component testing with subkeys
-  // experimentalComponentTesting: { componentFolder: 'cypress/component' }
+
+  // experimental keys (should all start with "experimental" prefix)
+  experimentalComponentTesting: false,
   experimentalSourceRewriting: false,
+  experimentalNetworkStubbing: false,
   experimentalShadowDomSupport: false,
   experimentalFetchPolyfill: false,
   retries: { runMode: 0, openMode: 0 },
@@ -222,12 +222,11 @@ const validationRules = {
   waitForAnimations: v.isBoolean,
   watchForFileChanges: v.isBoolean,
   firefoxGcInterval: v.isValidFirefoxGcInterval,
-  // experimental flag validation here
-  experimentalComponentTesting: v.isBoolean,
-  // validation for component testing experiment
   componentFolder: v.isStringOrFalse,
   // experimental flag validation below
+  experimentalComponentTesting: v.isBoolean,
   experimentalSourceRewriting: v.isBoolean,
+  experimentalNetworkStubbing: v.isBoolean,
   experimentalShadowDomSupport: v.isBoolean,
   experimentalFetchPolyfill: v.isBoolean,
   retries: v.isValidRetriesConfig,

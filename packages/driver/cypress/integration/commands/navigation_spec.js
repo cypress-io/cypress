@@ -141,7 +141,9 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('logs once on failure', function (done) {
+      it('logs once on failure', {
+        defaultCommandTimeout: 200,
+      }, function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
 

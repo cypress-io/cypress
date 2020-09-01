@@ -1,7 +1,3 @@
-declare interface Window {
-  jquery: Function
-}
-
 describe('src/dom/jquery', () => {
   context('.isJquery', () => {
     it('does not get confused when window contains jquery function', () => {

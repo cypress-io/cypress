@@ -10,6 +10,8 @@ describe('http/response-middleware', function () {
   it('exports the members in the correct order', function () {
     expect(_.keys(ResponseMiddleware)).to.have.ordered.members([
       'LogResponse',
+      'AttachPlainTextStreamFn',
+      'InterceptResponse',
       'PatchExpressSetHeader',
       'SetInjectionLevel',
       'OmitProblematicHeaders',
@@ -20,7 +22,6 @@ describe('http/response-middleware', function () {
       'CopyResponseStatusCode',
       'ClearCyInitialCookie',
       'MaybeEndWithEmptyBody',
-      'MaybeGunzipBody',
       'MaybeInjectHtml',
       'MaybeRemoveSecurity',
       'GzipBody',

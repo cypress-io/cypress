@@ -110,7 +110,10 @@ function getInvocationDetails (specWindow, config) {
       stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'mocha/lib/interfaces/common.js')
     }
 
-    return $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
+    return {
+      details: $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot')),
+      stack,
+    }
   }
 }
 
@@ -123,8 +126,18 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
     this._createHook = function (title, fn) {
       const hook = _createHook.call(this, title, fn)
 
+      let invocationStack = hook.invocationDetails?.stack
+
       if (!hook.invocationDetails) {
-        hook.invocationDetails = getInvocationDetails(specWindow, config)
+        const invocationDetails = getInvocationDetails(specWindow, config)
+
+        hook.invocationDetails = invocationDetails.details
+        invocationStack = invocationDetails.stack
+      }
+
+      if (this._condensedHooks) {
+        throw $errUtils.errByPath('mocha.hook_registered_late', { hookTitle: fnName })
+        .setUserInvocationStack(invocationStack)
       }
 
       return hook
@@ -143,7 +156,7 @@ function overloadMochaTest (suite, specWindow, config) {
 
   suite.addTest = function (test) {
     if (!test.invocationDetails) {
-      test.invocationDetails = getInvocationDetails(specWindow, config)
+      test.invocationDetails = getInvocationDetails(specWindow, config).details
     }
 
     return _fn.call(this, test)

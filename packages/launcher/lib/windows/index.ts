@@ -9,9 +9,10 @@ import { Browser, FoundBrowser } from '../types'
 import { utils } from '../utils'
 
 function formFullAppPath (name: string) {
-  const prefix = 'C:/Program Files (x86)/Google/Chrome/Application'
-
-  return [normalize(join(prefix, `${name}.exe`))]
+  return [
+    `C:/Program Files (x86)/Google/Chrome/Application/${name}.exe`,
+    `C:/Program Files/Google/Chrome/Application/${name}.exe`,
+  ].map(normalize)
 }
 
 function formChromiumAppPath () {
@@ -41,6 +42,13 @@ function getFirefoxPaths (editionFolder) {
     .map((programFiles) => {
       return normalize(`C:/${programFiles}/${editionFolder}/firefox.exe`)
     })
+    .concat(normalize(join(
+      os.homedir(),
+      'AppData',
+      'Local',
+      editionFolder,
+      'firefox.exe',
+    )))
   }
 }
 
