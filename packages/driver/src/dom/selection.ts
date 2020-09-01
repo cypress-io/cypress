@@ -560,6 +560,12 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
   }
 
   if ($elements.isContentEditable(el)) {
+    const selection = _getSelectionByEl(el)
+
+    if (!selection) {
+      return
+    }
+
     if (Cypress.isBrowser({ family: 'firefox' })) {
       // FireFox doesn't treat a selectall+arrow the same as clicking the start/end of a contenteditable
       // so we need to select the specific nodes inside the contenteditable.
@@ -584,35 +590,14 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
         elToSelect = toStart ? root.childNodes[1] : root.childNodes[root.childNodes.length - 2]
       }
 
-      const selection = _getSelectionByEl(el)
-
-      if (!selection) {
-        return
-      }
-
       const range = selection.getRangeAt(0)
 
       range.selectNodeContents(elToSelect)
-
-      toStart ? selection.collapseToStart() : selection.collapseToEnd()
-
-      return
+    } else {
+      $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
     }
 
-    $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
-    const selection = doc.getSelection()
-
-    if (!selection) {
-      return
-    }
-
-    // collapsing the range doesn't work on input/textareas, since the range contains more than the input element
-    // However, IE can always* set selection range, so only modern browsers (with the selection API) will need this
-    const direction = toStart ? 'backward' : 'forward'
-
-    selection.modify('move', direction, 'line')
-
-    return
+    toStart ? selection.collapseToStart() : selection.collapseToEnd()
   }
 
   return false
