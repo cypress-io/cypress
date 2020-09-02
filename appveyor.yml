@@ -1,7 +1,7 @@
 branches:
   only:
     - master
-    - develop
+    - issue-8482
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

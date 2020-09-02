@@ -7,7 +7,7 @@ macBuildFilters: &macBuildFilters
   filters:
     branches:
       only:
-        - develop
+        - issue-8482
         - v5.0-release
         - install-node-on-circleci-mac
         - stop-before-code-sign
@@ -36,7 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
   filters:
     branches:
       only:
-        - develop
+        - issue-8482
   requires:
     - build-npm-package
     - build-binary
@@ -420,7 +420,7 @@ jobs:
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
-      ##   * http://andykdocs.de/development/Docker/Fixing+the+Docker+TERM+variable+issue
+      ##   * http://andykdocs.de/issue-8482ment/Docker/Fixing+the+Docker+TERM+variable+issue
       ##   * https://unix.stackexchange.com/questions/43945/whats-the-difference-between-various-term-variables
       - run:
           name: Check terminal
@@ -1007,7 +1007,7 @@ jobs:
           # by default, electron-builder will NOT sign app built in a pull request
           # even our internal one (!)
           # Usually this is not a problem, since we only build and test binary
-          # built on "develop" and "master" branches
+          # built on "issue-8482" and "master" branches
           # but if you need to really build and sign a Mac binary in a PR
           # set variable CSC_FOR_PULL_REQUEST=true
           command: |
@@ -1042,7 +1042,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             node --version
-            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-development}
+            yarn binary-build --platform $PLATFORM --version ${NEXT_DEV_VERSION:-0.0.0-issue-8482ment}
       - run:
           name: Zip the binary
           command: |
@@ -1152,7 +1152,7 @@ jobs:
             yarn check-next-dev-version
       - run:
           name: bump NPM version
-          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-development}
+          command: yarn version --no-git-tag-version --new-version ${NEXT_DEV_VERSION:-0.0.0-issue-8482ment}
       - run:
           name: build NPM package
           command: |
@@ -1174,8 +1174,8 @@ jobs:
           command: ls -l
       # created file should have filename cypress-<version>.tgz
       - run: mkdir /tmp/urls
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz cypress.tgz
-      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-development}.tgz /tmp/urls/cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-issue-8482ment}.tgz cypress.tgz
+      - run: cp cli/build/cypress-v${NEXT_DEV_VERSION:-0.0.0-issue-8482ment}.tgz /tmp/urls/cypress.tgz
       - run: ls -l /tmp/urls
       - store-npm-logs
       - run: pwd
@@ -1779,7 +1779,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - build
     - test-kitchensink:
@@ -1796,7 +1796,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - build
     - build-npm-package:
@@ -1807,7 +1807,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
               - v5.0-release
         requires:
           - build-npm-package
@@ -1819,7 +1819,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
               - v5.0-release
         requires:
           - build-binary
@@ -1854,8 +1854,8 @@ linux-workflow: &linux-workflow
     # and you want to run a specific PR in the cypress-example-recipes
     # against this branch. This workflow job includes
     # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
-    # on "develop" this branch will be ignored anyway
+    # DO NOT DELETE THIS JOB BEFORE MERGING TO issue-8482
+    # on "issue-8482" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
     - test-binary-against-recipe-pull-request:
@@ -1876,7 +1876,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
               - v5.0-release
         requires:
           - upload-npm-package
@@ -1886,7 +1886,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - upload-npm-package
           - upload-binary
@@ -1894,7 +1894,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - build-npm-package
           - build-binary
@@ -1903,7 +1903,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - build-npm-package
           - build-binary
@@ -1928,7 +1928,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
               - kevin-v5.0-release-rwa
               - v5.0-release
         requires:
@@ -2023,7 +2023,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - Mac NPM package
           - Mac binary
@@ -2035,7 +2035,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2047,7 +2047,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - develop
+              - issue-8482
         requires:
           - Mac NPM package upload
           - Mac binary upload
