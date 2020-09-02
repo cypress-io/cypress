@@ -19,7 +19,7 @@ const { throwFormErrorText, errors } = require('../errors')
 
 // attempt to discover the version specifier used to install Cypress
 // for example: "^5.0.0", "https://cdn.cypress.io/...", ...
-const getVersionSpecifier = async (startDir = path.resolve(__dirname, '../..')) => {
+const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
   const getVersionSpecifierFromPkg = (dir) => {
     debug('looking for versionSpecifier %o', { dir })
 
@@ -47,11 +47,12 @@ const getVersionSpecifier = async (startDir = path.resolve(__dirname, '../..')) 
   }
 
   // recurse through parent directories until package.json with `cypress` is found
-  const versionSpecifier = await getVersionSpecifierFromPkg(startDir)
+  return getVersionSpecifierFromPkg(startDir)
+  .then((versionSpecifier) => {
+    debug('finished looking for versionSpecifier', { versionSpecifier })
 
-  debug('finished looking for versionSpecifier', { versionSpecifier })
-
-  return versionSpecifier
+    return versionSpecifier
+  })
 }
 
 const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>[^/]+)\/cypress\.tgz$/
