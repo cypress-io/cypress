@@ -207,6 +207,7 @@ const start = (options = {}) => {
 
   const pkgVersion = util.pkgVersion()
   let needVersion = pkgVersion
+  let binaryUrlOverride
 
   debug('version in package.json is', needVersion)
 
@@ -231,12 +232,7 @@ const start = (options = {}) => {
       return Promise.resolve()
     }
 
-    // if this doesn't match the expected version
-    // then print warning to the user
-    if (envVarVersion !== needVersion) {
-      // reset the version to the env var version
-      needVersion = envVarVersion
-    }
+    binaryUrlOverride = envVarVersion
   }
 
   if (util.getEnv('CYPRESS_CACHE_FOLDER')) {
@@ -266,14 +262,28 @@ const start = (options = {}) => {
     `)
   })
   .then(() => {
-    return state.getBinaryPkgVersionAsync(binaryDir)
+    return Promise.all([
+      state.getBinaryPkgVersionAsync(binaryDir),
+      getVersionSpecifier(),
+    ])
   })
-  .then((binaryVersion) => {
+  .then(([binaryVersion, versionSpecifier]) => {
     if (!binaryVersion) {
       debug('no binary installed under cli version')
 
       return true
     }
+
+    if (!binaryUrlOverride && versionSpecifier) {
+      const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
+
+      if (computedBinaryUrl) {
+        debug('computed binary url from version specifier %o', { computedBinaryUrl, needVersion })
+        binaryUrlOverride = computedBinaryUrl
+      }
+    }
+
+    needVersion = binaryUrlOverride || needVersion
 
     debug('installed version is', binaryVersion, 'version needed is', needVersion)
 
