@@ -2,13 +2,7 @@ const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
 describe('e2e config', () => {
-  e2e.setup({
-    settings: {
-      // force the default command timeout to be
-      // much lower which causes our test to fail
-      defaultCommandTimeout: 1000,
-    },
-  })
+  e2e.setup()
 
   it('provides various environment details', function () {
     return e2e.exec(this, {
@@ -23,17 +17,14 @@ describe('e2e config', () => {
   })
 
   it('applies defaultCommandTimeout globally', function () {
-    // tests that config is applied correctly from modified cypress.json
-
-    // TODO: test that environment variables and CYPRESS_config
-    // work as well
-
     return e2e.exec(this, {
-      spec: 'config_failing_spec.coffee',
+      project: Fixtures.projectPath('config-with-short-timeout'),
       snapshot: true,
       expectedExitCode: 1,
     })
   })
+
+  // TODO: test that environment variables and CYPRESS_config work as well
 
   it('throws error when invalid viewportWidth in the configuration file', function () {
     return e2e.exec(this, {
