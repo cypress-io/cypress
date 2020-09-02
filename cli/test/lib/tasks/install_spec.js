@@ -1,4 +1,5 @@
 require('../../spec_helper')
+const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const chalk = require('chalk')
@@ -457,6 +458,104 @@ describe('/lib/tasks/install', function () {
           'silent install 1',
           normalize(`[no output]${this.stdout.toString()}`),
         )
+      })
+    })
+  })
+
+  context('._getVersionSpecifier', function () {
+    beforeEach(function () {
+      sinon.stub(fs, 'readJSON').rejects()
+    })
+
+    it('resolves undefined if no versionSpecifier found', async function () {
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.be.undefined
+    })
+
+    it('resolves with versionSpecifier from parent pkg.json', async function () {
+      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
+        dependencies: {
+          'cypress': '1.2.3',
+        },
+      })
+
+      fs.readJSON.withArgs('/foo/bar/package.json').resolves({
+        dependencies: {
+          'cypress': 'wrong',
+        },
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('1.2.3')
+    })
+
+    it('resolves with devDependencies too', async function () {
+      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
+        devDependencies: {
+          'cypress': '4.5.6',
+        },
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('4.5.6')
+    })
+
+    it('resolves with optionalDependencies too', async function () {
+      fs.readJSON.withArgs('/foo/bar/baz/package.json').resolves({
+        optionalDependencies: {
+          'cypress': '6.7.8',
+        },
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('6.7.8')
+    })
+
+    context('with win32 path functions and paths', async function () {
+      const oldPath = _.clone(path)
+
+      beforeEach(() => {
+        _.assign(path, path.win32)
+      })
+
+      afterEach(() => {
+        _.assign(path, oldPath)
+      })
+
+      it('resolves undefined if no versionSpecifier found', async function () {
+        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.be.undefined
+      })
+
+      it('resolves with versionSpecifier from parent pkg.json', async function () {
+        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
+          dependencies: {
+            'cypress': '1.2.3',
+          },
+        })
+
+        fs.readJSON.withArgs('C:\\foo\\bar\\package.json').resolves({
+          dependencies: {
+            'cypress': 'wrong',
+          },
+        })
+
+        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('1.2.3')
+      })
+
+      it('resolves with devDependencies too', async function () {
+        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
+          devDependencies: {
+            'cypress': '4.5.6',
+          },
+        })
+
+        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('4.5.6')
+      })
+
+      it('resolves with optionalDependencies too', async function () {
+        fs.readJSON.withArgs('C:\\foo\\bar\\baz\\package.json').resolves({
+          optionalDependencies: {
+            'cypress': '6.7.8',
+          },
+        })
+
+        expect(await install._getVersionSpecifier('C:\\foo\\bar\\baz')).to.eq('6.7.8')
       })
     })
   })

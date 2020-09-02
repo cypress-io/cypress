@@ -16,6 +16,43 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 
+// attempt to discover the version specifier used to install Cypress
+// for example: "^5.0.0", "https://cdn.cypress.io/...", ...
+const getVersionSpecifier = async (startDir = path.resolve(__dirname, '../..')) => {
+  const getVersionSpecifierFromPkg = (dir) => {
+    debug('looking for versionSpecifier %o', { dir })
+
+    const tryParent = () => {
+      const parentPath = path.resolve(dir, '..')
+
+      if (parentPath === dir) {
+        debug('reached FS root with no versionSpecifier found')
+
+        return
+      }
+
+      return getVersionSpecifierFromPkg(parentPath)
+    }
+
+    return fs.readJSON(path.join(dir, 'package.json'))
+    .catch(() => ({}))
+    .then((pkg) => {
+      const specifier = _.chain(['dependencies', 'devDependencies', 'optionalDependencies'])
+      .map((prop) => _.get(pkg, `${prop}.cypress`))
+      .compact().first().value()
+
+      return specifier || tryParent()
+    })
+  }
+
+  // recurse through parent directories until package.json with `cypress` is found
+  const versionSpecifier = await getVersionSpecifierFromPkg(startDir)
+
+  debug('finished looking for versionSpecifier', { versionSpecifier })
+
+  return versionSpecifier
+}
+
 const alreadyInstalledMsg = () => {
   if (!util.isPostInstall()) {
     logger.log(stripIndent`
@@ -323,6 +360,7 @@ const start = (options = {}) => {
 
 module.exports = {
   start,
+  _getVersionSpecifier: getVersionSpecifier,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {
