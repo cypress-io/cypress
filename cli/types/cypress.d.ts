@@ -2597,6 +2597,14 @@ declare namespace Cypress {
      * @default null
      */
     retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
+    /**
+     * Enables including elements within the shadow DOM when using querying
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * per-suite or per-test in the test configuration object, or programmatically
+     * with Cypress.ShadowDom.defaults()
+     * @default false
+     */
+    shadowDomOptionPlaceholder: boolean
   }
 
   interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries'>> {

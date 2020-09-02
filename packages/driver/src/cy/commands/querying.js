@@ -85,6 +85,10 @@ module.exports = (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
+      if (Cypress.config('shadowDomOptionPlaceholder')) {
+        options.includeShadowDom = true
+      }
+
       if (!Cypress.config('experimentalShadowDomSupport')) {
         options.includeShadowDom = false
       }

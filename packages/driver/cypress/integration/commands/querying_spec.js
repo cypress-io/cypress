@@ -909,7 +909,7 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
-    describe('includeShadowDom', () => {
+    describe('shadow dom', () => {
       beforeEach(() => {
         cy.visit('/fixtures/shadow-dom.html')
       })
@@ -929,12 +929,6 @@ describe('src/cy/commands/querying', () => {
         .should('have.text', 'In Shadow Slot')
       })
 
-      // TODO: enable once we support cross-boundary selectors nicely
-      it.skip('finds elements within shadow roots with cross-boundary selector', () => {
-        cy.get('#parent-of-shadow-container-0 .shadow-3', { includeShadowDom: true })
-        .should('have.text', 'Shadow Content 3')
-      })
-
       it('finds elements outside shadow roots', () => {
         cy.get('#non-shadow-element', { includeShadowDom: true })
         .should('have.text', 'Non Shadow')
@@ -949,6 +943,43 @@ describe('src/cy/commands/querying', () => {
       it('does not error when querySelectorAll is wrapped and snapshots are off', () => {
         cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
         cy.get('.shadow-1', { includeShadowDom: true })
+      })
+
+      // TODO: enable once we support cross-boundary selectors
+      it.skip('finds elements within shadow roots with cross-boundary selector', () => {
+        cy.get('#parent-of-shadow-container-0 .shadow-3', { includeShadowDom: true })
+        .should('have.text', 'Shadow Content 3')
+      })
+
+      describe('"global" option', () => {
+        describe('works for suites', { shadowDomOptionPlaceholder: true }, () => {
+          beforeEach(() => {
+            cy.get('.shadow-div')
+          })
+
+          it('queries shadow dom', () => {
+            cy.get('.shadow-div')
+          })
+
+          it('also queries shadow dom', () => {
+            cy.get('.shadow-div')
+          })
+        })
+
+        describe('works for tests', () => {
+          it('queries shadow dom', { shadowDomOptionPlaceholder: true }, () => {
+            cy.get('.shadow-div')
+          })
+
+          it('fails without option set', (done) => {
+            cy.on('fail', (err) => {
+              expect(err.message).to.include('Expected to find element: `.shadow-div`, but never found it')
+              done()
+            })
+
+            cy.get('.shadow-div', { timeout: 50 })
+          })
+        })
       })
     })
 

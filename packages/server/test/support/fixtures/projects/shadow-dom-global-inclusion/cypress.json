@@ -1,0 +1,6 @@
+{
+  "experimentalShadowDomSupport": true,
+  "shadowDomOptionPlaceholder": true,
+  "pluginsFile": false,
+  "supportFile": false
+}

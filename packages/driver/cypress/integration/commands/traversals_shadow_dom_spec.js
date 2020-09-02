@@ -136,6 +136,47 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
       cy.get('#shadow-element-1').find('.shadow-1', { includeShadowDom: true })
     })
+
+    describe('"global" option', () => {
+      describe('works for suites', { shadowDomOptionPlaceholder: true }, () => {
+        beforeEach(() => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .find('.shadow-div')
+        })
+
+        it('queries shadow dom', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .find('.shadow-div')
+        })
+
+        it('also queries shadow dom', () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .find('.shadow-div')
+        })
+      })
+
+      describe('works for tests', () => {
+        it('queries shadow dom', { shadowDomOptionPlaceholder: true }, () => {
+          cy
+          .get('#parent-of-shadow-container-0')
+          .find('.shadow-div')
+        })
+
+        it('fails without option set', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.include('Expected to find element: `.shadow-div`, but never found it')
+            done()
+          })
+
+          cy
+          .get('#parent-of-shadow-container-0')
+          .find('.shadow-div', { timeout: 50 })
+        })
+      })
+    })
   })
 
   context('#parent', () => {

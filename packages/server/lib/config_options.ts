@@ -198,6 +198,10 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
+    name: 'shadowDomOptionPlaceholder',
+    defaultValue: false,
+    validation: v.isBoolean,
+  }, {
     name: 'socketId',
     defaultValue: null,
     isInternal: true,

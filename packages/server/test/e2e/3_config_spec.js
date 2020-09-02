@@ -50,4 +50,10 @@ describe('e2e config', () => {
       snapshot: true,
     })
   })
+
+  it('supports global shadow dom inclusion', function () {
+    return e2e.exec(this, {
+      project: Fixtures.projectPath('shadow-dom-global-inclusion'),
+    })
+  })
 })
