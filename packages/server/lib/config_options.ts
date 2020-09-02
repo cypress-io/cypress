@@ -283,9 +283,9 @@ export const breakingOptions = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
   }, {
-    name: 'videoRecording',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'video',
+    name: 'experimentalGetCookiesSameSite',
+    errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
+    isWarning: true,
   }, {
     name: 'screenshotOnHeadlessFailure',
     errorKey: 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED',
@@ -294,8 +294,8 @@ export const breakingOptions = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'trashAssetsBeforeRuns',
   }, {
-    name: 'experimentalGetCookiesSameSite',
-    errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
-    isWarning: true,
+    name: 'videoRecording',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'video',
   },
 ]

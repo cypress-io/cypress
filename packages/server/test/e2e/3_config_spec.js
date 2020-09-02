@@ -1,9 +1,6 @@
 const e2e = require('../support/helpers/e2e').default
 const Fixtures = require('../support/helpers/fixtures')
 
-const configWithInvalidViewport = Fixtures.projectPath('config-with-invalid-viewport')
-const configWithInvalidBrowser = Fixtures.projectPath('config-with-invalid-browser')
-
 describe('e2e config', () => {
   e2e.setup({
     settings: {
@@ -13,7 +10,7 @@ describe('e2e config', () => {
     },
   })
 
-  it('passes', function () {
+  it('provides various environment details', function () {
     return e2e.exec(this, {
       spec: 'config_passing_spec.coffee',
       snapshot: true,
@@ -25,9 +22,8 @@ describe('e2e config', () => {
     })
   })
 
-  it('fails', function () {
-    // this tests that config is applied correctly
-    // from modified cypress.json
+  it('applies defaultCommandTimeout globally', function () {
+    // tests that config is applied correctly from modified cypress.json
 
     // TODO: test that environment variables and CYPRESS_config
     // work as well
@@ -39,21 +35,17 @@ describe('e2e config', () => {
     })
   })
 
-  it('catches invalid viewportWidth in the configuration file', function () {
-    // the test project has cypress.json with a bad setting
-    // which should show an error and exit
+  it('throws error when invalid viewportWidth in the configuration file', function () {
     return e2e.exec(this, {
-      project: configWithInvalidViewport,
+      project: Fixtures.projectPath('config-with-invalid-viewport'),
       expectedExitCode: 1,
       snapshot: true,
     })
   })
 
-  it('catches invalid browser in the configuration file', function () {
-    // the test project has cypress.json with a bad browser
-    // which should show an error and exit
+  it('throws error when invalid browser in the configuration file', function () {
     return e2e.exec(this, {
-      project: configWithInvalidBrowser,
+      project: Fixtures.projectPath('config-with-invalid-browser'),
       expectedExitCode: 1,
       snapshot: true,
     })
