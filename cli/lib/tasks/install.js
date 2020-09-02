@@ -269,12 +269,6 @@ const start = (options = {}) => {
     ])
   })
   .then(([binaryVersion, versionSpecifier]) => {
-    if (!binaryVersion) {
-      debug('no binary installed under cli version')
-
-      return true
-    }
-
     if (!binaryUrlOverride && versionSpecifier) {
       const computedBinaryUrl = getBinaryUrlFromPrereleaseNpmUrl(versionSpecifier)
 
@@ -287,6 +281,12 @@ const start = (options = {}) => {
     needVersion = binaryUrlOverride || needVersion
 
     debug('installed version is', binaryVersion, 'version needed is', needVersion)
+
+    if (!binaryVersion) {
+      debug('no binary installed under cli version')
+
+      return true
+    }
 
     logger.log()
     logger.log(stripIndent`
