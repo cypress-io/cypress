@@ -1,0 +1,12 @@
+{
+  "name": "example-visual-testing-with-applitools",
+  "description": "Visual diffing for component testing using Applittols",
+  "private": true,
+  "scripts": {
+    "test": "../../node_modules/.bin/cypress run",
+    "cy:open": "../../node_modules/.bin/cypress open"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}
