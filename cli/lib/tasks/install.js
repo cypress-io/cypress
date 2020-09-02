@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const os = require('os')
+const url = require('url')
 const path = require('path')
 const chalk = require('chalk')
 const debug = require('debug')('cypress:cli')
@@ -51,6 +52,31 @@ const getVersionSpecifier = async (startDir = path.resolve(__dirname, '../..')) 
   debug('finished looking for versionSpecifier', { versionSpecifier })
 
   return versionSpecifier
+}
+
+const betaNpmUrlRe = /^\/beta\/npm\/(?<version>[0-9.]+)\/(?<artifactSlug>[^/]+)\/cypress\.tgz$/
+
+// convert a prerelease NPM package .tgz URL to the corresponding binary .zip URL
+const getBinaryUrlFromPrereleaseNpmUrl = (npmUrl) => {
+  let parsed
+
+  try {
+    parsed = url.parse(npmUrl)
+  } catch (e) {
+    return
+  }
+
+  const matches = betaNpmUrlRe.exec(parsed.pathname)
+
+  if (parsed.hostname !== 'cdn.cypress.io' || !matches) {
+    return
+  }
+
+  const { version, artifactSlug } = matches.groups
+
+  parsed.pathname = `/beta/binary/${version}/${os.platform()}-${os.arch()}/${artifactSlug}/cypress.zip`
+
+  return parsed.format()
 }
 
 const alreadyInstalledMsg = () => {
@@ -361,6 +387,7 @@ const start = (options = {}) => {
 module.exports = {
   start,
   _getVersionSpecifier: getVersionSpecifier,
+  _getBinaryUrlFromPrereleaseNpmUrl: getBinaryUrlFromPrereleaseNpmUrl,
 }
 
 const unzipTask = ({ zipFilePath, installDir, progress, rendererOptions }) => {

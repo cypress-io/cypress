@@ -462,6 +462,26 @@ describe('/lib/tasks/install', function () {
     })
   })
 
+  context('._getBinaryUrlFromPrereleaseNpmUrl', function () {
+    beforeEach(() => {
+      os.platform.returns('linux')
+      sinon.stub(os, 'arch').returns('x64')
+    })
+
+    it('returns binary url for prerelease npm url', function () {
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/ciprovider-branchname-sha/cypress.tgz'))
+      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/ciprovider-branchname-sha/cypress.zip')
+
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl('https://cdn.cypress.io/beta/npm/5.1.1/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.tgz'))
+      .to.eq('https://cdn.cypress.io/beta/binary/5.1.1/linux-x64/circle-develop-3fdfc3b453eb38ad3c0b079531e4dde6668e3dd0-436710/cypress.zip')
+    })
+
+    it('returns nothing for an invalid url', function () {
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl('1.2.3')).to.be.undefined
+      expect(install._getBinaryUrlFromPrereleaseNpmUrl(null)).to.be.undefined
+    })
+  })
+
   context('._getVersionSpecifier', function () {
     beforeEach(function () {
       sinon.stub(fs, 'readJSON').rejects()
