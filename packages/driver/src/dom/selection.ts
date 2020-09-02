@@ -563,14 +563,14 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
     }
 
     if (Cypress.isBrowser({ family: 'firefox' })) {
-      // FireFox doesn't treat a selectall+arrow the same as clicking the start/end of a contenteditable
+      // FireFox doesn't treat a selectAll+arrow the same as clicking the start/end of a contenteditable
       // so we need to select the specific nodes inside the contenteditable.
       const root = getHostContenteditable(el)
 
       let elToSelect = root.childNodes[toStart ? 0 : root.childNodes.length - 1]
 
-      // in firefox, an empty contenteditable my be a single <br> element, or <div><br/></div>
-      // but its innerText will be '\n' (maybe find a more efficient measure)
+      // in firefox, when an empty contenteditable is a single <br> element or <div><br/></div>
+      // its innerText will be '\n' (maybe find a more efficient measure)
       if (!elToSelect || root.innerText === '\n') {
         // we must be in an empty contenteditable, so we're already at both the start and end
         return
@@ -596,7 +596,7 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
     toStart ? selection.collapseToStart() : selection.collapseToEnd()
   }
 
-  return false
+  return
 }
 
 const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
