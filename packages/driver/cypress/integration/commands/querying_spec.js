@@ -951,8 +951,8 @@ describe('src/cy/commands/querying', () => {
         .should('have.text', 'Shadow Content 3')
       })
 
-      describe('"global" option', () => {
-        describe('works for suites', { shadowDomOptionPlaceholder: true }, () => {
+      describe('non-command options', () => {
+        describe('suite-level config', { shadowDomOptionPlaceholder: true }, () => {
           beforeEach(() => {
             cy.get('.shadow-div')
           })
@@ -966,18 +966,40 @@ describe('src/cy/commands/querying', () => {
           })
         })
 
-        describe('works for tests', () => {
+        describe('test-level config', () => {
           it('queries shadow dom', { shadowDomOptionPlaceholder: true }, () => {
             cy.get('.shadow-div')
           })
 
-          it('fails without option set', (done) => {
-            cy.on('fail', (err) => {
-              expect(err.message).to.include('Expected to find element: `.shadow-div`, but never found it')
-              done()
+          it('does not find element without option set', () => {
+            cy.get('.shadow-div').should('not.exist')
+          })
+        })
+
+        describe('Cypress.ShadowDom.defaults()', () => {
+          beforeEach(() => {
+            // reset to default value
+            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+          })
+
+          it('turns option on and off at will', () => {
+            cy.get('.shadow-div').should('not.exist').then(() => {
+              Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
             })
 
-            cy.get('.shadow-div', { timeout: 50 })
+            cy.get('.shadow-div')
+          })
+
+          it('overrides test-level option being true', { shadowDomOptionPlaceholder: true }, () => {
+            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+
+            cy.get('.shadow-div').should('not.exist')
+          })
+
+          it('overrides test-level option being false', { shadowDomOptionPlaceholder: false }, () => {
+            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+
+            cy.get('.shadow-div')
           })
         })
       })

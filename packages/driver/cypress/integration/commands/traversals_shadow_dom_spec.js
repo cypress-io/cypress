@@ -137,8 +137,8 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       cy.get('#shadow-element-1').find('.shadow-1', { includeShadowDom: true })
     })
 
-    describe('"global" option', () => {
-      describe('works for suites', { shadowDomOptionPlaceholder: true }, () => {
+    describe('non-command options', () => {
+      describe('suite-level config', { shadowDomOptionPlaceholder: true }, () => {
         beforeEach(() => {
           cy
           .get('#parent-of-shadow-container-0')
@@ -158,7 +158,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
         })
       })
 
-      describe('works for tests', () => {
+      describe('test-level config', () => {
         it('queries shadow dom', { shadowDomOptionPlaceholder: true }, () => {
           cy
           .get('#parent-of-shadow-container-0')
@@ -173,7 +173,34 @@ describe('src/cy/commands/traversals - shadow dom', () => {
 
           cy
           .get('#parent-of-shadow-container-0')
-          .find('.shadow-div', { timeout: 50 })
+          .find('.shadow-div').should('not.exist')
+        })
+      })
+
+      describe('Cypress.ShadowDom.defaults()', () => {
+        beforeEach(() => {
+          // reset to default value
+          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+        })
+
+        it('turns option on and off at will', () => {
+          cy.get('.shadow-div').should('not.exist').then(() => {
+            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+          })
+
+          cy.get('.shadow-div')
+        })
+
+        it('overrides test-level option being true', { shadowDomOptionPlaceholder: true }, () => {
+          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+
+          cy.get('.shadow-div').should('not.exist')
+        })
+
+        it('overrides test-level option being false', { shadowDomOptionPlaceholder: false }, () => {
+          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+
+          cy.get('.shadow-div')
         })
       })
     })

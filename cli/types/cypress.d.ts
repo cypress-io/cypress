@@ -500,6 +500,13 @@ declare namespace Cypress {
     }
 
     /**
+     * @see https://on.cypress.io/shadow-dom-api
+     */
+    ShadowDom: {
+      defaults(options: Partial<ShadowDomOptions>): ShadowDomOptions
+    }
+
+    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
@@ -1609,13 +1616,11 @@ declare namespace Cypress {
      * Traverse into an element's shadow root.
      * Requires `experimentalShadowDomSupport: true` config option
      *
-    @example
-    ```js
-    cy.get('.top-level > my-component')
-      .shadow()
-      .find('.my-button')
-      .click()
-    ```
+     * @example
+     *    cy.get('my-component')
+     *    .shadow()
+     *    .find('.my-button')
+     *    .click()
      * @see https://on.cypress.io/experimental
      */
     shadow(): Chainable<Subject>
@@ -2792,6 +2797,10 @@ declare namespace Cypress {
     httpOnly: boolean
     expiry: number
     sameSite: SameSiteStatus
+  }
+
+  interface ShadowDomOptions {
+    shadowDomOptionPlaceholder?: boolean
   }
 
   /**

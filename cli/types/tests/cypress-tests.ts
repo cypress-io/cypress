@@ -383,6 +383,16 @@ namespace CypressScreenshotTests {
   })
 }
 
+namespace CypressShadowDomTests {
+  cy.get('my-component').shadow()
+  Cypress.ShadowDom.defaults() // $ExpectError
+  Cypress.ShadowDom.defaults({}) // $ExpectType ShadowDomOptions
+  Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true }) // $ExpectType ShadowDomOptions
+  Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false }) // $ExpectType ShadowDomOptions
+  Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: 'foo' }) // $ExpectError
+  Cypress.ShadowDom.defaults({ shadowDomOptionTypo: true }) // $ExpectError
+}
+
 namespace CypressTriggerTests {
   cy.get('something')
     .trigger('click') // .trigger(eventName)
