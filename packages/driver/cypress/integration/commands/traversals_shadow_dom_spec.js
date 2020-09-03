@@ -172,28 +172,30 @@ describe('src/cy/commands/traversals - shadow dom', () => {
         })
       })
 
-      describe('Cypress.ShadowDom.defaults()', () => {
-        beforeEach(() => {
-          // reset to default value
-          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
-        })
+      describe('Cypress.config()', () => {
+        const reset = () => {
+          Cypress.config('shadowDomOptionPlaceholder', false)
+        }
+
+        beforeEach(reset)
+        afterEach(reset)
 
         it('turns option on and off at will', () => {
           cy.get('.shadow-div').should('not.exist').then(() => {
-            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+            Cypress.config('shadowDomOptionPlaceholder', true)
           })
 
           cy.get('.shadow-div')
         })
 
         it('overrides test-level option being true', { shadowDomOptionPlaceholder: true }, () => {
-          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+          Cypress.config('shadowDomOptionPlaceholder', false)
 
           cy.get('.shadow-div').should('not.exist')
         })
 
         it('overrides test-level option being false', { shadowDomOptionPlaceholder: false }, () => {
-          Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+          Cypress.config('shadowDomOptionPlaceholder', true)
 
           cy.get('.shadow-div')
         })

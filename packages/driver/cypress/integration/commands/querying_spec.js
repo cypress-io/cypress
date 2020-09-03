@@ -976,9 +976,9 @@ describe('src/cy/commands/querying', () => {
           })
         })
 
-        describe('Cypress.ShadowDom.defaults()', () => {
+        describe('Cypress.config()', () => {
           const reset = () => {
-            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+            Cypress.config('shadowDomOptionPlaceholder', false)
           }
 
           beforeEach(reset)
@@ -986,20 +986,20 @@ describe('src/cy/commands/querying', () => {
 
           it('turns option on and off at will', () => {
             cy.get('.shadow-div').should('not.exist').then(() => {
-              Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+              Cypress.config('shadowDomOptionPlaceholder', true)
             })
 
             cy.get('.shadow-div')
           })
 
           it('overrides test-level option being true', { shadowDomOptionPlaceholder: true }, () => {
-            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
+            Cypress.config('shadowDomOptionPlaceholder', false)
 
             cy.get('.shadow-div').should('not.exist')
           })
 
           it('overrides test-level option being false', { shadowDomOptionPlaceholder: false }, () => {
-            Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: true })
+            Cypress.config('shadowDomOptionPlaceholder', true)
 
             cy.get('.shadow-div')
           })

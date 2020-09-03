@@ -1478,17 +1478,6 @@ module.exports = {
     },
   },
 
-  shadowDom: {
-    invalid_arg: {
-      message: `${cmd('Cypress.ShadowDom.defaults')} must be called with an object. You passed: \`{{value}}\``,
-      docsUrl: 'https://on.cypress.io/shadow-dom-api',
-    },
-    invalid_boolean: {
-      message: `${cmd('Cypress.ShadowDom.defaults')} \`{{option}}\` option must be a boolean. You passed: \`{{value}}\``,
-      docsUrl: 'https://on.cypress.io/shadow-dom-api',
-    },
-  },
-
   should: {
     chainer_not_found: 'The chainer `{{chainer}}` was not found. Could not build assertion.',
     language_chainer: {

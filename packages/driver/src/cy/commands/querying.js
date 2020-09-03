@@ -3,6 +3,7 @@ const Promise = require('bluebird')
 
 const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
+const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
 module.exports = (Commands, Cypress, cy, state) => {
   Commands.addAll({
@@ -85,7 +86,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
-      options.includeShadowDom = Cypress.ShadowDom.resolveInclusionValue(Cypress, userOptions.includeShadowDom)
+      options.includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
       let aliasObj
       const consoleProps = {}

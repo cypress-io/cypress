@@ -500,13 +500,6 @@ declare namespace Cypress {
     }
 
     /**
-     * @see https://on.cypress.io/shadow-dom-api
-     */
-    ShadowDom: {
-      defaults(options: Partial<ShadowDomOptions>): ShadowDomOptions
-    }
-
-    /**
      * These events come from Cypress as it issues commands and reacts to their state. These are all useful to listen to for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
