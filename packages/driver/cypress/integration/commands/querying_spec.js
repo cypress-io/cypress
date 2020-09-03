@@ -977,10 +977,12 @@ describe('src/cy/commands/querying', () => {
         })
 
         describe('Cypress.ShadowDom.defaults()', () => {
-          beforeEach(() => {
-            // reset to default value
+          const reset = () => {
             Cypress.ShadowDom.defaults({ shadowDomOptionPlaceholder: false })
-          })
+          }
+
+          beforeEach(reset)
+          afterEach(reset)
 
           it('turns option on and off at will', () => {
             cy.get('.shadow-div').should('not.exist').then(() => {

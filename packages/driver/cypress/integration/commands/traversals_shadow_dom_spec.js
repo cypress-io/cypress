@@ -165,12 +165,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
           .find('.shadow-div')
         })
 
-        it('fails without option set', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.include('Expected to find element: `.shadow-div`, but never found it')
-            done()
-          })
-
+        it('does not find element without option set', () => {
           cy
           .get('#parent-of-shadow-container-0')
           .find('.shadow-div').should('not.exist')
