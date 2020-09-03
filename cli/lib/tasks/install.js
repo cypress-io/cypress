@@ -17,9 +17,29 @@ const unzip = require('./unzip')
 const logger = require('../logger')
 const { throwFormErrorText, errors } = require('../errors')
 
+const getNpmArgv = () => {
+  const json = process.env.npm_config_argv
+
+  if (!json) {
+    return
+  }
+
+  return JSON.parse(json).original || []
+}
+
 // attempt to discover the version specifier used to install Cypress
 // for example: "^5.0.0", "https://cdn.cypress.io/...", ...
 const getVersionSpecifier = (startDir = path.resolve(__dirname, '../..')) => {
+  const argv = getNpmArgv()
+
+  if (argv) {
+    const tgz = _.find(argv, (t) => t.endsWith('cypress.tgz'))
+
+    if (tgz) {
+      return tgz
+    }
+  }
+
   const getVersionSpecifierFromPkg = (dir) => {
     debug('looking for versionSpecifier %o', { dir })
 
