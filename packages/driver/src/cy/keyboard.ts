@@ -59,6 +59,12 @@ interface KeyDetails {
   }
 }
 
+interface ShortcutDetails {
+  isShortcut: boolean
+  modifiers: KeyDetails[]
+  key: KeyDetails
+}
+
 const dateRe = /^\d{4}-\d{2}-\d{2}/
 const monthRe = /^\d{4}-(0\d|1[0-2])/
 const weekRe = /^\d{4}-W(0[1-9]|[1-4]\d|5[0-3])/
@@ -186,8 +192,23 @@ const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
 
 const getTextLength = (str) => _.toArray(str).length
 
+const fillKeyDetailDefaults = (key) => {
+  const details = _.defaults({}, key, {
+    key: '',
+    keyCode: 0,
+    code: '',
+    text: '',
+    location: 0,
+    events: {},
+  })
+
+  details.originalSequence = key.key
+
+  return details
+}
+
 const getKeyDetails = (onKeyNotFound) => {
-  return (key: string): KeyDetails => {
+  return (key: string): KeyDetails | ShortcutDetails => {
     let foundKey: KeyDetailsPartial
 
     if (getTextLength(key) === 1) {
@@ -197,20 +218,31 @@ const getKeyDetails = (onKeyNotFound) => {
     }
 
     if (foundKey) {
-      const details = _.defaults({}, foundKey, {
-        key: '',
-        keyCode: 0,
-        code: '',
-        text: '',
-        location: 0,
-        events: {},
-      })
+      const details = fillKeyDetailDefaults(foundKey)
 
       if (getTextLength(details.key) === 1) {
         details.text = details.key
       }
 
       details.originalSequence = key
+
+      return details
+    }
+
+    if (key.includes('+')) {
+      const keys = key.split('+')
+      const lastKey = _.last(keys)
+
+      const details: ShortcutDetails = {
+        isShortcut: true,
+        modifiers: keys
+        .filter((k, i) => i !== keys.length - 1)
+        .map((key) => findKeyDetailsOrLowercase(key))
+        .map((key) => fillKeyDetailDefaults(key)),
+        key: fillKeyDetailDefaults(USKeyboard[lastKey]),
+      }
+
+      details.key.text = details.key.key
 
       return details
     }
@@ -742,7 +774,11 @@ export class Keyboard {
             return null
           }
 
-          this.typeSimulatedKey(activeEl, key, options)
+          if (key.isShortcut) {
+            this.simulateShortcut(activeEl, key, options)
+          } else {
+            this.typeSimulatedKey(activeEl, key, options)
+          }
 
           return null
         }
@@ -1047,6 +1083,25 @@ export class Keyboard {
     const elToKeyup = this.getActiveEl(options)
 
     this.simulatedKeyup(elToKeyup, key, options)
+  }
+
+  simulateShortcut (el: HTMLElement, key: KeyDetails, options) {
+    key.modifiers.forEach((key) => {
+      this.simulatedKeydown(el, key, options)
+    })
+
+    this.simulatedKeydown(el, key.key, options)
+    this.simulatedKeyup(el, key.key, options)
+
+    options.id = _.uniqueId('char')
+
+    const elToKeyup = this.getActiveEl(options)
+
+    key.modifiers.reverse().forEach((key) => {
+      delete key.events.keyup
+      options.id = _.uniqueId('char')
+      this.simulatedKeyup(elToKeyup, key, options)
+    })
   }
 
   simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
