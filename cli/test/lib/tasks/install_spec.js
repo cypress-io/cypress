@@ -5,6 +5,7 @@ const path = require('path')
 const chalk = require('chalk')
 const Promise = require('bluebird')
 const mockfs = require('mock-fs')
+const mockedEnv = require('mocked-env')
 const snapshot = require('../../support/snapshot')
 
 const stdout = require('../../support/stdout')
@@ -483,12 +484,25 @@ describe('/lib/tasks/install', function () {
   })
 
   context('._getVersionSpecifier', function () {
+    let restoreEnv
+
     beforeEach(function () {
       sinon.stub(fs, 'readJSON').rejects()
+      restoreEnv && restoreEnv()
     })
 
     it('resolves undefined if no versionSpecifier found', async function () {
       expect(await install._getVersionSpecifier('/foo/bar/baz')).to.be.undefined
+    })
+
+    it('resolves with cypress.tgz URL if specified in npm argv', async function () {
+      restoreEnv = mockedEnv({
+        npm_config_argv: JSON.stringify({
+          original: ['npm', 'i', 'https://foo.com/cypress.tgz'],
+        }),
+      })
+
+      expect(await install._getVersionSpecifier('/foo/bar/baz')).to.eq('https://foo.com/cypress.tgz')
     })
 
     it('resolves with versionSpecifier from parent pkg.json', async function () {
