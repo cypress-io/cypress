@@ -240,8 +240,29 @@ const getKeyDetails = (onKeyNotFound) => {
     }
 
     if (key.includes('+')) {
+      if (key.endsWith('++')) {
+        key = key.replace('++', '+plus')
+      }
+
       const keys = key.split('+')
-      const lastKey = _.last(keys)
+      let lastKey = _.last(keys)!
+
+      if (lastKey === 'plus') {
+        keys[keys.length - 1] = '+'
+        lastKey = '+'
+      }
+
+      const modifiers = keys.filter((k, i) => i !== keys.length - 1)
+
+      modifiers.forEach((m) => {
+        if (!Object.keys(modifierChars).includes(m)) {
+          $errUtils.throwErrByPath('type.not_a_modifier', {
+            args: {
+              key: m,
+            },
+          })
+        }
+      })
 
       const details: ShortcutDetails = {
         type: 'shortcut',
