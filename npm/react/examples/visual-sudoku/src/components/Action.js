@@ -3,7 +3,7 @@ import React from 'react'
 /**
  * Return the SVGs of the Action buttons in the Status Section.
  */
-const Svg = props => {
+const Svg = (props) => {
   if (props.action === 'undo') {
     return (
       <svg
@@ -23,7 +23,9 @@ const Svg = props => {
         />
       </svg>
     )
-  } else if (props.action === 'erase') {
+  }
+
+  if (props.action === 'erase') {
     return (
       <svg
         className="status__action-svg"
@@ -40,7 +42,9 @@ const Svg = props => {
         />
       </svg>
     )
-  } else if (props.action === 'hint') {
+  }
+
+  if (props.action === 'hint') {
     return (
       <svg
         className="status__action-svg"
@@ -95,17 +99,17 @@ const Svg = props => {
 /**
  * React component for the Action buttons in the Status Section.
  */
-export const Action = props => {
+export const Action = (props) => {
   return (
     <div
       className={
         props.action === 'undo'
           ? 'status__action-undo'
           : props.action === 'erase'
-          ? 'status__action-erase'
-          : props.action === 'hint'
-          ? 'status__action-hint'
-          : ''
+            ? 'status__action-erase'
+            : props.action === 'hint'
+              ? 'status__action-hint'
+              : ''
       }
       onClick={props.onClickAction}
     >
@@ -114,10 +118,10 @@ export const Action = props => {
         {props.action === 'undo'
           ? 'Undo'
           : props.action === 'erase'
-          ? 'Erase'
-          : props.action === 'hint'
-          ? 'Hint'
-          : ''}
+            ? 'Erase'
+            : props.action === 'hint'
+              ? 'Hint'
+              : ''}
       </p>
     </div>
   )

@@ -2,10 +2,11 @@
 /// <reference types="../../lib" />
 import React from 'react'
 
-/* eslint-env mocha */
+// NOTE: intentionally empty spec
 describe.skip('Empty div jsx', () => {
   it('works with El', () => {
     const El = () => <div>foo</div>
+
     cy.mount(<El></El>)
   })
 

@@ -3,12 +3,12 @@ import { Dropdown } from 'react-bootstrap'
 import { mount } from 'cypress-react-unit-test'
 
 class UserControls extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {}
   }
 
-  render() {
+  render () {
     return (
       <Dropdown>
         <Dropdown.Toggle>Top Toggle</Dropdown.Toggle>
@@ -30,6 +30,7 @@ describe('react-bootstrap Dropdown', () => {
     mount(<UserControls />, {
       cssFile: 'node_modules/bootstrap/dist/css/bootstrap.min.css',
     })
+
     cy.contains('Top Toggle').click()
     cy.contains('li', 'First').should('be.visible')
     cy.get('li').should('have.length', 3)

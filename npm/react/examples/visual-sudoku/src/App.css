@@ -32,7 +32,7 @@ body {
   background: var(--background-color);
   color: var(--color-blue);
   font-family: 'Source Sans Pro', sans-serif;
-	line-height: 1.4em;
+  line-height: 1.4em;
   font-weight: 300;
 }
 
@@ -58,12 +58,12 @@ body {
 .header h1 {
   float: left;
   font-size: 24px;
-	font-weight: 600;
+  font-weight: 600;
   line-height: 2.75;
   color: var(--color-grey);
   -webkit-text-rendering: optimizeLegibility;
-	-moz-text-rendering: optimizeLegibility;
-	text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility;
 }
 
 .header__group-one {
@@ -444,11 +444,11 @@ input:checked + .status__action-fast-mode-slider:before {
  * Add this to blur any DIV!
  */
 .blur {
-	-webkit-filter: blur(2px);
-	-moz-filter: blur(2px);
-	-o-filter: blur(2px);
-	-ms-filter: blur(2px);
-	filter: blur(2px);
+  -webkit-filter: blur(2px);
+  -moz-filter: blur(2px);
+  -o-filter: blur(2px);
+  -ms-filter: blur(2px);
+  filter: blur(2px);
 }
 
 /**

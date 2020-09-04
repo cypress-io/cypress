@@ -3,11 +3,11 @@
 import React from 'react'
 
 class Button extends React.Component {
-  handleClick() {
+  handleClick () {
     this.props.clickHandler(this.props.name)
   }
 
-  render() {
+  render () {
     const className = [
       'component-button',
       this.props.orange ? 'orange' : '',
@@ -22,6 +22,7 @@ class Button extends React.Component {
   }
 }
 
+// NOTE: skip injecting style tests
 describe.skip('Injecting style', () => {
   it('can be passed as an option', () => {
     const style = `
@@ -36,6 +37,7 @@ describe.skip('Injecting style', () => {
         color: white;
       }
     `
+
     cy.mount(<Button name="Orange" orange />, null, { style })
     cy.get('.orange button').should(
       'have.css',
@@ -45,18 +47,19 @@ describe.skip('Injecting style', () => {
   })
 
   it('read CSS file and pass as style', () => {
-    cy.readFile('cypress/integration/Button.css').then(style => {
+    cy.readFile('cypress/integration/Button.css').then((style) => {
       cy.mount(<Button name="Orange" orange />, null, { style })
     })
 
     cy.get('.component-button')
-      .should('have.class', 'orange')
-      .find('button')
-      .should('have.css', 'background-color', 'rgb(245, 146, 62)')
+    .should('have.class', 'orange')
+    .find('button')
+    .should('have.css', 'background-color', 'rgb(245, 146, 62)')
   })
 
   it('can be read automatically', () => {
     const cssFile = 'cypress/integration/Button.css'
+
     cy.mount(<Button name="Orange" orange />, null, { cssFile })
     cy.get('.orange button').should(
       'have.css',
@@ -72,7 +75,7 @@ describe.skip('Injecting style', () => {
       cy.readFile('cypress/integration/Button.css').as('style')
     })
 
-    it('is orange', function() {
+    it('is orange', function () {
       // notice we use "function () {}" callback
       // to get the test context "this" to be able to use "this.style"
       cy.mount(<Button name="Orange" orange />, null, { style: this.style })
@@ -84,7 +87,7 @@ describe.skip('Injecting style', () => {
       )
     })
 
-    it('is orange again', function() {
+    it('is orange again', function () {
       cy.mount(<Button name="Orange" orange />, null, { style: this.style })
 
       cy.get('.orange button').should(

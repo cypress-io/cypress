@@ -12,17 +12,17 @@ describe('Mocking Axios named import get', () => {
   })
 
   it('mocks get', () => {
-    console.log('Axios', Axios)
+    console.log('Axios', Axios) // eslint-disable-line no-console
     cy.stub(Axios, 'get')
-      .resolves({
-        data: [
-          {
-            id: 101,
-            name: 'Test User',
-          },
-        ],
-      })
-      .as('get')
+    .resolves({
+      data: [
+        {
+          id: 101,
+          name: 'Test User',
+        },
+      ],
+    })
+    .as('get')
 
     mount(<Users />)
     // only the test user should be shown

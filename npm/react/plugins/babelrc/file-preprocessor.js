@@ -5,28 +5,36 @@ const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
 // note: modifies the input object
-function enableBabelrc(webpackOptions) {
+function enableBabelrc (webpackOptions) {
   if (!Array.isArray(webpackOptions.module.rules)) {
     debug('could not find webpack module rules %o', webpackOptions.module)
+
     return
   }
 
   const jsCodeRule = webpackOptions.module.rules[0]
+
   debug('js code rule %o', jsCodeRule)
   if (!jsCodeRule) {
     debug('could not get first rule %o', webpackOptions.module)
+
     return
   }
 
   const jsCodeRuleUses = jsCodeRule.use
+
   if (!Array.isArray(jsCodeRuleUses)) {
     debug('js code rule use is not an array %o', jsCodeRuleUses)
+
     return
   }
+
   const babelLoaderOptions = jsCodeRuleUses[0].options
+
   debug('Babel options %o', babelLoaderOptions)
   if (!babelLoaderOptions) {
     debug('Hmm, no babel loader options %o', jsCodeRuleUses)
+
     return
   }
 
@@ -39,7 +47,7 @@ function enableBabelrc(webpackOptions) {
   debug('babel loader options %o', babelLoaderOptions)
 }
 
-module.exports = config => {
+module.exports = (config) => {
   debug('env object %o', config.env)
 
   debug('initial environments %o', {
@@ -48,10 +56,12 @@ module.exports = config => {
   })
 
   const nodeEnvironment = 'test'
+
   if (!process.env.BABEL_ENV) {
     debug('setting BABEL_ENV to %s', nodeEnvironment)
     process.env.BABEL_ENV = nodeEnvironment
   }
+
   if (!process.env.NODE_ENV) {
     debug('setting NODE_ENV to %s', nodeEnvironment)
     process.env.NODE_ENV = nodeEnvironment
@@ -64,9 +74,11 @@ module.exports = config => {
 
   const coverageIsDisabled =
     config && config.env && config.env.coverage === false
+
   debug('coverage is disabled? %o', { coverageIsDisabled })
 
   const wpPreprocessorOptions = webpackPreprocessor.defaultOptions
+
   enableBabelrc(wpPreprocessorOptions.webpackOptions)
   debug('webpack options %o', wpPreprocessorOptions.webpackOptions)
 

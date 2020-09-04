@@ -10,6 +10,7 @@ describe('Stateless component', () => {
     // pass spy and save it under an alias
     // so we can easily get it later with cy.get('@greeting')
     const spy = cy.spy().as('greeting')
+
     mount(<HelloWorld name="Test Aficionado" click={spy} />)
   })
 

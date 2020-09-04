@@ -50,7 +50,7 @@ export const Game = () => {
   /**
    * Creates a new game and initializes the state variables.
    */
-  function _createNewGame(e) {
+  function _createNewGame (e) {
     let [temporaryInitArray, temporarySolvedArray] = getUniqueSudoku(
       difficulty,
       e,
@@ -69,15 +69,17 @@ export const Game = () => {
   /**
    * Checks if the game is solved.
    */
-  function _isSolved(index, value) {
+  function _isSolved (index, value) {
     if (
       gameArray.every((cell, cellIndex) => {
         if (cellIndex === index) return value === solvedArray[cellIndex]
-        else return cell === solvedArray[cellIndex]
+
+        return cell === solvedArray[cellIndex]
       })
     ) {
       return true
     }
+
     return false
   }
 
@@ -85,7 +87,7 @@ export const Game = () => {
    * Fills the cell with the given 'value'
    * Used to Fill / Erase as required.
    */
-  function _fillCell(index, value) {
+  function _fillCell (index, value) {
     if (initArray[index] === '0') {
       // Direct copy results in interesting set of problems, investigate more!
       let tempArray = gameArray.slice()
@@ -109,7 +111,7 @@ export const Game = () => {
    * A 'user fill' will be passed on to the
    * _fillCell function above.
    */
-  function _userFillCell(index, value) {
+  function _userFillCell (index, value) {
     if (mistakesMode) {
       if (value === solvedArray[index]) {
         _fillCell(index, value)
@@ -125,17 +127,18 @@ export const Game = () => {
    * On Click of 'New Game' link,
    * create a new game.
    */
-  function onClickNewGame() {
+  function onClickNewGame () {
     _createNewGame()
   }
 
   /**
    * On Click of a Game cell.
    */
-  function onClickCell(indexOfArray) {
+  function onClickCell (indexOfArray) {
     if (fastMode && numberSelected !== '0') {
       _userFillCell(indexOfArray, numberSelected)
     }
+
     setCellSelected(indexOfArray)
   }
 
@@ -144,7 +147,7 @@ export const Game = () => {
    * 1. Update 'Difficulty' level
    * 2. Create New Game
    */
-  function onChangeDifficulty(e) {
+  function onChangeDifficulty (e) {
     setDifficulty(e.target.value)
     _createNewGame(e)
   }
@@ -153,7 +156,7 @@ export const Game = () => {
    * On Click of Number in Status section,
    * either fill cell or set the number.
    */
-  function onClickNumber(number) {
+  function onClickNumber (number) {
     if (fastMode) {
       setNumberSelected(number)
     } else if (cellSelected !== -1) {
@@ -165,10 +168,11 @@ export const Game = () => {
    * On Click Undo,
    * try to Undo the latest change.
    */
-  function onClickUndo() {
+  function onClickUndo () {
     if (history.length) {
       let tempHistory = history.slice()
       let tempArray = tempHistory.pop()
+
       setHistory(tempHistory)
       setGameArray(tempArray)
     }
@@ -178,7 +182,7 @@ export const Game = () => {
    * On Click Erase,
    * try to delete the cell.
    */
-  function onClickErase() {
+  function onClickErase () {
     if (cellSelected !== -1 && gameArray[cellSelected] !== '0') {
       _fillCell(cellSelected, '0')
     }
@@ -188,7 +192,7 @@ export const Game = () => {
    * On Click Hint,
    * fill the selected cell if its empty or wrong number is filled.
    */
-  function onClickHint() {
+  function onClickHint () {
     if (cellSelected !== -1) {
       _fillCell(cellSelected, solvedArray[cellSelected])
     }
@@ -197,17 +201,18 @@ export const Game = () => {
   /**
    * Toggle Mistakes Mode
    */
-  function onClickMistakesMode() {
+  function onClickMistakesMode () {
     setMistakesMode(!mistakesMode)
   }
 
   /**
    * Toggle Fast Mode
    */
-  function onClickFastMode() {
+  function onClickFastMode () {
     if (fastMode) {
       setNumberSelected('0')
     }
+
     setCellSelected(-1)
     setFastMode(!fastMode)
   }
@@ -215,7 +220,7 @@ export const Game = () => {
   /**
    * Close the overlay on Click.
    */
-  function onClickOverlay() {
+  function onClickOverlay () {
     setOverlay(false)
     _createNewGame()
   }
@@ -233,10 +238,10 @@ export const Game = () => {
       <div className={overlay ? 'container blur' : 'container'}>
         <Header onClick={onClickNewGame} />
         <div className="innercontainer">
-          <GameSection onClick={indexOfArray => onClickCell(indexOfArray)} />
+          <GameSection onClick={(indexOfArray) => onClickCell(indexOfArray)} />
           <StatusSection
-            onClickNumber={number => onClickNumber(number)}
-            onChange={e => onChangeDifficulty(e)}
+            onClickNumber={(number) => onClickNumber(number)}
+            onChange={(e) => onChangeDifficulty(e)}
             onClickUndo={onClickUndo}
             onClickErase={onClickErase}
             onClickHint={onClickHint}

@@ -6,11 +6,12 @@ import './tic-tac-toe.css'
 
 it('renders', () => {
   const onClick = cy.stub()
+
   mount(<Square value="O" onClick={onClick} />)
   cy.get('.square')
-    .should('have.text', 'O')
-    .click()
-    .then(() => {
-      expect(onClick).to.have.been.calledOnce
-    })
+  .should('have.text', 'O')
+  .click()
+  .then(() => {
+    expect(onClick).to.have.been.calledOnce
+  })
 })

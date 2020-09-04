@@ -27,8 +27,9 @@ describe('App', () => {
   it('can mock the child component', () => {
     // Child component we want to stub is the default export
     cy.stub(Child, 'default')
-      .as('child')
-      .returns(<div className="mock-child">Mock Child component</div>)
+    .as('child')
+    .returns(<div className="mock-child">Mock Child component</div>)
+
     mount(<App />)
     cy.contains('.mock-child', 'Mock Child')
   })

@@ -16,6 +16,7 @@ module.exports = (on, config) => {
   if (!babelLoader.options.plugins) {
     babelLoader.options.plugins = []
   }
+
   babelLoader.options.plugins.push(require.resolve('babel-plugin-istanbul'))
 
   // in order to mock named imports, need to include a plugin

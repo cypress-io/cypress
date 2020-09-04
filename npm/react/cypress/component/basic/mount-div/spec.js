@@ -3,7 +3,7 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 
-function Button() {
+function Button () {
   return <button>Hello</button>
 }
 
@@ -14,7 +14,7 @@ describe('mounting a div', () => {
   })
 
   // https://github.com/bahmutov/cypress-react-unit-test/issues/98
-  it('mount multiple components', function() {
+  it('mount multiple components', function () {
     mount(
       <div>
         <Button />
@@ -22,6 +22,7 @@ describe('mounting a div', () => {
         <Button />
       </div>,
     )
+
     cy.get('button').should('have.length', 2)
   })
 })

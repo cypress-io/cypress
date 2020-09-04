@@ -1,4 +1,5 @@
 const path = require('path')
+
 module.exports = {
   resolve: {
     // for this example, let's point 'cypress-react-unit-test' at the root

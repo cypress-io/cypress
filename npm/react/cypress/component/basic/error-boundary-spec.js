@@ -14,7 +14,6 @@ describe('Error Boundary', () => {
   const ChildWithoutError = () => <h1>Normal Child</h1>
   const ChildWithError = () => {
     throw new Error(errorMessage)
-    return null
   }
 
   it('renders normal children', () => {
@@ -23,10 +22,11 @@ describe('Error Boundary', () => {
         <ChildWithoutError />
       </ErrorBoundary>,
     )
+
     cy.get('h1').should('have.text', 'Normal Child')
     cy.get(ErrorBoundary)
-      .its('state.error')
-      .should('not.exist')
+    .its('state.error')
+    .should('not.exist')
   })
 
   it('on error, display fallback UI', () => {

@@ -9,8 +9,9 @@ import * as calc from './calc'
 describe('Mocking', () => {
   it('mocks import used by the Post', () => {
     cy.stub(calc, 'getRandomNumber')
-      .as('lucky')
-      .returns(777)
+    .as('lucky')
+    .returns(777)
+
     mount(<Post title="post title" children="post text" />)
     cy.contains('.random', '777')
   })

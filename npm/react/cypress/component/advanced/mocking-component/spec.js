@@ -2,6 +2,7 @@ import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 // Component "Contact" has child component "Map" that is expensive to render
 import Contact from './contact'
+/* eslint-disable no-duplicate-imports */
 import Map from './map'
 import * as MapModule from './map'
 
@@ -9,22 +10,25 @@ describe('Mock imported component', () => {
   // mock Map component used by Contact component
   // whenever React tries to instantiate using Map constructor
   // call DummyMap constructor
-  const DummyMap = props => (
-    <div data-testid="map">
+  const DummyMap = (props) => {
+    return (
+      <div data-testid="map">
       DummyMap {props.center.lat}:{props.center.long}
-    </div>
-  )
+      </div>
+    )
+  }
 
   context('by stubbing React.createElement method', () => {
     // stubbing like this works, but is less than ideal
     it('should render contact information', () => {
       cy.stub(React, 'createElement')
-        .callThrough()
-        .withArgs(Map)
-        .callsFake((constructor, props) => React.createElement(DummyMap, props))
+      .callThrough()
+      .withArgs(Map)
+      .callsFake((constructor, props) => React.createElement(DummyMap, props))
 
       cy.viewport(500, 500)
       const center = { lat: 0, long: 0 }
+
       mount(
         <Contact
           name="Joni Baez"
@@ -47,6 +51,7 @@ describe('Mock imported component', () => {
 
       cy.viewport(500, 500)
       const center = { lat: 0, long: 0 }
+
       mount(
         <Contact
           name="Joni Baez"

@@ -162,7 +162,7 @@ let nullArray = [
 /**
  * Gets the coordinates of the center cell of the specified box.
  */
-function _getBoxCenter(box) {
+function _getBoxCenter (box) {
   // eslint-disable-next-line
   switch (box) {
     case 0:
@@ -191,7 +191,7 @@ function _getBoxCenter(box) {
  * 1. Box
  * 2. Cell
  */
-function _getIndexOfCell(box, cell) {
+function _getIndexOfCell (box, cell) {
   let [row, column] = _getBoxCenter(box)
   // eslint-disable-next-line
   switch (cell) {
@@ -235,22 +235,23 @@ function _getIndexOfCell(box, cell) {
       break
     }
   }
+
   return row * 9 + column
 }
 
 /**
  * Checks if Cell is available or not (i.e., filled).
  */
-function _cellAvailable(tempInitArray, box, value) {
+function _cellAvailable (tempInitArray, box, value) {
   return tempInitArray[_getIndexOfCell(box, value)] === '0' ? 0 : 1
 }
 
 /**
  * Generates a Unique Sudoku puzzle from a solved Sudoku.
  */
-function _generateUniqueSudoku(solvedArray, difficulty, e) {
+function _generateUniqueSudoku (solvedArray, difficulty, e) {
   let currentDifficulty = difficulty
-  let minimumCells, maximumCells, totalCells, box, cell
+  let minimumCells; let maximumCells; let totalCells; let box; let cell
 
   let tempInitArray = nullArray.slice()
   let boxCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -300,6 +301,7 @@ function _generateUniqueSudoku(solvedArray, difficulty, e) {
         }
       }
     }
+
     box = boxesAvailable[(Math.random() * boxesAvailable.length) | 0]
 
     cellsAvailable = []
@@ -311,6 +313,7 @@ function _generateUniqueSudoku(solvedArray, difficulty, e) {
     cell = cellsAvailable[(Math.random() * cellsAvailable.length) | 0]
 
     let index = _getIndexOfCell(box, cell)
+
     tempInitArray[index] = solvedArray[index]
     boxCounts[box]++
   }
@@ -336,6 +339,7 @@ export const getUniqueSudoku = (difficulty, e) => {
    * Get the solution from sudoku.js
    */
   str = sudoku.solve(str)
+
   ;[...str].forEach((value, index) => {
     temporarySolvedArray[index] = value
   })

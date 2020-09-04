@@ -7,6 +7,7 @@ describe('Shopping list', () => {
   beforeEach(() => {
     cy.viewport(600, 400)
   })
+
   it('renders', () => {
     mount(<ShoppingList name="Mark" />)
     cy.contains('h1', 'Mark')

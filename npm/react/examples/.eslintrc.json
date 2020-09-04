@@ -1,0 +1,26 @@
+{
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/react",
+    "plugin:@cypress/dev/tests"
+  ],
+  "env": {
+    "cypress/globals": true
+  },
+  "rules": {
+    "no-unused-vars": "off",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  }
+}

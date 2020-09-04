@@ -10,6 +10,7 @@ Cypress.Commands.add('myMount', () => {
 
 Cypress.Commands.add('myMount2', () => {
   const toMount = React.createElement('div', null, ['mount 2'])
+
   return mount(toMount)
 })
 

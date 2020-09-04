@@ -9,8 +9,9 @@ const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 describe('RemotePizza', () => {
   it('mocks named import from services', () => {
     cy.stub(services, 'fetchIngredients')
-      .resolves({ args: { ingredients } })
-      .as('fetchMock')
+    .resolves({ args: { ingredients } })
+    .as('fetchMock')
+
     mount(<RemotePizza />)
     cy.contains('button', /cook/i).click()
 

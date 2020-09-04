@@ -1,11 +1,11 @@
 import React from 'react'
 import { fetchIngredients as defaultFetchIngredients } from './services'
 
-export default function RemotePizza() {
+export default function RemotePizza () {
   const [ingredients, setIngredients] = React.useState([])
 
   const handleCook = () => {
-    defaultFetchIngredients().then(response => {
+    defaultFetchIngredients().then((response) => {
       setIngredients(response.args.ingredients)
     })
   }
@@ -16,9 +16,11 @@ export default function RemotePizza() {
       <button onClick={handleCook}>Cook</button>
       {ingredients.length > 0 && (
         <ul>
-          {ingredients.map(ingredient => (
-            <li key={ingredient}>{ingredient}</li>
-          ))}
+          {ingredients.map((ingredient) => {
+            return (
+              <li key={ingredient}>{ingredient}</li>
+            )
+          })}
         </ul>
       )}
     </>

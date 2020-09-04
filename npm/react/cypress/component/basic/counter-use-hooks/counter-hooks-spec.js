@@ -7,9 +7,10 @@ describe('Counter using hooks', () => {
     mount(<Counter />)
     cy.contains('You clicked 0 times')
     cy.contains('Click me')
-      .click()
-      .click()
-      .click()
+    .click()
+    .click()
+    .click()
+
     cy.contains('You clicked 3 times')
   })
 })

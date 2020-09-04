@@ -22,6 +22,7 @@ describe('RemotePizza', () => {
 
   it('stubs via prop (di)', () => {
     const fetchIngredients = cy.stub().resolves({ args: { ingredients } })
+
     mount(<RemotePizza fetchIngredients={fetchIngredients} />)
     cy.contains('button', /cook/i).click()
 
@@ -34,6 +35,7 @@ describe('RemotePizza', () => {
     cy.stub(RemotePizza.defaultProps, 'fetchIngredients').resolves({
       args: { ingredients },
     })
+
     mount(<RemotePizza />)
     cy.contains('button', /cook/i).click()
 

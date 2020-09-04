@@ -10,26 +10,28 @@ export default class LoadingIndicator extends Component {
     isPastDelay: false,
   }
 
-  componentDidMount() {
-    console.log('component did mount')
+  componentDidMount () {
+    console.log('component did mount') // eslint-disable-line no-console
     this._delayTimer = setTimeout(() => {
-      console.log('2000ms passed')
+      console.log('2000ms passed') // eslint-disable-line no-console
       this.setState({ isPastDelay: true })
     }, 2000)
   }
 
-  componentWillUnmount() {
-    console.log('componentWillUnmount')
+  componentWillUnmount () {
+    console.log('componentWillUnmount') // eslint-disable-line no-console
     clearTimeout(this._delayTimer)
   }
 
-  render() {
+  render () {
     if (this.props.isLoading) {
       if (!this.state.isPastDelay) {
         return null
       }
+
       return <div>loading...</div>
     }
+
     return this.props.children
   }
 }

@@ -7,6 +7,7 @@ import { mount } from 'cypress-react-unit-test'
 describe('Stateless alert', () => {
   beforeEach(() => {
     const spy = cy.spy().as('alert')
+
     cy.on('window:alert', spy)
     mount(<HelloWorld name="React" />, { ReactDom })
   })
@@ -18,7 +19,7 @@ describe('Stateless alert', () => {
   it('alerts with name', () => {
     cy.contains('Say Hi').click()
     cy.get('@alert')
-      .should('have.been.calledOnce')
-      .and('have.been.be.calledWithExactly', 'Hi React')
+    .should('have.been.calledOnce')
+    .and('have.been.be.calledWithExactly', 'Hi React')
   })
 })

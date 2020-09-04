@@ -22,8 +22,9 @@ describe('App', () => {
     // we are stubbing "getRandomNumber" exported by "calc.js"
     // and imported into "App.js" and called.
     cy.stub(calc, 'getRandomNumber')
-      .as('lucky')
-      .returns(777)
+    .as('lucky')
+    .returns(777)
+
     mount(<App />)
     cy.contains('.random', '777')
     cy.get('@lucky').should('be.calledOnce')
@@ -31,8 +32,9 @@ describe('App', () => {
 
   it('stubs an imported child component', () => {
     cy.stub(child, 'Child')
-      .as('child')
-      .returns(<div className="mock-child">Mock child component</div>)
+    .as('child')
+    .returns(<div className="mock-child">Mock child component</div>)
+
     mount(<App />)
     // App component rendered our mock child component!
     cy.contains('Mock child component')

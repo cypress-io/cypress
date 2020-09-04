@@ -24,40 +24,44 @@ describe('Users with Fetch', () => {
       cy.route('/users?_limit=3').as('users')
       mount(<Users />)
       cy.wait('@users')
-        .its('response.body')
-        .should('have.length', 3)
-        .its('0')
-        .should('include.keys', ['id', 'name', 'username', 'email'])
+      .its('response.body')
+      .should('have.length', 3)
+      .its('0')
+      .should('include.keys', ['id', 'name', 'username', 'email'])
     })
 
     it('can stub and display mock network response', () => {
       const users = [{ id: 1, name: 'foo' }]
+
       // stub the request
       cy.route('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.get('li')
-        .should('have.length', 1)
-        .first()
-        .contains('foo')
+      .should('have.length', 1)
+      .first()
+      .contains('foo')
     })
 
     it('can inspect mocked network reaponse', () => {
       const users = [{ id: 1, name: 'foo' }]
+
       cy.route('GET', '/users?_limit=3', users).as('users')
       mount(<Users />)
       cy.wait('@users')
-        .its('response.body')
-        .should('deep.equal', users)
+      .its('response.body')
+      .should('deep.equal', users)
     })
 
     it('can delay and wait on Ajax call', () => {
       const users = [{ id: 1, name: 'foo' }]
+
       cy.route({
         method: 'GET',
         url: '/users?_limit=3',
         response: users,
         delay: 1000,
       }).as('users')
+
       mount(<Users />)
       cy.get('li').should('have.length', 0)
       cy.wait('@users')

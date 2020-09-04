@@ -10,6 +10,7 @@ describe('Mocking context', () => {
         <Toolbar />
       </ThemeContext.Provider>,
     )
+
     // the label "mocked" was passed through React context
     cy.contains('button', 'mocked').should('be.visible')
   })
