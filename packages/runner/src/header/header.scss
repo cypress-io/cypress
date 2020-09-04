@@ -117,6 +117,7 @@
       font-size: 1em;
       align-items: center;
       display: flex;
+      overflow: auto;
       position: relative;
       width: calc(100% - 115px);
     }
