@@ -3,10 +3,9 @@ import React from 'react'
 // example stateless component from
 // https://hackernoon.com/react-stateless-functional-components-nine-wins-you-might-have-overlooked-997b0d933dbc
 
-/* global alert */
 const HelloWorld = ({ name, click }) => {
   const sayHi = () => {
-    console.log('about to alert')
+    console.log('about to alert') // eslint-disable-line no-console
     alert(`Hi ${name}`)
   }
 

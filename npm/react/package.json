@@ -3,44 +3,31 @@
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
   "main": "dist",
-  "no-module-for-now": "lib",
-  "types": "lib",
   "scripts": {
-    "test": "cypress run",
-    "percy:test": "percy exec -- cypress run",
     "build": "yarn transpile",
-    "cy:open": "cypress open",
-    "transpile": "tsc",
-    "watch": "tsc -w",
-    "pretest": "yarn lint && yarn transpile",
-    "lint": "standard --verbose --fix *.js src cypress/integration",
-    "semantic-release": "semantic-release",
-    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
+    "cy:open": "cypress open",
+    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
+    "lint": "standard --verbose --fix *.js src cypress/integration",
+    "percy:test": "percy exec -- cypress run",
+    "semantic-release": "semantic-release",
     "stop-only": "stop-only --folder cypress",
-    "warn-only": "stop-only --warn --folder cypress"
+    "pretest": "yarn lint && yarn transpile",
+    "test": "cypress run",
+    "transpile": "tsc",
+    "warn-only": "stop-only --warn --folder cypress",
+    "watch": "tsc -w"
   },
-  "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "git add"
-    ]
+  "dependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.10.4",
+    "@cypress/code-coverage": "3.8.1",
+    "@cypress/webpack-preprocessor": "5.4.4",
+    "babel-plugin-istanbul": "6.0.0",
+    "debug": "4.1.1",
+    "find-webpack": "2.0.0",
+    "mime-types": "2.1.26",
+    "unfetch": "4.1.0"
   },
-  "files": [
-    "dist",
-    "lib",
-    "support",
-    "plugins"
-  ],
-  "keywords": [
-    "react",
-    "cypress",
-    "cypress-io",
-    "test",
-    "testing"
-  ],
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "license": "MIT",
   "devDependencies": {
     "@applitools/eyes-cypress": "3.13.4",
     "@babel/core": "7.4.5",
@@ -108,27 +95,33 @@
     "webpack": "4.33.0",
     "webpack-cli": "3.3.9"
   },
-  "standard": {
-    "globals": [
-      "Cypress",
-      "cy",
-      "expect"
-    ]
-  },
+  "files": [
+    "dist",
+    "lib",
+    "support",
+    "plugins"
+  ],
+  "types": "lib",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/bahmutov/cypress-react-unit-test.git"
   },
-  "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "5.4.4",
-    "babel-plugin-istanbul": "6.0.0",
-    "debug": "4.1.1",
-    "find-webpack": "2.0.0",
-    "mime-types": "2.1.26",
-    "unfetch": "4.1.0"
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "keywords": [
+    "react",
+    "cypress",
+    "cypress-io",
+    "test",
+    "testing"
+  ],
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
+  "no-module-for-now": "lib",
   "release": {
     "branches": [
       "main",
@@ -136,6 +129,13 @@
         "name": "feature/cypress-mount-mode",
         "prerelease": "cypress-mount-mode"
       }
+    ]
+  },
+  "standard": {
+    "globals": [
+      "Cypress",
+      "cy",
+      "expect"
     ]
   }
 }

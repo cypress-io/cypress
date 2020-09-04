@@ -2,15 +2,16 @@ import React from 'react'
 import { SimpleContext } from './simple-context'
 
 export class SimpleComponent extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       id: props.id || 'unknown id',
     }
   }
 
-  render() {
-    console.log('context %o', this.context)
+  render () {
+    console.log('context %o', this.context) // eslint-disable-line no-console
+
     return (
       <>
         <div>{this.context.name || 'context not set'}</div>

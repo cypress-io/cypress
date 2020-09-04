@@ -14,7 +14,9 @@
   "masterIssue": true,
   "packageRules": [
     {
-      "packagePatterns": ["*"],
+      "packagePatterns": [
+        "*"
+      ],
       "excludePackagePatterns": [
         "@babel/plugin-transform-modules-commonjs",
         "@cypress/code-coverage",

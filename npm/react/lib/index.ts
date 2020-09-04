@@ -8,7 +8,7 @@ const rootId = 'cypress-root'
 // @ts-ignore
 const isComponentSpec = () => Cypress.spec.specType === 'component'
 
-function checkMountModeEnabled() {
+function checkMountModeEnabled () {
   // @ts-ignore
   if (!isComponentSpec()) {
     throw new Error(
@@ -20,10 +20,13 @@ function checkMountModeEnabled() {
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
-const injectStyles = (options: MountOptions) => () => {
-  const document = cy.state('document')
-  const el = document.getElementById(rootId)
-  return injectStylesBeforeElement(options, document, el)
+const injectStyles = (options: MountOptions) => {
+  return () => {
+    const document = cy.state('document')
+    const el = document.getElementById(rootId)
+
+    return injectStylesBeforeElement(options, document, el)
+  }
 }
 
 /**
@@ -58,84 +61,85 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   let logInstance: Cypress.Log
 
   return cy
-    .then(() => {
-      if (options.log !== false) {
-        logInstance = Cypress.log({
-          name: 'mount',
-          message: [message],
-        })
-      }
-    })
-    .then(injectStyles(options))
-    .then(() => {
-      const document = cy.state('document')
-      const reactDomToUse = options.ReactDom || ReactDOM
+  .then(() => {
+    if (options.log !== false) {
+      logInstance = Cypress.log({
+        name: 'mount',
+        message: [message],
+      })
+    }
+  })
+  .then(injectStyles(options))
+  .then(() => {
+    const document = cy.state('document')
+    const reactDomToUse = options.ReactDom || ReactDOM
 
-      const el = document.getElementById(rootId)
+    const el = document.getElementById(rootId)
 
-      if (!el) {
-        throw new Error(
-          [
-            '[cypress-react-unit-test] 🔥 Hmm, cannot find root element to mount the component.',
-            'Did you forget to include the support file?',
-            'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
-          ].join(' '),
-        )
-      }
+    if (!el) {
+      throw new Error(
+        [
+          '[cypress-react-unit-test] 🔥 Hmm, cannot find root element to mount the component.',
+          'Did you forget to include the support file?',
+          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
+        ].join(' '),
+      )
+    }
 
-      const key =
+    const key =
         // @ts-ignore provide unique key to the the wrapped component to make sure we are rerendering between tests
         (Cypress?.mocha?.getRunner()?.test?.title || '') + Math.random()
-      const props = {
-        key,
+    const props = {
+      key,
+    }
+
+    const reactComponent = React.createElement(React.Fragment, props, jsx)
+    // since we always surround the component with a fragment
+    // let's get back the original component
+    // @ts-ignore
+    const userComponent = reactComponent.props.children
+
+    reactDomToUse.render(reactComponent, el)
+
+    if (logInstance) {
+      const logConsoleProps = {
+        props: jsx.props,
+        description: 'Mounts React component',
+        home: 'https://github.com/bahmutov/cypress-react-unit-test',
+      }
+      const componentElement = el.children[0]
+
+      if (componentElement) {
+        // @ts-ignore
+        logConsoleProps.yielded = reactDomToUse.findDOMNode(componentElement)
       }
 
-      const reactComponent = React.createElement(React.Fragment, props, jsx)
-      // since we always surround the component with a fragment
-      // let's get back the original component
-      // @ts-ignore
-      const userComponent = reactComponent.props.children
-      reactDomToUse.render(reactComponent, el)
+      logInstance.set('consoleProps', () => logConsoleProps)
 
-      if (logInstance) {
-        const logConsoleProps = {
-          props: jsx.props,
-          description: 'Mounts React component',
-          home: 'https://github.com/bahmutov/cypress-react-unit-test',
-        }
-        const componentElement = el.children[0]
-
-        if (componentElement) {
-          // @ts-ignore
-          logConsoleProps.yielded = reactDomToUse.findDOMNode(componentElement)
-        }
-
-        logInstance.set('consoleProps', () => logConsoleProps)
-
-        if (el.children.length) {
-          logInstance.set('$el', el.children.item(0))
-        }
+      if (el.children.length) {
+        logInstance.set('$el', el.children.item(0))
       }
+    }
 
-      return (
-        cy
-          .wrap(userComponent, { log: false })
-          .as(displayName)
-          // by waiting, we give the component's hook a chance to run
-          // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-          .wait(1, { log: false })
-          .then(() => {
-            if (logInstance) {
-              logInstance.snapshot('mounted')
-              logInstance.end()
-            }
+    return (
+      cy
+      .wrap(userComponent, { log: false })
+      .as(displayName)
+      // by waiting, we give the component's hook a chance to run
+      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+      .wait(1, { log: false })
+      .then(() => {
+        if (logInstance) {
+          logInstance.snapshot('mounted')
+          logInstance.end()
+        }
 
-            // by returning undefined we keep the previous subject
-            // which is the mounted component
-            return undefined
-          })
-      )
-    })
+        // by returning undefined we keep the previous subject
+        // which is the mounted component
+        return undefined
+      })
+    )
+  })
 }
 
 /**
@@ -159,8 +163,9 @@ export const unmount = () => {
 
   return cy.then(() => {
     cy.log('unmounting...')
-    const selector = '#' + rootId
-    return cy.get(selector, { log: false }).then($el => {
+    const selector = `#${rootId}`
+
+    return cy.get(selector, { log: false }).then(($el) => {
       unmountComponentAtNode($el[0])
     })
   })
@@ -168,19 +173,20 @@ export const unmount = () => {
 
 // mounting hooks inside a test component mostly copied from
 // https://github.com/testing-library/react-hooks-testing-library/blob/master/src/pure.js
-function resultContainer() {
+function resultContainer () {
   let value: any = null
   let error: Error | null = null
   const resolvers: any[] = []
 
   const result = {
-    get current() {
+    get current () {
       if (error) {
         throw error
       }
+
       return value
     },
-    get error() {
+    get error () {
       return error
     },
   }
@@ -188,7 +194,7 @@ function resultContainer() {
   const updateResult = (val: any, err: Error | null = null) => {
     value = val
     error = err
-    resolvers.splice(0, resolvers.length).forEach(resolve => resolve())
+    resolvers.splice(0, resolvers.length).forEach((resolve) => resolve())
   }
 
   return {
@@ -202,7 +208,7 @@ function resultContainer() {
 }
 
 // @ts-ignore
-function TestHook({ callback, onError, children }) {
+function TestHook ({ callback, onError, children }) {
   try {
     children(callback())
   } catch (err) {

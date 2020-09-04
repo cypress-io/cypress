@@ -9,6 +9,7 @@ import { getRandomNumber } from './calc'
  */
 const Component = () => {
   const n = getRandomNumber()
+
   return <div className="random">{n}</div>
 }
 
