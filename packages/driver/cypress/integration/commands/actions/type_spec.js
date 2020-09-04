@@ -2134,6 +2134,49 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/5694
+  describe('shortcuts', () => {
+    beforeEach(function () {
+      cy.visit('fixtures/dom.html')
+      cy.on('log:added', (attrs, log) => {
+        this.lastLog = log
+      })
+    })
+
+    it('releases modfier keys at the end of the shortcut sequence', () => {
+      cy.get(':text:first').type('{ctrl+alt++}hi')
+      .then(function ($input) {
+        const table = this.lastLog.invoke('consoleProps').table[2]()
+
+        // eslint-disable-next-line
+          console.table(table.data, table.columns)
+
+        expect(table.name).to.eq('Keyboard Events')
+        const expectedTable = {
+          1: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{Control}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{Alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          3: { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          4: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{Alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          5: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{Control}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          6: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+        }
+
+        // uncomment for debugging
+        // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
+        expect(table.data).to.deep.eq(expectedTable)
+      })
+    })
+
+    it('throws an error when a wrong modifier is given', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`asdf` is not a modifier.')
+      })
+
+      cy.get(':text:first').type('{asdf+x}hi')
+    })
+  })
+
   describe('case-insensitivity', () => {
     it('special chars are case-insensitive', () => {
       cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {
