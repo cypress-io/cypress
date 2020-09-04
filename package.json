@@ -220,7 +220,8 @@
   "workspaces": {
     "packages": [
       "cli",
-      "packages/*"
+      "packages/*",
+      "npm/*"
     ],
     "nohoist": [
       "**/@ffmpeg-installer",
