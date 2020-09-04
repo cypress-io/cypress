@@ -282,7 +282,7 @@ module.exports = (Commands, Cypress, cy, state) => {
           let scope = options.withinSubject
 
           if (options.includeShadowDom) {
-            const root = options.withinSubject || cy.state('document')
+            const root = options.withinSubject ? options.withinSubject[0] : cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
             scope = elementsWithShadow.concat(root)
@@ -536,7 +536,7 @@ module.exports = (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.addAll({ prevSubject: 'element' }, {
+  Commands.addAll({ prevSubject: ['element', 'document'] }, {
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
