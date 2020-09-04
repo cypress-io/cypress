@@ -109,6 +109,10 @@ export const options = [
     defaultValue: '*.hot-update.js',
     validation: v.isStringOrArrayOfStrings,
   }, {
+    name: 'includeShadowDom',
+    defaultValue: false,
+    validation: v.isBoolean,
+  }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
     validation: v.isString,
@@ -197,10 +201,6 @@ export const options = [
     defaultValue: 'cypress/screenshots',
     validation: v.isStringOrFalse,
     isFolder: true,
-  }, {
-    name: 'shadowDomOptionPlaceholder',
-    defaultValue: false,
-    validation: v.isBoolean,
   }, {
     name: 'socketId',
     defaultValue: null,

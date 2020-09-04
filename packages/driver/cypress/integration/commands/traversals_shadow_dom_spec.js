@@ -138,7 +138,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
     })
 
     describe('non-command options', () => {
-      describe('suite-level config', { shadowDomOptionPlaceholder: true }, () => {
+      describe('suite-level config', { includeShadowDom: true }, () => {
         beforeEach(() => {
           cy
           .get('#parent-of-shadow-container-0')
@@ -159,7 +159,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
       })
 
       describe('test-level config', () => {
-        it('queries shadow dom', { shadowDomOptionPlaceholder: true }, () => {
+        it('queries shadow dom', { includeShadowDom: true }, () => {
           cy
           .get('#parent-of-shadow-container-0')
           .find('.shadow-div')
@@ -174,7 +174,7 @@ describe('src/cy/commands/traversals - shadow dom', () => {
 
       describe('Cypress.config()', () => {
         const reset = () => {
-          Cypress.config('shadowDomOptionPlaceholder', false)
+          Cypress.config('includeShadowDom', false)
         }
 
         beforeEach(reset)
@@ -182,20 +182,20 @@ describe('src/cy/commands/traversals - shadow dom', () => {
 
         it('turns option on and off at will', () => {
           cy.get('.shadow-div').should('not.exist').then(() => {
-            Cypress.config('shadowDomOptionPlaceholder', true)
+            Cypress.config('includeShadowDom', true)
           })
 
           cy.get('.shadow-div')
         })
 
-        it('overrides test-level option being true', { shadowDomOptionPlaceholder: true }, () => {
-          Cypress.config('shadowDomOptionPlaceholder', false)
+        it('overrides test-level option being true', { includeShadowDom: true }, () => {
+          Cypress.config('includeShadowDom', false)
 
           cy.get('.shadow-div').should('not.exist')
         })
 
-        it('overrides test-level option being false', { shadowDomOptionPlaceholder: false }, () => {
-          Cypress.config('shadowDomOptionPlaceholder', true)
+        it('overrides test-level option being false', { includeShadowDom: false }, () => {
+          Cypress.config('includeShadowDom', true)
 
           cy.get('.shadow-div')
         })

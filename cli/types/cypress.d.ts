@@ -2599,13 +2599,13 @@ declare namespace Cypress {
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
      * per-suite or per-test in the test configuration object, or programmatically
-     * with Cypress.ShadowDom.defaults()
+     * with Cypress.config()
      * @default false
      */
-    shadowDomOptionPlaceholder: boolean
+    includeShadowDom: boolean
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries' | 'shadowDomOptionPlaceholder'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries' | 'includeShadowDom'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
@@ -2793,7 +2793,7 @@ declare namespace Cypress {
   }
 
   interface ShadowDomOptions {
-    shadowDomOptionPlaceholder?: boolean
+    includeShadowDom?: boolean
   }
 
   /**

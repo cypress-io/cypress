@@ -46,7 +46,7 @@ namespace CypressConfigTests {
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 
   Cypress.config('taskTimeout') // $ExpectType number
-  Cypress.config('shadowDomOptionPlaceholder') // $ExpectType boolean
+  Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
 namespace CypressEnvTests {

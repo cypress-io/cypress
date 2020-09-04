@@ -7,5 +7,5 @@ export const resolveShadowDomInclusion = (Cypress: Cypress.Cypress, commandValue
 
   if (commandValue != null) return commandValue
 
-  return Cypress.config('shadowDomOptionPlaceholder')
+  return Cypress.config('includeShadowDom')
 }
