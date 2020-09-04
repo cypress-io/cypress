@@ -24,7 +24,13 @@ const getNpmArgv = () => {
     return
   }
 
-  return JSON.parse(json).original || []
+  debug('found npm argv json %o', json)
+
+  try {
+    return JSON.parse(json).original || []
+  } catch (e) {
+    return []
+  }
 }
 
 // attempt to discover the version specifier used to install Cypress
