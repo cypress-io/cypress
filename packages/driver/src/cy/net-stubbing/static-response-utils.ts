@@ -56,16 +56,16 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (!_.isUndefined(throttleKbps)) {
     if (_.isNumber(throttleKbps) && (throttleKbps < 0 || !_.isFinite(throttleKbps))) {
-      throw new Error('`throttleKbps` must be a finite, positive number.')
+      err('`throttleKbps` must be a finite, positive number.')
     } else if (_.isString(throttleKbps) && !getNetworkThrottlePreset(throttleKbps)) {
-      throw new Error(`An invalid \`throttleKbps\` preset was passed. Valid presets are: ${_.keys(NETWORK_THROTTLE_PRESETS).join(', ')}`)
+      err(`An invalid \`throttleKbps\` preset was passed. Valid presets are: ${_.keys(NETWORK_THROTTLE_PRESETS).join(', ')}`)
     } else if (!_.isString(throttleKbps) && !_.isNumber(throttleKbps)) {
-      throw new Error('`throttleKbps` must be a finite, positive number or a string preset.')
+      err('`throttleKbps` must be a finite, positive number or a string preset.')
     }
   }
 
   if (delayMs && (!_.isFinite(delayMs) || delayMs < 0)) {
-    throw new Error('`delayMs` must be a finite, positive number.')
+    err('`delayMs` must be a finite, positive number.')
   }
 }
 
