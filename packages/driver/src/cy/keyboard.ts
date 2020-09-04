@@ -42,7 +42,10 @@ type SimulatedDefault = (
   options: typeOptions
 ) => void
 
+type KeyInfo = KeyDetails | ShortcutDetails
+
 interface KeyDetails {
+  type: 'key'
   key: string
   text: string
   code: string
@@ -60,9 +63,10 @@ interface KeyDetails {
 }
 
 interface ShortcutDetails {
-  isShortcut: boolean
+  type: 'shortcut'
   modifiers: KeyDetails[]
   key: KeyDetails
+  originalSequence: string
 }
 
 const dateRe = /^\d{4}-\d{2}-\d{2}/
@@ -143,11 +147,15 @@ const modifiersToString = (modifiers: KeyboardModifiers) => {
   })).join(', ')
 }
 
-const joinKeyArrayToString = (keyArr: KeyDetails[]) => {
-  return _.map(keyArr, (keyDetails) => {
-    if (keyDetails.text) return keyDetails.key
+const joinKeyArrayToString = (keyArr: KeyInfo[]) => {
+  return _.map(keyArr, (key) => {
+    if (key.type === 'key') {
+      if (key.text) return key.key
 
-    return `{${keyDetails.key}}`
+      return `{${key.key}}`
+    }
+
+    return `{${key.originalSequence}}`
   }).join('')
 }
 
@@ -155,8 +163,8 @@ type modifierKeyDetails = KeyDetails & {
   key: keyof typeof keyToModifierMap
 }
 
-const isModifier = (details: KeyDetails): details is modifierKeyDetails => {
-  return !!keyToModifierMap[details.key]
+const isModifier = (details: KeyInfo): details is modifierKeyDetails => {
+  return details.type === 'key' && !!keyToModifierMap[details.key]
 }
 
 const getFormattedKeyString = (details: KeyDetails) => {
@@ -175,7 +183,7 @@ const getFormattedKeyString = (details: KeyDetails) => {
   return details.originalSequence
 }
 
-const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
+const countNumIndividualKeyStrokes = (keys: KeyInfo[]) => {
   return _.countBy(keys, isModifier)['false']
 }
 
@@ -194,6 +202,7 @@ const getTextLength = (str) => _.toArray(str).length
 
 const fillKeyDetailDefaults = (key) => {
   const details = _.defaults({}, key, {
+    type: 'key',
     key: '',
     keyCode: 0,
     code: '',
@@ -224,6 +233,7 @@ const getKeyDetails = (onKeyNotFound) => {
         details.text = details.key
       }
 
+      details.type = 'key'
       details.originalSequence = key
 
       return details
@@ -234,12 +244,13 @@ const getKeyDetails = (onKeyNotFound) => {
       const lastKey = _.last(keys)
 
       const details: ShortcutDetails = {
-        isShortcut: true,
+        type: 'shortcut',
         modifiers: keys
         .filter((k, i) => i !== keys.length - 1)
         .map((key) => findKeyDetailsOrLowercase(key))
         .map((key) => fillKeyDetailDefaults(key)),
         key: fillKeyDetailDefaults(USKeyboard[lastKey]),
+        originalSequence: key,
       }
 
       details.key.text = details.key.key
@@ -342,7 +353,7 @@ const getKeymap = () => {
 }
 const validateTyping = (
   el: HTMLElement,
-  keys: KeyDetails[],
+  keys: KeyInfo[],
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
@@ -713,70 +724,76 @@ export class Keyboard {
 
     const typeKeyFns = _.map(
       keyDetailsArr,
-      (key: KeyDetails, currentKeyIndex: number) => {
+      (key: KeyInfo, currentKeyIndex: number) => {
         return () => {
-          debug('typing key:', key.key)
-
           const activeEl = getActiveEl(doc)
 
-          _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
-
-          if (!_skipCheckUntilIndex) {
-            const { skipCheckUntilIndex, isClearChars } = validateTyping(
-              activeEl,
-              keyDetailsArr,
-              currentKeyIndex,
-              options.onFail,
-              _skipCheckUntilIndex,
-              options.force,
-            )
-
-            _skipCheckUntilIndex = skipCheckUntilIndex
-
-            if (
-              _skipCheckUntilIndex
-              && $elements.isNeedSingleValueChangeInputElement(activeEl)
-            ) {
-              const originalText = $elements.getNativeProp(activeEl, 'value')
-
-              debug('skip validate until:', _skipCheckUntilIndex)
-              const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
-
-              _.each(keysToType, (key) => {
-                // singleValueChange inputs must have their value set once at the end
-                // performing the simulatedDefault for a key would try to insert text on each character
-                // we still send all the events as normal, however
-                key.simulatedDefault = _.noop
-              })
-
-              _.last(keysToType)!.simulatedDefault = () => {
-                options.onValueChange(originalText, activeEl)
-
-                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
-
-                debug('setting element value', valToSet, activeEl)
-
-                return $elements.setNativeProp(
-                  activeEl as $elements.HTMLTextLikeInputElement,
-                  'value',
-                  valToSet,
-                )
-              }
-            }
-          } else {
-            debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
-          }
-
-          // simulatedDefaultOnly keys will not send any events, and cannot be canceled
-          if (key.simulatedDefaultOnly) {
-            key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
-
-            return null
-          }
-
-          if (key.isShortcut) {
+          if (key.type === 'shortcut') {
             this.simulateShortcut(activeEl, key, options)
           } else {
+            debug('typing key:', key.key)
+
+            _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
+
+            if (!_skipCheckUntilIndex) {
+              const { skipCheckUntilIndex, isClearChars } = validateTyping(
+                activeEl,
+                keyDetailsArr,
+                currentKeyIndex,
+                options.onFail,
+                _skipCheckUntilIndex,
+                options.force,
+              )
+
+              _skipCheckUntilIndex = skipCheckUntilIndex
+
+              if (
+                _skipCheckUntilIndex
+              && $elements.isNeedSingleValueChangeInputElement(activeEl)
+              ) {
+                const originalText = $elements.getNativeProp(activeEl, 'value')
+
+                debug('skip validate until:', _skipCheckUntilIndex)
+                const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
+
+                _.each(keysToType, (key) => {
+                  // singleValueChange inputs must have their value set once at the end
+                  // performing the simulatedDefault for a key would try to insert text on each character
+                  // we still send all the events as normal, however
+                  if (key.type === 'key') {
+                    key.simulatedDefault = _.noop
+                  }
+                })
+
+                const lastKeysToType = _.last(keysToType)!
+
+                if (lastKeysToType.type === 'key') {
+                  lastKeysToType.simulatedDefault = () => {
+                    options.onValueChange(originalText, activeEl)
+
+                    const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
+
+                    debug('setting element value', valToSet, activeEl)
+
+                    return $elements.setNativeProp(
+                      activeEl as $elements.HTMLTextLikeInputElement,
+                      'value',
+                      valToSet,
+                    )
+                  }
+                }
+              }
+            } else {
+              debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
+            }
+
+            // simulatedDefaultOnly keys will not send any events, and cannot be canceled
+            if (key.simulatedDefaultOnly) {
+              key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
+
+              return null
+            }
+
             this.typeSimulatedKey(activeEl, key, options)
           }
 
@@ -1085,7 +1102,7 @@ export class Keyboard {
     this.simulatedKeyup(elToKeyup, key, options)
   }
 
-  simulateShortcut (el: HTMLElement, key: KeyDetails, options) {
+  simulateShortcut (el: HTMLElement, key: ShortcutDetails, options) {
     key.modifiers.forEach((key) => {
       this.simulatedKeydown(el, key, options)
     })
