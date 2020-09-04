@@ -20,12 +20,6 @@
     "stop-only": "stop-only --folder cypress",
     "warn-only": "stop-only --warn --folder cypress"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && yarn warn-only",
-      "pre-push": "yarn stop-only"
-    }
-  },
   "lint-staged": {
     "*.js": [
       "prettier --write",
@@ -85,7 +79,6 @@
     "date-fns": "2.13.0",
     "happo-cypress": "1.7.4",
     "happo.io": "5.6.1",
-    "husky": "3.1.0",
     "lint-staged": "9.5.0",
     "lodash": "4.17.15",
     "markdown-link-check": "3.8.1",
