@@ -19,6 +19,10 @@ if (!Error.captureStackTrace) {
 }
 
 const prepareErrorForSerialization = (err) => {
+  if (err._preparedForSeialization) {
+    return err
+  }
+
   if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
     err.showDiff = false
   }
@@ -35,6 +39,8 @@ const prepareErrorForSerialization = (err) => {
     delete err.actual
     delete err.expected
   }
+
+  err._preparedForSeialization = true
 
   return err
 }
