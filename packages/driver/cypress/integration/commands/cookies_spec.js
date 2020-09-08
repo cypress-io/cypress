@@ -8,12 +8,6 @@ describe('src/cy/commands/cookies', () => {
   })
 
   context('test:before:run:async', () => {
-    it('can test unstubbed, real server', () => {
-      Cypress.automation.restore()
-
-      cy.setCookie('foo', 'bar')
-    })
-
     it('clears cookies before each test run', () => {
       Cypress.automation
       .withArgs('get:cookies', { domain: 'localhost' })
