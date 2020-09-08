@@ -39,6 +39,11 @@
       <cy-test-element innerClass="inside-focusable" content="Inside Focusable"></cy-test-element>
     </div>
     <cy-test-element id="shadow-element-10" innerClass="inside-non-visible" content="Not Visible" style="display:block; transform-style: preserve-3d; backface-visibility: hidden; transform: rotateY(180deg);"></cy-test-element>
+    <cy-test-element id="shadow-element-11" content="
+      <span class='shadow-11-contains'>Find Me With cy.contains</span>
+      <span class='shadow-11-contains shadow-11-scope'>Find Me With cy.contains</span>
+      <span class='shadow-11-contains'>Find Me With cy.contains</span>
+    "></cy-test-element>
 
     <script type="text/javascript">
       if (window.customElements) {

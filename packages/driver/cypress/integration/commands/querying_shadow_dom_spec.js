@@ -75,7 +75,25 @@ describe('src/cy/commands/querying - shadow dom', () => {
   })
 
   context('#contains', () => {
+    it('finds element within shadow dom based on text content', () => {
+      cy
+      .contains('Shadow Content 1', { includeShadowDom: true })
+      .should('have.class', 'shadow-1')
+    })
 
+    it('finds element within shadow dom based on text content, scoped to selector', () => {
+      cy
+      .contains('.shadow-11-scope', 'Find Me With cy.contains', { includeShadowDom: true })
+      .should('have.length', 1)
+    })
+
+    it('finds element within shadow dom based when already past shadow root', () => {
+      cy
+      .get('#shadow-element-1')
+      .shadow()
+      .contains('Shadow Content 1')
+      .should('have.class', 'shadow-1')
+    })
   })
 
   context('#shadow', () => {

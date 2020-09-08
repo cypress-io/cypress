@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
+const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy, state) => {
@@ -391,13 +392,16 @@ module.exports = (Commands, Cypress, cy, state) => {
     contains (subject, filter, text, options = {}) {
       let userOptions = options
 
+      const shadowDomEnabled = Cypress.config('experimentalShadowDomSupport')
+
       // nuke our subject if its present but not an element.
       // in these cases its either window or document but
       // we dont care.
       // we'll null out the subject so it will show up as a parent
       // command since its behavior is identical to using it
       // as a parent command: cy.contains()
-      if (subject && !$dom.isElement(subject)) {
+      // don't nuke if subject is a shadow root, is a document not an element
+      if (subject && !$dom.isElement(subject) && (shadowDomEnabled && !$elements.isShadowRoot(subject[0]))) {
         subject = null
       }
 
