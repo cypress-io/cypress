@@ -5,11 +5,9 @@ import { injectStylesBeforeElement } from './utils'
 
 const rootId = 'cypress-root'
 
-// @ts-ignore
 const isComponentSpec = () => Cypress.spec.specType === 'component'
 
 function checkMountModeEnabled() {
-  // @ts-ignore
   if (!isComponentSpec()) {
     throw new Error(
       `In order to use mount or unmount functions please place the spec in component folder`,
@@ -68,7 +66,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
     })
     .then(injectStyles(options))
     .then(() => {
-      const document = cy.state('document')
+      const document = cy.state('document') as Document
       const reactDomToUse = options.ReactDom || ReactDOM
 
       const el = document.getElementById(rootId)
@@ -113,7 +111,10 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
         logInstance.set('consoleProps', () => logConsoleProps)
 
         if (el.children.length) {
-          logInstance.set('$el', el.children.item(0))
+          logInstance.set(
+            '$el',
+            (el.children.item(0) as unknown) as JQuery<HTMLElement>,
+          )
         }
       }
 
@@ -168,8 +169,8 @@ export const unmount = () => {
 
 // mounting hooks inside a test component mostly copied from
 // https://github.com/testing-library/react-hooks-testing-library/blob/master/src/pure.js
-function resultContainer() {
-  let value: any = null
+function resultContainer<T>() {
+  let value: T | undefined | null = null
   let error: Error | null = null
   const resolvers: any[] = []
 
@@ -185,7 +186,7 @@ function resultContainer() {
     },
   }
 
-  const updateResult = (val: any, err: Error | null = null) => {
+  const updateResult = (val: T | undefined, err: Error | null = null) => {
     value = val
     error = err
     resolvers.splice(0, resolvers.length).forEach(resolve => resolve())
@@ -196,13 +197,18 @@ function resultContainer() {
     addResolver: (resolver: any) => {
       resolvers.push(resolver)
     },
-    setValue: (val: any) => updateResult(val),
+    setValue: (val: T) => updateResult(val),
     setError: (err: Error) => updateResult(undefined, err),
   }
 }
 
-// @ts-ignore
-function TestHook({ callback, onError, children }) {
+type TestHookProps = {
+  callback: () => void
+  onError: (e: Error) => void
+  children: (...args: any[]) => any
+}
+
+function TestHook({ callback, onError, children }: TestHookProps) {
   try {
     children(callback())
   } catch (err) {
@@ -225,7 +231,7 @@ function TestHook({ callback, onError, children }) {
  *
  * @see https://github.com/bahmutov/cypress-react-unit-test#advanced-examples
  */
-export const mountHook = (hookFn: Function) => {
+export const mountHook = (hookFn: (...args: any[]) => any) => {
   const { result, setValue, setError } = resultContainer()
 
   return mount(
