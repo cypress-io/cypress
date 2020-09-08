@@ -392,8 +392,6 @@ module.exports = (Commands, Cypress, cy, state) => {
     contains (subject, filter, text, options = {}) {
       let userOptions = options
 
-      const shadowDomEnabled = Cypress.config('experimentalShadowDomSupport')
-
       // nuke our subject if its present but not an element.
       // in these cases its either window or document but
       // we dont care.
@@ -401,7 +399,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       // command since its behavior is identical to using it
       // as a parent command: cy.contains()
       // don't nuke if subject is a shadow root, is a document not an element
-      if (subject && !$dom.isElement(subject) && (shadowDomEnabled && !$elements.isShadowRoot(subject[0]))) {
+      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
         subject = null
       }
 
