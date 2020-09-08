@@ -19,6 +19,7 @@ export const SERIALIZABLE_REQ_PROPS = [
   'method',
   'httpVersion',
   'responseTimeout',
+  'followRedirect',
 ]
 
 export const SERIALIZABLE_RES_PROPS = _.concat(
@@ -89,6 +90,7 @@ export declare namespace NetEventFrames {
     // Millisecond timestamp for when the response should continue
     continueResponseAt?: number
     throttleKbps?: number
+    followRedirect?: boolean
   }
 
   // fired when a response has been sent completely by the server to an intercepted request
