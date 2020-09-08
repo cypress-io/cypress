@@ -2,6 +2,19 @@ version: 2.1
 orbs:
   cypress: cypress-io/cypress@1.26.0
 
+jobs:
+  lint-markdown-links:
+    description: Lint markdown links
+    docker:
+      - image: circleci/node:lts
+        environment:
+          ## this enables colors in the output
+          TERM: xterm
+    steps:
+      - run:
+          name: Check markdown links ⚓️
+          command: npm run check:links
+
 workflows:
   build:
     jobs:
@@ -23,11 +36,13 @@ workflows:
                 name: Stop exclusive tests 1️⃣
                 command: npm run stop-only
             - run:
-                name: Check markdown links ⚓️
-                command: npm run check:links
-            - run:
                 name: Build folder 🏗
                 command: npm run build
+
+      - lint-markdown-links:
+          filters:
+            branches:
+              only: main
 
       - cypress/run:
           name: Example A11y
