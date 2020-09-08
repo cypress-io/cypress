@@ -11,6 +11,7 @@ jobs:
           ## this enables colors in the output
           TERM: xterm
     steps:
+      - checkout
       - run:
           name: Check markdown links ⚓️
           command: npm run check:links
@@ -276,7 +277,7 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
-          name: Test
+          name: Component Tests
           executor: cypress/base-12
           parallelism: 4
           requires:
@@ -290,6 +291,7 @@ workflows:
           store_artifacts: true
           # following examples from
           # https://circleci.com/docs/2.0/parallelism-faster-jobs/
+          # TODO probably only run component tests and move integration sanity checks into own job
           command: |
             TESTFILES=$(circleci tests glob "cypress/{component,integration}/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=4)
             echo "Test files for this machine are $TESTFILES"
@@ -309,7 +311,7 @@ workflows:
           executor: cypress/base-12
           requires:
             - Install
-            - Test
+            - Component Tests
             - Example A11y
             - Example Babel
             - Example Component Folder
