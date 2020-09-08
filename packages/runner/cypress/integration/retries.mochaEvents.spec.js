@@ -249,6 +249,7 @@ describe('src/cypress/runner retries mochaEvents', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/8363
   describe('cleanses errors before emitting', () => {
     it('does not try to serialize error with err.actual as DOM node', () => {
       runIsolatedCypress(() => {
