@@ -249,6 +249,19 @@ describe('src/cypress/runner retries mochaEvents', () => {
     })
   })
 
+  describe('cleanses errors before emitting', () => {
+    it('does not try to serialize error with err.actual as DOM node', () => {
+      runIsolatedCypress(() => {
+        it('visits', () => {
+          cy.visit('/fixtures/dom.html')
+          cy.get('#button').should('not.be.visible')
+        })
+      }, { config: { defaultCommandTimeout: 200 } })
+      // should not have err.actual, expected properties since the subject is a DOM element
+      .then(snapshotMochaEvents)
+    })
+  })
+
   describe('save/reload state', () => {
     const serializeState = () => {
       return getRunState(getAutCypress())

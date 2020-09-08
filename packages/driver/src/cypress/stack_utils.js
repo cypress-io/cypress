@@ -1,13 +1,13 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
 const _ = require('lodash')
-const { codeFrameColumns } = require('@babel/code-frame')
-const errorStackParser = require('error-stack-parser')
 const path = require('path')
+const errorStackParser = require('error-stack-parser')
+const { codeFrameColumns } = require('@babel/code-frame')
 
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
-const $sourceMapUtils = require('./source_map_utils')
 const $utils = require('./utils')
+const $sourceMapUtils = require('./source_map_utils')
+const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -200,6 +200,11 @@ const parseLine = (line) => {
 }
 
 const stripCustomProtocol = (filePath) => {
+  // sometimes stack frames won't include a filepath
+  if (!filePath) {
+    return ''
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 

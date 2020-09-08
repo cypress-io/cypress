@@ -1,10 +1,12 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
 const _ = require('lodash')
+const chai = require('chai')
 
-const $errorMessages = require('./error_messages')
+const $dom = require('../dom')
 const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
+const $errorMessages = require('./error_messages')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
 
@@ -16,8 +18,31 @@ if (!Error.captureStackTrace) {
   }
 }
 
+const prepareErrorForSerialization = (err) => {
+  if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+    err.showDiff = false
+  }
+
+  if (err.showDiff === true) {
+    if (err.actual) {
+      err.actual = chai.util.inspect(err.actual)
+    }
+
+    if (err.expected) {
+      err.expected = chai.util.inspect(err.expected)
+    }
+  } else {
+    delete err.actual
+    delete err.expected
+  }
+
+  return err
+}
+
 const wrapErr = (err) => {
   if (!err) return
+
+  prepareErrorForSerialization(err)
 
   return $utils.reduceProps(err, ERROR_PROPS)
 }
