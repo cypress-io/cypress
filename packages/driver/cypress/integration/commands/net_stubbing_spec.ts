@@ -928,6 +928,22 @@ describe('network stubbing', function () {
       .wait('@dest')
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/7967
+    it('can skip redirects via followRedirect', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.route2('/redirect', (req) => {
+        req.followRedirect = true
+        req.reply((res) => {
+          expect(res.body).to.include('Some generic content')
+          expect(res.statusCode).to.eq(200)
+          res.send()
+        })
+      })
+      .then(() => fetch(url))
+    })
+
     it('intercepts cached responses as expected', {
       browser: '!firefox', // TODO: why does firefox behave differently? transparently returns cached response
     }, function () {
