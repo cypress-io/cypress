@@ -99,12 +99,38 @@ describe('Browsers', () => {
       cy.contains('li', 'Chrome 50').should('be.visible')
     })
 
-    it('finds browser by name', () => {
-      // TODO update this to full browser with channel
-      // https://github.com/cypress-io/cypress/issues/8281
+    it('finds chrome browser by name and channel', () => {
+      const savedBrowser = { 'name': 'chrome', 'channel': 'canary' }
+
+      window.localStorage.setItem('chosenBrowser', JSON.stringify(savedBrowser))
+      mntProjectModel()
+      // we go to that browser
+      cy.contains('li', 'Canary 48').should('be.visible')
+    })
+
+    it('picks stable browser if channel is missing', () => {
+      const savedBrowser = { 'name': 'chrome' }
+
+      window.localStorage.setItem('chosenBrowser', JSON.stringify(savedBrowser))
+      mntProjectModel()
+      // we go to stable channel
+      cy.contains('li', 'Chrome 50').should('be.visible')
+    })
+
+    it('finds chrome browser by name (old way)', () => {
+      // if an old version of Cypress saved the browser name only
       window.localStorage.setItem('chosenBrowser', 'chrome')
       mntProjectModel()
+      // we go to that browser
       cy.contains('li', 'Chrome 50').should('be.visible')
+    })
+
+    it('finds chromium browser by name (old way)', () => {
+      // if an old version of Cypress saved the browser name only
+      window.localStorage.setItem('chosenBrowser', 'chromium')
+      mntProjectModel()
+      // we go to that browser
+      cy.contains('li', 'Chromium 49').should('be.visible')
     })
 
     it('sets default browser if cannot find', () => {
