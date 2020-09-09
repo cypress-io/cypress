@@ -225,7 +225,9 @@
     ],
     "nohoist": [
       "**/@ffmpeg-installer",
-      "**/@ffmpeg-installer/**"
+      "**/@ffmpeg-installer/**",
+      "**/@cypress/webpack-preprocessor",
+      "**/@cypress/webpack-preprocessor/webpack"
     ]
   },
   "lint-staged": {

@@ -192,9 +192,7 @@
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [
-      "@benmalka/foxdriver",
-      "@cypress/webpack-batteries-included-preprocessor",
-      "@cypress/webpack-batteries-included-preprocessor/@cypress/webpack-preprocessor"
+      "@benmalka/foxdriver"
     ]
   },
   "optionalDependencies": {
