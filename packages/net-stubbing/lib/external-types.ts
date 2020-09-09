@@ -211,7 +211,37 @@ export type StringMatcher = GlobPattern | RegExp
 declare global {
   namespace Cypress {
     interface Chainable<Subject = any> {
+      /**
+       * Use `cy.route2()` to stub and intercept HTTP requests and responses.
+       *
+       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
+       * configuration option to `true`.
+       *
+       * @see https://on.cypress.io/route2
+       * @example
+       *    cy.route2('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
+       * @example
+       *    cy.route2('https://localhost:7777/protected-endpoint', (req) => {
+       *      req.headers['authorization'] = 'basic fooabc123'
+       *    })
+       * @example
+       *    cy.route2('https://localhost:7777/some-response', (req) => {
+       *      req.reply(res => {
+       *        res.body = 'some new body'
+       *      })
+       *    })
+       */
       route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * Use `cy.route2()` to stub and intercept HTTP requests and responses.
+       *
+       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
+       * configuration option to `true`.
+       *
+       * @see https://on.cypress.io/route2
+       * @example
+       *    cy.route2('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
+       */
       route2(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
     }
   }
