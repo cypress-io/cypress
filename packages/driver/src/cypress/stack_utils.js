@@ -55,8 +55,7 @@ const stackWithLinesDroppedFromMarker = (stack, marker) => {
       return !_.includes(line, marker)
     })
 
-    // remove the first line because it includes the marker
-    return withAboveMarkerRemoved.slice(1)
+    return withAboveMarkerRemoved
   })
 }
 
