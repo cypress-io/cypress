@@ -17,7 +17,7 @@
   "devDependencies": {
     "@babel/polyfill": "7.8.7",
     "@cypress/icons": "0.7.0",
-    "@cypress/json-schemas": "5.34.2",
+    "@cypress/json-schemas": "5.35.0",
     "@cypress/react-tooltip": "0.5.3",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",

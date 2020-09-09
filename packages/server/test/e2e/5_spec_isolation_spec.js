@@ -1,13 +1,14 @@
 // TODO: rename this file to 5_module_api_spec
 
 const path = require('path')
+const _ = require('lodash')
 const snapshot = require('snap-shot-it')
 const fs = require('../../lib/util/fs')
-const e2e = require('../support/helpers/e2e').default
+const { default: e2e, STDOUT_DURATION_IN_TABLES_RE } = require('../support/helpers/e2e')
 const Fixtures = require('../support/helpers/fixtures')
 const { expectCorrectModuleApiResult } = require('../support/helpers/resultsUtils')
-
 const e2ePath = Fixtures.projectPath('e2e')
+const { it } = e2e
 
 const outputPath = path.join(e2ePath, 'output.json')
 
@@ -21,13 +22,17 @@ const specs = [
 describe('e2e spec_isolation', () => {
   e2e.setup()
 
-  e2e.it('fails', {
+  it('fails', {
     spec: specs,
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
-    async onRun (exec) {
-      await exec()
+    async onRun (execFn) {
+      const { stdout } = await execFn()
+
+      _.each(STDOUT_DURATION_IN_TABLES_RE.exec(stdout), (str) => {
+        expect(str.trim(), 'spec durations in tables should not be 0ms').not.eq('0ms')
+      })
 
       // now what we want to do is read in the outputPath
       // and snapshot it so its what we expect after normalizing it
@@ -42,11 +47,11 @@ describe('e2e spec_isolation', () => {
     },
   })
 
-  e2e.it('failing with retries enabled', {
-    spec: 'simple_failing_hook_spec.coffee',
+  it('failing with retries enabled', {
+    spec: 'simple_failing_hook_spec.coffee,simple_retrying_spec.js',
     outputPath,
     snapshot: true,
-    expectedExitCode: 3,
+    expectedExitCode: 4,
     config: {
       retries: 1,
     },
@@ -55,7 +60,7 @@ describe('e2e spec_isolation', () => {
       const json = await fs.readJsonAsync(outputPath)
 
       // also mutates into normalized obj ready for snapshot
-      expectCorrectModuleApiResult(json, { e2ePath, runs: 1 })
+      expectCorrectModuleApiResult(json, { e2ePath, runs: 2 })
 
       snapshot('failing with retries enabled', json)
     },

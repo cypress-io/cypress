@@ -768,6 +768,7 @@ describe('Specs List', function () {
           })
 
           cy.contains('Set preference and open file')
+          cy.percySnapshot()
         })
 
         it('closes modal when cancel is clicked', function () {

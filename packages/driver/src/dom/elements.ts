@@ -55,6 +55,7 @@ declare global {
     SVGElement: typeof SVGElement
     EventTarget: typeof EventTarget
     Document: typeof Document
+    XMLHttpRequest: typeof XMLHttpRequest
   }
 
   interface Selection {
@@ -570,7 +571,7 @@ const isScrollOrAuto = (prop) => {
 }
 
 const isAncestor = ($el, $maybeAncestor) => {
-  return $el.parents().index($maybeAncestor) >= 0
+  return $jquery.wrap(getAllParents($el[0])).index($maybeAncestor) >= 0
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
@@ -611,7 +612,7 @@ const isWithinShadowRoot = (node: HTMLElement) => {
   return isShadowRoot(node.getRootNode())
 }
 
-const getParent = (el) => {
+const getParentNode = (el) => {
   // if the element has a direct parent element,
   // simply return it.
   if (el.parentElement) {
@@ -629,11 +630,15 @@ const getParent = (el) => {
   return null
 }
 
-const getAllParents = (el: HTMLElement, untilSelector?: string) => {
-  const collectParents = (parents, node) => {
-    const parent = getParent(node)
+const getParent = ($el: JQuery): JQuery => {
+  return $(getParentNode($el[0]))
+}
 
-    if (!parent || untilSelector && $(parent).is(untilSelector)) {
+const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTMLElement | JQuery) => {
+  const collectParents = (parents, node) => {
+    const parent = getParentNode(node)
+
+    if (!parent || untilSelectorOrEl && $(parent).is(untilSelectorOrEl)) {
       return parents
     }
 
@@ -901,7 +906,7 @@ const isDescendent = ($el1, $el2) => {
 
 const findParent = (el, condition) => {
   const collectParent = (node) => {
-    const parent = getParent(node)
+    const parent = getParentNode(node)
 
     if (!parent) return null
 
@@ -925,17 +930,17 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
     return $el
   }
 
-  const parent = $el.parent()
+  const $parent = getParent($el)
 
   // if we have no parent then just return
   // the window since that can receive focus
-  if (!parent.length) {
+  if (!$parent.length) {
     const win = $window.getWindowByElement($el.get(0))
 
     return $(win)
   }
 
-  return getFirstFocusableEl($el.parent())
+  return getFirstFocusableEl(getParent($el))
 }
 
 const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
@@ -1120,14 +1125,14 @@ const getContainsSelector = (text, filter = '', options: {
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'
 
-const getFirstDeepestElement = (elements, index = 0) => {
+const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   // iterate through all of the elements in pairs
   // and check if the next item in the array is a
   // descedent of the current. if it is continue
   // to recurse. if not, or there is no next item
   // then return the current
-  const $current = elements.slice(index, index + 1)
-  const $next = elements.slice(index + 1, index + 2)
+  const $current = $el.slice(index, index + 1)
+  const $next = $el.slice(index + 1, index + 2)
 
   if (!$next) {
     return $current
@@ -1135,7 +1140,7 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // does current contain next?
   if ($.contains($current.get(0), $next.get(0))) {
-    return getFirstDeepestElement(elements, index + 1)
+    return getFirstDeepestElement($el, index + 1)
   }
 
   // return the current if it already is a priority element
@@ -1145,7 +1150,8 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // else once we find the first deepest element then return its priority
   // parent if it has one and it exists in the elements chain
-  const $priorities = elements.filter($current.parents(priorityElement))
+  const $parents = $jquery.wrap(getAllParents($current[0])).filter(priorityElement)
+  const $priorities = $el.filter($parents)
 
   if ($priorities.length) {
     return $priorities.last()
@@ -1245,6 +1251,12 @@ const elementFromPoint = (doc, x, y) => {
   }
 
   return elFromPoint
+}
+
+const getShadowRoot = ($el: JQuery): JQuery<Node> => {
+  const root = $el[0].getRootNode()
+
+  return $(root)
 }
 
 const findAllShadowRoots = (root: Node): Node[] => {
@@ -1355,10 +1367,13 @@ export {
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getTagName,
   getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,
   getFirstScrollableParent,
   getParent,
+  getParentNode,
   getAllParents,
+  getShadowRoot,
 }

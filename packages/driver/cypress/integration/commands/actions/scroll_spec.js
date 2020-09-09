@@ -799,6 +799,17 @@ describe('src/cy/commands/actions/scroll', () => {
       })
     })
 
+    describe('shadow dom', () => {
+      beforeEach(() => {
+        cy.visit('/fixtures/shadow-dom.html')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7986
+      it('does not hang', () => {
+        cy.get('.shadow-1', { includeShadowDom: true }).scrollIntoView()
+      })
+    })
+
     describe('assertion verification', () => {
       beforeEach(function () {
         cy.on('log:added', (attrs, log) => {

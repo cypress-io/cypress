@@ -14,6 +14,6 @@ agent:
 
     # let Percy wait for network to fetch static resources
     # like images and fonts to avoid missing icons
-    network-idle-timeout: 250 # ms
+    network-idle-timeout: 5000 # ms
     # assets that don't change could be cached
     cache-responses: true
