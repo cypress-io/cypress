@@ -116,7 +116,7 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
       }
     }
 
-    if (cookie.name.startsWith('__Host-')) {
+    if (setCookieRequest.name.startsWith('__Host-')) {
       setCookieRequest.url = `https://${cookie.domain}`
       delete setCookieRequest.domain
     }
