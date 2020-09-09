@@ -664,6 +664,16 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         return cy.verifyUpcomingAssertions($el, options, {
           onRetry: getShadowRoots,
+          onFail (err) {
+            if (err.type !== 'existence') {
+              return
+            }
+
+            const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+
+            err.message = message
+            err.docsUrl = docsUrl
+          },
         })
       }
 
