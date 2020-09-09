@@ -315,7 +315,7 @@ describe('<Command />', () => {
         expect(component.find(Progress)).to.exist
       })
 
-      it('modifies the timer width based on time elapsed', () => {
+      it('modifies the timer scale factor based on time elapsed', () => {
         const initialDate = new Date(Date.now())
         const timeout = 1000
 
@@ -333,7 +333,7 @@ describe('<Command />', () => {
         const rootNode = component.getDOMNode()[0]
         const timerSpan = rootNode.children[0]
 
-        expect(timerSpan.style).to.have.property('width', '50%') // because we ticked half of the timeout
+        expect(timerSpan.style).to.have.property('transform', 'scaleX(0.5)') // because we ticked half of the timeout
       })
     })
   })

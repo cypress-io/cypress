@@ -9,6 +9,7 @@ import Bluebird from 'bluebird'
 import fse from 'fs-extra'
 import os from 'os'
 import snapshot from 'snap-shot-it'
+import { Browser } from '../../lib/types'
 
 function stubBrowser (path: string, version: string) {
   path = normalize(path.replace(/\\/g, '\\\\'))
@@ -20,6 +21,15 @@ function stubBrowser (path: string, version: string) {
   ;(fse.pathExists as SinonStub)
   .withArgs(path)
   .resolves(true)
+}
+
+function detect (goalBrowsers: Browser[]) {
+  return Bluebird.mapSeries(goalBrowsers, (browser) => {
+    return windowsHelper.detect(browser)
+    .then((foundBrowser) => {
+      return _.merge(browser, foundBrowser)
+    })
+  })
 }
 
 const HOMEDIR = 'C:/Users/flotwig'
@@ -55,14 +65,26 @@ describe('windows browser detection', () => {
     // edge canary is installed in homedir
     stubBrowser(`${HOMEDIR}/AppData/Local/Microsoft/Edge SxS/Application/msedge.exe`, '14')
 
-    const detected = (await Bluebird.mapSeries(browsers, (browser) => {
-      return windowsHelper.detect(browser)
-      .then((foundBrowser) => {
-        return _.merge(browser, foundBrowser)
-      })
-    }))
+    snapshot(await detect(browsers))
+  })
 
-    snapshot(detected)
+  // @see https://github.com/cypress-io/cypress/issues/8425
+  it('detects new Chrome 64-bit app path', async () => {
+    stubBrowser('C:/Program Files/Google/Chrome/Application/chrome.exe', '4.4.4')
+    const chrome = _.find(browsers, { name: 'chrome', channel: 'stable' })
+
+    snapshot(await windowsHelper.detect(chrome))
+  })
+
+  // @see https://github.com/cypress-io/cypress/issues/8432
+  it('detects local Firefox installs', async () => {
+    stubBrowser(`${HOMEDIR}/AppData/Local/Mozilla Firefox/firefox.exe`, '100')
+    stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Nightly/firefox.exe`, '200')
+    stubBrowser(`${HOMEDIR}/AppData/Local/Firefox Developer Edition/firefox.exe`, '300')
+
+    const firefoxes = _.filter(browsers, { family: 'firefox' })
+
+    snapshot(await detect(firefoxes))
   })
 
   context('#getVersionString', () => {

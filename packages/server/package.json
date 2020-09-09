@@ -108,6 +108,7 @@
     "syntax-error": "1.4.0",
     "systeminformation": "4.26.9",
     "term-size": "2.1.0",
+    "through": "2.3.8",
     "tough-cookie": "4.0.0",
     "trash": "5.2.0",
     "tree-kill": "1.2.2",
@@ -187,6 +188,7 @@
     "lib",
     "patches"
   ],
+  "types": "index.d.ts",
   "productName": "Cypress",
   "workspaces": {
     "nohoist": [

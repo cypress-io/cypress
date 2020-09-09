@@ -105,6 +105,13 @@ export const trimInnerText = ($el) => {
   return _.trimEnd($el.get(0).innerText, '\n')
 }
 
+export const expectCaret = (start, end) => {
+  return ($el) => {
+    end = end == null ? start : end
+    expect(Cypress.dom.getSelectionBounds($el.get(0))).to.deep.eq({ start, end })
+  }
+}
+
 Cypress.Commands.add('getAll', getAllFn)
 
 const chaiSubset = require('chai-subset')

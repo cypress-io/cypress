@@ -21,6 +21,7 @@ const {
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
+const { netStubbingState } = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')
@@ -200,16 +201,13 @@ class Server {
       // TODO: does not need to be an instance anymore
       this._request = Request()
       this._nodeProxy = httpProxy.createProxyServer()
+      this._socket = new Socket(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
       }
 
-      const getFileServerToken = () => {
-        return this._fileServer.token
-      }
-
-      this._networkProxy = new NetworkProxy({ config, getRemoteState, getFileServerToken, request: this._request })
+      this.createNetworkProxy(config, getRemoteState)
 
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
@@ -227,6 +225,22 @@ class Server {
       })
 
       return this.createServer(app, config, project, this._request, onWarning)
+    })
+  }
+
+  createNetworkProxy (config, getRemoteState) {
+    const getFileServerToken = () => {
+      return this._fileServer.token
+    }
+
+    this._netStubbingState = netStubbingState()
+    this._networkProxy = new NetworkProxy({
+      socket: this._socket,
+      netStubbingState: this._netStubbingState,
+      config,
+      getRemoteState,
+      getFileServerToken,
+      request: this._request,
     })
   }
 
@@ -656,6 +670,15 @@ class Server {
         },
       })
 
+      if (options.selfProxy) {
+        // TODO: this is being used to force cy.visits to be interceptable by network stubbing
+        // however, network errors will be obsfucated by the proxying so this is not an ideal solution
+        _.assign(options, {
+          proxy: `http://127.0.0.1:${this._port()}`,
+          agent: null,
+        })
+      }
+
       debug('sending request with options %o', options)
 
       return runPhase(() => {
@@ -865,12 +888,13 @@ class Server {
   startWebsockets (automation, config, options = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
     options.onRequest = this._onRequest.bind(this)
+    options.netStubbingState = this._netStubbingState
 
     options.onResetServerState = () => {
-      return this._networkProxy.reset()
+      this._networkProxy.reset()
+      this._netStubbingState.reset()
     }
 
-    this._socket = new Socket(config)
     this._socket.startListening(this._server, automation, config, options)
 
     return this._normalizeReqUrl(this._server)

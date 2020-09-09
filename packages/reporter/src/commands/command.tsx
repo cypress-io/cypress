@@ -119,12 +119,12 @@ interface ProgressProps {
 const Progress = observer(({ model }: ProgressProps) => {
   const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
-  const percentageRemaining = timeRemaining / model.timeout * 100 || 0
+  const percentageRemaining = timeRemaining / model.timeout || 0
 
   // we add a key to the span to ensure a rerender and restart of the animation on change
   return (
     <div className='command-progress'>
-      <span style={{ animationDuration: `${timeRemaining}ms`, width: `${percentageRemaining}%` }} key={timeRemaining} />
+      <span style={{ animationDuration: `${timeRemaining}ms`, transform: `scaleX(${percentageRemaining})` }} key={timeRemaining} />
     </div>
   )
 })

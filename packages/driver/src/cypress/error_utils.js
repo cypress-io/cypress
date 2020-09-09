@@ -1,3 +1,5 @@
+// See: ./errorScenarios.md for details about error messages and stack traces
+
 const _ = require('lodash')
 
 const $errorMessages = require('./error_messages')
@@ -187,6 +189,16 @@ class CypressError extends Error {
       Error.captureStackTrace(this, CypressError)
     }
   }
+
+  setUserInvocationStack (stack) {
+    this.userInvocationStack = stack
+
+    return this
+  }
+}
+
+const getUserInvocationStack = (err) => {
+  return err.userInvocationStack
 }
 
 const internalErr = (err) => {
@@ -254,7 +266,8 @@ const errByPath = (msgPath, args) => {
 }
 
 const createUncaughtException = (type, err) => {
-  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
+  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
   })
@@ -338,4 +351,5 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
+  getUserInvocationStack,
 }

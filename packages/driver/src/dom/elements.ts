@@ -55,6 +55,7 @@ declare global {
     SVGElement: typeof SVGElement
     EventTarget: typeof EventTarget
     Document: typeof Document
+    XMLHttpRequest: typeof XMLHttpRequest
   }
 
   interface Selection {
@@ -1366,6 +1367,7 @@ export {
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getTagName,
   getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,
