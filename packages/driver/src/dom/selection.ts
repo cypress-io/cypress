@@ -616,7 +616,13 @@ const moveSelectionToPoint = function (contentWindow, clientX, clientY) {
   let doc = contentWindow.document
 
   if (doc.caretPositionFromPoint) { // For Firefox
-    range = doc.caretPositionFromPoint(clientX, clientY)
+    const { offsetNode, offset } = doc.caretPositionFromPoint(clientX, clientY)
+
+    // Range should be manually created
+    // because the return type of caretPositionFromPoint is CaretPosition.
+    range = doc.createRange()
+    range.setStart(offsetNode, offset)
+    range.setEnd(offsetNode, offset)
   } else if (doc.caretRangeFromPoint) { // For Chrome
     range = doc.caretRangeFromPoint(clientX, clientY)
   }
