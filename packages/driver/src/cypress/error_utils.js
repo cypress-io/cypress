@@ -9,6 +9,7 @@ const $stackUtils = require('./stack_utils')
 const $errorMessages = require('./error_messages')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
+const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
@@ -19,7 +20,7 @@ if (!Error.captureStackTrace) {
 }
 
 const prepareErrorForSerialization = (err) => {
-  if (err[Symbol('preparedForSerialization')]) {
+  if (err[ERR_PREPARED_FOR_SERIALIZATION]) {
     return err
   }
 
@@ -41,7 +42,7 @@ const prepareErrorForSerialization = (err) => {
     delete err.showDiff
   }
 
-  err[Symbol('preparedForSerialization')] = true
+  err[ERR_PREPARED_FOR_SERIALIZATION] = true
 
   return err
 }
