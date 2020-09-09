@@ -108,7 +108,7 @@ function getInvocationDetails (specWindow, config) {
     // which includes stackframes from cypress_runner.js.
     // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
     if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
-      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests')
+      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
     return {

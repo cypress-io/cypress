@@ -48,14 +48,14 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithLinesDroppedFromMarker = (stack, marker) => {
+const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
     const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
       return !_.includes(line, marker)
     })
 
-    return withAboveMarkerRemoved
+    return includeLast ? withAboveMarkerRemoved : withAboveMarkerRemoved.slice(1)
   })
 }
 
