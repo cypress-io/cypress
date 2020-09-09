@@ -885,34 +885,37 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      describe('point', () => {
-        it('[contenteditable]', () => {
-          cy.get('[contenteditable]:first')
-          .invoke('html', '<div><br></div>').click(15, 5, {
-            caretPosition: 'point',
-          })
-          .then(expectCaret(0))
+      // caretPositionFromPoint doesn't work on headless mode on Firefox.
+      if (Cypress.isBrowser('chrome') || Cypress.config('isInteractive', true)) {
+        describe('point', () => {
+          it('[contenteditable]', () => {
+            cy.get('[contenteditable]:first')
+            .invoke('html', '<div><br></div>').click(15, 5, {
+              caretPosition: 'point',
+            })
+            .then(expectCaret(0))
 
-          cy.get('[contenteditable]:first')
-          .invoke('html', 'foobar').click(15, 5, {
-            caretPosition: 'point',
-          })
-          .then(expectCaret(2))
+            cy.get('[contenteditable]:first')
+            .invoke('html', 'foobar').click(15, 5, {
+              caretPosition: 'point',
+            })
+            .then(expectCaret(2))
 
-          cy.get('[contenteditable]:first')
-          .invoke('html', '<div>foobar</div>').click(15, 5, {
-            caretPosition: 'point',
-          })
-          .then(expectCaret(2))
+            cy.get('[contenteditable]:first')
+            .invoke('html', '<div>foobar</div>').click(15, 5, {
+              caretPosition: 'point',
+            })
+            .then(expectCaret(2))
 
-          cy.get('[contenteditable]:first')
-          // firefox headless: prevent contenteditable from disappearing (dont set to empty)
-          .invoke('html', '<br>').click(15, 5, {
-            caretPosition: 'point',
+            cy.get('[contenteditable]:first')
+            // firefox headless: prevent contenteditable from disappearing (dont set to empty)
+            .invoke('html', '<br>').click(15, 5, {
+              caretPosition: 'point',
+            })
+            .then(expectCaret(0))
           })
-          .then(expectCaret(0))
         })
-      })
+      }
     })
 
     it('can click SVG elements', () => {
