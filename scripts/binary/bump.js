@@ -125,12 +125,6 @@ const awaitEachProjectAndProvider = function (projects, fn, filter = R.identity)
     }
   }
 
-  if (check.unemptyString(creds.buildkiteToken)) {
-    providers.buildkite = {
-      buildkiteToken: creds.buildkiteToken,
-    }
-  }
-
   const providerNames = Object.keys(providers)
 
   console.log('configured providers', providerNames)

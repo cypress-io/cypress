@@ -10,6 +10,7 @@ export type CypressIncomingRequest = Request & {
   requestId: string
   body?: string
   responseTimeout?: number
+  followRedirect?: boolean
 }
 
 /**
