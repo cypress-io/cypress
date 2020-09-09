@@ -151,7 +151,7 @@ const create = (state, keyboard, focused, Cypress) => {
     return !_.isEqual(xy(fromElViewport), xy(coords))
   }
 
-  const shouldMoveCursorToEndAfterMousedown = (el) => {
+  const shouldMoveCursorAfterMousedown = (el) => {
     const _debug = debug.extend(':shouldMoveCursorToEnd')
 
     _debug('shouldMoveToEnd?', el)
@@ -450,7 +450,7 @@ const create = (state, keyboard, focused, Cypress) => {
       }
     },
 
-    down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    down (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}, caretPosition = 'end') {
       const $previouslyFocused = focused.getFocused()
 
       const mouseDownPhase = mouse._downEvents(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
@@ -483,9 +483,19 @@ const create = (state, keyboard, focused, Cypress) => {
         }
       }
 
-      if (shouldMoveCursorToEndAfterMousedown(el)) {
-        debug('moveSelectionToEnd due to click', el)
-        $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
+      if (shouldMoveCursorAfterMousedown(el)) {
+        debug('moveSelection to', caretPosition)
+        debug('moveSelection due to click', el)
+
+        if (caretPosition === 'start') {
+          $selection.moveSelectionToStart(el, { onlyIfEmptySelection: true })
+        } else if (caretPosition === 'end') {
+          $selection.moveSelectionToEnd(el, { onlyIfEmptySelection: true })
+        } else if (caretPosition === 'point') {
+          const { x, y } = getMouseCoords(state)
+
+          $selection.moveSelectionToPoint(state('window'), x, y)
+        }
       }
 
       return mouseDownPhase
@@ -524,10 +534,10 @@ const create = (state, keyboard, focused, Cypress) => {
     * if (notDetached(el1))
     *   sendClick(ancestorOf(el1, el2))
     */
-    click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}) {
+    click (fromElViewport, forceEl, pointerEvtOptionsExtend = {}, mouseEvtOptionsExtend = {}, caretPosition = 'end') {
       debug('mouse.click', { fromElViewport, forceEl })
 
-      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend)
+      const mouseDownPhase = mouse.down(fromElViewport, forceEl, pointerEvtOptionsExtend, mouseEvtOptionsExtend, caretPosition)
 
       const skipMouseupEvent = mouseDownPhase.events.pointerdown.skipped || mouseDownPhase.events.pointerdown.preventedDefault
 

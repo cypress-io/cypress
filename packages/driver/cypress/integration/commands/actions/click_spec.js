@@ -762,59 +762,157 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#table tr:first').click()
     })
 
-    it('places cursor at the end of input', () => {
-      cy.get('input:first').invoke('val', 'foobar').click().then(($el) => {
-        const el = $el.get(0)
+    describe('caret position', () => {
+      describe('end - default', () => {
+        it('input', () => {
+          cy.get('input:first').invoke('val', 'foobar').click().then(($el) => {
+            const el = $el.get(0)
 
-        expect(el.selectionStart).to.eql(6)
+            expect(el.selectionStart).to.eql(6)
+            expect(el.selectionEnd).to.eql(6)
+          })
 
-        expect(el.selectionEnd).to.eql(6)
+          cy.get('input:first').invoke('val', '').click().then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
+        })
+
+        it('textarea', () => {
+          cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(11)
+            expect(el.selectionEnd).to.eql(11)
+          })
+
+          cy.get('textarea:first').invoke('val', '').click().then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
+        })
+
+        it('[contenteditable]', () => {
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div><br></div>').click()
+          .then(expectCaret(0))
+
+          cy.get('[contenteditable]:first')
+          .invoke('html', 'foo').click()
+          .then(expectCaret(3))
+
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div>foo</div>').click()
+          .then(expectCaret(3))
+
+          cy.get('[contenteditable]:first')
+          // firefox headless: prevent contenteditable from disappearing (dont set to empty)
+          .invoke('html', '<br>').click()
+          .then(expectCaret(0))
+        })
       })
 
-      cy.get('input:first').invoke('val', '').click().then(($el) => {
-        const el = $el.get(0)
+      describe('start', () => {
+        it('input', () => {
+          cy.get('input:first').invoke('val', 'foobar').click({
+            caretPosition: 'start',
+          }).then(($el) => {
+            const el = $el.get(0)
 
-        expect(el.selectionStart).to.eql(0)
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
 
-        expect(el.selectionEnd).to.eql(0)
+          cy.get('input:first').invoke('val', '').click({
+            caretPosition: 'start',
+          }).then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
+        })
+
+        it('textarea', () => {
+          cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click({
+            caretPosition: 'start',
+          }).then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
+
+          cy.get('textarea:first').invoke('val', '').click({
+            caretPosition: 'start',
+          }).then(($el) => {
+            const el = $el.get(0)
+
+            expect(el.selectionStart).to.eql(0)
+            expect(el.selectionEnd).to.eql(0)
+          })
+        })
+
+        it('[contenteditable]', () => {
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div><br></div>').click({
+            caretPosition: 'start',
+          })
+          .then(expectCaret(0))
+
+          cy.get('[contenteditable]:first')
+          .invoke('html', 'foo').click({
+            caretPosition: 'start',
+          })
+          .then(expectCaret(0))
+
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div>foo</div>').click({
+            caretPosition: 'start',
+          })
+          .then(expectCaret(0))
+
+          cy.get('[contenteditable]:first')
+          // firefox headless: prevent contenteditable from disappearing (dont set to empty)
+          .invoke('html', '<br>').click({
+            caretPosition: 'start',
+          })
+          .then(expectCaret(0))
+        })
       })
-    })
 
-    it('places cursor at the end of textarea', () => {
-      cy.get('textarea:first').invoke('val', 'foo\nbar\nbaz').click().then(($el) => {
-        const el = $el.get(0)
+      describe('point', () => {
+        it('[contenteditable]', () => {
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div><br></div>').click(15, 5, {
+            caretPosition: 'point',
+          })
+          .then(expectCaret(0))
 
-        expect(el.selectionStart).to.eql(11)
+          cy.get('[contenteditable]:first')
+          .invoke('html', 'foobar').click(15, 5, {
+            caretPosition: 'point',
+          })
+          .then(expectCaret(2))
 
-        expect(el.selectionEnd).to.eql(11)
+          cy.get('[contenteditable]:first')
+          .invoke('html', '<div>foobar</div>').click(15, 5, {
+            caretPosition: 'point',
+          })
+          .then(expectCaret(2))
+
+          cy.get('[contenteditable]:first')
+          // firefox headless: prevent contenteditable from disappearing (dont set to empty)
+          .invoke('html', '<br>').click(15, 5, {
+            caretPosition: 'point',
+          })
+          .then(expectCaret(0))
+        })
       })
-
-      cy.get('textarea:first').invoke('val', '').click().then(($el) => {
-        const el = $el.get(0)
-
-        expect(el.selectionStart).to.eql(0)
-
-        expect(el.selectionEnd).to.eql(0)
-      })
-    })
-
-    it('places cursor at the end of [contenteditable]', () => {
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div><br></div>').click()
-      .then(expectCaret(0))
-
-      cy.get('[contenteditable]:first')
-      .invoke('html', 'foo').click()
-      .then(expectCaret(3))
-
-      cy.get('[contenteditable]:first')
-      .invoke('html', '<div>foo</div>').click()
-      .then(expectCaret(3))
-
-      cy.get('[contenteditable]:first')
-      // firefox headless: prevent contenteditable from disappearing (dont set to empty)
-      .invoke('html', '<br>').click()
-      .then(expectCaret(0))
     })
 
     it('can click SVG elements', () => {

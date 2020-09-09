@@ -610,6 +610,23 @@ const moveSelectionToEnd = _.curry(_moveSelectionTo)(false)
 
 const moveSelectionToStart = _.curry(_moveSelectionTo)(true)
 
+const moveSelectionToPoint = function (contentWindow, clientX, clientY) {
+  let range
+  let sel = contentWindow.getSelection()
+  let doc = contentWindow.document
+
+  if (doc.caretPositionFromPoint) { // For Firefox
+    range = doc.caretPositionFromPoint(clientX, clientY)
+  } else if (doc.caretRangeFromPoint) { // For Chrome
+    range = doc.caretRangeFromPoint(clientX, clientY)
+  }
+
+  range.collapse(true)
+
+  sel.removeAllRanges()
+  sel.addRange(range)
+}
+
 const replaceSelectionContents = function (el, key) {
   if ($elements.isContentEditable(el)) {
     _replaceSelectionContentsContentEditable(el, key)
@@ -740,6 +757,7 @@ export {
   deleteSelectionContents,
   moveSelectionToEnd,
   moveSelectionToStart,
+  moveSelectionToPoint,
   getCaretPosition,
   getHostContenteditable,
   moveCursorLeft,

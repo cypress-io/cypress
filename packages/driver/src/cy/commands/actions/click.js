@@ -62,6 +62,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       metaKey: false,
       commandKey: false,
       cmdKey: false,
+      caretPosition: 'end',
       ...defaultOptions,
     })
 
@@ -186,7 +187,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           flagModifiers(true)
 
-          const onReadyProps = onReady(fromElViewport, forceEl)
+          const onReadyProps = onReady(fromElViewport, forceEl, options.caretPosition)
 
           flagModifiers(false)
 
@@ -236,8 +237,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         subject,
         userOptions: options,
         positionOrX,
-        onReady (fromElViewport, forceEl) {
-          const clickEvents = mouse.click(fromElViewport, forceEl)
+        onReady (fromElViewport, forceEl, caretPosition) {
+          const clickEvents = mouse.click(fromElViewport, forceEl, {}, {}, caretPosition)
 
           return {
             clickEvents,
