@@ -227,7 +227,7 @@
       "**/@ffmpeg-installer",
       "**/@ffmpeg-installer/**",
       "**/@cypress/webpack-preprocessor",
-      "**/@cypress/webpack-preprocessor/webpack"
+      "**/find-webpack"
     ]
   },
   "lint-staged": {
