@@ -2390,6 +2390,13 @@ declare namespace Cypress {
      * @default false
      */
     cmdKey: boolean
+    /**
+     * Where the caret should be placed when <input>, <textarea>, [contenteditable] elements are clicked.
+     * 'point' option can be only used with [contenteditable].
+     *
+     * @default 'end'
+     */
+    caretPosition: 'start' | 'end' | 'point'
   }
 
   interface ResolvedConfigOptions {
