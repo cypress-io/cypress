@@ -85,11 +85,11 @@ describe('Browsers', () => {
     mntProjectModel()
     cy.get('.dropdown-chosen').click()
     cy.contains('li', 'Canary 48').click()
-    // TODO later one we should save the entire browser object
-    // with name and channel
-    // https://github.com/cypress-io/cypress/issues/8281
+
+    const expectedBrowser = { 'name': 'chrome', 'channel': 'canary' }
+
     cy.wrap(window.localStorage)
-    .invoke('getItem', 'chosenBrowser').should('equal', 'chrome')
+    .invoke('getItem', 'chosenBrowser').should('equal', JSON.stringify(expectedBrowser))
   })
 
   context('previously chosen browser', () => {
