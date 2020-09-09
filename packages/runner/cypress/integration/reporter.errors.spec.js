@@ -461,7 +461,7 @@ describe('errors ui', () => {
   describe('uncaught errors', () => {
     const file = 'uncaught_spec.js'
 
-    verify.it.only('sync app exception', {
+    verify.it('sync app exception', {
       file,
       message: [
         'The following error originated from your application code',
