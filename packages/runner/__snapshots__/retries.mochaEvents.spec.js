@@ -73,8 +73,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -99,8 +98,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -115,8 +113,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -428,8 +425,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -475,8 +471,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -524,8 +519,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -1022,8 +1016,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -1069,8 +1062,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -1118,8 +1110,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -1687,8 +1678,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h3",
@@ -1740,8 +1730,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -1790,8 +1779,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h3",
@@ -2484,8 +2472,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h1",
@@ -2542,8 +2529,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -2559,8 +2545,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -2584,8 +2569,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h1",
@@ -2768,8 +2752,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -2793,8 +2776,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3096,8 +3078,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3121,8 +3102,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3430,8 +3410,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3455,8 +3434,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3756,8 +3734,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -3795,8 +3772,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -3812,8 +3788,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3837,8 +3812,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3862,8 +3836,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3887,8 +3860,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -3950,8 +3922,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -3974,8 +3945,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -4012,8 +3982,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -4029,8 +3998,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4054,8 +4022,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4079,8 +4046,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4103,8 +4069,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h7",
@@ -4165,8 +4130,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4190,8 +4154,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4215,8 +4178,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4240,8 +4202,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4429,8 +4390,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4454,8 +4414,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "body": "[body]",
       "type": "hook",
@@ -4676,8 +4635,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -4694,8 +4652,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -4756,8 +4713,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h1",
@@ -4802,8 +4758,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h1",
@@ -5160,8 +5115,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -5178,8 +5132,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -5195,8 +5148,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h4",
@@ -5281,8 +5233,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "failedFromHookId": "h4",
@@ -5774,8 +5725,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -5814,8 +5764,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -5864,8 +5813,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -5960,8 +5908,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -5999,8 +5946,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -6048,8 +5994,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -6817,8 +6762,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -6843,8 +6787,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -6859,8 +6802,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -6907,8 +6849,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -6932,8 +6873,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -6947,8 +6887,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -6994,8 +6933,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -7018,8 +6956,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
       "name": "AssertionError",
       "stack": "match.string",
       "sourceMappedStack": "match.string",
-      "parsedStack": "match.array",
-      "showDiff": false
+      "parsedStack": "match.array"
     }
   ],
   [
@@ -7033,8 +6970,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",
@@ -7065,8 +7001,7 @@ exports['src/cypress/runner retries mochaEvents cleanses errors before emitting 
         "name": "AssertionError",
         "stack": "match.string",
         "sourceMappedStack": "match.string",
-        "parsedStack": "match.array",
-        "showDiff": false
+        "parsedStack": "match.array"
       },
       "state": "failed",
       "body": "[body]",

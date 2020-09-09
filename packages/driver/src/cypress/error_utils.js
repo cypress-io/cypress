@@ -19,7 +19,7 @@ if (!Error.captureStackTrace) {
 }
 
 const prepareErrorForSerialization = (err) => {
-  if (err._preparedForSeialization) {
+  if (err[Symbol('preparedForSerialization')]) {
     return err
   }
 
@@ -38,9 +38,10 @@ const prepareErrorForSerialization = (err) => {
   } else {
     delete err.actual
     delete err.expected
+    delete err.showDiff
   }
 
-  err._preparedForSeialization = true
+  err[Symbol('preparedForSerialization')] = true
 
   return err
 }

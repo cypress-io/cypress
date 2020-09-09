@@ -1,6 +1,9 @@
 const helpers = require('../support/helpers')
 
-const { verify } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
+const { verify } = helpers.createCypress({
+  config: { isTextTerminal: true, retries: 0 },
+  visitUrl: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
+})
 
 const verifyInternalFailure = (props) => {
   const { method } = props
@@ -458,7 +461,7 @@ describe('errors ui', () => {
   describe('uncaught errors', () => {
     const file = 'uncaught_spec.js'
 
-    verify.it('sync app exception', {
+    verify.it.only('sync app exception', {
       file,
       message: [
         'The following error originated from your application code',
