@@ -4,8 +4,8 @@
   "private": true,
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack",
-    "build-prod": "cross-env NODE_ENV=production yarn build",
+    "build": "cross-env NODE_ENV=production webpack",
+    "build-prod": "yarn build",
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open",
     "cypress:run": "node ../../scripts/cypress run",
