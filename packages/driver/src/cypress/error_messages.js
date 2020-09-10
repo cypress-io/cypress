@@ -904,7 +904,7 @@ module.exports = {
     `,
     hook_registered_late: stripIndent`\
     Cypress detected you registered a(n) \`{{hookTitle}}\` hook while a test was running (possibly a hook nested inside another hook). All hooks must be registered before a test begins executing.
-    
+
     Move the \`{{hookTitle}}\` into a suite callback or the global scope.
     `,
 
@@ -1475,6 +1475,13 @@ module.exports = {
           Pass \`secure: true\` to ${cmd('setCookie')} to set a cookie with \`sameSite: '{{value}}'\`.`,
         docsUrl: 'https://on.cypress.io/setcookie',
       }
+    },
+  },
+
+  shadow: {
+    no_shadow_root: {
+      message: 'Expected the subject to host a shadow root, but never found it.',
+      docsUrl: 'https://on.cypress.io/shadow',
     },
   },
 
