@@ -420,7 +420,7 @@ const isFocused = (el) => {
   try {
     let doc
 
-    if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot(el)) {
+    if (isWithinShadowRoot(el)) {
       doc = el.getRootNode()
     } else {
       doc = $document.getDocumentFromElement(el)
@@ -946,7 +946,7 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
 const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
   let activeElement
 
-  if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot($el[0])) {
+  if (isWithinShadowRoot($el[0])) {
     activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
   } else {
     activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
@@ -1231,26 +1231,22 @@ const stringify = (el, form = 'long') => {
   })
 }
 
+// if the node has a shadow root, we must behave like
+// the browser and find the inner element of the shadow
+// root at that same point.
+const getShadowElementFromPoint = (node, x, y) => {
+  const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
+
+  if (!nodeFromPoint || nodeFromPoint === node) return node
+
+  return getShadowElementFromPoint(nodeFromPoint, x, y)
+}
+
 const elementFromPoint = (doc, x, y) => {
   // first try the native elementFromPoint method
   let elFromPoint = doc.elementFromPoint(x, y)
 
-  // if the node has a shadow root, we must behave like
-  // the browser and find the inner element of the shadow
-  // root at that same point.
-  if (Cypress.config('experimentalShadowDomSupport')) {
-    const getShadowElementFromPoint = (node) => {
-      const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
-
-      if (!nodeFromPoint || nodeFromPoint === node) return node
-
-      return getShadowElementFromPoint(nodeFromPoint)
-    }
-
-    elFromPoint = getShadowElementFromPoint(elFromPoint)
-  }
-
-  return elFromPoint
+  return getShadowElementFromPoint(elFromPoint, x, y)
 }
 
 const getShadowRoot = ($el: JQuery): JQuery<Node> => {

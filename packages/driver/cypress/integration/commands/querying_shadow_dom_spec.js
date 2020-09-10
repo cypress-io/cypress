@@ -72,6 +72,61 @@ describe('src/cy/commands/querying - shadow dom', () => {
       cy.visit('/fixtures/shadow-dom.html?wrap-qsa=true')
       cy.get('.shadow-1', { includeShadowDom: true })
     })
+
+    describe('non-command options', () => {
+      describe('suite-level config', { includeShadowDom: true }, () => {
+        beforeEach(() => {
+          cy.get('.shadow-div')
+        })
+
+        it('queries shadow dom', () => {
+          cy.get('.shadow-div')
+        })
+
+        it('also queries shadow dom', () => {
+          cy.get('.shadow-div')
+        })
+      })
+
+      describe('test-level config', () => {
+        it('queries shadow dom', { includeShadowDom: true }, () => {
+          cy.get('.shadow-div')
+        })
+
+        it('does not find element without option set', () => {
+          cy.get('.shadow-div').should('not.exist')
+        })
+      })
+
+      describe('Cypress.config()', () => {
+        const reset = () => {
+          Cypress.config('includeShadowDom', false)
+        }
+
+        beforeEach(reset)
+        afterEach(reset)
+
+        it('turns option on and off at will', () => {
+          cy.get('.shadow-div').should('not.exist').then(() => {
+            Cypress.config('includeShadowDom', true)
+          })
+
+          cy.get('.shadow-div')
+        })
+
+        it('overrides test-level option being true', { includeShadowDom: true }, () => {
+          Cypress.config('includeShadowDom', false)
+
+          cy.get('.shadow-div').should('not.exist')
+        })
+
+        it('overrides test-level option being false', { includeShadowDom: false }, () => {
+          Cypress.config('includeShadowDom', true)
+
+          cy.get('.shadow-div')
+        })
+      })
+    })
   })
 
   context('#contains', () => {
@@ -132,6 +187,17 @@ describe('src/cy/commands/querying - shadow dom', () => {
       .then(($roots) => {
         expect($roots.length).to.equal(1)
       })
+    })
+
+    it('has a custom error message if it cannot find a root', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.equal(`Timed out retrying: Expected the subject to host a shadow root, but never found it.`)
+        expect(err.docsUrl).to.equal('https://on.cypress.io/shadow')
+
+        done()
+      })
+
+      cy.get('#non-shadow-element').shadow({ timeout: 0 })
     })
 
     describe('.log', () => {

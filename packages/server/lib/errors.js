@@ -756,8 +756,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         You've exceeded the limit of test recordings under your free plan this month. ${arg1.usedTestsMessage}
 
-        Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}. 
-        
+        Your plan is now in a grace period, which means you will have the full benefits of your current plan until ${arg1.gracePeriodMessage}.
+
         Please visit your billing to upgrade your plan.
 
         ${arg1.link}`
@@ -930,14 +930,19 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalGetCookiesSameSite\` configuration option was removed in Cypress version \`5.0.0\`. Yielding the \`sameSite\` property is now the default behavior of the \`cy.cookie\` commands.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_SHADOW_DOM_REMOVED':
+      return stripIndent`\
+        The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
-      
+
       Test retries is now supported in Cypress version \`5.0.0\`.
 
       Remove the plugin from your dependencies to silence this warning.
-      
+
       https://on.cypress.io/test-retries
       `
     default:
