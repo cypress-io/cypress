@@ -55,7 +55,6 @@ const _summaries: StringValues = {
   experimentalNetworkStubbing: 'Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing',
-  experimentalShadowDomSupport: 'Enables support for shadow DOM traversal, introduces the `shadow()` command and the `includeShadowDom` option to traversal commands.',
 }
 
 /**
@@ -72,7 +71,6 @@ const _names: StringValues = {
   experimentalComponentTesting: 'Component Testing',
   experimentalNetworkStubbing: 'Experimental network mocking',
   experimentalSourceRewriting: 'Improved source rewriting',
-  experimentalShadowDomSupport: 'Shadow DOM Support',
   experimentalFetchPolyfill: 'Fetch polyfill',
 }
 

@@ -10,47 +10,29 @@ describe('src/cypress/shadow_dom_utils', () => {
       }
     })
 
-    describe('when experimental flag is false', () => {
-      beforeEach(() => {
-        CypressMock.config.withArgs('experimentalShadowDomSupport').returns(false)
-      })
+    it('returns true if command value is true', () => {
+      CypressMock.config.withArgs('includeShadowDom').returns(false)
 
-      it('returns false', () => {
-        CypressMock.config.withArgs('includeShadowDom').returns(true)
-
-        expect(resolveShadowDomInclusion(CypressMock, true)).to.be.false
-      })
+      expect(resolveShadowDomInclusion(CypressMock, true)).to.be.true
     })
 
-    describe('when experimental flag is true', () => {
-      beforeEach(() => {
-        CypressMock.config.withArgs('experimentalShadowDomSupport').returns(true)
-      })
+    it('returns false if command value is false', () => {
+      CypressMock.config.withArgs('includeShadowDom').returns(true)
 
-      it('returns true if command value is true', () => {
-        CypressMock.config.withArgs('includeShadowDom').returns(false)
+      expect(resolveShadowDomInclusion(CypressMock, false)).to.be.false
+    })
 
-        expect(resolveShadowDomInclusion(CypressMock, true)).to.be.true
-      })
-
-      it('returns false if command value is false', () => {
+    describe('when command value is undefined', () => {
+      it('returns true if config value is true', () => {
         CypressMock.config.withArgs('includeShadowDom').returns(true)
 
-        expect(resolveShadowDomInclusion(CypressMock, false)).to.be.false
+        expect(resolveShadowDomInclusion(CypressMock)).to.be.true
       })
 
-      describe('when command value is undefined', () => {
-        it('returns true if config value is true', () => {
-          CypressMock.config.withArgs('includeShadowDom').returns(true)
+      it('returns false if config value is false', () => {
+        CypressMock.config.withArgs('includeShadowDom').returns(false)
 
-          expect(resolveShadowDomInclusion(CypressMock)).to.be.true
-        })
-
-        it('returns false if config value is false', () => {
-          CypressMock.config.withArgs('includeShadowDom').returns(false)
-
-          expect(resolveShadowDomInclusion(CypressMock)).to.be.false
-        })
+        expect(resolveShadowDomInclusion(CypressMock)).to.be.false
       })
     })
   })

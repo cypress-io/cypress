@@ -3780,8 +3780,7 @@ describe('shadow dom', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/7679
-  it('does not hang when experimentalShadowDomSupport is false and clicking on custom element', () => {
-    Cypress.config('experimentalShadowDomSupport', false)
+  it('does not hang when clicking on custom element', () => {
     // needs some size or it's considered invisible and click will fail its prerequisites
     // so we make it display: block so its getClientRects() contains only a single
     cy.$$('#shadow-element-1').css({ display: 'block' })

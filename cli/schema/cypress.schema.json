@@ -239,11 +239,6 @@
       "default": false,
       "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
     },
-    "experimentalShadowDomSupport": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enables shadow DOM support. Adds the `cy.shadow()` command and the `ignoreShadowBoundaries` option to some DOM commands."
-    },
     "experimentalFetchPolyfill": {
       "type": "boolean",
       "default": false,

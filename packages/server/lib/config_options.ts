@@ -70,11 +70,6 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalShadowDomSupport',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: v.isBoolean,
@@ -289,6 +284,10 @@ export const breakingOptions = [
   }, {
     name: 'experimentalGetCookiesSameSite',
     errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalShadowDomSupport',
+    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
     name: 'screenshotOnHeadlessFailure',

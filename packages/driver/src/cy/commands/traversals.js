@@ -126,7 +126,6 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getEl = () => {
-        const shadowDomSupportEnabled = Cypress.config('experimentalShadowDomSupport')
         const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
         const optInShadowTraversal = optInShadowTraversals[traversal]
         const autoShadowTraversal = autoShadowTraversals[traversal]
@@ -138,7 +137,7 @@ module.exports = (Commands, Cypress, cy) => {
           return optInShadowTraversal(cy, subject, arg1, arg2)
         }
 
-        if (shadowDomSupportEnabled && autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
+        if (autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
           // if we detect the element is within a shadow root and we're using
           // .closest() or .parents(), automatically cross shadow boundaries
           return autoShadowTraversal(cy, subject, arg1, arg2)
