@@ -1132,6 +1132,16 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SAMESITE_REMOVED')
     })
 
+    it('warns if experimentalShadowDomSupport is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalShadowDomSupport', true, {
+        experimentalShadowDomSupport: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {
@@ -1158,7 +1168,6 @@ describe('lib/config', () => {
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalNetworkStubbing: { value: false, from: 'default' },
-            experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
@@ -1238,7 +1247,6 @@ describe('lib/config', () => {
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalNetworkStubbing: { value: false, from: 'default' },
-            experimentalShadowDomSupport: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
               foo: {

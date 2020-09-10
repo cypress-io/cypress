@@ -1607,7 +1607,6 @@ declare namespace Cypress {
 
     /**
      * Traverse into an element's shadow root.
-     * Requires `experimentalShadowDomSupport: true` config option
      *
      * @example
      *    cy.get('my-component')
@@ -2582,12 +2581,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalNetworkStubbing: boolean
-    /**
-     * Enables shadow DOM support. Adds the `cy.shadow()` command and
-     * the `includeShadowDom` option to some DOM commands.
-     * @default false
-     */
-    experimentalShadowDomSupport: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
