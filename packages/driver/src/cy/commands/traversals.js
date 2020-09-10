@@ -2,6 +2,7 @@ const _ = require('lodash')
 
 const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
+const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
@@ -126,10 +127,11 @@ module.exports = (Commands, Cypress, cy) => {
 
       const getEl = () => {
         const shadowDomSupportEnabled = Cypress.config('experimentalShadowDomSupport')
+        const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
         const optInShadowTraversal = optInShadowTraversals[traversal]
         const autoShadowTraversal = autoShadowTraversals[traversal]
 
-        if (shadowDomSupportEnabled && options.includeShadowDom && optInShadowTraversal) {
+        if (includeShadowDom && optInShadowTraversal) {
           // if we're told explicitly to ignore shadow boundaries,
           // use the replacement traversal function if one exists
           // so we can cross boundaries
