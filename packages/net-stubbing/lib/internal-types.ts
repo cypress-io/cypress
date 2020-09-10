@@ -10,7 +10,7 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string, number> & {
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string> & {
   // Millisecond timestamp for when the response should continue
   continueResponseAt?: number
 }
