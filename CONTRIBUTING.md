@@ -613,3 +613,17 @@ We will try to review and merge pull requests quickly. After merging we will try
 ### ENFILE or EMFILE
 
 If you get `ENFILE: file table overflow`, `ENFILE: too many open files` or any other `ENFILE` or `EMFILE` errors on Mac, that means you are doing synchronous file system operations. Cypress should **NEVER** do them. Instead we should use async file system operations and let `graceful-fs` retry them. Find the place where the synchronous `fs` operation is done from the stacktrace and make it async.
+
+### lock file
+
+You can rebuild the lock file using the latest `develop` version in a clean isolated environment using Docker. From the current branch:
+
+```shell
+git checkout develop
+git pull
+git checkout -
+git checkout origin/develop -- yarn.lock
+# remove all unknown files
+git clean -xfd
+yarn
+```

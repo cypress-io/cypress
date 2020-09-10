@@ -98,7 +98,7 @@
     "@types/node": "12.12.50",
     "@types/prismjs": "1.16.0",
     "@types/ramda": "0.25.47",
-    "@types/react": "16.9.49",
+    "@types/react": "16.9.42",
     "@types/react-dom": "16.9.8",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
