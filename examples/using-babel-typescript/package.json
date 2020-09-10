@@ -1,0 +1,12 @@
+{
+  "name": "example-using-babel",
+  "description": "Component testing for projects using Babel config",
+  "private": true,
+  "scripts": {
+    "test": "node ../../scripts/cypress-expect run --passing 17",
+    "cy:open": "../../node_modules/.bin/cypress open"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}

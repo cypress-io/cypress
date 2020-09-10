@@ -4,6 +4,16 @@ const debug = require('debug')('cypress-react-unit-test')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const { addImageRedirect } = require('../utils/add-image-redirect')
 
+const wpPreprocessorOptions = {
+  ...webpackPreprocessor.defaultOptions,
+}
+
+wpPreprocessorOptions.webpackOptions.resolve = {
+  extensions: ['.js', '.ts', '.jsx', '.tsx', '.json'],
+}
+
+wpPreprocessorOptions.webpackOptions.module.rules[0].test = /\.(jsx|tsx|js|ts)?$/
+
 // note: modifies the input object
 function enableBabelrc(webpackOptions) {
   if (!Array.isArray(webpackOptions.module.rules)) {
@@ -66,7 +76,6 @@ module.exports = config => {
     config && config.env && config.env.coverage === false
   debug('coverage is disabled? %o', { coverageIsDisabled })
 
-  const wpPreprocessorOptions = webpackPreprocessor.defaultOptions
   enableBabelrc(wpPreprocessorOptions.webpackOptions)
   debug('webpack options %o', wpPreprocessorOptions.webpackOptions)
 

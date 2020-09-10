@@ -70,6 +70,19 @@ workflows:
           store_artifacts: true
 
       - cypress/run:
+          name: Example Babel + Typescript
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/using-babel-typesceript
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Example React Scripts
           requires:
             - Install
