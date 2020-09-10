@@ -1478,6 +1478,13 @@ module.exports = {
     },
   },
 
+  shadow: {
+    no_shadow_root: {
+      message: 'Expected the subject to host a shadow root, but never found it.',
+      docsUrl: 'https://on.cypress.io/shadow',
+    },
+  },
+
   should: {
     chainer_not_found: 'The chainer `{{chainer}}` was not found. Could not build assertion.',
     language_chainer: {
