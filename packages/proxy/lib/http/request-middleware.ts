@@ -103,7 +103,7 @@ const SendRequestOutgoing: RequestMiddleware = function () {
   const requestOptions = {
     timeout: this.req.responseTimeout,
     strictSSL: false,
-    followRedirect: false,
+    followRedirect: this.req.followRedirect || false,
     retryIntervals: [0, 100, 200, 200],
     url: this.req.proxiedUrl,
   }

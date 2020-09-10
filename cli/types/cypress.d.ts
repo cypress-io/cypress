@@ -518,7 +518,7 @@ declare namespace Cypress {
     off: Actions
   }
 
-  type CanReturnChainable = void | Chainable
+  type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
     R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :

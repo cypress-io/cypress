@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
+const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
 const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
@@ -281,7 +282,7 @@ module.exports = (Commands, Cypress, cy, state) => {
           let scope = options.withinSubject
 
           if (options.includeShadowDom) {
-            const root = options.withinSubject || cy.state('document')
+            const root = options.withinSubject ? options.withinSubject[0] : cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
             scope = elementsWithShadow.concat(root)
@@ -396,7 +397,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       // we'll null out the subject so it will show up as a parent
       // command since its behavior is identical to using it
       // as a parent command: cy.contains()
-      if (subject && !$dom.isElement(subject)) {
+      // don't nuke if subject is a shadow root, is a document not an element
+      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
         subject = null
       }
 
@@ -535,7 +537,7 @@ module.exports = (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.addAll({ prevSubject: 'element' }, {
+  Commands.addAll({ prevSubject: ['element', 'document'] }, {
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
