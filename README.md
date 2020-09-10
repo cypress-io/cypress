@@ -365,7 +365,7 @@ Currently, this project cannot find Webpack settings used by Gatsby.js, thus it 
 
 ## Chat
 
-We have a chat workspace at [https://component-testing.slack.com/](https://component-testing.slack.com/), you are welcome to [join us](https://join.slack.com/t/component-testing/shared_invite/zt-g4k6sget-oj2wlswjNTb38s0n7kql1A).
+We have a chat workspace at [https://component-testing.slack.com/](https://component-testing.slack.com/), you are welcome to [join us](https://join.slack.com/t/component-testing/shared_invite/zt-h93lrgsl-8WzE8yNQlcZuZji_gA_mtg).
 
 ## Development
 
