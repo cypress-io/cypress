@@ -447,7 +447,7 @@ jobs:
           name: install and build
           command: |
             . ./scripts/load-nvm.sh
-            yarn --frozen-lockfile || yarn --frozen-lockfile
+            NODE_ENV=production yarn --frozen-lockfile || NODE_ENV=production yarn --frozen-lockfile
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
