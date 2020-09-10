@@ -762,6 +762,7 @@ describe('src/cy/commands/actions/click', () => {
       cy.get('#table tr:first').click()
     })
 
+    // https://github.com/cypress-io/cypress/issues/7721
     describe('caret position', () => {
       describe('end - default', () => {
         it('input', () => {
