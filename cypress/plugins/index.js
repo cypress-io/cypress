@@ -5,6 +5,7 @@ const babelConfig = require('../../babel.config.js')
 // should we just reuse root webpack config?
 const webpackOptions = {
   resolve: {
+    extensions: ['.js', '.ts', '.jsx', '.tsx'],
     alias: {
       react: path.resolve('./node_modules/react'),
     },
