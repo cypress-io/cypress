@@ -886,7 +886,7 @@ describe('src/cy/commands/actions/click', () => {
       })
 
       // caretPositionFromPoint doesn't work on headless mode on Firefox.
-      if (Cypress.isBrowser('chrome') || Cypress.config('isInteractive', true)) {
+      if (Cypress.isBrowser('chrome')) {
         describe('point', () => {
           it('[contenteditable]', () => {
             cy.get('[contenteditable]:first')
