@@ -27,23 +27,6 @@ workflows:
                 command: npm run build
 
       - cypress/run:
-          name: Lint Markdown links
-          filters:
-            branches:
-              only: main
-          executor: cypress/base-12
-          requires:
-            - Install
-          # notice a trick to avoid re-installing dependencies
-          # in this job - a do-nothing "install-command" parameter
-          install-command: echo 'Nothing to install in this job'
-          # we are not going to use results from this job anywhere else
-          no-workspace: true
-          record: false
-          store_artifacts: true
-          command: npm run check:links
-
-      - cypress/run:
           name: Example A11y
           requires:
             - Install
@@ -323,7 +306,6 @@ workflows:
           requires:
             - Install
             - Component Tests
-            - Lint Markdown links
             - Example A11y
             - Example Babel
             - Example Component Folder
