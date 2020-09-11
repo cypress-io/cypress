@@ -290,10 +290,15 @@ function createCypress (defaultOptions = {}) {
   }
 
   const createVerifyTest = (modifier) => {
-    return (title, props) => {
+    return (title, opts, props) => {
+      if (!props) {
+        props = opts
+        opts = null
+      }
+
       const verifyFn = props.verifyFn || verifyFailure
 
-  ;(modifier ? it[modifier] : it)(title, () => {
+      const args = _.compact([title, opts, () => {
         return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
           onBeforeRun ({ specWindow, win, autCypress }) {
             specWindow.testToRun = title
@@ -308,10 +313,11 @@ function createCypress (defaultOptions = {}) {
         .then(({ win }) => {
           props.codeFrameText = props.codeFrameText || title
           props.win = win
-
           verifyFn(props)
         })
-      })
+      }])
+
+  ;(modifier ? it[modifier] : it)(...args)
     }
   }
 
