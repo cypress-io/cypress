@@ -471,6 +471,7 @@ jobs:
           name: Linting 🧹
           command: |
             . ./scripts/load-nvm.sh
+            git clean -df
             yarn lint
       - run:
           name: cypress info (dev)
