@@ -110,3 +110,27 @@ describe "visits", ->
 
           expect(headers.accept).to.eq("text/html,*/*")
           expect(headers.host).to.eq("localhost:3434")
+
+  # https://github.com/cypress-io/cypress/issues/8544
+  context "can be redirected from initial POST", ->
+    it "with status code 307", ->
+      # 307 is slightly different, the request method must not change
+      cy.visit({
+        url: "http://localhost:3434/redirect-post?code",
+        qs: {
+          code: 307
+        },
+        method: 'POST'
+      })
+      .contains('it posted')
+
+    [301, 302, 303, 308].forEach (code) ->
+      it "with status code #{code}", ->
+        cy.visit({
+          url: "http://localhost:3434/redirect-post?code",
+          qs: {
+            code
+          },
+          method: 'POST'
+        })
+        .contains('timeout: 0')
