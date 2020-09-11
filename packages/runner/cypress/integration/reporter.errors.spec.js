@@ -551,7 +551,7 @@ describe('errors ui', () => {
     const file = 'docs_url_spec.js'
     const docsUrl = 'https://on.cypress.io/viewport'
 
-    verify.it('displays as button in interactive mode', {
+    verify.it('displays as button in interactive mode', { retries: 1 }, {
       file,
       verifyFn () {
         cy

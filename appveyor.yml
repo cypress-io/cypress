@@ -65,6 +65,7 @@ install:
   # clean cache to prevent install permission issues
   - yarn cache clean
   - yarn --frozen-lockfile || yarn --frozen-lockfile || yarn --frozen-lockfile
+  - yarn build-prod
   - .\node_modules\.bin\print-arch
 
 # Post-install test scripts.
