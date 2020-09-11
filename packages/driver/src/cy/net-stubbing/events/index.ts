@@ -38,6 +38,10 @@ export function registerEvents (Cypress: Cypress.Cypress) {
   function emitNetEvent (eventName: string, frame: any): Promise<void> {
     // all messages from driver to server are wrapped in backend:request
     return Cypress.backend('net', eventName, frame)
+    .catch((err) => {
+      err.message = `An error was thrown while processing a network event: ${err.message}`
+      failCurrentTest(err)
+    })
   }
 
   function failCurrentTest (err: Error) {
