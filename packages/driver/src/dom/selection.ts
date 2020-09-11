@@ -30,6 +30,13 @@ const _getSelectionBoundsFromInput = function (el) {
     }
   }
 
+  if (el.type === 'number') {
+    return {
+      start: el.value.length,
+      end: el.value.length,
+    }
+  }
+
   return {
     start: 0,
     end: 0,
