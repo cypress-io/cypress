@@ -4,6 +4,7 @@ const babelConfig = require('./babel.config')
 const BUILD_DIR = path.resolve(__dirname, 'public')
 const APP_DIR = path.resolve(__dirname, 'src')
 
+/** @type import("webpack").Configuration */
 const config = {
   entry: APP_DIR + '/index.jsx',
   output: {

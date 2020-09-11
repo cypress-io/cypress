@@ -113,7 +113,7 @@
     "tailwindcss": "1.4.6",
     "typescript": "3.9.7",
     "victory": "34.3.6",
-    "webpack": "4.33.0",
+    "webpack": "4.44.1",
     "webpack-cli": "3.3.9"
   },
   "standard": {

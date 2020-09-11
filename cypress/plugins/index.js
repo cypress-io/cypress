@@ -2,7 +2,7 @@ const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const babelConfig = require('../../babel.config.js')
 
-// should we just reuse root webpack config?
+/** @type import("webpack").Configuration */
 const webpackOptions = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
@@ -12,6 +12,10 @@ const webpackOptions = {
   },
   mode: 'development',
   devtool: false,
+  output: {
+    publicPath: '/',
+    chunkFilename: '[name].bundle.js',
+  },
   module: {
     rules: [
       {
@@ -28,6 +32,15 @@ const webpackOptions = {
         // some of our examples import SVG
         test: /\.svg$/,
         loader: 'svg-url-loader',
+      },
+      {
+        // some of our examples import SVG
+        test: /\.svg$/,
+        loader: 'svg-url-loader',
+      },
+      {
+        test: /\.(png|jpg)$/,
+        use: ['file-loader'],
       },
     ],
   },
