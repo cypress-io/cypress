@@ -27,6 +27,7 @@ const registerTsNode = (projectRoot, pluginsFile) => {
     debug('typescript path: %s', tsPath)
     debug('registering project TS with options %o', tsOptions)
 
+    require('tsconfig-paths/register')
     tsnode.register(tsOptions)
   } catch (err) {
     debug(`typescript doesn't exist. ts-node setup failed.`)

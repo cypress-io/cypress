@@ -2,7 +2,9 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
+const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
+const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
 module.exports = (Commands, Cypress, cy, state) => {
   Commands.addAll({
@@ -85,9 +87,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         verify: true,
       })
 
-      if (!Cypress.config('experimentalShadowDomSupport')) {
-        options.includeShadowDom = false
-      }
+      options.includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
 
       let aliasObj
       const consoleProps = {}
@@ -282,7 +282,7 @@ module.exports = (Commands, Cypress, cy, state) => {
           let scope = options.withinSubject
 
           if (options.includeShadowDom) {
-            const root = options.withinSubject || cy.state('document')
+            const root = options.withinSubject ? options.withinSubject[0] : cy.state('document')
             const elementsWithShadow = $dom.findAllShadowRoots(root)
 
             scope = elementsWithShadow.concat(root)
@@ -397,7 +397,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       // we'll null out the subject so it will show up as a parent
       // command since its behavior is identical to using it
       // as a parent command: cy.contains()
-      if (subject && !$dom.isElement(subject)) {
+      // don't nuke if subject is a shadow root, is a document not an element
+      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
         subject = null
       }
 
@@ -536,7 +537,7 @@ module.exports = (Commands, Cypress, cy, state) => {
     },
   })
 
-  Commands.addAll({ prevSubject: 'element' }, {
+  Commands.addAll({ prevSubject: ['element', 'document'] }, {
     within (subject, options, fn) {
       let userOptions = options
       const ctx = this
@@ -622,50 +623,58 @@ module.exports = (Commands, Cypress, cy, state) => {
     },
   })
 
-  if (Cypress.config('experimentalShadowDomSupport')) {
-    Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
-      const userOptions = options || {}
+  Commands.add('shadow', { prevSubject: 'element' }, (subject, options) => {
+    const userOptions = options || {}
 
-      options = _.defaults({}, userOptions, { log: true })
+    options = _.defaults({}, userOptions, { log: true })
 
-      const consoleProps = {
-        'Applied To': $dom.getElements(subject),
+    const consoleProps = {
+      'Applied To': $dom.getElements(subject),
+    }
+
+    if (options.log !== false) {
+      options._log = Cypress.log({
+        timeout: options.timeout,
+        consoleProps () {
+          return consoleProps
+        },
+      })
+    }
+
+    const setEl = ($el) => {
+      if (options.log === false) {
+        return
       }
 
-      if (options.log !== false) {
-        options._log = Cypress.log({
-          timeout: options.timeout,
-          consoleProps () {
-            return consoleProps
-          },
-        })
-      }
+      consoleProps.Yielded = $dom.getElements($el)
+      consoleProps.Elements = $el?.length
 
-      const setEl = ($el) => {
-        if (options.log === false) {
-          return
-        }
+      return options._log.set({ $el })
+    }
 
-        consoleProps.Yielded = $dom.getElements($el)
-        consoleProps.Elements = $el?.length
+    const getShadowRoots = () => {
+      // find all shadow roots of the subject(s), if any exist
+      const $el = subject
+      .map((i, node) => node.shadowRoot)
+      .filter((i, node) => node !== undefined && node !== null)
 
-        return options._log.set({ $el })
-      }
+      setEl($el)
 
-      const getShadowRoots = () => {
-        // find all shadow roots of the subject(s), if any exist
-        const $el = subject
-        .map((i, node) => node.shadowRoot)
-        .filter((i, node) => node !== undefined && node !== null)
+      return cy.verifyUpcomingAssertions($el, options, {
+        onRetry: getShadowRoots,
+        onFail (err) {
+          if (err.type !== 'existence') {
+            return
+          }
 
-        setEl($el)
+          const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
 
-        return cy.verifyUpcomingAssertions($el, options, {
-          onRetry: getShadowRoots,
-        })
-      }
+          err.message = message
+          err.docsUrl = docsUrl
+        },
+      })
+    }
 
-      return getShadowRoots()
-    })
-  }
+    return getShadowRoots()
+  })
 }

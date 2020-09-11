@@ -8,9 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v5.0-release
-        - install-node-on-circleci-mac
-        - stop-before-code-sign
+        - remove-old-binary-file
 
 defaults: &defaults
   parallelism: 1
@@ -549,7 +547,7 @@ jobs:
       # run unit tests from each individual package
       - run: yarn test
       - verify-mocha-results:
-          expectedResultCount: 8
+          expectedResultCount: 9
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output

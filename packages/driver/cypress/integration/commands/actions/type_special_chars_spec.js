@@ -40,6 +40,40 @@ describe('src/cy/commands/actions/type - #type special chars', () => {
     cy.visit('/fixtures/dom.html')
   })
 
+  // https://github.com/cypress-io/cypress/issues/5502
+  describe('moves the cursor from in-between to the start or the end', () => {
+    it('input', () => {
+      cy.get('input:first')
+      .type('123{moveToStart}456{moveToEnd}789')
+      .should('have.value', '456123789')
+    })
+
+    describe('contenteditable', () => {
+      it('basic tests', () => {
+        cy.get('[contenteditable]:first')
+        .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
+        .then(($div) => {
+          expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789\nabcghi')
+        })
+      })
+
+      it('bare text in front and back of an element', () => {
+        cy.get('[contenteditable]:first')
+        .invoke('html', '123<div>456</div>789')
+        .type('abc{moveToStart}def{moveToEnd}ghi')
+        .then(($div) => {
+          expect($div.get(0).innerText.trim()).to.eql('def123\n456\n789abcghi')
+        })
+      })
+    })
+
+    it('textarea', () => {
+      cy.get('textarea:first')
+      .type('123{enter}456{enter}789{enter}abc{moveToStart}def{moveToEnd}ghi')
+      .should('have.value', 'def123\n456\n789\nabcghi')
+    })
+  })
+
   context('parseSpecialCharSequences: false', () => {
     it('types special character sequences literally', (done) => {
       cy.get(':text:first').invoke('val', 'foo')

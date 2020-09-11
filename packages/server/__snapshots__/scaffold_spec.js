@@ -100,6 +100,46 @@ exports['lib/scaffold .fileTree returns tree-like structure of scaffolded 1'] = 
   }
 ]
 
+exports['lib/scaffold .fileTree leaves out integration tests if using component testing 1'] = [
+  {
+    "name": "tests",
+    "children": [
+      {
+        "name": "_fixtures",
+        "children": [
+          {
+            "name": "example.json"
+          }
+        ]
+      },
+      {
+        "name": "_support",
+        "children": [
+          {
+            "name": "commands.js"
+          },
+          {
+            "name": "index.js"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "cypress",
+    "children": [
+      {
+        "name": "plugins",
+        "children": [
+          {
+            "name": "index.js"
+          }
+        ]
+      }
+    ]
+  }
+]
+
 exports['lib/scaffold .fileTree leaves out fixtures if configured to false 1'] = [
   {
     "name": "tests",

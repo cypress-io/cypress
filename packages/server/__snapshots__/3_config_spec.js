@@ -1,4 +1,4 @@
-exports['e2e config passes 1'] = `
+exports['e2e config provides various environment details 1'] = `
 
 ====================================================================================================
 
@@ -65,7 +65,7 @@ exports['e2e config passes 1'] = `
 
 `
 
-exports['e2e config fails 1'] = `
+exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
 ====================================================================================================
 
@@ -74,24 +74,23 @@ exports['e2e config fails 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_failing_spec.coffee                                     │
+  │ Specs:      1 found (dom_times_out_spec.js)                                                    │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  config_failing_spec.coffee                                                      (1 of 1)
+  Running:  dom_times_out_spec.js                                                           (1 of 1)
 
 
-  config
+  short defaultCommandTimeout
     1) times out looking for a missing element
 
 
   0 passing
   1 failing
 
-  1) config
+  1) short defaultCommandTimeout
        times out looking for a missing element:
      AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
       [stack trace lines]
@@ -110,20 +109,20 @@ exports['e2e config fails 1'] = `
   │ Screenshots:  1                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     config_failing_spec.coffee                                                       │
+  │ Spec Ran:     dom_times_out_spec.js                                                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/config_failing_spec.coffee/config -- times out      (1280x720)
-     looking for a missing element (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/dom_times_out_spec.js/short defaultCommandTimeo     (1280x720)
+     ut -- times out looking for a missing element (failed).png                                     
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_failing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/dom_times_out_spec.js.mp4           (X second)
 
 
 ====================================================================================================
@@ -133,21 +132,21 @@ exports['e2e config fails 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  config_failing_spec.coffee               XX:XX        1        -        1        -        - │
+  │ ✖  dom_times_out_spec.js                    XX:XX        1        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        1        -        1        -        -  
 
 
 `
 
-exports['e2e config catches invalid viewportWidth in the configuration file 1'] = `
+exports['e2e config throws error when invalid viewportWidth in the configuration file 1'] = `
 We found an invalid value in the file: \`cypress.json\`
 
 Expected \`viewportWidth\` to be a number. Instead the value was: \`"foo"\`
 
 `
 
-exports['e2e config catches invalid browser in the configuration file 1'] = `
+exports['e2e config throws error when invalid browser in the configuration file 1'] = `
 We found an invalid value in the file: \`cypress.json\`
 
 Found an error while validating the \`browsers\` list. Expected \`family\` to be either chromium or firefox. Instead the value was: \`{"name":"bad browser","family":"unknown family","displayName":"Bad browser","version":"no version","path":"/path/to","majorVersion":123}\`

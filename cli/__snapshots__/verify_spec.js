@@ -10,6 +10,8 @@ Reasons this may happen:
 
 Please check that you have the appropriate user permissions.
 
+You can also try clearing the cache with 'cypress cache clear' and reinstalling.
+
 ----------
 
 Platform: darwin (Foo-OsVersion)

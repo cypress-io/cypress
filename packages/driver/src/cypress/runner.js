@@ -131,6 +131,7 @@ const wrapAll = (runnable) => {
 }
 
 const condenseHooks = (runnable, getHookId) => {
+  runnable._condensedHooks = true
   const hooks = _.compact(_.concat(
     runnable._beforeAll,
     runnable._beforeEach,
