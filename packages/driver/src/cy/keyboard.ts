@@ -803,7 +803,7 @@ export class Keyboard {
     let eventConstructor = 'KeyboardEvent'
     let cancelable = true
     let addModifiers = true
-    let inputType = ''
+    let inputType: string | undefined
 
     switch (eventType) {
       case 'keydown':

@@ -643,6 +643,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           view: cy.state('window'),
           which: 65, // deprecated but fired by chrome
         })
+        .not.have.property('inputType')
 
         done()
       })
