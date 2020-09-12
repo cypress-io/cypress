@@ -83,7 +83,7 @@
     "cypress-plugin-snapshots": "1.4.4",
     "cypress-react-selector": "2.0.2",
     "date-fns": "2.13.0",
-    "happo-cypress": "1.9.0",
+    "happo-cypress": "1.9.1",
     "happo.io": "5.6.1",
     "husky": "3.1.0",
     "lint-staged": "9.5.0",
