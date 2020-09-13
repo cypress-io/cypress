@@ -91,3 +91,11 @@ Then open Cypress with
 ## from repo root
 yarn workspace @packages/desktop-gui cypress:open
 ```
+
+### Component testing
+
+Using [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test) you can run some of the component tests in this project. You MUST run from the root of the repo using absolute path, no need to start the server.
+
+```bash
+yarn dev --project ~/git/cypress/packages/desktop-gui/
+```

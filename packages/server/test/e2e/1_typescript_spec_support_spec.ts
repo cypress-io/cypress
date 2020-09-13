@@ -29,6 +29,9 @@ describe('e2e typescript in spec and support file', function () {
     })
   })
 
+  // this covers spec/support files as well as the plugins file
+  // @see https://github.com/cypress-io/cypress/issues/7006
+  // @see https://github.com/cypress-io/cypress/issues/8555
   it('respects tsconfig paths', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('ts-proj-with-paths'),
