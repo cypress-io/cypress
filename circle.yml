@@ -396,7 +396,7 @@ commands:
       - run: git branch
       - run:
           name: checking if develop branch or changed files in << parameters.pattern >>
-          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
+          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base origin/develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
 jobs:
   ## code checkout and yarn installs
