@@ -139,6 +139,7 @@ Spec | Description
 [stateless-spec.js](cypress/component/basic/stateless-spec.js) | Passes Cypress stub to the component, confirms the component calls it on click
 [window-spec.js](cypress/component/basic/window-spec.js) | In the component test, the spec `window` and the application's `window` where the component is running should be the same object
 [css](cypress/component/basic/css) | Shows that component with `import './Button.css'` works
+[css modules](cypress/component/basic/css-modules) | Shows that component that using css modules styles works
 [network](cypress/component/basic/network) | Confirms we can use `cy.route` to stub / spy on component's network calls
 [no-visit](cypress/component/basic/no-visit) | Component specs cannot call `cy.visit`
 [react-book-by-chris-noring](cypress/component/basic/react-book-by-chris-noring) | Copied test examples from [React Book](https://softchris.github.io/books/react) and adapted for Cypress component tests

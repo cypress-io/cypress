@@ -24,8 +24,21 @@ const webpackOptions = {
         options: babelConfig,
       },
       {
-        test: /\.css$/,
+        test: /\.modules\.css$/i,
         exclude: [/node_modules/],
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.css$/,
+        exclude: [/node_modules/, /\.modules\.css$/i],
         use: ['style-loader', 'css-loader'],
       },
       {
