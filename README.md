@@ -655,6 +655,8 @@ If you want to disable code coverage instrumentation and reporting, use `--env c
 }
 ```
 
+**Note ⚠️:** if the component `.vue` file does not have a `<script>` section, it will not have any code coverage information.
+
 <a name="#development"/>
 
 ## Development
