@@ -2,6 +2,7 @@ const _ = require('lodash')
 const Promise = require('bluebird')
 
 const $dom = require('../../dom')
+const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
 
 module.exports = (Commands, Cypress, cy, state) => {
@@ -397,7 +398,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       // we'll null out the subject so it will show up as a parent
       // command since its behavior is identical to using it
       // as a parent command: cy.contains()
-      if (subject && !$dom.isElement(subject)) {
+      // don't nuke if subject is a shadow root, is a document not an element
+      if (subject && !$dom.isElement(subject) && !$elements.isShadowRoot(subject[0])) {
         subject = null
       }
 
@@ -662,6 +664,16 @@ module.exports = (Commands, Cypress, cy, state) => {
 
         return cy.verifyUpcomingAssertions($el, options, {
           onRetry: getShadowRoots,
+          onFail (err) {
+            if (err.type !== 'existence') {
+              return
+            }
+
+            const { message, docsUrl } = $errUtils.cypressErrByPath('shadow.no_shadow_root')
+
+            err.message = message
+            err.docsUrl = docsUrl
+          },
         })
       }
 

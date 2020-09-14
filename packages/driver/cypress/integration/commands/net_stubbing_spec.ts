@@ -881,6 +881,7 @@ describe('network stubbing', function () {
 
       it('can timeout in request handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
@@ -1357,6 +1358,7 @@ describe('network stubbing', function () {
 
       it('can timeout in req.reply handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)

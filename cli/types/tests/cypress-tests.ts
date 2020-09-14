@@ -76,6 +76,9 @@ namespace CypressCommandsTests {
   Cypress.Commands.add('newCommand', { prevSubject: true }, () => {
     return
   })
+  Cypress.Commands.add('newCommand', () => {
+    return new Promise((resolve) => {})
+  })
   Cypress.Commands.overwrite('newCommand', () => {
     return
   })
