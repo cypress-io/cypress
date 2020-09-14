@@ -1759,7 +1759,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction warnings create run warnings grace period - over tests limit warns when over test recordings 1'] = `
 You've exceeded the limit of test recordings under your free plan this month. The limit is 500 test recordings.
 
-Your plan is now in a grace period, which means you will have the full benefits of your current plan until 2999-12-31. 
+Your plan is now in a grace period, which means you will have the full benefits of your current plan until 2999-12-31.
 
 Please visit your billing to upgrade your plan.
 

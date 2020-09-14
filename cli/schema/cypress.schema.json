@@ -239,11 +239,6 @@
       "default": false,
       "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
     },
-    "experimentalShadowDomSupport": {
-      "type": "boolean",
-      "default": false,
-      "description": "Enables shadow DOM support. Adds the `cy.shadow()` command and the `ignoreShadowBoundaries` option to some DOM commands."
-    },
     "experimentalFetchPolyfill": {
       "type": "boolean",
       "default": false,
@@ -260,6 +255,11 @@
         "openMode": 0
       },
       "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
+    },
+    "includeShadowDom": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
     }
   }
 }

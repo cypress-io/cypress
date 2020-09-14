@@ -35,16 +35,22 @@ exports['e2e visit / low response timeout / passes'] = `
       ✓ passes
     issue #309: request accept header not set
       ✓ sets accept header to text/html,*/*
+    can be redirected from initial POST
+      ✓ with status code 307
+      ✓ with status code 301
+      ✓ with status code 302
+      ✓ with status code 303
+      ✓ with status code 308
 
 
-  13 passing
+  18 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        13                                                                               │
-  │ Passing:      13                                                                               │
+  │ Tests:        18                                                                               │
+  │ Passing:      18                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -68,9 +74,9 @@ exports['e2e visit / low response timeout / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  visit_spec.coffee                        XX:XX       13       13        -        -        - │
+  │ ✔  visit_spec.coffee                        XX:XX       18       18        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX       13       13        -        -        -  
+    ✔  All specs passed!                        XX:XX       18       18        -        -        -  
 
 
 `

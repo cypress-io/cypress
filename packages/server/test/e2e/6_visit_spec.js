@@ -82,7 +82,7 @@ const onServer = function (app) {
   })
 
   // https://github.com/cypress-io/cypress/issues/5602
-  return app.get('/invalid-header-char', (req, res) => {
+  app.get('/invalid-header-char', (req, res) => {
     // express/node may interfere if we just use res.setHeader
     res.connection.write(
       `\
@@ -95,6 +95,23 @@ foo\
     )
 
     return res.connection.end()
+  })
+
+  app.post('/redirect-post', (req, res) => {
+    const code = Number(req.query.code)
+
+    if (!code) {
+      return res.end('no code supplied')
+    }
+
+    // 307 keeps the same HTTP method
+    const url = code === 307 ? '/post-only' : '/timeout'
+
+    res.redirect(code, url)
+  })
+
+  app.post('/post-only', (req, res) => {
+    res.end('<html>it posted</html>')
   })
 }
 
