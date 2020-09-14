@@ -186,6 +186,7 @@ Spec | Description
 [select React component](cypress/component/advanced/react-book-example/src/components/ProductsList.spec.js) | Uses [cypress-react-selector](https://github.com/abhinaba-ghosh/cypress-react-selector) to find DOM elements using React component name and state values
 [lazy-loaded](cypress/component/advanced/lazy-loaded-suspense) | Uses multiple chunks and async components with `React.lazy` + `React.Suspense`.
 [i18n](cypress/component/advanced/i18n) | Uses[react-i18next](https://react.i18next.com/) for localizaiton.
+[framer-motion](cypress/component/advanced/framer-motion) | Uses [framer motion](https://www.framer.com/motion/) for javascript-based animation.
 <!-- prettier-ignore-end -->
 
 ### Full examples

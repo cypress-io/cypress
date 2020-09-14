@@ -134,6 +134,7 @@
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
     "find-webpack": "2.0.0",
+    "framer-motion": "2.6.13",
     "i18next": "19.7.0",
     "mime-types": "2.1.26",
     "react-i18next": "11.7.2",

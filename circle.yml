@@ -61,7 +61,7 @@ workflows:
           install-command: npm install
           verify-command: echo 'Already verified'
           no-workspace: true
-          working_directory: examples/using-babel-typesceript
+          working_directory: examples/using-babel-typescript
           command: npm test
           store_artifacts: true
 

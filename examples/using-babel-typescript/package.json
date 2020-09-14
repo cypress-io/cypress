@@ -1,9 +1,9 @@
 {
-  "name": "example-using-babel",
-  "description": "Component testing for projects using Babel config",
+  "name": "example-using-babel-typescript",
+  "description": "Component testing for TypeScript projects using Babel config",
   "private": true,
   "scripts": {
-    "test": "node ../../scripts/cypress-expect run --passing 17",
+    "test": "node ../../scripts/cypress-expect run --passing 1",
     "cy:open": "../../node_modules/.bin/cypress open"
   },
   "devDependencies": {
