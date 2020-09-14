@@ -199,11 +199,6 @@ const parseLine = (line) => {
 }
 
 const stripCustomProtocol = (filePath) => {
-  // sometimes stack frames won't include a filepath
-  if (!filePath) {
-    return ''
-  }
-
   return filePath.replace(customProtocolRegex, '')
 }
 
