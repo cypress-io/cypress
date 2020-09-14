@@ -1,10 +1,10 @@
 declare namespace Cypress {
   type FileContents = string | any[] | object
-  type HistoryDirection = "back" | "forward"
+  type HistoryDirection = 'back' | 'forward'
   type HttpMethod = string
   type RequestBody = string | object
-  type ViewportOrientation = "portrait" | "landscape"
-  type PrevSubject = "optional" | "element" | "document" | "window"
+  type ViewportOrientation = 'portrait' | 'landscape'
+  type PrevSubject = 'optional' | 'element' | 'document' | 'window'
   type PluginConfig = (on: PluginEvents, config: PluginConfigOptions) => void | ConfigOptions | Promise<ConfigOptions>
 
   interface CommandOptions {
@@ -114,7 +114,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/experiments
    */
-  type CypressSpecType = "integration" | "component"
+  type CypressSpecType = 'integration' | 'component'
 
   /**
    * Window type for Application Under Test(AUT)
@@ -413,7 +413,7 @@ declare namespace Cypress {
        * Returns a boolean indicating whether an object is a DOM object.
        */
       isDom(obj: any): boolean
-      isType(element: JQuery | HTMLElement , type: string): boolean
+      isType(element: JQuery | HTMLElement, type: string): boolean
       /**
        * Returns a boolean indicating whether an element is visible.
        */
@@ -518,7 +518,7 @@ declare namespace Cypress {
     off: Actions
   }
 
-  type CanReturnChainable = void | Chainable
+  type CanReturnChainable = void | Chainable | Promise<unknown>
   type ThenReturn<S, R> =
     R extends void ? Chainable<S> :
     R extends R | undefined ? Chainable<S | Exclude<R, undefined>> :
@@ -1607,15 +1607,12 @@ declare namespace Cypress {
 
     /**
      * Traverse into an element's shadow root.
-     * Requires `experimentalShadowDomSupport: true` config option
      *
-    @example
-    ```js
-    cy.get('.top-level > my-component')
-      .shadow()
-      .find('.my-button')
-      .click()
-    ```
+     * @example
+     *    cy.get('my-component')
+     *    .shadow()
+     *    .find('.my-button')
+     *    .click()
      * @see https://on.cypress.io/experimental
      */
     shadow(): Chainable<Subject>
@@ -2302,7 +2299,7 @@ declare namespace Cypress {
      * @default {@link Timeoutable#timeout}
      * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
      */
-    requestTimeout: number,
+    requestTimeout: number
     /**
      * Time to wait for the response (ms)
      *
@@ -2485,7 +2482,7 @@ declare namespace Cypress {
      * If set to `system`, Cypress will try to find a `node` executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress.
      * @default "bundled"
      */
-    nodeVersion: "system" | "bundled"
+    nodeVersion: 'system' | 'bundled'
     /**
      * Path to plugins file. (Pass false to disable)
      * @default "cypress/plugins/index.js"
@@ -2585,21 +2582,23 @@ declare namespace Cypress {
      */
     experimentalNetworkStubbing: boolean
     /**
-     * Enables shadow DOM support. Adds the `cy.shadow()` command and
-     * the `includeShadowDom` option to some DOM commands.
-     * @default false
-     */
-    experimentalShadowDomSupport: boolean
-    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
     retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
+    /**
+     * Enables including elements within the shadow DOM when using querying
+     * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
+     * per-suite or per-test in the test configuration object, or programmatically
+     * with Cypress.config()
+     * @default false
+     */
+    includeShadowDom: boolean
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries' | 'includeShadowDom'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
@@ -2699,18 +2698,18 @@ declare namespace Cypress {
     scale: boolean
     onBeforeScreenshot: ($el: JQuery) => void
     onAfterScreenshot: ($el: JQuery, props: {
-      path: string,
-      size: number,
+      path: string
+      size: number
       dimensions: {
-        width: number,
+        width: number
         height: number
-      },
-      multipart: boolean,
-      pixelRatio: number,
-      takenAt: string,
-      name: string,
-      blackout: string[],
-      duration: number,
+      }
+      multipart: boolean
+      pixelRatio: number
+      takenAt: string
+      name: string
+      blackout: string[]
+      duration: number
       testAttemptIndex: number
     }) => void
   }
@@ -2731,13 +2730,13 @@ declare namespace Cypress {
      *
      * @default 'swing'
      */
-    easing: 'swing' | 'linear',
+    easing: 'swing' | 'linear'
     /**
      * Ensure element is scrollable. Error if element is not scrollable
      *
      * @default true
      */
-    ensureScrollable: boolean,
+    ensureScrollable: boolean
   }
 
   interface ScrollIntoViewOptions extends ScrollToOptions {
@@ -2784,6 +2783,10 @@ declare namespace Cypress {
     httpOnly: boolean
     expiry: number
     sameSite: SameSiteStatus
+  }
+
+  interface ShadowDomOptions {
+    includeShadowDom?: boolean
   }
 
   /**
@@ -4948,9 +4951,9 @@ declare namespace Cypress {
   }
 
   interface BrowserLaunchOptions {
-    extensions: string[],
+    extensions: string[]
     preferences: { [key: string]: any }
-    args: string[],
+    args: string[]
   }
 
   interface Dimensions {
@@ -5291,10 +5294,10 @@ declare namespace Cypress {
   }
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
-  type PositionType = "topLeft" | "top" | "topRight" | "left" | "center" | "right" | "bottomLeft" | "bottom" | "bottomRight"
+  type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
   type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
-    top: number,
+    top: number
     left: number
   }
 
@@ -5382,6 +5385,6 @@ declare namespace Mocha {
   }
 
   interface PendingSuiteFunction {
-    (title: string,  config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
+    (title: string, config: Cypress.TestConfigOverrides, fn: (this: Suite) => void): Suite | void
   }
 }

@@ -670,6 +670,31 @@ describe('network stubbing', function () {
       cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
     })
 
+    it('can delay and throttle a StaticResponse', function (done) {
+      const payload = 'A'.repeat(10 * 1024)
+      const throttleKbps = 10
+      const delayMs = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+      cy.route2('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          statusCode: 200,
+          body: payload,
+          throttleKbps,
+          delayMs,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 100, 100)
+          expect(responseText).to.eq(payload)
+
+          done()
+        })
+      })
+    })
+
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
         cy.route2({
@@ -1117,7 +1142,7 @@ describe('network stubbing', function () {
       cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
     })
 
-    context('with StaticResponse shorthand', function () {
+    context('with StaticResponse', function () {
       it('res.send(body)', function () {
         cy.route2('/custom-headers', function (req) {
           req.reply((res) => {
@@ -1247,6 +1272,34 @@ describe('network stubbing', function () {
               statusText: 'error',
               readyState: 0,
             })
+
+            done()
+          })
+        })
+      })
+
+      it('can delay and throttle', function (done) {
+        const payload = 'A'.repeat(10 * 1024)
+        const throttleKbps = 50
+        const delayMs = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+        cy.route2('/timeout', (req) => {
+          req.reply((res) => {
+            this.start = Date.now()
+
+            // ensure .throttle and .delay are overridden
+            res.throttle(1e6).delay(1).send({
+              statusCode: 200,
+              body: payload,
+              throttleKbps,
+              delayMs,
+            })
+          })
+        }).then(() => {
+          return $.get('/timeout').then((responseText) => {
+            expect(responseText).to.eq(payload)
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
 
             done()
           })

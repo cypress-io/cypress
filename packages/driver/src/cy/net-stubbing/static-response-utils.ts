@@ -4,18 +4,18 @@ import {
   StaticResponse,
   BackendStaticResponse,
   FixtureOpts,
-  GenericStaticResponse,
 } from '@packages/net-stubbing/lib/types'
 import $errUtils from '../../cypress/error_utils'
 
-export const STATIC_RESPONSE_KEYS: (keyof GenericStaticResponse<void, void>)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError']
+// user-facing StaticResponse only
+export const STATIC_RESPONSE_KEYS: (keyof StaticResponse)[] = ['body', 'fixture', 'statusCode', 'headers', 'forceNetworkError', 'throttleKbps', 'delayMs']
 
 export function validateStaticResponse (cmd: string, staticResponse: StaticResponse): void {
   const err = (message) => {
     $errUtils.throwErrByPath('net_stubbing.invalid_static_response', { args: { cmd, message, staticResponse } })
   }
 
-  const { body, fixture, statusCode, headers, forceNetworkError } = staticResponse
+  const { body, fixture, statusCode, headers, forceNetworkError, throttleKbps, delayMs } = staticResponse
 
   if (forceNetworkError && (body || statusCode || headers)) {
     err('`forceNetworkError`, if passed, must be the only option in the StaticResponse.')
@@ -37,6 +37,14 @@ export function validateStaticResponse (cmd: string, staticResponse: StaticRespo
 
   if (headers && _.keys(_.omitBy(headers, _.isString)).length) {
     err('`headers` must be a map of strings to strings.')
+  }
+
+  if (!_.isUndefined(throttleKbps) && (!_.isNumber(throttleKbps) || (throttleKbps < 0 || !_.isFinite(throttleKbps)))) {
+    err('`throttleKbps` must be a finite, positive number.')
+  }
+
+  if (delayMs && (!_.isFinite(delayMs) || delayMs < 0)) {
+    err('`delayMs` must be a finite, positive number.')
   }
 }
 
@@ -80,7 +88,7 @@ function getFixtureOpts (fixture: string): FixtureOpts {
 }
 
 export function getBackendStaticResponse (staticResponse: Readonly<StaticResponse>): BackendStaticResponse {
-  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture')
+  const backendStaticResponse: BackendStaticResponse = _.omit(staticResponse, 'body', 'fixture', 'delayMs')
 
   if (staticResponse.fixture) {
     backendStaticResponse.fixture = getFixtureOpts(staticResponse.fixture)
@@ -93,6 +101,10 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
       backendStaticResponse.body = JSON.stringify(staticResponse.body)
       _.set(backendStaticResponse, 'headers.content-type', 'application/json')
     }
+  }
+
+  if (staticResponse.delayMs) {
+    backendStaticResponse.continueResponseAt = Date.now() + staticResponse.delayMs
   }
 
   return backendStaticResponse

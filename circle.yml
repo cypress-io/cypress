@@ -8,9 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v5.0-release
-        - install-node-on-circleci-mac
-        - stop-before-code-sign
+        - remove-old-binary-file
 
 defaults: &defaults
   parallelism: 1

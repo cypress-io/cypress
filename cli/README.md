@@ -29,7 +29,13 @@ yarn test-watch --scope cypress
 yarn test-debug --scope cypress
 ```
 
-This will take and compare snapshots of the CLI output. To update snapshots, see `snap-shot-it` instructions: https://github.com/bahmutov/snap-shot-it#advanced-use
+### Updating snaphots
+
+Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
+
+```bash
+SNAPSHOT_UPDATE=1 yarn test-unit --scope cypress
+```
 
 #### Type Linting
 
