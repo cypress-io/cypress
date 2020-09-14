@@ -1004,6 +1004,24 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
+  npm-webpack-preprocessor-build:
+    <<: *defaults
+    steps:
+      - check-changed-files:
+          path: "npm/webpack-preprocessor"
+      - run:
+          command: yarn build
+          working_directory: npm/webpack-preprocessor
+
+  npm-webpack-preprocessor-test-react:
+    <<: *defaults
+    steps:
+      - check-changed-files:
+          path: "npm/webpack-preprocessor"
+      - run:
+          command: yarn start
+          working_directory: npm/webpack-preprocessor/examples/react-app
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
@@ -1637,24 +1655,6 @@ jobs:
           command: DEBUG=cypress:cli $(yarn bin)/cypress run
       - store-npm-logs
 
-  npm-webpack-preprocessor-build:
-    <<: *defaults
-    steps:
-      - check-changed-files:
-          path: npm/webpack-preprocessor
-      - run:
-          command: yarn build
-          working_directory: npm/webpack-preprocessor
-
-  npm-webpack-preprocessor-test-react:
-    <<: *defaults
-    steps:
-      - check-changed-files:
-          path: npm/webpack-preprocessor
-      - run:
-          command: yarn start
-          working_directory: npm/webpack-preprocessor/examples/react-app
-
 linux-workflow: &linux-workflow
   jobs:
     - build
@@ -1797,6 +1797,15 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
+    - npm-webpack-preprocessor-build:
+        requires:
+          - build
+
+    - npm-webpack-preprocessor-test-react:
+        requires:
+          - build
+          - npm-webpack-preprocessor-build
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
