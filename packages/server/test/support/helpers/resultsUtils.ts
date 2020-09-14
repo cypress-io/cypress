@@ -53,8 +53,8 @@ const normalizeTestTimings = function (obj, timings) {
         // reset to 100
         return 100
       case 'test':
-        // ensure test fn duration is within 1500ms
-        expectDurationWithin(val, 'fnDuration', 0, 1500, 400)
+        // ensure test fn duration is within 2000ms
+        expectDurationWithin(val, 'fnDuration', 0, 2000, 400)
         // ensure test after fn duration is within 500ms
         expectDurationWithin(val, 'afterFnDuration', 0, 500, 200)
 
