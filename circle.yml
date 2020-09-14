@@ -392,7 +392,10 @@ commands:
       pattern:
         type: string
     steps:
-      - run: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
+      - checkout
+      - run:
+          name: checking if develop branch or changed files in << parameters.pattern >>
+          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
 jobs:
   ## code checkout and yarn installs
@@ -1012,6 +1015,7 @@ jobs:
       - run:
           command: yarn build
           working_directory: npm/webpack-preprocessor
+      - store-npm-logs
 
   npm-webpack-preprocessor-test-react:
     <<: *defaults
@@ -1021,6 +1025,7 @@ jobs:
       - run:
           command: yarn start
           working_directory: npm/webpack-preprocessor/examples/react-app
+      - store-npm-logs
 
   build-binary:
     <<: *defaults
@@ -1801,7 +1806,6 @@ linux-workflow: &linux-workflow
     - npm-webpack-preprocessor-build:
         requires:
           - build
-
     - npm-webpack-preprocessor-test-react:
         requires:
           - build
