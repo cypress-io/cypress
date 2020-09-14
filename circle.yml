@@ -395,6 +395,7 @@ commands:
         type: string
     steps:
       - checkout
+      - run: git branch
       - run:
           name: checking if develop branch or changed files in << parameters.pattern >>
           command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
@@ -1803,13 +1804,8 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
-    - npm-webpack-preprocessor-build:
-        requires:
-          - build
-    - npm-webpack-preprocessor-test-react:
-        requires:
-          - build
-          - npm-webpack-preprocessor-build
+    - npm-webpack-preprocessor-build
+    - npm-webpack-preprocessor-test-react
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
