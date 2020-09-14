@@ -44,7 +44,7 @@ const normalizeTestTimings = function (obj, timings) {
     return
   }
 
-  return _.set(obj, 'timings', _.mapValues(t, (val, key) => {
+  _.set(obj, 'timings', _.mapValues(t, (val, key) => {
     switch (key) {
       case 'lifecycle':
         // ensure that lifecycle is under 500ms
@@ -112,52 +112,59 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
     }
 
     _.each(run.tests, (test) => {
-      if (test.displayError) {
-        test.displayError = e2e.normalizeStdout(test.displayError)
-      }
-    })
-
-    // now make sure that each tests wallclock duration
-    // is around the sum of all of its timings
-    attempts.forEach((attempt) => {
-      if (attempt.error) {
-        attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
-      }
-
-      // cannot sum an object, must use array of values
-      const timings = _.sumBy(_.values(attempt.timings), (val) => {
-        if (_.isArray(val)) {
-        // array for hooks
-          return _.sumBy(val, addFnAndAfterFn)
+      try {
+        if (test.displayError) {
+          test.displayError = e2e.normalizeStdout(test.displayError)
         }
 
-        if (_.isObject(val)) {
-        // obj for test itself
-          return addFnAndAfterFn(val)
-        }
+        const attempts = test.attempts
 
-        return val
-      })
+        // now make sure that each tests wallclock duration
+        // is around the sum of all of its timings
+        attempts.forEach((attempt) => {
+          if (attempt.error) {
+            attempt.error.stack = e2e.normalizeStdout(attempt.error.stack).trim()
+          }
 
-      expectDurationWithin(
-        attempt,
-        'wallClockDuration',
-        timings,
-        timings + 80, // add 80ms to account for padding
-        1234,
-      )
+          // cannot sum an object, must use array of values
+          const timings = _.sumBy(_.values(attempt.timings), (val) => {
+            if (_.isArray(val)) {
+              // array for hooks
+              return _.sumBy(val, addFnAndAfterFn)
+            }
 
-      // now reset all the test timings
-      normalizeTestTimings(attempt, 'timings')
+            if (_.isObject(val)) {
+              // obj for test itself
+              return addFnAndAfterFn(val)
+            }
 
-      if (attempt.wallClockStartedAt) {
-        const d = new Date(attempt.wallClockStartedAt)
+            return val
+          })
 
-        expect(d.toJSON()).to.eq(attempt.wallClockStartedAt)
-        attempt.wallClockStartedAt = STATIC_DATE
+          expectDurationWithin(
+            attempt,
+            'wallClockDuration',
+            timings,
+            timings + 80, // add 80ms to account for padding
+            1234,
+          )
 
-        expect(attempt.videoTimestamp).to.be.a('number')
-        attempt.videoTimestamp = 9999
+          // now reset all the test timings
+          normalizeTestTimings(attempt, 'timings')
+
+          if (attempt.wallClockStartedAt) {
+            const d = new Date(attempt.wallClockStartedAt)
+
+            expect(d.toJSON()).to.eq(attempt.wallClockStartedAt)
+            attempt.wallClockStartedAt = STATIC_DATE
+
+            expect(attempt.videoTimestamp).to.be.a('number')
+            attempt.videoTimestamp = 9999
+          }
+        })
+      } catch (e) {
+        e.message = `Error during validation for test "${test.title.join(' / ')}"\n${e.message}`
+        throw e
       }
     })
 

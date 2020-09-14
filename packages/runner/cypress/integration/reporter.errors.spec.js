@@ -1,6 +1,9 @@
 const helpers = require('../support/helpers')
 
-const { verify } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
+const { verify } = helpers.createCypress({
+  config: { isTextTerminal: true, retries: 0 },
+  visitUrl: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
+})
 
 const verifyInternalFailure = (props) => {
   const { method } = props
