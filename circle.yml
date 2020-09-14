@@ -207,7 +207,6 @@ commands:
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
       - run: ls -la
-      # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -385,6 +384,15 @@ commands:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
+  check-changed-files:
+    description: |
+      Halts CI job if certain files were not changed or not running on develop branch.
+    parameters:
+      pattern:
+        type: string
+      steps:
+        - run: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
 jobs:
   ## code checkout and yarn installs
@@ -1628,6 +1636,24 @@ jobs:
           working_directory: test-binary
           command: DEBUG=cypress:cli $(yarn bin)/cypress run
       - store-npm-logs
+
+  npm-webpack-preprocessor-build:
+    <<: *defaults
+    steps:
+      - check-changed-files:
+          path: npm/webpack-preprocessor
+      - run:
+          command: yarn build
+          working_directory: npm/webpack-preprocessor
+
+  npm-webpack-preprocessor-test-react:
+    <<: *defaults
+    steps:
+      - check-changed-files:
+          path: npm/webpack-preprocessor
+      - run:
+          command: yarn start
+          working_directory: npm/webpack-preprocessor/examples/react-app
 
 linux-workflow: &linux-workflow
   jobs:
