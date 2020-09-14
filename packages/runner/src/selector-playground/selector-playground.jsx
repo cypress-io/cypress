@@ -4,7 +4,6 @@ import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
-import AutosizeInput from 'react-input-autosize'
 
 import eventManager from '../lib/event-manager'
 
@@ -59,14 +58,16 @@ class SelectorPlayground extends Component {
             {this._methodSelector()}
             <span>(</span>
             <span>{'\''}</span>
-            <AutosizeInput
-              ref={(node) => this._input = node}
-              className='selector-input'
-              name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector playground */}
-              value={model.selector}
-              onChange={this._updateSelector}
-              onFocus={this._setHighlight(true)}
-            /><span>{'\''}</span>
+            <div className='selector-input'>
+              <input
+                ref={(node) => this._input = node}
+                name={`${model.isEnabled}` /* fixes issue with not resizing when opening/closing selector playground */}
+                value={model.selector}
+                onChange={this._updateSelector}
+                onFocus={this._setHighlight(true)}
+              />
+            </div>
+            <span>{'\''}</span>
             <span>)</span>
             <input ref='copyText' className='copy-backer' value={selectorText} readOnly />
             <Tooltip title={model.infoHelp || ''} className='cy-tooltip'>
