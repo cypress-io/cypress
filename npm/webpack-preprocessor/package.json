@@ -22,11 +22,6 @@
     "types": "tsc --noEmit",
     "watch": "yarn build --watch"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "dependencies": {
     "bluebird": "^3.7.1",
     "debug": "^4.1.1",
@@ -56,7 +51,6 @@
     "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
     "fs-extra": "8.1.0",
-    "husky": "4.2.5",
     "license-checker": "13.0.3",
     "lint-staged": "10.2.2",
     "mocha": "^7.1.0",
