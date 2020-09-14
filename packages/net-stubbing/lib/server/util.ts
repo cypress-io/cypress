@@ -12,6 +12,7 @@ import { Readable, PassThrough } from 'stream'
 import CyServer from '@packages/server'
 import { Socket } from 'net'
 import { GetFixtureFn } from './types'
+import ThrottleStream from 'throttle'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
@@ -19,7 +20,10 @@ import { parseContentType } from '@packages/server/lib/controllers/xhrs'
 const debug = Debug('cypress:net-stubbing:server:util')
 
 export function emit (socket: CyServer.Socket, eventName: string, data: object) {
-  debug('sending event to driver %o', { eventName, data })
+  if (debug.enabled) {
+    debug('sending event to driver %o', { eventName, data: _.chain(data).cloneDeep().omit('res.body').value() })
+  }
+
   socket.toDriver('net:event', eventName, data)
 }
 
@@ -117,7 +121,7 @@ export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResp
  * @param onResponse Will be called with the response metadata + body stream
  * @param resStream Optionally, provide a Readable stream to be used as the response body (overrides staticResponse.body)
  */
-export function sendStaticResponse (res: ServerResponse, staticResponse: BackendStaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void, resStream?: Readable) {
+export function sendStaticResponse (res: ServerResponse, staticResponse: BackendStaticResponse, onResponse: (incomingRes: IncomingMessage, stream: Readable) => void) {
   if (staticResponse.forceNetworkError) {
     res.connection.destroy()
     res.destroy()
@@ -127,7 +131,7 @@ export function sendStaticResponse (res: ServerResponse, staticResponse: Backend
 
   const statusCode = staticResponse.statusCode || 200
   const headers = staticResponse.headers || {}
-  const body = resStream ? '' : staticResponse.body || ''
+  const body = staticResponse.body || ''
 
   const incomingRes = _getFakeClientResponse({
     statusCode,
@@ -135,17 +139,38 @@ export function sendStaticResponse (res: ServerResponse, staticResponse: Backend
     body,
   })
 
-  if (!resStream) {
-    const pt = new PassThrough()
+  const bodyStream = getBodyStream(body, _.pick(staticResponse, 'throttleKbps', 'continueResponseAt'))
 
-    if (staticResponse.body) {
-      pt.write(staticResponse.body)
+  onResponse(incomingRes, bodyStream)
+}
+
+export function getBodyStream (body: Buffer | string | Readable | undefined, options: { continueResponseAt?: number, throttleKbps?: number }): Readable {
+  const { continueResponseAt, throttleKbps } = options
+  const delayMs = continueResponseAt ? _.max([continueResponseAt - Date.now(), 0]) : 0
+  const pt = new PassThrough()
+
+  const sendBody = () => {
+    let writable = pt
+
+    if (throttleKbps) {
+      // ThrottleStream must be instantiated after any other delays because it uses a `Date.now()`
+      // called at construction-time to decide if it's behind on throttling bytes
+      writable = new ThrottleStream({ bps: throttleKbps * 1024 })
+      writable.pipe(pt)
     }
 
-    pt.end()
+    if (body) {
+      if ((body as Readable).pipe) {
+        return (body as Readable).pipe(writable)
+      }
 
-    resStream = pt
+      writable.write(body)
+    }
+
+    return writable.end()
   }
 
-  onResponse(incomingRes, resStream)
+  delayMs ? setTimeout(sendBody, delayMs) : sendBody()
+
+  return pt
 }

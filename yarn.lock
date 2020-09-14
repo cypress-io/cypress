@@ -1955,14 +1955,14 @@
     tsconfig-paths-webpack-plugin "^3.3.0"
     webpack "^4.44.1"
 
-"@cypress/webpack-preprocessor@5.4.1":
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.1.tgz#eb58f6cd02932a95653c1a674cfd769da2409806"
-  integrity sha512-1E2BdVVXQ4wDQ7f3mXCvS9xmfTVwEoT3oqKhjAr1iNlTJpBq10Z0VNBZd3VZ3nmCTFwTuUvs735QGnRE1gQ1BA==
+"@cypress/webpack-preprocessor@5.4.2":
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.2.tgz#d40fed6375b09dd16b266a045f4577e9c7a0299a"
+  integrity sha512-ffydnj6mTVm83qc1p63dE2qxRkiIQNXxiHp2xyuVelwmksX+l0VSBxawYd/9Z99rInmqa583yUDPKk8IkCtmDg==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
-    lodash "4.17.15"
+    lodash "4.17.19"
 
 "@cypress/webpack-preprocessor@5.4.4":
   version "5.4.4"
@@ -9743,18 +9743,19 @@ cypress-multi-reporters@1.4.0:
     debug "^4.1.1"
     lodash "^4.17.15"
 
-cypress-react-unit-test@4.8.0:
-  version "4.8.0"
-  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-4.8.0.tgz#d05a294dff23977ed6a76f6ca67f6551755eefe4"
-  integrity sha512-PqsX238ic0wO43Jp8zrJ/B6WJcgoB5okld8WR0HZiVatOCyIWj78X1Bzd4A/LNbU8yAYQHnc6+Pf7PlW4QzBIw==
+cypress-react-unit-test@4.11.2:
+  version "4.11.2"
+  resolved "https://registry.yarnpkg.com/cypress-react-unit-test/-/cypress-react-unit-test-4.11.2.tgz#2034baa1ee186a33219c0e1ca6730df0462f143b"
+  integrity sha512-73GhdPywzfEUv1hDRws8z5KUtx3a0T3cP0LZ6Gb7UIfMbxx3QRityKBgeNK/Pehq5diIRmR5QAl4nI5/oHsqOA==
   dependencies:
     "@babel/plugin-transform-modules-commonjs" "7.10.1"
     "@cypress/code-coverage" "3.8.1"
-    "@cypress/webpack-preprocessor" "5.4.1"
+    "@cypress/webpack-preprocessor" "5.4.2"
     babel-plugin-istanbul "6.0.0"
     debug "4.1.1"
     find-webpack "2.0.0"
     mime-types "2.1.26"
+    unfetch "4.1.0"
 
 d@1, d@^1.0.1:
   version "1.0.1"
@@ -20902,7 +20903,7 @@ react-focus-lock@^2.3.1:
     use-callback-ref "^1.2.1"
     use-sidecar "^1.0.1"
 
-react-input-autosize@2.2.2, react-input-autosize@^2.2.2:
+react-input-autosize@^2.2.2:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.2.tgz#fcaa7020568ec206bc04be36f4eb68e647c4d8c2"
   integrity sha512-jQJgYCA3S0j+cuOwzuCd1OjmBmnZLdqQdiLKRYrsMMzbjUrVDS5RvJUDwJqA7sKuksDuzFtm6hZGKFu7Mjk5aw==
@@ -24474,7 +24475,7 @@ tsconfig-paths-webpack-plugin@^3.3.0:
     enhanced-resolve "^4.0.0"
     tsconfig-paths "^3.4.0"
 
-tsconfig-paths@^3.4.0:
+tsconfig-paths@3.9.0, tsconfig-paths@^3.4.0:
   version "3.9.0"
   resolved "https://registry.yarnpkg.com/tsconfig-paths/-/tsconfig-paths-3.9.0.tgz#098547a6c4448807e8fcb8eae081064ee9a3c90b"
   integrity sha512-dRcuzokWhajtZWkQsDVKbWyY+jgcLC5sqJhg2PSgf4ZkH2aHPvaOY8YWGhmjb68b5qqTfasSsDO9k7RUiEmZAw==

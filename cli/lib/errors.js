@@ -73,6 +73,8 @@ const binaryNotExecutable = (executable) => {
     - the cypress npm package as 'root' or with 'sudo'
 
     Please check that you have the appropriate user permissions.
+
+    You can also try clearing the cache with 'cypress cache clear' and reinstalling. 
   `,
   }
 }

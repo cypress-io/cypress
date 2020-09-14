@@ -4,7 +4,6 @@ import { mount, shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Tooltip from '@cypress/react-tooltip'
-import AutosizeInput from 'react-input-autosize'
 
 import eventManager from '../lib/event-manager'
 import SelectorPlayground from './selector-playground'
@@ -52,7 +51,7 @@ describe('<SelectorPlayground />', () => {
     const model = createModel()
     const component = shallow(<SelectorPlayground model={model} />)
 
-    component.find(AutosizeInput).simulate('change', { target: { value: '.qux' } })
+    component.find('.selector-input input').simulate('change', { target: { value: '.qux' } })
     expect(model.setSelector).to.be.calledWith('.qux')
     expect(model.setShowingHighlight).to.be.calledWith(true)
   })
@@ -63,7 +62,7 @@ describe('<SelectorPlayground />', () => {
     model.selector = '.bar'
     const component = shallow(<SelectorPlayground model={model} />)
 
-    expect(component.find(AutosizeInput)).to.have.prop('value', '.bar')
+    expect(component.find('.selector-input input')).to.have.prop('value', '.bar')
   })
 
   it('shows number of elements if selector is valid', () => {
