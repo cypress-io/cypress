@@ -7,13 +7,13 @@ describe('slatejs', () => {
     const testString = 'Hello world'
 
     cy.get('[data-slate-editor="true"]')
-    .type(testString, { noUpdate: true })
+    .type(testString, { })
 
     cy.contains('[data-slate-string="true"]', testString)
     .should('be.visible')
 
     cy.get('[data-slate-editor="true"]')
-    .type('{ctrl}{shift}{backspace}', { release: false, noUpdate: true })
+    .type('{ctrl}{shift}{backspace}', { release: false })
 
     cy.get('span[contenteditable="false"]').should('have.text', 'Enter some plain text...')
   })
