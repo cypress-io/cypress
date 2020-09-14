@@ -105,10 +105,9 @@ function getInvocationDetails (specWindow, config) {
     // if the user quickly reloads the tests multiple times
 
     // firefox throws a different stack than chromium
-    // which includes stackframes from cypress_runner.js.
-    // So we drop the lines until we get to the spec stackframe (incldues __cypress/tests)
+    // which includes this file (mocha.js) and mocha/.../common.js at the top
     if (specWindow.Cypress && specWindow.Cypress.isBrowser('firefox')) {
-      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
+      stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, 'mocha/lib/interfaces/common.js')
     }
 
     return {

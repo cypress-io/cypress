@@ -163,7 +163,7 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
           }
         })
       } catch (e) {
-        e.message = `Error validation test "${test.title.join(' / ')}"\n${e.message}`
+        e.message = `Error during validation for test "${test.title.join(' / ')}"\n${e.message}`
         throw e
       }
     })
