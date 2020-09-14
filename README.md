@@ -101,6 +101,7 @@ See [Recipes](./docs/recipes.md) for more examples.
 ## API
 
 - `mount` is the most important function, allows to mount a given React component as a mini web application and interact with it using Cypress commands
+- `createMount` factory function that creates new `mount` function with default options
 - `unmount` removes previously mounted component, mostly useful to test how the component cleans up after itself
 - `mountHook` mounts a given React Hook in a test component for full testing, see `hooks` example
 
