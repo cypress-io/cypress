@@ -1,7 +1,7 @@
 const helpers = require('../support/helpers')
 
 const { shouldHaveTestResults, getRunState, cleanseRunStateMap } = helpers
-const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true } })
+const { runIsolatedCypress, snapshotMochaEvents, getAutCypress } = helpers.createCypress({ config: { retries: 2, isTextTerminal: true, firefoxGcInterval: null } })
 const { sinon } = Cypress
 const match = Cypress.sinon.match
 
@@ -246,6 +246,20 @@ describe('src/cypress/runner retries mochaEvents', () => {
         expect(onAfterScreenshot.args[0][0]).matchDeep({ testAttemptIndex: 0 })
         expect(onAfterScreenshot.args[2][0]).matchDeep({ testAttemptIndex: 1 })
       })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/8363
+  describe('cleanses errors before emitting', () => {
+    it('does not try to serialize error with err.actual as DOM node', () => {
+      runIsolatedCypress(() => {
+        it('visits', () => {
+          cy.visit('/fixtures/dom.html')
+          cy.get('#button').should('not.be.visible')
+        })
+      }, { config: { defaultCommandTimeout: 200 } })
+      // should not have err.actual, expected properties since the subject is a DOM element
+      .then(snapshotMochaEvents)
     })
   })
 
