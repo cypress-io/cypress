@@ -463,6 +463,22 @@ describe('network stubbing', function () {
       })
     })
 
+    it('can stub a response with an array', function (done) {
+      const response = ['foo', 'bar', { foo: 'baz' }]
+
+      cy.route2({
+        url: '*',
+      }, response).then(() => {
+        $.get('/abc123').done((responseJson, _, xhr) => {
+          expect(xhr.status).to.eq(200)
+          expect(responseJson).to.deep.eq(response)
+          expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+          done()
+        })
+      })
+    })
+
     it('still works after a cy.visit', function () {
       cy.route2(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
@@ -478,6 +494,45 @@ describe('network stubbing', function () {
           $.get('/foo').done(_.ary(resolve, 0))
         })
       }).wait('@getFoo').its('request.url').should('include', '/foo')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8532
+    context('can stub a response with an empty array', function () {
+      const assertEmptyArray = (done) => {
+        return () => {
+          $.get('/abc123').done((responseJson, _, xhr) => {
+            expect(xhr.status).to.eq(200)
+            expect(responseJson).to.deep.eq([])
+            expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+            done()
+          })
+        }
+      }
+
+      it('with explicit StaticResponse', function (done) {
+        cy.route2({
+          url: '*',
+        }, {
+          body: [],
+        }).then(assertEmptyArray(done))
+      })
+
+      it('with body shorthand', function (done) {
+        cy.route2('*', []).then(assertEmptyArray(done))
+      })
+
+      it('with method, url, res shorthand', function (done) {
+        cy.route2('GET', '*', []).then(assertEmptyArray(done))
+      })
+
+      it('in req.reply', function (done) {
+        cy.route2('*', (req) => req.reply([])).then(assertEmptyArray(done))
+      })
+
+      it('in res.send', function (done) {
+        cy.route2('*', (req) => req.reply((res) => res.send(200, []))).then(assertEmptyArray(done))
+      })
     })
 
     context('fixtures', function () {
