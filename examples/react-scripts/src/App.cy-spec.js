@@ -8,7 +8,7 @@ import * as Child from './Child'
 
 describe('App', () => {
   it('renders learn react link', () => {
-    mount(<App />)
+    mount(<App />, { strict: true })
     cy.contains(/Learn React/)
   })
 

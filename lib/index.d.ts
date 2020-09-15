@@ -56,6 +56,11 @@ interface MountReactComponentOptions {
    * true by default.
    */
   log: boolean
+  /**
+   * Render component in React [strict mode](https://reactjs.org/docs/strict-mode.html)
+   * It activates additional checks and warnings for child components.
+   */
+  strict: boolean
 }
 
 type MountOptions = Partial<StyleOptions & MountReactComponentOptions>

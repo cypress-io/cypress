@@ -88,7 +88,11 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
         key,
       }
 
-      const reactComponent = React.createElement(React.Fragment, props, jsx)
+      const reactComponent = React.createElement(
+        options.strict ? React.StrictMode : React.Fragment,
+        props,
+        jsx,
+      )
       // since we always surround the component with a fragment
       // let's get back the original component
       // @ts-ignore
