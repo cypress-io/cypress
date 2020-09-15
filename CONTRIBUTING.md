@@ -107,6 +107,16 @@ Also, your proposed solution may not be compatible with the direction we want to
 
 **It is nearly impossible for us to resolve many issues if we can not reproduce them. Your best chance of getting a bug looked at quickly is to provide a repository with a reproducible bug that can be cloned and run.**
 
+## Common issues
+
+Label | Description | Main issue | Issues
+--- | --- | --- | ---
+cross-origin | Getting cross-origin error | [944](https://github.com/cypress-io/cypress/issues/944) |[open](https://github.com/cypress-io/cypress/labels/topic%3A%20cross-origin%20%E2%A4%AD), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cross-origin+%E2%A4%AD%22+is%3Aclosed)
+network | Controlling network requests | [3427](https://github.com/cypress-io/cypress/issues/3427), [3083](https://github.com/cypress-io/cypress/issues/3083), [1773](https://github.com/cypress-io/cypress/issues/1773) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20network), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+network%22+is%3Aclosed)
+performance | Slow loading, slow network, etc | [1305](https://github.com/cypress-io/cypress/issues/1305) | [open](https://github.com/cypress-io/cypress/labels/type%3A%20performance%20%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22type%3A+performance+%F0%9F%8F%83%E2%80%8D%E2%99%80%EF%B8%8F%22+is%3Aclosed)
+spec execution | Running all specs or some specs in some specific order | [390](https://github.com/cypress-io/cypress/issues/390) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20spec%20execution) | [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+spec+execution%22+is%3Aclosed)
+test execution | Running tests inside a single spec | [2908](https://github.com/cypress-io/cypress/issues/2908) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20test%20execution), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+test+execution%22+is%3Aclosed)
+
 ## Triaging Issues
 
 When an issue is opened in [cypress](https://github.com/cypress-io/cypress), we need to evaluate the issue to determine what steps should be taken next. So, when approaching new issues, there are some steps that should be taken.
@@ -227,6 +237,7 @@ Some issues are resolved by the community, by giving some guidance or a workarou
 
 - Explain that you are closing the issue as resolved and that they can comment if they are still having the issue and we will consider reopening it.
 - Close the issue.
+
 
 ## Writing Documentation
 
