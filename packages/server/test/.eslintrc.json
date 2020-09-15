@@ -10,5 +10,8 @@
   },
   "extends": [
     "plugin:@cypress/dev/tests"
-  ]
+  ],
+  "rules": {
+    "no-console": "off"
+  }
 }

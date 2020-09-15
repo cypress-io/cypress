@@ -49,19 +49,22 @@ describe('Project Nav', function () {
       cy.get('.navbar-default')
     })
 
-    it('displays \'Tests\' nav as active', () => {
+    it('displays "Tests" nav as active', () => {
       cy.get('.navbar-default').contains('a', 'Tests')
       .should('have.class', 'active')
     })
 
-    describe('when project loads', function () {
-      beforeEach(() => {
-        cy.wait(600)
-      })
+    it('displays "Tests" page when project loads', () => {
+      cy.contains('integration')
+      cy.get('.list-as-table').should('be.visible')
+      cy.percySnapshot()
+    })
 
-      it('displays \'Tests\' page', () => {
-        cy.contains('integration')
-      })
+    it('displays "Tests" page when switching to a beta browser', () => {
+      cy.get('.browsers .dropdown-chosen').click()
+      cy.contains('.browsers', 'beta').first().click()
+      cy.get('.list-as-table').should('be.visible')
+      cy.percySnapshot()
     })
 
     describe('runs page', function () {
@@ -212,7 +215,7 @@ describe('Project Nav', function () {
         })
 
         it('saves chosen browser in local storage', () => {
-          expect(localStorage.getItem('chosenBrowser')).to.eq('chromium')
+          expect(localStorage.getItem('chosenBrowser')).to.eq(JSON.stringify({ name: 'chromium', channel: 'stable' }))
         })
       })
 
@@ -251,13 +254,14 @@ describe('Project Nav', function () {
 
         it('displays stop browser button', () => {
           cy.get('.close-browser').should('be.visible')
+          cy.percySnapshot()
         })
 
         it('sends the required parameters to launch a browser', function () {
           const browserArg = this.ipc.launchBrowser.getCall(0).args[0].browser
 
           expect(browserArg).to.have.keys([
-            'family', 'name', 'path', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
+            'family', 'name', 'path', 'profilePath', 'version', 'majorVersion', 'displayName', 'info', 'isChosen', 'custom', 'warning', 'channel',
           ])
 
           expect(browserArg.path).to.include('/')
@@ -314,25 +318,42 @@ describe('Project Nav', function () {
     })
 
     describe('local storage saved browser', function () {
-      beforeEach(function () {
-        localStorage.setItem('chosenBrowser', 'chromium')
-
-        this.openProject.resolve(this.config)
-      })
-
       afterEach(() => {
         cy.clearLocalStorage()
       })
 
-      it('displays local storage browser name in chosen', () => {
+      it('displays chosen browser in localStorage', function () {
+        // deliberately not the default 'chrome' browser
+        // @see https://github.com/cypress-io/cypress/issues/8281
+        localStorage.setItem('chosenBrowser', JSON.stringify({
+          name: 'chrome',
+          channel: 'canary',
+        }))
+
+        this.openProject.resolve(this.config)
+
         cy.get('.browsers-list .dropdown-chosen')
-        .should('contain', 'Chromium')
+        .should('contain', 'Canary').and('not.contain', 'Edge')
+        .get('.dropdown-chosen .browser-icon')
+        .should('have.attr', 'src').and('include', './img/chrome-canary')
       })
 
-      it('displays local storage browser icon in chosen', () => {
-        cy.get('.browsers-list .dropdown-chosen .browser-icon')
-        .should('have.attr', 'src')
-        .and('include', './img/chromium')
+      it('displays chosen browser with old string-style id in localStorage', function () {
+        localStorage.setItem('chosenBrowser', 'chrome')
+
+        this.openProject.resolve(this.config)
+
+        cy.get('.browsers-list .dropdown-chosen')
+        .should('contain', 'Chrome')
+      })
+
+      it('displays default browser with null localStorage', function () {
+        localStorage.removeItem('chosenBrowser')
+
+        this.openProject.resolve(this.config)
+
+        cy.get('.browsers-list .dropdown-chosen')
+        .should('contain', this.config.browsers[0].displayName)
       })
     })
 

@@ -3,6 +3,9 @@ const path = require('path')
 const debug = require('debug')('cypress:server:socket')
 const Promise = require('bluebird')
 const socketIo = require('@packages/socket')
+
+const editors = require('./util/editors')
+const { openFile } = require('./util/file-opener')
 const fs = require('./util/fs')
 const open = require('./util/open')
 const exec = require('./exec')
@@ -11,6 +14,7 @@ const files = require('./files')
 const fixture = require('./fixture')
 const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
+const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
 
 const runnerEvents = [
@@ -66,16 +70,19 @@ class Socket {
     })
   }
 
-  // TODO: clean this up by sending the spec object instead of
-  // the url path
-  watchTestFileByPath (config, originalFilePath, options) {
-    // files are always sent as integration/foo_spec.js
-    // need to take into account integrationFolder may be different so
-    // integration/foo_spec.js becomes cypress/my-integration-folder/foo_spec.js
-    debug('watch test file %o', originalFilePath)
-    let filePath = path.join(config.integrationFolder, originalFilePath.replace(`integration${path.sep}`, ''))
+  watchTestFileByPath (config, specConfig, options) {
+    debug('watching spec with config %o', specConfig)
 
-    filePath = path.relative(config.projectRoot, filePath)
+    const cleanIntegrationPrefix = (s) => {
+      const removedIntegrationPrefix = path.join(config.integrationFolder, s.replace(`integration${path.sep}`, ''))
+
+      return path.relative(config.projectRoot, removedIntegrationPrefix)
+    }
+
+    // previously we have assumed that we pass integration spec path with "integration/" prefix
+    // now we pass spec config object that tells what kind of spec it is, has relative path already
+    // so the only special handling remains for special paths like "integration/__all"
+    const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.relative
 
     // bail if this is special path like "__all"
     // maybe the client should not ask to watch non-spec files?
@@ -115,6 +122,10 @@ class Socket {
     return socket && socket.connected
   }
 
+  toDriver (event, ...data) {
+    return this.io && this.io.emit(event, ...data)
+  }
+
   onAutomation (socket, message, data, id) {
     // instead of throwing immediately here perhaps we need
     // to make this more resilient by automatically retrying
@@ -147,7 +158,6 @@ class Socket {
 
     _.defaults(options, {
       socketId: null,
-      onIncomingXhr () {},
       onResetServerState () {},
       onSetRunnables () {},
       onMocha () {},
@@ -185,6 +195,8 @@ class Socket {
     const automationRequest = (message, data) => {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
+
+    const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
     return this.io.on('connection', (socket) => {
       debug('socket connected')
@@ -285,8 +297,10 @@ class Socket {
         return options.onSpecChanged(spec)
       })
 
-      socket.on('watch:test:file', (filePath, cb = function () {}) => {
-        this.watchTestFileByPath(config, filePath, options)
+      socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+        debug('watch:test:file %o', specInfo)
+
+        this.watchTestFileByPath(config, specInfo, options)
 
         // callback is only for testing purposes
         return cb()
@@ -356,7 +370,7 @@ class Socket {
 
         debug('backend:request %o', { eventName, args })
 
-        const backendRequest = function () {
+        const backendRequest = () => {
           switch (eventName) {
             case 'preserve:run:state':
               existingState = args[0]
@@ -375,14 +389,21 @@ class Socket {
               return firefoxUtil.log()
             case 'firefox:force:gc':
               return firefoxUtil.collectGarbage()
-            case 'incoming:xhr':
-              return options.onIncomingXhr(args[0], args[1])
             case 'get:fixture':
-              return fixture.get(config.fixturesFolder, args[0], args[1])
+              return getFixture(args[0], args[1])
             case 'read:file':
               return files.readFile(config.projectRoot, args[0], args[1])
             case 'write:file':
               return files.writeFile(config.projectRoot, args[0], args[1], args[2])
+            case 'net':
+              return netStubbing.onNetEvent({
+                eventName: args[0],
+                frame: args[1],
+                state: options.netStubbingState,
+                socket: this,
+                getFixture,
+                args,
+              })
             case 'exec':
               return exec.run(config.projectRoot, args[0])
             case 'task':
@@ -429,6 +450,19 @@ class Socket {
         debug('received external:open %o', { url })
 
         return require('electron').shell.openExternal(url)
+      })
+
+      socket.on('get:user:editor', (cb) => {
+        editors.getUserEditor(false)
+        .then(cb)
+      })
+
+      socket.on('set:user:editor', (editor) => {
+        editors.setUserEditor(editor)
+      })
+
+      socket.on('open:file', (fileDetails) => {
+        openFile(fileDetails)
       })
 
       reporterEvents.forEach((event) => {

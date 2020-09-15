@@ -50,7 +50,12 @@ interface StringValues {
   }
   ```
 */
-const _summaries: StringValues = {}
+const _summaries: StringValues = {
+  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
+  experimentalNetworkStubbing: 'Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)',
+  experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
+  experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing',
+}
 
 /**
  * Keeps short names for experiments. When adding new experiments, add a short name.
@@ -62,7 +67,12 @@ const _summaries: StringValues = {}
   }
   ```
 */
-const _names: StringValues = {}
+const _names: StringValues = {
+  experimentalComponentTesting: 'Component Testing',
+  experimentalNetworkStubbing: 'Experimental network mocking',
+  experimentalSourceRewriting: 'Improved source rewriting',
+  experimentalFetchPolyfill: 'Fetch polyfill',
+}
 
 /**
  * Export this object for easy stubbing from end-to-end tests.
@@ -128,4 +138,10 @@ export const getExperiments = (project: CypressProject, names = experimental.nam
 // @ts-ignore
 export const isKnownExperiment = (experiment, key) => {
   return Object.keys(experimental.names).includes(key)
+}
+
+// exporting a single default object with methods
+// helps make it is to stub and to test
+export default {
+  getExperiments,
 }

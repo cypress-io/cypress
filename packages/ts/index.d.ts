@@ -21,9 +21,6 @@ declare module 'http' {
     createSocket(req: ClientRequest, options: RequestOptions, cb: SocketCallback): void
     createConnection(options: RequestOptions, cb: Optional<SocketCallback>): void
     protocol: 'http:' | 'https:' | string
-    freeSockets: {
-      [key: string]: Socket[]
-    }
   }
 
   interface ClientRequest {
@@ -44,6 +41,10 @@ declare module 'http' {
     uri: Url
   }
 
+  interface OutgoingMessage {
+    destroy(error?: Error): void
+  }
+
   export const CRLF: string
 }
 
@@ -51,6 +52,10 @@ declare module 'https' {
   interface Agent {
     _sessionCache: { [_agentKey: string]: Buffer }
   }
+}
+
+declare interface InternalStream {
+  queue(str: string | null): void
 }
 
 declare module 'net' {

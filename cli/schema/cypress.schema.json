@@ -103,6 +103,19 @@
       "default": "cypress/integration",
       "description": "Path to folder containing integration test files"
     },
+    "experimentalComponentTesting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enabled experimental component testing, see https://github.com/cypress-io/cypress/issues/5922"
+    },
+    "componentFolder": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "default": false,
+      "description": "Path to folder containing component test files (Pass false to disable)"
+    },
     "pluginsFile": {
       "type": [
         "string",
@@ -110,6 +123,11 @@
       ],
       "default": "cypress/plugins/index.js",
       "description": "Path to plugins file. (Pass false to disable)"
+    },
+    "screenshotOnRunFailure": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether Cypress will take a screenshot when a test fails during cypress run"
     },
     "screenshotsFolder": {
       "type": "string",
@@ -162,7 +180,7 @@
       "default": null,
       "description": "Enables you to override the default user agent the browser sends in all request headers. User agent values are typically used by servers to help identify the operating system, browser, and browser version. See User-Agent MDN Documentation for example user agent values here: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/User-Agent"
     },
-    "blacklistHosts": {
+    "blockHosts": {
       "type": [
         "string",
         "array"
@@ -171,7 +189,7 @@
         "type": "string"
       },
       "default": null,
-      "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blacklistHosts"
+      "description": "A String or Array of hosts that you wish to block traffic for. Please read the notes for examples on using this https://on.cypress.io/configuration#blockHosts"
     },
     "modifyObstructiveCode": {
       "type": "boolean",
@@ -210,6 +228,38 @@
       ],
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
+    },
+    "experimentalSourceRewriting": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
+    },
+    "experimentalNetworkStubbing": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
+    },
+    "experimentalFetchPolyfill": {
+      "type": "boolean",
+      "default": false,
+      "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
+    },
+    "retries": {
+      "type": [
+        "object",
+        "number",
+        "null"
+      ],
+      "default": {
+        "runMode": 0,
+        "openMode": 0
+      },
+      "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
+    },
+    "includeShadowDom": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
     }
   }
 }

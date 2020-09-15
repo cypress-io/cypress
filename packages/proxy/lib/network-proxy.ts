@@ -1,20 +1,18 @@
-import { Http } from './http'
+import { Http, ServerCtx } from './http'
 
 export class NetworkProxy {
   http: Http
 
-  constructor (opts: {
-    config: any
-    getRemoteState: () => any
-    getFileServerToken: () => string
-    middleware?: any
-    request: any
-  }) {
+  constructor (opts: ServerCtx) {
     this.http = new Http(opts)
   }
 
   handleHttpRequest (req, res) {
     this.http.handle(req, res)
+  }
+
+  handleSourceMapRequest (req, res) {
+    this.http.handleSourceMapRequest(req, res)
   }
 
   setHttpBuffer (buffer) {

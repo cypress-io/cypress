@@ -21,12 +21,12 @@ class AuthApi {
     })
   }
 
-  login () {
+  login (utm) {
     ipc.onAuthMessage((__, message) => {
       authStore.setMessage(message)
     })
 
-    return ipc.beginAuth()
+    return ipc.beginAuth(utm)
     .then((user) => {
       authStore.setUser(user)
       authStore.setMessage(null)

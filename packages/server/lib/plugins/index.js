@@ -2,9 +2,11 @@ const _ = require('lodash')
 const cp = require('child_process')
 const path = require('path')
 const debug = require('debug')('cypress:server:plugins')
+const resolve = require('resolve')
 const Promise = require('bluebird')
 const errors = require('../errors')
 const util = require('./util')
+const pkg = require('@packages/root')
 
 let pluginsProcess = null
 let registeredEvents = {}
@@ -37,6 +39,17 @@ const registerHandler = (handler) => {
 const init = (config, options) => {
   debug('plugins.init', config.pluginsFile)
 
+  // test and warn for incompatible plugin
+  try {
+    const retriesPluginPath = path.dirname(resolve.sync('cypress-plugin-retries', {
+      basedir: options.projectRoot,
+    }))
+
+    options.onWarning(errors.get('INCOMPATIBLE_PLUGIN_RETRIES', path.relative(options.projectRoot, retriesPluginPath)))
+  } catch (e) {
+    // noop, incompatible plugin not installed
+  }
+
   return new Promise((_resolve, _reject) => {
     // provide a safety net for fulfilling the promise because the
     // 'handleError' function below can potentially be triggered
@@ -66,7 +79,7 @@ const init = (config, options) => {
     registeredEvents = {}
 
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', config.pluginsFile]
+    const childArguments = ['--file', config.pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
     }
@@ -87,6 +100,7 @@ const init = (config, options) => {
     _.extend(config, {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
+      version: pkg.version,
     })
 
     ipc.send('load', config)

@@ -1,11 +1,25 @@
+const _ = require('lodash')
 const $window = require('./window')
 const $elements = require('./elements')
 
 const getElementAtPointFromViewport = (doc, x, y) => {
-  return doc.elementFromPoint(x, y)
+  return $elements.elementFromPoint(doc, x, y)
 }
 
-const isAutIframe = (win) => !$elements.getNativeProp(win.parent, 'frameElement')
+const isAutIframe = (win) => {
+  const parent = win.parent
+
+  // https://github.com/cypress-io/cypress/issues/6412
+  // ensure the parent is a Window before checking prop
+  return $window.isWindow(parent) && !$elements.getNativeProp(parent, 'frameElement')
+}
+
+const getFirstValidSizedRect = (el) => {
+  return _.find(el.getClientRects(), (rect) => {
+    // use the first rect that has a nonzero width and height
+    return rect.width && rect.height
+  }) || el.getBoundingClientRect() // otherwise fall back to the parent client rect
+}
 
 /**
  * @param {JQuery<HTMLElement>} $el
@@ -24,12 +38,15 @@ const getElementPositioning = ($el) => {
   // elements that span multiple lines. Which would cause us to click
   // click in the center and thus miss...
   //
+  // sometimes the first client rect has no height or width, which also causes a miss
+  // so a simple loop is used to find the first with non-zero dimensions
+  //
   // however we have a fallback to getBoundingClientRect() such as
   // when the element is hidden or detached from the DOM. getClientRects()
   // returns a zero length DOMRectList in that case, which becomes undefined.
   // so we fallback to getBoundingClientRect() so that we get an actual DOMRect
   // with all properties 0'd out
-  const rect = el.getClientRects()[0] || el.getBoundingClientRect()
+  const rect = getFirstValidSizedRect(el)
 
   // we want to return the coordinates from the autWindow to the element
   // which handles a situation in which the element is inside of a nested
@@ -42,8 +59,10 @@ const getElementPositioning = ($el) => {
     let curWindow = win
     let frame
 
+    // https://github.com/cypress-io/cypress/issues/6412
+    // ensure the parent is a Window before checking prop
     // walk up from a nested iframe so we continually add the x + y values
-    while (!isAutIframe(curWindow) && curWindow.parent !== curWindow) {
+    while ($window.isWindow(curWindow) && !isAutIframe(curWindow) && curWindow.parent !== curWindow) {
       frame = $elements.getNativeProp(curWindow, 'frameElement')
 
       if (curWindow && frame) {

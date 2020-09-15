@@ -55,7 +55,7 @@ const Routes = observer(({ model }: RoutesProps) => (
         <li className='hook-item'>
           <Collapsible
             header={`Routes (${model.routes.length})`}
-            headerClass='hook-name'
+            headerClass='hook-header'
             contentClass='instrument-content'
           >
             <table>

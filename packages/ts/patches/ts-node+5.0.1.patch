@@ -1,0 +1,13 @@
+diff --git a/node_modules/ts-node/dist/index.js b/node_modules/ts-node/dist/index.js
+index 2dfd704..c00aa39 100644
+--- a/node_modules/ts-node/dist/index.js
++++ b/node_modules/ts-node/dist/index.js
+@@ -298,7 +298,7 @@ function readThrough(cachedir, shouldCache, memoryCache, compile, getExtension)
+     };
+ }
+ function updateOutput(outputText, fileName, sourceMap, getExtension) {
+-    var base64Map = new Buffer(updateSourceMap(sourceMap, fileName), 'utf8').toString('base64');
++    var base64Map = Buffer.from(updateSourceMap(sourceMap, fileName), 'utf8').toString('base64');
+     var sourceMapContent = "data:application/json;charset=utf-8;base64," + base64Map;
+     var sourceMapLength = (path_1.basename(fileName) + ".map").length + (getExtension(fileName).length - path_1.extname(fileName).length);
+     return outputText.slice(0, -sourceMapLength) + sourceMapContent;

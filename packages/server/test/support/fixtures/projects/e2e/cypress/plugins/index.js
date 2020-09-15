@@ -1,9 +1,12 @@
 require('@packages/ts/register')
 
 const _ = require('lodash')
+const { expect } = require('chai')
+const http = require('http')
 const Jimp = require('jimp')
 const path = require('path')
 const Promise = require('bluebird')
+const { useFixedFirefoxResolution } = require('../../../utils')
 
 module.exports = (on, config) => {
   let performance = {
@@ -15,7 +18,6 @@ module.exports = (on, config) => {
   try {
     performance = require('../../../../test/support/helpers/performance')
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err)
   }
 
@@ -44,12 +46,21 @@ module.exports = (on, config) => {
   })
 
   on('before:browser:launch', (browser, options) => {
-    if (browser.family === 'firefox' && !config.env['NO_RESIZE']) {
-      // this is needed to ensure correct error screenshot / video recording
-      // resolution of exactly 1280x720 (height must account for firefox url bar)
-      options.args = options.args.concat(
-        ['-width', '1280', '-height', '794'],
-      )
+    useFixedFirefoxResolution(browser, options, config)
+
+    if (browser.family === 'firefox' && process.env.FIREFOX_FORCE_STRICT_SAMESITE) {
+      // @see https://www.jardinesoftware.net/2019/10/28/samesite-by-default-in-2020/
+      // this option will eventually become default, but for now, it seems to have inconsistent
+      // behavior in the extension vs regular web browsing - default in webextension is still
+      // "no_restriction"
+      // options.preferences['network.cookie.sameSite.laxByDefault'] = true
+      options.preferences['network.cookie.sameSite.noneRequiresSecure'] = true
+    }
+
+    if (browser.family === 'chromium' && browser.name !== 'electron') {
+      if (process.env.CHROMIUM_EXTRA_LAUNCH_ARGS) {
+        options.args = options.args.concat(process.env.CHROMIUM_EXTRA_LAUNCH_ARGS.split(' '))
+      }
     }
 
     browserArgs = options.args
@@ -137,7 +148,6 @@ module.exports = (on, config) => {
 
     'record:fast_visit_spec' ({ percentiles, url, browser, currentRetry }) {
       percentiles.forEach(([percent, percentile]) => {
-        // eslint-disable-next-line no-console
         console.log(`${percent}%\t of visits to ${url} finished in less than ${percentile}ms`)
       })
 
@@ -166,6 +176,12 @@ module.exports = (on, config) => {
 
     'get:config:value' (key) {
       return config[key]
+    },
+
+    'assert:http:max:header:size' (expectedBytes) {
+      expect(http.maxHeaderSize).to.eq(expectedBytes)
+
+      return null
     },
   })
 }

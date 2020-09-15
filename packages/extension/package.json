@@ -17,15 +17,13 @@
   },
   "dependencies": {
     "bluebird": "3.5.3",
-    "lodash": "4.17.15"
+    "lodash": "4.17.19"
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
-    "@packages/coffee": "*",
     "@packages/socket": "*",
     "browserify": "16.3.0",
     "chai": "3.5.0",
-    "coffeeify": "3.0.1",
     "coffeescript": "1.12.7",
     "cross-env": "6.0.3",
     "eol": "0.9.1",
@@ -35,8 +33,7 @@
     "gulp-rename": "1.4.0",
     "mocha": "3.5.3",
     "mock-require": "3.0.3",
-    "rimraf": "2.6.3",
-    "run-sequence": "1.2.2",
+    "rimraf": "3.0.2",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
     "vinyl-source-stream": "2.0.0",

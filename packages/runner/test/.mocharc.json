@@ -1,5 +1,5 @@
 {
   "file": "test/helper.js",
   "require": "../web-config/node-register",
-  "extension": "ts,jsx,tsx,coffee,js"
+  "extension": "ts,jsx,tsx,js"
 }

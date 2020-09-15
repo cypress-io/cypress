@@ -147,5 +147,96 @@ describe('cypress', function () {
         expect(args).to.deep.eq(opts)
       })
     })
+
+    it('rejects if project is an empty string', () => {
+      return expect(cypress.run({ project: '' })).to.be.rejected
+    })
+
+    it('rejects if project is true', () => {
+      return expect(cypress.run({ project: true })).to.be.rejected
+    })
+
+    it('rejects if project is false', () => {
+      return expect(cypress.run({ project: false })).to.be.rejected
+    })
+
+    it('passes quiet: true', () => {
+      const opts = {
+        quiet: true,
+      }
+
+      return cypress.run(opts)
+      .then(getStartArgs)
+      .then((args) => {
+        expect(args).to.deep.eq(opts)
+      })
+    })
+  })
+
+  context('cli', function () {
+    describe('.parseRunArguments', function () {
+      it('parses CLI cypress run arguments', async () => {
+        const args = 'cypress run --browser chrome --spec my/test/spec.js'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          browser: 'chrome',
+          spec: 'my/test/spec.js',
+        })
+      })
+
+      it('parses CLI cypress run shorthand arguments', async () => {
+        const args = 'cypress run -b firefox -p 5005 --headed --quiet'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          browser: 'firefox',
+          port: 5005,
+          headed: true,
+          quiet: true,
+        })
+      })
+
+      it('coerces --record and --dev', async () => {
+        const args = 'cypress run --record false --dev true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          record: false,
+          dev: true,
+        })
+      })
+
+      it('parses config file false', async () => {
+        const args = 'cypress run --config-file false'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          configFile: false,
+        })
+      })
+
+      it('parses config', async () => {
+        const args = 'cypress run --config baseUrl=localhost,video=true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // we don't need to convert the config into an object
+        // since the logic inside cypress.run handles that
+        expect(options).to.deep.equal({
+          config: 'baseUrl=localhost,video=true',
+        })
+      })
+
+      it('parses env', async () => {
+        const args = 'cypress run --env MY_NUMBER=42,MY_FLAG=true'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        // we don't need to convert the environment into an object
+        // since the logic inside cypress.run handles that
+        expect(options).to.deep.equal({
+          env: 'MY_NUMBER=42,MY_FLAG=true',
+        })
+      })
+    })
   })
 })

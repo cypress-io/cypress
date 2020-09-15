@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const $ = require('jquery')
 const $dom = require('../dom')
+const $elements = require('../dom/elements')
 
 const selectors = {
   visible: 'visible',
@@ -13,7 +14,7 @@ const selectors = {
   focused: 'focused',
 }
 
-const attrs = {
+const accessors = {
   attr: 'attribute',
   css: 'CSS property',
   prop: 'property',
@@ -24,6 +25,12 @@ const attrs = {
 // jquery, so we can control
 // the methods on it
 const wrap = (ctx) => $(ctx._obj)
+
+const maybeCastNumberToString = (num) => {
+  // if this is a finite number (no Infinity or NaN)
+  // cast to a string
+  return _.isFinite(num) ? `${num}` : num
+}
 
 const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   const { inspect, flag } = chaiUtils
@@ -111,6 +118,8 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   chai.Assertion.addMethod('id', function (id) {
+    id = maybeCastNumberToString(id)
+
     return assert(
       this,
       'id',
@@ -145,6 +154,8 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   chai.Assertion.addMethod('text', function (text) {
+    text = maybeCastNumberToString(text)
+
     assertDom(
       this,
       'text',
@@ -168,6 +179,14 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
   })
 
   chai.Assertion.addMethod('value', function (value) {
+    const $el = wrap(this)
+
+    // some elements return a number for the .value property
+    // in this case, we don't want to cast the expected value to a string
+    if (!$elements.isValueNumberTypeElement($el[0])) {
+      value = maybeCastNumberToString(value)
+    }
+
     assertDom(
       this,
       'value',
@@ -176,7 +195,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
       value,
     )
 
-    const actual = wrap(this).val()
+    const actual = $el.val()
 
     return assertPartial(
       this,
@@ -250,23 +269,23 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
     })
   })
 
-  _.each(attrs, (description, attr) => {
-    return chai.Assertion.addMethod(attr, function (name, val) {
+  _.each(accessors, (description, accessor) => {
+    return chai.Assertion.addMethod(accessor, function (name, val) {
       assertDom(
         this,
-        attr,
+        accessor,
         `expected #{this} to have ${description} #{exp}`,
         `expected #{this} not to have ${description} #{exp}`,
         name,
       )
 
-      const actual = wrap(this)[attr](name)
+      const actual = wrap(this)[accessor](name)
 
       // when we only have 1 argument dont worry about val
       if (arguments.length === 1) {
         assert(
           this,
-          attr,
+          accessor,
           actual !== undefined,
           `expected #{this} to have ${description} #{exp}`,
           `expected #{this} not to have ${description} #{exp}`,
@@ -276,7 +295,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
         // change the subject
         this._obj = actual
       } else {
-        // if we don't have an attribute here at all we need to
+        // if we don't have an accessor here at all we need to
         // have a different failure message
         let message; let negatedMessage
 
@@ -290,9 +309,17 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
           negatedMessage = `expected \#{this} not to have ${description} ${inspect(name)} with the value \#{exp}, but the value was \#{act}`
         }
 
+        // only cast .attr() as a string
+        // since prop stores the native javascript type
+        // and we don't want to optimistically cast those
+        // values as a string
+        if (accessor === 'attr') {
+          val = maybeCastNumberToString(val)
+        }
+
         assert(
           this,
-          attr,
+          accessor,
           (actual != null) && (actual === val),
           message,
           negatedMessage,

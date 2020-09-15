@@ -18,6 +18,16 @@ if (!(electronVersion = pkg.devDependencies.electron)) {
 }
 
 module.exports = {
+  getElectronVersion () {
+    return electronVersion
+  },
+
+  // returns icons package so that the caller code can find
+  // paths to the icons without hard-coding them
+  icons () {
+    return require('@cypress/icons')
+  },
+
   checkCurrentVersion () {
     const pathToVersion = paths.getPathToVersion()
 

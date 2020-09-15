@@ -44,6 +44,10 @@ Install Cypress for Mac, Linux, or Windows, then [get started](https://docs.cypr
 ```bash
 npm install cypress --save-dev
 ```
+or
+```bash
+yarn add cypress --dev
+```
 
 ![installing-cli e1693232](https://user-images.githubusercontent.com/1271364/31740846-7bf607f0-b420-11e7-855f-41c996040d31.gif)
 
@@ -65,8 +69,8 @@ This project is licensed under the terms of the [MIT license](/LICENSE).
 
 Let the world know your project is using Cypress.io to test with this cool badge
 
-[![badge](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
 
 ```
-[![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://cypress.io)
+[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
 ```

@@ -45,14 +45,14 @@ const create = (state, keyboard, focused, Cypress) => {
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     const constructor = el.ownerDocument.defaultView.PointerEvent
 
-    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor, true)
   }
   const sendMouseEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
     // IE doesn't have event constructors, so you should use document.createEvent('mouseevent')
     // https://dom.spec.whatwg.org/#dom-document-createevent
     const constructor = el.ownerDocument.defaultView.MouseEvent
 
-    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor)
+    return sendEvent(evtName, el, evtOptions, bubbles, cancelable, constructor, true)
   }
 
   const sendPointerup = (el, evtOptions) => {
@@ -370,7 +370,7 @@ const create = (state, keyboard, focused, Cypress) => {
      * @returns {HTMLElement}
      */
     getElAtCoords ({ x, y, doc }) {
-      const el = doc.elementFromPoint(x, y)
+      const el = $dom.elementFromPoint(doc, x, y)
 
       return el
     },
@@ -540,7 +540,7 @@ const create = (state, keyboard, focused, Cypress) => {
         }
 
         // Only send click event if mousedown element is not detached.
-        if ($elements.isDetachedEl(mouseDownPhase.targetEl)) {
+        if ($elements.isDetachedEl(mouseDownPhase.targetEl) || $elements.isDetached(mouseUpPhase.targetEl)) {
           return { skipClickEventReason: 'element was detached' }
         }
 
@@ -706,12 +706,12 @@ const create = (state, keyboard, focused, Cypress) => {
 
 const { stopPropagation } = window.MouseEvent.prototype
 
-const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor) => {
+const sendEvent = (evtName, el, evtOptions, bubbles = false, cancelable = false, Constructor, composed = false) => {
   evtOptions = _.extend({}, evtOptions, { bubbles, cancelable })
   const _eventModifiers = $Keyboard.fromModifierEventOptions(evtOptions)
   const modifiers = $Keyboard.modifiersToString(_eventModifiers)
 
-  const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable }))
+  const evt = new Constructor(evtName, _.extend({}, evtOptions, { bubbles, cancelable, composed }))
 
   if (bubbles) {
     evt.stopPropagation = function (...args) {

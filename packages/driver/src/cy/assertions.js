@@ -1,4 +1,3 @@
-/* global cy Cypress */
 const _ = require('lodash')
 const Promise = require('bluebird')
 
@@ -70,14 +69,14 @@ const parseValueActualAndExpected = (value, actual, expected) => {
   return obj
 }
 
-const create = function (state, queue, retryFn) {
+const create = function (Cypress, cy) {
   const getUpcomingAssertions = () => {
-    const index = state('index') + 1
+    const index = cy.state('index') + 1
 
     const assertions = []
 
     // grab the rest of the queue'd commands
-    for (let cmd of queue.slice(index).get()) {
+    for (let cmd of cy.queue.slice(index).get()) {
       // don't break on utilities, just skip over them
       if (cmd.is('utility')) {
         continue
@@ -111,8 +110,12 @@ const create = function (state, queue, retryFn) {
       // them up with existing ones
       cmd.set('assertionIndex', 0)
 
+      if (cy.state('current') != null) {
+        cy.state('current').set('currentAssertionCommand', cmd)
+      }
+
       return cmd.get('fn').originalFn.apply(
-        state('ctx'),
+        cy.state('ctx'),
         [subject].concat(cmd.get('args')),
       )
     })
@@ -135,7 +138,7 @@ const create = function (state, queue, retryFn) {
   const verifyUpcomingAssertions = function (subject, options = {}, callbacks = {}) {
     const cmds = getUpcomingAssertions()
 
-    state('upcomingAssertions', cmds)
+    cy.state('upcomingAssertions', cmds)
 
     // we're applying the default assertion in the
     // case where there are no upcoming assertion commands
@@ -202,6 +205,8 @@ const create = function (state, queue, retryFn) {
         err = e2
       }
 
+      err.isDefaultAssertionErr = isDefaultAssertionErr
+
       options.error = err
 
       if (err.retry === false) {
@@ -228,7 +233,7 @@ const create = function (state, queue, retryFn) {
       }
 
       if (_.isFunction(onRetry)) {
-        return retryFn(onRetry, options)
+        return cy.retry(onRetry, options)
       }
     }
 
@@ -258,7 +263,7 @@ const create = function (state, queue, retryFn) {
         }
 
         // when we do immediately unbind this function
-        state('onBeforeLog', null)
+        cy.state('onBeforeLog', null)
 
         const insertNewLog = (log) => {
           cmd.log(log)
@@ -341,7 +346,7 @@ const create = function (state, queue, retryFn) {
         return insertNewLog(log)
       }
 
-      state('onBeforeLog', setCommandLog)
+      cy.state('onBeforeLog', setCommandLog)
 
       // send verify=true as the last arg
       return assertFn.apply(this, args.concat(true))
@@ -381,16 +386,16 @@ const create = function (state, queue, retryFn) {
     }
 
     const restore = () => {
-      state('upcomingAssertions', [])
+      cy.state('upcomingAssertions', [])
 
       // no matter what we need to
       // restore the assert fn
-      return state('overrideAssert', undefined)
+      return cy.state('overrideAssert', undefined)
     }
 
     // store this in case our test ends early
     // and we reset between tests
-    state('overrideAssert', overrideAssert)
+    cy.state('overrideAssert', overrideAssert)
 
     return Promise
     .reduce(fns, assertions, [subject])
@@ -459,7 +464,7 @@ const create = function (state, queue, retryFn) {
         // if our current command is an assertion type
         isAssertionType(current) ||
         // are we currently verifying assertions?
-        (state('upcomingAssertions') && state('upcomingAssertions').length > 0) ||
+        (cy.state('upcomingAssertions') && cy.state('upcomingAssertions').length > 0) ||
         // did the function have arguments
         functionHadArguments(current)
     }
@@ -471,6 +476,7 @@ const create = function (state, queue, retryFn) {
       message,
       passed,
       selector: value ? value.selector : undefined,
+      timeout: 0,
       type (current, subject) {
         // if our current command has arguments assume
         // we are an assertion that's involving the current
@@ -503,7 +509,7 @@ const create = function (state, queue, retryFn) {
   const assert = function (...args) {
     // if we've temporarily overriden assertions
     // then just bail early with this function
-    const fn = state('overrideAssert') || assertFn
+    const fn = cy.state('overrideAssert') || assertFn
 
     return fn.apply(this, args)
   }

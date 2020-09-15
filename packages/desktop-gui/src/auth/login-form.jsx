@@ -25,7 +25,7 @@ class LoginForm extends Component {
       <div className='login-content'>
         {this._error()}
         <button
-          className={cs('btn btn-login btn-black btn-block', {
+          className={cs('btn btn-login btn-primary btn-wide', {
             disabled: this.state.isLoggingIn,
           })}
           onClick={this._login}
@@ -115,7 +115,7 @@ class LoginForm extends Component {
 
     this.setState({ isLoggingIn: true })
 
-    authApi.login()
+    authApi.login(this.props.utm)
     .then(() => {
       this.props.onSuccess()
     })

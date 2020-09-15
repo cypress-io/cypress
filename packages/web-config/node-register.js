@@ -1,5 +1,3 @@
-require('@packages/coffee/register')
-
 require('@babel/register')({
   'plugins': [
     // "istanbul",
@@ -9,7 +7,7 @@ require('@babel/register')({
   'presets': [
     require.resolve('@babel/preset-env'),
     require.resolve('@babel/preset-react'),
-    require.resolve('@babel/preset-typescript'),
+    [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
   ],
 
   // Setting this will remove the currently hooked extensions of `.es6`, `.es`, `.jsx`, `.mjs`

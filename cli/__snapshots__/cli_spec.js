@@ -75,6 +75,7 @@ exports['shows help for run --foo 1'] = `
     --parallel                                 enables concurrent runs and automatic load balancing of specs across multiple machines or processes
     -p, --port <port>                          runs Cypress on a specific port. overrides any value in cypress.json.
     -P, --project <project-path>               path to the project
+    -q, --quiet                                run quietly, using only the configured reporter
     --record [bool]                            records the run. sends test results, screenshots and videos to your Cypress Dashboard.
     -r, --reporter <reporter>                  runs a specific mocha reporter. pass a path to use a custom reporter. defaults to "spec"
     -o, --reporter-options <reporter-options>  options for the mocha reporter. defaults to "null"
@@ -427,4 +428,14 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
   
   -------
 
+`
+
+exports['cli version and binary version with npm log silent'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+`
+
+exports['cli version and binary version with npm log warn'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
 `

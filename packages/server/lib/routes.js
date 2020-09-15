@@ -1,8 +1,10 @@
 const path = require('path')
 const la = require('lazy-ass')
 const check = require('check-more-types')
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:routes')
 
+const AppData = require('./util/app_data')
 const CacheBuster = require('./util/cache_buster')
 const spec = require('./controllers/spec')
 const reporter = require('./controllers/reporter')
@@ -12,7 +14,7 @@ const client = require('./controllers/client')
 const files = require('./controllers/files')
 const staticCtrl = require('./controllers/static')
 
-module.exports = ({ app, config, getDeferredResponse, getRemoteState, networkProxy, project, onError }) => {
+module.exports = ({ app, config, getRemoteState, networkProxy, project, onError }) => {
   // routing for the actual specs which are processed automatically
   // this could be just a regular .js file or a .coffee file
   app.get('/__cypress/tests', (req, res, next) => {
@@ -45,26 +47,43 @@ module.exports = ({ app, config, getDeferredResponse, getRemoteState, networkPro
 
   // routing for the dynamic iframe html
   app.get('/__cypress/iframes/*', (req, res) => {
-    files.handleIframe(req, res, config, getRemoteState)
+    const extraOptions = {
+      specFilter: _.get(project, 'spec.specFilter'),
+    }
+
+    debug('project %o', project)
+    debug('handling iframe for project spec %o', {
+      spec: project.spec,
+      extraOptions,
+    })
+
+    files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
   app.all('/__cypress/xhrs/*', (req, res, next) => {
-    xhrs.handle(req, res, getDeferredResponse, config, next)
+    xhrs.handle(req, res, config, next)
   })
 
+  app.get('/__cypress/source-maps/:id.map', (req, res) => {
+    networkProxy.handleSourceMapRequest(req, res)
+  })
+
+  // special fallback - serve local files from the project's root folder
   app.get('/__root/*', (req, res) => {
     const file = path.join(config.projectRoot, req.params[0])
 
     res.sendFile(file, { etag: false })
   })
 
-  // we've namespaced the initial sending down of our cypress
-  // app as '__'  this route shouldn't ever be used by servers
-  // and therefore should not conflict
-  // ---
-  // TODO: we should additionally send config for the socket.io route, etc
-  // and any other __cypress namespaced files so that the runner does
-  // not have to be aware of anything
+  // special fallback - serve dist'd (bundled/static) files from the project path folder
+  app.get('/__cypress/bundled/*', (req, res) => {
+    const file = AppData.getBundledFilePath(config.projectRoot, path.join('src', req.params[0]))
+
+    debug(`Serving dist'd bundle at file path: %o`, { path: file, url: req.url })
+
+    res.sendFile(file, { etag: false })
+  })
+
   la(check.unemptyString(config.clientRoute), 'missing client route in config', config)
 
   app.get(config.clientRoute, (req, res) => {

@@ -1,7 +1,7 @@
 // NOT patched jquery
 import $ from 'jquery'
 import _ from '../config/lodash'
-import $utils from '../cypress/utils.coffee'
+import $utils from '../cypress/utils'
 import * as $document from './document'
 import * as $jquery from './jquery'
 import * as $selection from './selection'
@@ -40,6 +40,7 @@ const focusableWhenNotDisabledSelectors = [
 
 const inputTypeNeedSingleValueChangeRe = /^(date|time|week|month|datetime-local)$/
 const canSetSelectionRangeElementRe = /^(text|search|URL|tel|password)$/
+const valueIsNumberTypeRe = /progress|meter|li/
 
 declare global {
   interface Window {
@@ -54,6 +55,7 @@ declare global {
     SVGElement: typeof SVGElement
     EventTarget: typeof EventTarget
     Document: typeof Document
+    XMLHttpRequest: typeof XMLHttpRequest
   }
 
   interface Selection {
@@ -325,6 +327,14 @@ const setNativeProp = function<T, K extends keyof T> (obj: T, prop: K, val) {
   return retProp
 }
 
+interface HTMLValueIsNumberTypeElement extends HTMLElement {
+  value: number
+}
+
+const isValueNumberTypeElement = (el: HTMLElement): el is HTMLValueIsNumberTypeElement => {
+  return valueIsNumberTypeRe.test(getTagName(el))
+}
+
 export interface HTMLSingleValueChangeInputElement extends HTMLInputElement {
   type: 'date' | 'time' | 'week' | 'month'
 }
@@ -408,7 +418,13 @@ const activeElementIsDefault = (activeElement, body: HTMLElement) => {
 
 const isFocused = (el) => {
   try {
-    const doc = $document.getDocumentFromElement(el)
+    let doc
+
+    if (isWithinShadowRoot(el)) {
+      doc = el.getRootNode()
+    } else {
+      doc = $document.getDocumentFromElement(el)
+    }
 
     const { activeElement, body } = doc
 
@@ -555,34 +571,81 @@ const isScrollOrAuto = (prop) => {
 }
 
 const isAncestor = ($el, $maybeAncestor) => {
-  return $el.parents().index($maybeAncestor) >= 0
+  return $jquery.wrap(getAllParents($el[0])).index($maybeAncestor) >= 0
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
+  // get all parents of each element
   const el1Ancestors = [el1].concat(getAllParents(el1))
-  let curEl = el2
+  const el2Ancestors = [el2].concat(getAllParents(el2))
 
-  while (curEl) {
-    if (el1Ancestors.indexOf(curEl) !== -1) {
-      return curEl
-    }
+  let a
+  let b
 
-    curEl = curEl.parentNode
+  // choose the largest tree of parents to
+  // traverse up
+  if (el1Ancestors.length > el2Ancestors.length) {
+    a = el1Ancestors
+    b = el2Ancestors
+  } else {
+    a = el2Ancestors
+    b = el1Ancestors
   }
 
-  return curEl
+  // for each ancestor of the largest of the two
+  // parent arrays, check if the other parent array
+  // contains it.
+  for (const ancestor of a) {
+    if (b.includes(ancestor)) {
+      return ancestor
+    }
+  }
+
+  return el2
 }
 
-const getAllParents = (el) => {
-  let curEl = el.parentNode
-  const allParents: any[] = []
+const isShadowRoot = (maybeRoot) => {
+  return maybeRoot?.toString() === '[object ShadowRoot]'
+}
 
-  while (curEl) {
-    allParents.push(curEl)
-    curEl = curEl.parentNode
+const isWithinShadowRoot = (node: HTMLElement) => {
+  return isShadowRoot(node.getRootNode())
+}
+
+const getParentNode = (el) => {
+  // if the element has a direct parent element,
+  // simply return it.
+  if (el.parentElement) {
+    return el.parentElement
   }
 
-  return allParents
+  const root = el.getRootNode()
+
+  // if the element is inside a shadow root,
+  // return the host of the root.
+  if (root && isWithinShadowRoot(el)) {
+    return root.host
+  }
+
+  return null
+}
+
+const getParent = ($el: JQuery): JQuery => {
+  return $(getParentNode($el[0]))
+}
+
+const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTMLElement | JQuery) => {
+  const collectParents = (parents, node) => {
+    const parent = getParentNode(node)
+
+    if (!parent || untilSelectorOrEl && $(parent).is(untilSelectorOrEl)) {
+      return parents
+    }
+
+    return collectParents(parents.concat(parent), parent)
+  }
+
+  return collectParents([], el)
 }
 
 const isChild = ($el, $maybeChild) => {
@@ -620,38 +683,32 @@ const isAttached = function ($el) {
     return true
   }
 
-  // if this is a document we can simply check
-  // whether or not it has a defaultView (window).
-  // documents which are part of stale pages
-  // will have this property null'd out
-  if ($document.isDocument($el)) {
-    return $document.hasActiveWindow($el)
+  const nodes: Node[] = []
+
+  // push the set of elements to the nodes array
+  // whether they are wrapped or not
+  if ($jquery.isJquery($el)) {
+    nodes.push(...$el.toArray())
+  } else if ($el) {
+    nodes.push($el)
   }
 
-  // normalize into an array
-  const els = [].concat($jquery.unwrap($el))
-
-  // we could be passed an empty array here
-  // which in that case it is not attached
-  if (els.length === 0) {
+  // if there are no nodes, nothing is attached
+  if (nodes.length === 0) {
     return false
   }
 
-  // get the document from the first element
-  const doc = $document.getDocumentFromElement(els[0])
+  // check that every node has an active window
+  // and is connected to the dom
+  return nodes.every((node) => {
+    const doc = $document.getDocumentFromElement(node)
 
-  // TODO: i guess its possible each element
-  // is technically bound to a different document
-  // but c'mon
-  const isIn = (el) => {
-    return $.contains(doc as any, el)
-  }
+    if (!$document.hasActiveWindow(doc)) {
+      return false
+    }
 
-  // make sure the document is currently
-  // active (it has a window) and
-  // make sure every single element
-  // is attached to this document
-  return $document.hasActiveWindow(doc) && _.every(els, isIn)
+    return node.isConnected
+  })
 }
 
 /**
@@ -833,27 +890,34 @@ const isDescendent = ($el1, $el2) => {
     return false
   }
 
-  return !!($el1.get(0) === $el2.get(0) || $el1.has($el2).length)
-}
-
-const findParent = (el, fn) => {
-  const recurse = (curEl, prevEl) => {
-    if (!curEl) {
-      return null
-    }
-
-    const retEl = fn(curEl, prevEl)
-
-    if (retEl) {
-      return retEl
-    }
-
-    const nextEl = curEl.parentElement
-
-    return recurse(nextEl, curEl)
+  // if they are equal, consider them a descendent
+  if ($el1.get(0) === $el2.get(0)) {
+    return true
   }
 
-  return recurse(el.parentElement, el) || el
+  // walk up the tree until we find a parent which
+  // equals the descendent, if ever
+  return findParent($el2.get(0), (node) => {
+    if (node === $el1.get(0)) {
+      return node
+    }
+  }) === $el1.get(0)
+}
+
+const findParent = (el, condition) => {
+  const collectParent = (node) => {
+    const parent = getParentNode(node)
+
+    if (!parent) return null
+
+    const parentMatchingCondition = condition(parent, node)
+
+    if (parentMatchingCondition) return parentMatchingCondition
+
+    return collectParent(parent)
+  }
+
+  return collectParent(el)
 }
 
 // in order to simulate actual user behavior we need to do the following:
@@ -866,20 +930,27 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
     return $el
   }
 
-  const parent = $el.parent()
+  const $parent = getParent($el)
 
   // if we have no parent then just return
   // the window since that can receive focus
-  if (!parent.length) {
+  if (!$parent.length) {
     const win = $window.getWindowByElement($el.get(0))
 
     return $(win)
   }
 
-  return getFirstFocusableEl($el.parent())
+  return getFirstFocusableEl(getParent($el))
 }
-const getActiveElByDocument = (doc: Document): HTMLElement | null => {
-  const activeElement = getNativeProp(doc, 'activeElement')
+
+const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
+  let activeElement
+
+  if (isWithinShadowRoot($el[0])) {
+    activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
+  } else {
+    activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
+  }
 
   if (isFocused(activeElement)) {
     return activeElement as HTMLElement
@@ -889,77 +960,87 @@ const getActiveElByDocument = (doc: Document): HTMLElement | null => {
 }
 
 const getFirstParentWithTagName = ($el, tagName) => {
-  // return null if undefined or we're at body/html/document
-  // cuz that means nothing has fixed position
   if (isUndefinedOrHTMLBodyDoc($el) || !tagName) {
     return null
   }
 
-  // if we are the matching element return ourselves
-  if (getTagName($el[0]) === tagName) {
+  // if this element is already the tag we want,
+  // return it
+  if (getTagName($el.get(0)) === tagName) {
     return $el
   }
 
-  // else recursively continue to walk up the parent node chain
-  return getFirstParentWithTagName($el.parent(), tagName)
+  // walk up the tree until we find a parent with
+  // the tag we want
+  return findParent($el.get(0), (node) => {
+    if (getTagName(node) === tagName) {
+      return $jquery.wrap(node)
+    }
+
+    return null
+  })
 }
 
 const getFirstFixedOrStickyPositionParent = ($el) => {
-  // return null if we're undefined or at not a normal DOM el
-  // cuz that means nothing has fixed position
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
-  // if we have fixed position return ourselves
   if (fixedOrStickyRe.test($el.css('position'))) {
     return $el
   }
 
-  // else recursively continue to walk up the parent node chain
-  return getFirstFixedOrStickyPositionParent($el.parent())
+  // walk up the tree until we find an element
+  // with a fixed/sticky position
+  return findParent($el.get(0), (node) => {
+    let wrapped = $jquery.wrap(node)
+
+    if (fixedOrStickyRe.test(wrapped.css('position'))) {
+      return wrapped
+    }
+
+    return null
+  })
 }
 
 const getFirstStickyPositionParent = ($el) => {
-  // return null if we're undefined or at body/html/document
-  // cuz that means nothing has sticky position
   if (isUndefinedOrHTMLBodyDoc($el)) {
     return null
   }
 
-  // if we have sticky position return ourselves
   if ($el.css('position') === 'sticky') {
     return $el
   }
 
-  // else recursively continue to walk up the parent node chain
-  return getFirstStickyPositionParent($el.parent())
+  // walk up the tree until we find an element
+  // with a sticky position
+  return findParent($el.get(0), (node) => {
+    let wrapped = $jquery.wrap(node)
+
+    if (wrapped.css('position') === 'sticky') {
+      return wrapped
+    }
+
+    return null
+  })
 }
 
 const getFirstScrollableParent = ($el) => {
-  // this may be null or not even defined in IE
-  // scrollingElement = doc.scrollingElement
-
-  const search = ($el) => {
-    const $parent = $el.parent()
-
-    // parent is undefined or
-    // instead of fussing with scrollingElement
-    // we'll simply return null here and let our
-    // caller deal with situations where they're
-    // needing to scroll the window or scrollableElement
-    if (isUndefinedOrHTMLBodyDoc($parent)) {
-      return null
-    }
-
-    if (isScrollable($parent)) {
-      return $parent
-    }
-
-    return search($parent)
+  if (isUndefinedOrHTMLBodyDoc($el)) {
+    return null
   }
 
-  return search($el)
+  // walk up the tree until we find a scrollable
+  // parent
+  return findParent($el.get(0), (node) => {
+    let wrapped = $jquery.wrap(node)
+
+    if (isScrollable(wrapped)) {
+      return wrapped
+    }
+
+    return null
+  })
 }
 
 const getElements = ($el) => {
@@ -1044,14 +1125,14 @@ const getContainsSelector = (text, filter = '', options: {
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'
 
-const getFirstDeepestElement = (elements, index = 0) => {
+const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   // iterate through all of the elements in pairs
   // and check if the next item in the array is a
   // descedent of the current. if it is continue
   // to recurse. if not, or there is no next item
   // then return the current
-  const $current = elements.slice(index, index + 1)
-  const $next = elements.slice(index + 1, index + 2)
+  const $current = $el.slice(index, index + 1)
+  const $next = $el.slice(index + 1, index + 2)
 
   if (!$next) {
     return $current
@@ -1059,7 +1140,7 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // does current contain next?
   if ($.contains($current.get(0), $next.get(0))) {
-    return getFirstDeepestElement(elements, index + 1)
+    return getFirstDeepestElement($el, index + 1)
   }
 
   // return the current if it already is a priority element
@@ -1069,7 +1150,8 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // else once we find the first deepest element then return its priority
   // parent if it has one and it exists in the elements chain
-  const $priorities = elements.filter($current.parents(priorityElement))
+  const $parents = $jquery.wrap(getAllParents($current[0])).filter(priorityElement)
+  const $priorities = $el.filter($parents)
 
   if ($priorities.length) {
     return $priorities.last()
@@ -1149,7 +1231,86 @@ const stringify = (el, form = 'long') => {
   })
 }
 
+// if the node has a shadow root, we must behave like
+// the browser and find the inner element of the shadow
+// root at that same point.
+const getShadowElementFromPoint = (node, x, y) => {
+  const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
+
+  if (!nodeFromPoint || nodeFromPoint === node) return node
+
+  return getShadowElementFromPoint(nodeFromPoint, x, y)
+}
+
+const elementFromPoint = (doc, x, y) => {
+  // first try the native elementFromPoint method
+  let elFromPoint = doc.elementFromPoint(x, y)
+
+  return getShadowElementFromPoint(elFromPoint, x, y)
+}
+
+const getShadowRoot = ($el: JQuery): JQuery<Node> => {
+  const root = $el[0].getRootNode()
+
+  return $(root)
+}
+
+const findAllShadowRoots = (root: Node): Node[] => {
+  const collectRoots = (roots, nodes, node) => {
+    const currentRoot = roots.pop()
+
+    if (!currentRoot) return nodes
+
+    const childRoots = findShadowRoots(currentRoot)
+
+    if (childRoots.length > 0) {
+      roots.push(...childRoots)
+      nodes.push(...childRoots)
+    }
+
+    return collectRoots(roots, nodes, currentRoot)
+  }
+
+  return collectRoots([root], [], root)
+}
+
+const findShadowRoots = (root: Node): Node[] => {
+  // get the document for this node
+  const doc = root.getRootNode({ composed: true }) as Document
+  // create a walker for efficiently traversing the
+  // dom of this node
+  const walker = doc.createTreeWalker(root, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_DOCUMENT_FRAGMENT, {
+    acceptNode (node) {
+      // we only care about nodes which have a shadow root
+      if ((node as Element).shadowRoot) {
+        return NodeFilter.FILTER_ACCEPT
+      }
+
+      // we skip other nodes, but continue to traverse their children
+      return NodeFilter.FILTER_SKIP
+    },
+  })
+
+  const roots: Node[] = []
+  const rootAsElement = root as Element
+
+  if (rootAsElement.shadowRoot) {
+    roots.push(rootAsElement.shadowRoot)
+  }
+
+  const collectRoots = (roots) => {
+    const nextNode = walker.nextNode() as Element
+
+    if (!nextNode) return roots
+
+    return collectRoots(roots.concat(nextNode.shadowRoot))
+  }
+
+  return collectRoots(roots)
+}
+
 export {
+  elementFromPoint,
   isElement,
   isUndefinedOrHTMLBodyDoc,
   isSelector,
@@ -1183,6 +1344,7 @@ export {
   isFocused,
   isFocusedOrInFocused,
   isInputAllowingImplicitFormSubmission,
+  isValueNumberTypeElement,
   isNeedSingleValueChangeInputElement,
   canSetSelectionRangeElement,
   stringify,
@@ -1191,14 +1353,23 @@ export {
   callNativeMethod,
   tryCallNativeMethod,
   findParent,
+  findAllShadowRoots,
+  findShadowRoots,
+  isShadowRoot,
+  isWithinShadowRoot,
   getElements,
   getFirstFocusableEl,
   getActiveElByDocument,
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getTagName,
   getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,
   getFirstScrollableParent,
+  getParent,
+  getParentNode,
+  getAllParents,
+  getShadowRoot,
 }

@@ -14,12 +14,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   const { keyboard } = cy.devices
 
   function type (subject, chars, options = {}) {
+    const userOptions = options
     let updateTable
 
-    options = _.clone(options)
     // allow the el we're typing into to be
     // changed by options -- used by cy.clear()
-    _.defaults(options, {
+    options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -85,6 +85,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       options._log = Cypress.log({
         message: [chars, deltaOptions],
         $el: options.$el,
+        timeout: options.timeout,
         consoleProps () {
           return {
             'Typed': chars,
@@ -201,19 +202,25 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // issue the click event to the 'default button' of the form
-        // we need this to be synchronous so not going through our
-        // own click command
-        // as of now, at least in Chrome, causing the click event
-        // on the button will indeed trigger the form submit event
-        // so we dont need to fire it manually anymore!
-        if (!clickedDefaultButton(defaultButton)) {
-          // if we werent able to click the default button
-          // then synchronously fire the submit event
-          // currently this is sync but if we use a waterfall
-          // promise in the submit command it will break again
-          // consider changing type to a Promise and juggle logging
-          return cy.now('submit', form, { log: false, $el: form })
+        // In Firefox, submit event is automatically fired
+        // when we send {Enter} KeyboardEvent to the input fields.
+        // Because of that, we don't have to click the submit buttons.
+        // Otherwise, we trigger submit events twice.
+        if (!Cypress.isBrowser('firefox')) {
+          // issue the click event to the 'default button' of the form
+          // we need this to be synchronous so not going through our
+          // own click command
+          // as of now, at least in Chrome, causing the click event
+          // on the button will indeed trigger the form submit event
+          // so we dont need to fire it manually anymore!
+          if (!clickedDefaultButton(defaultButton)) {
+            // if we werent able to click the default button
+            // then synchronously fire the submit event
+            // currently this is sync but if we use a waterfall
+            // promise in the submit command it will break again
+            // consider changing type to a Promise and juggle logging
+            return cy.now('submit', form, { log: false, $el: form })
+          }
         }
       }
 
@@ -408,7 +415,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
             errorOnSelect: false,
           })
           .then(() => {
-            if (!options.force && $elements.getActiveElByDocument($elToClick[0].ownerDocument) === null) {
+            let activeElement = $elements.getActiveElByDocument($elToClick)
+
+            if (!options.force && activeElement === null) {
               const node = $dom.stringify($elToClick)
               const onFail = options._log
 
@@ -457,7 +466,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   }
 
   function clear (subject, options = {}) {
-    _.defaults(options, {
+    const userOptions = options
+
+    options = _.defaults({}, userOptions, {
       log: true,
       force: false,
     })
@@ -474,6 +485,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         options._log = Cypress.log({
           message: deltaOptions,
           $el,
+          timeout: options.timeout,
           consoleProps () {
             return {
               'Applied To': $dom.getElements($el),

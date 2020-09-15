@@ -13,7 +13,7 @@ const $errUtils = require('./error_utils')
 const groupsOrTableRe = /^(groups|table)$/
 const parentOrChildRe = /parent|child/
 const SNAPSHOT_PROPS = 'id snapshots $el url coords highlightAttr scrollBy viewportWidth viewportHeight'.split(' ')
-const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookName instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId type url visible'.split(' ')
+const DISPLAY_PROPS = 'id alias aliasType callCount displayName end err event functionName hookId instrument isStubbed message method name numElements numResponses referencesAlias renderProps state testId timeout type url visible wallClockStartedAt testCurrentRetry'.split(' ')
 const BLACKLIST_PROPS = 'snapshots'.split(' ')
 
 let delay = null
@@ -90,10 +90,12 @@ const countLogsByTests = function (tests = {}) {
 
   return _
   .chain(tests)
-  .map((test, key) => {
-    return [].concat(test.agents, test.routes, test.commands)
-  }).flatten()
-  .compact()
+  .flatMap((test) => {
+    return [test, test.prevAttempts]
+  })
+  .flatMap((tests) => {
+    return [].concat(tests.agents, tests.routes, tests.commands)
+  }).compact()
   .union([{ id: 0 }])
   .map('id')
   .max()
@@ -133,6 +135,7 @@ const defaults = function (state, config, obj) {
     }
 
     _.defaults(obj, {
+      timeout: config('defaultCommandTimeout'),
       event: false,
       renderProps () {
         return {}
@@ -166,19 +169,32 @@ const defaults = function (state, config, obj) {
 
   const runnable = state('runnable')
 
+  const getTestAttemptFromRunnable = (runnable) => {
+    if (!runnable) {
+      return
+    }
+
+    const t = $utils.getTestFromRunnable(runnable)
+
+    return t._currentRetry || 0
+  }
+
   return _.defaults(obj, {
     id: (counter += 1),
     state: 'pending',
     instrument: 'command',
     url: state('url'),
-    hookName: state('hookName'),
+    hookId: state('hookId'),
     testId: runnable ? runnable.id : undefined,
+    testCurrentRetry: getTestAttemptFromRunnable(state('runnable')),
     viewportWidth: state('viewportWidth'),
     viewportHeight: state('viewportHeight'),
     referencesAlias: undefined,
     alias: undefined,
     aliasType: undefined,
     message: undefined,
+    timeout: undefined,
+    wallClockStartedAt: new Date().toJSON(),
     renderProps () {
       return {}
     },
@@ -359,13 +375,7 @@ const Log = function (cy, state, config, obj) {
     },
 
     getError (err) {
-      // dont log stack traces on cypress errors
-      // or assertion errors
-      if ($errUtils.CypressErrorRe.test(err.name)) {
-        return err.toString()
-      }
-
-      return err.stack
+      return err.stack || err.message
     },
 
     setElAttrs () {

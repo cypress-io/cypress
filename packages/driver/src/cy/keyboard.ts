@@ -263,7 +263,7 @@ const shouldUpdateValue = (el: HTMLElement, key: KeyDetails, options: typeOption
 
       if (!(numberRe.test(potentialValue))) {
         debug('skipping inserting value since number input would be invalid', key.text, potentialValue)
-        // when typing in a number input, only certain whitelisted chars will insert text
+        // when typing in a number input, only certain allowed chars will insert text
         if (!key.text.match(isValidNumberInputChar)) {
           // https://github.com/cypress-io/cypress/issues/6055
           // Should not remove old valid values when a new one is not a valid number char, just dismiss it with return
@@ -672,7 +672,7 @@ export class Keyboard {
         return options.$el.get(0)
       }
 
-      const activeEl = $elements.getActiveElByDocument(doc) || doc.body
+      const activeEl = $elements.getActiveElByDocument(options.$el) || doc.body
 
       return activeEl
     }
@@ -900,10 +900,15 @@ export class Keyboard {
 
       // or is IE
     } else {
-      // For some reason we can't set certain props on Keyboard Events in chrome < 63.
-      // So we'll use the plain Event constructor
-      // event = new win[eventConstructor](eventType, eventOptions)
-      event = new win['Event'](eventType, eventOptions)
+      let constructor = win[eventConstructor]
+
+      // When event constructor doesn't exist, fallback to KeyboardEvent.
+      // It's necessary because Firefox doesn't support InputEvent.
+      if (typeof constructor !== 'function') {
+        constructor = win['KeyboardEvent']
+      }
+
+      event = new constructor(eventType, eventOptions)
       _.extend(event, eventOptions)
     }
 
@@ -1098,7 +1103,7 @@ export class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    return $elements.getActiveElByDocument(doc) || doc.body
+    return $elements.getActiveElByDocument(options.$el) || doc.body
   }
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {

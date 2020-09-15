@@ -9,31 +9,6 @@ const appData = require(`${root}lib/util/app_data`)
 const savedState = require(`${root}lib/saved_state`)
 
 describe('lib/saved_state', () => {
-  describe('#toHashName', () => {
-    const projectRoot = '/foo/bar'
-
-    it('starts with folder name', () => {
-      const hash = savedState.toHashName(projectRoot)
-
-      expect(hash).to.match(/^bar-/)
-    })
-
-    it('computed for given path', () => {
-      const hash = savedState.toHashName(projectRoot)
-      const expected = 'bar-1df481b1ec67d4d8bec721f521d4937d'
-
-      expect(hash).to.equal(expected)
-    })
-
-    it('does not handle empty project path', () => {
-      const tryWithoutPath = () => {
-        return savedState.toHashName()
-      }
-
-      expect(tryWithoutPath).to.throw('Missing project path')
-    })
-  })
-
   context('#create', () => {
     beforeEach(() => {
       return savedState.create().then((state) => {
@@ -87,7 +62,7 @@ describe('lib/saved_state', () => {
       })
     })
 
-    it('only saves whitelisted keys', () => {
+    it('only saves allowed keys', () => {
       return savedState.create()
       .then((state) => {
         return state.set({ foo: 'bar', appWidth: 20 })
@@ -106,8 +81,7 @@ describe('lib/saved_state', () => {
       .then((state) => {
         return state.set({ foo: 'bar', baz: 'qux' })
       }).then(() => {
-        // eslint-disable-next-line no-console
-        expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-whitelisted key(s): foo, baz. All keys must be whitelisted in server/lib/saved_state.js')
+        expect(console.error).to.be.calledWith('WARNING: attempted to save state for non-allowed key(s): foo, baz. All keys must be allowed in server/lib/saved_state.js')
       })
     })
   })

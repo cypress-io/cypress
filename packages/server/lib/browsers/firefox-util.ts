@@ -5,7 +5,7 @@ import Marionette from 'marionette-client'
 import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
-import protocol from './protocol'
+import * as protocol from './protocol'
 
 const errors = require('../errors')
 
@@ -21,6 +21,22 @@ let timings = {
 
 const getTabId = (tab) => {
   return _.get(tab, 'browsingContextID')
+}
+
+const getDelayMsForRetry = (i) => {
+  if (i < 10) {
+    return 100
+  }
+
+  if (i < 18) {
+    return 500
+  }
+
+  if (i < 63) {
+    return 1000
+  }
+
+  return
 }
 
 const getPrimaryTab = Bluebird.method((browser) => {
@@ -54,6 +70,9 @@ const getPrimaryTab = Bluebird.method((browser) => {
 })
 
 const attachToTabMemory = Bluebird.method((tab) => {
+  // TODO: figure out why tab.memory is sometimes undefined
+  if (!tab.memory) return
+
   if (tab.memory.isAttached) {
     return
   }
@@ -154,32 +173,25 @@ export default {
     await protocol._connectAsync({
       host: '127.0.0.1',
       port,
-      getDelayMsForRetry: (i) => {
-        if (i < 10) {
-          return 100
-        }
-
-        if (i < 18) {
-          return 500
-        }
-
-        if (i < 33) {
-          return 1000
-        }
-
-        return
-      },
+      getDelayMsForRetry,
     })
 
     const foxdriver = await Foxdriver.attach('127.0.0.1', port)
 
     const { browser } = foxdriver
 
+    browser.on('error', (err) => {
+      debug('received error from foxdriver connection, ignoring %o', err)
+    })
+
     forceGcCc = () => {
       let gcDuration; let ccDuration
 
       const gc = (tab) => {
         return () => {
+          // TODO: figure out why tab.memory is sometimes undefined
+          if (!tab.memory) return
+
           let start = Date.now()
 
           return tab.memory.forceGarbageCollection()
@@ -192,6 +204,9 @@ export default {
 
       const cc = (tab) => {
         return () => {
+          // TODO: figure out why tab.memory is sometimes undefined
+          if (!tab.memory) return
+
           let start = Date.now()
 
           return tab.memory.forceCycleCollection()
@@ -220,7 +235,16 @@ export default {
   },
 
   async setupMarionette (extensions, url, port) {
-    const driver = new Marionette.Drivers.Promises({ port })
+    await protocol._connectAsync({
+      host: '127.0.0.1',
+      port,
+      getDelayMsForRetry,
+    })
+
+    const driver = new Marionette.Drivers.Promises({
+      port,
+      tries: 1, // marionette-client has its own retry logic which we want to avoid
+    })
 
     const sendMarionette = (data) => {
       return driver.send(new Command(data))

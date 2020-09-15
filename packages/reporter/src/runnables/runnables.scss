@@ -41,28 +41,52 @@
     line-height: 18px;
     padding-left: 0;
 
-    &.hover {
-      background-color: #f7f8f9;
-      cursor: pointer;
+    .runnable-wrapper {
+      border-left: 5px solid transparent;
+      padding: 0;
 
-      > .runnable-wrapper .runnable-controls i.fa-redo {
-        visibility: visible !important;
+      .collapsible-header {
+        &:focus {
+          .collapsible-header-inner {
+            background-color: #f7f8f9;
+            cursor: pointer;
+          }
+        }
+
+        .collapsible-header-inner {
+          &:hover {
+            background-color: #f7f8f9;
+            cursor: pointer;
+          }
+
+          &:focus {
+            outline: 0;
+          }
+
+          height: 100%;
+          padding: 5px 15px 5px 5px;
+          width: 100%;
+        }
       }
     }
 
-    &:focus {
-      outline: 1px dotted #6c6c6c;
-      outline-offset: -1px;
+    .attempt-item:hover {
+      > .runnable-wrapper .runnable-controls i.fa-redo {
+        visibility: visible !important;
+      }
+
+      .hooks-container, .runnable-err-wrapper {
+        border-color: #828282;
+      }
     }
 
     &.runnable-active {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-sync-alt;
-        @extend .#{$fa-css-prefix}-spin;
+        @include runnable-state-active;
       }
     }
 
-    .runnable-state {
+    .runnable-state,.attempt-state {
       display: inline-block;
       line-height: 18px;
       margin-right: 5px;
@@ -78,37 +102,41 @@
       color: #bbbcbd;
     }
 
-    &.runnable-processing > .runnable-wrapper {
+
+    &.test.runnable-processing  {
       .runnable-state {
-        @extend .far;
-        line-height: 18px; // @extend .far overrides line-height, so we need to set it again
-        @extend .#{$fa-css-prefix}-square;
-        color: #888;
+        @include runnable-state-processing;
       }
     }
 
-    &.test.runnable-failed > .runnable-wrapper {
-      border-left: 10px solid $fail;
+    &.runnable-failed > div > .runnable-wrapper,
+    &.runnable-failed > div > .runnable-instruments {
+      border-left: 5px solid $fail;
 
       .fa-exclamation-triangle.has-command-failures {
         visibility: visible;
       }
     }
 
-    &.suite.runnable-pending > div > .runnable-wrapper,
-    &.test.runnable-pending > .runnable-wrapper {
-      border-left: 10px solid lighten($pending, 25%);
+    &.runnable-pending > div > .runnable-wrapper,
+    &.runnable-pending > div > .runnable-instruments {
+      border-left: 5px solid lighten($pending, 25%);
+      padding-bottom: 0;
     }
 
-    &.suite.runnable-passed > div > .runnable-wrapper,
-    &.test.runnable-passed > .runnable-wrapper {
-      border-left: 10px solid $pass;
+    &.runnable-passed > div > .runnable-wrapper,
+    &.runnable-passed > div > .runnable-instruments {
+      border-left: 5px solid $pass;
+    }
+
+    .runnable-retried > div > .runnable-wrapper,
+    .runnable-retried > div > .runnable-instruments {
+      border-left: 5px solid $retried;
     }
 
     &.runnable-skipped > .runnable-wrapper {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-ban;
-        color: #888;
+        @include runnable-state-skipped;
       }
 
       .runnable-title {
@@ -116,28 +144,14 @@
       }
     }
 
-    &.suite.runnable-skipped > div > .runnable-wrapper,
-    &.test.runnable-skipped > .runnable-wrapper {
-      border-left: 10px solid #9a9aaa;
-    }
-
-    &.suite.runnable-failed > div > .runnable-wrapper {
-      border-left: 10px solid $fail;
-
-      .collapsible-more {
-        border-radius: 3px;
-        background-color: $fail;
-        color: #FFF;
-        padding: 0 4px 0 3px;
-        font-size: 10px;
-        margin-left: 2px;
-      }
+    &.runnable-skipped > div > .runnable-wrapper,
+    &.runnable-skipped > div > .runnable-instruments {
+      border-left: 5px solid #9a9aaa;
     }
 
     &.test.runnable-failed {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-times;
-        color: $fail;
+        @include runnable-state-failed;
       }
     }
 
@@ -149,29 +163,18 @@
       }
     }
 
-    &.suite > div > .runnable-wrapper:focus {
-      outline: 0;
-
-      .runnable-title {
-        outline: 1px dotted;
-      }
-    }
-
-    &.runnable-passed > .runnable-wrapper {
+    &.test.runnable-passed {
       .runnable-state {
-        @extend .#{$fa-css-prefix}-check;
-        color: $pass;
+        @include runnable-state-passed;
       }
     }
 
-    &.runnable-pending > .runnable-wrapper {
+    &.test.runnable-pending {
+      .runnable-state {
+        @include runnable-state-pending;
+      }
       .runnable-title {
         color: lighten($pending, 25%);
-      }
-
-      .runnable-state {
-        @extend .#{$fa-css-prefix}-circle-notch;
-        color: lighten($pending, 20%);
       }
 
       .runnable-commands-region {
@@ -180,10 +183,13 @@
     }
   }
 
-  .runnable-wrapper {
-    padding: 5px 15px 5px 5px;
-    overflow: hidden;
-    border-left: 10px solid transparent;
+  .runnable-instruments {
+    border-left: 5px solid transparent;
+  }
+
+  .collapsible > .runnable-instruments {
+    padding-right: 15px;
+    padding-bottom: 5px;
   }
 
   .runnable-title {
@@ -195,7 +201,7 @@
     }
   }
 
-  .runnable-content-region {
+  .runnable-wrapper > .collapsible-header {
     overflow: auto;
     position: relative;
     display: inline-flex;
@@ -207,23 +213,16 @@
     }
   }
 
-  .suite > div > .runnable-wrapper,
-  .test .runnable-content-region {
+  .suite > div .runnable-wrapper,
+  .test .runnable-wrapper > .collapsible-header {
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  .test .runnable-content-region {
-    padding-right: 30px;
-  }
-
   .runnable-controls {
+    float: right;
     overflow: hidden;
-    position: absolute;
-    right: 0;
-    text-align: right;
-    top: 0;
 
     label {
       padding: 2px 4px;
@@ -241,14 +240,121 @@
     visibility: visible;
   }
 
+  .test .collapsible {
+    display: flex;
+    flex-direction: column;
+
+    .runnable-wrapper {
+      .collapsible-header-inner {
+        width: 100%;
+
+        .collapsible-header-text {
+          display: flex;
+
+          .runnable-title {
+            flex-grow: 1;
+            padding-right: 10px;
+          }
+
+          .runnable-controls {
+            justify-self: flex-end;
+            min-width: 20px;
+          }
+        }
+      }
+    }
+  }
+
   .collapsible-header {
     display: flex;
   }
 
-  .test > .runnable-wrapper > .collapsible > .collapsible-header {
-    .collapsible-indicator,
-    .collapsible-more {
-      display: none;
+  .test > .collapsible > .runnable-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
+    display: none;
+  }
+
+  .runnable-header {
+    background: #f2f2f2;
+    box-shadow: 0 2px 7px rgba(0, 0, 0, 0.25);
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 24px;
+    overflow-wrap: break-word;
+    padding: 5px 10px;
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1;
+
+    span > span > a:before,
+    span > span > span:before {
+      @extend .#{$fa-css-prefix};
+      @extend .#{$fa-css-prefix}-file;
+      color: #bdbdbd;
+      display: inline;
+      margin-right: 5px;
+    }
+  }
+
+  .runnable-loading {
+    .runnable-loading-animation {
+      display: flex;
+      margin: 3.5rem auto 1.5rem;
+      padding: 0 5px;
+      width: 160px;
+
+      div {
+        animation: scaling 1.65s ease-in-out infinite;
+        border-radius: 50%;
+        height: 40px;
+        margin: 0 -5px;
+        transform: scale(0.5);
+        width: 40px;
+      }
+
+      div:nth-child(1) {
+        animation-delay:0.1s;
+        background: #56b790;
+      }
+
+      div:nth-child(2) {
+        animation-delay:0.2s;
+        background: #4a88cc;
+      }
+
+      div:nth-child(3) {
+        animation-delay:0.3s;
+        background: #b96162;
+      }
+
+      div:nth-child(4) {
+        animation-delay:0.4s;
+        background: #e3b065;
+      }
+
+      div:nth-child(5) {
+        animation-delay:0.5s;
+        background: #a9abad;
+      }
+
+      @keyframes scaling {
+        0%, 20%, 80%, 100% {
+          opacity: 100%;
+          transform: scale(0.5);
+        }
+
+        50% {
+          opacity: 50%;
+          transform: scale(1);
+        }
+      }
+    }
+
+    .runnable-loading-title {
+      font-family: $muli;
+      font-size: 20px;
+      text-align: center;
     }
   }
 }

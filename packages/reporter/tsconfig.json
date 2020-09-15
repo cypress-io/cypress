@@ -19,7 +19,7 @@
     // "declaration": true,
     // "declarationMap": true,                /* Generates a sourcemap for each corresponding '.d.ts' file. */
     /* Generates corresponding '.map' file. */
-    "sourceMap": true,
+    "inlineSourceMap": true,
     /* Import emit helpers from 'tslib'. */
     "importHelpers": true,
     "strictNullChecks": true,
@@ -50,7 +50,7 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "noErrorTruncation": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   },
   "exclude": [
     "dist"

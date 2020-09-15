@@ -10,6 +10,12 @@ import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import TestModel from '../test/test-model'
 
+const specStub = {
+  name: 'foo.js',
+  relative: 'relative/path/to/foo.js',
+  absolute: '/absolute/path/to/foo.js',
+}
+
 type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
 }
@@ -40,9 +46,9 @@ describe('<Runnables />', () => {
   it('renders <RunnablesList /> when there are runnables', () => {
     const component = shallow(
       <Runnables
-        runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }] as TestModel[] })}
+        runnablesStore={runnablesStoreStub({ runnables: [{ id: '1' }] as TestModel[] })}
         scroller={scrollerStub()}
-        specPath=''
+        spec={specStub}
       />,
     )
 
@@ -54,7 +60,7 @@ describe('<Runnables />', () => {
       <Runnables
         runnablesStore={runnablesStoreStub()}
         scroller={scrollerStub()}
-        specPath='/path/to/foo_spec.js'
+        spec={specStub}
       />,
     )
 
@@ -62,7 +68,7 @@ describe('<Runnables />', () => {
     expect(component.find(AnError).prop('error')).to.eql({
       title: 'No tests found in your file:',
       link: 'https://on.cypress.io/no-tests-found-in-your-file',
-      callout: '/path/to/foo_spec.js',
+      callout: specStub.relative,
       message: 'We could not detect any tests in the above file. Write some tests and re-run.',
     })
   })
@@ -72,7 +78,7 @@ describe('<Runnables />', () => {
       <Runnables
         runnablesStore={runnablesStoreStub({ isReady: false })}
         scroller={scrollerStub()}
-        specPath=''
+        spec={specStub}
       />,
     )
 
@@ -85,7 +91,7 @@ describe('<Runnables />', () => {
       <Runnables
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
-        specPath=''
+        spec={specStub}
       />,
     )
 
@@ -101,7 +107,7 @@ describe('<Runnables />', () => {
         appState={appState}
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
-        specPath=''
+        spec={specStub}
       />,
     )
 
@@ -118,7 +124,7 @@ describe('<Runnables />', () => {
         appState={appState}
         runnablesStore={runnablesStoreStub()}
         scroller={scroller}
-        specPath=''
+        spec={specStub}
       />,
     )
 
@@ -128,7 +134,7 @@ describe('<Runnables />', () => {
 
   context('<RunnablesList />', () => {
     it('renders a runnable for each runnable in model', () => {
-      const component = shallow(<RunnablesList runnablesStore={runnablesStoreStub({ runnables: [{ id: 1 }, { id: 2 }] as TestModel[] })} />)
+      const component = shallow(<RunnablesList runnablesStore={runnablesStoreStub({ runnables: [{ id: '1' }, { id: '2' }] as TestModel[] })} />)
 
       expect(component.find('Runnable').length).to.equal(2)
     })

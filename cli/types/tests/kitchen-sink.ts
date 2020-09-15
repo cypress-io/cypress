@@ -35,14 +35,14 @@ cy.visit('https://www.acme.com/', {
 
 const serverOptions: Partial<Cypress.ServerOptions> = {
   delay: 100,
-  whitelist: () => true
+  ignore: () => true
 }
 
 cy.server(serverOptions)
 
 Cypress.spec.name // $ExpectType string
-Cypress.spec.relative // $ExpectType string | null
-Cypress.spec.absolute // $ExpectType string | null
+Cypress.spec.relative // $ExpectType string
+Cypress.spec.absolute // $ExpectType string
 
 Cypress.browser // $ExpectType Browser
 
@@ -62,6 +62,7 @@ expect(stub).to.not.have.been.called
 stub()
 expect(stub).to.have.been.calledOnce
 cy.wrap(stub).should('have.been.calledOnce')
+cy.wrap(stub).should('be.calledOnce')
 
 namespace EventInterfaceTests {
   // window:confirm stubbing
@@ -135,3 +136,16 @@ cy.clearLocalStorage()
 cy.clearLocalStorage('todos')
 cy.clearLocalStorage('todos', { log: false })
 cy.clearLocalStorage({ log: false })
+
+namespace BlobTests {
+  Cypress.Blob.imgSrcToDataURL('/some/path', undefined, 'anonymous')
+    .then((dateUrl) => {
+      dateUrl // $ExpectType string
+  })
+}
+
+cy.window().then(window => {
+  window // $ExpectType AUTWindow
+
+  window.eval('1')
+})

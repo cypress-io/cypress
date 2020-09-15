@@ -1,31 +1,20 @@
-import cs from 'classnames'
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, createRef, RefObject } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
+import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
-import { indent, onEnterOrSpace } from '../lib/util'
+import Collapsible from '../collapsible/collapsible'
+import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
+import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 
-import Hooks from '../hooks/hooks'
-import Agents from '../agents/agents'
-import Routes from '../routes/routes'
-import TestError from '../errors/test-error'
-
-import TestModel from './test-model'
-
-const NoCommands = observer(() => (
-  <ul className='hooks-container'>
-    <li className='no-commands'>
-      No commands were issued in this test.
-    </li>
-  </ul>
-))
+import Attempts from '../attempts/attempts'
 
 interface Props {
+  events: Events
   appState: AppState
   runnablesStore: RunnablesStore
   scroller: Scroller
@@ -35,12 +24,19 @@ interface Props {
 @observer
 class Test extends Component<Props> {
   static defaultProps = {
+    events,
     appState,
     runnablesStore,
     scroller,
   }
 
-  @observable isOpen: boolean | null = null
+  containerRef: RefObject<HTMLDivElement>
+
+  constructor (props: Props) {
+    super(props)
+
+    this.containerRef = createRef<HTMLDivElement>()
+  }
 
   componentDidMount () {
     this._scrollIntoView()
@@ -48,20 +44,20 @@ class Test extends Component<Props> {
 
   componentDidUpdate () {
     this._scrollIntoView()
-
-    const cb = this.props.model.callbackAfterUpdate
-
-    if (cb) {
-      cb()
-    }
+    this.props.model.callbackAfterUpdate()
   }
 
   _scrollIntoView () {
     const { appState, model, scroller } = this.props
-    const { isActive, shouldRender } = model
+    const { state, shouldRender } = model
 
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && isActive != null) {
-      scroller.scrollIntoView(this.refs.container as HTMLElement)
+    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
+      window.requestAnimationFrame(() => {
+        // since this executes async in a RAF the ref might be null
+        if (this.containerRef.current) {
+          scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+        }
+      })
     }
   }
 
@@ -71,79 +67,46 @@ class Test extends Component<Props> {
     if (!model.shouldRender) return null
 
     return (
-      <div
-        ref='container'
-        className={cs('runnable-wrapper', { 'is-open': this._shouldBeOpen() })}
-        onClick={this._toggleOpen}
-        style={{ paddingLeft: indent(model.level) }}
+      <Collapsible
+        containerRef={this.containerRef}
+        header={this._header()}
+        headerClass='runnable-wrapper'
+        headerStyle={{ paddingLeft: indent(model.level) }}
+        contentClass='runnable-instruments'
+        isOpen={model.isOpen}
       >
-        <div className='runnable-content-region'>
-          <i aria-hidden="true" className='runnable-state fas'></i>
-          <div
-            aria-expanded={this._shouldBeOpen() === true}
-            className='runnable-title'
-            onKeyPress={onEnterOrSpace(this._toggleOpen)}
-            role='button'
-            tabIndex={0}
-          >
-            {model.title}
-            <span className="visually-hidden">{model.state}</span>
-          </div>
-          <div className='runnable-controls'>
-            <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-              <i className='fas fa-exclamation-triangle'></i>
-            </Tooltip>
-          </div>
-        </div>
         {this._contents()}
-        <TestError model={model} />
-      </div>
+      </Collapsible>
     )
+  }
+
+  _header () {
+    const { model } = this.props
+
+    return (<>
+      <i aria-hidden='true' className='runnable-state fas' />
+      <span className='runnable-title'>
+        <span>{model.title}</span>
+        <span className='visually-hidden'>{model.state}</span>
+      </span>
+      <span className='runnable-controls'>
+        <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
+          <i className='fas fa-exclamation-triangle' />
+        </Tooltip>
+      </span>
+    </>)
   }
 
   _contents () {
-    // performance optimization - don't render contents if not open
-    if (!this._shouldBeOpen()) return null
-
     const { model } = this.props
 
     return (
-      <div
-        className='runnable-instruments collapsible-content'
-        onClick={(e) => {
-          e.stopPropagation()
-        }}
-      >
-        <Agents model={model} />
-        <Routes model={model} />
-        <div className='runnable-commands-region'>
-          {model.commands.length ? <Hooks model={model} /> : <NoCommands />}
-        </div>
+      <div style={{ paddingLeft: indent(model.level) }}>
+
+        <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
       </div>
     )
   }
-
-  _shouldBeOpen () {
-    // if this.isOpen is non-null, prefer that since the user has
-    // explicity chosen to open or close the test
-    if (this.isOpen !== null) return this.isOpen
-
-    // otherwise, look at reasons to auto-open the test
-    return this.props.model.state === 'failed'
-           || this.props.model.isOpen
-           || this.props.model.isLongRunning
-           || this.props.runnablesStore.hasSingleTest
-  }
-
-  @action _toggleOpen = () => {
-    if (this.isOpen === null) {
-      this.isOpen = !this._shouldBeOpen()
-    } else {
-      this.isOpen = !this.isOpen
-    }
-  }
 }
-
-export { NoCommands }
 
 export default Test

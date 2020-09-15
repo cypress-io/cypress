@@ -18,8 +18,9 @@ const cwd = options.cwd || process.cwd()
 
 console.log('in', cwd)
 
-execa.shell(`npm install ${npm}`, {
+execa(`npm install ${npm}`, {
   cwd,
+  shell: true,
   stdio: 'inherit',
   env: {
     CYPRESS_INSTALL_BINARY: binary,

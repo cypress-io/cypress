@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>jQuery 3.2.1 Fixture</title>
+    <script type="text/javascript" src="/fixtures/jquery-3.2.1.js"></script>
+  </head>
+  <body>
+    <span id="foo">foo<span>
+    <div>div</div>
+    <input id="input" />
+    <button>button</button>
+    <ul id="list">
+      <li>li 0</li>
+    </ul>
+    <a href="#">a</a>
+    <div>
+      Nested Find
+    </div>
+    <span id="number" class="999">123</span>
+    <span id="456">span with id=number</span>
+    <span id="data-number" data-number='222'>span with data-number=number</span>
+    <input id="value-number" value=123 />
+    <span id="attr-number" num="777">span with attr=number</span>
+    <span id="prop-number">span with prop=number</span>
+    <!-- cy.visit() fails when element with id="jquery" exists
+    // https://github.com/cypress-io/cypress/issues/6193 -->
+    <p id="jquery">jQuery</p>
+  </body>
+</html>

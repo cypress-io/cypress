@@ -2,5 +2,7 @@
 @import 'styles/mixins';
 @import 'styles/vendor';
 @import 'styles/components/*';
+@import '../../ui-components/src/file-opener/file-opener';
 @import '!(styles)*/**/*';
+@import '../../../node_modules/@reach/dialog/styles.css';
 @import '../../ui-components/src/dropdown';

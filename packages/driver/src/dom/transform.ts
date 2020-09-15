@@ -1,4 +1,5 @@
 import _ from 'lodash'
+import { getParent } from './elements'
 import { isDocument } from './document'
 
 export const detectVisibility = ($el: any) => {
@@ -11,7 +12,7 @@ export const detectVisibility = ($el: any) => {
   return elIsTransformedToZero(list) ? 'transformed' : 'visible'
 }
 
-type BackfaceVisibility = 'hidden' | 'visible'
+type BackfaceVisibility = 'hidden' | 'visible' | ''
 type TransformStyle = 'flat' | 'preserve-3d'
 type Matrix2D = [
   number, number, number,
@@ -33,9 +34,13 @@ interface TransformInfo {
 }
 
 const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []): TransformInfo[] => {
-  list.push(extractTransformInfo($el))
+  const info = extractTransformInfo($el)
 
-  const $parent = $el.parent()
+  if (info) {
+    list.push(info)
+  }
+
+  const $parent = getParent($el)
 
   if (!$parent.length || isDocument($parent)) {
     return list
@@ -44,12 +49,23 @@ const extractTransformInfoFromElements = ($el: any, list: TransformInfo[] = []):
   return extractTransformInfoFromElements($parent, list)
 }
 
-const extractTransformInfo = ($el): TransformInfo => {
+const extractTransformInfo = ($el): TransformInfo | null => {
   const el = $el[0]
   const style = getComputedStyle(el)
 
+  const backfaceVisibility = style.getPropertyValue('backface-visibility') as BackfaceVisibility
+
+  // When an element is not in the DOM tree, getComputedStyle() returns empty string.
+  // In an edge case from frameworks like `vue-fragment`
+  // `parentNode` is modified and out of the DOM tree.
+  // @see https://github.com/cypress-io/cypress/pull/6787
+  // @see https://github.com/cypress-io/cypress/issues/6745
+  if (backfaceVisibility === '') {
+    return null
+  }
+
   return {
-    backfaceVisibility: style.getPropertyValue('backface-visibility') as BackfaceVisibility,
+    backfaceVisibility,
     transformStyle: style.getPropertyValue('transform-style') as TransformStyle,
     transform: style.getPropertyValue('transform'),
   }
@@ -209,7 +225,7 @@ const toUnitVector = (v: Vector3): Vector3 => {
 
 // This function checks 2 things that can happen: scale and rotate to 0 in width or height.
 const elIsTransformedToZero = (list: TransformInfo[]) => {
-  if (list[1].transformStyle === 'preserve-3d') {
+  if (list.some((info) => info.transformStyle === 'preserve-3d')) {
     const normal = finalNormal(0, list)
 
     return isElementOrthogonalWithView(normal)

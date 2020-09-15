@@ -1,13 +1,13 @@
-const webpack = require('@cypress/webpack-preprocessor')
+const wp = require('@cypress/webpack-preprocessor')
 const webpackOptions = {
   mode: 'none',
   resolve: {
-    extensions: ['.js', '.jsx', '.png'],
+    extensions: ['.ts', '.js', '.jsx', '.tsx', '.png'],
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(ts|js|jsx|tsx)$/,
         exclude: /node_modules/,
         use: {
           loader: require.resolve('babel-loader'),
@@ -19,6 +19,7 @@ const webpackOptions = {
             presets: [
               require.resolve('@babel/preset-env'),
               require.resolve('@babel/preset-react'),
+              require.resolve('@babel/preset-typescript'),
             ],
             babelrc: false,
           },
@@ -52,5 +53,5 @@ const webpackOptions = {
 }
 
 module.exports = (on) => {
-  on('file:preprocessor', webpack({ webpackOptions }))
+  on('file:preprocessor', wp({ webpackOptions }))
 }

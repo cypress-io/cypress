@@ -8,7 +8,7 @@ You can see a list of the modules exported from this package in [./lib/index.ts]
 
 * `agent` is a HTTP/HTTPS [agent][1] with support for HTTP/HTTPS proxies and keepalive whenever possible
 * `allowDestroy` can be used to wrap a `net.Server` to add a `.destroy()` method
-* `blacklist` is a utility for matching glob blacklists
+* `blocked` is a utility for matching blocked globs
 * `concatStream` is a wrapper around [`concat-stream@1.6.2`][2] that makes it always yield a `Buffer`
 * `connect` contains utilities for making network connections, including `createRetryingSocket`
 * `cors` contains utilities for Cross-Origin Resource Sharing
@@ -21,7 +21,7 @@ See the individual class files in [`./lib`](./lib) for more information.
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-yarn lerna run build-prod --scope @packages/network --stream
+yarn workspace @packages/network build-prod
 ```
 
 ## Testing
@@ -31,9 +31,9 @@ Tests are located in [`./test`](./test)
 To run tests:
 
 ```shell
-yarn lerna run test --scope @packages/network --stream
-yarn lerna run test-watch --scope @packages/network --stream
-yarn lerna run test-debug --scope @packages/network --stream
+yarn workspace @packages/network test
+yarn workspace @packages/network test-watch
+yarn workspace @packages/network test-debug
 ```
 
 [1]: https://devdocs.io/node/http#http_class_http_agent

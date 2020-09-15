@@ -10,6 +10,7 @@ const preprocessor = require('./preprocessor')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
+const { registerTsNode } = require('../../util/ts-node')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
@@ -154,8 +155,14 @@ const execute = (ipc, event, ids, args = []) => {
   }
 }
 
-module.exports = (ipc, pluginsFile) => {
+let tsRegistered = false
+
+const runPlugins = (ipc, pluginsFile, projectRoot) => {
   debug('pluginsFile:', pluginsFile)
+  debug('project root:', projectRoot)
+  if (!projectRoot) {
+    throw new Error('Unexpected: projectRoot should be a string')
+  }
 
   process.on('uncaughtException', (err) => {
     debug('uncaught exception:', util.serializeError(err))
@@ -173,9 +180,21 @@ module.exports = (ipc, pluginsFile) => {
     return false
   })
 
+  if (!tsRegistered) {
+    registerTsNode(projectRoot, pluginsFile)
+
+    // ensure typescript is only registered once
+    tsRegistered = true
+  }
+
   try {
     debug('require pluginsFile')
     plugins = require(pluginsFile)
+
+    // Handle export default () => {}
+    if (plugins && typeof plugins.default === 'function') {
+      plugins = plugins.default
+    }
   } catch (err) {
     debug('failed to require pluginsFile:\n%s', err.stack)
     ipc.send('load:error', 'PLUGINS_FILE_ERROR', pluginsFile, err.stack)
@@ -200,3 +219,10 @@ module.exports = (ipc, pluginsFile) => {
     execute(ipc, event, ids, args)
   })
 }
+
+// for testing purposes
+runPlugins.__reset = () => {
+  tsRegistered = false
+}
+
+module.exports = runPlugins

@@ -16,10 +16,11 @@ export interface InstrumentProps {
   name?: string
   message?: string
   type?: string
+  testCurrentRetry: number
   state?: string | null
   referencesAlias?: Alias
   instrument?: 'agent' | 'command' | 'route'
-  testId: number
+  testId: string
 }
 
 export default class Log {

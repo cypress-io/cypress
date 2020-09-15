@@ -9,6 +9,7 @@ import ProjectId from './project-id'
 import RecordKey from './record-key'
 import ProxySettings from './proxy-settings'
 import NodeVersion from './node-version'
+import FilePreference from './file-preference'
 import Experiments from './experiments'
 
 import { getExperiments, experimental } from '@packages/server/lib/experiments'
@@ -45,10 +46,13 @@ const Settings = observer(({ project, app }) => {
           <Panel header='Proxy Settings' key='proxy-settings' className='form-horizontal settings-proxy'>
             <ProxySettings app={app} />
           </Panel>
-          {hasExperiments &&
-          <Panel header='Experiments' key='experiments' className='form-horizontal settings-experiments'>
-            <Experiments project={project} />
+          <Panel header='File Opener Preference' key='file-preference' className='form-horizontal settings-file-preference'>
+            <FilePreference />
           </Panel>
+          {hasExperiments &&
+            <Panel header='Experiments' key='experiments' className='form-horizontal settings-experiments'>
+              <Experiments project={project} />
+            </Panel>
           }
         </Collapse>
       </div>

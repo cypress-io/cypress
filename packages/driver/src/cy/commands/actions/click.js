@@ -34,15 +34,15 @@ const formatMouseEvents = (events) => {
 }
 
 module.exports = (Commands, Cypress, cy, state, config) => {
-  const { mouse } = cy.devices
+  const { mouse, keyboard } = cy.devices
 
-  const mouseAction = (eventName, { subject, positionOrX, y, options, onReady, onTable, defaultOptions }) => {
+  const mouseAction = (eventName, { subject, positionOrX, y, userOptions, onReady, onTable, defaultOptions }) => {
     let position
     let x
 
-    ({ options, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, options))
+    ({ options: userOptions, position, x, y } = $actionability.getPositionFromArguments(positionOrX, y, userOptions))
 
-    _.defaults(options, {
+    const options = _.defaults({}, userOptions, {
       $el: subject,
       log: true,
       verify: true,
@@ -54,6 +54,14 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       errorOnSelect: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      ctrlKey: false,
+      controlKey: false,
+      altKey: false,
+      optionKey: false,
+      shiftKey: false,
+      metaKey: false,
+      commandKey: false,
+      cmdKey: false,
       ...defaultOptions,
     })
 
@@ -63,6 +71,24 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       $errUtils.throwErrByPath('click.multiple_elements', {
         args: { cmd: eventName, num: options.$el.length },
       })
+    }
+
+    const flagModifiers = (press) => {
+      if (options.ctrlKey || options.controlKey) {
+        keyboard.flagModifier({ key: 'Control' }, press)
+      }
+
+      if (options.altKey || options.optionKey) {
+        keyboard.flagModifier({ key: 'Alt' }, press)
+      }
+
+      if (options.shiftKey) {
+        keyboard.flagModifier({ key: 'Shift' }, press)
+      }
+
+      if (options.metaKey || options.commandKey || options.cmdKey) {
+        keyboard.flagModifier({ key: 'Meta' }, press)
+      }
     }
 
     const perform = (el) => {
@@ -76,6 +102,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           message: deltaOptions,
           $el,
+          timeout: options.timeout,
         })
 
         options._log.snapshot('before', { next: 'after' })
@@ -142,7 +169,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       }
 
       // must use callbacks here instead of .then()
-      // because we're issuing the clicks synchonrously
+      // because we're issuing the clicks synchronously
       // once we establish the coordinates and the element
       // passes all of the internal checks
       return $actionability.verify(cy, $el, options, {
@@ -157,7 +184,11 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
           const moveEvents = mouse.move(fromElViewport, forceEl)
 
+          flagModifiers(true)
+
           const onReadyProps = onReady(fromElViewport, forceEl)
+
+          flagModifiers(false)
 
           return createLog({
             moveEvents,
@@ -203,7 +234,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('click', {
         y,
         subject,
-        options,
+        userOptions: options,
         positionOrX,
         onReady (fromElViewport, forceEl) {
           const clickEvents = mouse.click(fromElViewport, forceEl)
@@ -232,7 +263,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('dblclick', {
         y,
         subject,
-        options,
+        userOptions: options,
         // TODO: 4.0 make this false by default
         defaultOptions: { multiple: true },
         positionOrX,
@@ -268,7 +299,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
       return mouseAction('rightclick', {
         y,
         subject,
-        options,
+        userOptions: options,
         positionOrX,
         onReady (fromElViewport, forceEl) {
           const { clickEvents, contextmenuEvent } = mouse.rightclick(fromElViewport, forceEl)

@@ -1,0 +1,42 @@
+{
+  "name": "@packages/rewriter",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "build-prod": "tsc --project .",
+    "build-test": "yarn build-prod --noEmit",
+    "clean-deps": "rm -rf node_modules",
+    "test": "mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json"
+  },
+  "dependencies": {
+    "ast-types": "0.13.3",
+    "bluebird": "3.7.2",
+    "chai-as-promised": "7.1.1",
+    "debug": "4.1.1",
+    "lodash": "4.17.19",
+    "parse5-html-rewriting-stream": "5.1.1",
+    "recast": "0.19.1"
+  },
+  "devDependencies": {
+    "@cypress/request-promise": "4.2.6",
+    "@types/parse5-html-rewriting-stream": "5.1.1",
+    "fs-extra": "9.0.0",
+    "nock": "12.0.3",
+    "sinon": "9.0.2",
+    "sinon-chai": "3.5.0",
+    "snap-shot-it": "7.9.3"
+  },
+  "files": [
+    "lib"
+  ],
+  "types": "./lib/index.ts",
+  "workspaces": {
+    "nohoist": [
+      "parse5-html-rewriting-stream",
+      "parse5-html-rewriting-stream/**",
+      "@types/parse5-html-rewriting-stream",
+      "@types/parse5-html-rewriting-stream/**"
+    ]
+  }
+}

@@ -1,10 +1,7 @@
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:saved_state')
-const md5 = require('md5')
 const path = require('path')
 const Promise = require('bluebird')
-const sanitize = require('sanitize-filename')
-
 const appData = require('./util/app_data')
 const cwd = require('./cwd')
 const FileUtil = require('./util/file')
@@ -12,7 +9,7 @@ const fs = require('./util/fs')
 
 const stateFiles = {}
 
-const whitelist = `
+const allowed = `
 appWidth
 appHeight
 appX
@@ -28,21 +25,6 @@ reporterWidth
 showedOnBoardingModal
 preferredOpener
 `.trim().split(/\s+/)
-
-const toHashName = function (projectRoot) {
-  if (!projectRoot) {
-    throw new Error('Missing project path')
-  }
-
-  if (!path.isAbsolute(projectRoot)) {
-    throw new Error(`Expected project absolute path, not just a name ${projectRoot}`)
-  }
-
-  const name = sanitize(path.basename(projectRoot))
-  const hash = md5(projectRoot)
-
-  return `${name}-${hash}`
-}
 
 const formStatePath = (projectRoot) => {
   return Promise.try(() => {
@@ -73,7 +55,7 @@ const formStatePath = (projectRoot) => {
     if (projectRoot) {
       debug(`state path for project ${projectRoot}`)
 
-      return path.join(toHashName(projectRoot), fileName)
+      return path.join(appData.toHashName(projectRoot), fileName)
     }
 
     debug('state path for global mode')
@@ -82,7 +64,7 @@ const formStatePath = (projectRoot) => {
   })
 }
 
-const normalizeAndWhitelistSet = (set, key, value) => {
+const normalizeAndAllowSet = (set, key, value) => {
   const valueObject = (() => {
     if (_.isString(key)) {
       const tmp = {}
@@ -96,15 +78,15 @@ const normalizeAndWhitelistSet = (set, key, value) => {
   })()
 
   const invalidKeys = _.filter(_.keys(valueObject), (key) => {
-    return !_.includes(whitelist, key)
+    return !_.includes(allowed, key)
   })
 
   if (invalidKeys.length) {
     // eslint-disable-next-line no-console
-    console.error(`WARNING: attempted to save state for non-whitelisted key(s): ${invalidKeys.join(', ')}. All keys must be whitelisted in server/lib/saved_state.js`)
+    console.error(`WARNING: attempted to save state for non-allowed key(s): ${invalidKeys.join(', ')}. All keys must be allowed in server/lib/saved_state.js`)
   }
 
-  return set(_.pick(valueObject, whitelist))
+  return set(_.pick(valueObject, allowed))
 }
 
 const create = (projectRoot, isTextTerminal) => {
@@ -128,7 +110,7 @@ const create = (projectRoot, isTextTerminal) => {
       path: fullStatePath,
     })
 
-    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndWhitelistSet)
+    stateFile.set = _.wrap(stateFile.set.bind(stateFile), normalizeAndAllowSet)
 
     stateFiles[fullStatePath] = stateFile
 
@@ -139,5 +121,4 @@ const create = (projectRoot, isTextTerminal) => {
 module.exports = {
   create,
   formStatePath,
-  toHashName,
 }

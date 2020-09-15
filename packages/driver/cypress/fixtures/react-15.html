@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>React</title>
+</head>
+<body>
+  <div id="react-container"></div>
+  <script src="/node_modules/react-15.6.1/dist/react.js"></script>
+  <script src="/node_modules/react-dom-15.6.1/dist/react-dom.js"></script>
+  <script>
+      window.onChangeEvents = 0
+
+      ReactDOM.render(React.createElement('div', {},
+        React.createElement('input', {
+          type: 'text',
+          onChange (e) { window.onChangeEvents++ }
+        }),
+        React.createElement('input', {
+          type: 'email',
+          onChange (e) { window.onChangeEvents++ }
+        }),
+        React.createElement('input', {
+          type: 'number',
+          onChange (e) { window.onChangeEvents++ }
+        })
+      ), document.getElementById('react-container'))
+  </script>
+</body>

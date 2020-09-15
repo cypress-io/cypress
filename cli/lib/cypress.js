@@ -7,15 +7,28 @@ const fs = require('./fs')
 const open = require('./exec/open')
 const run = require('./exec/run')
 const util = require('./util')
+const cli = require('./cli')
 
 const cypressModuleApi = {
+  /**
+   * Opens Cypress GUI
+   * @see https://on.cypress.io/module-api#cypress-open
+   */
   open (options = {}) {
     options = util.normalizeModuleOptions(options)
 
     return open.start(options)
   },
 
+  /**
+   * Runs Cypress tests in the current project
+   * @see https://on.cypress.io/module-api#cypress-run
+   */
   run (options = {}) {
+    if (!run.isValidProject(options.project)) {
+      return Promise.reject(new Error(`Invalid project path parameter: ${options.project}`))
+    }
+
     options = util.normalizeModuleOptions(options)
 
     return tmp.fileAsync()
@@ -37,6 +50,22 @@ const cypressModuleApi = {
         })
       })
     })
+  },
+
+  cli: {
+    /**
+     * Parses CLI arguments into an object that you can pass to "cypress.run"
+     * @example
+     *  const cypress = require('cypress')
+     *  const cli = ['cypress', 'run', '--browser', 'firefox']
+     *  const options = await cypress.cli.parseRunArguments(cli)
+     *  // options is {browser: 'firefox'}
+     *  await cypress.run(options)
+     * @see https://on.cypress.io/module-api
+     */
+    parseRunArguments (args) {
+      return cli.parseRunCommand(args)
+    },
   },
 }
 

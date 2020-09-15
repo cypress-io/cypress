@@ -1,19 +1,11 @@
 // this file is used when developing the reporter in isolation via cypress tests
 // if you update this file, also update main-runner.scss
 @import 'lib/variables';
+@import 'lib/mixins';
 @import 'lib/fonts';
 @import 'lib/base';
 @import 'lib/components';
+@import 'lib/tooltip';
+@import '../../../node_modules/@reach/dialog/styles.css';
+@import '../../ui-components/src/file-opener/file-opener';
 @import '!(lib)*/**/*';
-
-/* Used to provide additional context for screen readers */
-.visually-hidden {
-  border: 0;
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}

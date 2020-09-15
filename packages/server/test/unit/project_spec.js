@@ -1,5 +1,6 @@
 require('../spec_helper')
 
+const mockedEnv = require('mocked-env')
 const path = require('path')
 const commitInfo = require('@cypress/commit-info')
 const Fixtures = require('../support/helpers/fixtures')
@@ -415,6 +416,54 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
         expect(scaffold.plugins).not.to.be.called
       })
     })
+
+    describe('forced', () => {
+      let resetEnv
+
+      beforeEach(function () {
+        this.obj.isTextTerminal = true
+        resetEnv = mockedEnv({
+          CYPRESS_INTERNAL_FORCE_SCAFFOLD: '1',
+        })
+      })
+
+      afterEach(() => {
+        resetEnv()
+      })
+
+      it('calls scaffold when forced by environment variable', function () {
+        return this.project.scaffold(this.obj).then(() => {
+          expect(scaffold.integration).to.be.calledWith(this.obj.integrationFolder)
+          expect(scaffold.fixture).to.be.calledWith(this.obj.fixturesFolder)
+          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
+        })
+      })
+    })
+
+    describe('not forced', () => {
+      let resetEnv
+
+      beforeEach(function () {
+        this.obj.isTextTerminal = true
+
+        resetEnv = mockedEnv({
+          CYPRESS_INTERNAL_FORCE_SCAFFOLD: undefined,
+        })
+      })
+
+      afterEach(() => {
+        resetEnv()
+      })
+
+      it('does not scaffold integration folder', function () {
+        return this.project.scaffold(this.obj).then(() => {
+          expect(scaffold.integration).to.not.be.calledWith(this.obj.integrationFolder)
+          expect(scaffold.fixture).to.not.be.calledWith(this.obj.fixturesFolder)
+          // still scaffolds support folder due to old logic
+          expect(scaffold.support).to.be.calledWith(this.obj.supportFolder)
+        })
+      })
+    })
   })
 
   context('#watchSettings', () => {
@@ -563,7 +612,7 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
       plugins.init.rejects(error)
 
-      return this.project.watchPluginsFile(this.config, {
+      this.project.watchPluginsFile(this.config, {
         onError (err) {
           expect(err).to.eql(error)
 

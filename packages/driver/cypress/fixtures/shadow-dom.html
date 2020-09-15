@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Shadow DOM Fixture</title>
+  </head>
+  <body class="filter-me">
+    <div id="non-shadow-element" class="in-and-out">Non Shadow</div>
+    <cy-test-element id="shadow-element-1" innerClass="shadow-1" content="Shadow Content 1"></cy-test-element>
+    <cy-test-element id="shadow-element-2" innerClass="shadow-2" content="Shadow Content 2"></cy-test-element>
+    <div id="parent-of-shadow-container-0">
+      <div id="parent-of-shadow-container-1" class="filter-me">
+        <cy-test-element id="shadow-element-3" innerClass="shadow-3" content="Shadow Content 3"></cy-test-element>
+      </div>
+    </div>
+    <cy-test-element id="shadow-element-4" innerClass="shadow-4" content="Shadow Content 4">
+      <cy-test-element id="shadow-element-5" innerClass="shadow-5" content="Shadow Content 5"></cy-test-element>
+    </cy-test-element>
+    <cy-test-element innerClass="shadow-6" content="Shadow Content 6">
+      <div class="in-shadow-slot">In Shadow Slot</div>
+    </cy-test-element>
+    <cy-test-element id="shadow-element-7" innerClass="in-and-out" content="Shadow Content 7"></cy-test-element>
+    <div id="parent-of-shadow-container-2">
+      <div id="parent-of-shadow-container-3" class="filter-me">
+        <cy-test-element id="shadow-element-8" content="
+          <span class='shadow-8-nested-1 filter-me'>
+            <span class='shadow-8-nested-2'>
+              <span class='shadow-8-nested-3 shadow-8-nested'>Shadow </span>
+              <span class='shadow-8-nested-4 shadow-8-nested'>Content </span>
+              <span class='shadow-8-nested-5 shadow-8-nested'>8</span>
+            </span>
+          </span>
+          "></cy-test-element>
+      </div>
+    </div>
+    <cy-test-element id="shadow-element-9" content="Shadow Content 9" rootAddition="
+      <div class='shadow-div'>Shadow Content 9</div>
+    "></cy-test-element>
+    <div class="focusable" tabindex="1">
+      <cy-test-element innerClass="inside-focusable" content="Inside Focusable"></cy-test-element>
+    </div>
+    <cy-test-element id="shadow-element-10" innerClass="inside-non-visible" content="Not Visible" style="display:block; transform-style: preserve-3d; backface-visibility: hidden; transform: rotateY(180deg);"></cy-test-element>
+    <cy-test-element id="shadow-element-11" content="
+      <span class='shadow-11-contains'>Find Me With cy.contains</span>
+      <span class='shadow-11-contains shadow-11-scope'>Find Me With cy.contains</span>
+      <span class='shadow-11-contains'>Find Me With cy.contains</span>
+    "></cy-test-element>
+
+    <script type="text/javascript">
+      if (window.customElements) {
+        window.customElements.define('cy-test-element', class extends HTMLElement {
+          constructor () {
+            super()
+
+            const root = this.attachShadow({ mode: 'open' })
+            const content = this.getAttribute('content') || 'Shadow Content'
+            const className = this.hasAttribute('innerClass') ? this.getAttribute('innerClass') : 'shadow-content'
+            const rootAddition = this.hasAttribute('rootAddition') ? this.getAttribute('rootAddition') : 'shadow-content'
+
+            root.innerHTML = `<div class="shadow-div"><p class="${className}">${content}</p><input /><slot></slot></div>${rootAddition}`
+          }
+        })
+      }
+
+      if (window.location.search.includes('wrap-qsa')) {
+        const realQuerySelectorAll = document.querySelectorAll;
+        document.querySelectorAll = function (...args) {
+          return realQuerySelectorAll.apply(document, args);
+        };
+      }
+    </script>
+  </body>
+</html>

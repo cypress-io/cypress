@@ -132,13 +132,13 @@
     "parallelizationDisabled": false,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/projects/3d897a",
     "totalSkipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "running",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
+    "runUrl": "http://test-dashboard.cypress.io/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
   },
   {
     "buildNumber": 1892,
@@ -242,13 +242,13 @@
     "parallelizationDisabled": true,
     "projectId": "4d8971",
     "projectName": "webAppOnline",
-    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/projects/3d897a",
     "totalSkipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "failed",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
+    "runUrl": "http://test-dashboard.cypress.io/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
   },
   {
     "buildNumber": 1893,
@@ -288,13 +288,13 @@
     "parallelizationDisabled": false,
     "projectId": "4d8971",
     "projectName": "webAppOnline",
-    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/projects/3d897a",
     "totalSkipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "errored",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
+    "runUrl": "http://test-dashboard.cypress.io/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
   },
   {
     "buildNumber": 1894,
@@ -373,13 +373,13 @@
     "parallelizationDisabled": false,
     "projectId": "3d897a",
     "projectName": "jekyl_blog",
-    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/projects/3d897a",
     "totalSkipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "running",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
+    "runUrl": "http://test-dashboard.cypress.io/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
   },
   {
     "buildNumber": 1895,
@@ -496,12 +496,12 @@
     "parallelizationDisabled": false,
     "projectId": "2d8971",
     "projectName": "management-app",
-    "projectUrl": "http://test-dashboard.cypress.io/#/projects/3d897a",
+    "projectUrl": "http://test-dashboard.cypress.io/projects/3d897a",
     "totalSkipped": 1,
     "specIsolation": false,
     "specPattern": null,
     "status": "passed",
     "updatedAt": "2016-05-15T02:35:38.687Z",
-    "runUrl": "http://test-dashboard.cypress.io/#/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
+    "runUrl": "http://test-dashboard.cypress.io/projects/3d897a/runs/e9dcb3f6-2d68-587e-af1e-451e05f6539c"
   }
 ]

@@ -15,16 +15,16 @@ After [releasing a new version](https://github.com/cypress-io/cypress-example-ki
 
 1. Bump the `cypress-example-kitchensink` `devDependency` within this package's [`package.json`](https://github.com/cypress-io/cypress/blob/develop/packages/example/package.json).
 
-2. Run `yarn` and `yarn lerna run build --scope @packages/example` to build the app and spec files.
+2. Run `yarn` and `yarn workspace @packages/example` to build the app and spec files.
 CONTRIBUTING
-3. Create a new pull-request following this repo's [pull request instructions](.github/CONTRIBUTING.md#pull-requests).
+3. Create a new pull-request following this repo's [pull request instructions](CONTRIBUTING.md#pull-requests).
 
 ## Building
 
 After running `yarn` you must build the app + spec files.
 
 ```bash
-yarn lerna run build --scope @packages/example --stream
+yarn workspace @packages/example build
 ```
 
 This copies the src files from [`cypress-example-kitchensink`](https://github.com/cypress-io/cypress-example-kitchensink), modifies them to point to `https://example.cypress.io` and creates the `example` tests.
@@ -32,5 +32,5 @@ This copies the src files from [`cypress-example-kitchensink`](https://github.co
 ## Deploying
 
 ```bash
-yarn lerna run deploy --scope @packages/example --stream
+yarn workspace @packages/example deploy
 ```

@@ -91,40 +91,10 @@
     }
   }
 
-  .runnable-err-print {
-    background: none;
-    border: solid 2px $err-text;
-    border-radius: 3px;
-    color: $err-text;
-    font-size: 8px;
-    padding: 0.4em;
-
-    &:hover,
-    &:focus {
-      background: rgba(255, 255, 255, 0.6);
-      outline: none;
-    }
-  }
-
   .runnable-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
-    color: $err-text;
-    text-decoration: underline;
-
-    i {
-      position: relative;
-      top: 1px;
-      font-size: 10px;
-      margin-left: 5px;
-      display: inline;
-    }
-
-    &:hover,
-    &:focus {
-      cursor: pointer;
-      color: lighten($err-text, 10%);
-    }
+    font-family: $muli;
   }
 
   .runnable-err-message {
@@ -146,38 +116,131 @@
   }
 
   .runnable-err-stack-expander {
-    cursor: pointer;
-    outline: none;
-    padding: 0 10px 2px 5px;
+    display: flex;
 
-    &:hover,
-    &:focus {
-      color: lighten($err-text, 10%);
+    .collapsible-header {
+      flex-grow: 1;
+
+      &:focus {
+        outline: 0;
+
+        div {
+          background: #fee0e3;
+        }
+      }
+
+      div {
+        background: #ffeaec;
+        cursor: pointer;
+        outline: none;
+        padding: 7px 5px;
+        width: 100%;
+
+        &:hover {
+          background: $err-header-background;
+        }
+
+        &:active {
+          background: darken($err-header-background, 2%);
+        }
+
+        .collapsible-header-text {
+          color: #4f4f4f;
+          font-size: 13px;
+        }
+
+        .collapsible-indicator {
+          line-height: 18px;
+          color: #bbbcbd !important;
+        }
+      }
     }
 
-    .collapsible-header-text {
-      text-decoration: underline;
-      font-size: 13px;
-    }
+    .runnable-err-print {
+      &:focus {
+        outline: none;
 
-    .collapsible-indicator {
-      line-height: 18px;
-      color: #eb535e !important;
-    }
+        div {
+          background: $err-header-background;
+        }
+      }
 
-    .collapsible-more {
-      display: none;
+      div {
+        background: #ffeaec;
+        color: #4f4f4f;
+        cursor: pointer;
+        font-size: 13px;
+        height: 100%;
+        padding: 7px 10px;
+        width: 100%;
+
+        &:focus {
+          outline: none;
+        }
+
+        &:hover {
+          background: $err-header-background;
+        }
+
+        &:active {
+          background: darken($err-header-background, 2%);
+        }
+
+        i {
+          border: solid 1px #4f4f4f;
+          border-radius: 4px;
+          font-size: 6px;
+          padding: 4px 3px;
+          vertical-align: middle;
+        }
+
+        span {
+          vertical-align: middle;
+        }
+      }
     }
   }
 
   .runnable-err-stack-trace {
+    font-family: $monospace;
     overflow: auto;
     padding: 10px;
-    font-family: $monospace;
-    margin-left: 15px;
 
     .err-stack-line {
       white-space: pre;
+
+      // ensure empty lines still take up vertical space
+      &:empty:before {
+        content: ' ';
+      }
+    }
+  }
+
+  .test-err-code-frame {
+    background-color: #fff;
+    border: 1px solid #ffe4e7;
+    margin: 0 10px 10px;
+
+    .runnable-err-file-path {
+      &:before {
+        @extend .#{$fa-css-prefix};
+        @extend .#{$fa-css-prefix}-file;
+        color: #bdbdbd;
+        margin-right: 5px;
+      }
+
+      background: #f6f6f6;
+      display: block;
+      font-size: 13px;
+      line-height: 24px;
+      padding: 3px 10px;
+      word-break: break-all;
+    }
+
+    pre {
+      background-color: #fff;
+      border: 0;
+      padding-left: 10px;
     }
   }
 }

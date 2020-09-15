@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <title>Test input event</title>
+    </head>
+    <body>
+        <input id="test-input"/>
+        <div id="result"></div>
+    </body>
+    <script>
+        let elem = window.document.getElementById('test-input');
+        let resultDiv = window.document.getElementById('result');
+        elem.addEventListener('keydown', (event) => {
+            resultDiv.innerText = `isKeyboardEvent: ${event instanceof KeyboardEvent}`;
+        });
+        elem.addEventListener('mousedown', (event) => {
+            resultDiv.innerText = `isMouseEvent: ${event instanceof MouseEvent}`;
+        });
+    </script>
+</html>

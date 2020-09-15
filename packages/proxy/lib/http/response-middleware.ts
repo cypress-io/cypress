@@ -2,15 +2,25 @@ import _ from 'lodash'
 import charset from 'charset'
 import { CookieOptions } from 'express'
 import { cors, concatStream } from '@packages/network'
-import { CypressRequest, CypressResponse, HttpMiddleware } from '.'
+import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
+import { HttpMiddleware } from '.'
 import iconv from 'iconv-lite'
 import { IncomingMessage, IncomingHttpHeaders } from 'http'
+import { InterceptResponse } from '@packages/net-stubbing'
 import { PassThrough, Readable } from 'stream'
 import * as rewriter from './util/rewriter'
 import zlib from 'zlib'
 
 export type ResponseMiddleware = HttpMiddleware<{
+  /**
+   * Before using `res.incomingResStream`, `prepareResStream` can be used
+   * to remove any encoding that prevents it from being returned as plain text.
+   *
+   * This is done as-needed to avoid unnecessary g(un)zipping.
+   */
+  makeResStreamPlainText: () => void
+  isGunzipped: boolean
   incomingRes: IncomingMessage
   incomingResStream: Readable
 }>
@@ -36,7 +46,7 @@ function getNodeCharsetFromResponse (headers: IncomingHttpHeaders, body: Buffer)
   return 'latin1'
 }
 
-function reqMatchesOriginPolicy (req: CypressRequest, remoteState) {
+function reqMatchesOriginPolicy (req: CypressIncomingRequest, remoteState) {
   if (remoteState.strategy === 'http') {
     return cors.urlMatchesOriginPolicyProps(req.proxiedUrl, remoteState.props)
   }
@@ -48,7 +58,7 @@ function reqMatchesOriginPolicy (req: CypressRequest, remoteState) {
   return false
 }
 
-function reqWillRenderHtml (req: CypressRequest) {
+function reqWillRenderHtml (req: CypressIncomingRequest) {
   // will this request be rendered in the browser, necessitating injection?
   // https://github.com/cypress-io/cypress/issues/288
 
@@ -74,6 +84,10 @@ function resContentTypeIsJavaScript (res: IncomingMessage) {
   )
 }
 
+function isHtml (res: IncomingMessage) {
+  return !resContentTypeIsJavaScript(res)
+}
+
 function resIsGzipped (res: IncomingMessage) {
   return (res.headers['content-encoding'] || '').includes('gzip')
 }
@@ -83,11 +97,11 @@ function resIsGzipped (res: IncomingMessage) {
 // HEAD, 1xx, 204, and 304 responses should never contain anything after headers
 const NO_BODY_STATUS_CODES = [204, 304]
 
-function responseMustHaveEmptyBody (req: CypressRequest, res: IncomingMessage) {
+function responseMustHaveEmptyBody (req: CypressIncomingRequest, res: IncomingMessage) {
   return _.some([_.includes(NO_BODY_STATUS_CODES, res.statusCode), _.invoke(req.method, 'toLowerCase') === 'head'])
 }
 
-function setCookie (res: CypressResponse, k: string, v: string, domain: string) {
+function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
   let opts: CookieOptions = { domain }
 
   if (!v) {
@@ -99,7 +113,7 @@ function setCookie (res: CypressResponse, k: string, v: string, domain: string) 
   return res.cookie(k, v, opts)
 }
 
-function setInitialCookie (res: CypressResponse, remoteState: any, value) {
+function setInitialCookie (res: CypressOutgoingResponse, remoteState: any, value) {
   // dont modify any cookies if we're trying to clear the initial cookie and we're not injecting anything
   // dont set the cookies if we're not on the initial request
   if ((!value && !res.wantsInjection) || !res.isInitial) {
@@ -107,6 +121,20 @@ function setInitialCookie (res: CypressResponse, remoteState: any, value) {
   }
 
   return setCookie(res, '__cypress.initial', value, remoteState.domainName)
+}
+
+// "autoplay *; document-domain 'none'" => { autoplay: "*", "document-domain": "'none'" }
+const parseFeaturePolicy = (policy: string): any => {
+  const pairs = policy.split('; ').map((directive) => directive.split(' '))
+
+  return _.fromPairs(pairs)
+}
+
+// { autoplay: "*", "document-domain": "'none'" } => "autoplay *; document-domain 'none'"
+const stringifyFeaturePolicy = (policy: any): string => {
+  const pairs = _.toPairs(policy)
+
+  return pairs.map((directive) => directive.join(' ')).join('; ')
 }
 
 const LogResponse: ResponseMiddleware = function () {
@@ -118,17 +146,89 @@ const LogResponse: ResponseMiddleware = function () {
   this.next()
 }
 
+const AttachPlainTextStreamFn: ResponseMiddleware = function () {
+  this.makeResStreamPlainText = function () {
+    debug('ensuring resStream is plaintext')
+
+    if (!this.isGunzipped && resIsGzipped(this.incomingRes)) {
+      debug('gunzipping response body')
+
+      const gunzip = zlib.createGunzip(zlibOptions)
+
+      this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
+
+      this.isGunzipped = true
+    }
+  }
+
+  this.next()
+}
+
 const PatchExpressSetHeader: ResponseMiddleware = function () {
+  const { incomingRes } = this
   const originalSetHeader = this.res.setHeader
 
-  // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
-  // but we don't want to change it at all!
-  this.res.setHeader = (k, v) => {
-    if (k === 'content-type') {
-      v = this.incomingRes.headers['content-type'] || v
+  // Node uses their own Symbol object, so use this to get the internal kOutHeaders
+  // symbol - Symbol.for('kOutHeaders') will not work
+  const getKOutHeadersSymbol = () => {
+    const findKOutHeadersSymbol = (): symbol => {
+      return _.find(Object.getOwnPropertySymbols(this.res), (sym) => {
+        return sym.toString() === 'Symbol(kOutHeaders)'
+      })!
     }
 
-    return originalSetHeader.call(this.res, k, v)
+    let sym = findKOutHeadersSymbol()
+
+    if (sym) {
+      return sym
+    }
+
+    // force creation of a new header field so the kOutHeaders key is available
+    this.res.setHeader('X-Cypress-HTTP-Response', 'X')
+    this.res.removeHeader('X-Cypress-HTTP-Response')
+
+    sym = findKOutHeadersSymbol()
+
+    if (!sym) {
+      throw new Error('unable to find kOutHeaders symbol')
+    }
+
+    return sym
+  }
+
+  let kOutHeaders
+
+  this.res.setHeader = function (name, value) {
+    // express.Response.setHeader does all kinds of silly/nasty stuff to the content-type...
+    // but we don't want to change it at all!
+    if (name === 'content-type') {
+      value = incomingRes.headers['content-type'] || value
+    }
+
+    // run the original function - if an "invalid header char" error is raised,
+    // set the header manually. this way we can retain Node's original error behavior
+    try {
+      return originalSetHeader.call(this, name, value)
+    } catch (err) {
+      if (err.code !== 'ERR_INVALID_CHAR') {
+        throw err
+      }
+
+      debug('setHeader error ignored %o', { name, value, code: err.code, err })
+
+      if (!kOutHeaders) {
+        kOutHeaders = getKOutHeadersSymbol()
+      }
+
+      // https://github.com/nodejs/node/blob/42cce5a9d0fd905bf4ad7a2528c36572dfb8b5ad/lib/_http_outgoing.js#L483-L495
+      let headers = this[kOutHeaders]
+
+      if (!headers) {
+        this[kOutHeaders] = headers = Object.create(null)
+      }
+
+      headers[name.toLowerCase()] = [name, value]
+    }
   }
 
   this.next()
@@ -167,6 +267,29 @@ const SetInjectionLevel: ResponseMiddleware = function () {
   )
 
   debug('injection levels: %o', _.pick(this.res, 'isInitial', 'wantsInjection', 'wantsSecurityRemoved'))
+
+  this.next()
+}
+
+// https://github.com/cypress-io/cypress/issues/6480
+const MaybeStripDocumentDomainFeaturePolicy: ResponseMiddleware = function () {
+  const { 'feature-policy': featurePolicy } = this.incomingRes.headers
+
+  if (featurePolicy) {
+    const directives = parseFeaturePolicy(<string>featurePolicy)
+
+    if (directives['document-domain']) {
+      delete directives['document-domain']
+
+      const policy = stringifyFeaturePolicy(directives)
+
+      if (policy) {
+        this.res.set('feature-policy', policy)
+      } else {
+        this.res.removeHeader('feature-policy')
+      }
+    }
+  }
 
   this.next()
 }
@@ -250,20 +373,6 @@ const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
   this.next()
 }
 
-const MaybeGunzipBody: ResponseMiddleware = function () {
-  if (resIsGzipped(this.incomingRes) && (this.res.wantsInjection || this.res.wantsSecurityRemoved)) {
-    debug('ungzipping response body')
-
-    const gunzip = zlib.createGunzip(zlibOptions)
-
-    this.incomingResStream = this.incomingResStream.pipe(gunzip).on('error', this.onError)
-  } else {
-    this.skipMiddleware('GzipBody') // not needed anymore
-  }
-
-  this.next()
-}
-
 const MaybeInjectHtml: ResponseMiddleware = function () {
   if (!this.res.wantsInjection) {
     return this.next()
@@ -273,10 +382,20 @@ const MaybeInjectHtml: ResponseMiddleware = function () {
 
   debug('injecting into HTML')
 
-  this.incomingResStream.pipe(concatStream((body) => {
+  this.makeResStreamPlainText()
+
+  this.incomingResStream.pipe(concatStream(async (body) => {
     const nodeCharset = getNodeCharsetFromResponse(this.incomingRes.headers, body)
     const decodedBody = iconv.decode(body, nodeCharset)
-    const injectedBody = rewriter.html(decodedBody, this.getRemoteState().domainName, this.res.wantsInjection, this.res.wantsSecurityRemoved)
+    const injectedBody = await rewriter.html(decodedBody, {
+      domainName: this.getRemoteState().domainName,
+      wantsInjection: this.res.wantsInjection,
+      wantsSecurityRemoved: this.res.wantsSecurityRemoved,
+      isHtml: isHtml(this.incomingRes),
+      useAstSourceRewriting: this.config.experimentalSourceRewriting,
+      url: this.req.proxiedUrl,
+      deferSourceMapRewrite: this.deferSourceMapRewrite,
+    })
     const encodedBody = iconv.encode(injectedBody, nodeCharset)
 
     const pt = new PassThrough
@@ -296,14 +415,24 @@ const MaybeRemoveSecurity: ResponseMiddleware = function () {
 
   debug('removing JS framebusting code')
 
+  this.makeResStreamPlainText()
+
   this.incomingResStream.setEncoding('utf8')
-  this.incomingResStream = this.incomingResStream.pipe(rewriter.security()).on('error', this.onError)
+  this.incomingResStream = this.incomingResStream.pipe(rewriter.security({
+    isHtml: isHtml(this.incomingRes),
+    useAstSourceRewriting: this.config.experimentalSourceRewriting,
+    url: this.req.proxiedUrl,
+    deferSourceMapRewrite: this.deferSourceMapRewrite,
+  })).on('error', this.onError)
+
   this.next()
 }
 
 const GzipBody: ResponseMiddleware = function () {
-  debug('regzipping response body')
-  this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+  if (this.isGunzipped) {
+    debug('regzipping response body')
+    this.incomingResStream = this.incomingResStream.pipe(zlib.createGzip(zlibOptions)).on('error', this.onError)
+  }
 
   this.next()
 }
@@ -315,16 +444,18 @@ const SendResponseBodyToClient: ResponseMiddleware = function () {
 
 export default {
   LogResponse,
+  AttachPlainTextStreamFn,
+  InterceptResponse,
   PatchExpressSetHeader,
   SetInjectionLevel,
   OmitProblematicHeaders,
   MaybePreventCaching,
+  MaybeStripDocumentDomainFeaturePolicy,
   CopyCookiesFromIncomingRes,
   MaybeSendRedirectToClient,
   CopyResponseStatusCode,
   ClearCyInitialCookie,
   MaybeEndWithEmptyBody,
-  MaybeGunzipBody,
   MaybeInjectHtml,
   MaybeRemoveSecurity,
   GzipBody,

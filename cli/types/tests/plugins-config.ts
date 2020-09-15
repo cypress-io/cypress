@@ -8,7 +8,12 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
   config // $ExpectType PluginConfigOptions
   config.baseUrl // $ExpectType: string
   config.configFile // $ExpectType: string | false
+  config.fixturesFolder // $ExpectType: string | false
+  config.pluginsFile // $ExpectType: string | false
+  config.screenshotsFolder // $ExpectType: string | false
+  config.videoCompression // $ExpectType: number | false
   config.projectRoot // $ExpectType: string
+  config.version // $ExpectType: string
 
   on('before:browser:launch', (browser, options) => {
     browser.displayName // $ExpectType string

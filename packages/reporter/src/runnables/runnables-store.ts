@@ -6,8 +6,9 @@ import AgentModel, { AgentProps } from '../agents/agent-model'
 import CommandModel, { CommandProps } from '../commands/command-model'
 import RouteModel, { RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
+import { HookProps } from '../hooks/hook-model'
 import SuiteModel, { SuiteProps } from './suite-model'
-import TestModel, { TestProps, UpdateTestCallback, TestState } from '../test/test-model'
+import TestModel, { TestProps, TestState, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
 import RunnableModel from './runnable-model'
 
 const defaults = {
@@ -28,9 +29,10 @@ export type LogProps = AgentProps | CommandProps | RouteProps
 
 export type RunnableArray = Array<TestModel | SuiteModel>
 
-type Log = AgentModel | CommandModel | RouteModel
+export type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
+  hooks?: Array<HookProps>
   tests?: Array<TestProps>
   suites?: Array<SuiteProps>
 }
@@ -88,18 +90,20 @@ class RunnablesStore {
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
-    return this._createRunnables<TestProps>('test', runnableProps.tests || [], level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], level),
+    return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level).concat(
+      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
     )
   }
 
-  _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, level: number) {
+  _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, level: number) {
     return _.map(runnables, (runnableProps) => {
-      return this._createRunnable(type, runnableProps, level)
+      return this._createRunnable(type, runnableProps, hooks, level)
     })
   }
 
-  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, level: number) {
+  _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number) {
+    props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
+
     return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
   }
 
@@ -113,14 +117,10 @@ class RunnablesStore {
   }
 
   _createTest (props: TestProps, level: number) {
-    const test = new TestModel(props, level)
+    const test = new TestModel(props, level, this)
 
     this._runnablesQueue.push(test)
     this._tests[test.id] = test
-
-    _.each(props.agents, this.addLog.bind(this))
-    _.each(props.commands, this.addLog.bind(this))
-    _.each(props.routes, this.addLog.bind(this))
 
     return test
   }
@@ -162,66 +162,35 @@ class RunnablesStore {
     this._initialScrollTop = initialScrollTop
   }
 
-  updateTest (props: TestProps, cb: UpdateTestCallback) {
+  updateTest (props: UpdatableTestProps, cb: UpdateTestCallback) {
     this._withTest(props.id, (test) => {
-      return test.update(props, cb)
+      test.update(props, cb)
     })
   }
 
-  runnableStarted ({ id }: TestModel) {
-    this._withTest(id, (test) => {
-      return test.start()
-    })
-  }
-
-  runnableFinished (props: TestModel) {
+  runnableStarted (props: TestProps) {
     this._withTest(props.id, (test) => {
-      return test.finish(props)
+      test.start(props)
     })
   }
 
-  testById (id: number) {
+  runnableFinished (props: TestProps) {
+    this._withTest(props.id, (test) => {
+      test.finish(props)
+    })
+  }
+
+  testById (id: string) {
     return this._tests[id]
   }
 
   addLog (log: LogProps) {
-    switch (log.instrument) {
-      case 'command': {
-        const command = new CommandModel(log as CommandProps)
-
-        this._logs[log.id] = command
-        this._withTest(log.testId, (test) => {
-          return test.addCommand(command, (log as CommandProps).hookName)
-        })
-
-        break
-      }
-      case 'agent': {
-        const agent = new AgentModel(log as AgentProps)
-
-        this._logs[log.id] = agent
-        this._withTest(log.testId, (test) => {
-          return test.addAgent(agent)
-        })
-
-        break
-      }
-      case 'route': {
-        const route = new RouteModel(log as RouteProps)
-
-        this._logs[log.id] = route
-        this._withTest(log.testId, (test) => {
-          return test.addRoute(route)
-        })
-
-        break
-      }
-      default:
-        throw new Error(`Attempted to add log for unknown instrument: ${log.instrument}`)
-    }
+    this._withTest(log.testId, (test) => {
+      test.addLog(log)
+    })
   }
 
-  _withTest (id: number, cb: ((test: TestModel) => void)) {
+  _withTest (id: string, cb: ((test: TestModel) => void)) {
     // we get events for suites and tests, but only tests change during a run,
     // so if the id isn't found in this._tests, we ignore it b/c it's a suite
     const test = this._tests[id]
@@ -229,13 +198,10 @@ class RunnablesStore {
     if (test) cb(test)
   }
 
-  updateLog (log: LogProps) {
-    const found = this._logs[log.id]
-
-    if (found) {
-      // The type of found is Log (one of Agent, Command, Route). So, we need any here.
-      found.update(log as any)
-    }
+  updateLog (props: LogProps) {
+    this._withTest(props.testId, (test) => {
+      test.updateLog(props)
+    })
   }
 
   reset () {
@@ -245,7 +211,6 @@ class RunnablesStore {
 
     this.runnables = []
     this._tests = {}
-    this._logs = {}
     this._runnablesQueue = []
   }
 }

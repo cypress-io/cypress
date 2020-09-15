@@ -28,13 +28,19 @@ Thanks for taking the time to contribute! :smile:
   - [Requirements](#requirements)
   - [Getting Started](#getting-started)
   - [Coding Style](#coding-style)
+  - [Adding links within code](#Adding-links-within-code)
   - [Tests](#tests)
   - [Packages](#packages)
 - [Committing Code](#committing-code)
- - [Branches](#branches)
- - [Pull Requests](#pull-requests)
- - [Testing](#testing)
- - [Dependencies](#dependencies)
+  - [Branches](#branches)
+  - [Pull Requests](#pull-requests)
+  - [Testing](#testing)
+  - [Dependencies](#dependencies)
+- [Reviewing Code](#reviewing-code)
+  - [Some rules about Code Review](#Some-rules-about-Code-Review)
+  - [Steps to take during Code Review](#Steps-to-take-during-Code-Review)
+  - [Code Review Checklist](#Code-Review-Checklist)
+  - [Code Review of Dependency Updates](#Code-Review-of-Dependency-Updates)
 - [Deployment](#deployment)
 
 ## CI status
@@ -111,7 +117,7 @@ Some opened issue are questions, not bug reports or feature requests. Issues are
 
 - Explain that issues in our GitHub repo are reserved for potential bugs or feature requests and that the issue will be closed since it appears to be neither a bug nor a feature request.
 - Guide them to existing resources where their questions can be asked like our [community chat](https://on.cypress.io/chat), our [documentation](https://docs.cypress.io), or [Stack Overflow](https://stackoverflow.com/questions/tagged/cypress).
-- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option. Cypress also offers screen sharing and workshops with our [premium support options](https://www.cypress.io/support/) if they would like something higher-touch.
+- Cypress offers support via email when signing up for any of our our [paid plans](https://www.cypress.io/pricing/), so remind them that this is an option if they already have a paid account.
 - Add the `type: question` label to the issue.
 - Close the issue.
 
@@ -244,7 +250,6 @@ Here is a list of the core packages in this repository with a short description,
  | Folder Name                           | Package Name            | Purpose                                                                      |
  | :------------------------------------ | :---------------------- | :--------------------------------------------------------------------------- |
  | [cli](./cli)                          | `cypress`               | The command-line tool that is packaged as an `npm` module.                   |
- | [coffee](./packages/coffee)           | `@packages/coffee`      | A centralized version of CoffeeScript used for other packages.               |
  | [desktop-gui](./packages/desktop-gui) | `@packages/desktop-gui` | The front-end code for the Cypress Desktop GUI.                              |
  | [driver](./packages/driver)           | `@packages/driver`      | The code that is used to drive the behavior of the API commands.             |
  | [electron](./packages/electron)       | `@packages/electron`    | The Cypress implementation of Electron.                                      |
@@ -308,6 +313,8 @@ yarn dev --run-project /project/folder --record --key <key>
 ```
 
 #### Adding new Dependencies
+
+⚠️ There is a [bug in yarn](https://github.com/yarnpkg/yarn/issues/7734) that may cause issues adding a new dependency to a workspace. You can avoid this by downgrading yarn to 1.19.1 (temporarily downgrade using `npx yarn@1.19.1 workspace @packages/server add my-new-dep1`).
 
 ```shell
 # add a new dep to the root of the repo
@@ -406,13 +413,23 @@ We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rule
 When you edit files, you can quickly fix all changed files before you commit using
 
 ```bash
-$ yarn lint-changed-fix
+$ yarn lint-changed --fix
 ```
 
 When committing files, we run a Git pre-commit hook to lint the staged JS files. See the [`lint-staged` project](https://github.com/okonet/lint-staged).
-If this command fails, you may need to run `yarn lint-changed-fix` and commit those changes.
+If this command fails, you may need to run `yarn lint-changed --fix` and commit those changes.
 
 We **DO NOT** use Prettier to format code. You can find [.prettierignore](.prettierignore) file that ignores all files in this repository. To ensure this file is loaded, please always open _the root repository folder_ in your text editor, otherwise your code formatter might execute, reformatting lots of source files.
+
+### Adding links within code
+
+When adding links to outside resources within the Cypress Test Runner (including links to Cypress's own documentation), we utilize our [`cypress-on`](https://github.com/cypress-io/cypress-services/tree/develop/packages/on) service for all links.
+
+This is to ensure that links do not go dead in older versions of Cypress when the location of the link has changed. To add a new link:
+
+- Make up a new slug for the linked resource like `https://on.cypress.io/my-special-link`.
+- Open a PR adding the new slug in [links.yml](https://github.com/cypress-io/cypress-services/blob/develop/packages/on/data/links.yml) with the href of the resource it should redirect to. *Note: this requires access to the internal [cypress-services](https://github.com/cypress-io/cypress-services) repo which is only granted to employees. If you're an outside contributor and need a link reroute added, please comment in the relevant PR asking for assistance.*
+- Wait for the PR to be reviewed and **deployed** from [cypress-services](https://github.com/cypress-io/cypress-services). This is required before your changes can be merged into the `cypress` project.
 
 ### Tests
 
@@ -500,27 +517,11 @@ The repository is setup with two main (protected) branches.
 ### Pull Requests
 
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
-- PR's can be opened before all the work is finished. In fact we encourage this! Please write `[WIP]` in the title of your Pull Request if your PR is not ready for review - someone will review your PR as soon as the `[WIP]` is removed.
+- PR's can be opened before all the work is finished. In fact we encourage this! Please create a [Draft Pull Request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests#draft-pull-requests) if your PR is not ready for review. [Mark the PR as **Ready for Review**](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/changing-the-stage-of-a-pull-request#marking-a-pull-request-as-ready-for-review) when you're ready for a Cypress team member to review the PR.
+- Prefix the title of the Pull Request using [semantic-release](https://github.com/semantic-release/semantic-release)'s format as defined [here](https://github.com/angular/angular.js/blob/master/DEVELOPERS.md#type). For example, if your PR is fixing a bug, you should prefix the PR title with `fix:`.
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
-
-### Pull Request Reviews
-
-After a PR has been opened, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review Pull Requests. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
-
-**Some rules about Pull Requests Reviews:**
-
-1. The contributor opening the pull request may not approve their own PR.
-2. The PR will not be merged if some reviewers have voted "Needs changes".
-
-If any of the Pull Request Review guidelines can't be met, a comment will be left by the reviewer with 'Request changes'. Please make any updates as appropriate and we will re-review once those changes are addressed.
-
-**During a Pull Request Review, the following should be done:**
-
-- Run the code and use it as the end user would. Double check issue and PR description to ensure it is meeting requirements.
-- Read through every line of changed code (Yes, we know this could be a LOT).
-- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
 
 ### Testing
 
@@ -534,6 +535,75 @@ We use [RenovateBot](https://renovatebot.com/) to automatically upgrade our depe
 
 After a PR has been opened for a dependency update, our `cypress-bot` will comment on the PR detailing the guidelines to be used to review the dependency update. Please read these guidelines carefully and make any updates where you see the PR may not be meeting the quality of these guidelines.
 
+## Reviewing Code
+
+### Some rules about Code Review
+
+1. The contributor opening the pull request may not approve their own PR.
+2. The PR will not be merged if some reviewers have requested changes.
+
+If any of the Pull Request Review guidelines can't be met, a comment should be left by the reviewer with 'Request changes'. The original contributor is responsible for making any updates and request re-review once those changes are addressed.
+
+### Steps to take during Code Review
+
+- Run the code and use it as the end user would.
+- Double check the issue and PR description to ensure it is meeting the original requirements.
+- Read through every line of changed code (Yes, we know this could be a LOT).
+- If you don’t understand why some piece of code is required, ask for clarification! Likely the contributor had a reason and can provide the answer quicker than investigating yourself.
+
+### Code Review Checklist
+
+Below are guidelines to help during code review. If any of the following requirements can't be met, leave a comment in the review selecting 'Request changes', otherwise 'Approve'.
+
+#### User Experience
+
+- [ ] The feature/bugfix is self-documenting from within the product.
+- [ ] The change provides the end user with a way to fix their problem (no dead ends).
+- [ ] If a breaking change or a change to a commonly used API, the proposed changes have been discussed and agreed upon in the weekly team meeting (or a separate meeting if a larger change).
+
+#### Functionality
+
+- [ ] The code works and performs its intended function with the correct logic.
+- [ ] Performance has been factored in (for example, the code cleans up after itself to not cause memory leaks).
+- [ ] The code guards against edge cases and invalid input and has tests to cover it.
+
+#### Maintainability
+
+- [ ] The code is readable (too many nested 'if's are a bad sign).
+- [ ] Names used for variables, methods, etc, clearly describe their function.
+- [ ] The code is easy to understood and there are relevant comments explaining.
+- [ ] New algorithms are documented in the code with link(s) to external docs (flowcharts, w3c, chrome, firefox).
+- [ ] There are comments containing link(s) to the addressed issue (in tests and code).
+
+#### Quality
+
+- [ ] The change does not reimplement code.
+- [ ] There's not a module from the ecosystem that should be used instead.
+- [ ] There is no redundant or duplicate code.
+- [ ] There are no irrelevant comments left in the code.
+- [ ] Tests are testing the code’s intended functionality in the best way possible.
+
+#### Internal
+
+- [ ] The original issue has been tagged with a release in ZenHub.
+
+### Code Review of Dependency Updates
+
+Below are some guidelines Cypress uses when reviewing dependency updates.
+
+#### Dependency Update Instructions
+
+- Read through the entire changelog of the dependency's changes. If a changelog is not available, check every commit made to the dependency. **NOTE** - do not rely on semver to indicate breaking changes - every product does not follow this standard.
+- Add a PR review comment noting any relevant changes in the dependency.
+- If any of the following requirements cannot be met, leave a comment in the review selecting 'Request changes', otherwise 'Approve'.
+
+#### Dependency Updates Checklist
+
+- [ ] Code using the dependency has been updated to accommodate any breaking changes
+- [ ] The dependency still supports the version of Node that the package requires.
+- [ ] The PR been tagged with a release in ZenHub.
+- [ ] Appropriate labels have been added to the PR (for example: label `type: breaking change` if it is a breaking change)
+
 ## Deployment
 
 We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md)
@@ -543,3 +613,17 @@ We will try to review and merge pull requests quickly. After merging we will try
 ### ENFILE or EMFILE
 
 If you get `ENFILE: file table overflow`, `ENFILE: too many open files` or any other `ENFILE` or `EMFILE` errors on Mac, that means you are doing synchronous file system operations. Cypress should **NEVER** do them. Instead we should use async file system operations and let `graceful-fs` retry them. Find the place where the synchronous `fs` operation is done from the stacktrace and make it async.
+
+### lock file
+
+You can rebuild the lock file using the latest `develop` version in a clean isolated environment using Docker. From the current branch:
+
+```shell
+git checkout develop
+git pull
+git checkout -
+git checkout origin/develop -- yarn.lock
+# remove all unknown files
+git clean -xfd
+yarn
+```

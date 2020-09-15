@@ -6,6 +6,7 @@ const Promise = require('bluebird')
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $errUtils = require('./error_utils')
+const $stackUtils = require('./stack_utils')
 const $Chai = require('../cy/chai')
 const $Xhrs = require('../cy/xhrs')
 const $jQuery = require('../cy/jquery')
@@ -28,6 +29,9 @@ const $selection = require('../dom/selection')
 const $Snapshots = require('../cy/snapshots')
 const $CommandQueue = require('./command_queue')
 const $VideoRecorder = require('../cy/video-recorder')
+const $TestConfigOverrides = require('../cy/testConfigOverrides')
+
+const { registerFetch } = require('unfetch')
 
 const privateProps = {
   props: { name: 'state', url: true },
@@ -60,6 +64,10 @@ const setRemoteIframeProps = ($autIframe, state) => {
   return state('$autIframe', $autIframe)
 }
 
+function __stackReplacementMarker (fn, ctx, args) {
+  return fn.apply(ctx, args)
+}
+
 // We only set top.onerror once since we make it configurable:false
 // but we update cy instance every run (page reload or rerun button)
 let curCy = null
@@ -72,9 +80,17 @@ const setTopOnError = function (cy) {
 
   curCy = cy
 
+  // prevent overriding top.onerror twice when loading more than one
+  // instance of test runner.
+  if (top.onerror && top.onerror.isCypressHandler) {
+    return
+  }
+
   const onTopError = function () {
     return curCy.onUncaughtException.apply(curCy, arguments)
   }
+
+  onTopError.isCypressHandler = true
 
   top.onerror = onTopError
 
@@ -90,7 +106,12 @@ const setTopOnError = function (cy) {
   })
 }
 
+// NOTE: this makes the cy object an instance
+// TODO: refactor the 'create' method below into this class
+class $Cy {}
+
 const create = function (specWindow, Cypress, Cookies, state, config, log) {
+  let cy = new $Cy()
   let stopped = false
   const commandFns = {}
 
@@ -124,7 +145,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const timeouts = $Timeouts.create(state)
   const stability = $Stability.create(Cypress, state)
   const retries = $Retries.create(Cypress, state, timeouts.timeout, timeouts.clearTimeout, stability.whenStable, onFinishAssertions)
-  const assertions = $Assertions.create(state, queue, retries.retry)
+  const assertions = $Assertions.create(Cypress, cy)
 
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
@@ -133,15 +154,16 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
-  const { expect } = $Chai.create(specWindow, assertions.assert)
+  const { expect } = $Chai.create(specWindow, state, assertions.assert)
 
   const xhrs = $Xhrs.create(state)
-  const aliases = $Aliases.create(state)
+  const aliases = $Aliases.create(cy)
 
   const errors = $Errors.create(state, config, log)
   const ensures = $Ensures.create(state, expect)
 
   const snapshots = $Snapshots.create($$, state)
+  const testConfigOverrides = $TestConfigOverrides.create()
 
   const isCy = (val) => {
     return (val === cy) || $utils.isInstanceOf(val, $Chainer)
@@ -251,6 +273,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       contentWindow.CSSStyleSheet.prototype.insertRule = _.wrap(insertRule, cssModificationSpy)
       contentWindow.CSSStyleSheet.prototype.deleteRule = _.wrap(deleteRule, cssModificationSpy)
+
+      if (config('experimentalFetchPolyfill')) {
+        // drop "fetch" polyfill that replaces it with XMLHttpRequest
+        // from the app iframe that we wrap for network stubbing
+        contentWindow.fetch = registerFetch(contentWindow)
+        // flag the polyfill to test this experimental feature easier
+        state('fetchPolyfilled', true)
+      }
     } catch (error) {} // eslint-disable-line no-empty
   }
 
@@ -322,7 +352,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       state('nestedIndex', state('index'))
 
       return command.get('args')
-    }).all()
+    })
 
     .then((args) => {
       // store this if we enqueue new commands
@@ -345,7 +375,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // run the command's fn with runnable's context
       try {
-        ret = command.get('fn').apply(state('ctx'), args)
+        ret = __stackReplacementMarker(command.get('fn'), state('ctx'), args)
       } catch (err) {
         throw err
       } finally {
@@ -428,6 +458,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       // also reset recentlyReady back to null
       state('recentlyReady', null)
+
+      // we're finished with the current command
+      // so set it back to null
+      state('current', null)
 
       state('subject', subject)
 
@@ -556,14 +590,12 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       state('resolve', resolve)
-
-      return state('reject', rejectOuterAndCancelInner)
+      state('reject', rejectOuterAndCancelInner)
     })
     .catch((err) => {
       // since this failed this means that a
       // specific command failed and we should
       // highlight it in red or insert a new command
-
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
 
@@ -673,12 +705,54 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return state('index', queue.length)
   }
 
-  const fail = function (err, runnable) {
+  const getUserInvocationStack = (err) => {
+    const current = state('current')
+    const currentAssertionCommand = current?.get('currentAssertionCommand')
+    const withInvocationStack = currentAssertionCommand || current
+    // user assertion errors (expect().to, etc) get their invocation stack
+    // attached to the error thrown from chai
+    // command errors and command assertion errors (default assertion or cy.should)
+    // have the invocation stack attached to the current command
+    // prefer err.userInvocation stack if it's been set
+    let userInvocationStack = $errUtils.getUserInvocationStack(err) || state('currentAssertionUserInvocationStack')
+
+    // if there is no user invocation stack from an assertion or it is the default
+    // assertion, meaning it came from a command (e.g. cy.get), prefer the
+    // command's user invocation stack so the code frame points to the command.
+    // `should` callbacks are tricky because the `currentAssertionUserInvocationStack`
+    // points to the `cy.should`, but the error came from inside the callback,
+    // so we need to prefer that.
+    if (
+      !userInvocationStack
+      || err.isDefaultAssertionErr
+      || (currentAssertionCommand && !current?.get('followedByShouldCallback'))
+    ) {
+      userInvocationStack = withInvocationStack?.get('userInvocationStack')
+    }
+
+    if (!userInvocationStack) return
+
+    if (
+      $errUtils.isCypressErr(err)
+      || $errUtils.isAssertionErr(err)
+      || $errUtils.isChaiValidationErr(err)
+    ) {
+      return userInvocationStack
+    }
+  }
+
+  const fail = (err) => {
     let rets
 
     stopped = true
 
-    err = $errUtils.normalizeErrorStack(err)
+    err.stack = $stackUtils.normalizedStack(err)
+
+    err = $errUtils.enhanceStack({
+      err,
+      userInvocationStack: getUserInvocationStack(err),
+      projectRoot: config('projectRoot'),
+    })
 
     err = $errUtils.processErr(err, config)
 
@@ -705,6 +779,14 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       throw err
     }
 
+    // this means the error came from a 'fail' handler, so don't send
+    // 'cy:fail' action again, just finish up
+    if (err.isCyFailErr) {
+      delete err.isCyFailErr
+
+      return finish(err)
+    }
+
     // if we have a "fail" handler
     // 1. catch any errors it throws and fail the test
     // 2. otherwise swallow any errors
@@ -718,11 +800,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     try {
       // collect all of the callbacks for 'fail'
       rets = Cypress.action('cy:fail', err, state('runnable'))
-    } catch (err2) {
-      $errUtils.normalizeErrorStack(err2)
-
+    } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
-      return finish(err2)
+      cyFailErr.isCyFailErr = true
+
+      return fail(cyFailErr)
     }
 
     // bail if we had callbacks attached
@@ -734,7 +816,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     return finish(err)
   }
 
-  const cy = {
+  _.extend(cy, {
     id: _.uniqueId('cy'),
 
     // synchrounous querying
@@ -898,7 +980,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return doneEarly()
     },
 
-    reset () {
+    reset (attrs, test) {
       stopped = false
 
       const s = state()
@@ -917,6 +999,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
       queue.reset()
       timers.reset()
+      testConfigOverrides.restoreAndSetTestConfigOverrides(test, Cypress.config, Cypress.env)
 
       return cy.removeAllListeners()
     },
@@ -962,13 +1045,15 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
+        const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
+
         let ret
 
         ensures.ensureRunnable(name)
 
         // this is the first call on cypress
         // so create a new chainer instance
-        const chain = $Chainer.create(name, args)
+        const chain = $Chainer.create(name, userInvocationStack, specWindow, args)
 
         // store the chain so we can access it later
         state('chain', chain)
@@ -1009,7 +1094,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         return chain
       }
 
-      return cy.addChainer(name, (chainer, args) => {
+      return cy.addChainer(name, (chainer, userInvocationStack, args) => {
         const { firstCall, chainerId } = chainer
 
         // dont enqueue / inject any new commands if
@@ -1027,6 +1112,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           args,
           type,
           chainerId,
+          userInvocationStack,
           fn: wrap(firstCall),
         })
 
@@ -1123,30 +1209,22 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     onSpecWindowUncaughtException () {
       // create the special uncaught exception err
-      let runnable
       const err = errors.createUncaughtException('spec', arguments)
+      const runnable = state('runnable')
 
-      runnable = state('runnable')
+      if (!runnable) return err
 
-      if (runnable) {
-        // we're using an explicit done callback here
-        let d; let r
-
-        d = state('done')
-
-        if (d) {
-          d(err)
-        }
-
-        r = state('reject')
+      try {
+        fail(err)
+      } catch (failErr) {
+        const r = state('reject')
 
         if (r) {
           return r(err)
         }
-      }
 
-      // else pass the error along
-      return err
+        return failErr
+      }
     },
 
     onUncaughtException () {
@@ -1191,7 +1269,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       return snapshots.getStyles(...args)
     },
 
-    setRunnable (runnable, hookName) {
+    setRunnable (runnable, hookId) {
       // when we're setting a new runnable
       // prepare to run again!
       stopped = false
@@ -1199,9 +1277,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // reset the promise again
       state('promise', undefined)
 
-      state('hookName', hookName)
+      state('hookId', hookId)
 
       state('runnable', runnable)
+
+      state('test', $utils.getTestFromRunnable(runnable))
 
       state('ctx', runnable.ctx)
 
@@ -1254,7 +1334,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
             state('done', done)
           }
 
-          let ret = fn.apply(this, arguments)
+          let ret = __stackReplacementMarker(fn, this, arguments)
 
           // if we returned a value from fn
           // and enqueued some new commands
@@ -1317,18 +1397,15 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
           // else just return ret
           return ret
-        } catch (error) {
-          // if our runnable.fn throw synchronously
-          // then it didnt fail from a cypress command
-          // but we should still teardown and handle
+        } catch (err) {
+          // if runnable.fn threw synchronously, then it didnt fail from
+          // a cypress command, but we should still teardown and handle
           // the error
-          const err = error
-
           return fail(err, runnable)
         }
       }
     },
-  }
+  })
 
   _.each(privateProps, (obj, key) => {
     return Object.defineProperty(cy, key, {

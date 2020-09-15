@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-
 const _ = require('lodash')
 const chalk = require('chalk')
 const minimist = require('minimist')
@@ -24,7 +22,7 @@ if (options['glob-in-dir']) {
   if (run[0]) {
     run = [path.join(options['glob-in-dir'], '**', `*${run[0]}*`)]
   } else {
-    run = [options['glob-in-dir']]
+    run = [path.join(options['glob-in-dir'], '**')]
   }
 }
 
@@ -48,7 +46,7 @@ if (!run || !run.length) {
 
     It should look something like this:
 
-      $ yarn test ./test/unit/api_spec.coffee
+      $ yarn test ./test/unit/api_spec.js
 
     If you want to run all a specific group of tests:
 
@@ -70,8 +68,9 @@ if (isWindows()) {
   commandAndArguments.command = 'xvfb-maybe'
   // this should always match cli/lib/exec/xvfb.js
   commandAndArguments.args = [
-    '--xvfb-run-args ' +
-    '"-as \\"-screen 0 1280x1024x24\\""',
+    `-as`,
+    `"-screen 0 1280x1024x24"`,
+    `--`,
     'node',
   ]
 }
@@ -87,7 +86,7 @@ if (isGteNode12()) {
   // max HTTP header size 8kb -> 1mb
   // https://github.com/cypress-io/cypress/issues/76
   commandAndArguments.args.push(
-    `--max-http-header-size=${1024 * 1024}`,
+    `--max-http-header-size=${1024 * 1024} --http-parser=legacy`,
   )
 }
 
@@ -110,11 +109,14 @@ commandAndArguments.args.push(
   '--timeout',
   options['inspect-brk'] ? '40000000' : '10000',
   '--recursive',
-  '--compilers ts:@packages/ts/register,coffee:@packages/coffee/register',
+  '-r @packages/ts/register',
   '--reporter',
   'mocha-multi-reporters',
   '--reporter-options',
   'configFile=../../mocha-reporter-config.json',
+  '--extension=js,ts',
+  // restore mocha 2.x behavior to force end process after spec run
+  '--exit',
 )
 
 const env = _.clone(process.env)
@@ -145,8 +147,16 @@ if (options.browser) {
   env.BROWSER = options.browser
 }
 
-if (options.exit != null) {
-  env.EXIT = options.exit
+if (options.headed) {
+  env.HEADED = true
+}
+
+if (options.exit === false) {
+  env.NO_EXIT = '1'
+}
+
+if (options['cypress-inspect-brk']) {
+  env.CYPRESS_INSPECT_BRK = '1'
 }
 
 const cmd = `${commandAndArguments.command} ${
@@ -158,4 +168,10 @@ console.log(cmd)
 
 const child = execa.shell(cmd, { env, stdio: 'inherit' })
 
-child.on('exit', process.exit)
+child.on('exit', (code, signal) => {
+  if (signal) {
+    console.error(`tests exited with signal ${signal}`)
+  }
+
+  process.exit(code === null ? 1 : code)
+})

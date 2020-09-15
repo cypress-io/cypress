@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import check from 'check-more-types'
 import la from 'lazy-ass'
-import rp from 'request-promise'
+import rp from '@cypress/request-promise'
 
 function hasCloudflareEnvironmentVars () {
   return _.chain([process.env.CF_TOKEN, process.env.CF_ZONEID])

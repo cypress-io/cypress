@@ -84,6 +84,17 @@ describe('Settings', () => {
     })
   })
 
+  /**
+   * Opens "Configuration" panel of the Settings tab
+   * and checks that configuration element is fully visible.
+   * This helps to ensure no flake down the line
+   */
+  const openConfiguration = () => {
+    cy.contains('Configuration').click()
+    cy.get('.config-vars').should('be.visible')
+    .invoke('height').should('be.gt', 400)
+  }
+
   describe('configuration panel', () => {
     describe('displays config', () => {
       beforeEach(function () {
@@ -92,7 +103,7 @@ describe('Settings', () => {
         this.getProjectStatus.resolve(this.projectStatuses[0])
 
         this.goToSettings()
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('displays config section', () => {
@@ -105,8 +116,16 @@ describe('Settings', () => {
         .should('not.contain', '0:Chrome')
 
         cy.contains('span', 'browsers').parents('div').first().find('span').first().click()
+
         cy.get('.config-vars').invoke('text')
         .should('contain', '0:Chrome')
+
+        // make sure the main collapsible content
+        // has finished animating and that it has
+        // an empty inline style attribute
+        cy.get('.rc-collapse-content')
+        .should('not.have.class', 'rc-collapse-anim')
+        .should('have.attr', 'style', '')
 
         cy.percySnapshot()
       })
@@ -143,7 +162,7 @@ describe('Settings', () => {
         cy.get('@config-vars')
         .contains('span', 'Electron').parent('span').should('have.class', 'plugin')
 
-        cy.contains('span', 'blacklistHosts').parents('div').first().find('span').first().click()
+        cy.contains('span', 'blockHosts').parents('div').first().find('span').first().click()
         cy.get('@config-vars')
         .contains('span', 'www.google-analytics.com').parent('span').should('have.class', 'config')
 
@@ -196,8 +215,8 @@ describe('Settings', () => {
         cy.get('.line').contains('*.foobar.com, *.bazqux.com')
       })
 
-      it('displays "array" values for blacklistHosts', () => {
-        cy.contains('.line', 'blacklistHosts').contains('www.google-analytics.com, hotjar.com')
+      it('displays "array" values for blockHosts', () => {
+        cy.contains('.line', 'blockHosts').contains('www.google-analytics.com, hotjar.com')
       })
 
       it('opens help link on click', () => {
@@ -296,7 +315,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('displays updated config', function () {
@@ -318,7 +337,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('notes that cypress.json is disabled', () => {
@@ -334,7 +353,7 @@ describe('Settings', () => {
 
         this.goToSettings()
 
-        cy.contains('Configuration').click()
+        openConfiguration()
       })
 
       it('notes that a custom config is in use', () => {
@@ -374,7 +393,7 @@ describe('Settings', () => {
       })
 
       it('opens ci guide when learn more is clicked', () => {
-        cy.get('.settings-record-key').contains('Learn More').click().then(function () {
+        cy.get('.settings-record-key').contains('Learn more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/what-is-a-record-key')
         })
       })
@@ -550,7 +569,7 @@ describe('Settings', () => {
       this.getProjectStatus.resolve(this.projectStatuses[0])
       this.openProject.resolve(this.config)
       this.goToSettings()
-      cy.contains('Configuration').click()
+      openConfiguration()
 
       cy.contains('http://localhost:7777').then(() => {
         this.ipc.openProject.onCall(1).rejects(this.err)
@@ -676,9 +695,7 @@ describe('Settings', () => {
         // do not overwrite the shared object reference -
         // because it is used by the app's code.
         this.win.experimental.names.experimentalCoolFeature = 'Cool Feature'
-        this.win.experimental.summaries.experimentalCoolFeature = `
-          Enables super cool feature from Cypress where you can see the cool feature
-        `
+        this.win.experimental.summaries.experimentalCoolFeature = 'Enables super cool feature from Cypress where you can see the cool feature'
       })
 
       const hasLearnMoreLink = () => {
@@ -709,7 +726,7 @@ describe('Settings', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
           .should('have.class', 'enabled')
-          .and('have.text', 'ON')
+          .and('have.text', 'enabled')
 
           cy.percySnapshot()
         })
@@ -734,11 +751,84 @@ describe('Settings', () => {
         it('displays experiment', () => {
           cy.get('.settings-experiments').contains('Cool Feature')
           cy.get('.experiment-status-sign')
-          .should('not.have.class', 'disabled')
-          .and('have.text', 'OFF')
+          .should('have.class', 'disabled')
+          .and('have.text', 'disabled')
 
           cy.percySnapshot()
         })
+      })
+    })
+  })
+
+  describe('file preference panel', () => {
+    const availableEditors = [
+      { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
+      { id: 'vim', name: 'Vim', isOther: false, openerId: 'vim' },
+      { id: 'sublime', name: 'Sublime Text', isOther: false, openerId: 'sublime' },
+      { id: 'vscode', name: 'Visual Studio Code', isOther: false, openerId: 'vscode' },
+      { id: 'other', name: 'Other', isOther: true, openerId: '' },
+    ]
+
+    beforeEach(function () {
+      this.getUserEditor = this.util.deferred()
+      cy.stub(this.ipc, 'getUserEditor').returns(this.getUserEditor.promise)
+      cy.stub(this.ipc, 'setUserEditor').resolves()
+
+      this.openProject.resolve(this.config)
+      this.projectStatuses[0].id = this.config.projectId
+      this.getProjectStatus.resolve(this.projectStatuses[0])
+
+      this.goToSettings()
+
+      cy.contains('File Opener Preference').click()
+    })
+
+    it('displays file preference section', () => {
+      cy.contains('Your preference is used to open files')
+    })
+
+    it('opens file preference guide when learn more is clicked', () => {
+      cy.get('.file-preference').contains('Learn more').click().then(function () {
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/file-opener-preference')
+      })
+    })
+
+    it('loads preferred editor and available editors', function () {
+      expect(this.ipc.getUserEditor).to.be.called
+    })
+
+    it('shows spinner', () => {
+      cy.get('.loading-editors')
+    })
+
+    describe('when editors load with preferred editor', () => {
+      beforeEach(function () {
+        this.getUserEditor.resolve({ availableEditors, preferredOpener: availableEditors[3] })
+      })
+
+      it('displays available editors with preferred one selected', () => {
+        cy.get('.loading-editors').should('not.exist')
+        cy.contains('Atom')
+        cy.contains('Other')
+        cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
+      })
+
+      it('sets editor through ipc when a different editor is selected', function () {
+        cy.contains('Atom').click()
+        .closest('li').should('have.class', 'is-selected')
+
+        cy.wrap(this.ipc.setUserEditor).should('be.calledWith', availableEditors[0])
+      })
+    })
+
+    describe('when editors load without preferred editor', () => {
+      beforeEach(function () {
+        this.getUserEditor.resolve({ availableEditors })
+      })
+
+      it('does not select an editor', () => {
+        cy.get('.loading-editors').should('not.exist')
+        cy.get('.editor-picker li').should('not.have.class', 'is-selected')
       })
     })
   })
@@ -762,7 +852,7 @@ describe('Settings', () => {
       this.getProjectStatus.resolve(this.projectStatuses[0])
       this.openProject.resolve(this.config)
       this.goToSettings()
-      cy.contains('Configuration').click()
+      openConfiguration()
 
       cy.contains('http://localhost:7777').then(() => {
         this.ipc.openProject.onCall(1).rejects(this.err)

@@ -19,14 +19,10 @@ require('graceful-fs').gracefulify(require('fs'))
 // all transpile should have been done already
 // and these calls should do nothing
 require('@packages/ts/register')
-require('@packages/coffee/register')
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()
 }
-
-require && require.extensions && delete require.extensions['.litcoffee']
-require && require.extensions && delete require.extensions['.coffee.md']
 
 // warn when deprecated callback apis are used in electron
 // https://github.com/electron/electron/blob/master/docs/api/process.md#processenablepromiseapis
@@ -40,4 +36,17 @@ process.traceDeprecation = true
 
 require('./lib/util/suppress_unauthorized_warning').suppress()
 
-module.exports = require('./lib/cypress').start(process.argv)
+function launchOrFork () {
+  const nodeOptions = require('./lib/util/node_options')
+
+  if (nodeOptions.needsOptions()) {
+    // https://github.com/cypress-io/cypress/pull/5492
+    return nodeOptions.forkWithCorrectOptions()
+  }
+
+  nodeOptions.restoreOriginalOptions()
+
+  module.exports = require('./lib/cypress').start(process.argv)
+}
+
+launchOrFork()

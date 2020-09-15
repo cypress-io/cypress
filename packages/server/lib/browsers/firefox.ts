@@ -8,7 +8,12 @@ import urlUtil from 'url'
 import FirefoxProfile from 'firefox-profile'
 import firefoxUtil from './firefox-util'
 import utils from './utils'
-import { Browser } from './types'
+import * as launcherDebug from '@packages/launcher/lib/log'
+import { Browser, BrowserInstance } from './types'
+import { EventEmitter } from 'events'
+import os from 'os'
+import treeKill from 'tree-kill'
+const errors = require('../errors')
 
 const debug = Debug('cypress:server:browsers:firefox')
 
@@ -188,7 +193,7 @@ const defaultPreferences = {
   // Do not wait for the notification button security delay
   'security.notification_enable_delay': 0,
 
-  // Ensure blocklist updates do not hit the network
+  // Ensure blocked updates do not hit the network
   'services.settings.server': '',
 
   // Do not automatically fill sign-in forms with known usernames and
@@ -281,9 +286,27 @@ const defaultPreferences = {
   // allow getUserMedia APIs on insecure domains
   'media.devices.insecure.enabled':	true,
   'media.getusermedia.insecure.enabled': true,
+
+  'marionette.log.level': launcherDebug.log.enabled ? 'Debug' : undefined,
 }
 
-export async function open (browser: Browser, url, options: any = {}) {
+export function _createDetachedInstance (browserInstance: BrowserInstance): BrowserInstance {
+  const detachedInstance: BrowserInstance = new EventEmitter() as BrowserInstance
+
+  detachedInstance.pid = browserInstance.pid
+
+  // kill the entire process tree, from the spawned instance up
+  detachedInstance.kill = (): void => {
+    treeKill(browserInstance.pid, (err?, result?) => {
+      debug('force-exit of process tree complete %o', { err, result })
+      detachedInstance.emit('exit')
+    })
+  }
+
+  return detachedInstance
+}
+
+export async function open (browser: Browser, url, options: any = {}): Bluebird<BrowserInstance> {
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -343,7 +366,7 @@ export async function open (browser: Browser, url, options: any = {}) {
     launchOptions,
   ] = await Bluebird.all([
     utils.ensureCleanCache(browser, options.isTextTerminal),
-    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute, options.onScreencastFrame),
+    utils.writeExtension(browser, options.isTextTerminal, options.proxyUrl, options.socketIoRoute),
     utils.executeBeforeBrowserLaunch(browser, defaultLaunchOptions, options),
   ])
 
@@ -411,6 +434,15 @@ export async function open (browser: Browser, url, options: any = {}) {
   const browserInstance = await utils.launch(browser, 'about:blank', launchOptions.args)
 
   await firefoxUtil.setup({ extensions: launchOptions.extensions, url, foxdriverPort, marionettePort })
+  .catch((err) => {
+    errors.throw('FIREFOX_COULD_NOT_CONNECT', err)
+  })
+
+  if (os.platform() === 'win32') {
+    // override the .kill method for Windows so that the detached Firefox process closes between specs
+    // @see https://github.com/cypress-io/cypress/issues/6392
+    return _createDetachedInstance(browserInstance)
+  }
 
   return browserInstance
 }

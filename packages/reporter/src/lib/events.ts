@@ -4,7 +4,7 @@ import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
-import TestModel, { TestProps, UpdateTestCallback } from '../test/test-model'
+import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
 
 const localBus = new EventEmitter()
 
@@ -93,17 +93,19 @@ const events: Events = {
       }
     }))
 
-    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestModel) => {
+    runner.on('test:before:run:async', action('test:before:run:async', (runnable: TestProps) => {
       runnablesStore.runnableStarted(runnable)
     }))
 
-    runner.on('test:after:run', action('test:after:run', (runnable: TestModel) => {
+    runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
-      statsStore.incrementCount(runnable.state)
+      if (runnable.final) {
+        statsStore.incrementCount(runnable.state!)
+      }
     }))
 
-    runner.on('test:set:state', action('test:set:state', (runnable: TestProps, cb: UpdateTestCallback) => {
-      runnablesStore.updateTest(runnable, cb)
+    runner.on('test:set:state', action('test:set:state', (props: UpdatableTestProps, cb: UpdateTestCallback) => {
+      runnablesStore.updateTest(props, cb)
     }))
 
     runner.on('paused', action('paused', (nextCommandName: string) => {
@@ -160,13 +162,12 @@ const events: Events = {
       runner.emit('runner:console:log', commandId)
     })
 
-    localBus.on('show:error', (testId: number) => {
-      const test = runnablesStore.testById(testId)
-      const command = test.err.isCommandErr && test.commandMatchingErr()
+    localBus.on('show:error', (test: TestModel) => {
+      const command = test.err.isCommandErr ? test.commandMatchingErr() : null
 
       runner.emit('runner:console:error', {
         err: test.err,
-        commandId: command ? command.id : undefined,
+        commandId: command?.id,
       })
     })
 
@@ -190,6 +191,14 @@ const events: Events = {
       runner.emit('focus:tests')
     })
 
+    localBus.on('get:user:editor', (cb) => {
+      runner.emit('get:user:editor', cb)
+    })
+
+    localBus.on('set:user:editor', (editor) => {
+      runner.emit('set:user:editor', editor)
+    })
+
     localBus.on('save:state', () => {
       runner.emit('save:state', {
         autoScrollingEnabled: appState.autoScrollingEnabled,
@@ -198,6 +207,10 @@ const events: Events = {
 
     localBus.on('external:open', (url) => {
       runner.emit('external:open', url)
+    })
+
+    localBus.on('open:file', (fileDetails) => {
+      runner.emit('open:file', fileDetails)
     })
   },
 

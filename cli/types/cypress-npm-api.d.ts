@@ -6,204 +6,13 @@
 // in the future the NPM module itself will be in TypeScript
 // but for now describe it as an ambient module
 
-declare module 'cypress' {
-  /**
-   * Cypress configuration object.
-   * @see https://on.cypress.io/configuration
-   */
-  interface CypressConfiguration {
-    //
-    // global options
-    //
-
-    /**
-     * Url used as prefix for `cy.visit()` or `cy.request()` command’s url
-     */
-    baseUrl: string,
-    /**
-     * Any values to be set as environment variables
-     */
-    env: object,
-    /**
-     * A String or Array of glob patterns used to ignore test files
-     * that would otherwise be shown in your list of tests.
-     */
-    ignoreTestFiles: string | string[],
-    /**
-     * The number of tests for which snapshots and command data are kept in memory.
-     * Reduce this number if you are experiencing high memory consumption in your browser during a test run.
-     */
-    numTestsKeptInMemory: number,
-    /**
-     * Port used to host Cypress. Normally this is a randomly generated port
-     */
-    port: number,
-    /**
-     * The reporter used during the `cypress run`. Default is "spec"
-     */
-    reporter: string,
-    /**
-     * A String or Array of string glob pattern of the test files to load.
-     */
-    testFiles: string | string[]
-
-    //
-    // timeouts
-    //
-
-    /**
-     * Time, in milliseconds, to wait until most DOM based commands
-     * are considered timed out.
-     */
-    defaultCommandTimeout: number,
-    /**
-     * Time, in milliseconds, to wait for a system command to
-     * finish executing during a `cy.exec()` command.
-     */
-    execTimeout: number,
-    /**
-     * Time, in milliseconds, to wait for a task to finish executing
-     * during a `cy.task()` command.
-     */
-    taskTimeout: number,
-    /**
-     * Time, in milliseconds, to wait for page transition events or
-     * `cy.visit()`, `cy.go()`, `cy.reload()` commands to fire
-     * their page load events.
-     */
-    pageLoadTimeout: number,
-    /**
-     * Time, in milliseconds, to wait for an XHR request to go out
-     * in a `cy.wait()` command.
-     */
-    requestTimeout: number,
-    /**
-     * Time, in milliseconds, to wait until a response in a
-     * `cy.request()`, `cy.wait()`, `cy.fixture()`, `cy.getCookie()`,
-     * `cy.getCookies()`, `cy.setCookie()`, `cy.clearCookie()`,
-     * `cy.clearCookies()`, and `cy.screenshot()` commands.
-    */
-    responseTimeout: number,
-
-    //
-    // folders and files
-    //
-
-    /**
-     * Path to folder where application files will attempt to be served from.
-     */
-    fileServerFolder: string,
-    /**
-     * Path to folder containing fixture files (Pass `false` to disable).
-     */
-    fixturesFolder: string | false,
-    /**
-     * Path to folder containing integration test files.
-     */
-    integrationFolder: string,
-    /**
-     * Path to plugins file. (Pass `false` to disable)
-     */
-    pluginsFile: string | false,
-    /**
-     * Path to folder where screenshots will be saved from `cy.screenshot()`
-     * command or after a test fails during cypress run.
-     */
-    screenshotsFolder: string,
-    /**
-     * Path to file to load before test files load.
-     * This file is compiled and bundled. (Pass `false` to disable).
-     */
-    supportFile: string | false,
-    /**
-     * Path to folder where videos will be saved during `cypress run`
-     */
-    videosFolder: string,
-
-    //
-    // screenshots
-    //
-
-    /**
-     * Whether Cypress will trash assets within the `screenshotsFolder` and
-     * `videosFolder` before tests run with cypress run. Default is `true`.
-     */
-    trashAssetsBeforeRuns: boolean,
-
-    //
-    // videos
-    //
-
-    /**
-     * The quality setting for the video compression, in Constant Rate Factor (CRF).
-     * The value can be false to disable compression or a value between 0 and 51,
-     * where a lower value results in better quality
-     * (at the expense of a higher file size).
-     */
-    videoCompression: number | false,
-    /**
-     * Whether Cypress will capture a video of the tests run with `cypress run`.
-     */
-    video: boolean,
-    /**
-     * Whether Cypress will upload the video to the Dashboard even if
-     * all tests are passing. This applies only when recording your runs
-     * to the Dashboard. Turn this off if you’d like the video uploaded
-     * only when there are failing tests.
-     */
-    videoUploadOnPasses: boolean,
-
-    //
-    // browser
-    //
-    /**
-     * Whether Chrome Web Security for `same-origin` policy and
-     * `insecure mixed content` is enabled.
-     */
-    chromeWebSecurity: boolean,
-    /**
-     * Enables you to override the default user agent the
-     * browser sends in all request headers.
-     */
-    userAgent: string,
-    /**
-     * A String or Array of hosts that you wish to block traffic for.
-     */
-    blacklistHosts: string | string[],
-    /**
-     * Whether Cypress will search for and replace obstructive JS code
-     * in `.js` or `.html` files.
-     */
-    modifyObstructiveCode: boolean,
-
-    //
-    // viewport
-    //
-    /**
-     * Default height in pixels for the application under tests’ viewport
-     * (Override with `cy.viewport()` command)
-     */
-    viewportHeight: number,
-    /**
-     * Default width in pixels for the application under tests’ viewport.
-     * (Override with `cy.viewport()` command)
-     */
-    viewportWidth: number
-
-    //
-    // animations
-    //
-    /**
-     * The distance in pixels an element must exceed over
-     * time to be considered animating.
-     */
-    animationDistanceThreshold: number
-    /**
-     * Whether to wait for elements to finish animating before executing commands.
-     */
-    waitForAnimations: boolean
+declare namespace CypressCommandLine {
+  type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
+  interface TestError {
+    name: string
+    message: string
+    stack: string
   }
-
   /**
    * All options that one can pass to "cypress.run"
    * @see https://on.cypress.io/module-api#cypress-run
@@ -238,6 +47,10 @@ declare module 'cypress' {
      */
     group: string
     /**
+     * Tag string for the recorded run, like "production,nightly"
+     */
+    tag: string
+    /**
      * Display the browser instead of running headlessly
      */
     headed: boolean
@@ -261,6 +74,10 @@ declare module 'cypress' {
      * Override default port
      */
     port: number
+    /**
+     * Run quietly, using only the configured reporter
+     */
+    quiet: boolean
     /**
      * Whether to record the test run
      */
@@ -320,7 +137,7 @@ declare module 'cypress' {
     /**
      * Specify configuration
      */
-    config: Partial<CypressConfiguration>
+    config: Partial<Cypress.ResolvedConfigOptions>
     /**
      * Path to the config file to be used.
      *
@@ -330,7 +147,8 @@ declare module 'cypress' {
      */
     configFile: string | false
     /**
-     * Specify environment variables
+     * Specify environment variables.
+     * TODO: isn't this duplicate of config.env?!
      */
     env: object
     /**
@@ -342,39 +160,36 @@ declare module 'cypress' {
   // small utility types to better express meaning of other types
   type dateTimeISO = string
   type ms = number
-  type hookId = string
-  type testId = string
   type pixels = number
 
   /**
    * Cypress single test result
    */
   interface TestResult {
-    testId: testId
     title: string[]
     state: string
     body: string
-    /**
-     * Error stack string if there is an error
+     /**
+     * Error string as it's presented in console if the test fails
      */
-    stack: string | null
-    /**
-     * Error message if there is an error
-     */
-    error: string | null
-    timings: any
-    failedFromHookId: hookId | null
-    wallClockStartedAt: dateTimeISO
-    wallClockDuration: ms
+    displayError: string | null
+    attempts: AttemptResult[]
+  }
+
+  interface AttemptResult {
+    state: string
+    error: TestError | null
+    startedAt: dateTimeISO
+    duration: ms
     videoTimestamp: ms
+    screenshots: ScreenshotInformation[]
   }
 
   /**
    * Information about a single "before", "beforeEach", "afterEach" and "after" hook.
   */
   interface HookInformation {
-    hookId: hookId
-    hookName: 'before' | 'beforeEach' | 'afterEach' | 'after'
+    hookName: HookName
     title: string[]
     body: string
   }
@@ -383,9 +198,7 @@ declare module 'cypress' {
    * Information about a single screenshot.
    */
   interface ScreenshotInformation {
-    screenshotId: string
     name: string
-    testId: testId
     takenAt: dateTimeISO
     /**
      * Absolute path to the saved image
@@ -409,9 +222,9 @@ declare module 'cypress' {
       pending: number
       skipped: number
       failures: number
-      wallClockStartedAt: dateTimeISO
-      wallClockEndedAt: dateTimeISO
-      wallClockDuration: ms
+      startedAt: dateTimeISO
+      endedAt: dateTimeISO
+      duration: ms
     },
     /**
      * Reporter name like "spec"
@@ -426,7 +239,6 @@ declare module 'cypress' {
     tests: TestResult[]
     error: string | null
     video: string | null
-    screenshots: ScreenshotInformation[]
     /**
      * information about the spec test file.
     */
@@ -473,14 +285,12 @@ declare module 'cypress' {
     osName: string
     osVersion: string
     cypressVersion: string
-    // TODO add resolved object to the configuration
-    config: CypressConfiguration
-    /**
+    config: Cypress.ResolvedConfigOptions
+  }
+
+  /**
      * If Cypress fails to run at all (for example, if there are no spec files to run),
-     * then it will set failures to 1 and will have actual error message in the
-     * property "message". Check this property before checking other properties.
-     *
-     * @type {number}
+     * then it will return a CypressFailedRunResult. Check the failures attribute.
      * @example
       ```
       const result = await cypress.run()
@@ -489,17 +299,34 @@ declare module 'cypress' {
         process.exit(result.failures)
       }
       ```
-     */
-    failures?: number
-    /**
-     * If returned result has "failures" set, then this property gives
-     * the error message.
      *
-     * @type {string}
-     */
-    message?: string
+  **/
+  interface CypressFailedRunResult {
+    failures: number
+    message: string
   }
 
+  /**
+   * Methods allow parsing given CLI arguments the same way Cypress CLI does it.
+   */
+  interface CypressCliParser {
+    /**
+     * Parses the given array of string arguments to "cypress run"
+     * just like Cypress CLI does it.
+     * @see https://on.cypress.io/module-api
+     * @example
+     *  const cypress = require('cypress')
+     *  const args = ['cypress', 'run', '--browser', 'chrome']
+     *  const options = await cypress.cli.parseRunArguments(args)
+     *  // options is {browser: 'chrome'}
+     *  // pass the options to cypress.run()
+     *  const results = await cypress.run(options)
+     */
+    parseRunArguments(args: string[]): Promise<Partial<CypressRunOptions>>
+  }
+}
+
+declare module 'cypress' {
   /**
    * Cypress NPM module interface.
    * @see https://on.cypress.io/module-api
@@ -524,13 +351,19 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressRunOptions>): Promise<CypressRunResult>,
+    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>,
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.
      * @see https://on.cypress.io/module-api#cypress-open
      */
-    open(options?: Partial<CypressOpenOptions>): Promise<void>
+    open(options?: Partial<CypressCommandLine.CypressOpenOptions>): Promise<void>
+
+    /**
+     * Utility functions for parsing CLI arguments the same way
+     * Cypress does
+     */
+    cli: CypressCommandLine.CypressCliParser
   }
 
   // export Cypress NPM module interface

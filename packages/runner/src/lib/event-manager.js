@@ -26,10 +26,23 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketToDriverEvents = 'net:event'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
 
+// NOTE: this is exposed for testing, ideally we should only expose this if a test flag is set
+window.runnerWs = ws
+
+// NOTE: this is for testing Cypress-in-Cypress, window.Cypress is undefined here
+// unless Cypress has been loaded into the AUT frame
+if (window.Cypress) {
+  window.eventManager = { reporterBus, localBus }
+}
+
+/**
+ * @type {Cypress.Cypress}
+ */
 let Cypress
 
 const eventManager = {
@@ -41,6 +54,12 @@ const eventManager = {
 
   addGlobalListeners (state, connectionInfo) {
     const rerun = () => {
+      if (!this) {
+        // if the tests have been reloaded
+        // then nothing to rerun
+        return
+      }
+
       return this._reRun(state)
     }
 
@@ -71,8 +90,14 @@ const eventManager = {
       ws.on(event, rerun)
     })
 
+    _.each(socketToDriverEvents, (event) => {
+      ws.on(event, (...args) => {
+        Cypress.emit(event, ...args)
+      })
+    })
+
     const logCommand = (logId) => {
-      const consoleProps = Cypress.getConsolePropsForLogById(logId)
+      const consoleProps = Cypress.runner.getConsolePropsForLogById(logId)
 
       logger.logFormatted(consoleProps)
     }
@@ -96,12 +121,20 @@ const eventManager = {
 
     reporterBus.on('focus:tests', this.focusTests)
 
+    reporterBus.on('get:user:editor', (cb) => {
+      ws.emit('get:user:editor', cb)
+    })
+
+    reporterBus.on('set:user:editor', (editor) => {
+      ws.emit('set:user:editor', editor)
+    })
+
     reporterBus.on('runner:restart', rerun)
 
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
 
-      const snapshotProps = Cypress.getSnapshotPropsForLogById(logId)
+      const snapshotProps = Cypress.runner.getSnapshotPropsForLogById(logId)
 
       if (snapshotProps) {
         localBus.emit(event, snapshotProps)
@@ -146,6 +179,10 @@ const eventManager = {
       ws.emit('external:open', url)
     })
 
+    reporterBus.on('open:file', (url) => {
+      ws.emit('open:file', url)
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)
@@ -177,7 +214,7 @@ const eventManager = {
     }
   },
 
-  setup (config, specPath) {
+  setup (config) {
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -185,7 +222,7 @@ const eventManager = {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', specPath)
+    ws.emit('watch:test:file', config.spec)
   },
 
   isBrowser (browserName) {
@@ -197,40 +234,49 @@ const eventManager = {
   initialize ($autIframe, config) {
     performance.mark('initialize-start')
 
-    Cypress.initialize($autIframe)
+    return Cypress.initialize({
+      $autIframe,
+      onSpecReady: () => {
+        // get the current runnable in case we reran mid-test due to a visit
+        // to a new domain
+        ws.emit('get:existing:run:state', (state = {}) => {
+          if (!Cypress.runner) {
+            // the tests have been reloaded
+            return
+          }
 
-    // get the current runnable in case we reran mid-test due to a visit
-    // to a new domain
-    ws.emit('get:existing:run:state', (state = {}) => {
-      const runnables = Cypress.normalizeAll(state.tests)
-      const run = () => {
-        performance.mark('initialize-end')
-        performance.measure('initialize', 'initialize-start', 'initialize-end')
-        this._runDriver(state)
-      }
+          const runnables = Cypress.runner.normalizeAll(state.tests)
+          const run = () => {
+            performance.mark('initialize-end')
+            performance.measure('initialize', 'initialize-start', 'initialize-end')
 
-      reporterBus.emit('runnables:ready', runnables)
+            this._runDriver(state)
+          }
 
-      if (state.numLogs) {
-        Cypress.setNumLogs(state.numLogs)
-      }
+          reporterBus.emit('runnables:ready', runnables)
 
-      if (state.startTime) {
-        Cypress.setStartTime(state.startTime)
-      }
+          if (state.numLogs) {
+            Cypress.runner.setNumLogs(state.numLogs)
+          }
 
-      if (state.currentId) {
-        // if we have a currentId it means
-        // we need to tell the Cypress to skip
-        // ahead to that test
-        Cypress.resumeAtTest(state.currentId, state.emissions)
-      }
+          if (state.startTime) {
+            Cypress.runner.setStartTime(state.startTime)
+          }
 
-      if (config.isTextTerminal && !state.currentId) {
-        ws.emit('set:runnables', runnables, run)
-      } else {
-        run()
-      }
+          if (state.currentId) {
+            // if we have a currentId it means
+            // we need to tell the Cypress to skip
+            // ahead to that test
+            Cypress.runner.resumeAtTest(state.currentId, state.emissions)
+          }
+
+          if (config.isTextTerminal && !state.currentId) {
+            ws.emit('set:runnables', runnables, run)
+          } else {
+            run()
+          }
+        })
+      },
     })
   },
 
@@ -252,13 +298,13 @@ const eventManager = {
     })
 
     Cypress.on('log:added', (log) => {
-      const displayProps = Cypress.getDisplayPropsForLog(log)
+      const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
-      const displayProps = Cypress.getDisplayPropsForLog(log)
+      const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
@@ -322,7 +368,7 @@ const eventManager = {
 
     reporterBus.emit('reporter:start', {
       firefoxGcInterval: Cypress.getFirefoxGcInterval(),
-      startTime: Cypress.getStartTime(),
+      startTime: Cypress.runner.getStartTime(),
       numPassed: state.passed,
       numFailed: state.failed,
       numPending: state.pending,

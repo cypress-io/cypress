@@ -33,7 +33,7 @@ Since this is slow, it's better to drive your development with tests.
 Note: you should not ever need to build the .js files manually. `@packages/ts` provides require-time transpilation when in development.
 
 ```shell
-yarn lerna run build-prod --scope @packages/server --stream
+yarn workspace @packages/server build-prod
 ```
 
 * `yarn test-unit` executes unit tests in [`test/unit`](./test/unit)
@@ -53,7 +53,7 @@ When running e2e tests, some test projects output verbose logs. To see them run 
 
 ```bashtest-kitchensink
 yarn test <path/to/test>
-yarn test test/unit/api_spec.coffee
+yarn test test/unit/api_spec.js
 ## or
 yarn test-unit api_spec ## shorthand, uses globbing to find spec
 ```
@@ -62,7 +62,7 @@ yarn test-unit api_spec ## shorthand, uses globbing to find spec
 
 ```bash
 yarn test <path/to/test>
-yarn test test/integration/cli_spec.coffee
+yarn test test/integration/cli_spec.js
 ## or
 yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 ```
@@ -71,9 +71,14 @@ yarn test-integration cli_spec ## shorthand, uses globbing to find spec
 
 ```bash
 yarn test <path/to/test>
-yarn test test/e2e/1_async_timeouts_spec.coffee
+yarn test test/e2e/1_async_timeouts_spec.js
 ## or
 yarn test-e2e 1_async ## shorthand, uses globbing to find spec
+```
+
+To keep the browser open after a spec run (for easier debugging and iterating on specs), you can pass the `--no-exit` flag to the e2e test command. Live reloading due to spec changes should also work:
+```sh
+yarn test test/e2e/2_go_spec.js --browser chrome --no-exit
 ```
 
 ### Updating snaphots
@@ -81,7 +86,7 @@ yarn test-e2e 1_async ## shorthand, uses globbing to find spec
 Prepend `SNAPSHOT_UPDATE=1` to any test command. See [`snap-shot-it` instructions](https://github.com/bahmutov/snap-shot-it#advanced-use) for more info.
 
 ```bash
-SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.coffee
-SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.coffee
+SNAPSHOT_UPDATE=1 yarn test test/unit/api_spec.js
+SNAPSHOT_UPDATE=1 yarn test test/integration/cli_spec.js
 SNAPSHOT_UPDATE=1 yarn test-e2e 1_async
 ```
