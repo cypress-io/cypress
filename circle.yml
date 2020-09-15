@@ -392,8 +392,6 @@ commands:
       pattern:
         type: string
     steps:
-      - checkout
-      - run: git branch
       - run:
           name: checking if develop branch or changed files in << parameters.pattern >>
           command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base origin/develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
@@ -1011,6 +1009,8 @@ jobs:
   npm-webpack-preprocessor-build:
     <<: *defaults
     steps:
+      - attach_workspace:
+          at: ~/
       - check-changed-files:
           pattern: npm/webpack-preprocessor
       - run:
@@ -1021,6 +1021,8 @@ jobs:
   npm-webpack-preprocessor-test-react:
     <<: *defaults
     steps:
+      - attach_workspace:
+          at: ~/
       - check-changed-files:
           pattern: npm/webpack-preprocessor
       - run:
