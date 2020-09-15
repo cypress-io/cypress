@@ -38,9 +38,9 @@ export interface BackendRequest {
   res: CypressOutgoingResponse
   incomingRes?: IncomingMessage
   /**
-   * Should the response go to the driver, or should it be allowed to continue?
+   * Should we wait for the driver to allow the response to continue?
    */
-  sendResponseToDriver?: boolean
+  waitForResponseContinue?: boolean
 }
 
 export interface NetStubbingState {

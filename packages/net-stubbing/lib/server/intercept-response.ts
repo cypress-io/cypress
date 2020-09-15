@@ -28,13 +28,10 @@ export const InterceptResponse: ResponseMiddleware = function () {
 
   debug('InterceptResponse %o', { req: _.pick(this.req, 'url'), backendRequest })
 
-  if (!backendRequest || !backendRequest.sendResponseToDriver) {
-    // either the original request was not intercepted, or there's nothing for the driver to do with this response
+  if (!backendRequest) {
+    // original request was not intercepted, nothing to do
     return this.next()
   }
-
-  // this may get set back to `true` by another route
-  backendRequest.sendResponseToDriver = false
 
   backendRequest.incomingRes = this.incomingRes
 
@@ -72,6 +69,13 @@ export const InterceptResponse: ResponseMiddleware = function () {
     res.body = resBody.toString()
     emitReceived()
   }))
+
+  if (!backendRequest.waitForResponseContinue) {
+    this.next()
+  }
+
+  // this may get set back to `true` by another route
+  backendRequest.waitForResponseContinue = false
 }
 
 export async function onResponseContinue (state: NetStubbingState, frame: NetEventFrames.HttpResponseContinue) {
