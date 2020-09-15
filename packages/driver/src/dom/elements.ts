@@ -420,7 +420,7 @@ const isFocused = (el) => {
   try {
     let doc
 
-    if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot(el)) {
+    if (isWithinShadowRoot(el)) {
       doc = el.getRootNode()
     } else {
       doc = $document.getDocumentFromElement(el)
@@ -571,7 +571,7 @@ const isScrollOrAuto = (prop) => {
 }
 
 const isAncestor = ($el, $maybeAncestor) => {
-  return $el.parents().index($maybeAncestor) >= 0
+  return $jquery.wrap(getAllParents($el[0])).index($maybeAncestor) >= 0
 }
 
 const getFirstCommonAncestor = (el1, el2) => {
@@ -634,11 +634,11 @@ const getParent = ($el: JQuery): JQuery => {
   return $(getParentNode($el[0]))
 }
 
-const getAllParents = (el: HTMLElement, untilSelector?: string) => {
+const getAllParents = (el: HTMLElement, untilSelectorOrEl?: string | HTMLElement | JQuery) => {
   const collectParents = (parents, node) => {
     const parent = getParentNode(node)
 
-    if (!parent || untilSelector && $(parent).is(untilSelector)) {
+    if (!parent || untilSelectorOrEl && $(parent).is(untilSelectorOrEl)) {
       return parents
     }
 
@@ -946,7 +946,7 @@ const getFirstFocusableEl = ($el: JQuery<HTMLElement>) => {
 const getActiveElByDocument = ($el: JQuery<HTMLElement>): HTMLElement | null => {
   let activeElement
 
-  if (Cypress.config('experimentalShadowDomSupport') && isWithinShadowRoot($el[0])) {
+  if (isWithinShadowRoot($el[0])) {
     activeElement = ($el[0].getRootNode() as ShadowRoot).activeElement
   } else {
     activeElement = getNativeProp($el[0].ownerDocument as Document, 'activeElement')
@@ -1125,14 +1125,14 @@ const getContainsSelector = (text, filter = '', options: {
 
 const priorityElement = 'input[type=\'submit\'], button, a, label'
 
-const getFirstDeepestElement = (elements, index = 0) => {
+const getFirstDeepestElement = ($el: JQuery, index = 0) => {
   // iterate through all of the elements in pairs
   // and check if the next item in the array is a
   // descedent of the current. if it is continue
   // to recurse. if not, or there is no next item
   // then return the current
-  const $current = elements.slice(index, index + 1)
-  const $next = elements.slice(index + 1, index + 2)
+  const $current = $el.slice(index, index + 1)
+  const $next = $el.slice(index + 1, index + 2)
 
   if (!$next) {
     return $current
@@ -1140,7 +1140,7 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // does current contain next?
   if ($.contains($current.get(0), $next.get(0))) {
-    return getFirstDeepestElement(elements, index + 1)
+    return getFirstDeepestElement($el, index + 1)
   }
 
   // return the current if it already is a priority element
@@ -1150,7 +1150,8 @@ const getFirstDeepestElement = (elements, index = 0) => {
 
   // else once we find the first deepest element then return its priority
   // parent if it has one and it exists in the elements chain
-  const $priorities = elements.filter($current.parents(priorityElement))
+  const $parents = $jquery.wrap(getAllParents($current[0])).filter(priorityElement)
+  const $priorities = $el.filter($parents)
 
   if ($priorities.length) {
     return $priorities.last()
@@ -1230,26 +1231,22 @@ const stringify = (el, form = 'long') => {
   })
 }
 
+// if the node has a shadow root, we must behave like
+// the browser and find the inner element of the shadow
+// root at that same point.
+const getShadowElementFromPoint = (node, x, y) => {
+  const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
+
+  if (!nodeFromPoint || nodeFromPoint === node) return node
+
+  return getShadowElementFromPoint(nodeFromPoint, x, y)
+}
+
 const elementFromPoint = (doc, x, y) => {
   // first try the native elementFromPoint method
   let elFromPoint = doc.elementFromPoint(x, y)
 
-  // if the node has a shadow root, we must behave like
-  // the browser and find the inner element of the shadow
-  // root at that same point.
-  if (Cypress.config('experimentalShadowDomSupport')) {
-    const getShadowElementFromPoint = (node) => {
-      const nodeFromPoint = node?.shadowRoot?.elementFromPoint(x, y)
-
-      if (!nodeFromPoint || nodeFromPoint === node) return node
-
-      return getShadowElementFromPoint(nodeFromPoint)
-    }
-
-    elFromPoint = getShadowElementFromPoint(elFromPoint)
-  }
-
-  return elFromPoint
+  return getShadowElementFromPoint(elFromPoint, x, y)
 }
 
 const getShadowRoot = ($el: JQuery): JQuery<Node> => {
@@ -1366,6 +1363,7 @@ export {
   getContainsSelector,
   getFirstDeepestElement,
   getFirstCommonAncestor,
+  getTagName,
   getFirstParentWithTagName,
   getFirstFixedOrStickyPositionParent,
   getFirstStickyPositionParent,

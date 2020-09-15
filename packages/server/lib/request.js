@@ -602,6 +602,7 @@ module.exports = function (options = {}) {
 
       _.defaults(options, {
         headers: {},
+        followAllRedirects: true,
         onBeforeReqInit (fn) {
           return fn()
         },

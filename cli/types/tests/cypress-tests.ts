@@ -46,6 +46,7 @@ namespace CypressConfigTests {
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 
   Cypress.config('taskTimeout') // $ExpectType number
+  Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
 namespace CypressEnvTests {
@@ -75,6 +76,9 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, () => {
     return
+  })
+  Cypress.Commands.add('newCommand', () => {
+    return new Promise((resolve) => {})
   })
   Cypress.Commands.overwrite('newCommand', () => {
     return
@@ -381,6 +385,10 @@ namespace CypressScreenshotTests {
     log: true,
     blackout: []
   })
+}
+
+namespace CypressShadowDomTests {
+  cy.get('my-component').shadow()
 }
 
 namespace CypressTriggerTests {

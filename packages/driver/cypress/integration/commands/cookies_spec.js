@@ -360,9 +360,15 @@ describe('src/cy/commands/cookies', () => {
 
     describe('.log', () => {
       beforeEach(function () {
+        this.asserts = []
+
         cy.on('log:added', (attrs, log) => {
           if (attrs.name === 'getCookie') {
             this.lastLog = log
+          }
+
+          if (attrs.name === 'assert') {
+            this.asserts.push(log)
           }
         })
 
@@ -378,6 +384,12 @@ describe('src/cy/commands/cookies', () => {
       it('can turn off logging', () => {
         cy.getCookie('foo', { log: false }).then(function () {
           expect(this.log).to.be.undefined
+        })
+      })
+
+      it('only logs assertion once when should is invoked', () => {
+        cy.getCookie('foo').should('exist').then(function () {
+          expect(this.asserts.length).to.eq(1)
         })
       })
 

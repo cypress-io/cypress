@@ -202,19 +202,25 @@ module.exports = function (Commands, Cypress, cy, state, config) {
           return
         }
 
-        // issue the click event to the 'default button' of the form
-        // we need this to be synchronous so not going through our
-        // own click command
-        // as of now, at least in Chrome, causing the click event
-        // on the button will indeed trigger the form submit event
-        // so we dont need to fire it manually anymore!
-        if (!clickedDefaultButton(defaultButton)) {
-          // if we werent able to click the default button
-          // then synchronously fire the submit event
-          // currently this is sync but if we use a waterfall
-          // promise in the submit command it will break again
-          // consider changing type to a Promise and juggle logging
-          return cy.now('submit', form, { log: false, $el: form })
+        // In Firefox, submit event is automatically fired
+        // when we send {Enter} KeyboardEvent to the input fields.
+        // Because of that, we don't have to click the submit buttons.
+        // Otherwise, we trigger submit events twice.
+        if (!Cypress.isBrowser('firefox')) {
+          // issue the click event to the 'default button' of the form
+          // we need this to be synchronous so not going through our
+          // own click command
+          // as of now, at least in Chrome, causing the click event
+          // on the button will indeed trigger the form submit event
+          // so we dont need to fire it manually anymore!
+          if (!clickedDefaultButton(defaultButton)) {
+            // if we werent able to click the default button
+            // then synchronously fire the submit event
+            // currently this is sync but if we use a waterfall
+            // promise in the submit command it will break again
+            // consider changing type to a Promise and juggle logging
+            return cy.now('submit', form, { log: false, $el: form })
+          }
         }
       }
 

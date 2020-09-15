@@ -61,15 +61,11 @@ module.exports = function (Commands, Cypress, cy, state) {
       throwAndLogErr(err)
     }
 
-    let isCheckingExistence
-
-    // are we doing a length assertion?
-    if (reHaveLength.test(chainers) || reExistence.test(chainers)) {
-      isCheckingExistence = true
-    }
+    const isCheckingExistence = reExistence.test(chainers)
+    const isCheckingLengthOrExistence = isCheckingExistence || reHaveLength.test(chainers)
 
     const applyChainer = function (memo, value) {
-      if (value === lastChainer) {
+      if (value === lastChainer && !isCheckingExistence) {
         if (_.isFunction(memo[value])) {
           try {
             return memo[value].apply(memo, args)
@@ -99,7 +95,7 @@ module.exports = function (Commands, Cypress, cy, state) {
       // because its possible we're asserting about an
       // element which has left the DOM and we always
       // want to auto-fail on those
-      if (!isCheckingExistence && $dom.isElement(subject)) {
+      if (!isCheckingLengthOrExistence && $dom.isElement(subject)) {
         cy.ensureAttached(subject, 'should')
       }
 
@@ -112,7 +108,7 @@ module.exports = function (Commands, Cypress, cy, state) {
 
         // https://github.com/cypress-io/cypress/issues/883
         // A single chainer used that is not an actual assertion, like '.should('be', 'true')'
-        if (chainers.length < 2 && !_.isFunction(memo[value]) && !isCheckingExistence) {
+        if (chainers.length < 2 && !isCheckingExistence && !_.isFunction(memo[value])) {
           err = $errUtils.cypressErrByPath('should.language_chainer', { args: { originalChainers } })
           err.retry = false
           throwAndLogErr(err)

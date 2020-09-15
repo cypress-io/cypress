@@ -16,7 +16,6 @@ const eventCleanseMap = {
   parent: stringifyShort,
   tests: stringifyShort,
   commands: stringifyShort,
-  err: stringifyShort,
   invocationDetails: stringifyShort,
   body: '[body]',
   wallClockStartedAt: match.date,
@@ -102,10 +101,11 @@ function createCypress (defaultOptions = {}) {
    * @param {{state?: any, config?: any}} opts
    */
   const runIsolatedCypress = (mochaTestsOrFile, opts = {}) => {
-    _.defaultsDeep(opts, defaultOptions, {
+    opts = _.defaultsDeep(opts, defaultOptions, {
       state: {},
       config: { video: false },
       onBeforeRun () {},
+      visitUrl: 'http://localhost:3500/fixtures/dom.html',
     })
 
     return cy.visit('/fixtures/isolated-runner.html#/tests/cypress/fixtures/empty_spec.js')
@@ -256,7 +256,7 @@ function createCypress (defaultOptions = {}) {
         .yieldsAsync({ response: {
           isOkStatusCode: true,
           isHtml: true,
-          url: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
+          url: opts.visitUrl,
         } })
 
         .withArgs('set:runnables')
@@ -290,10 +290,15 @@ function createCypress (defaultOptions = {}) {
   }
 
   const createVerifyTest = (modifier) => {
-    return (title, props) => {
+    return (title, opts, props) => {
+      if (!props) {
+        props = opts
+        opts = null
+      }
+
       const verifyFn = props.verifyFn || verifyFailure
 
-  ;(modifier ? it[modifier] : it)(title, () => {
+      const args = _.compact([title, opts, () => {
         return runIsolatedCypress(`cypress/fixtures/errors/${props.file}`, {
           onBeforeRun ({ specWindow, win, autCypress }) {
             specWindow.testToRun = title
@@ -308,10 +313,11 @@ function createCypress (defaultOptions = {}) {
         .then(({ win }) => {
           props.codeFrameText = props.codeFrameText || title
           props.win = win
-
           verifyFn(props)
         })
-      })
+      }])
+
+  ;(modifier ? it[modifier] : it)(...args)
     }
   }
 

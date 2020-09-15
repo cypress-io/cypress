@@ -8,9 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - v5.0-release
-        - install-node-on-circleci-mac
-        - stop-before-code-sign
+        - remove-old-binary-file
 
 defaults: &defaults
   parallelism: 1
@@ -448,6 +446,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             yarn --frozen-lockfile || yarn --frozen-lockfile
+            yarn build-prod
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -471,6 +470,7 @@ jobs:
           name: Linting 🧹
           command: |
             . ./scripts/load-nvm.sh
+            git clean -df
             yarn lint
       - run:
           name: cypress info (dev)

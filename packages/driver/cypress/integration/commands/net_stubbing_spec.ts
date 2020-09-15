@@ -670,6 +670,31 @@ describe('network stubbing', function () {
       cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
     })
 
+    it('can delay and throttle a StaticResponse', function (done) {
+      const payload = 'A'.repeat(10 * 1024)
+      const throttleKbps = 10
+      const delayMs = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+      cy.route2('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          statusCode: 200,
+          body: payload,
+          throttleKbps,
+          delayMs,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 100, 100)
+          expect(responseText).to.eq(payload)
+
+          done()
+        })
+      })
+    })
+
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
         cy.route2({
@@ -881,6 +906,7 @@ describe('network stubbing', function () {
 
       it('can timeout in request handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
@@ -926,6 +952,22 @@ describe('network stubbing', function () {
       .then(() => fetch(url))
       .wait('@redirect')
       .wait('@dest')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/7967
+    it('can skip redirects via followRedirect', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.route2('/redirect', (req) => {
+        req.followRedirect = true
+        req.reply((res) => {
+          expect(res.body).to.include('Some generic content')
+          expect(res.statusCode).to.eq(200)
+          res.send()
+        })
+      })
+      .then(() => fetch(url))
     })
 
     it('intercepts cached responses as expected', {
@@ -1101,7 +1143,7 @@ describe('network stubbing', function () {
       cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
     })
 
-    context('with StaticResponse shorthand', function () {
+    context('with StaticResponse', function () {
       it('res.send(body)', function () {
         cy.route2('/custom-headers', function (req) {
           req.reply((res) => {
@@ -1236,6 +1278,34 @@ describe('network stubbing', function () {
           })
         })
       })
+
+      it('can delay and throttle', function (done) {
+        const payload = 'A'.repeat(10 * 1024)
+        const throttleKbps = 50
+        const delayMs = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+        cy.route2('/timeout', (req) => {
+          req.reply((res) => {
+            this.start = Date.now()
+
+            // ensure .throttle and .delay are overridden
+            res.throttle(1e6).delay(1).send({
+              statusCode: 200,
+              body: payload,
+              throttleKbps,
+              delayMs,
+            })
+          })
+        }).then(() => {
+          return $.get('/timeout').then((responseText) => {
+            expect(responseText).to.eq(payload)
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
+
+            done()
+          })
+        })
+      })
     })
 
     context('errors', function () {
@@ -1341,6 +1411,7 @@ describe('network stubbing', function () {
 
       it('can timeout in req.reply handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)

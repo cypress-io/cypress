@@ -74,6 +74,18 @@ describe('hooks', function () {
         expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].line).to.be.eq(2)
       })
     })
+
+    it('properly opens file in IDE at test', function () {
+      cy.contains('tests 1').click()
+
+      cy.get('a:contains(Open in IDE)').eq(2).invoke('show').click().then(function () {
+        expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].file).to.include('basic_spec.js')
+        // chrome sets the column to right before "it("
+        // while firefox sets it right after "it("
+        expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].column).to.be.eq(Cypress.browser.family === 'firefox' ? 6 : 3)
+        expect(this.win.runnerWs.emit.withArgs('open:file').lastCall.args[1].line).to.be.eq(10)
+      })
+    })
   })
 
   describe('skipped tests', function () {
