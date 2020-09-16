@@ -1803,12 +1803,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
 
-    - npm-webpack-preprocessor-build:
+    - npm-webpack-preprocessor:
         requires:
             - build
-    - npm-webpack-preprocessor-test-react:
-        requires:
-            - npm-webpack-preprocessor-build
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
