@@ -2,6 +2,8 @@
 
 > A typical project using [next.js](https://nextjs.org/)
 
+![Page spec](images/page-spec.png)
+
 ## Configuration
 
 In order to reuse next's webpack configuration and all the custom configuration defined in `next.config.js` connect special plugin in [plugin file](./cypress/plugins/index.js)
@@ -52,3 +54,7 @@ cy.contains(
 ```
 
 Find more examples in [Page.spec.jsx](./cypress/components/Page.spec.jsx).
+
+## Coverage
+
+Code coverage is not working yet, see issue [431](https://github.com/bahmutov/cypress-react-unit-test/issues/431). It was disabled in [cypress.json](cypress.json)

@@ -8,6 +8,8 @@ describe('NextJS page', () => {
     mount(<IndexPage />)
 
     cy.contains('Welcome to Next.js')
+    cy.get('[aria-label=search]').type('Cypress')
+    cy.contains('.search-text', 'You are searching for: Cypress')
   })
 
   it("It doesn't run the `.getInitialProps()`", () => {
