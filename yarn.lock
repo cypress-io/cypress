@@ -11124,7 +11124,6 @@ cypress-react-unit-test@4.11.2:
     debug "4.1.1"
     find-webpack "2.0.0"
     mime-types "2.1.26"
-    unfetch "4.1.0"
 
 d3-helpers@0.3.0:
   version "0.3.0"
