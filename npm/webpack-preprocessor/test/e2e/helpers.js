@@ -104,6 +104,7 @@ exports.runTest = async (options = {}) => {
     config: {
       video: false,
     },
+    dev: true,
   })
   .finally(() => {
     stdout = stdio.toString()
@@ -295,6 +296,8 @@ function normalizeStdout (str, options = {}) {
   // /Users/jane/........../ -> //foo/bar/.projects/
   // (Required when paths are printed outside of our own formatting)
   .split(process.cwd()).join('/[cwd]')
+  // also normalize paths to the workspace root
+  .split(path.resolve(process.cwd(), '../..')).join('/[root]')
 
   // unless normalization is explicitly turned off then
   // always normalize the stdout replacing the browser text

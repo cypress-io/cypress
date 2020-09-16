@@ -1014,9 +1014,6 @@ jobs:
       - check-changed-files:
           pattern: "@cypress/webpack-preprocessor"
       - run:
-          name: build preprocessor
-          command: yarn workspace @cypress/webpack-preprocessor build
-      - run:
           name: run tests
           command: yarn workspace @cypress/webpack-preprocessor test
       - run:
