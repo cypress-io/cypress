@@ -2191,7 +2191,16 @@ exports['e2e record passing passes 2'] = [
             "error": {
               "name": "Error",
               "message": "foo\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `record fails`",
-              "stack": "[stack trace lines]"
+              "stack": "[stack trace lines]",
+              "codeFrame": {
+                "line": 3,
+                "column": 11,
+                "originalFile": "cypress/integration/record_fail_spec.coffee",
+                "relativeFile": "cypress/integration/record_fail_spec.coffee",
+                "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/record_fail_spec.coffee",
+                "frame": "  1 | describe \"record fails\", ->\n  2 |   beforeEach ->\n> 3 |     throw new Error(\"foo\")\n    |           ^\n  4 | \n  5 |   it \"fails 1\", ->\n  6 | ",
+                "language": "coffee"
+              }
             },
             "timings": {
               "lifecycle": 100,
@@ -2382,7 +2391,16 @@ exports['e2e record passing passes 2'] = [
             "error": {
               "name": "Error",
               "message": "The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.",
-              "stack": "[stack trace lines]"
+              "stack": "[stack trace lines]",
+              "codeFrame": {
+                "line": 1,
+                "column": 7,
+                "originalFile": "cypress/integration/record_uncaught_spec.coffee",
+                "relativeFile": "cypress/integration/record_uncaught_spec.coffee",
+                "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/record_uncaught_spec.coffee",
+                "frame": "> 1 | throw new Error('instantly fails')\n    |       ^\n  2 | ",
+                "language": "coffee"
+              }
             },
             "timings": {
               "lifecycle": 100,
