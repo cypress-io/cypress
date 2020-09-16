@@ -9,11 +9,11 @@ assignees: ''
 
 <!-- Is this a question? Questions WILL BE CLOSED. Ask in our chat https://on.cypress.io/chat  -->
 
-### Current behavior:
+### Current behavior
 
 <!-- A description including screenshots, stack traces, DEBUG logs, etc -->
 
-### Desired behavior:
+### Desired behavior
 
 <!-- A clear description of what you want to happen -->
 
