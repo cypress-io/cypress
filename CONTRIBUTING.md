@@ -111,6 +111,7 @@ Also, your proposed solution may not be compatible with the direction we want to
 
 Label | Description | Main issue | Issues
 --- | --- | --- | ---
+browser detection | Local browser is not detected | [8541](https://github.com/cypress-io/cypress/issues/8541) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20browser%20detection), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+browser+detection%22+is%3Aclosed)
 cross-origin | Getting cross-origin error | [944](https://github.com/cypress-io/cypress/issues/944) |[open](https://github.com/cypress-io/cypress/labels/topic%3A%20cross-origin%20%E2%A4%AD), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cross-origin+%E2%A4%AD%22+is%3Aclosed)
 cy.request | Issues related to cy.request command | [1647](https://github.com/cypress-io/cypress/issues/1647) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20cy.request), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+cy.request%22+is%3Aclosed)
 fixtures | Fixture loading and usage | | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20fixtures), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+fixtures%22+is%3Aclosed)
@@ -121,6 +122,9 @@ performance | Slow loading, slow network, etc | [1305](https://github.com/cypres
 screenshots | Taking image screenshots | [2102](https://github.com/cypress-io/cypress/issues/2102) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20screenshots%20%F0%9F%93%B8), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+screenshots+%F0%9F%93%B8%22+is%3Aclosed)
 spec execution | Running all specs or some specs in some specific order | [390](https://github.com/cypress-io/cypress/issues/390) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20spec%20execution) | [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+spec+execution%22+is%3Aclosed)
 test execution | Running tests inside a single spec | [2908](https://github.com/cypress-io/cypress/issues/2908) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20test%20execution), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+test+execution%22+is%3Aclosed)
+scrolling | Scrolling elements into view | [871](https://github.com/cypress-io/cypress/issues/871) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20scrolling%20%E2%86%95%EF%B8%8F), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+scrolling+%E2%86%95%EF%B8%8F%22+is%3Aclosed)
+typescript | Transpiling or bundling TypeScript | [7435](https://github.com/cypress-io/cypress/issues/7435) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20typescript), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+typescript%22+is%3Aclosed)
+iframes | Working with iframes | [136](https://github.com/cypress-io/cypress/issues/136) | [open](https://github.com/cypress-io/cypress/labels/topic%3A%20iframes), [closed](https://github.com/cypress-io/cypress/issues?q=label%3A%22topic%3A+iframes%22+is%3Aclosed)
 
 ## Triaging Issues
 
