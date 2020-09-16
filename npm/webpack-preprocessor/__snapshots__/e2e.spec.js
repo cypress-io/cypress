@@ -24,7 +24,7 @@ The error was:
 
 Error: Webpack Compilation Error
 ./cypress/tests/e2e/compile-error.js
-Module build failed (from ./node_modules/babel-loader/lib/index.js):
+Module build failed (from /[root]/node_modules/babel-loader/lib/index.js):
 SyntaxError: /[cwd]/cypress/tests/e2e/compile-error.js: Unexpected token, expected "," (14:27)
 
   12 | 
@@ -33,6 +33,7 @@ SyntaxError: /[cwd]/cypress/tests/e2e/compile-error.js: Unexpected token, expect
      |                            ^
   15 | })
   16 | 
+
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:
 
