@@ -142,6 +142,7 @@ Spec | Description
 [css modules](cypress/component/basic/css-modules) | Shows that component that using css modules styles works
 [network](cypress/component/basic/network) | Confirms we can use `cy.route` to stub / spy on component's network calls
 [no-visit](cypress/component/basic/no-visit) | Component specs cannot call `cy.visit`
+[re-render](cypress/component/basic/re-render) | Checking how the component re-renders when its props change
 [react-book-by-chris-noring](cypress/component/basic/react-book-by-chris-noring) | Copied test examples from [React Book](https://softchris.github.io/books/react) and adapted for Cypress component tests
 [react-tutorial](cypress/component/basic/react-tutorial) | Tests from official [ReactJS tutorial](https://reactjs.org/tutorial/tutorial.html) copied and adapted for Cypress component tests
 [stub-example](cypress/component/basic/stub-example) | Uses `cy.stub` as component props
