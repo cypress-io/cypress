@@ -1012,7 +1012,7 @@ jobs:
       - attach_workspace:
           at: ~/
       - check-changed-files:
-          pattern: @cypress/webpack-preprocessor
+          pattern: "@cypress/webpack-preprocessor"
       - run:
           name: build preprocessor
           command: yarn workspace @cypress/webpack-preprocessor build
