@@ -174,14 +174,16 @@ export const unmount = () => {
 /**
  * Creates new instance of `mount` function with default options
  * @function   createMount
- * @param      {React.ReactElement}  element - component to mount
  * @param      {MountOptions}  [defaultOptions] - defaultOptions for returned `mount` function
+ * @returns    new instance of `mount` with assigned options
  * @example
  * ```
  * import Hello from './hello.jsx'
  * import { createMount } from 'cypress-react-unit-test'
+ * 
+ * const mount = createMount({ strict: true, cssFile: 'path/to/any/css/file.css' })
+ * 
  * it('works', () => {
- *   const mount = createMount({ strict: true, cssFile: 'path/to/any/css/file.css' })
  *   mount(<Hello />)
  *   // use Cypress commands
  *   cy.get('button').should('have.css', 'color', 'rgb(124, 12, 109)')
@@ -190,7 +192,7 @@ export const unmount = () => {
  **/
 export const createMount = (defaultOptions: MountOptions) => (
   element: React.ReactElement,
-  options: MountOptions,
+  options?: MountOptions,
 ) => mount(element, { ...defaultOptions, ...options })
 
 /** @deprecated Should be removed in the next major version */

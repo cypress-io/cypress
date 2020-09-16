@@ -86,6 +86,26 @@ workflows:
                 working_directory: examples/react-scripts
 
       - cypress/run:
+          name: Example Next.js
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/nextjs
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/nextjs
+
+      - cypress/run:
           # react-scripts example with component tests not in "src" folder
           # but in "cypress/component" folder
           name: Example Component Folder
