@@ -396,7 +396,7 @@ commands:
     steps:
       - run:
           name: checking if develop branch or changed files in << parameters.pattern >>
-          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || git diff --name-only $(git merge-base origin/develop HEAD) | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
+          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || node scripts/changed-packages.js | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
 
 jobs:
   ## code checkout and yarn installs
@@ -1006,28 +1006,25 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
-  npm-webpack-preprocessor-build:
+  npm-webpack-preprocessor:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
       - check-changed-files:
-          pattern: npm/webpack-preprocessor
+          pattern: @cypress/webpack-preprocessor
       - run:
-          command: yarn build
-          working_directory: npm/webpack-preprocessor
-      - store-npm-logs
-
-  npm-webpack-preprocessor-test-react:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-changed-files:
-          pattern: npm/webpack-preprocessor
+          name: build preprocessor
+          command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          command: yarn start
-          working_directory: npm/webpack-preprocessor/examples/react-app
+          name: run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
+      - run:
+          name: install latest webpack
+          command: yarn workspace @cypress/webpack-preprocessor add -D webpack@latest webpack-cli@latest
+      - run:
+          name: run tests with latest webpack
+          command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
 
   build-binary:
