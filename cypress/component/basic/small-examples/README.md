@@ -1,6 +1,6 @@
 # Small examples
 
-These examples come from the blog post [Testing Vue components with Vue Testing Library](https://blog.logrocket.com/testing-vue-components-with-vue-testing-library/) and the tests are written using `cypress-vue-unit-test`.
+These examples come from the blog post [Testing Vue components with Vue Testing Library](https://blog.logrocket.com/testing-vue-components-with-vue-testing-library/) and the tests are written using `@cypress/vue`.
 
 Tests for [Counter.vue](Counter.vue) are in [Counter.spec.js](Counter.spec.js)
 

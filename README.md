@@ -1,4 +1,4 @@
-# cypress-vue-unit-test
+# @cypress/vue
 
 [![NPM][npm-icon] ][npm-url]
 
@@ -7,25 +7,21 @@
 [![semantic-release][semantic-image] ][semantic-url]
 [![renovate-app badge][renovate-badge]][renovate-app]
 
-> A little helper to unit test Vue components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
+> Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
-## TLDR
-
-- What is this? This package allows you to use [Cypress](https://www.cypress.io/) test runner to unit test your Vue components with zero effort.
+### What is @cypress/vue?
+This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
 
 ![Example component test](images/dynamic.gif)
 
-- How is this different from [vue-test-utils](https://vue-test-utils.vuejs.org/en/)? Vue Test Utils uses Node, requires stubbing browser APIs, and requires users to await Vue's internal event loop. Cypress Vue Unit Test runs each component in the real browser with full power of Cypress E2E test runner: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/).
+### How is this different from Vue Test Utils?
+It uses [Vue Test Utils](https://github.com/vuejs/vue-test-utils) under the hood. This is more of a replacement for node-based testing than it is replacing Vue Test Utils and its API. Instead of running your tests in node (using Jest or Mocha), the Cypress Component Testing Library runs each component in the **real browser** with full power of the Cypress Framework: [live GUI, full API, screen recording, CI support, cross-platform](https://www.cypress.io/features/). One benefit to using Cypress instead of a node-based runner is that limitations of Vue Test Utils in Node (e.g. manually awaiting Vue's internal event loop) are hidden from the user due to Cypress's retry-ability logic.  
 
 - If you like using `@testing-library/vue`, you can use `@testing-library/cypress` for the same `findBy`, `queryBy` commands, see one of the examples in the list below
 
-## Blog posts
-
-- [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
-
-## Install
+## Installation
 
 <p align="center">
   <img src="./docs/commands.gif" width="400px" alt="Terminal typing vue add cypress-experimental"/>
@@ -52,7 +48,7 @@ If you want to install this package manually, follow [manual install](./docs/man
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -130,7 +126,7 @@ Let's test it in [Cypress.io][cypress.io] (for the current version see
 [cypress/integration/spec.js](cypress/integration/spec.js)).
 
 ```js
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 describe('Declarative rendering', () => {
   // Vue code from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -244,7 +240,7 @@ The next section in the Vue docs starts with [reverse message example](https://v
 ```html
 <div id="app-5">
   <p>{{ message }}</p>
-  <button v-on:click="reverseMessage">Reverse Message</button>
+  <button @click="reverseMessage">Reverse Message</button>
 </div>
 ```
 
@@ -265,14 +261,14 @@ var app5 = new Vue({
 We can write the test the same way
 
 ```js
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 describe('Handling User Input', () => {
   // Example from https://vuejs.org/v2/guide/#Handling-User-Input
   const template = `
     <div>
       <p>{{ message }}</p>
-      <button v-on:click="reverseMessage">Reverse Message</button>
+      <button @click="reverseMessage">Reverse Message</button>
     </div>
   `
 
@@ -340,7 +336,7 @@ to have multiple components? No problem!
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 describe('Several components', () => {
   const template = `
     <div>
@@ -368,7 +364,7 @@ Button counter component is used in several Vue doc examples
 
 ```vue
 <template>
-  <button v-on:click="incrementCounter">{{ counter }}</button>
+  <button @click="incrementCounter">{{ counter }}</button>
 </template>
 
 <script>
@@ -402,7 +398,7 @@ Simple - let us spy on the event, [spying and stubbing is built into Cypress](ht
 
 ```js
 import ButtonCounter from '../../components/ButtonCounter.vue'
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 describe('ButtonCounter', () => {
   beforeEach(mountCallback(ButtonCounter))
@@ -475,7 +471,7 @@ Calls to `window.alert` are automatically recorded, but do not show up. Instead 
 ## Comparison
 
 <!-- prettier-ignore-start -->
-Feature | Vue Test Utils or @testing-library/vue | Cypress + `cypress-vue-unit-test`
+Feature | Vue Test Utils or @testing-library/vue | Cypress + `@cypress/vue`
 --- | --- | ---
 Test runs in real browser | ❌ | ✅
 Uses full mount | ❌ | ✅
@@ -496,7 +492,7 @@ Code coverage | ✅ | ✅
 
 ```js
 // components/HelloWorld.spec.js
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 import { HelloWorld } from './HelloWorld.vue'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -577,7 +573,7 @@ file.
 ```js
 const {
   onFilePreprocessor,
-} = require('cypress-vue-unit-test/preprocessor/webpack')
+} = require('@cypress/vue/preprocessor/webpack')
 module.exports = (on) => {
   on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
 }
@@ -630,7 +626,7 @@ And write a test
 
 ```js
 import Hello from '../../components/Hello.vue'
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 describe('Hello.vue', () => {
   beforeEach(mountCallback(Hello))
@@ -685,13 +681,13 @@ Larger tests that use full application and run on CI (see [circle.yml](circle.ym
 Run Cypress with environment variable
 
 ```
-DEBUG=cypress-vue-unit-test
+DEBUG=@cypress/vue
 ```
 
 If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
 
 ```
-DEBUG=cypress-vue-unit-test DEBUG_DEPTH=10
+DEBUG=@cypress/vue DEBUG_DEPTH=10
 ```
 
 <a name="#faq"/>
@@ -709,7 +705,7 @@ DEBUG=cypress-vue-unit-test DEBUG_DEPTH=10
 - [Why Cypress?](https://on.cypress.io/why-cypress)
 - [Cypress API](https://on.cypress.io/api)
 - [Learn TDD in Vue](https://learntdd.in/vue)
-- [cypress-vue-unit-test vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
+- [@cypress/vue vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
 
 ## Migration guide
 
@@ -720,7 +716,7 @@ DEBUG=cypress-vue-unit-test DEBUG_DEPTH=10
 ```js
 const {
   onFileDefaultPreprocessor,
-} = require('cypress-vue-unit-test/preprocessor/webpack')
+} = require('@cypress/vue/preprocessor/webpack')
 
 module.exports = (on, config) => {
   require('@cypress/code-coverage/task')(on, config)
@@ -731,6 +727,10 @@ module.exports = (on, config) => {
   return config
 }
 ```
+
+## Blog posts
+
+- [Write Your First Vue Component Test](https://glebbahmutov.com/blog/first-vue-component-test/)
 
 <a name="#other"/>
 
@@ -743,53 +743,31 @@ module.exports = (on, config) => {
 - [cypress-hyperapp-unit-test](https://github.com/bahmutov/cypress-hyperapp-unit-test)
 - [cypress-angularjs-unit-test](https://github.com/bahmutov/cypress-angularjs-unit-test)
 
-<a name="#contributors"/>
+<a name="#maintainers"/>
 
-## Contributors
+## Maintainers
 
-- [Amir Rustamzadeh](https://github.com/amirrustam)
-- [Gleb Bahmutov](https://github.com/bahmutov)
+The Cypress.io Component Testing Team
 
-### Small print
+- [Jessica Sachs](https://github.com/jessicasachs) (Current Maintainer, [Vue Test Utils](https://github.com/vuejs/vue-test-utils) Maintainer)
+- [Gleb Bahmutov](https://github.com/bahmutov) (Original Author, Current Maintainer of [@cypress/react](https://github.com/bahmutov/cypress-react-unit-test))
 
-Author: Gleb Bahmutov &lt;gleb.bahmutov@gmail.com&gt; &copy; 2017
+Support: if you find any problems with this module, [tweet](https://twitter.com/_jessicasachs) / [open issue](https://github.com/cypress-io/cypress/issues) on Github
 
-- [@bahmutov](https://twitter.com/bahmutov)
-- [glebbahmutov.com](https://glebbahmutov.com)
-- [blog](https://glebbahmutov.com/blog)
+## License
 
-License: MIT - do anything with the code, but don't blame me if it does not work.
+[![license](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/cypress-io/cypress/blob/master/LICENSE)
 
-Support: if you find any problems with this module, email / tweet /
-[open issue](https://github.com/bahmutov/cypress-vue-unit-test/issues) on Github
+This project is licensed under the terms of the [MIT license](/LICENSE).
 
-## MIT License
+## Badges
 
-Copyright (c) 2017 Gleb Bahmutov &lt;gleb.bahmutov@gmail.com&gt;
+Let the world know your project is using Cypress.io to test with this cool badge
 
-Permission is hereby granted, free of charge, to any person
-obtaining a copy of this software and associated documentation
-files (the "Software"), to deal in the Software without
-restriction, including without limitation the rights to use,
-copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the
-Software is furnished to do so, subject to the following
-conditions:
+[![Cypress.io](https://img.shields.io/badge/tested%20with-Cypress-04C38E.svg)](https://www.cypress.io/)
 
-The above copyright notice and this permission notice shall be
-included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
-HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
-WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
-
-[npm-icon]: https://nodei.co/npm/cypress-vue-unit-test.svg?downloads=true
-[npm-url]: https://npmjs.org/package/cypress-vue-unit-test
+[npm-icon]: https://nodei.co/npm/@cypress/vue.svg?downloads=true
+[npm-url]: https://npmjs.org/package/@cypress/vue
 [ci-image]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master.svg?style=svg
 [ci-url]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg

@@ -70,17 +70,17 @@ workflows:
             echo ""
             echo "🦶🏻 test scaffolded project, should work"
             echo ""
-            DEBUG=cypress-vue-unit-test npx cypress run --spec 'tests/components/**/*.js'
+            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
             # let's inspect the scaffolded app
             ls -la
             echo ""
-            echo "🦶🏻 install the current cypress-vue-unit-test"
+            echo "🦶🏻 install the current @cypress/vue"
             echo ""
-            npm install ../../cypress-vue-unit-test-0.0.0-development.tgz
+            npm install ../../@cypress/vue-0.0.0-development.tgz
             echo ""
             echo "🦶🏻 run component tests"
             echo ""
-            DEBUG=cypress-vue-unit-test npx cypress run --spec 'tests/components/**/*.js'
+            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
             echo ""
             echo "🦶🏻 look at the generated files, should have coverage"
             # (after updating cypress-experimental)

@@ -1,5 +1,5 @@
 import Todo from './Todo.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 // let's make sure we can show the checked Todo item using CSS
 const style = `

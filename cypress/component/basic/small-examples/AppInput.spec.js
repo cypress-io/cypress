@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
 import AppInput from './AppInput.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 it('renders label', () => {
   mount(AppInput, {

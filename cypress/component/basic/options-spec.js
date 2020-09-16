@@ -1,4 +1,4 @@
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 const template = `
     <div id="app">

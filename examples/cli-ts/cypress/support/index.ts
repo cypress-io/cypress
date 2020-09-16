@@ -1,1 +1,1 @@
-import 'cypress-vue-unit-test/dist/support'
+import '@cypress/vue/dist/support'

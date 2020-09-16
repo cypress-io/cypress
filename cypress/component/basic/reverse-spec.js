@@ -1,4 +1,4 @@
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 /* eslint-env mocha */
 describe('Handling User Input', () => {

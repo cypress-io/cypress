@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 import { reverse } from './reverse'
 
 describe('Global filters', () => {
@@ -24,7 +24,7 @@ describe('Global filters', () => {
       .should('equal', filters.reverse)
   })
 
-  it('unit tests the reverse function', () => {
+  it('tests the reverse function', () => {
     expect(reverse('Hello')).to.equal('olleH')
   })
 

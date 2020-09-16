@@ -6,7 +6,7 @@
 /// <reference types="cypress" />
 
 import Card from './Card.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 describe('Card', () => {
   it('skipped slots', () => {

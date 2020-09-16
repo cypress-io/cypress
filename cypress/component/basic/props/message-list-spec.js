@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import MessageList from '../MessageList.vue'
-import { mount, mountCallback } from 'cypress-vue-unit-test'
+import { mount, mountCallback } from '@cypress/vue'
 
 // common utils for MessageList
 const getItems = () => cy.get('ul li')
