@@ -204,5 +204,21 @@ describe('lib/tasks/cache', () => {
       await cache.list()
       await snapshotWithHtml('second-binary-never-used.html')
     })
+
+    it('shows sizes', async function () {
+      sinon.stub(state, 'getPathToExecutable').returns('/.cache/Cypress/1.2.3/app/cypress')
+
+      const statAsync = sinon.stub(fs, 'statAsync')
+
+      statAsync.onFirstCall().resolves({
+        atime: moment().subtract(3, 'month').valueOf(),
+      })
+
+      // the second binary has never been accessed
+      statAsync.onSecondCall().resolves()
+
+      await cache.list(true)
+      await snapshotWithHtml('show-size.html')
+    })
   })
 })
