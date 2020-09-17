@@ -1014,11 +1014,17 @@ jobs:
       - check-changed-files:
           pattern: "@cypress/webpack-preprocessor"
       - run:
+          name: build
+          command: yarn build
+      - run:
+          name: check types
+          command: yarn types
+      - run:
           name: run tests
           command: yarn workspace @cypress/webpack-preprocessor test
       - run:
           name: install latest webpack
-          command: yarn workspace @cypress/webpack-preprocessor add -D webpack@latest webpack-cli@latest
+          command: yarn workspace @cypress/webpack-preprocessor add --no-save webpack@latest webpack-cli@latest
       - run:
           name: run tests with latest webpack
           command: yarn workspace @cypress/webpack-preprocessor test
