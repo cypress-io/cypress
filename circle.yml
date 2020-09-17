@@ -76,7 +76,7 @@ workflows:
             echo ""
             echo "🦶🏻 install the current @cypress/vue"
             echo ""
-            npm install ../../@cypress/vue-0.0.0-development.tgz
+            npm install ../../@cypress/vue
             echo ""
             echo "🦶🏻 run component tests"
             echo ""
