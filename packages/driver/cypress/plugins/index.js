@@ -38,6 +38,9 @@ module.exports = (on) => {
     'return:arg' (arg) {
       return arg
     },
+    'no:arg' (arg = 'hello') {
+      return arg
+    },
     'wait' () {
       return Promise.delay(2000)
     },
