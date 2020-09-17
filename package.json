@@ -130,7 +130,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "5.4.4",
+    "@cypress/webpack-preprocessor": "5.4.5",
     "@mdx-js/loader": "^1.6.16",
     "@next/mdx": "^9.5.3",
     "@zeit/next-sass": "^1.0.1",
