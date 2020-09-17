@@ -314,7 +314,7 @@ function failTestOnVueError(err, vm, info) {
  * @param {object} component imported from Vue file
  * @example
  *  import Greeting from './Greeting.vue'
- *  import { mount } from 'cypress-vue-unit-test'
+ *  import { mount } from '@cypress/vue'
  *  it('works', () => {
  *    // pass props, additional extensions, etc
  *    mount(Greeting, { ... })
@@ -424,7 +424,7 @@ export const mount = (
 /**
  * Helper function for mounting a component quickly in test hooks.
  * @example
- *  import {mountCallback} from 'cypress-vue-unit-test'
+ *  import {mountCallback} from '@cypress/vue'
  *  beforeEach(mountVue(component, options))
  */
 export const mountCallback = (

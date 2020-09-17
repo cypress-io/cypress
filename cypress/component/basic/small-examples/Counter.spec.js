@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
 import Counter from './Counter.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 describe('Counter', () => {
   it('renders correctly', () => {

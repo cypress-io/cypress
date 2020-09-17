@@ -2,7 +2,7 @@
 'use strict'
 
 import AjaxList from './AjaxList.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 /* eslint-env mocha */
 describe('AjaxList', () => {

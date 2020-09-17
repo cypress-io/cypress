@@ -1,4 +1,4 @@
-import { mount, mountCallback } from 'cypress-vue-unit-test'
+import { mount, mountCallback } from '@cypress/vue'
 import RedBox from './RedBox.vue'
 
 describe('RedBox 1', () => {

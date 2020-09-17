@@ -3,7 +3,7 @@ import Vue from 'vue'
 import TranslatedMessageWithJSON from './TranslatedJSONMessage.vue'
 import TranslatedMessageI18nBlock from './TranslatedI18nMessage.vue'
 import VueI18n from 'vue-i18n'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
 function expectHelloWorldGreeting() {

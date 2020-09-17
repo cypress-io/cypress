@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 
 import Repeater from './Repeater.vue'
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 
 describe('Repeater', () => {
   it('User can type and see output on the screen', () => {

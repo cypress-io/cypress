@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from 'cypress-vue-unit-test'
+import { mount } from '@cypress/vue'
 import Users from './Users.vue'
 
 describe('Fetching users', () => {
