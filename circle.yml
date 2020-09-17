@@ -88,32 +88,33 @@ workflows:
             ls -la
           store_artifacts: true
 
-      # this job attaches the workspace left by the install job
-      # so it is ready to run Cypress tests
-      # only we will run semantic release script instead
-      - cypress/run:
-          name: NPM release
-          # only run NPM release from specific branch(es)
-          filters:
-            branches:
-              only:
-                - master
-          # we need newer Node for semantic release
-          executor: cypress/base-12
-          requires:
-            - Install
-            - Test
-            - Example CLI
-          install-command: echo 'Already installed'
-          verify-command: echo 'Already verified'
-          no-workspace: true
-          # instead of "cypress run" do NPM release 😁
-          # clear environment variables to trick semantic-release
-          # into thinking this is NOT a pull request.
-          # (under the hood the module env-ci is used to check if this is a PR)
-          command: |
-            npm run build
-            CIRCLE_PR_NUMBER= \
-            CIRCLE_PULL_REQUEST= \
-            CI_PULL_REQUEST= \
-            npm run semantic-release
+#      Turning off semantic release until merged into monorepo
+#      # this job attaches the workspace left by the install job
+#      # so it is ready to run Cypress tests
+#      # only we will run semantic release script instead
+#      - cypress/run:
+#          name: NPM release
+#          # only run NPM release from specific branch(es)
+#          filters:
+#            branches:
+#              only:
+#                - master
+#          # we need newer Node for semantic release
+#          executor: cypress/base-12
+#          requires:
+#            - Install
+#            - Test
+#            - Example CLI
+#          install-command: echo 'Already installed'
+#          verify-command: echo 'Already verified'
+#          no-workspace: true
+#          # instead of "cypress run" do NPM release 😁
+#          # clear environment variables to trick semantic-release
+#          # into thinking this is NOT a pull request.
+#          # (under the hood the module env-ci is used to check if this is a PR)
+#          command: |
+#            npm run build
+#            CIRCLE_PR_NUMBER= \
+#            CIRCLE_PULL_REQUEST= \
+#            CI_PULL_REQUEST= \
+#            npm run semantic-release

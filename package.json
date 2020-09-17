@@ -1,7 +1,7 @@
 {
   "name": "@cypress/vue",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
-  "version": "1.0.0-alpha.4",
+  "version": "1.0.0-alpha.5",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
   "bugs": "https://github.com/cypress/cypress/issues",
   "engines": {
@@ -40,18 +40,8 @@
     "test": "npm run cy:run",
     "unit": "mocha src/*-spec.js",
     "unused-deps": "echo skip dependency-check --unused --no-dev --no-peer . --entry cypress/plugins/index.js",
-    "semantic-release": "semantic-release",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
-  },
-  "release": {
-    "branches": [
-      "master",
-      {
-        "name": "feature/cypress-mount-mode",
-        "prerelease": "cypress-mount-mode"
-      }
-    ]
   },
   "devDependencies": {
     "@babel/core": "7.9.0",
