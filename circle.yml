@@ -53,40 +53,40 @@ workflows:
             echo "Test files for this machine are $TESTFILES"
             npx cypress run --spec $TESTFILES
 
-      - cypress/run:
-          name: Example CLI
-          executor: cypress/base-12
-          requires:
-            - Install
-          install-command: npm install
-          verify-command: echo 'Already verified'
-          no-workspace: true
-          working_directory: examples/cli
-          command: |
-            echo "🦶🏻 Scaffolding component tests"
-            echo ""
-            # scaffolds Babel + Webpack combo
-            npx --package @vue/cli vue add cypress-experimental
-            echo ""
-            echo "🦶🏻 test scaffolded project, should work"
-            echo ""
-            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
-            # let's inspect the scaffolded app
-            ls -la
-            echo ""
-            echo "🦶🏻 install the current @cypress/vue"
-            echo ""
-            npm install ../../@cypress/vue
-            echo ""
-            echo "🦶🏻 run component tests"
-            echo ""
-            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
-            echo ""
-            echo "🦶🏻 look at the generated files, should have coverage"
-            # (after updating cypress-experimental)
-            echo ""
-            ls -la
-          store_artifacts: true
+#      - cypress/run:
+#          name: Example CLI
+#          executor: cypress/base-12
+#          requires:
+#            - Install
+#          install-command: npm install
+#          verify-command: echo 'Already verified'
+#          no-workspace: true
+#          working_directory: examples/cli
+#          command: |
+#            echo "🦶🏻 Scaffolding component tests"
+#            echo ""
+#            # scaffolds Babel + Webpack combo
+#            npx --package @vue/cli vue add cypress-experimental
+#            echo ""
+#            echo "🦶🏻 test scaffolded project, should work"
+#            echo ""
+#            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
+#            # let's inspect the scaffolded app
+#            ls -la
+#            echo ""
+#            echo "🦶🏻 install the current @cypress/vue"
+#            echo ""
+#            npm install ../../@cypress/vue
+#            echo ""
+#            echo "🦶🏻 run component tests"
+#            echo ""
+#            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
+#            echo ""
+#            echo "🦶🏻 look at the generated files, should have coverage"
+#            # (after updating cypress-experimental)
+#            echo ""
+#            ls -la
+#          store_artifacts: true
 
 #      Turning off semantic release until merged into monorepo
 #      # this job attaches the workspace left by the install job

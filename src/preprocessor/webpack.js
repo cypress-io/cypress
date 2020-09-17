@@ -112,6 +112,8 @@ function insertBabelLoader(config, options) {
     babelRule.options.plugins.push(instrumentPlugin)
   }
 
+  options.module = options.module || {}
+  options.module.rules = options.module.rules || []
   options.module.rules.push(babelRule)
   options.plugins = options.plugins || []
 
