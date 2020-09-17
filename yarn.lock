@@ -2210,10 +2210,10 @@
     debug "^4.1.1"
     lodash "^4.17.20"
 
-"@cypress/webpack-preprocessor@5.4.1":
-  version "5.4.1"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.1.tgz#eb58f6cd02932a95653c1a674cfd769da2409806"
-  integrity sha512-1E2BdVVXQ4wDQ7f3mXCvS9xmfTVwEoT3oqKhjAr1iNlTJpBq10Z0VNBZd3VZ3nmCTFwTuUvs735QGnRE1gQ1BA==
+"@cypress/webpack-preprocessor@5.4.2":
+  version "5.4.2"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.2.tgz#d40fed6375b09dd16b266a045f4577e9c7a0299a"
+  integrity sha512-ffydnj6mTVm83qc1p63dE2qxRkiIQNXxiHp2xyuVelwmksX+l0VSBxawYd/9Z99rInmqa583yUDPKk8IkCtmDg==
   dependencies:
     bluebird "3.7.1"
     debug "4.1.1"
@@ -11124,6 +11124,7 @@ cypress-react-unit-test@4.11.2:
     debug "4.1.1"
     find-webpack "2.0.0"
     mime-types "2.1.26"
+    unfetch "4.1.0"
 
 d3-helpers@0.3.0:
   version "0.3.0"
