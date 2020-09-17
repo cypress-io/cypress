@@ -1,14 +1,14 @@
 // See: ./errorScenarios.md for details about error messages and stack traces
 
 const _ = require('lodash')
-const chai = require('chai')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
 const $errorMessages = require('./error_messages')
+const mochaDiffUtils = require('./mocha_diff_utils')
 
-const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
+const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught diff showDiff isPending docsUrl codeFrame'.split(' ')
 const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 if (!Error.captureStackTrace) {
@@ -29,18 +29,24 @@ const prepareErrorForSerialization = (err) => {
   }
 
   if (err.showDiff === true) {
-    if (err.actual) {
-      err.actual = chai.util.inspect(err.actual)
-    }
+    err.diff = mochaDiffUtils.getAnsiDiff(err)
 
-    if (err.expected) {
-      err.expected = chai.util.inspect(err.expected)
-    }
-  } else {
-    delete err.actual
-    delete err.expected
-    delete err.showDiff
+    // TODO: remove this since we calculate the diff above,
+    // so there's no need to send entire actual/expected objs
+    // if (err.actual) {
+    //   // err.actual = chai.util.inspect(err.actual)
+    //   err.actual = mochaUtils.stringify(err.actual)
+    // }
+
+    // if (err.expected) {
+    //   // err.expected = chai.util.inspect(err.expected)
+    //   err.expected = mochaUtils.stringify(err.expected)
+    // }
   }
+
+  delete err.actual
+  delete err.expected
+  delete err.showDiff
 
   err[ERR_PREPARED_FOR_SERIALIZATION] = true
 

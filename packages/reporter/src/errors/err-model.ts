@@ -31,11 +31,13 @@ export interface ErrProps {
   docsUrl: string | string[]
   templateType: string
   codeFrame: CodeFrame
+  diff? : string
 }
 
 export default class Err {
   @observable name = ''
   @observable message = ''
+  @observable diff = ''
   @observable stack = ''
   @observable sourceMappedStack = ''
   @observable.ref parsedStack = [] as ParsedStackLine[]
@@ -67,5 +69,6 @@ export default class Err {
     if (props.parsedStack) this.parsedStack = props.parsedStack
     if (props.templateType) this.templateType = props.templateType
     if (props.codeFrame) this.codeFrame = props.codeFrame
+    if (props.diff) this.diff = props.diff
   }
 }

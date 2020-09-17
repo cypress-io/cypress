@@ -178,6 +178,12 @@ const mergeErr = function (runnable, runnables, stats) {
   let test = runnables[runnable.id]
 
   test.err = runnable.err
+
+  // TODO: clean this up, what to do about custom reporters
+  if (test.err.diff) {
+    test.err.message += `${test.err.diff}`
+  }
+
   test.state = 'failed'
 
   if (runnable.type === 'hook') {

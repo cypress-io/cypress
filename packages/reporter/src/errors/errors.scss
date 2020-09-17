@@ -114,6 +114,13 @@
       font-weight: bold;
     }
   }
+  
+  .runnable-err-diff {
+    background-color: unset;
+    border: none;
+    line-height: 1.4;
+    padding: 0;
+  }
 
   .runnable-err-stack-expander {
     display: flex;

@@ -41,6 +41,12 @@ describe('errors ui', () => {
       column: 12,
       message: `expected 'actual' to equal 'expected'`,
     })
+
+    // verify.it.only('with actual/expected + showDiff', {
+    //   file,
+    //   column: 12,
+    //   message: 'foobar',
+    // })
   })
 
   describe('exception failures', () => {
