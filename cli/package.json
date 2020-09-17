@@ -98,8 +98,7 @@
     "bin",
     "lib",
     "index.js",
-    "types/**/*.d.ts",
-    "types/net-stubbing.ts"
+    "types/**/*.d.ts"
   ],
   "bin": {
     "cypress": "bin/cypress"
