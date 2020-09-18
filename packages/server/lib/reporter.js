@@ -187,8 +187,10 @@ const mergeErr = function (runnable, runnables, stats) {
   const diff = runnable.err.diff
 
   if (diff) {
-    test.err.message += `${mochaUseColors ? diff : stripAnsi(diff)}`
+    test.err.message = `${test.err.message}${mochaUseColors ? diff : stripAnsi(diff)}`
   }
+
+  test.err.message = `${test.err.name}: ${test.err.message}`
 
   test.state = 'failed'
 
