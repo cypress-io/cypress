@@ -317,6 +317,7 @@ describe('src/cypress/runner', () => {
   })
 
   describe('reporter interaction', () => {
+    // https://github.com/cypress-io/cypress/issues/8621
     it('user can stop test execution', (done) => {
       runIsolatedCypress(() => {
         // eslint-disable-next-line mocha/handle-done-callback
