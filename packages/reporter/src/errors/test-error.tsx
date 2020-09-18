@@ -81,7 +81,7 @@ const TestError = observer((props: TestErrorProps) => {
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />
         </div>
-        {err.diff && <pre className='runnable-err-diff' dangerouslySetInnerHTML={{ __html: convert.toHtml(err.diff) }}></pre>}
+        {Boolean(err.diff) && <pre className='runnable-err-diff' dangerouslySetInnerHTML={{ __html: convert.toHtml(err.diff) }}></pre>}
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
         {err.stack &&
           <Collapsible
