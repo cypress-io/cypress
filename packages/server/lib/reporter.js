@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const stripAnsi = require('strip-ansi')
 const stackUtils = require('./util/stack_utils')
 // mocha-* is used to allow us to have later versions of mocha specified in devDependencies
 // and prevents accidently upgrading this one
@@ -8,6 +9,7 @@ const Mocha = require('mocha-7.0.1')
 const mochaReporters = require('mocha-7.0.1/lib/reporters')
 const mochaCreateStatsCollector = require('mocha-7.0.1/lib/stats-collector')
 const mochaColor = mochaReporters.Base.color
+const mochaUseColors = mochaReporters.Base.useColors
 
 const debug = require('debug')('cypress:server:reporter')
 const Promise = require('bluebird')
@@ -179,9 +181,13 @@ const mergeErr = function (runnable, runnables, stats) {
 
   test.err = runnable.err
 
+  test.err.stack = stackUtils.stackWithoutMessage(test.err.stack)
+
   // TODO: clean this up, what to do about custom reporters
-  if (test.err.diff) {
-    test.err.message += `${test.err.diff}`
+  const diff = runnable.err.diff
+
+  if (diff) {
+    test.err.message += `${mochaUseColors ? diff : stripAnsi(diff)}`
   }
 
   test.state = 'failed'
@@ -367,7 +373,7 @@ class Reporter {
         const err = attempt.err && {
           name: attempt.err.name,
           message: attempt.err.message,
-          stack: stackUtils.stackWithoutMessage(attempt.err.stack),
+          stack: attempt.err.stack,
         }
 
         return {

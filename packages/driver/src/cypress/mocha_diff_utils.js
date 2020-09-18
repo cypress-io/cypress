@@ -4,8 +4,6 @@
 let diff = require('diff')
 let utils = require('mocha/lib/utils')
 
-const inlineDiffs = false
-
 /**
  * Default color map.
  */
@@ -58,6 +56,8 @@ let showDiff = function (err) {
     err &&
     err.showDiff !== false &&
     sameType(err.actual, err.expected) &&
+    typeof err.expected !== 'boolean' &&
+    typeof err.expected !== 'number' &&
     err.expected !== undefined
   )
 }
@@ -82,9 +82,7 @@ function stringifyDiffObjs (err) {
  */
 let generateDiff = function (actual, expected) {
   try {
-    return inlineDiffs
-      ? inlineDiff(actual, expected)
-      : unifiedDiff(actual, expected)
+    return unifiedDiff(actual, expected)
   } catch (err) {
     let msg =
       `\n      ${
@@ -103,60 +101,6 @@ export function getAnsiDiff (err) {
 
     return generateDiff(err.actual, err.expected)
   }
-}
-
-/**
- * Pads the given `str` to `len`.
- *
- * @private
- * @param {string} str
- * @param {string} len
- * @return {string}
- */
-function pad (str, len) {
-  str = String(str)
-
-  return Array(len - str.length + 1).join(' ') + str
-}
-
-/**
- * Returns inline diff between 2 strings with coloured ANSI output.
- *
- * @private
- * @param {String} actual
- * @param {String} expected
- * @return {string} Diff
- */
-function inlineDiff (actual, expected) {
-  let msg = errorDiff(actual, expected)
-
-  // linenos
-  let lines = msg.split('\n')
-
-  if (lines.length > 4) {
-    let width = String(lines.length).length
-
-    msg = lines
-    .map(function (str, i) {
-      return `${pad(++i, width)} | ${str}`
-    })
-    .join('\n')
-  }
-
-  // legend
-  msg =
-    `\n${
-      color('diff removed inline', 'actual')
-    } ${
-      color('diff added inline', 'expected')
-    }\n\n${
-      msg
-    }\n`
-
-  // indent
-  msg = msg.replace(/^/gm, '      ')
-
-  return msg
 }
 
 /**
@@ -206,31 +150,6 @@ function unifiedDiff (actual, expected) {
       .filter(notBlank)
       .join('\n')}`
   )
-}
-
-/**
- * Returns character diff for `err`.
- *
- * @private
- * @param {String} actual
- * @param {String} expected
- * @return {string} the diff
- */
-function errorDiff (actual, expected) {
-  return diff
-  .diffWordsWithSpace(actual, expected)
-  .map(function (str) {
-    if (str.added) {
-      return colorLines('diff added inline', str.value)
-    }
-
-    if (str.removed) {
-      return colorLines('diff removed inline', str.value)
-    }
-
-    return str.value
-  })
-  .join('')
 }
 
 /**
