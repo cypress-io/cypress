@@ -42,7 +42,7 @@ describe('errors ui', () => {
       message: `expected 'actual' to equal 'expected'`,
     })
 
-    // verify.it.only('with actual/expected + showDiff', {
+    // verify.it('with actual/expected + showDiff', {
     //   file,
     //   column: 12,
     //   message: 'foobar',
