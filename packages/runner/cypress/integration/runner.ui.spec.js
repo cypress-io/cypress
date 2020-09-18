@@ -315,4 +315,30 @@ describe('src/cypress/runner', () => {
       })
     })
   })
+
+  describe('reporter interaction', () => {
+    it('user can stop test execution', (done) => {
+      runIsolatedCypress(() => {
+        // eslint-disable-next-line mocha/handle-done-callback
+        it('test stops while running', (done) => {
+          cy.timeout(200)
+          cy.get('.not-exist')
+          setTimeout(() => {
+            cy.$$('button.stop', parent.document).click()
+          }, 100)
+        })
+
+        afterEach(function () {
+          this.currentTest.err = new Error('ran aftereach')
+        })
+      }, {
+        onBeforeRun ({ autCypress }) {
+          autCypress.on('test:after:run', (arg) => {
+            expect(arg.err.message).not.contain('aftereach')
+            done()
+          })
+        },
+      })
+    })
+  })
 })
