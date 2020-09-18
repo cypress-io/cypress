@@ -66,13 +66,7 @@ const TestError = observer((props: TestErrorProps) => {
   const { err } = props.model
   const { codeFrame } = err
 
-  let diffHTML
-
   if (!err.displayMessage) return null
-
-  if (err.diff) {
-    diffHTML = convert.toHtml(err.diff)
-  }
 
   return (
     <div className='runnable-err-wrapper'>
@@ -87,7 +81,7 @@ const TestError = observer((props: TestErrorProps) => {
           <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
           <DocsUrl url={err.docsUrl} />
         </div>
-        {diffHTML && <pre className='runnable-err-diff' dangerouslySetInnerHTML={{ __html: diffHTML }}></pre>}
+        {err.diff && <pre className='runnable-err-diff' dangerouslySetInnerHTML={{ __html: convert.toHtml(err.diff) }}></pre>}
         {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
         {err.stack &&
           <Collapsible
