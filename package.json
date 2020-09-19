@@ -57,7 +57,7 @@
     "license-checker": "19.0.0",
     "mocha": "7.1.1",
     "prettier": "2.0.5",
-    "semantic-release": "17.1.1",
+    "semantic-release": "17.1.2",
     "tailwindcss": "1.1.4",
     "typescript": "3.9.6",
     "vue": "2.6.11",
