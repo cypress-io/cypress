@@ -82,7 +82,7 @@
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
     "common-tags": "1.8.0",
-    "debug": "4.1.1",
+    "debug": "4.2.0",
     "find-webpack": "2.0.0",
     "unfetch": "4.1.0"
   }
