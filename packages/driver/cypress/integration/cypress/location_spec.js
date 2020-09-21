@@ -435,5 +435,25 @@ describe('src/cypress/location', () => {
 
       expect(url).to.eq('http://localhost:3500/?foo=..')
     })
+
+    // https://github.com/cypress-io/cypress/issues/2101
+    describe('handles query param in baseUrl', () => {
+      const cases = [
+        'http://localhost:3500/?foo=bar',
+        'http://localhost:3500?foo=bar',
+        'http://localhost:3500/?foo',
+        'http://localhost:3500/?foo=bar&a=b',
+      ]
+
+      cases.forEach((c) => {
+        it(c, function () {
+          let url = this.normalize('')
+
+          url = Location.qualifyWithBaseUrl(c, '')
+
+          expect(url).to.eq(c)
+        })
+      })
+    })
   })
 })
