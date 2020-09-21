@@ -129,6 +129,12 @@ class $Location {
   }
 
   static isUrlLike (url) {
+    // https://github.com/cypress-io/cypress/issues/5090
+    // In the case of a url like /?foo=..
+    if (/\.{2,}/.test(url)) {
+      return false
+    }
+
     // beta.cypress.io
     // aws.amazon.com/bucket/foo
     // foo.bar.co.uk
