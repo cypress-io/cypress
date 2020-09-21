@@ -38,8 +38,12 @@ module.exports = (on) => {
     'return:arg' (arg) {
       return arg
     },
-    'no:arg' (arg = 'hello') {
-      return arg
+    'arg:is:undefined' (arg) {
+      if (arg === undefined) {
+        return 'arg was undefined'
+      }
+
+      throw new Error(`Expected arg to be undefined, but it was ${arg}`)
     },
     'wait' () {
       return Promise.delay(2000)
