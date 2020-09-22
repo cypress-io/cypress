@@ -145,7 +145,7 @@ class $Location {
   }
 
   static fullyQualifyUrl (url) {
-    return new URL(url, window.location.origin).toString()
+    return $Location.resolve(window.location.origin, url)
   }
 
   static mergeUrlWithParams (url, params) {
@@ -192,7 +192,7 @@ class $Location {
   }
 
   static qualifyWithBaseUrl (baseUrl, url) {
-    return new URL(url, baseUrl).toString()
+    return $Location.resolve(baseUrl, url)
   }
 
   static isAbsoluteRelative (segment) {
