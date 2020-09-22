@@ -1,3 +1,12 @@
+---
+name: "\U0001F41B Bug report"
+about: Create a report to help us improve
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 <!-- Is this a question? Questions WILL BE CLOSED. Ask in our chat https://on.cypress.io/chat  -->
 
 ### Current behavior
