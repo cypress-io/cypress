@@ -9,8 +9,6 @@
     "build": "rm -rf dist && tsc",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "eslint --ext .js,.jsx,.json,.ts,.tsx .",
-    "lint-fix": "yarn lint --fix",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -52,7 +50,6 @@
     "find-webpack": "1.5.0",
     "fs-extra": "8.1.0",
     "license-checker": "13.0.3",
-    "lint-staged": "10.2.2",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
     "prettier-eslint-cli": "4.4.0",
@@ -92,10 +89,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json}": [
-      "eslint --fix"
-    ]
-  }
+  ]
 }
