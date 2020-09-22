@@ -127,7 +127,7 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         - chromium
         - edge
         - electron
-        - firefox (Cypress support in beta)
+        - firefox
 
         You can also use a custom browser: https://on.cypress.io/customize-browsers
 
