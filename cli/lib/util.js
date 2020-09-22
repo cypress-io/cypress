@@ -464,24 +464,23 @@ const util = {
   getEnv (varName, trim) {
     la(is.unemptyString(varName), 'expected environment variable name, not', varName)
 
-    const envVar = process.env[varName]
-    const configVar = process.env[`npm_config_${varName}`]
-    const packageConfigVar = process.env[`npm_package_config_${varName}`]
+    const configVarName = `npm_config_${varName}`
+    const packageConfigVarName = `npm_package_config_${varName}`
 
     let result
 
-    if (envVar) {
+    if (process.env.hasOwnProperty(varName)) {
       debug(`Using ${varName} from environment variable`)
 
-      result = envVar
-    } else if (configVar) {
+      result = process.env[varName]
+    } else if (process.env.hasOwnProperty(configVarName)) {
       debug(`Using ${varName} from npm config`)
 
-      result = configVar
-    } else if (packageConfigVar) {
+      result = process.env[configVarName]
+    } else if (process.env.hasOwnProperty(packageConfigVarName)) {
       debug(`Using ${varName} from package.json config`)
 
-      result = packageConfigVar
+      result = process.env[packageConfigVarName]
     }
 
     // environment variables are often set double quotes to escape characters
