@@ -1017,9 +1017,6 @@ jobs:
           name: build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: check types
-          command: yarn workspace @cypress/webpack-preprocessor types
-      - run:
           name: run tests
           command: yarn workspace @cypress/webpack-preprocessor test
       - store-npm-logs
