@@ -331,36 +331,36 @@ namespace CypressAUTWindowTests {
 namespace CypressOnTests {
   Cypress.on('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.on('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
 namespace CypressOnceTests {
   Cypress.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
 namespace CypressOffTests {
   Cypress.off('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.off('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
