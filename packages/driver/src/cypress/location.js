@@ -145,7 +145,7 @@ class $Location {
   }
 
   static fullyQualifyUrl (url) {
-    return $Location.resolve(window.location.origin, url)
+    return this.resolve(window.location.origin, url)
   }
 
   static mergeUrlWithParams (url, params) {
@@ -192,7 +192,13 @@ class $Location {
   }
 
   static qualifyWithBaseUrl (baseUrl, url) {
-    return $Location.resolve(baseUrl, url)
+    // if we have a root url and our url isnt full qualified
+    if (baseUrl && !this.isFullyQualifiedUrl(url)) {
+      // prepend the root url to it
+      url = this.join(baseUrl, url)
+    }
+
+    return this.fullyQualifyUrl(url)
   }
 
   static isAbsoluteRelative (segment) {
