@@ -1,0 +1,6 @@
+{
+  "name": "@cypress/test-noop",
+  "version": "0.0.0-development",
+  "description": "Testing",
+  "main": "index.js"
+}
