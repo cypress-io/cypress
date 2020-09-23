@@ -45,6 +45,8 @@ function polyfillFetchIfNeeded() {
   // @ts-ignore
   if (Cypress.config('experimentalFetchPolyfill')) {
     if (!cy.state('fetchPolyfilled')) {
+      // TypeScript v4 checks if the property to be deleted is optional
+      // @ts-ignore
       delete window.fetch
       window.fetch = unfetch
       // @ts-ignore
