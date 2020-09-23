@@ -996,6 +996,16 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
+  npm-semantic-release-monorepo:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Test semantic-release-monorepo
+          command: yarn workspace @cypress/semantic-release-monorepo test
+      - store-npm-logs
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
