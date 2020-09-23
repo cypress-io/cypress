@@ -1,17 +1,11 @@
 {
-  "name": "semantic-release-monorepo",
-  "version": "0.0.0-development",
+  "name": "@cypress/semantic-release-monorepo",
+  "version": "0.0.0",
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
+  "private": true,
   "main": "src/index.js",
   "scripts": {
-    "format": "prettier --write --single-quote --trailing-comma es5",
-    "format:all": "yarn format \"./**/*.js\"",
     "test": "jest"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "dependencies": {
     "debug": "^3.1.0",
@@ -23,10 +17,8 @@
     "semantic-release-plugin-decorators": "^3.0.0"
   },
   "devDependencies": {
-    "husky": "^4.2.1",
+    "eslint-plugin-jest": "^24.0.2",
     "jest": "^25.1.0",
-    "lint-staged": "^10.0.7",
-    "prettier": "^1.19.1",
     "semantic-release": "^17.0.2",
     "semantic-release-github-pr": "^6.0.0"
   },
@@ -36,10 +28,5 @@
   "files": [
     "src"
   ],
-  "license": "MIT",
-  "lint-staged": {
-    "*.js": [
-      "yarn format"
-    ]
-  }
+  "license": "MIT"
 }
