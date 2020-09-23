@@ -30,8 +30,34 @@ const generateNotes = wrapStep(
   }
 );
 
+const success = wrapStep(
+  'success',
+  compose(
+    logPluginVersion('success'),
+    withOnlyPackageCommits,
+    withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
+  ),
+  {
+    wrapperName: 'semantic-release-monorepo',
+  }
+);
+
+const fail = wrapStep(
+  'fail',
+  compose(
+    logPluginVersion('fail'),
+    withOnlyPackageCommits,
+    withOptionsTransforms([mapNextReleaseVersion(versionToGitTag)])
+  ),
+  {
+    wrapperName: 'semantic-release-monorepo',
+  }
+);
+
 module.exports = {
   analyzeCommits,
   generateNotes,
+  success,
+  fail,
   tagFormat: readPkg.sync().name + '-v${version}',
 };
