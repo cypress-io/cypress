@@ -385,17 +385,6 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-  check-changed-files:
-    description: |
-      Halts CI job if certain files were not changed or not running on develop branch.
-    parameters:
-      pattern:
-        type: string
-    steps:
-      - run:
-          name: checking if develop branch or changed files in << parameters.pattern >>
-          command: git rev-parse --abbrev-ref HEAD | egrep -q 'develop' || node scripts/changed-packages.js | egrep -q '<< parameters.pattern >>' || circleci-agent step halt
-
 jobs:
   ## code checkout and yarn installs
   build:
@@ -1011,8 +1000,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-changed-files:
-          pattern: "@cypress/webpack-preprocessor"
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1028,6 +1015,22 @@ jobs:
           name: Test React app
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Test babelrc
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-babelrc
+      - run:
+          name: Build ts-loader
+          command: yarn install
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Types ts-loader
+          command: yarn types
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Test ts-loader
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
       - store-npm-logs
 
   build-binary:
