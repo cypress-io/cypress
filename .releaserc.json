@@ -3,5 +3,6 @@
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator"
   ],
-  "extends": "@cypress/semantic-release-monorepo"
+  "extends": "@cypress/semantic-release-monorepo",
+  "branches": "test-semantic-release"
 }

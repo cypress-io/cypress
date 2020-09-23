@@ -996,6 +996,14 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
+  npm-test-noop-deploy:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn semantic-release @cypress/test-noop
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
@@ -1769,6 +1777,10 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - run-launcher:
+        requires:
+          - build
+
+    - npm-test-noop-deploy:
         requires:
           - build
 
