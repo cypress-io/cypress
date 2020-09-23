@@ -1007,15 +1007,6 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/webpack-preprocessor test
       - run:
-          name: Start React app
-          command: yarn start
-          background: true
-          working_directory: npm/webpack-preprocessor/examples/react-app
-      - run:
-          name: Test React app
-          command: yarn test
-          working_directory: npm/webpack-preprocessor/examples/react-app
-      - run:
           name: Test babelrc
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-babelrc
@@ -1031,6 +1022,15 @@ jobs:
           name: Test ts-loader
           command: yarn test
           working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Start React app
+          command: yarn start
+          background: true
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Test React app
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
   build-binary:
