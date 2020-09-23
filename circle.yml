@@ -1014,13 +1014,11 @@ jobs:
       - check-changed-files:
           pattern: "@cypress/webpack-preprocessor"
       - run:
-          name: Build
-          command: yarn build
-          working_directory: npm/webpack-preprocessor
+          name: build
+          command: yarn workspace @cypress/webpack-preprocessor build
       - run:
-          name: Run tests
-          command: yarn test
-          working_directory: npm/webpack-preprocessor
+          name: run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
       - run:
           name: Start React app
           command: yarn start
