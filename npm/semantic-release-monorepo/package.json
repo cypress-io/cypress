@@ -1,0 +1,45 @@
+{
+  "name": "semantic-release-monorepo",
+  "version": "0.0.0-development",
+  "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
+  "main": "src/index.js",
+  "scripts": {
+    "format": "prettier --write --single-quote --trailing-comma es5",
+    "format:all": "yarn format \"./**/*.js\"",
+    "test": "jest"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "execa": "^0.8.0",
+    "p-limit": "^1.2.0",
+    "pkg-up": "^2.0.0",
+    "ramda": "^0.25.0",
+    "read-pkg": "^3.0.0",
+    "semantic-release-plugin-decorators": "^3.0.0"
+  },
+  "devDependencies": {
+    "husky": "^4.2.1",
+    "jest": "^25.1.0",
+    "lint-staged": "^10.0.7",
+    "prettier": "^1.19.1",
+    "semantic-release": "^17.0.2",
+    "semantic-release-github-pr": "^6.0.0"
+  },
+  "peerDependencies": {
+    "semantic-release": ">=15.11.x"
+  },
+  "files": [
+    "src"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.js": [
+      "yarn format"
+    ]
+  }
+}
