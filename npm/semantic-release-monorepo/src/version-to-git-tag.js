@@ -1,10 +1,11 @@
-const readPkg = require('read-pkg');
+const readPkg = require('read-pkg')
 
-module.exports = async version => {
+module.exports = async (version) => {
   if (!version) {
-    return null;
+    return null
   }
 
-  const { name } = await readPkg();
-  return `${name}-v${version}`;
-};
+  const { name } = await readPkg()
+
+  return `${name}-v${version}`
+}

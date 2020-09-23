@@ -1,7 +1,8 @@
 {
-  "name": "semantic-release-monorepo",
-  "version": "0.0.0-development",
+  "name": "@cypress/semantic-release-monorepo",
+  "version": "0.0.0",
   "description": "Plugins for `semantic-release` allowing it to be used with a monorepo.",
+  "private": true,
   "main": "src/index.js",
   "scripts": {
     "test": "jest"
@@ -16,6 +17,7 @@
     "semantic-release-plugin-decorators": "^3.0.0"
   },
   "devDependencies": {
+    "eslint-plugin-jest": "^24.0.2",
     "jest": "^25.1.0",
     "semantic-release": "^17.0.2",
     "semantic-release-github-pr": "^6.0.0"
