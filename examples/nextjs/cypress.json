@@ -6,6 +6,6 @@
   "experimentalFetchPolyfill": true,
   "componentFolder": "cypress/components",
   "env": {
-    "coverage": false
+    "coverage": true
   }
 }

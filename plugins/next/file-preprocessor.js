@@ -35,7 +35,9 @@ async function getNextWebpackConfig(config) {
     {
       coverage: !coverageIsDisabled,
       // insert Babel plugin to mock named imports
-      looseModules: true,
+      // disable because causes an error with double definitions
+      // https://github.com/bahmutov/cypress-react-unit-test/issues/439
+      looseModules: false,
     },
     nextWebpackConfig,
   )

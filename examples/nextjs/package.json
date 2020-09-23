@@ -10,8 +10,8 @@
     "test": "node ../../scripts/cypress-expect run --passing 7",
     "cy:open": "../../node_modules/.bin/cypress open",
     "build:static": "next build && next out",
-    "check-coverage": "echo no code coverage yet",
-    "only-covered": "echo no code coverage yet"
+    "check-coverage": "../../node_modules/.bin/check-coverage components/Search.jsx && ../../node_modules/.bin/check-coverage pages/index.js",
+    "only-covered": "../../node_modules/.bin/only-covered components/Search.jsx pages/index.js"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."

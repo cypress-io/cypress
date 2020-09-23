@@ -55,6 +55,6 @@ cy.contains(
 
 Find more examples in [Page.spec.jsx](./cypress/components/Page.spec.jsx).
 
-## Coverage
+## Mocking imports
 
-Code coverage is not working yet, see issue [431](https://github.com/bahmutov/cypress-react-unit-test/issues/431). It was disabled in [cypress.json](cypress.json)
+Mocking imports is not working yet, seems the plugin we are inserting for loose mode causes problems, see issue [439](https://github.com/bahmutov/cypress-react-unit-test/issues/439).
