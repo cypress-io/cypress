@@ -29,7 +29,7 @@ index 0000000..1b620f8
 +  getDependencyGraph,
 +};
 diff --git a/node_modules/semantic-release-monorepo/src/only-package-commits.js b/node_modules/semantic-release-monorepo/src/only-package-commits.js
-index fbcb315..a924780 100644
+index fbcb315..1c39529 100644
 --- a/node_modules/semantic-release-monorepo/src/only-package-commits.js
 +++ b/node_modules/semantic-release-monorepo/src/only-package-commits.js
 @@ -1,10 +1,11 @@
@@ -45,7 +45,7 @@ index fbcb315..a924780 100644
  const { mapCommits } = require('./options-transforms');
  
  const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
-@@ -12,11 +13,48 @@ const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
+@@ -12,11 +13,50 @@ const memoizedGetCommitFiles = memoizeWith(identity, getCommitFiles);
  /**
   * Get the normalized PACKAGE root path, relative to the git PROJECT root.
   */
@@ -71,7 +71,9 @@ index fbcb315..a924780 100644
 +  }
 +
 +  const lernaPackages = await getPackageInfo();
-+  const privatePackages = lernaPackages.filter(propEq('private', true));
++  const privatePackages = lernaPackages
++  .filter(propEq('private', true))
++  .filter((p) => !p.name.includes('@package') && !p.name === 'cypress');
 +  const dependencyGraph = await getDependencyGraph();
 +
 +  // build a list of private local packages
@@ -96,7 +98,7 @@ index fbcb315..a924780 100644
  };
  
  const withFiles = async commits => {
-@@ -33,21 +71,30 @@ const withFiles = async commits => {
+@@ -33,21 +73,30 @@ const withFiles = async commits => {
  
  const onlyPackageCommits = async commits => {
    const packagePath = await getPackagePath();
