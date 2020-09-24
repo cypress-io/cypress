@@ -6,6 +6,6 @@
   ],
   "extends": "semantic-release-monorepo",
   "branches": [
-    "init-monorepo"
+    "master"
   ]
 }
