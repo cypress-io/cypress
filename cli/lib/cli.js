@@ -22,6 +22,10 @@ function unknownOption (flag, type = 'option') {
 }
 commander.Command.prototype.unknownOption = unknownOption
 
+const coerceFalseOrString = (arg) => {
+  return arg !== 'false' ? arg : false
+}
+
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -219,7 +223,7 @@ const castCypressRunOptions = (opts) => {
   // boolean arguments
   const result = R.evolve({
     port: coerceAnyStringToInt,
-    configFile: coerceFalse,
+    configFile: coerceFalseOrString,
   })(opts)
 
   return result
