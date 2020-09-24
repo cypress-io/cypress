@@ -1476,6 +1476,14 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/setcookie',
       }
     },
+    host_prefix: {
+      message: 'Cookies starting with the `__Host-` prefix must be set with `{ secure: true }`, and the path must be `/`',
+      docsUrl: 'https://on.cypress.io/setcookie',
+    },
+    secure_prefix: {
+      message: 'Cookies starting with the `__Secure-` prefix must be set with `{ secure: true }`',
+      docsUrl: 'https://on.cypress.io/setcookie',
+    },
   },
 
   should: {
