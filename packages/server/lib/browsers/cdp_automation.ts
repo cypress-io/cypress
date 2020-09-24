@@ -117,6 +117,10 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     }
 
     if (setCookieRequest.name.startsWith('__Host-')) {
+      if (setCookieRequest.secure === false) {
+        throw new Error('`__Host-` Prefix cookies must have `{ secure: true }`')
+      }
+
       setCookieRequest.url = `https://${cookie.domain}`
       delete setCookieRequest.domain
     }

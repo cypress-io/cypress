@@ -228,8 +228,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         name,
         value,
         path: '/',
-        secure: false,
-        httpOnly: false,
         log: true,
         expiry: $utils.addTwentyYears(),
         timeout: config('responseTimeout'),
