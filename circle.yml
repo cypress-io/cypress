@@ -1033,6 +1033,18 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
+  npm-webpack-preprocessor-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/webpack-preprocessor
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
@@ -1812,6 +1824,14 @@ linux-workflow: &linux-workflow
     - npm-webpack-preprocessor:
         requires:
             - build
+    - npm-webpack-preprocessor-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-webpack-preprocessor
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
