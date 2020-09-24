@@ -1,55 +1,61 @@
-import React from "react";
-import {Todo} from "./App";
-import {mount} from 'cypress-react-unit-test'
+import React from 'react'
+import { Todo } from './App'
+import { mount } from 'cypress-react-unit-test'
 
 describe('Todo', () => {
   it('renders new item', () => {
     const todo = {
       text: 'test item',
-      isCompleted: false
+      isCompleted: false,
     }
+
     mount(
       <Todo todo={todo} />,
       {
         stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
-        ]
-      }
+          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+        ],
+      },
     )
+
     cy.contains('.todo button', 'Complete')
   })
 
   it('renders with styles', () => {
     const todo = {
       text: 'test item',
-      isCompleted: false
+      isCompleted: false,
     }
     const TestTodo = () => <div className="app"><Todo todo={todo} /></div>
+
     mount(
       <TestTodo />,
       {
         stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
+          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
         ],
-        cssFile: 'src/App.css'
-      }
+        cssFile: 'src/App.css',
+      },
     )
+
     cy.contains('.todo button', 'Complete')
   })
 
   it('renders completed item', () => {
     const todo = {
       text: 'test item',
-      isCompleted: true
+      isCompleted: true,
     }
+
     mount(
       <Todo todo={todo} />,
       {
         stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
-        ]
-      }
+          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+        ],
+      },
     )
+
     cy.contains('.todo button', 'Redo')
   })
 
@@ -64,12 +70,14 @@ describe('Todo', () => {
       <Todo todo={todo} index={123} removeTodo={removeTodo} />,
       {
         stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
-        ]
-      }
+          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+        ],
+      },
     )
+
     cy.contains('.todo', 'test item')
-      .find('[data-cy="remove"]').click()
+    .find('[data-cy="remove"]').click()
+
     cy.get('@remove').should('have.been.calledWith', 123)
   })
 
@@ -79,16 +87,19 @@ describe('Todo', () => {
       isCompleted: false,
     }
     const toggleTodo = cy.stub().as('toggle')
+
     mount(
       <Todo todo={todo} index={123} toggleTodo={toggleTodo} />,
       {
         stylesheets: [
-          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css'
-        ]
-      }
+          'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.css',
+        ],
+      },
     )
+
     cy.contains('.todo', 'test item')
-      .contains('Complete').click()
+    .contains('Complete').click()
+
     cy.get('@toggle').should('have.been.calledWith', 123)
   })
 })

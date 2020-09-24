@@ -9,8 +9,6 @@
     "build": "rm -rf dist && tsc",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
-    "lint": "eslint --ext .js,.jsx,.json,.ts,.tsx .",
-    "lint-fix": "yarn lint --fix",
     "secure": "nsp check",
     "semantic-release": "semantic-release",
     "size": "npm pack --dry",
@@ -21,11 +19,6 @@
     "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
     "types": "tsc --noEmit",
     "watch": "yarn build --watch"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "dependencies": {
     "bluebird": "^3.7.1",
@@ -46,7 +39,7 @@
     "chai": "4.1.2",
     "chalk": "3.0.0",
     "chokidar-cli": "1.2.0",
-    "cypress": "4.5.0",
+    "cypress": "*",
     "dependency-check": "2.9.1",
     "deps-ok": "1.2.1",
     "eslint": "6.8.0",
@@ -56,9 +49,7 @@
     "fast-glob": "3.1.1",
     "find-webpack": "1.5.0",
     "fs-extra": "8.1.0",
-    "husky": "4.2.5",
     "license-checker": "13.0.3",
-    "lint-staged": "10.2.2",
     "mocha": "^7.1.0",
     "mockery": "2.1.0",
     "prettier-eslint-cli": "4.4.0",
@@ -98,10 +89,5 @@
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
-  ],
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json}": [
-      "eslint --fix"
-    ]
-  }
+  ]
 }

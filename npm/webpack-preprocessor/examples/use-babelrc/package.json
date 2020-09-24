@@ -4,8 +4,8 @@
   "description": "Transpiling specs using local .babelrc file",
   "private": true,
   "scripts": {
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "test": "../../node_modules/.bin/cypress run"
+    "cy:open": "../../node_modules/.bin/cypress open --dev",
+    "test": "../../node_modules/.bin/cypress run --dev"
   },
   "license": "ISC",
   "author": "",
