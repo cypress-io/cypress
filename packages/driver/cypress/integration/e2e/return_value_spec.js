@@ -42,7 +42,7 @@ describe('return values', () => {
 
   it('stringifies function bodies', (done) => {
     cy.on('fail', (err) => {
-      expect(err.message).to.include('> function')
+      expect(err.message).to.include('\n> () => {')
       expect(err.message).to.include(`return 'foo';`)
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands but returned a different value.')
       expect(err.docsUrl).to.eq('https://on.cypress.io/returning-value-and-commands-in-test')
@@ -102,7 +102,7 @@ describe('return values', () => {
       expect(lastLog.get('name')).to.eq('foo')
       expect(lastLog.get('error')).to.eq(err)
       expect(err.message).to.include('> `cy.foo()`')
-      expect(err.message).to.include('> function () {')
+      expect(err.message).to.include('> () => {')
       expect(err.message).to.include(`return 'bar';`)
       expect(err.message).to.include('Cypress detected that you invoked one or more cy commands in a custom command but returned a different value.')
 

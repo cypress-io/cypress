@@ -2374,7 +2374,7 @@ exports['e2e record passing passes 2'] = [
           "An uncaught error was detected outside of a test"
         ],
         "state": "failed",
-        "body": "function throwErr() {\n      throw err;\n    }",
+        "body": "() => {\n      throw err;\n    }",
         "displayError": "Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]",
         "attempts": [
           {
