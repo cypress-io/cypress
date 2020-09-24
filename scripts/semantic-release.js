@@ -12,4 +12,5 @@ const pack = argv._[0]
 
 console.log(`Running semantic release for ${pack}`)
 
+exec(`node ./scripts/inject-npm-version.js ${pack}`)
 exec(`lerna exec --scope ${pack} -- npx --no-install semantic-release`)
