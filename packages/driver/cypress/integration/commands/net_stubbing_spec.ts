@@ -400,6 +400,32 @@ describe('network stubbing', function () {
     })
   })
 
+  context('network handling', function () {
+    context('can intercept against any domain', function () {
+      beforeEach(function () {
+        // reset origin
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+      })
+
+      it('different origin (HTTP)', function () {
+        cy.route2('/foo').as('foo')
+        .then(() => {
+          $.get('http://baz.foobar.com:3501/foo')
+        })
+        .wait('@foo')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/8487
+      it('different origin (HTTPS)', function () {
+        cy.route2('/foo', 'somethin').as('foo')
+        .then(() => {
+          $.get('https://bar.foobar.com:3502/foo')
+        })
+        .wait('@foo')
+      })
+    })
+  })
+
   context('stubbing with static responses', function () {
     it('can stub a response with static body as string', function (done) {
       cy.route2({
