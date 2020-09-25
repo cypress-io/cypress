@@ -2564,7 +2564,7 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
-     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
      * @default { runMode: 1, openMode: null }

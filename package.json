@@ -41,6 +41,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
+    "semantic-release": "node ./scripts/semantic-release.js",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
@@ -174,6 +175,8 @@
     "print-arch": "1.0.0",
     "proxyquire": "2.1.3",
     "ramda": "0.24.1",
+    "semantic-release": "17.1.1",
+    "semantic-release-monorepo": "7.0.3",
     "shelljs": "0.8.3",
     "shx": "0.3.2",
     "sinon": "7.3.2",
@@ -220,7 +223,8 @@
   "workspaces": {
     "packages": [
       "cli",
-      "packages/*"
+      "packages/*",
+      "npm/*"
     ],
     "nohoist": [
       "**/@ffmpeg-installer",
