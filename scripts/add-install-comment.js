@@ -11,7 +11,7 @@ const {
   getCIBuildUrl,
 } = require('./utils')
 const { addCommitComment } = require('@cypress/github-commit-status-check')
-const { html, stripIndent } = require('common-tags')
+const { stripIndent } = require('common-tags')
 
 /* eslint-disable no-console */
 
@@ -40,59 +40,19 @@ console.log(' arch:', arch)
 const ciName = getCIName() || 'Unknown CI'
 const buildUrl = getCIBuildUrl()
 const ciBuildLink = buildUrl ? `[${ciName} has built](${buildUrl})` : `${ciName} has built`
-const instructionsAt =
-  'https://on.cypress.io/installing-cypress#Install-pre-release-version'
-const preamble = stripIndent`
-  ${ciBuildLink} the \`${platform} ${arch}\` version of the Test Runner.
-
-  You can install this pre-release platform-specific build using instructions at [${instructionsAt}](${instructionsAt}).
-
-  You will need to use custom \`CYPRESS_INSTALL_BINARY\` url and install Cypress using an url instead of the version.
-`
-
-const getLinuxInstallMessage = () => {
-  return stripIndent`
-    ${preamble}
-
-    export CYPRESS_INSTALL_BINARY=${binary}
-    npm install ${npm}
-  `
-}
-
-const getWindowsInstallMessage = () => {
-  return html`
-    ${preamble}
-
-    Instructions are included below, depending on the shell you are using.
-
-    #### In Command Prompt (\`cmd.exe\`):
-
-        set CYPRESS_INSTALL_BINARY=${binary}
-        npm install ${npm}
-
-    #### In PowerShell:
-
-        $env:CYPRESS_INSTALL_BINARY = ${binary}
-        npm install ${npm}
-
-    #### In Git Bash:
-
-        export CYPRESS_INSTALL_BINARY=${binary}
-        npm install ${npm}
-
-    #### Using \`cross-env\`:
-
-    If the above commands do not work for you, you can also try using \`cross-env\`:
-
-        npm i -g cross-env
-        cross-env CYPRESS_INSTALL_BINARY=${binary} npm install ${npm}
-  `
-}
 
 const getInstallMessage = () => {
-  return platform === 'win32'
-    ? getWindowsInstallMessage()
-    : getLinuxInstallMessage()
+  return stripIndent`
+    ${ciBuildLink} the \`${platform} ${arch}\` version of the Test Runner.
+
+    Learn more about this pre-release platform-specific build at https://on.cypress.io/installing-cypress#Install-pre-release-version.
+
+    Run this command to install the pre-release locally:
+
+    \`\`\`
+    npm install ${npm}
+    \`\`\`
+  `
 }
 
 addCommitComment({
