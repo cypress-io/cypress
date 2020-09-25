@@ -8,6 +8,8 @@ export { InterceptResponse } from './intercept-response'
 
 export { NetStubbingState } from './types'
 
+export { isHostInterceptable } from './is-host-interceptable'
+
 import { state } from './state'
 
 export const netStubbingState = state

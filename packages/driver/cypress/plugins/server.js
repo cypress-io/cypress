@@ -3,15 +3,16 @@ const auth = require('basic-auth')
 const bodyParser = require('body-parser')
 const express = require('express')
 const http = require('http')
+const httpsProxy = require('@packages/https-proxy')
 const path = require('path')
 const Promise = require('bluebird')
 
 const PATH_TO_SERVER_PKG = path.dirname(require.resolve('@packages/server'))
-const ports = [3500, 3501]
+const httpPorts = [3500, 3501]
+const httpsPort = 3502
 
-ports.forEach((port) => {
+const createApp = (port) => {
   const app = express()
-  const server = http.Server(app)
 
   app.set('port', port)
 
@@ -131,8 +132,23 @@ ports.forEach((port) => {
 
   app.use(require('errorhandler')())
 
+  return app
+}
+
+httpPorts.forEach((port) => {
+  const app = createApp(port)
+  const server = http.Server(app)
+
   return server.listen(app.get('port'), () => {
     // eslint-disable-next-line no-console
     return console.log('Express server listening on port', app.get('port'))
   })
+})
+
+const httpsApp = createApp(httpsPort)
+const httpsServer = httpsProxy.httpsServer(httpsApp)
+
+httpsServer.listen(httpsPort, () => {
+  // eslint-disable-next-line no-console
+  return console.log('Express server listening on port', httpsPort, '(HTTPS)')
 })
