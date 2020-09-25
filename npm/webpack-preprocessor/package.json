@@ -1,0 +1,107 @@
+{
+  "name": "@cypress/webpack-preprocessor",
+  "version": "0.0.0-development",
+  "description": "Cypress preprocessor for bundling JavaScript via webpack",
+  "private": false,
+  "main": "dist",
+  "scripts": {
+    "ban": "ban",
+    "build": "rm -rf dist && tsc",
+    "deps": "deps-ok && dependency-check --no-dev .",
+    "license": "license-checker --production --onlyunknown --csv",
+    "lint": "eslint --ext .js,.jsx,.json,.ts,.tsx .",
+    "lint-fix": "yarn lint --fix",
+    "secure": "nsp check",
+    "semantic-release": "semantic-release",
+    "size": "npm pack --dry",
+    "test": "yarn test-unit && yarn test-e2e",
+    "test-debug": "node --inspect --debug-brk ./node_modules/.bin/_mocha",
+    "test-e2e": "mocha test/e2e/*.spec.*",
+    "test-unit": "mocha test/unit/*.spec.*",
+    "test-watch": "yarn test-unit & chokidar '**/*.(js|ts)' 'test/unit/*.(js|ts)' -c 'yarn test-unit'",
+    "types": "tsc --noEmit",
+    "watch": "yarn build --watch"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "dependencies": {
+    "bluebird": "^3.7.1",
+    "debug": "^4.1.1",
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.1",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "7.8.3",
+    "@babel/preset-env": "^7.0.0",
+    "@cypress/eslint-plugin-dev": "5.0.0",
+    "@fellow/eslint-plugin-coffee": "0.4.13",
+    "@types/webpack": "4.41.12",
+    "@typescript-eslint/eslint-plugin": "2.31.0",
+    "@typescript-eslint/parser": "2.31.0",
+    "babel-loader": "^8.0.2",
+    "ban-sensitive-files": "1.9.0",
+    "chai": "4.1.2",
+    "chalk": "3.0.0",
+    "chokidar-cli": "1.2.0",
+    "cypress": "4.5.0",
+    "dependency-check": "2.9.1",
+    "deps-ok": "1.2.1",
+    "eslint": "6.8.0",
+    "eslint-plugin-cypress": "2.10.3",
+    "eslint-plugin-json-format": "2.0.1",
+    "eslint-plugin-mocha": "4.11.0",
+    "fast-glob": "3.1.1",
+    "find-webpack": "1.5.0",
+    "fs-extra": "8.1.0",
+    "husky": "4.2.5",
+    "license-checker": "13.0.3",
+    "lint-staged": "10.2.2",
+    "mocha": "^7.1.0",
+    "mockery": "2.1.0",
+    "prettier-eslint-cli": "4.4.0",
+    "proxyquire": "2.1.3",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-scripts": "3.2",
+    "semantic-release": "17.0.4",
+    "sinon": "^9.0.0",
+    "sinon-chai": "^3.5.0",
+    "snap-shot-it": "7.9.2",
+    "start-server-and-test": "1.10.11",
+    "ts-node": "8.10.1",
+    "typescript": "3.8.3",
+    "webpack": "^4.18.1"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.1",
+    "@babel/preset-env": "^7.0.0",
+    "babel-loader": "^8.0.2",
+    "webpack": "^4.18.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "types": "dist",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress-webpack-preprocessor.git"
+  },
+  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
+  "author": "Chris Breiding <chris@cypress.io>",
+  "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
+  "keywords": [
+    "cypress",
+    "cypress-plugin",
+    "cypress-preprocessor",
+    "webpack"
+  ],
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json}": [
+      "eslint --fix"
+    ]
+  }
+}
