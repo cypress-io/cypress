@@ -79,11 +79,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress-webpack-preprocessor.git"
+    "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress-webpack-preprocessor#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme",
   "author": "Chris Breiding <chris@cypress.io>",
-  "bugs": "https://github.com/cypress-io/cypress-webpack-preprocessor/issues",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=&title=",
   "keywords": [
     "cypress",
     "cypress-plugin",
