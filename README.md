@@ -129,6 +129,7 @@ Spec | Description
 --- | ---
 [alias](cypress/component/basic/alias) | Retrieve mounted component by its name or alias
 [alert-spec.js](cypress/component/basic/alert-spec.js) | Component tries to use `window.alert`
+[before-hook](cypress/component/basic/before-hook) | Mount the component from `before` hook to run multiple tests against it
 [counter-set-state](cypress/component/basic/counter-set-state) | Counter component that uses `this.state`
 [counter-use-hooks](cypress/component/basic/counter-use-hooks) | Counter component that uses `useState` hook
 [document-spec](cypress/component/basic/document) | Checks `document` dimensions from the component
