@@ -4,6 +4,6 @@ describe('Dynamic import', () => {
     // dynamically import module
     // and then invoke an exported method "reverse"
     cy.wrap(import('../utils'))
-      .invoke('reverse', 'Hello').should('equal', 'olleH')
+    .invoke('reverse', 'Hello').should('equal', 'olleH')
   })
 })

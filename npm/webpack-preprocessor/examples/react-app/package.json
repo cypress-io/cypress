@@ -5,10 +5,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "../../node_modules/.bin/react-scripts start",
-    "test": "../../node_modules/.bin/cypress run",
+    "cy:open": "../../node_modules/.bin/cypress open --dev",
     "dev": "../../node_modules/.bin/start-test 3000 cy:open",
-    "cy:open": "../../node_modules/.bin/cypress open"
+    "start": "../../node_modules/.bin/react-scripts start",
+    "test": "../../node_modules/.bin/cypress run --dev"
   },
   "license": "ISC",
   "author": "",
