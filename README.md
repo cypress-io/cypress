@@ -26,7 +26,7 @@ Feature | Jest / Enzyme / RTL | Cypress + `cypress-react-unit-test`
 Test runs in real browser | ❌ | ✅
 Supports shallow mount | ✅ | ❌
 Supports full mount | ✅ | ✅
-Test speed | 🏎 | as fast as the app works in the browser
+Test speed | 🏎 | [as fast as the app works in the browser](#fast-enough)
 Test can use additional plugins | maybe | use any [Cypress plugin](https://on.cypress.io/plugins)
 Test can interact with component | synthetic limited API | use any [Cypress command](https://on.cypress.io/api)
 Test can be debugged | via terminal and Node debugger | use browser DevTools
@@ -35,7 +35,7 @@ Re-run tests on file or test change | ✅ | ✅
 Test output on CI | terminal | terminal, screenshots, videos
 Tests can be run in parallel | ✅ | ✅ via [parallelization](https://on.cypress.io/parallelization)
 Test against interface | if using `@testing-library/react` | ✅ and can use `@testing-library/cypress`
-Spying and stubbing methods | Jest mocks | Sinon library
+Spying and stubbing methods | Jest mocks | [Sinon library](https://on.cypress.io/stubs-spies-and-clocks)
 Stubbing imports | ✅ | ✅
 Stubbing clock | ✅ | ✅
 Code coverage | ✅ | ✅
@@ -136,6 +136,7 @@ Spec | Description
 [enzyme](cypress/component/basic/enzyme) | Several specs showing how to recreate Enzyme's `setProps`, `setState`, and `setContext` methods.
 [emotion-spec.js](cypress/component/basic/emotion-spec.js) | Confirms the component is using `@emotion/core` and styles are set
 [error-boundary-spec.js](cypress/component/basic/error-boundary-spec.js) | Checks if an error boundary component works
+[fails-correctly](cypress/component/basic/fails-correctly) | Cypress test fails correctly when interacting with disabled elements
 [pure-component-spec.js](cypress/component/basic/pure-component.spec.js) | Tests stateless component
 [stateless-spec.js](cypress/component/basic/stateless-spec.js) | Passes Cypress stub to the component, confirms the component calls it on click
 [window-spec.js](cypress/component/basic/window-spec.js) | In the component test, the spec `window` and the application's `window` where the component is running should be the same object
@@ -329,6 +330,41 @@ When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.
 ```
 
 Find full example in [sass-and-ts](examples/sass-and-ts) folder.
+
+</details>
+
+<details id="fast-enough">
+  <summary>Slower than Jest</summary>
+
+When you use `cypress-X-unit-test` for component testing, you might notice the tests are slower than using Jest to test the same components. Yes, that's true. A test runner could be made _extremely_ fast if it did nothing, just check out the [auchenberg/volkswagen](https://github.com/auchenberg/volkswagen) test runner - it is blazing on CI 😉. Of course, Jest does do things, just not inside the real browser environment.
+
+Testing using Jest with its jsdom browser is faster than starting the real browser, loading all libraries, mounting the component and then waiting for the component to actually perform its work in response to the test's actions. But do those tests give you a true confidence that the component is working?
+
+Try this test 🙈
+
+Spoiler: it fails, [proof](https://codesandbox.io/s/react-testing-library-demo-forked-z7l2o?file=/src/__tests__/components.js).
+
+```js
+const mock = jest.fn()
+// render a component that does NOT allow any click events
+// using pointerEvents: "none" style
+const { getByRole } = render(
+  <button style={{ pointerEvents: 'none' }} onClick={mock}>
+    text
+  </button>,
+)
+// Jest happily clicks
+fireEvent.click(getByRole('button'))
+expect(mock).not.toBeCalled()
+```
+
+Cypress test on the other hand [fails correctly](cypress/component/basic/fails-correctly).
+
+We think that using `cypress-X-unit-test` runs tests as _fast as your application code is_, and often you need to think how to _slow down_ the Cypress Test Runner so it does not run away from the component's code, just see our blog posts dealing with [test flake](https://cypress.io/blog/tag/flake/).
+
+From the developer's perspective I would ask myself: which tests do I _write faster_? What happens when a test fails and I need to debug the failure: which test runner allows me to _debug a failed test quicker_? While I am partial, I have to say, realistic Cypress tests are easier to write and debug.
+
+Finally, when running tests on the continuous integration service, the true test speed up comes from properly configuring [dependencies caching](https://on.cypress.io/caching) and running [tests in parallel](https://on.cypress.io/parallelization) - something we have extensively documented and consider a solved problem.
 
 </details>
 
