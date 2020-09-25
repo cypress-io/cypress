@@ -1,9 +1,11 @@
 # Recipes
 
-- [Do nothing](#do-nothing)
-- [React scripts](#react-scripts)
-- [Your own Webpack config](#your-webpack-config)
-- [Your own Babelrc](#your-babelrc-file)
+- [Recipes](#recipes)
+  - [Do nothing](#do-nothing)
+  - [React Scripts](#react-scripts)
+  - [Your webpack config](#your-webpack-config)
+  - [Your `.babelrc` file](#your-babelrc-file)
+    - [Add Babel plugins](#add-babel-plugins)
 
 ## Do nothing
 
@@ -25,7 +27,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test)
+See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test) or included example in the folder [examples/react-scripts](examples/react-scripts).
 
 **Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
 
@@ -45,7 +47,7 @@ module.exports = (on, config) => {
 }
 ```
 
-See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React).
+See example in [bahmutov/Jscrambler-Webpack-React](https://github.com/bahmutov/Jscrambler-Webpack-React) or included example in the folder [examples/webpack-file](examples/webpack-file).
 
 ## Your `.babelrc` file
 
@@ -61,6 +63,8 @@ module.exports = (on, config) => {
   return config
 }
 ```
+
+See example in the folder [examples/using-babel](examples/using-babel) and [examples/using-babel-typescript](examples/using-babel-typescript).
 
 ### Add Babel plugins
 
