@@ -7,7 +7,7 @@ macBuildFilters: &macBuildFilters
   filters:
     branches:
       only:
-        - update-add-install-comment
+        - develop
         - remove-old-binary-file
 
 defaults: &defaults
@@ -34,7 +34,7 @@ testBinaryFirefox: &testBinaryFirefox
   filters:
     branches:
       only:
-        - update-add-install-comment
+        - develop
   requires:
     - build-npm-package
     - build-binary
@@ -1779,7 +1779,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - build
     - test-kitchensink:
@@ -1796,7 +1796,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - build
     - build-npm-package:
@@ -1807,7 +1807,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
               - v5.0-release
         requires:
           - build-npm-package
@@ -1819,7 +1819,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
               - v5.0-release
         requires:
           - build-binary
@@ -1854,7 +1854,7 @@ linux-workflow: &linux-workflow
     # and you want to run a specific PR in the cypress-example-recipes
     # against this branch. This workflow job includes
     # the job but only when it runs on specific branch
-    # DO NOT DELETE THIS JOB BEFORE MERGING TO update-add-install-comment
+    # DO NOT DELETE THIS JOB BEFORE MERGING TO DEVELOP
     # on "develop" this branch will be ignored anyway
     # and someone else might use this job definition for another
     # feature branch and would just update the branch filter
@@ -1876,7 +1876,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
               - v5.0-release
         requires:
           - upload-npm-package
@@ -1886,7 +1886,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - upload-npm-package
           - upload-binary
@@ -1894,7 +1894,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - build-npm-package
           - build-binary
@@ -1903,7 +1903,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - build-npm-package
           - build-binary
@@ -1928,7 +1928,7 @@ linux-workflow: &linux-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
               - kevin-v5.0-release-rwa
               - v5.0-release
         requires:
@@ -2023,7 +2023,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - Mac NPM package
           - Mac binary
@@ -2035,7 +2035,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2047,7 +2047,7 @@ mac-workflow: &mac-workflow
         filters:
           branches:
             only:
-              - update-add-install-comment
+              - develop
         requires:
           - Mac NPM package upload
           - Mac binary upload
