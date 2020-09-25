@@ -1,8 +1,14 @@
 import cs from 'classnames'
+import * as ReactDomExperimental from 'react-dom'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
+import {
+  activate as activateBackend,
+  initialize as initializeBackend,
+} from 'react-devtools-inline/backend'
+import { initialize as initializeFrontend } from 'react-devtools-inline/frontend'
 
 import AutIframe from './aut-iframe'
 import ScriptError from '../errors/script-error'
@@ -16,36 +22,42 @@ import util from '../lib/util'
 @observer
 export default class Iframes extends Component {
   _disposers = []
+  _devtoolsRoot = null;
 
   render () {
     const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
 
     return (
-      <div
-        className={cs('iframes-container', { 'has-error': !!scriptError })}
-        style={{
-          top: headerHeight,
-          left: this.props.state.absoluteReporterWidth,
-        }}
-      >
+      <>
         <div
-          ref='container'
-          className='size-container'
+          className={cs('iframes-container', { 'has-error': !!scriptError })}
           style={{
-            marginLeft,
-            height,
-            transform: `scale(${scale})`,
-            width,
+            top: headerHeight,
+            left: this.props.state.absoluteReporterWidth,
           }}
-        />
-        <ScriptError error={scriptError} />
-        <div className='cover' />
-      </div>
+        >
+          <div
+            ref='container'
+            className='size-container'
+            style={{
+              marginLeft,
+              height,
+              transform: `scale(${scale})`,
+              width,
+            }}
+          />
+
+          <ScriptError error={scriptError} />
+          <div className='cover' />
+        </div>
+        <div ref="devtoolsContainer" className="devtools-container" />
+      </>
     )
   }
 
   componentDidMount () {
     this.autIframe = new AutIframe(this.props.config)
+    this.devtoolsRoot = ReactDomExperimental.unstable_createRoot(this.refs.devtoolsContainer)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -106,6 +118,7 @@ export default class Iframes extends Component {
 
     const $autIframe = this._loadIframes(specPath)
 
+    this._activateDevtools($autIframe)
     this.props.eventManager.initialize($autIframe, config)
   }
 
@@ -135,6 +148,27 @@ export default class Iframes extends Component {
     $specIframe.prop('src', specSrc)
 
     return $autIframe
+  }
+
+  _activateDevtools = (autFrame) => {
+    const activateDevtools = (contentWindow) => {
+      initializeBackend(contentWindow)
+      const DevTools = initializeFrontend(contentWindow)
+
+      activateBackend(contentWindow)
+
+      this.devtoolsRoot?.render(<DevTools browserTheme="dark" />)
+    }
+
+    if (this.props.config.spec.specType === 'component') {
+      const { contentWindow } = autFrame[0]
+
+      autFrame[0].onload = () => {
+        activateDevtools(contentWindow)
+      }
+    } else {
+      window.Cypress.on('window:before:load', activateDevtools)
+    }
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {

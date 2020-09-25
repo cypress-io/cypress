@@ -20841,6 +20841,11 @@ react-clientside-effect@^1.2.2:
   dependencies:
     "@babel/runtime" "^7.0.0"
 
+react-devtools-inline@4.8.2:
+  version "4.8.2"
+  resolved "https://registry.yarnpkg.com/react-devtools-inline/-/react-devtools-inline-4.8.2.tgz#f9d5dfc449542b5b8d8b74b9ad635a5271931948"
+  integrity sha512-ESK76a3kq8N5hwKbvtfYFbfnO/nFCWY3rvvY2q7fMuFkv8n2Y80ytfQvLpgIyQtejp6EzEEY6q2LK7pQ2+DPDg==
+
 "react-dom-15.6.1@npm:react-dom@15.6.1":
   version "15.6.1"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.6.1.tgz#2cb0ed4191038e53c209eb3a79a23e2a4cf99470"
