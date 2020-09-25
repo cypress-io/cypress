@@ -3,6 +3,7 @@
 - [Recipes](#recipes)
   - [Do nothing](#do-nothing)
   - [React Scripts](#react-scripts)
+  - [Next.js](#nextjs)
   - [Your webpack config](#your-webpack-config)
   - [Your `.babelrc` file](#your-babelrc-file)
     - [Add Babel plugins](#add-babel-plugins)
@@ -30,6 +31,20 @@ module.exports = (on, config) => {
 See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/try-cra-with-unit-test) or included example in the folder [examples/react-scripts](examples/react-scripts).
 
 **Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
+
+## Next.js
+
+```js
+// cypress/plugins/index.js
+module.exports = (on, config) => {
+  require('cypress-react-unit-test/plugins/next')(on, config)
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
+  return config
+}
+```
+
+See example in the folder [examples/nextjs](examples/nextjs).
 
 ## Your webpack config
 
