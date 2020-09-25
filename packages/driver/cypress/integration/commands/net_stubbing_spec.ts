@@ -415,13 +415,45 @@ describe('network stubbing', function () {
         .wait('@foo')
       })
 
+      it('different origin with response interception (HTTP)', function () {
+        cy.route2('/xhr.html', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('xhr fixture')
+            res.body = 'replaced the body'
+          })
+        }).as('foo')
+        .then(() => {
+          return $.get('http://baz.foobar.com:3501/fixtures/xhr.html')
+          .then((responseText) => {
+            expect(responseText).to.eq('replaced the body')
+          })
+        })
+        .wait('@foo').its('response.body').should('eq', 'replaced the body')
+      })
+
       // @see https://github.com/cypress-io/cypress/issues/8487
       it('different origin (HTTPS)', function () {
         cy.route2('/foo', 'somethin').as('foo')
         .then(() => {
-          $.get('https://bar.foobar.com:3502/foo')
+          $.get('https://bar.foobar.com.invalid:3502/foo')
         })
         .wait('@foo')
+      })
+
+      it('different origin with response interception (HTTPS)', function () {
+        cy.route2('/xhr.html', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('xhr fixture')
+            res.body = 'replaced the body'
+          })
+        }).as('foo')
+        .then(() => {
+          return $.get('https://bar.foobar.com:3502/fixtures/xhr.html')
+          .then((responseText) => {
+            expect(responseText).to.eq('replaced the body')
+          })
+        })
+        .wait('@foo').its('response.body').should('eq', 'replaced the body')
       })
     })
   })
