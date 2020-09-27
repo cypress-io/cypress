@@ -84,7 +84,7 @@
     "cypress-axe": "0.8.1",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",
-    "cypress-react-selector": "2.0.2",
+    "cypress-react-selector": "2.0.4",
     "date-fns": "2.13.0",
     "framer-motion": "2.6.13",
     "happo-cypress": "1.9.1",
