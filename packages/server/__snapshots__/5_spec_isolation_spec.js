@@ -74,7 +74,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Pending:      1                                                                                │
   │ Skipped:      1                                                                                │
   │ Screenshots:  5                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_failing_hook_spec.coffee                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -94,13 +94,6 @@ Although you have test retries enabled, we do not retry tests when \`before all\
      ).png                                                                                          
   -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
      hook spec -- after hooks -- fails on this -- after all hook (failed).png                       
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_failing_hook_spec.coffee     (X second)
-                          .mp4                                                                      
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -134,7 +127,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  2                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     simple_retrying_spec.js                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -146,13 +139,6 @@ Although you have test retries enabled, we do not retry tests when \`before all\
       t1 (failed).png                                                                               
   -  /XXX/XXX/XXX/cypress/screenshots/simple_retrying_spec.js/simple retrying spec --     (1280x720)
       t1 (failed) (attempt 2).png                                                                   
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
 ====================================================================================================
@@ -255,9 +241,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:50.393Z",
               "screenshots": [
                 {
                   "name": null,
@@ -316,9 +302,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:50.797Z",
               "screenshots": [
                 {
                   "name": null,
@@ -364,9 +350,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:51.173Z",
               "screenshots": []
             }
           ]
@@ -397,9 +383,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:51.192Z",
               "screenshots": [
                 {
                   "name": null,
@@ -414,7 +400,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -473,9 +459,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:52.862Z",
               "screenshots": [
                 {
                   "name": null,
@@ -513,9 +499,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:53.372Z",
               "screenshots": [
                 {
                   "name": null,
@@ -530,7 +516,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
@@ -605,9 +591,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:55.029Z",
               "screenshots": []
             }
           ]
@@ -624,9 +610,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:55.587Z",
               "screenshots": []
             }
           ]
@@ -643,16 +629,16 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:56.016Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
@@ -706,16 +692,16 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:21:57.881Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_passing_spec.coffee",
         "relative": "cypress/integration/simple_passing_spec.coffee",
@@ -818,9 +804,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:07.209Z",
               "screenshots": [
                 {
                   "name": null,
@@ -879,9 +865,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:07.544Z",
               "screenshots": [
                 {
                   "name": null,
@@ -927,9 +913,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:07.874Z",
               "screenshots": []
             }
           ]
@@ -960,9 +946,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:07.893Z",
               "screenshots": [
                 {
                   "name": null,
@@ -977,7 +963,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -1036,9 +1022,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:09.813Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1076,9 +1062,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:10.279Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1093,7 +1079,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
@@ -1168,9 +1154,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:12.230Z",
               "screenshots": []
             }
           ]
@@ -1187,9 +1173,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:12.793Z",
               "screenshots": []
             }
           ]
@@ -1206,16 +1192,16 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:13.219Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
@@ -1269,16 +1255,16 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:15.345Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_passing_spec.coffee",
         "relative": "cypress/integration/simple_passing_spec.coffee",
@@ -1381,9 +1367,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:26.790Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1442,9 +1428,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:26.929Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1490,9 +1476,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:27.043Z",
               "screenshots": []
             }
           ]
@@ -1523,9 +1509,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:27.066Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1540,7 +1526,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -1599,9 +1585,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:30.256Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1639,9 +1625,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:30.524Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1656,7 +1642,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_spec.coffee",
         "relative": "cypress/integration/simple_failing_spec.coffee",
@@ -1731,9 +1717,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:33.723Z",
               "screenshots": []
             }
           ]
@@ -1750,9 +1736,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:34.306Z",
               "screenshots": []
             }
           ]
@@ -1769,16 +1755,16 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:34.758Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_hooks_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_hooks_spec.coffee",
         "relative": "cypress/integration/simple_hooks_spec.coffee",
@@ -1832,16 +1818,16 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:38.289Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_passing_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_passing_spec.coffee",
         "relative": "cypress/integration/simple_passing_spec.coffee",
@@ -1944,9 +1930,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:47.522Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1973,9 +1959,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:47.926Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2034,9 +2020,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:48.327Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2063,9 +2049,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:48.673Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2111,9 +2097,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:49.011Z",
               "screenshots": []
             }
           ]
@@ -2144,9 +2130,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:49.028Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2161,7 +2147,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -2220,9 +2206,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:50.705Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2249,9 +2235,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:51.081Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2276,16 +2262,16 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:51.408Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_retrying_spec.js.mp4",
+      "video": null,
       "spec": {
         "name": "simple_retrying_spec.js",
         "relative": "cypress/integration/simple_retrying_spec.js",
@@ -2388,9 +2374,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:22:59.692Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2417,9 +2403,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:00.017Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2478,9 +2464,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:00.344Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2507,9 +2493,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:00.668Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2555,9 +2541,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:01.019Z",
               "screenshots": []
             }
           ]
@@ -2588,9 +2574,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:01.036Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2605,7 +2591,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -2664,9 +2650,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:02.927Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2693,9 +2679,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:03.279Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2720,16 +2706,16 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:03.606Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_retrying_spec.js.mp4",
+      "video": null,
       "spec": {
         "name": "simple_retrying_spec.js",
         "relative": "cypress/integration/simple_retrying_spec.js",
@@ -2832,9 +2818,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:13.932Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2861,9 +2847,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:14.063Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2922,9 +2908,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:14.198Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2951,9 +2937,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:14.307Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2999,9 +2985,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:14.403Z",
               "screenshots": []
             }
           ]
@@ -3032,9 +3018,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "coffee"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:14.424Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3049,7 +3035,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_failing_hook_spec.coffee.mp4",
+      "video": null,
       "spec": {
         "name": "simple_failing_hook_spec.coffee",
         "relative": "cypress/integration/simple_failing_hook_spec.coffee",
@@ -3108,9 +3094,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:17.516Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3137,9 +3123,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                   "language": "js"
                 }
               },
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:17.637Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3164,16 +3150,16 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             {
               "state": "passed",
               "error": null,
-              "videoTimestamp": 9999,
+              "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2018-02-01T20:14:19.323Z",
+              "startedAt": "2020-09-28T15:23:17.753Z",
               "screenshots": []
             }
           ]
         }
       ],
       "error": null,
-      "video": "/foo/bar/.projects/e2e/cypress/videos/simple_retrying_spec.js.mp4",
+      "video": null,
       "spec": {
         "name": "simple_retrying_spec.js",
         "relative": "cypress/integration/simple_retrying_spec.js",

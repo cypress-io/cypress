@@ -27,6 +27,9 @@ describe('e2e spec_isolation', () => {
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
+    config: {
+      video: false,
+    },
     async onRun (execFn) {
       const { stdout } = await execFn()
 
@@ -42,7 +45,7 @@ describe('e2e spec_isolation', () => {
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
-        e2ePath, runs: 4,
+        e2ePath, runs: 4, video: false,
       })
 
       snapshot(json, { allowSharedSnapshot: true })
@@ -56,6 +59,7 @@ describe('e2e spec_isolation', () => {
     expectedExitCode: 4,
     config: {
       retries: 1,
+      video: false,
     },
     async onRun (execFn) {
       await execFn()
@@ -64,7 +68,9 @@ describe('e2e spec_isolation', () => {
       json.runs = e2e.normalizeRuns(json.runs)
 
       // also mutates into normalized obj ready for snapshot
-      expectCorrectModuleApiResult(json, { e2ePath, runs: 2 })
+      expectCorrectModuleApiResult(json, {
+        e2ePath, runs: 2, video: false,
+      })
 
       snapshot(json)
     },
