@@ -58,8 +58,8 @@ const main = async () => {
     }
 
     const { stdout: semrel } = await execa('npx', ['lerna', 'exec', '--scope', dep, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
-    const currentVersion = (semrel.match(/associated with version (\d+\.\d+\.\d+)/) || [])[1]
-    const nextVersion = (semrel.match(/The next release version is (\d+\.\d+\.\d+)/) || [])[1]
+    const currentVersion = (semrel.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+    const nextVersion = (semrel.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
 
     const version = nextVersion || currentVersion
 
