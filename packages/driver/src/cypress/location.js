@@ -129,6 +129,12 @@ class $Location {
   }
 
   static isUrlLike (url) {
+    // https://github.com/cypress-io/cypress/issues/5090
+    // In the case of a url like /?foo=..
+    if (/\.{2,}/.test(url)) {
+      return false
+    }
+
     // beta.cypress.io
     // aws.amazon.com/bucket/foo
     // foo.bar.co.uk
@@ -139,18 +145,7 @@ class $Location {
   }
 
   static fullyQualifyUrl (url) {
-    if (this.isFullyQualifiedUrl(url)) {
-      return url
-    }
-
-    const existing = new UrlParse(window.location.href)
-
-    // always normalize against our existing origin
-    // as the baseUrl so that we do not accidentally
-    // have relative url's
-    url = new UrlParse(url, existing.origin)
-
-    return url.toString()
+    return this.resolve(window.location.origin, url)
   }
 
   static mergeUrlWithParams (url, params) {
@@ -228,24 +223,7 @@ class $Location {
   }
 
   static resolve (from, to) {
-    // if to is fully qualified then
-    // just return that
-    if (this.isFullyQualifiedUrl(to)) {
-      return to
-    }
-
-    // else take from and figure out if
-    // to is relative or absolute-relative
-
-    // if to is absolute relative '/foo'
-    if (this.isAbsoluteRelative(to)) {
-      // get origin from 'from'
-      const { origin } = this.create(from)
-
-      return this.join(origin, to)
-    }
-
-    return this.join(from, to)
+    return new URL(to, from).toString()
   }
 
   static create (remote) {

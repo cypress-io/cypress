@@ -300,6 +300,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'x-frame-options',
     'content-length',
     'content-security-policy',
+    'content-security-policy-report-only',
     'connection',
   ])
 

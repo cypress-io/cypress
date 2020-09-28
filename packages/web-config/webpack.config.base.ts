@@ -74,7 +74,7 @@ const getCommonConfig = () => {
                 [require.resolve('@babel/plugin-proposal-class-properties'), { loose: true }],
               ],
               presets: [
-                require.resolve('@babel/preset-env'),
+                [require.resolve('@babel/preset-env'), { targets: { 'chrome': 63 } }],
                 require.resolve('@babel/preset-react'),
                 [require.resolve('@babel/preset-typescript'), { allowNamespaces: true }],
               ],

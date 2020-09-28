@@ -2014,6 +2014,27 @@ describe('Routes', () => {
         })
       })
 
+      it('omits content-security-policy-report-only', function () {
+        nock(this.server._remoteOrigin)
+        .get('/bar')
+        .reply(200, 'OK', {
+          'Content-Type': 'text/html',
+          'content-security-policy-report-only': 'foobar;',
+        })
+
+        return this.rp({
+          url: 'http://localhost:8080/bar',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.headers).not.to.have.property('content-security-policy-report-only')
+        })
+      })
+
       it('omits document-domain from Feature-Policy header', function () {
         nock(this.server._remoteOrigin)
         .get('/bar')

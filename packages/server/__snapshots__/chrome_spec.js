@@ -8,7 +8,7 @@ Cypress supports the following browsers:
 - chromium
 - edge
 - electron
-- firefox (Cypress support in beta)
+- firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 

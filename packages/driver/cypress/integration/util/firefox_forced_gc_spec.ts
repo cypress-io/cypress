@@ -84,6 +84,9 @@ describe('driver/src/util/firefox_forced_gc', () => {
         on: cy.stub().throws(),
         emit: cy.stub().throws(),
         isBrowser: cy.stub().throws(),
+        browser: {
+          majorVersion: 79,
+        },
         getFirefoxGcInterval: cy.stub().throws(),
         backend: cy.stub().throws(),
       }
@@ -109,6 +112,16 @@ describe('driver/src/util/firefox_forced_gc', () => {
 
     it('registers no event handlers if not in Firefox', () => {
       MockCypress.isBrowser.withArgs('firefox').returns(false)
+
+      install(MockCypress)
+
+      expect(MockCypress.on).to.not.be.called
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8241
+    it('registers no event handlers if in Firefox >= 80', () => {
+      MockCypress.isBrowser.withArgs('firefox').returns(true)
+      MockCypress.browser.majorVersion = 80
 
       install(MockCypress)
 

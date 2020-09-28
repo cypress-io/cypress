@@ -17,7 +17,9 @@ export function createIntervalGetter (config) {
 }
 
 export function install (Cypress: Cypress.Cypress & EventEmitter) {
-  if (!Cypress.isBrowser('firefox')) {
+  // the firefox GC issue was fixed in v80 so we can stop here
+  // @see https://github.com/cypress-io/cypress/issues/8241
+  if (!Cypress.isBrowser('firefox') || Cypress.browser.majorVersion >= 80) {
     return
   }
 

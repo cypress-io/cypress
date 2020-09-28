@@ -1143,7 +1143,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // if there's no test, this is likely a rouge before/after hook
       // that should not have run, so skip this runnable
-      if (!test) {
+      if (!test || _runner.stopped) {
         return _next()
       }
 
