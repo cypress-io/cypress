@@ -111,5 +111,5 @@ export function getBackendStaticResponse (staticResponse: Readonly<StaticRespons
 }
 
 export function hasStaticResponseKeys (obj: any) {
-  return _.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj)
+  return !_.isArray(obj) && (_.intersection(_.keys(obj), STATIC_RESPONSE_KEYS).length || _.isEmpty(obj))
 }

@@ -207,6 +207,24 @@ describe('cypress', function () {
         })
       })
 
+      it('coerces --config-file false to boolean', async () => {
+        const args = 'cypress run --config-file false'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          configFile: false,
+        })
+      })
+
+      it('coerces --config-file cypress.json to string', async () => {
+        const args = 'cypress run --config-file cypress.json'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          configFile: 'cypress.json',
+        })
+      })
+
       it('parses config file false', async () => {
         const args = 'cypress run --config-file false'.split(' ')
         const options = await cypress.cli.parseRunArguments(args)

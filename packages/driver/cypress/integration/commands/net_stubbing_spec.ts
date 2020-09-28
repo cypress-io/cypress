@@ -446,8 +446,7 @@ describe('network stubbing', function () {
       cy.route2('/foo', 'foo bar baz').as('getFoo').then(function (win) {
         $.get('/foo')
       }).wait('@getFoo').then(function (res) {
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response.body).to.eq('foo bar baz')
       })
     })
 
@@ -458,8 +457,23 @@ describe('network stubbing', function () {
           method: 'PROPFIND',
         })
       }).wait('@getFoo').then(function (res) {
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response.body).to.eq('foo bar baz')
+      })
+    })
+
+    it('can stub a response with an array', function (done) {
+      const response = ['foo', 'bar', { foo: 'baz' }]
+
+      cy.route2({
+        url: '*',
+      }, response).then(() => {
+        $.get('/abc123').done((responseJson, _, xhr) => {
+          expect(xhr.status).to.eq(200)
+          expect(responseJson).to.deep.eq(response)
+          expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+          done()
+        })
       })
     })
 
@@ -478,6 +492,45 @@ describe('network stubbing', function () {
           $.get('/foo').done(_.ary(resolve, 0))
         })
       }).wait('@getFoo').its('request.url').should('include', '/foo')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8532
+    context('can stub a response with an empty array', function () {
+      const assertEmptyArray = (done) => {
+        return () => {
+          $.get('/abc123').done((responseJson, _, xhr) => {
+            expect(xhr.status).to.eq(200)
+            expect(responseJson).to.deep.eq([])
+            expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+            done()
+          })
+        }
+      }
+
+      it('with explicit StaticResponse', function (done) {
+        cy.route2({
+          url: '*',
+        }, {
+          body: [],
+        }).then(assertEmptyArray(done))
+      })
+
+      it('with body shorthand', function (done) {
+        cy.route2('*', []).then(assertEmptyArray(done))
+      })
+
+      it('with method, url, res shorthand', function (done) {
+        cy.route2('GET', '*', []).then(assertEmptyArray(done))
+      })
+
+      it('in req.reply', function (done) {
+        cy.route2('*', (req) => req.reply([])).then(assertEmptyArray(done))
+      })
+
+      it('in res.send', function (done) {
+        cy.route2('*', (req) => req.reply((res) => res.send(200, []))).then(assertEmptyArray(done))
+      })
     })
 
     context('fixtures', function () {
@@ -1577,21 +1630,55 @@ describe('network stubbing', function () {
       cy.route2(/fixtures\/app/).as('getFoo').then(function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
-        let log
-
-        log = cy.queue.logs({
+        const log = cy.queue.logs({
           displayName: 'req',
         })[0]
 
         expect(log.get('alias')).to.eq('getFoo')
 
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.responseBody).to.deep.eq({
-        //   some: 'json',
-        //   foo: {
-        //     bar: 'baz',
-        //   },
-        // })
+        expect(JSON.parse(res.response.body as string)).to.deep.eq({
+          some: 'json',
+          foo: {
+            bar: 'baz',
+          },
+        })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8536
+    context('yields response', function () {
+      const testResponse = (expectedBody, done) => {
+        return () => {
+          $.get('/xml')
+
+          cy.wait('@foo').then((request) => {
+            expect(request.response.body).to.eq(expectedBody)
+            done()
+          })
+        }
+      }
+
+      it('when not stubbed', function (done) {
+        cy.route2('/xml').as('foo')
+        .then(testResponse('<foo>bar</foo>', done))
+      })
+
+      it('when stubbed with StaticResponse', function (done) {
+        cy.route2('/xml', 'something different')
+        .as('foo')
+        .then(testResponse('something different', done))
+      })
+
+      it('when stubbed with req.reply', function (done) {
+        cy.route2('/xml', (req) => req.reply('something different'))
+        .as('foo')
+        .then(testResponse('something different', done))
+      })
+
+      it('when stubbed with res.send', function (done) {
+        cy.route2('/xml', (req) => req.reply((res) => res.send('something different')))
+        .as('foo')
+        .then(testResponse('something different', done))
       })
     })
 
