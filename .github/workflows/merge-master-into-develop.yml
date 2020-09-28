@@ -16,8 +16,8 @@ jobs:
         run: git checkout develop
       - name: Set committer info
         run: |
-          git config --local user.email github-actions@github.com
-          git config --local user.name github-actions
+          git config --local user.email "$(git log --format='%ae' HEAD^!)"
+          git config --local user.name "$(git log --format='%an' HEAD^!)"
       - name: Check for merge conflict
         id: check-conflict
         run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<')"
