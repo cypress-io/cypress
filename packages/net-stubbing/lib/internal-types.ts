@@ -10,7 +10,10 @@ export type FixtureOpts = {
   filePath: string
 }
 
-export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string>
+export type BackendStaticResponse = GenericStaticResponse<FixtureOpts, string> & {
+  // Millisecond timestamp for when the response should continue
+  continueResponseAt?: number
+}
 
 export const SERIALIZABLE_REQ_PROPS = [
   'headers',

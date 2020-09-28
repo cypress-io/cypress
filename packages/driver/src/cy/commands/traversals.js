@@ -2,6 +2,7 @@ const _ = require('lodash')
 
 const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
+const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
 
 const traversals = 'find filter not children eq closest first last next nextAll nextUntil parent parents parentsUntil prev prevAll prevUntil siblings'.split(' ')
 
@@ -69,9 +70,9 @@ const autoShadowTraversals = {
 
     return $parents.filter(selector)
   },
-  parentsUntil: (cy, $el, selector, filter) => {
+  parentsUntil: (cy, $el, selectorOrEl, filter) => {
     let $parents = $el.map((i, el) => {
-      return $elements.getAllParents(el, selector)
+      return $elements.getAllParents(el, selectorOrEl)
     })
 
     if ($el.length > 1) {
@@ -125,18 +126,18 @@ module.exports = (Commands, Cypress, cy) => {
       }
 
       const getEl = () => {
-        const shadowDomSupportEnabled = Cypress.config('experimentalShadowDomSupport')
+        const includeShadowDom = resolveShadowDomInclusion(Cypress, userOptions.includeShadowDom)
         const optInShadowTraversal = optInShadowTraversals[traversal]
         const autoShadowTraversal = autoShadowTraversals[traversal]
 
-        if (shadowDomSupportEnabled && options.includeShadowDom && optInShadowTraversal) {
+        if (includeShadowDom && optInShadowTraversal) {
           // if we're told explicitly to ignore shadow boundaries,
           // use the replacement traversal function if one exists
           // so we can cross boundaries
           return optInShadowTraversal(cy, subject, arg1, arg2)
         }
 
-        if (shadowDomSupportEnabled && autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
+        if (autoShadowTraversal && $dom.isWithinShadowRoot(subject[0])) {
           // if we detect the element is within a shadow root and we're using
           // .closest() or .parents(), automatically cross shadow boundaries
           return autoShadowTraversal(cy, subject, arg1, arg2)

@@ -782,7 +782,7 @@ Cypress supports the following browsers:
 - chromium
 - edge
 - electron
-- firefox (Cypress support in beta)
+- firefox
 
 You can also use a custom browser: https://on.cypress.io/customize-browsers
 
@@ -1759,7 +1759,7 @@ https://on.cypress.io/dashboard/organizations/org-id-1234/billing
 exports['e2e record api interaction warnings create run warnings grace period - over tests limit warns when over test recordings 1'] = `
 You've exceeded the limit of test recordings under your free plan this month. The limit is 500 test recordings.
 
-Your plan is now in a grace period, which means you will have the full benefits of your current plan until 2999-12-31. 
+Your plan is now in a grace period, which means you will have the full benefits of your current plan until 2999-12-31.
 
 Please visit your billing to upgrade your plan.
 
@@ -2374,7 +2374,7 @@ exports['e2e record passing passes 2'] = [
           "An uncaught error was detected outside of a test"
         ],
         "state": "failed",
-        "body": "function throwErr() {\n      throw err;\n    }",
+        "body": "() => {\n      throw err;\n    }",
         "displayError": "Error: The following error originated from your test code, not from Cypress.\n\n  > instantly fails\n\nWhen Cypress detects uncaught errors originating from your test code it will automatically fail the current test.\n\nCypress could not associate this error to any specific test.\n\nWe dynamically generated a new test to display this failure.\n      [stack trace lines]",
         "attempts": [
           {

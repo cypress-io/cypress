@@ -72,7 +72,7 @@
 
   .showing-selector-playground {
     .selector-playground {
-      display: block;
+      display: flex;
     }
 
     .selector-playground-toggle {
@@ -87,6 +87,7 @@
   }
 
   .selector-playground {
+    align-items: center;
     background-color: #f8f8f8;
     display: none;
     padding: 8px;
@@ -122,10 +123,9 @@
     }
 
     .selector-info {
-      position: absolute;
-      right: 30px;
-      top: 23%;
       color: #4971C6;
+      margin: 0 1.5em;
+      white-space: nowrap;
     }
 
     .num-elements {
@@ -146,6 +146,7 @@
        // needs a background to hide the copy-to-clipboard backer input
       background: #f8f8f8;
       display: flex;
+      flex-grow: 2;
       padding: 0 6px;
     }
 
@@ -155,25 +156,24 @@
     .syntax-string { color: #50a160; }
 
     .selector-input {
+      flex-grow: 2;
+
       input {
         border: 0;
         color: #476fc9;
-        max-width: 100%;
-        min-width: 2px;
+        min-width: 5em;
         outline: none;
         padding: 6px 8px 6px 9px;
         font-family: $font-mono;
         border: 1px solid #ced4da;
         font-size: 1em;
         border-radius: 6px;
+        width: 100%;
 
         &:focus {
           border: 1px solid #80bdff;
           box-shadow: 0 0 0 0.1rem rgba(0,123,255,.25);
         }
-
-        // https://github.com/JedWatson/react-input-autosize#csp-and-the-ie-clear-indicator
-        &::-ms-clear { display: none; }
       }
     }
 

@@ -21,7 +21,7 @@ const {
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
-const { netStubbingState } = require('@packages/net-stubbing')
+const { netStubbingState, isHostInterceptable } = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')
@@ -294,6 +294,12 @@ class Server {
 
         return this._httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) => {
+            if (this._netStubbingState && isHostInterceptable(req.url, this._netStubbingState)) {
+              debug('CONNECT request may match a net-stubbing route, proxying %o', _.pick(req, 'url'))
+
+              return false
+            }
+
             const urlToCheck = `https://${req.url}`
 
             let isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, this._remoteProps)
