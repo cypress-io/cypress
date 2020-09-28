@@ -280,14 +280,16 @@ export const expectCorrectModuleApiResult = (json, opts: {
       }
 
       // normalize startedAt
-      if (opts.video && attempt.startedAt) {
+      if (attempt.startedAt) {
         const d = new Date(attempt.startedAt)
 
         expect(d.toJSON()).to.eq(attempt.startedAt)
         attempt.startedAt = STATIC_DATE
 
-        expect(attempt.videoTimestamp).to.be.a('number')
-        attempt.videoTimestamp = 9999
+        if (opts.video) {
+          expect(attempt.videoTimestamp).to.be.a('number')
+          attempt.videoTimestamp = 9999
+        }
       }
 
       attempt.screenshots.forEach((screenshot) => {

@@ -243,7 +243,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:50.393Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -304,7 +304,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:50.797Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -352,7 +352,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:51.173Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -385,7 +385,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:51.192Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -461,7 +461,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:52.862Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -501,7 +501,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:53.372Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -593,7 +593,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:55.029Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -612,7 +612,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:55.587Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -631,7 +631,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:56.016Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -694,7 +694,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:21:57.881Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -806,7 +806,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:07.209Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -867,7 +867,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:07.544Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -915,7 +915,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:07.874Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -948,7 +948,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:07.893Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1024,7 +1024,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:09.813Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1064,7 +1064,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:10.279Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1156,7 +1156,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:12.230Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1175,7 +1175,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:12.793Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1194,7 +1194,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:13.219Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1257,7 +1257,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:15.345Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1369,7 +1369,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:26.790Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1430,7 +1430,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:26.929Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1478,7 +1478,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:27.043Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1511,7 +1511,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:27.066Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1587,7 +1587,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:30.256Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1627,7 +1627,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:30.524Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1719,7 +1719,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:33.723Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1738,7 +1738,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:34.306Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1757,7 +1757,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:34.758Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1820,7 +1820,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:38.289Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -1932,7 +1932,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:47.522Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -1961,7 +1961,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:47.926Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2022,7 +2022,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:48.327Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2051,7 +2051,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:48.673Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2099,7 +2099,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:49.011Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -2132,7 +2132,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:49.028Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2208,7 +2208,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:50.705Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2237,7 +2237,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:51.081Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2264,7 +2264,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:51.408Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -2376,7 +2376,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:22:59.692Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2405,7 +2405,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:00.017Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2466,7 +2466,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:00.344Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2495,7 +2495,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:00.668Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2543,7 +2543,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:01.019Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -2576,7 +2576,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:01.036Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2652,7 +2652,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:02.927Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2681,7 +2681,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:03.279Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2708,7 +2708,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:03.606Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -2820,7 +2820,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:13.932Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2849,7 +2849,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:14.063Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2910,7 +2910,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:14.198Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2939,7 +2939,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:14.307Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -2987,7 +2987,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:14.403Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
@@ -3020,7 +3020,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:14.424Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3096,7 +3096,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:17.516Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3125,7 +3125,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               },
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:17.637Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": [
                 {
                   "name": null,
@@ -3152,7 +3152,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
               "error": null,
               "videoTimestamp": null,
               "duration": 1234,
-              "startedAt": "2020-09-28T15:23:17.753Z",
+              "startedAt": "2018-02-01T20:14:19.323Z",
               "screenshots": []
             }
           ]
