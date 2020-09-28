@@ -207,7 +207,6 @@ commands:
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
       - run: ls -la
-      # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -996,6 +995,56 @@ jobs:
           command: node index.js
           working_directory: packages/launcher
 
+  npm-webpack-preprocessor:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
+      - run:
+          name: Test babelrc
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-babelrc
+      - run:
+          name: Build ts-loader
+          command: yarn install
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Types ts-loader
+          command: yarn types
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Test ts-loader
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Start React app
+          command: yarn start
+          background: true
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Test React app
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - store-npm-logs
+
+  npm-webpack-preprocessor-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/webpack-preprocessor
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
@@ -1771,6 +1820,18 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
+    - npm-webpack-preprocessor:
+        requires:
+            - build
+    - npm-webpack-preprocessor-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-webpack-preprocessor
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
