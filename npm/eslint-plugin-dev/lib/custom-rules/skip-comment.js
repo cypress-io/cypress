@@ -38,7 +38,6 @@ e.g.
   },
 
   create (context) {
-
     let commentTokens = defaultCommentTokens
 
     if (context.options.length) {
@@ -49,13 +48,12 @@ e.g.
 
     return {
       'CallExpression:exit' (node) {
-
         const callee = node.callee
 
         const commentBefore = sourceCode.getCommentsBefore(node)
 
         const hasExplain = commentBefore && commentBefore.map(
-          (v) => commentTokens.concat(commentTokens.map((v) => `# ${v}`)).map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0]
+          (v) => commentTokens.concat(commentTokens.map((v) => `# ${v}`)).map((commentToken) => v.value.trim().startsWith(commentToken)).filter(Boolean)[0],
         ).filter(Boolean)[0]
 
         if (hasExplain) {
@@ -80,7 +78,6 @@ e.g.
             })
           }
         }
-
       },
     }
   },

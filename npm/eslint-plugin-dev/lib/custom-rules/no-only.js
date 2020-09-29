@@ -22,7 +22,6 @@ module.exports = {
   },
 
   create (context) {
-
     const sourceCode = context.getSourceCode()
 
     function getPropertyText (node) {
@@ -33,7 +32,6 @@ module.exports = {
 
     return {
       'CallExpression:exit' (node) {
-
         const callee = node.callee
 
         if (node.type === 'CallExpression' && callee.type === 'MemberExpression' && callee.property.name === 'only') {
@@ -52,7 +50,6 @@ module.exports = {
             })
           }
         }
-
       },
     }
   },

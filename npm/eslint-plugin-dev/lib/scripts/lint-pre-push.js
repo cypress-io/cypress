@@ -6,7 +6,6 @@ const chalk = require('chalk')
 const debug = require('debug')('lint-pre-push')
 
 const start = () => {
-
   const getFilenames = () => {
     const GIT_PARAMS = (process.env.HUSKY_GIT_PARAMS || 'origin').split(' ')
     const gitRemote = GIT_PARAMS[0]
@@ -19,7 +18,6 @@ const start = () => {
     return sh
     .exec(`git diff HEAD ${sh.ShellString(gitRemoteBranch)} --name-only`)
     .split('\n')
-
   }
 
   return utils.lintFilesByText({

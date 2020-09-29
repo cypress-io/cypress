@@ -38,7 +38,6 @@ function execute (file, options = {}) {
 }
 
 describe('skip-comment', () => {
-
   it('skip test with comment', async () => {
     const filename = './fixtures/skip-comment-pass.js'
     const result = execute(filename, {
@@ -90,7 +89,5 @@ describe('skip-comment', () => {
 
       expect(result.output).not.toBeTruthy()
     })
-
   })
-
 })

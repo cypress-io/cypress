@@ -32,7 +32,6 @@ Found a 'return' after '{{token}}'\
   },
 
   create (context) {
-
     let tokens = defaultTokens
 
     if (context.options.length) {
@@ -41,7 +40,6 @@ Found a 'return' after '{{token}}'\
 
     return {
       'CallExpression:exit' (node) {
-
         const callee = node.callee
 
         if (
@@ -69,7 +67,6 @@ Found a 'return' after '{{token}}'\
             },
           })
         }
-
       },
     }
   },

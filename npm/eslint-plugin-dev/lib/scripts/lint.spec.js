@@ -54,7 +54,6 @@ beforeEach(() => {
   .returns(getCommittedFiles())
 
   sh.exec.callsFake(eslintSuccess)
-
 })
 
 describe('lint-staged', () => {
@@ -103,7 +102,6 @@ describe('lint-changed', () => {
     await lintChanged.start()
     expect(process.exit).not.calledOnce
   })
-
 })
 
 describe('lint-pre-push', () => {
@@ -129,7 +127,6 @@ describe('lint-pre-commit', () => {
     sh.exec
     .withArgs(`./node_modules/.bin/eslint --color=true --fix '' foo.js`)
     .yields(null, 'success')
-
   })
 
   it('lint success', async () => {

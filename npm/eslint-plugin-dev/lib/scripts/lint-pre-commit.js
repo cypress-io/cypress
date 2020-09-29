@@ -6,7 +6,6 @@ const sh = require('shelljs')
 const chalk = require('chalk')
 
 const start = () => {
-
   const filesStaged = sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n').filter(Boolean)
   const filesUnstaged = sh.exec(`git diff --name-only --diff-filter=M`).split('\n').filter(Boolean)
   const filesPartiallyStaged = _.intersection(filesStaged, filesUnstaged)
@@ -29,7 +28,6 @@ const start = () => {
     lintedFilesCount += filenames.length
 
     return
-
   })
   .then(() => {
     return utils.lintFilesByText({
@@ -38,7 +36,6 @@ const start = () => {
     })
   })
   .then(({ failCount, filenames }) => {
-
     if (failCount) {
       fail = true
     }
@@ -48,7 +45,6 @@ const start = () => {
     return
   })
   .then(() => {
-
     if (fail) {
       process.exit(1)
     }
@@ -58,7 +54,6 @@ const start = () => {
 
     return
   })
-
 }
 
 if (!module.parent) {

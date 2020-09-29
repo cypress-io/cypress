@@ -40,7 +40,6 @@ function execute (file, options = {}) {
 }
 
 describe(ruleName, () => {
-
   it('pass', async () => {
     const filename = './fixtures/no-return-before-pass.js'
     const result = execute(filename)
@@ -74,7 +73,6 @@ describe(ruleName, () => {
       })
     })
     `}\n`)
-
   })
 
   describe('config', () => {
@@ -98,7 +96,5 @@ describe(ruleName, () => {
 
       expect(result.output).not.toBeTruthy()
     })
-
   })
-
 })
