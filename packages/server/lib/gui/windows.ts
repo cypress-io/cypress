@@ -20,7 +20,7 @@ export type WindowOptions = Electron.BrowserWindowConstructorOptions & {
 let windows = {}
 let recentlyCreatedWindow = false
 
-const getUrl = function (type) {
+const getUrl = function(type) {
   switch (type) {
     case 'INDEX':
       return cyDesktop.getPathToIndex()
@@ -33,7 +33,7 @@ const getByType = (type) => {
   return windows[type]
 }
 
-const setWindowProxy = function (win) {
+const setWindowProxy = function(win) {
   if (!process.env.HTTP_PROXY) {
     return
   }
@@ -44,18 +44,19 @@ const setWindowProxy = function (win) {
   })
 }
 
-export function installExtension (win: BrowserWindow, path) {
-  return win.webContents.session.loadExtension(path)
-  .then((data) => {
-    debug('electron extension installed %o', { data, path })
-  })
-  .catch((err) => {
-    debug('error installing electron extension %o', { err, path })
-    throw err
-  })
+export function installExtension(win: BrowserWindow, path) {
+  return win.webContents.session
+    .loadExtension(path)
+    .then((data) => {
+      debug('electron extension installed %o', { data, path })
+    })
+    .catch((err) => {
+      debug('error installing electron extension %o', { err, path })
+      throw err
+    })
 }
 
-export function removeAllExtensions (win: BrowserWindow) {
+export function removeAllExtensions(win: BrowserWindow) {
   let extensions
 
   try {
@@ -69,11 +70,11 @@ export function removeAllExtensions (win: BrowserWindow) {
   }
 }
 
-export function reset () {
+export function reset() {
   windows = {}
 }
 
-export function destroy (type) {
+export function destroy(type) {
   let win
 
   if (type && (win = getByType(type))) {
@@ -81,17 +82,20 @@ export function destroy (type) {
   }
 }
 
-export function get (type) {
-  return getByType(type) || (() => {
-    throw new Error(`No window exists for: '${type}'`)
-  })()
+export function get(type) {
+  return (
+    getByType(type) ||
+    (() => {
+      throw new Error(`No window exists for: '${type}'`)
+    })()
+  )
 }
 
-export function showAll () {
+export function showAll() {
   return _.invoke(windows, 'showInactive')
 }
 
-export function hideAllUnlessAnotherWindowIsFocused () {
+export function hideAllUnlessAnotherWindowIsFocused() {
   // bail if we have another focused window
   // or we are in the middle of creating a new one
   if (BrowserWindow.getFocusedWindow() || recentlyCreatedWindow) {
@@ -102,19 +106,19 @@ export function hideAllUnlessAnotherWindowIsFocused () {
   return _.invoke(windows, 'hide')
 }
 
-export function focusMainWindow () {
+export function focusMainWindow() {
   return getByType('INDEX').show()
 }
 
-export function getByWebContents (webContents) {
+export function getByWebContents(webContents) {
   return BrowserWindow.fromWebContents(webContents)
 }
 
-export function _newBrowserWindow (options) {
+export function _newBrowserWindow(options) {
   return new BrowserWindow(options)
 }
 
-export function defaults (options = {}) {
+export function defaults(options = {}) {
   return _.defaultsDeep(options, {
     x: null,
     y: null,
@@ -128,11 +132,11 @@ export function defaults (options = {}) {
     trackState: false,
     contextMenu: false,
     recordFrameRate: null,
-    onFocus () {},
-    onBlur () {},
-    onClose () {},
-    onCrashed () {},
-    onNewWindow () {},
+    onFocus() {},
+    onBlur() {},
+    onClose() {},
+    onCrashed() {},
+    onNewWindow() {},
     webPreferences: {
       partition: null,
       webSecurity: true,
@@ -142,7 +146,11 @@ export function defaults (options = {}) {
   })
 }
 
-export function create (projectRoot, _options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+export function create(
+  projectRoot,
+  _options: WindowOptions = {},
+  newBrowserWindow = _newBrowserWindow
+) {
   const options = defaults(_options)
 
   if (options.show === false) {
@@ -157,15 +165,15 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
   const win = newBrowserWindow(options)
 
-  win.on('blur', function (...args) {
+  win.on('blur', function(...args) {
     return options.onBlur.apply(win, args)
   })
 
-  win.on('focus', function (...args) {
+  win.on('focus', function(...args) {
     return options.onFocus.apply(win, args)
   })
 
-  win.once('closed', function (...args) {
+  win.once('closed', function(...args) {
     win.removeAllListeners()
 
     return options.onClose.apply(win, args)
@@ -182,11 +190,11 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
     })
   }
 
-  win.webContents.on('crashed', function (...args) {
+  win.webContents.on('crashed', function(...args) {
     return options.onCrashed.apply(win, args)
   })
 
-  win.webContents.on('new-window', function (...args) {
+  win.webContents.on('new-window', function(...args) {
     return options.onNewWindow.apply(win, args)
   })
 
@@ -211,7 +219,12 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
-export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+export function open(
+  projectRoot,
+  options: WindowOptions = {},
+  newBrowserWindow = _newBrowserWindow
+) {
+  console.trace()
   bench.timeEnd('start')
   bench.dumpAverages()
   bench.save()
@@ -258,69 +271,68 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
 
   // enable our url to be a promise
   // and wait for this to be resolved
-  return Bluebird.join(
-    options.url,
-    setWindowProxy(win),
-  )
-  .spread((url) => {
-    // navigate the window here!
-    win.loadURL(url)
+  return Bluebird.join(options.url, setWindowProxy(win))
+    .spread((url) => {
+      // navigate the window here!
+      win.loadURL(url)
 
-    recentlyCreatedWindow = false
-  }).thenReturn(win)
+      recentlyCreatedWindow = false
+    })
+    .thenReturn(win)
 }
 
-export function trackState (projectRoot, isTextTerminal, win, keys) {
+export function trackState(projectRoot, isTextTerminal, win, keys) {
   const isDestroyed = () => {
     return win.isDestroyed()
   }
 
-  win.on('resize', _.debounce(() => {
-    if (isDestroyed()) {
-      return
-    }
+  win.on(
+    'resize',
+    _.debounce(() => {
+      if (isDestroyed()) {
+        return
+      }
 
-    const [width, height] = win.getSize()
-    const [x, y] = win.getPosition()
-    const newState = {}
+      const [width, height] = win.getSize()
+      const [x, y] = win.getPosition()
+      const newState = {}
 
-    newState[keys.width] = width
-    newState[keys.height] = height
-    newState[keys.x] = x
-    newState[keys.y] = y
+      newState[keys.width] = width
+      newState[keys.height] = height
+      newState[keys.x] = x
+      newState[keys.y] = y
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
-  }
-  , 500))
+      return savedState.create(projectRoot, isTextTerminal).then((state) => {
+        return state.set(newState)
+      })
+    }, 500)
+  )
 
-  win.on('moved', _.debounce(() => {
-    if (isDestroyed()) {
-      return
-    }
+  win.on(
+    'moved',
+    _.debounce(() => {
+      if (isDestroyed()) {
+        return
+      }
 
-    const [x, y] = win.getPosition()
-    const newState = {}
+      const [x, y] = win.getPosition()
+      const newState = {}
 
-    newState[keys.x] = x
-    newState[keys.y] = y
+      newState[keys.x] = x
+      newState[keys.y] = y
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
-      return state.set(newState)
-    })
-  }
-  , 500))
+      return savedState.create(projectRoot, isTextTerminal).then((state) => {
+        return state.set(newState)
+      })
+    }, 500)
+  )
 
   win.webContents.on('devtools-opened', () => {
     const newState = {}
 
     newState[keys.devTools] = true
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
+    return savedState.create(projectRoot, isTextTerminal).then((state) => {
       return state.set(newState)
     })
   })
@@ -330,8 +342,7 @@ export function trackState (projectRoot, isTextTerminal, win, keys) {
 
     newState[keys.devTools] = false
 
-    return savedState.create(projectRoot, isTextTerminal)
-    .then((state) => {
+    return savedState.create(projectRoot, isTextTerminal).then((state) => {
       return state.set(newState)
     })
   })

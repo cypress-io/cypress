@@ -1,3 +1,6 @@
+const bench = require('../../util/bench').benchmark
+
+bench.time('lib/modes/interactive:require:top-level')
 const _ = require('lodash')
 const os = require('os')
 const EE = require('events')
@@ -10,6 +13,8 @@ const savedState = require('../saved_state')
 const menu = require('../gui/menu')
 const Events = require('../gui/events')
 const Windows = require('../gui/windows')
+
+bench.timeEnd('lib/modes/interactive:require:top-level')
 
 const isDev = () => {
   return process.env['CYPRESS_INTERNAL_ENV'] === 'development'
@@ -80,7 +85,7 @@ module.exports = {
   },
 
   ready (options = {}) {
-    const bus = new EE
+    const bus = new EE()
 
     const { projectRoot } = options
 
@@ -93,19 +98,25 @@ module.exports = {
       },
     })
 
-    return savedState.create(projectRoot, false)
+    return savedState
+    .create(projectRoot, false)
     .then((state) => {
       return state.get()
     })
     .then((state) => {
-      return Windows.open(projectRoot, this.getWindowArgs(state, options))
-      .then((win) => {
-        Events.start(_.extend({}, options, {
-          onFocusTests () {
-            return app.focus({ steal: true }) || win.focus()
-          },
-          os: os.platform(),
-        }), bus)
+      return Windows.open(
+        projectRoot,
+        this.getWindowArgs(state, options),
+      ).then((win) => {
+        Events.start(
+          _.extend({}, options, {
+            onFocusTests () {
+              return app.focus({ steal: true }) || win.focus()
+            },
+            os: os.platform(),
+          }),
+          bus,
+        )
 
         return win
       })
@@ -121,11 +132,7 @@ module.exports = {
 
     electronApp.allowRendererProcessReuse()
 
-    return Promise.any([
-      waitForReady(),
-      Promise.delay(500),
-    ])
-    .then(() => {
+    return Promise.any([waitForReady(), Promise.delay(500)]).then(() => {
       return this.ready(options)
     })
   },

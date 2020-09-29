@@ -1,3 +1,6 @@
+const bench = require('../util/bench').benchmark
+
+bench.time('cypress:require:top-level')
 require('./environment')
 
 // we are not requiring everything up front
@@ -13,6 +16,8 @@ const R = require('ramda')
 const Promise = require('bluebird')
 const debug = require('debug')('cypress:server:cypress')
 const argsUtils = require('./util/args')
+
+bench.timeEnd('cypress:require:top-level')
 
 const warning = (code) => {
   return require('./errors').warning(code)
@@ -37,7 +42,8 @@ const exitErr = (err) => {
   // and exit with 1
   debug('exiting with err', err)
 
-  return require('./errors').logException(err)
+  return require('./errors')
+  .logException(err)
   .then(() => {
     debug('calling exit 1')
 
@@ -143,7 +149,8 @@ module.exports = {
     }
 
     // make sure we have the appData folder
-    return require('./util/app_data').ensure()
+    return require('./util/app_data')
+    .ensure()
     .then(() => {
       // else determine the mode by
       // the passed in arguments / options
@@ -185,7 +192,8 @@ module.exports = {
         .get('version')
         .then((version) => {
           return console.log(version) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'info':
@@ -205,42 +213,50 @@ module.exports = {
           }
 
           return 1
-        }).then(exit)
+        })
+        .then(exit)
         .catch(exitErr)
 
       case 'returnPkg':
         return require('./modes/pkg')(options)
         .then((pkg) => {
           return console.log(JSON.stringify(pkg)) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'logs':
         // print the logs + exit
-        return require('./gui/logs').print()
+        return require('./gui/logs')
+        .print()
         .then(exit0)
         .catch(exitErr)
 
       case 'clearLogs':
         // clear the logs + exit
-        return require('./gui/logs').clear()
+        return require('./gui/logs')
+        .clear()
         .then(exit0)
         .catch(exitErr)
 
       case 'getKey':
         // print the key + exit
-        return require('./project').getSecretKeyByPath(options.projectRoot)
+        return require('./project')
+        .getSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'generateKey':
         // generate + print the key + exit
-        return require('./project').generateSecretKeyByPath(options.projectRoot)
+        return require('./project')
+        .generateSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
-        }).then(exit0)
+        })
+        .then(exit0)
         .catch(exitErr)
 
       case 'exitWithCode':
