@@ -213,7 +213,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 
 export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
   bench.timeEnd('start')
-  bench.dumpData()
+  bench.dumpAverages()
   bench.save()
 
   return process.exit(0)
