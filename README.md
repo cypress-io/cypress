@@ -221,6 +221,7 @@ Folder Name | Description
 [visual-testing-with-happo](examples/visual-testing-with-happo) | [Visual testing](#visual-testing) for components using 3rd party service [Happo](https://happo.io/)
 [visual-testing-with-applitools](examples/visual-testing-with-applitools) | [Visual testing](#visual-testing) for components using 3rd party service [Applitools.com](https://applitools.com/)
 [using-babel](examples/using-babel) | Bundling specs and loaded source files using project's existing `.babelrc` file
+[webpack-file](examples/rollup) | Bundle component and specs using [rollup](http://rollupjs.org/guide/en/).
 [webpack-file](examples/webpack-file) | Load existing `webpack.config.js` file
 [webpack-options](examples/webpack-options) | Using the default Webpack options from `@cypress/webpack-preprocessor` to transpile JSX specs
 <!-- prettier-ignore-end -->

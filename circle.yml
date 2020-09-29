@@ -173,6 +173,19 @@ workflows:
                 working_directory: examples/webpack-file
 
       - cypress/run:
+          name: Example Rollup
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
+          install-command: npm install --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/rollup
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
           name: Example Webpack options
           requires:
             - Install
@@ -338,6 +351,7 @@ workflows:
             - Example Tailwind
             - Example Webpack file
             - Example Webpack options
+            - Example Rollup
             - Visual Sudoku
             - Visual with Percy
             - Visual with Happo

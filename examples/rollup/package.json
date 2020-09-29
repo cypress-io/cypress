@@ -1,0 +1,13 @@
+{
+  "name": "example-rollup",
+  "description": "Component testing using Rollup bundler",
+  "private": true,
+  "scripts": {
+    "build": "../../node_modules/.bin/rollup -c",
+    "test": "../../node_modules/.bin/cypress-expect run --passing 1",
+    "cy:open": "../../node_modules/.bin/cypress open"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}
