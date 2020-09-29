@@ -123,6 +123,7 @@ commands:
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
+            CYPRESS_NO_COMMANDLOG: 1
           command: |
             echo Current working directory is $PWD
             echo Total containers $CIRCLE_NODE_TOTAL
