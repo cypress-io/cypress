@@ -295,7 +295,7 @@ const util = {
     }
 
     // https://github.com/cypress-io/cypress/issues/5431
-    const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
+    const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2}`
 
     if (_.isString(process.env.NODE_OPTIONS)) {
       return {
