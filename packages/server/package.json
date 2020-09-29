@@ -178,6 +178,7 @@
     "supertest": "4.0.2",
     "supertest-session": "4.0.0",
     "through2": "2.0.5",
+    "time-require": "^0.1.2",
     "ts-loader": "7.0.4",
     "tsconfig-paths": "3.9.0",
     "webpack": "4.43.0",
