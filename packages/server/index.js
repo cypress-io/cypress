@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-console
+console.time('start')
+
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 

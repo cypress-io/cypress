@@ -1,4 +1,4 @@
-import _ from 'lodash'
+/* eslint-disable */
 import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
@@ -210,6 +210,10 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
+  // eslint-disable-next-line no-console
+  console.timeEnd('start')
+
+  return process.exit(0)
   // if we already have a window open based
   // on that type then just show + focus it!
   let win
