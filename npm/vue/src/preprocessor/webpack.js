@@ -4,7 +4,7 @@ import util from 'util'
 // Cypress webpack bundler adaptor
 // https://github.com/cypress-io/cypress-webpack-preprocessor
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
-const debug = require('debug')('cypress-vue-unit-test')
+const debug = require('debug')('@cypress/vue')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 // const { VueLoaderPlugin } = require('vue-loader')
 const fw = require('find-webpack')
@@ -50,20 +50,6 @@ function compileTemplate(options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
   options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
-}
-
-/**
- * Warning: modifies the input object
- * @param {WebpackOptions} options
- */
-
-function removeForkTsCheckerWebpackPlugin(options) {
-  if (!Array.isArray(options.plugins)) {
-    return
-  }
-  options.plugins = options.plugins.filter((plugin) => {
-    return plugin.typescript === undefined
-  })
 }
 
 /**
@@ -134,6 +120,7 @@ function insertBabelLoader(config, options) {
  * Basic Cypress Vue Webpack file loader for .vue files.
  */
 const onFileDefaultPreprocessor = (config) => {
+  debug('I think the config is', { config })
   let webpackOptions = fw.getWebpackOptions()
   if (!webpackOptions) {
     debug('Could not find webpack options, starting with default')
