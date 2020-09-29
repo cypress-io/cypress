@@ -4,6 +4,7 @@ import { MyPluginWithOptions } from './MyPluginWithOptions'
 import { mount, mountCallback } from '@cypress/vue'
 
 const EmptyComponent = { template: '<div></div>' }
+
 describe('Single component mount', () => {
   it('has the plugin', () => {
     const use = [MyPlugin]
@@ -26,6 +27,7 @@ describe('Custom plugin MyPlugin', () => {
   const extensions = {
     use,
   }
+
   // use "mountCallback" to register the plugins
   beforeEach(mountCallback(EmptyComponent, { extensions }))
 
@@ -56,8 +58,8 @@ describe('Plugins with options', () => {
     cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
     // second plugin works
     cy.window()
-      .its('Vue')
-      .invoke('anotherPluginMethod')
-      .should('equal', 'testing')
+    .its('Vue')
+    .invoke('anotherPluginMethod')
+    .should('equal', 'testing')
   })
 })

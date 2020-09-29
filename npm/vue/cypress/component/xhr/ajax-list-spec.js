@@ -27,6 +27,7 @@ describe('AjaxList', () => {
   it('can display mock XHR response', () => {
     cy.server()
     const users = [{ id: 1, name: 'foo' }]
+
     cy.route('GET', '/users?_limit=3', users).as('users')
     mount(AjaxList)
 
@@ -36,6 +37,7 @@ describe('AjaxList', () => {
   it('can inspect mocked XHR', () => {
     cy.server()
     const users = [{ id: 1, name: 'foo' }]
+
     cy.route('GET', '/users?_limit=3', users).as('users')
     mount(AjaxList)
 
@@ -45,12 +47,14 @@ describe('AjaxList', () => {
   it('can delay and wait on XHR', () => {
     cy.server()
     const users = [{ id: 1, name: 'foo' }]
+
     cy.route({
       method: 'GET',
       url: '/users?_limit=3',
       response: users,
       delay: 1000,
     }).as('users')
+
     mount(AjaxList)
 
     cy.get('li').should('have.length', 0)

@@ -10,6 +10,7 @@ describe('AlertMessage', () => {
 
   it('calls window.alert', () => {
     const spy = cy.spy().as('alert')
+
     cy.on('window:alert', spy)
     cy.get('button').click()
     cy.get('@alert').should('have.been.calledOnce')

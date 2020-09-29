@@ -50,6 +50,7 @@ describe('Vuex Counter', () => {
 
   it('asynchronously increments counter', () => {
     const count = getCount()
+
     // increment mutation is delayed by 1 second
     // Cypress waits 4 seconds by default
     cy.contains('button', 'Increment async').click()
@@ -60,9 +61,10 @@ describe('Vuex Counter', () => {
     cy.get('input').type(`{selectall}{backspace}`)
     cy.contains('0 times')
   }),
-    it('set count via input field', () => {
-      const count = 42
-      cy.get('input').type(`{selectall}{backspace}${count}`)
-      cy.contains(`${count} times`)
-    })
+  it('set count via input field', () => {
+    const count = 42
+
+    cy.get('input').type(`{selectall}{backspace}${count}`)
+    cy.contains(`${count} times`)
+  })
 })

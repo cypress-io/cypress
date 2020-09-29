@@ -22,28 +22,31 @@ describe('Fetching users', () => {
     cy.stub(window, 'fetch').resolves({
       json: cy.stub().resolves(mockUsers),
     })
+
     mount(Users)
     cy.get('.user').should('have.length', mockUsers.length)
     cy.get('.user')
-      .first()
-      .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
+    .first()
+    .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
   })
 
   it('shows loading UI while fetch is happening', () => {
     const mockResponse = {
       json: cy.stub().resolves(mockUsers),
     }
+
     cy.stub(window, 'fetch').resolves(
       // resolve promise after a delay
       Cypress.Promise.resolve(mockResponse).delay(1000),
     )
+
     mount(Users)
     cy.get('.loading').should('be.visible')
     cy.get('.loading').should('not.exist')
 
     cy.get('.user').should('have.length', mockUsers.length)
     cy.get('.user')
-      .first()
-      .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
+    .first()
+    .should('have.text', `${mockUsers[0].id} - ${mockUsers[0].name}`)
   })
 })

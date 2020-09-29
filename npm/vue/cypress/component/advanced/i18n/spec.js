@@ -6,7 +6,7 @@ import VueI18n from 'vue-i18n'
 import { mount } from '@cypress/vue'
 import messages from './translations.json'
 
-function expectHelloWorldGreeting() {
+function expectHelloWorldGreeting () {
   cy.viewport(400, 200)
   const allLocales = Cypress.vue.$i18n.availableLocales
 
@@ -16,6 +16,7 @@ function expectHelloWorldGreeting() {
   allLocales.forEach((locale) => {
     cy.get('select').select(locale).should('have.value', locale)
     const hello = messages[locale].hello
+
     cy.contains(hello)
   })
 }
@@ -26,6 +27,7 @@ describe('VueI18n', () => {
   describe('with i18n block', () => {
     beforeEach(() => {
       const i18n = new VueI18n({ locale: 'en' })
+
       mount(TranslatedMessageI18nBlock, { i18n })
     })
 
@@ -35,6 +37,7 @@ describe('VueI18n', () => {
   describe('with messages argument', () => {
     beforeEach(() => {
       const i18n = new VueI18n({ locale: 'en', messages })
+
       mount(TranslatedMessageWithJSON, { i18n })
     })
 

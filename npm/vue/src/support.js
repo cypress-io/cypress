@@ -1,20 +1,24 @@
 /* eslint-env mocha */
 import unfetch from 'unfetch'
+
 require('@cypress/code-coverage/support')
 
 /** Initialize an empty document with root element */
-function renderTestingPlatform() {
+function renderTestingPlatform () {
   const document = cy.state('document')
   const el = document.getElementById('cypress-jsdom')
+
   if (el) {
     // clean the element before each test
     while (el.hasChildNodes()) {
       el.removeChild(el.lastChild)
     }
+
     return
   }
 
   const rootNode = document.createElement('div')
+
   rootNode.setAttribute('id', 'cypress-jsdom')
   document.getElementsByTagName('body')[0].prepend(rootNode)
 
@@ -26,7 +30,7 @@ function renderTestingPlatform() {
  * that Cypress can spy on and stub
  * @see https://www.cypress.io/blog/2020/06/29/experimental-fetch-polyfill/
  */
-function polyfillFetchIfNeeded() {
+function polyfillFetchIfNeeded () {
   // @ts-ignore
   if (Cypress.config('experimentalFetchPolyfill')) {
     // @ts-ignore

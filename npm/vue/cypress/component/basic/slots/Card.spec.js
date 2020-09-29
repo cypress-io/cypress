@@ -21,6 +21,7 @@ describe('Card', () => {
         footer: '<div>FOOTER</div>',
       },
     })
+
     cy.contains('h1', 'HEADER')
     cy.contains('div', 'FOOTER')
   })
@@ -31,6 +32,7 @@ describe('Card', () => {
         default: '<p>Yay! {{props.content}}</p>',
       },
     })
+
     cy.contains('Yay! Scoped content!').should('be.visible')
     cy.contains('Nothing used the Scoped content!').should('not.exist')
   })

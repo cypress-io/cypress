@@ -692,13 +692,6 @@ If some deeply nested objects are abbreviated and do not print fully, set the ma
 DEBUG=@cypress/vue DEBUG_DEPTH=10
 ```
 
-<a name="#faq"/>
-
-## FAQ
-
-- If your component's static assets are not loading, you probably need
-  to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
-
 <a name="#related"/>
 
 ## Related info
