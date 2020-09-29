@@ -1,10 +1,15 @@
 const bench = require('./util/bench').initBenchmark('cold')
+
 bench.time('start')
+bench.time('launch:init')
 
 // override tty if we're being forced to
 require('./lib/util/tty').override()
 
+bench.time('launch:init:require:lib/util/electron-app')
 const electronApp = require('./lib/util/electron-app')
+
+bench.timeEnd('launch:init:require:lib/util/electron-app')
 
 // are we in the main node process or the electron process?
 const isRunningElectron = electronApp.isRunning()
@@ -17,11 +22,15 @@ if (process.env.CY_NET_PROFILE && isRunningElectron) {
 
 process.env.UV_THREADPOOL_SIZE = 128
 
+bench.time('launch:init:require:graceful-fs')
 require('graceful-fs').gracefulify(require('fs'))
+bench.timeEnd('launch:init:require:graceful-fs')
 // if running in production mode (CYPRESS_INTERNAL_ENV)
 // all transpile should have been done already
 // and these calls should do nothing
+bench.time('launch:init:require:@packages/ts/register')
 require('@packages/ts/register')
+bench.timeEnd('launch:init:require:@packages/ts/register')
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()
@@ -49,7 +58,17 @@ function launchOrFork () {
 
   nodeOptions.restoreOriginalOptions()
 
-  module.exports = require('./lib/cypress').start(process.argv)
+  bench.timeEnd('launch:init')
+
+  bench.time('launch:require:lib/cypress')
+  const cy = require('./lib/cypress')
+
+  bench.timeEnd('launch:require:lib/cypress')
+
+  bench.time('launch:start')
+  module.exports = cy.start(process.argv)
+
+  bench.timeEnd('launch:start')
 }
 
 launchOrFork()
