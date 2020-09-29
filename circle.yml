@@ -1051,9 +1051,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Build
-          command: yarn workspace @cypress/eslint-plugin-dev build
-      - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
 
@@ -1062,9 +1059,6 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run:
-          name: Build
-          command: yarn workspace @cypress/eslint-plugin-dev build
       - run:
           name: Release
           command: yarn semantic-release @cypress/eslint-plugin-dev
