@@ -1045,6 +1045,24 @@ jobs:
           name: Release
           command: yarn semantic-release @cypress/webpack-preprocessor
 
+  npm-eslint-plugin-dev:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/eslint-plugin-dev test
+
+  npm-eslint-plugin-dev-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/eslint-plugin-dev
+
   build-binary:
     <<: *defaults
     shell: /bin/bash --login
@@ -1832,6 +1850,17 @@ linux-workflow: &linux-workflow
         requires:
           - build
           - npm-webpack-preprocessor
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-eslint-plugin-dev-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-eslint-plugin-dev
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
