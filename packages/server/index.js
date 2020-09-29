@@ -1,5 +1,5 @@
-// eslint-disable-next-line no-console
-console.time('start')
+const bench = require('./util/bench').initBenchmark('cold')
+bench.time('start')
 
 // override tty if we're being forced to
 require('./lib/util/tty').override()

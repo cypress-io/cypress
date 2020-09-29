@@ -1,4 +1,5 @@
 /* eslint-disable */
+
 import Bluebird from 'bluebird'
 import contextMenu from 'electron-context-menu'
 import { BrowserWindow } from 'electron'
@@ -6,6 +7,7 @@ import Debug from 'debug'
 import cwd from '../cwd'
 import savedState from '../saved_state'
 const cyDesktop = require('@packages/desktop-gui')
+const bench = require('../../util/bench').benchmark
 
 const debug = Debug('cypress:server:windows')
 
@@ -210,8 +212,9 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
 }
 
 export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
-  // eslint-disable-next-line no-console
-  console.timeEnd('start')
+  bench.timeEnd('start')
+  bench.dumpData()
+  bench.save()
 
   return process.exit(0)
   // if we already have a window open based
