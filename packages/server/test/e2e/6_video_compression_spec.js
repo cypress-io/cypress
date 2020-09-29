@@ -17,7 +17,18 @@ const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 
 describe('e2e video compression', () => {
-  e2e.setup()
+  e2e.setup({
+    servers: [
+      {
+        onServer: (app) => {
+          app.get('/', (req, res) => {
+            res.end('<html><body>foo</body></html>')
+          })
+        },
+        port: 38883,
+      },
+    ],
+  })
 
   return [
     true,

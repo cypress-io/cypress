@@ -191,6 +191,7 @@ module.exports = {
         })
         .videoCodec('libx264')
         .outputOptions('-preset ultrafast')
+        .inputOptions('-use_wallclock_as_timestamps 1')
         .on('start', (command) => {
           debug('capture started %o', { command })
 
@@ -220,13 +221,9 @@ module.exports = {
           cmd
           .inputFormat('webm')
 
-          // assume 18 fps. This number comes from manual measurement of avg fps coming from firefox.
-          // TODO: replace this with the 'vfr' option below when dropped frames issue is fixed.
-          .inputFPS(18)
-
-          // 'vsync vfr' (variable framerate) works perfectly but fails on top page navigation
-          // since video timestamp resets to 0, timestamps already written will be dropped
-          // .outputOption('-vsync vfr')
+          // 'vsync vfr' (variable framerate) works because timestamps are discarded via
+          // of use_wallclock_as_timestamps
+          .outputOption('-vsync vfr')
 
           // this is to prevent the error "invalid data input" error
           // when input frames have an odd resolution
@@ -237,7 +234,6 @@ module.exports = {
         } else {
           cmd
           .inputFormat('image2pipe')
-          .inputOptions('-use_wallclock_as_timestamps 1')
         }
 
         return cmd.save(name)
