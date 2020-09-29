@@ -97,6 +97,7 @@
     "css-loader": "2.1.1",
     "cypress": "5.3.0",
     "cypress-axe": "0.8.1",
+    "cypress-expect": "2.0.0",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",
     "cypress-react-selector": "2.0.4",

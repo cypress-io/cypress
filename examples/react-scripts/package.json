@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "../../node_modules/.bin/react-scripts start",
-    "test": "node ../../scripts/cypress-expect run --passing 13",
+    "test": "../../node_modules/.bin/cypress-expect run --min-passing 13",
     "cy:open": "../../node_modules/.bin/cypress open",
     "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
     "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js"
