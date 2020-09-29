@@ -69,7 +69,7 @@ describe('e2e web security', () => {
 
   context('when enabled', () => {
     e2e.it('fails', {
-      spec: 'web_security_spec.coffee',
+      spec: 'web_security_spec.js',
       snapshot: true,
       expectedExitCode: 4,
     })
@@ -77,7 +77,7 @@ describe('e2e web security', () => {
 
   context('when disabled', () => {
     e2e.it('passes', {
-      spec: 'web_security_spec.coffee',
+      spec: 'web_security_spec.js',
       config: {
         chromeWebSecurity: false,
       },
