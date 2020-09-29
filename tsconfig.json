@@ -48,5 +48,6 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "esModuleInterop": true
   },
-  "include": ["lib/**/*.ts"]
+  "include": ["lib/**/*.ts"],
+  "exclude": ["./init/**/*.ts"]
 }

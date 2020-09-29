@@ -9,3 +9,4 @@ package-lock.json
 coverage
 *.generated.css
 .next
+bin

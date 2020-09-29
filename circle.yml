@@ -25,6 +25,9 @@ workflows:
             - run:
                 name: Build folder 🏗
                 command: npm run build
+            - run:
+                name: Run unit tests 👷
+                command: npm run test:unit
 
       - cypress/run:
           name: Example A11y
@@ -32,7 +35,7 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/a11y
@@ -45,9 +48,9 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
-          no-workspace: true
+          no-workspace: false
           working_directory: examples/using-babel
           command: npm test
           store_artifacts: true
@@ -58,7 +61,7 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/using-babel-typescript
@@ -71,7 +74,7 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/react-scripts
@@ -91,7 +94,7 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/nextjs
@@ -113,7 +116,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/react-scripts-folder
@@ -133,7 +136,7 @@ workflows:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           executor: cypress/base-12
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/tailwind
@@ -155,7 +158,7 @@ workflows:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           executor: cypress/base-12
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/webpack-file
@@ -175,7 +178,7 @@ workflows:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
           executor: cypress/base-12
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/webpack-options
@@ -197,7 +200,7 @@ workflows:
           # because we will use native Sass dependency
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/sass-and-ts
@@ -217,7 +220,7 @@ workflows:
             - Install
           executor: cypress/base-12
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/snapshots
@@ -230,7 +233,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-sudoku
@@ -246,7 +249,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-testing-with-applitools
@@ -268,7 +271,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-testing-with-percy
@@ -283,7 +286,7 @@ workflows:
           requires:
             - Install
           # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install
+          install-command: npm install  --no-bin-links
           verify-command: echo 'Already verified'
           no-workspace: true
           working_directory: examples/visual-testing-with-happo

@@ -70,6 +70,16 @@ Requires [Node](https://nodejs.org/en/) version 8 or above.
 npm install --save-dev cypress cypress-react-unit-test
 ```
 
+## Init
+
+You can use our command line wizard to give you instructions on configuring this plugin. It will try to determine which framework or bundling tool you are using and give you instructions on right configuration.
+
+```sh
+cypress-react-unit-test init
+```
+
+Or continue with manual installation:
+
 1. Include this plugin from your project's `cypress/support/index.js`
 
 ```js

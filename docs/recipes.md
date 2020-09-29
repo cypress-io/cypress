@@ -124,3 +124,37 @@ When loading your `.babelrc` settings, `cypress-react-unit-test` sets `BABEL_ENV
 ```
 
 See [examples/using-babel](examples/using-babel) folder for full example.
+
+### Using rollup config
+
+If you are using rollup for bundling – we can use it as well for the bundling. Check the example:
+
+```js
+// // cypress/plugins/index.js
+const rollupPreprocessor = require('@bahmutov/cy-rollup')
+
+module.exports = (on, config) => {
+  on(
+    'file:preprocessor',
+    rollupPreprocessor({
+      // this is the default value
+      configFile: 'rollup.config.js',
+    }),
+  )
+
+  require('@cypress/code-coverage/task')(on, config)
+}
+```
+
+But make sure that several rollup plugins are required in order to bundle the code for cypress.
+
+```js
+// bundle node_modules
+nodeResolve(),
+// process commonjs modules
+commonjs(),
+// required for react (prop-types) sources
+replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),
+```
+
+See [examples/rollup](examples/rollup) folder for full example.
