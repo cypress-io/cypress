@@ -21,10 +21,11 @@ exports['e2e web security / when enabled / fails'] = `
     1) fails when clicking <a> to another origin
     2) fails when submitted a form and being redirected to another origin
     3) fails when using a javascript redirect to another origin
+    4) fails when doing a CORS request cross-origin
 
 
   0 passing
-  3 failing
+  4 failing
 
   1) web security
        fails when clicking <a> to another origin:
@@ -95,18 +96,23 @@ Alternatively you can also disable Chrome Web Security in Chromium-based browser
 https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
+  4) web security
+       fails when doing a CORS request cross-origin:
+     AssertionError: Timed out retrying: Expected to find content: 'success!' but never did.
+      [stack trace lines]
+
 
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
+  │ Tests:        4                                                                                │
   │ Passing:      0                                                                                │
-  │ Failing:      3                                                                                │
+  │ Failing:      4                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  4                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     web_security_spec.coffee                                                         │
@@ -121,6 +127,8 @@ https://on.cypress.io/cross-origin-violation
      when submitted a form and being redirected to another origin (failed).png                      
   -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
      when using a javascript redirect to another origin (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
+     when doing a CORS request cross-origin (failed).png                                            
 
 
   (Video)
@@ -136,9 +144,9 @@ https://on.cypress.io/cross-origin-violation
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security_spec.coffee                 XX:XX        3        -        3        -        - │
+  │ ✖  web_security_spec.coffee                 XX:XX        4        -        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
 
 
 `
@@ -166,16 +174,17 @@ exports['e2e web security / when disabled / passes'] = `
     ✓ fails when clicking <a> to another origin
     ✓ fails when submitted a form and being redirected to another origin
     ✓ fails when using a javascript redirect to another origin
+    ✓ fails when doing a CORS request cross-origin
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
@@ -199,9 +208,9 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
+  │ ✔  web_security_spec.coffee                 XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `

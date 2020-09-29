@@ -1,5 +1,4 @@
 describe "web security", ->
-
   it "fails when clicking <a> to another origin", ->
     cy
       .visit("http://localhost:4466/link")
@@ -23,3 +22,7 @@ describe "web security", ->
       .url().should("eq", "https://www.foo.com:44665/cross_origin")
 
     cy.contains("h1", "cross origin")
+
+  it "fails when doing a CORS request cross-origin", ->
+    cy.visit('http://localhost:4466/cors')
+    .contains('success!', { timeout: 500 })
