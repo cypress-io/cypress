@@ -1,0 +1,11 @@
+.idea/
+dist
+node_modules/
+.DS_Store
+npm-debug.log
+cypress/videos/
+cypress/screenshots
+.nyc_output
+coverage
+*.tgz
+examples/*/cypress/videos/

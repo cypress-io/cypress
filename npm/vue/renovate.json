@@ -1,0 +1,37 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "prHourlyLimit": 2,
+  "updateNotScheduled": false,
+  "timezone": "America/New_York",
+  "schedule": [
+    "every weekend"
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "masterIssue": true,
+  "packageRules": [
+    {
+      "packagePatterns": [
+        "*"
+      ],
+      "excludePackagePatterns": [
+        "@cypress/code-coverage",
+        "@cypress/webpack-preprocessor",
+        "@kazupon/vue-i18n-loader",
+        "common-tags",
+        "cypress",
+        "find-webpack",
+        "semantic-release",
+        "debug"
+      ],
+      "enabled": false
+    }
+  ]
+}
