@@ -7,11 +7,11 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "test": "../../node_modules/.bin/../../node_modules/.bin/cypress-expect run --min-passing 7",
+    "test": "../../node_modules/.bin/../../node_modules/.bin/cypress-expect run --min-passing 10",
     "cy:open": "../../node_modules/.bin/cypress open",
     "build:static": "next build && next out",
-    "check-coverage": "../../node_modules/.bin/check-coverage components/Search.jsx && ../../node_modules/.bin/check-coverage pages/index.js",
-    "only-covered": "../../node_modules/.bin/only-covered components/Search.jsx pages/index.js"
+    "check-coverage": "../../node_modules/.bin/check-coverage components/Search.jsx && ../../node_modules/.bin/check-coverage pages/index.js && ../../node_modules/.bin/check-coverage pages/router.js",
+    "only-covered": "../../node_modules/.bin/only-covered components/Search.jsx pages/index.js pages/router.js"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."
