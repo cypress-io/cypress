@@ -146,6 +146,10 @@ class $Location {
   }
 
   static fullyQualifyUrl (url) {
+    if (url.startsWith(window.location.origin)) {
+      return url
+    }
+
     return this.resolve(window.location.origin, url)
   }
 

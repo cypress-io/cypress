@@ -443,6 +443,7 @@ describe('src/cypress/location', () => {
         'http://localhost:3500?foo=bar',
         'http://localhost:3500/?foo',
         'http://localhost:3500/?foo=bar&a=b',
+        'http://localhost:3500/abcd?foo=bar',
       ]
 
       cases.forEach((c) => {
