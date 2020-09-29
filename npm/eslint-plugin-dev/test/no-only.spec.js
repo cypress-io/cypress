@@ -38,7 +38,6 @@ function execute (file, options = {}) {
 }
 
 describe('no-only', () => {
-
   it('lint js with only', async () => {
     const filename = './fixtures/with-only.js'
     const result = execute(filename, {
@@ -52,5 +51,4 @@ describe('no-only', () => {
 
     expect(result.output).not.toBeTruthy()
   })
-
 })

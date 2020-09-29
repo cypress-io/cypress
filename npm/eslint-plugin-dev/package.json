@@ -7,13 +7,7 @@
     "lint": "eslint --ext .js,json,.eslintrc .",
     "lint-changed": "node ./lib/scripts/lint-changed",
     "lint-fix": "npm run lint -- --fix",
-    "semantic-release": "semantic-release",
     "test": "jest"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "dependencies": {
     "bluebird": "^3.5.5",
@@ -23,24 +17,12 @@
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "file:./shim",
-    "@fellow/eslint-plugin-coffee": "^0.4.13",
-    "@types/chai": "^4.1.7",
-    "@types/jest": "^24.0.15",
-    "@types/mocha": "^5.2.7",
-    "@types/sinon": "^7.0.13",
-    "@types/sinon-chai": "^3.2.2",
-    "chai": "^4.2.0",
     "eslint": "^6.1.0",
     "eslint-plugin-json-format": "^2.0.0",
     "eslint-plugin-mocha": "^5.3.0",
     "eslint-plugin-promise": "^4.2.1",
-    "husky": "^2.7.0",
     "jest": "^24.8.0",
     "jest-cli": "^24.8.0",
-    "lint-staged": "^9.2.0",
-    "mocha": "^6.1.4",
-    "semantic-release": "^15.13.17",
     "sinon": "^7.3.2",
     "sinon-chai": "^3.3.0"
   },
@@ -60,22 +42,16 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/eslint-plugin-dev.git"
+    "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/eslint-plugin-dev#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/eslint-plugin-dev#readme",
   "author": "Chris Breiding (chris@cypress.io)",
   "bugs": {
-    "url": "https://github.com/cypress-io/eslint-plugin-dev/issues"
+    "url": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Feslint-plugin-dev&template=&title="
   },
   "keywords": [
     "cypress",
     "eslint",
     "eslintplugin"
-  ],
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix",
-      "git add"
-    ]
-  }
+  ]
 }

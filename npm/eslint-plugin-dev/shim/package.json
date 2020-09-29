@@ -1,5 +1,0 @@
-{
-  "name": "@cypress/eslint-plugin-dev",
-  "version": "0.0.0",
-  "main": "../../../lib"
-}

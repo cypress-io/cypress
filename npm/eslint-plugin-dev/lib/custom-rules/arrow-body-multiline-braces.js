@@ -12,5 +12,5 @@ module.exports = ruleComposer.filterReports(
     }
 
     return !(reportedToken && reportedToken.type === 'Line' && /^-{2,}$/u.test(reportedToken.value))
-  }
+  },
 )

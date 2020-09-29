@@ -6,7 +6,6 @@ const _ = require('lodash')
 const chalk = require('chalk')
 
 const start = () => {
-
   const fix = process.argv.slice(2).includes('--fix')
 
   return utils.lintFilesByName({
@@ -14,7 +13,7 @@ const start = () => {
     getFilenames: () => {
       return _.union(
         sh.exec(`git diff --name-only --diff-filter=M`).split('\n'),
-        sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n')
+        sh.exec(`git diff --name-only --diff-filter=MA --staged`).split('\n'),
       )
     },
     fix,

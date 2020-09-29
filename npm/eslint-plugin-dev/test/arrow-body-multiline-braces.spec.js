@@ -38,7 +38,6 @@ function execute (file, options = {}) {
 }
 
 describe('arrow-body-multiline-braces', () => {
-
   it('lint multiline js', async () => {
     const filename = './fixtures/multiline.js'
     const result = execute(filename, {

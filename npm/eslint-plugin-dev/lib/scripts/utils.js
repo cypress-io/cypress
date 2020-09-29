@@ -29,7 +29,6 @@ module.exports = {
     `)
 
     return Promise.map(filenames, (f) => {
-
       debug('started linting', f)
 
       const fileText = opts.getFileText(f)
@@ -42,7 +41,7 @@ module.exports = {
 
       return Promise.promisify(fileText.exec)(
         lintCommand,
-        { silent: false, async: true }
+        { silent: false, async: true },
       )
       .tapCatch(debugTerse)
       .return(false)
@@ -58,7 +57,6 @@ module.exports = {
 
       return { failCount, filenames }
     })
-
   },
   lintFilesByName: (options) => {
     sh.config.silent = true
@@ -82,7 +80,7 @@ module.exports = {
 
     return Promise.promisify(sh.exec)(
       lintCommand,
-      { silent: false, async: true }
+      { silent: false, async: true },
     )
     .tapCatch(debugTerse)
     .return(false)
@@ -93,7 +91,6 @@ module.exports = {
         filenames,
       }
     })
-
   },
 
 }
