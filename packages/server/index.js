@@ -3,6 +3,7 @@ if (process.env.TIME_REQUIRE != null) {
 }
 
 require('./util/capture-require')
+require('./util/bundle-cache')
 
 const bench = require('./util/bench').initBenchmark('cold')
 
