@@ -17,7 +17,11 @@ function hookRequire () {
     const isNodeModule =
       !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('@package')
 
-    if (!isCore && isNodeModule) modules.add(id)
+    if (!isCore && isNodeModule) {
+      // TODO(thlorenz): why are we missing some modules here?
+      // Are they required _after_ on('exit')???
+      modules.add(id)
+    }
 
     return origRequire.apply(this, arguments)
   }

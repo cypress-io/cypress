@@ -2,6 +2,7 @@
 
 const path = require('path')
 const fs = require('fs').promises
+const { builtinModules } = require('module')
 
 // rollup and needed plugins
 const rollup = require('rollup')
@@ -16,9 +17,24 @@ const bundleInputFile = path.join(resultsDir, 'bundle-input.js')
 const bundleOutputFile = path.join(resultsDir, 'bundle.js')
 const bundleMinOutputFile = path.join(resultsDir, 'bundle.min.js')
 
-const blacklist = new Set(['@microsoft/typescript-etw'])
+const external = new Set([
+  ...builtinModules,
+  //
+  // Circular deps
+  //
+
+  // breaking bundle
+  'readable-stream',
+  'xmlbuilder',
+  '@microsoft/typescript-etw',
+  'osx-temperature-sensor',
+
+  // non-breaking
+  'glob',
+])
+
 const nodeModulesString = nodeModules
-.filter((x) => !blacklist.has(x))
+.filter((x) => !external.has(x))
 .map((x) => `cache['${x}'] = () => require('${x}')`)
 .join('\n')
 
@@ -30,6 +46,8 @@ function resolveFromCache(id) {
   const resolve = cache[id]
   return resolve == null ? null : resolve()
 }
+resolveFromCache.__cache__ = cache
+
 module.exports = resolveFromCache
 `
 
@@ -42,6 +60,7 @@ const plugins = [
 ]
 
 const config = {
+  external: Array.from(external),
   input: bundleInputFile,
   output: [
     {
