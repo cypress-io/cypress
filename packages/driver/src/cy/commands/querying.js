@@ -575,6 +575,16 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       state('withinSubject', subject)
 
+      const restoreCmdIndex = state('index') + 1
+
+      cy.queue.splice(restoreCmdIndex, 0, {
+        args: [subject],
+        name: 'within-restore',
+        fn: (subject) => subject,
+      })
+
+      state('index', restoreCmdIndex)
+
       fn.call(ctx, subject)
 
       const cleanup = () => cy.removeListener('command:start', setWithinSubject)
