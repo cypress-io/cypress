@@ -264,7 +264,9 @@ Working on your first Pull Request? You can learn how from this free series [How
 
 Cypress is a large open source project. When you want to contribute to Cypress, you may be unsure which part of the project to work within.
 
-This repository is made up of various packages. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app.
+Cypress uses a monorepo, which means there are many independent packages in this repository. There are two main types of packages: private and public.
+
+Private packages generally live within the [`packages`](./packages) directory and are in the `@packages/` namespace. These packages are combined to form the main Cypress app that you get when you `npm install cypress`. They are discrete modules with different responsibilities, but each is necessary for the Cypress app and is not necessarily useful outside of the Cypress app. Since these modules are all compiled and bundled into a binary upon release, they are sometimes collectively referred to as the Cypress binary.
 
 Here is a list of the core packages in this repository with a short description, located within the [`packages`](./packages) directory:
 
@@ -285,8 +287,16 @@ Here is a list of the core packages in this repository with a short description,
  | [socket](./packages/socket)           | `@packages/socket`      | A wrapper around socket.io to provide common libraries.                      |
  | [static](./packages/static)           | `@packages/static`      | Serves static assets used in the Cypress GUI.                                |
  | [ts](./packages/ts)                   | `@packages/ts`          | A centralized version of typescript.                                         |
+ 
+Public packages live within the [`npm`](./npm) folder and are standalone modules that get independently published to npm under the `@cypress/` namespace. These packages generally contain extensions, plugins, or other packages that are complementary to, yet independent of, the main Cypress app.
 
-We try to tag all issues with a `pkg/` tag describing the appropriate package the work is required in. For example, the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label is tagged on issues that require work in the `driver` package.
+Here is a list of the npm packages in this repository:
+
+ | Folder Name                                            | Package Name                       | Purpose                                                                      |
+ | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
+ | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.                    |
+
+We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate package the work is required in. For public packages, we use their qualified package name: For example, issues relating to the  webpack preprocessor are tagged under [`npm: @cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/labels/npm%3A%20%40cypress%2Fwebpack-preprocessor) label and issues related to the `driver` package are tagged with the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label.
 
 ### Requirements
 
@@ -532,8 +542,22 @@ They will outline development and test procedures. When in doubt just look at th
 
 The repository is setup with two main (protected) branches.
 
-- `master` is the code already published in the last Cypress version.
-- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests should be made against this branch.
+- `master` is the code already published, both for the main Cypress app and independent npm packages.
+- `develop` is the current latest "pre-release" code. This branch is set as the default branch, and all pull requests that update the main Cypress binary should be made against this branch.
+
+In general, we want to publish our standalone npm packages continuously as new features are added. Therefore, any pull requests that only change independent `@cypress/` packages in the [`npm`](./npm) directory should be made directly off the `master` branch. We use [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/) to automatically publish these packages to npm when a PR is merged directly into master.
+
+When updating the main Cypress app, pull requests should be made against the `develop` branch. We do not continuously deploy the Cypress binary, so `develop` contains all of the new features and fixes that are staged to go out in the next update of the main Cypress app. In addition, if you make changes to an npm package that can't be published until the binary is also updated, you should make a pull request against the `develop` branch.
+
+Essentially, if you only change files within the [`npm`](./npm) folder, then you should make a pull request against `master`. Otherwise, make it against `develop`.
+
+All updates to `master` are automatically merged into `develop`, so `develop` always has the latest version of every package.
+
+#### Workflow Diagrams
+
+<!-- To edit these diagrams, visit [`./assets/DIAGRAMS`](./assets/DIAGRAMS.md) -->
+<img src="./assets/branching-diagram.png" />
+<img src="./assets/sample-workflow.png" />
 
 ### Pull Requests
 

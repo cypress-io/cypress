@@ -1,7 +1,6 @@
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
-const argv = require('minimist')(process.argv.slice(2))
 
 // updates a public package's package.json
 // replaces any local dependencies that have a * version
@@ -11,15 +10,47 @@ const argv = require('minimist')(process.argv.slice(2))
 
 /* eslint-disable no-console */
 
-const name = argv._[0]
+const getPackages = async () => {
+  const { stdout: packages } = await execa('npx', ['lerna', 'la', '--json'])
 
-const main = async () => {
+  return JSON.parse(packages)
+}
+
+const getBinaryVersion = async () => {
+  const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
+  const rootPath = path.join(root, 'package.json')
+  const rootPackage = JSON.parse(fs.readFileSync(rootPath))
+
+  return rootPackage.version
+}
+
+const parseSemanticReleaseOutput = (output) => {
+  const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+  const nextVersion = (output.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+
+  return nextVersion || currentVersion
+}
+
+const getPackageVersion = async (pack) => {
+  const { stdout: semrel } = await execa('npx', ['lerna', 'exec', '--scope', pack, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
+
+  const version = parseSemanticReleaseOutput(semrel)
+
+  if (!version) {
+    console.log(`ERROR`)
+    console.log(`Couldn't find a current or next version for ${pack}`)
+
+    process.exit(1)
+  }
+
+  return version
+}
+
+const main = async (name) => {
   console.log(`Setting local npm packages to the correct version in package.json`)
 
-  const { stdout: packs } = await execa('npx', ['lerna', 'la', '--json'])
-
-  const packages = JSON.parse(packs)
-  const localPackages = packages.map((p) => p.name)
+  const packages = await getPackages()
+  const packageNames = packages.map((p) => p.name)
 
   const pack = packages.find((p) => p.name === name)
 
@@ -36,38 +67,25 @@ const main = async () => {
     process.exit(0)
   }
 
-  const dependencies = Object.keys(packageJson.dependencies).filter((d) => localPackages.includes(d))
+  // filter dependencies to only include local packages
+  const dependencies = Object.keys(packageJson.dependencies).filter((d) => packageNames.includes(d))
 
   for (let dep of dependencies) {
     process.stdout.write(`${dep}: `)
 
+    let version
+
     if (dep === 'cypress') {
-      const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
-      const rootPath = path.join(root, 'package.json')
-      const rootPackage = JSON.parse(fs.readFileSync(rootPath))
+      // Cypress binary gets handled differently than everything else
+      version = await getBinaryVersion()
+    } else {
+      if (packages.find((p) => p.name === dep).private) {
+        console.log(`ERROR`)
+        console.log(`Cannot add ${dep} as a dependency since it is private`)
+        process.exit(1)
+      }
 
-      packageJson.dependencies[dep] = rootPackage.version
-
-      break
-    }
-
-    if (packages.find((p) => p.name === dep).private) {
-      console.log(`ERROR`)
-      console.log(`Cannot add ${dep} as a dependency since it is private`)
-      process.exit(1)
-    }
-
-    const { stdout: semrel } = await execa('npx', ['lerna', 'exec', '--scope', dep, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
-    const currentVersion = (semrel.match(/associated with version (\d+\.\d+\.\d+)/) || [])[1]
-    const nextVersion = (semrel.match(/The next release version is (\d+\.\d+\.\d+)/) || [])[1]
-
-    const version = nextVersion || currentVersion
-
-    if (!version) {
-      console.log(`ERROR`)
-      console.log(`Couldn't find a current or next version for ${dep}`)
-
-      process.exit(1)
+      version = await getPackageVersion(dep)
     }
 
     console.log(version)
@@ -80,4 +98,15 @@ const main = async () => {
   console.log(`package.json updated!`)
 }
 
-main()
+// execute main function if called from command line
+if (require.main === module) {
+  const argv = require('minimist')(process.argv.slice(2))
+  const name = argv._[0]
+
+  main(name)
+}
+
+module.exports = {
+  parseSemanticReleaseOutput,
+  main,
+}

@@ -438,6 +438,17 @@ describe('src/cy/commands/assertions', () => {
         cy.noop({}).should('dee.eq', {})
       })
 
+      // https://github.com/cypress-io/cypress/issues/7870
+      it('handles when a string literal is thrown', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).eq('error string')
+        })
+
+        cy.then(() => {
+          throw 'error string'
+        })
+      })
+
       describe('language chainers err', () => {
         // https://github.com/cypress-io/cypress/issues/883
         const langChainers = ['to', 'be', 'been', 'is', 'that', 'which', 'and', 'has', 'have', 'with', 'at', 'of', 'same', 'but', 'does', 'still']

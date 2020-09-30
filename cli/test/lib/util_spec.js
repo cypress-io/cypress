@@ -13,7 +13,7 @@ const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 
 // https://github.com/cypress-io/cypress/issues/5431
-const expectedNodeOptions = `--max-http-header-size=${1024 * 1024} --http-parser=legacy`
+const expectedNodeOptions = `--max-http-header-size=${1024 * 1024}`
 
 describe('util', () => {
   beforeEach(() => {

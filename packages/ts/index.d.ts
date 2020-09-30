@@ -28,6 +28,7 @@ declare module 'http' {
     _implicitHeader: () => void
     output: string[]
     agent: Agent
+    insecureHTTPParser: boolean
   }
 
   interface RequestOptions extends ClientRequestArgs {
