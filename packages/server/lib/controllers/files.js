@@ -67,6 +67,7 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
+    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -91,7 +92,7 @@ module.exports = {
         .filter(specFilterFn)
         .filter((foundSpec) => {
           if (experimentalComponentTestingEnabled) {
-            return foundSpec.specType === 'integration'
+            return foundSpec.specType === specTypeFilter
           }
 
           return true
