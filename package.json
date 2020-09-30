@@ -112,6 +112,8 @@
     "lodash": "4.17.15",
     "markdown-link-check": "3.8.1",
     "memfs": "3.2.0",
+    "mobx": "6.0.0",
+    "mobx-react-lite": "3.0.0",
     "mock-fs": "4.13.0",
     "next": "^9.5.3",
     "node-sass": "4.14.1",

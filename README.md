@@ -182,6 +182,7 @@ Spec | Description
 [hooks](cypress/component/advanced/hooks) | Tests several components that use React Hooks like `useState`, `useCallback`
 [lazy-loaded](cypress/component/advanced/lazy-loaded) | Confirms components that use `React.lazy` and dynamic imports work
 [material-ui-example](cypress/component/advanced/material-ui-example) | Large components demos from [Material UI](https://material-ui.com/)
+[mobx-v6](cypress/component/advanced/mobx-v6) | Test components with MobX v6 observable
 [mock-fetch](cypress/component/advanced/mock-fetch) | Test stubs `window.fetch` used by component in `useEffect` hook
 [mocking-axios](cypress/component/advanced/mocking-axios) | Stubbing methods from a 3rd party component like `axios`
 [mocking-component](cypress/component/advanced/mocking-component) | Replaced a child component with dummy component during test
