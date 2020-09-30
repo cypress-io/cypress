@@ -55,7 +55,7 @@ babel-eslint
 ```json
 {
   "extends": [
-    "plugin:@cypress/dev/tests",
+    "plugin:@cypress/dev/tests"
   ]
 }
 ```
