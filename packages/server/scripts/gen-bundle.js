@@ -16,12 +16,22 @@ const bundleInputFile = path.join(resultsDir, 'bundle-input.js')
 const bundleOutputFile = path.join(resultsDir, 'bundle.js')
 const bundleMinOutputFile = path.join(resultsDir, 'bundle.min.js')
 
-const blacklist = ['@microsoft/typescript-etw']
-
-const bundleInput = nodeModules
-.filter((x) => !blacklist.includes(x))
-.map((x) => `require('${x}')`)
+const blacklist = new Set(['@microsoft/typescript-etw'])
+const nodeModulesString = nodeModules
+.filter((x) => !blacklist.has(x))
+.map((x) => `cache['${x}'] = () => require('${x}')`)
 .join('\n')
+
+const bundleInput = `
+const cache = {}
+${nodeModulesString}
+
+function resolveFromCache(id) {
+  const resolve = cache[id]
+  return resolve == null ? null : resolve()
+}
+module.exports = resolveFromCache
+`
 
 const plugins = [
   commonjs(),
