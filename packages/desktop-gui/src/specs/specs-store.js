@@ -13,6 +13,7 @@ export const allSpecsSpec = new Spec({
   absolute: '__all',
   relative: '__all',
   displayName: 'Run all specs',
+  specType: 'integration',
 })
 
 const formRelativePath = (spec) => {
