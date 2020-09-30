@@ -224,7 +224,6 @@ export function open(
   options: WindowOptions = {},
   newBrowserWindow = _newBrowserWindow
 ) {
-  console.trace()
   bench.timeEnd('start')
   bench.dumpAverages()
   bench.save()

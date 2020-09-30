@@ -1,3 +1,9 @@
+if (process.env.TIME_REQUIRE != null) {
+  require('time-require')
+}
+
+require('./util/capture-require')
+
 const bench = require('./util/bench').initBenchmark('cold')
 
 bench.time('start')

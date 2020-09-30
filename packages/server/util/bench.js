@@ -5,10 +5,6 @@ const fs = require('fs')
 const path = require('path')
 const getTime = require('performance-now')
 
-if (process.env.TIME_REQUIRE != null) {
-  require('time-require')
-}
-
 function threeDecimals (n) {
   return Math.round(n * 1000) / 1000
 }
