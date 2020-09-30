@@ -4,7 +4,7 @@ import util from 'util'
 // Cypress webpack bundler adaptor
 // https://github.com/cypress-io/cypress-webpack-preprocessor
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
-const debug = require('debug')('cypress-vue-unit-test')
+const debug = require('debug')('@cypress/vue')
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 // const { VueLoaderPlugin } = require('vue-loader')
 const fw = require('find-webpack')
@@ -142,9 +142,7 @@ function insertBabelLoader (config, options) {
 /**
  * Basic Cypress Vue Webpack file loader for .vue files.
  */
-const onFileDefaultPreprocessor = (config) => {
-  let webpackOptions = fw.getWebpackOptions()
-
+const onFileDefaultPreprocessor = (config, webpackOptions = fw.getWebpackOptions()) => {
   if (!webpackOptions) {
     debug('Could not find webpack options, starting with default')
     webpackOptions = {}
@@ -177,7 +175,7 @@ const onFileDefaultPreprocessor = (config) => {
  * @example
  *    const {
  *      onFilePreprocessor
- *    } = require('cypress-vue-unit-test/preprocessor/webpack')
+ *    } = require('@cypress/vue/preprocessor/webpack')
  *    module.exports = on => {
  *      on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
  *    }

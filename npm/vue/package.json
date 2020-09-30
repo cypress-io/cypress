@@ -1,22 +1,15 @@
 {
   "name": "@cypress/vue",
-  "version": "1.0.0-alpha.5",
+  "version": "0.0.0-development",
   "description": "Browser-based Component Testing for Vue.js with Cypress.io ✌️🌲",
   "main": "dist/index.js",
   "scripts": {
-    "ban": "ban",
     "build": "tsc",
     "build:watch": "tsc --watch",
-    "cy:open": "yarn cypress open --dev",
-    "cy:run": "yarn cypress run --dev",
-    "deps": "echo skip deps-ok && dependency-check --no-dev .",
-    "issues": "git-issues",
-    "license": "license-checker --production --onlyunknown --csv",
-    "size": "npm pack --dry",
-    "pretest": "npm run lint && npm run build",
-    "test": "npm run cy:run",
-    "unit": "mocha src/*-spec.js",
-    "unused-deps": "echo skip dependency-check --unused --no-dev --no-peer . --entry cypress/plugins/index.js"
+    "cy:open": "node ../../scripts/cypress open",
+    "cy:run": "node ../../scripts/cypress run",
+    "pretest": "yarn build",
+    "test": "yarn cy:run"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
@@ -25,7 +18,6 @@
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
-    "common-tags": "1.8.0",
     "debug": "4.2.0",
     "find-webpack": "2.1.0",
     "unfetch": "4.1.0"

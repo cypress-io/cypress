@@ -5,9 +5,7 @@ import {
   VueTestUtilsConfigOptions,
   Wrapper,
 } from '@vue/test-utils'
-const { stripIndent } = require('common-tags')
 
-// mountVue options
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
   'extensions',
@@ -146,14 +144,14 @@ type VuePlugins = VuePlugin[]
  * local components, plugins, etc.
  *
  * @interface MountOptionsExtensions
- * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+ * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
  */
 interface MountOptionsExtensions {
   /**
    * Extra local components
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @example
    *  import Hello from './Hello.vue'
    *  // imagine Hello needs AppComponent
@@ -171,7 +169,7 @@ interface MountOptionsExtensions {
    * Optional Vue filters to install while mounting the component
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @example
    *  const filters = {
    *    reverse: (s) => s.split('').reverse().join(''),
@@ -185,7 +183,7 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixins
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   mixin?: VueMixins
 
@@ -194,14 +192,14 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixin
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   mixins?: VueMixins
 
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @alias plugins
    * @memberof MountOptionsExtensions
    */
@@ -210,7 +208,7 @@ interface MountOptionsExtensions {
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @alias use
    * @memberof MountOptionsExtensions
    */
@@ -268,7 +266,7 @@ interface MountOptions {
    * mounting this component
    *
    * @memberof MountOptions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   extensions: MountOptionsExtensions
 }
@@ -342,14 +340,6 @@ export const mount = (
     optionsOrProps,
     defaultOptions,
   )
-
-  // display deprecation warnings
-  if (options.vue) {
-    console.warn(stripIndent`
-      [DEPRECATION]: 'vue' option has been deprecated.
-      'node_modules/vue/dis/vue' is always used.
-      Please remove it from your 'mountVue' options.`)
-  }
 
   return cy
   .window({

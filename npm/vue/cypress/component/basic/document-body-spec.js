@@ -2,7 +2,6 @@ import { mount } from '@cypress/vue'
 
 /* eslint-env mocha */
 describe('document.body', () => {
-  // https://github.com/bahmutov/cypress-vue-unit-test/issues/122
   it('is set correctly', () => {
     mount({
       mounted () {
