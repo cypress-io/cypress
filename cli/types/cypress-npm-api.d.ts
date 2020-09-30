@@ -9,21 +9,10 @@
 declare namespace CypressCommandLine {
   type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
 
-  interface CodeFrame {
-    line?: number
-    column?: number
-    originalFile: string
-    relativeFile: string
-    absoluteFile: string
-    frame: string
-    language: string
-  }
-
   interface TestError {
     name: string
     message: string
     stack: string
-    codeFrame?: CodeFrame
   }
   /**
    * All options that one can pass to "cypress.run"
