@@ -8,7 +8,7 @@ import Tooltip from '@cypress/react-tooltip'
 import FileOpener from './file-opener'
 import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
-import specsStore, { allSpecsSpec } from './specs-store'
+import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
 
 @observer
 class SpecsList extends Component {
@@ -40,7 +40,7 @@ class SpecsList extends Component {
     }
 
     const areTestsRunning = this._areTestsRunning()
-    let runSpecsLabel = allSpecsSpec.displayName
+    let runSpecsLabel = allIntegrationSpecsSpec.displayName
     let runButtonDisabled = false
 
     if (areTestsRunning && this.runAllSavedLabel) {
@@ -58,10 +58,10 @@ class SpecsList extends Component {
       }
     }
 
-    const runTestsButton = (<button onClick={this._selectSpec.bind(this, allSpecsSpec)}
+    const runIntegrationTestsButton = (<button onClick={this._selectSpec.bind(this, allIntegrationSpecsSpec)}
       disabled={runButtonDisabled}
       title="Run all integration specs together"
-      className={cs('btn-link all-tests', { active: specsStore.isChosen(allSpecsSpec) })}>
+      className={cs('btn-link all-tests', { active: specsStore.isChosen(allIntegrationSpecsSpec) })}>
       <i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}
       {runSpecsLabel}
     </button>)
@@ -91,7 +91,7 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-          {runTestsButton}
+          {runIntegrationTestsButton}
         </header>
         {this._specsList()}
       </div>
@@ -162,6 +162,7 @@ class SpecsList extends Component {
 
   _selectSpec (spec, e) {
     e.preventDefault()
+    e.stopPropagation()
 
     const { project } = this.props
 
@@ -219,6 +220,11 @@ class SpecsList extends Component {
                 </> :
                 spec.displayName
             }
+            {/* TODO: style these buttons */}
+            {nestingLevel === 0 ? <button style={{ marginLeft: '2em' }}
+              onClick={this._selectSpec.bind(this,
+                spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
+              }>Run tests</button> : <></>}
           </div>
           {
             isExpanded ?
@@ -231,6 +237,7 @@ class SpecsList extends Component {
           }
         </div>
       </li>
+
     )
   }
 

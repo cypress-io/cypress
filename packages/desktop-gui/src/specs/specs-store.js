@@ -8,7 +8,7 @@ import Folder from './folder-model'
 
 const pathSeparatorRe = /[\\\/]/g
 
-export const allSpecsSpec = new Spec({
+export const allIntegrationSpecsSpec = new Spec({
   name: 'All Specs',
   absolute: '__all',
   relative: '__all',
@@ -16,8 +16,16 @@ export const allSpecsSpec = new Spec({
   specType: 'integration',
 })
 
+export const allComponentSpecsSpec = new Spec({
+  name: 'All Component Specs',
+  absolute: '__all',
+  relative: '__all',
+  displayName: 'Run all component specs',
+  specType: 'component',
+})
+
 const formRelativePath = (spec) => {
-  return spec === allSpecsSpec ? spec.relative : path.join(spec.type, spec.name)
+  return spec === spec.type ? path.join(spec.type, spec.name) : spec.relative
 }
 
 const pathsEqual = (path1, path2) => {
