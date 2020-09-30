@@ -186,7 +186,7 @@ describe('lib/util/ci_provider', () => {
       bitbucketBuildNumber: 'bitbucketBuildNumber',
       bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
-      bitbucketParallelStep: 'bitbucketParallelStep'
+      bitbucketParallelStep: 'bitbucketParallelStep',
     })
 
     expectsCommitParams({
