@@ -292,7 +292,7 @@ const eventManager = {
     })
 
     Cypress.on('collect:run:state', () => {
-      if (Cypress.env('NO_COMMANDLOG')) {
+      if (Cypress.env('NO_COMMAND_LOG')) {
         return Promise.resolve()
       }
 
@@ -319,7 +319,7 @@ const eventManager = {
         cb()
       }
 
-      if (Cypress.env('NO_COMMANDLOG')) {
+      if (Cypress.env('NO_COMMAND_LOG')) {
         return beforeThenCb()
       }
 

@@ -26,7 +26,7 @@ class App extends Component {
      */
     const spec = this.props.config.spec
 
-    const NO_COMMANDLOG = this.props.config.env && this.props.config.env.NO_COMMANDLOG
+    const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
 
     return (
       <div className={cs({
@@ -38,7 +38,7 @@ class App extends Component {
           className='reporter-wrap'
           style={{ width: this.props.state.reporterWidth }}
         >
-          {Boolean(NO_COMMANDLOG) || <Reporter
+          {Boolean(NO_COMMAND_LOG) || <Reporter
             runner={this.props.eventManager.reporterBus}
             spec={spec}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
