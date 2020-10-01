@@ -7,7 +7,7 @@ import ipc from '../lib/ipc'
 
 const openChangelog = (e) => {
   e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/changelog')
+  ipc.externalOpen('https://on.cypress.io/changelog?source=dgui_footer')
 }
 
 const openDownload = (e) => {

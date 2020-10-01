@@ -111,7 +111,7 @@ describe('Updates', function () {
 
     it('opens changelog when new version is clicked', function () {
       cy.get('.modal').contains(NEW_VERSION).click().then(() => {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/changelog')
+        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/changelog?source=dgui_footer')
       })
     })
   })
