@@ -27,6 +27,9 @@ describe('e2e spec_isolation', () => {
     outputPath,
     snapshot: false,
     expectedExitCode: 5,
+    config: {
+      video: false,
+    },
     async onRun (execFn) {
       const { stdout } = await execFn()
 
@@ -36,14 +39,16 @@ describe('e2e spec_isolation', () => {
 
       // now what we want to do is read in the outputPath
       // and snapshot it so its what we expect after normalizing it
-      const json = await fs.readJsonAsync(outputPath)
+      let json = await fs.readJsonAsync(outputPath)
+
+      json.runs = e2e.normalizeRuns(json.runs)
 
       // also mutates into normalized obj ready for snapshot
       expectCorrectModuleApiResult(json, {
-        e2ePath, runs: 4,
+        e2ePath, runs: 4, video: false,
       })
 
-      snapshot('e2e spec isolation fails', json, { allowSharedSnapshot: true })
+      snapshot(json, { allowSharedSnapshot: true })
     },
   })
 
@@ -54,15 +59,20 @@ describe('e2e spec_isolation', () => {
     expectedExitCode: 4,
     config: {
       retries: 1,
+      video: false,
     },
     async onRun (execFn) {
       await execFn()
-      const json = await fs.readJsonAsync(outputPath)
+      let json = await fs.readJsonAsync(outputPath)
+
+      json.runs = e2e.normalizeRuns(json.runs)
 
       // also mutates into normalized obj ready for snapshot
-      expectCorrectModuleApiResult(json, { e2ePath, runs: 2 })
+      expectCorrectModuleApiResult(json, {
+        e2ePath, runs: 2, video: false,
+      })
 
-      snapshot('failing with retries enabled', json)
+      snapshot(json)
     },
   })
 })
