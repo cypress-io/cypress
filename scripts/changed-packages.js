@@ -4,9 +4,9 @@ const path = require('path')
 // lists all packages that have changed from develop
 // and all packages that depend on those
 
-const main = async () => {
+const main = async (base = 'develop', output = false) => {
   const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
-  const { stdout: diff } = await execa('git', ['merge-base', 'origin/develop', 'HEAD'])
+  const { stdout: diff } = await execa('git', ['merge-base', base, 'HEAD'])
   const { stdout: filesChanged } = await execa('git', ['diff', '--name-only', diff])
   const { stdout: depGraph } = await execa('npx', ['lerna', 'la', '--graph'])
   const { stdout: packs } = await execa('npx', ['lerna', 'la', '--json'])
@@ -45,8 +45,20 @@ const main = async () => {
     }
   }
 
-  /* eslint-disable-next-line no-console */
-  console.log(changed.join('\n'))
+  if (output) {
+    /* eslint-disable-next-line no-console */
+    console.log(changed.join('\n'))
+  }
+
+  return changed
 }
 
-main()
+// execute main function if called from command line
+if (require.main === module) {
+  const argv = require('minimist')(process.argv.slice(2))
+  const base = argv._[0]
+
+  main(base, true)
+}
+
+module.exports = main
