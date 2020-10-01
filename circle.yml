@@ -397,6 +397,7 @@ jobs:
     steps:
       - checkout
       - install-required-node
+      - run: git config --local user.email "$(git log --format='%ae' HEAD^!)" && git config --local user.name "$(git log --format='%an' HEAD^!)"
       - run: git branch -D develop && git pull origin develop:develop
       - run: git branch -D master && git pull origin master:master
       - run:
