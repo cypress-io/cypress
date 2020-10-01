@@ -6,7 +6,8 @@ import _parseDomain, { ParsedDomain } from '@cypress/parse-domain'
 const debug = debugModule('cypress:network:cors')
 
 // match IP addresses or anything following the last .
-const customTldsRe = /(^[\d\.]+$|\.[^\.]+$)/
+const customTldsRe = /.+/
+// /(^[\d\.]+$|\.[^\.]+$)/
 
 type ParsedHost = {
   port?: string

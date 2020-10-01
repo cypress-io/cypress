@@ -196,6 +196,7 @@
   "files": [
     "config",
     "lib",
+    "util",
     "patches"
   ],
   "types": "index.d.ts",
