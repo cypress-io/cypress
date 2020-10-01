@@ -575,6 +575,9 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       state('withinSubject', subject)
 
+      // https://github.com/cypress-io/cypress/pull/8699
+      // An internal command is inserted to create a divider between
+      // commands inside within() callback and commands chained to it.
       const restoreCmdIndex = state('index') + 1
 
       cy.queue.splice(restoreCmdIndex, 0, {
