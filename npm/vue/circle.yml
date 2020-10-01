@@ -1,0 +1,90 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1
+
+workflows:
+  build:
+    jobs:
+      # install and cache dependencies in this job
+      # AND build the library once
+      # then the workspace will be passed to other jobs
+      - cypress/install:
+          name: Install
+          executor: cypress/base-12
+          # creates files in "dist" folder
+          build: |
+            npm run build
+            echo ""
+            echo "Build package archive 📦"
+            echo ""
+            # first show the contents to be packed
+            npm pack --dry
+            echo ""
+            echo "packing ..."
+            echo ""
+            npm pack
+            echo ""
+            ls -la
+          post-steps:
+            - run:
+                name: Show info 📺
+                command: npx cypress info
+            - run:
+                name: Linting code 🧹
+                command: npm run lint
+
+      - cypress/run:
+          name: Test
+          executor: cypress/base-12
+          parallelism: 2
+          requires:
+            - Install
+          # notice a trick to avoid re-installing dependencies
+          # in this job - a do-nothing "install-command" parameter
+          install-command: echo 'Nothing to install in this job'
+          # we are not going to use results from this job anywhere else
+          no-workspace: true
+          record: false
+          store_artifacts: true
+          # following examples from
+          # https://circleci.com/docs/2.0/parallelism-faster-jobs/
+          command: |
+            TESTFILES=$(circleci tests glob "cypress/{component,integration}/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=2)
+            echo "Test files for this machine are $TESTFILES"
+            npx cypress run --spec $TESTFILES
+
+#      - cypress/run:
+#          name: Example CLI
+#          executor: cypress/base-12
+#          requires:
+#            - Install
+#          install-command: npm install
+#          verify-command: echo 'Already verified'
+#          no-workspace: true
+#          working_directory: examples/cli
+#          command: |
+#            echo "🦶🏻 Scaffolding component tests"
+#            echo ""
+#            # scaffolds Babel + Webpack combo
+#            npx --package @vue/cli vue add cypress-experimental
+#            echo ""
+#            echo "🦶🏻 test scaffolded project, should work"
+#            echo ""
+#            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
+#            # let's inspect the scaffolded app
+#            ls -la
+#            echo ""
+#            echo "🦶🏻 install the current @cypress/vue"
+#            echo ""
+#            npm install ../../@cypress/vue
+#            echo ""
+#            echo "🦶🏻 run component tests"
+#            echo ""
+#            DEBUG=@cypress/vue npx cypress run --spec 'tests/components/**/*.js'
+#            echo ""
+#            echo "🦶🏻 look at the generated files, should have coverage"
+#            # (after updating cypress-experimental)
+#            echo ""
+#            ls -la
+#          store_artifacts: true
+
