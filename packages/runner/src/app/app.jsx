@@ -26,6 +26,8 @@ class App extends Component {
      */
     const spec = this.props.config.spec
 
+    const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
+
     return (
       <div className={cs({
         'is-reporter-resizing': this.isReporterResizing,
@@ -36,13 +38,13 @@ class App extends Component {
           className='reporter-wrap'
           style={{ width: this.props.state.reporterWidth }}
         >
-          <Reporter
+          {Boolean(NO_COMMAND_LOG) || <Reporter
             runner={this.props.eventManager.reporterBus}
             spec={spec}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
-          />
+          />}
         </div>
         <div
           ref='container'

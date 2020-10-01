@@ -1045,6 +1045,28 @@ jobs:
           name: Release
           command: yarn semantic-release @cypress/webpack-preprocessor
 
+  npm-vue:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vue build
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vue test
+      - store-npm-logs
+
+  npm-vue-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/vue
+
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1841,7 +1863,7 @@ linux-workflow: &linux-workflow
 
     - npm-webpack-preprocessor:
         requires:
-            - build
+          - build
     - npm-webpack-preprocessor-release:
         filters:
           branches:
@@ -1850,6 +1872,19 @@ linux-workflow: &linux-workflow
         requires:
           - build
           - npm-webpack-preprocessor
+
+    - npm-vue:
+        requires:
+          - build
+    - npm-vue-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-vue
+
     - npm-eslint-plugin-dev:
         requires:
           - build
