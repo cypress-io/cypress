@@ -1,0 +1,13 @@
+{
+  "name": "example-happo",
+  "description": "Visual component testing using Happo.io",
+  "private": true,
+  "scripts": {
+    "test": "../../node_modules/.bin/cypress run",
+    "cy:open": "../../node_modules/.bin/cypress open",
+    "test:happo": "../../node_modules/.bin/happo-cypress -- npm test"
+  },
+  "devDependencies": {
+    "cypress-react-unit-test": "file:../.."
+  }
+}
