@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { Dialog } from '@reach/dialog'
 import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
+// @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import cs from 'classnames'
