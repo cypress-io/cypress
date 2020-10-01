@@ -2,7 +2,8 @@
 
 const path = require('path')
 const fs = require('fs').promises
-const { builtinModules } = require('module')
+
+const { external, extraModules } = require('./common')
 
 // rollup and needed plugins
 const rollup = require('rollup')
@@ -16,36 +17,6 @@ const resultsDir = path.join(__dirname, '..', 'results')
 const bundleInputFile = path.join(resultsDir, 'bundle-input.js')
 const bundleOutputFile = path.join(resultsDir, 'bundle.js')
 const bundleMinOutputFile = path.join(resultsDir, 'bundle.min.js')
-
-const external = new Set([
-  ...builtinModules,
-  //
-  // Circular deps
-  //
-
-  // have to be required normally
-  '@packages/ts/register',
-
-  // breaking bundle
-  '@microsoft/typescript-etw',
-  'cson',
-  'fsevents',
-  'node-webkit-updater',
-  'osx-temperature-sensor',
-  'parse5-html-rewriting-stream',
-  'readable-stream',
-  'registry-js',
-  'requirejs',
-  'xmlbuilder',
-  'spawn-sync',
-
-  // non-breaking
-  'glob',
-])
-
-// TODO: Not sure why those aren't captured.
-// Also we had to add these to our deps to make things work
-const extraModules = ['bufferutil', 'utf-8-validate']
 
 const nodeModulesString = nodeModules
 .concat(extraModules)
@@ -77,6 +48,7 @@ const plugins = [
 const config = {
   external: Array.from(external),
   input: bundleInputFile,
+  inlineDynamicImports: true,
   output: [
     {
       file: bundleOutputFile,
