@@ -13,6 +13,7 @@ describe('babel installation template', () => {
     })
 
     const { success } = BabelTemplate.test('/')
+
     expect(success).toBe(true)
   })
 
@@ -24,6 +25,7 @@ describe('babel installation template', () => {
     })
 
     const { success } = BabelTemplate.test('/project/index')
+
     expect(success).toBe(true)
   })
 
@@ -37,6 +39,7 @@ describe('babel installation template', () => {
     })
 
     const { success } = BabelTemplate.test('/some/deep/folder')
+
     expect(success).toBe(true)
   })
 
@@ -46,6 +49,7 @@ describe('babel installation template', () => {
     })
 
     const { success } = BabelTemplate.test('/')
+
     expect(success).toBe(false)
   })
 
@@ -59,6 +63,7 @@ describe('babel installation template', () => {
     })
 
     const { success } = BabelTemplate.test('/')
+
     expect(success).toBe(true)
   })
 })

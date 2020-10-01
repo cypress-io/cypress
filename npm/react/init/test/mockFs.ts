@@ -7,7 +7,7 @@ export const clearMockedFs = () => {
   vol.reset()
 }
 
-export function mockFs(
+export function mockFs (
   fsConfig: Record<string, string>,
   options?: { cwd: string },
 ) {

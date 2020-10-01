@@ -8,16 +8,18 @@ const TodoContainer = styled.div`
   margin-bottom: 10px;
 `
 
-const Todo = ({ todo, handleChecked }) => (
-  <TodoContainer key={todo.id} data-cy="todo">
-    <input
-      type="checkbox"
-      onChange={() => handleChecked(todo)}
-      checked={todo.done}
-    />
-    {todo.title}
-  </TodoContainer>
-)
+const Todo = ({ todo, handleChecked }) => {
+  return (
+    <TodoContainer key={todo.id} data-cy="todo">
+      <input
+        type="checkbox"
+        onChange={() => handleChecked(todo)}
+        checked={todo.done}
+      />
+      {todo.title}
+    </TodoContainer>
+  )
+}
 
 Todo.propTypes = {
   todo: PropTypes.shape({

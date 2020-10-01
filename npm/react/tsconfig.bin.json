@@ -4,11 +4,20 @@
     "outDir": "./bin",
     "module": "CommonJS",
     "target": "ES2018",
-    "types": ["node"],
-    "lib": ["ES2018"],
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2018"
+    ],
     "strict": true,
     "noImplicitAny": true
   },
-  "exclude": ["**/*.test.ts", "./init/test/*"],
-  "include": ["./init/**/*.ts"]
+  "exclude": [
+    "**/*.test.ts",
+    "./init/test/*"
+  ],
+  "include": [
+    "./init/**/*.ts"
+  ]
 }

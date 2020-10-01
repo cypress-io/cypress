@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "build": "../../node_modules/.bin/rollup -c",
-    "test": "../../node_modules/.bin/cypress-expect run --passing 1",
-    "cy:open": "../../node_modules/.bin/cypress open"
+    "cy:open": "../../node_modules/.bin/cypress open",
+    "test": "../../node_modules/.bin/cypress-expect run --passing 1"
   },
   "devDependencies": {
     "cypress-react-unit-test": "file:../.."

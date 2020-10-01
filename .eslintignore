@@ -39,3 +39,5 @@ npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 **/.history
 **/.cy
 **/.git
+
+/npm/react/bin/*

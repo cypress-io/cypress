@@ -22,12 +22,15 @@ it('calls React.createElement with props and text', () => {
 })
 
 it('renders fragments', () => {
-  const ElemFragment = () => (
-    <React.Fragment>
-      <h1>Some title</h1>
-      <div>Some content</div>
-    </React.Fragment>
-  )
+  const ElemFragment = () => {
+    return (
+      <React.Fragment>
+        <h1>Some title</h1>
+        <div>Some content</div>
+      </React.Fragment>
+    )
+  }
+
   mount(<ElemFragment />)
   cy.contains('h1', 'Some title')
   cy.contains('Some content')

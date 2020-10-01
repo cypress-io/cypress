@@ -10,8 +10,9 @@ import * as calc from './calc'
 describe('Component', () => {
   it('mocks call from the component', () => {
     cy.stub(calc, 'getRandomNumber')
-      .as('lucky')
-      .returns(777)
+    .as('lucky')
+    .returns(777)
+
     mount(<Component />)
   })
 })

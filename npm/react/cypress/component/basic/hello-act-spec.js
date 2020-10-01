@@ -2,12 +2,12 @@
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 
-function Hello(props) {
+function Hello (props) {
   if (props.name) {
     return <h1>Hello, {props.name}!</h1>
-  } else {
-    return <span>Hey, stranger</span>
   }
+
+  return <span>Hey, stranger</span>
 }
 
 // shows multiple mount commands
@@ -24,7 +24,8 @@ it('renders with or without a name', () => {
 
 // data-driven testing
 const names = ['Jenny', 'Margaret']
-names.forEach(name => {
+
+names.forEach((name) => {
   it(`greets ${name}`, () => {
     mount(<Hello name={name} />)
     cy.contains('h1', `Hello, ${name}!`).should('be.visible')

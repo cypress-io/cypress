@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-// import * as React from 'react'
+import * as React from 'react'
 import { mount } from 'cypress-react-unit-test'
 import { Search } from '../../components/Search'
 

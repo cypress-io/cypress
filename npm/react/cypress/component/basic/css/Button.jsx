@@ -2,11 +2,11 @@ import React from 'react'
 import './Button.css'
 
 export class Button extends React.Component {
-  handleClick() {
+  handleClick () {
     this.props.clickHandler(this.props.name)
   }
 
-  render() {
+  render () {
     const className = [
       'component-button',
       this.props.orange ? 'orange' : '',

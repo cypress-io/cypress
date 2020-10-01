@@ -15,5 +15,6 @@ it.skip('works inside a div', () => {
       <HelloWorld />
     </div>,
   )
+
   cy.contains('Hello World!')
 })

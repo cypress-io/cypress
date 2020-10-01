@@ -11,6 +11,7 @@ it('renders a list item', () => {
       <ListItemText primary={'my example list item'} />
     </ListItem>,
   )
+
   cy.contains('my example list item')
 })
 
@@ -19,9 +20,9 @@ it('renders full list', () => {
   cy.viewport(500, 800)
   mount(<SimpleList />)
   cy.contains('Drafts')
-    .click()
-    .wait(1000)
-    .click()
-    .wait(1000)
-    .click()
+  .click()
+  .wait(1000)
+  .click()
+  .wait(1000)
+  .click()
 })

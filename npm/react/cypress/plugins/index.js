@@ -68,5 +68,6 @@ const options = {
 
 module.exports = (on, config) => {
   on('file:preprocessor', webpackPreprocessor(options))
+
   return config
 }

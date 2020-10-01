@@ -12,7 +12,7 @@ describe('webpack-file install template', () => {
         },
         { cypressProjectRoot: '/' },
       ),
-    ).toContain("config.env.webpackFilename = 'somePath/webpack.config.js'")
+    ).toContain('config.env.webpackFilename = \'somePath/webpack.config.js\'')
   })
 
   it('resolves webpack.config.js', () => {
@@ -21,6 +21,7 @@ describe('webpack-file install template', () => {
     })
 
     const { success, payload } = WebpackTemplate.test(process.cwd())
+
     expect(success).toBe(true)
     expect(payload?.webpackConfigPath).toBe('/webpack.config.js')
   })
@@ -67,6 +68,7 @@ describe('webpack-file install template', () => {
     })
 
     const { success, payload } = WebpackTemplate.test('/')
+
     expect(success).toBe(false)
     expect(payload).toBe(undefined)
   })

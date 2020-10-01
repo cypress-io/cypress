@@ -21,6 +21,7 @@ describe('Enzyme', () => {
           <SimpleComponent />
         </SimpleContext.Provider>,
       )
+
       cy.contains('test context').should('be.visible')
     })
 
@@ -34,6 +35,7 @@ describe('Enzyme', () => {
           {cmp}
         </SimpleContext.Provider>,
       )
+
       cy.contains('first context').should('be.visible')
       cy.contains('.id', '0x123').should('be.visible')
 
@@ -43,6 +45,7 @@ describe('Enzyme', () => {
           {cmp}
         </SimpleContext.Provider>,
       )
+
       cy.contains('second context').should('be.visible')
       cy.contains('.id', '0x123').should('be.visible')
     })

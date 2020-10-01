@@ -3,7 +3,7 @@ import { NextTemplate } from './next'
 
 jest.spyOn(global.console, 'warn')
 
-describe.only('next.js install template', () => {
+describe('next.js install template', () => {
   beforeEach(clearMockedFs)
 
   it('finds the closest package.json and checks that next is declared as dependency', () => {
@@ -19,6 +19,7 @@ describe.only('next.js install template', () => {
     })
 
     const { success } = NextTemplate.test('/')
+
     expect(success).toBe(true)
   })
 
@@ -35,6 +36,7 @@ describe.only('next.js install template', () => {
     })
 
     const { success } = NextTemplate.test(process.cwd())
+
     expect(success).toBe(true)
   })
 

@@ -12,7 +12,7 @@ describe('rollup-file install template', () => {
         },
         { cypressProjectRoot: '/' },
       ),
-    ).toContain("configFile: 'configs/rollup.config.js'")
+    ).toContain('configFile: \'configs/rollup.config.js\'')
   })
 
   it('resolves rollup.config.js', () => {
@@ -21,6 +21,7 @@ describe('rollup-file install template', () => {
     })
 
     const { success, payload } = RollupTemplate.test(process.cwd())
+
     expect(success).toBe(true)
     expect(payload?.rollupConfigPath).toBe('/rollup.config.js')
   })
@@ -65,6 +66,7 @@ describe('rollup-file install template', () => {
     })
 
     const { success, payload } = RollupTemplate.test('/')
+
     expect(success).toBe(false)
     expect(payload).toBe(undefined)
   })

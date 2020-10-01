@@ -12,7 +12,7 @@ describe('NextJS page', () => {
     cy.contains('.search-text', 'You are searching for: Cypress')
   })
 
-  it("It doesn't run the `.getInitialProps()`", () => {
+  it('It doesn\'t run the `.getInitialProps()`', () => {
     mount(<IndexPage />)
 
     cy.get('[data-testid="server-result"').should(
@@ -30,7 +30,7 @@ describe('NextJS page', () => {
   })
 
   it('can be tested with real .getInitialProps call', () => {
-    IndexPage.getInitialProps().then(props => {
+    IndexPage.getInitialProps().then((props) => {
       mount(<IndexPage {...props} />)
     })
 

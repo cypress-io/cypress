@@ -16,10 +16,12 @@ describe('Tic Tac Toe', () => {
   beforeEach(() => {
     cy.viewport(200, 200)
   })
+
   it('starts and lets X win', () => {
     mount(<Game />, {
       cssFile: 'cypress/component/advanced/tutorial/tic-tac-toe.css',
     })
+
     cy.contains('.status', 'Next player: X')
     clickSquare(0, 0).click()
     cy.contains('.status', 'Next player: O')

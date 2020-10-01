@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import highlight from 'cli-highlight'
-import { main, guessTemplateForUsedFramework } from './init'
+import { main } from './init'
 import inquirer from 'inquirer'
 import { mockFs, clearMockedFs } from './test/mockFs'
 
@@ -19,12 +19,12 @@ describe('end-to-end tests for init script', () => {
     })
 
     // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
+    inquirer.prompt = jest.fn(() => {
+      return Promise.resolve({
         chosenTemplateName: 'create-react-app',
         componentFolder: 'cypress/component',
-      }),
-    )
+      })
+    })
 
     await main()
 
@@ -47,12 +47,12 @@ describe('end-to-end tests for init script', () => {
     })
 
     // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
+    inquirer.prompt = jest.fn(() => {
+      return Promise.resolve({
         chosenTemplateName: 'next.js',
         componentFolder: 'src',
-      }),
-    )
+      })
+    })
 
     await main()
 
@@ -72,24 +72,25 @@ describe('end-to-end tests for init script', () => {
     })
 
     // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
+    inquirer.prompt = jest.fn(() => {
+      return Promise.resolve({
         chosenTemplateName: 'create-react-app',
         componentFolder: 'src',
-      }),
-    )
+      })
+    })
 
     await main()
 
     expect(
       // @ts-ignore
       global.console.log.mock.calls.some(
-        ([call]: string[]) =>
-          // Make sure that link to the example of right template was logged
-          call.includes('create-react-app') &&
+        // Make sure that link to the example of right template was logged
+        ([call]: string[]) => {
+          return call.includes('create-react-app') &&
           call.includes(
             'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/react-scripts',
-          ),
+          )
+        },
       ),
     ).toBe(true)
   })
@@ -100,12 +101,12 @@ describe('end-to-end tests for init script', () => {
     })
 
     // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
+    inquirer.prompt = jest.fn(() => {
+      return Promise.resolve({
         chosenTemplateName: 'create-react-app',
         componentFolder: 'cypress/component',
-      }),
-    )
+      })
+    })
 
     await main()
 

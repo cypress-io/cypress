@@ -16,6 +16,7 @@ describe('create-react-app install template', () => {
     })
 
     const { success } = ReactScriptsTemplate.test(process.cwd())
+
     expect(success).toBe(true)
   })
 
@@ -29,6 +30,7 @@ describe('create-react-app install template', () => {
     })
 
     const { success } = ReactScriptsTemplate.test(process.cwd())
+
     expect(success).toBe(true)
   })
 

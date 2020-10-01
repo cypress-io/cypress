@@ -10,10 +10,12 @@ describe('reactive-state Counter', () => {
         <Counter />
       </div>,
     )
+
     cy.contains('.count', '0')
-      .click()
-      .click()
-      .click()
+    .click()
+    .click()
+    .click()
+
     cy.contains('.count', '3')
   })
 })
