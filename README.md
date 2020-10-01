@@ -412,6 +412,10 @@ Currently, this project cannot find Webpack settings used by Gatsby.js, thus it 
 
 </details>
 
+## Context Provider usage
+
+React context provider usage and API described in [./docs/providers-and-composition.md](./docs/providers-and-composition.md)
+
 ## Chat
 
 We have a chat workspace at [https://component-testing.slack.com/](https://component-testing.slack.com/), you are welcome to [join us](https://join.slack.com/t/component-testing/shared_invite/zt-h93lrgsl-8WzE8yNQlcZuZji_gA_mtg).
