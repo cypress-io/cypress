@@ -71,7 +71,7 @@
     "@material-ui/pickers": "3.2.10",
     "@mdx-js/loader": "^1.6.16",
     "@next/mdx": "^9.5.3",
-    "@percy/cypress": "2.3.1",
+    "@percy/cypress": "2.3.2",
     "@rollup/plugin-babel": "5.2.1",
     "@rollup/plugin-commonjs": "15.1.0",
     "@rollup/plugin-node-resolve": "9.0.0",
