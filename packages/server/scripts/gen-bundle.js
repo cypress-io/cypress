@@ -23,6 +23,9 @@ const external = new Set([
   // Circular deps
   //
 
+  // have to be required normally
+  '@packages/ts/register',
+
   // breaking bundle
   'readable-stream',
   'xmlbuilder',
@@ -33,7 +36,12 @@ const external = new Set([
   'glob',
 ])
 
+// TODO: Not sure why those aren't captured.
+// Also we had to add these to our deps to make things work
+const extraModules = ['bufferutil', 'utf-8-validate']
+
 const nodeModulesString = nodeModules
+.concat(extraModules)
 .filter((x) => !external.has(x))
 .map((x) => `cache['${x}'] = () => require('${x}')`)
 .join('\n')

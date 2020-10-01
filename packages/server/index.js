@@ -2,12 +2,14 @@ if (process.env.TIME_REQUIRE != null) {
   require('time-require')
 }
 
-require('./util/capture-require')
-require('./util/bundle-cache')
-
 const bench = require('./util/bench').initBenchmark('cold')
 
 bench.time('start')
+require('./util/capture-require')
+bench.time('launch:init:require:bundle-cache')
+require('./util/bundle-cache')
+bench.timeEnd('launch:init:require:bundle-cache')
+
 bench.time('launch:init')
 
 // override tty if we're being forced to
@@ -35,9 +37,12 @@ bench.timeEnd('launch:init:require:graceful-fs')
 // if running in production mode (CYPRESS_INTERNAL_ENV)
 // all transpile should have been done already
 // and these calls should do nothing
-bench.time('launch:init:require:@packages/ts/register')
-require('@packages/ts/register')
-bench.timeEnd('launch:init:require:@packages/ts/register')
+// if we are requiring from bundle, we already took care of this step
+if (process.env.REQUIRE_FROM_BUNDLE == null) {
+  bench.time('launch:init:require:@packages/ts/register')
+  require('@packages/ts/register')
+  bench.timeEnd('launch:init:require:@packages/ts/register')
+}
 
 if (isRunningElectron) {
   require('./lib/util/process_profiler').start()
