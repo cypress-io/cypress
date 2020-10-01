@@ -27,10 +27,17 @@ const external = new Set([
   '@packages/ts/register',
 
   // breaking bundle
-  'readable-stream',
-  'xmlbuilder',
   '@microsoft/typescript-etw',
+  'cson',
+  'fsevents',
+  'node-webkit-updater',
   'osx-temperature-sensor',
+  'parse5-html-rewriting-stream',
+  'readable-stream',
+  'registry-js',
+  'requirejs',
+  'xmlbuilder',
+  'spawn-sync',
 
   // non-breaking
   'glob',
