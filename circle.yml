@@ -397,6 +397,8 @@ jobs:
     steps:
       - checkout
       - install-required-node
+      - run: git branch -D develop && git pull origin develop:develop
+      - run: git branch -D master && git pull origin master:master
       - run:
           name: Print working folder
           command: echo $PWD
