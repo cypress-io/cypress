@@ -8,6 +8,7 @@ const rollup = require('rollup')
 const commonjs = require('@rollup/plugin-commonjs')
 const { nodeResolve } = require('@rollup/plugin-node-resolve')
 const json = require('@rollup/plugin-json')
+const nodeGlobals = require('rollup-plugin-node-globals')
 
 const plugins = [
   commonjs(),
@@ -15,6 +16,7 @@ const plugins = [
     preferBuiltins: false,
   }),
   json(),
+  nodeGlobals(),
 ]
 
 const output = path.resolve(__dirname, '../../../dist/darwin/bundle.js')
