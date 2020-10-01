@@ -13,11 +13,15 @@ function hookRequire () {
   const origRequire = Module.prototype.require
 
   Module.prototype.require = function (id) {
+    const isNotNested = !this.filename.includes('node_modules')
     const isCore = builtins.includes(id)
     const isNodeModule =
-      !id.startsWith('.') && !id.startsWith('/') && !id.startsWith('@package')
+      !id.startsWith('.') &&
+      !id.startsWith('/') &&
+      !id.startsWith('@package') &&
+      !id.startsWith('@npm')
 
-    if (!isCore && isNodeModule) {
+    if (!isCore && isNodeModule && isNotNested) {
       // TODO(thlorenz): why are we missing some modules here?
       // Are they required _after_ on('exit')???
       modules.add(id)
