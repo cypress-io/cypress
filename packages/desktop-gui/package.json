@@ -22,6 +22,7 @@
     "@cypress/webpack-preprocessor": "*",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",
+    "@reach/dialog": "0.10.5",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
