@@ -397,7 +397,6 @@ jobs:
     steps:
       - checkout
       - install-required-node
-      - run: git branch
       - run:
           name: Print working folder
           command: echo $PWD
