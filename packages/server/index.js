@@ -65,10 +65,10 @@ function launchOrFork () {
 
   if (nodeOptions.needsOptions()) {
     // https://github.com/cypress-io/cypress/pull/5492
-    return nodeOptions.forkWithCorrectOptions()
+    // return nodeOptions.forkWithCorrectOptions()
   }
 
-  nodeOptions.restoreOriginalOptions()
+  // nodeOptions.restoreOriginalOptions()
 
   bench.timeEnd('launch:init')
 
