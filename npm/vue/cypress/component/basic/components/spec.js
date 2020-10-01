@@ -25,6 +25,7 @@ describe('Global components', () => {
   const extensions = {
     components,
   }
+
   beforeEach(mountCallback({ template, data }, { extensions }))
 
   it('shows two items at the start in both lists', () => {

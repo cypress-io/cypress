@@ -3,6 +3,7 @@
 // https://vue-loader.vuejs.org/guide/#manual-setup
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const path = require('path')
+
 module.exports = {
   resolve: {
     extensions: ['.js', '.json', '.vue'],

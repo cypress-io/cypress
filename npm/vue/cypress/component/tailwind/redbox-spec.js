@@ -13,9 +13,7 @@ describe('RedBox 1', () => {
     //
     stylesheets: [
       // you can use external links
-      // 'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css'
-      // or local node_modules paths
-      '/node_modules/tailwindcss/dist/tailwind.min.css',
+      'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css',
     ],
   }
 
@@ -24,9 +22,9 @@ describe('RedBox 1', () => {
 
     cy.contains('Hello RedBox')
     cy.get('[data-cy=box]')
-      .should('have.css', 'background-color', 'rgb(255, 0, 0)')
-      // and Tailwindcss style should have been applied
-      .and('have.css', 'margin', '32px')
+    .should('have.css', 'background-color', 'rgb(255, 0, 0)')
+    // and Tailwindcss style should have been applied
+    .and('have.css', 'margin', '32px')
   })
 })
 
@@ -44,6 +42,7 @@ describe('RedBox 2', () => {
   it('displays Goodbye RedBox', () => {
     cy.contains('Goodbye RedBox')
   })
+
   it('should be Red', () => {
     cy.get('[data-cy=box]').should(
       'have.css',

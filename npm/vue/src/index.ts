@@ -3,11 +3,9 @@ import {
   createLocalVue,
   mount as testUtilsMount,
   VueTestUtilsConfigOptions,
-  Wrapper
+  Wrapper,
 } from '@vue/test-utils'
-const { stripIndent } = require('common-tags')
 
-// mountVue options
 const defaultOptions: (keyof MountOptions)[] = [
   'vue',
   'extensions',
@@ -15,7 +13,7 @@ const defaultOptions: (keyof MountOptions)[] = [
   'stylesheets',
 ]
 
-function checkMountModeEnabled() {
+function checkMountModeEnabled () {
   // @ts-ignore
   if (Cypress.spec.specType !== 'component') {
     throw new Error(
@@ -26,6 +24,7 @@ function checkMountModeEnabled() {
 
 const registerGlobalComponents = (Vue, options) => {
   const globalComponents = Cypress._.get(options, 'extensions.components')
+
   if (Cypress._.isPlainObject(globalComponents)) {
     Cypress._.forEach(globalComponents, (component, id) => {
       Vue.component(id, component)
@@ -38,6 +37,7 @@ const installFilters = (Vue, options) => {
     options,
     'extensions.filters',
   )
+
   if (Cypress._.isPlainObject(filters)) {
     Object.keys(filters).forEach((name) => {
       Vue.filter(name, filters[name])
@@ -62,6 +62,7 @@ const installMixins = (Vue, options) => {
   const mixins =
     Cypress._.get(options, 'extensions.mixin') ||
     Cypress._.get(options, 'extensions.mixins')
+
   if (Cypress._.isArray(mixins)) {
     mixins.forEach((mixin) => {
       Vue.mixin(mixin)
@@ -72,14 +73,16 @@ const installMixins = (Vue, options) => {
 // @ts-ignore
 const hasStore = ({ store }: { store: object }) => store && store._vm
 
-const forEachValue = (obj: object, fn: Function) =>
-  Object.keys(obj).forEach((key) => fn(obj[key], key))
+const forEachValue = (obj: object, fn: Function) => {
+  return Object.keys(obj).forEach((key) => fn(obj[key], key))
+}
 
 const resetStoreVM = (Vue, { store }) => {
   // bind store public getters
   store.getters = {}
   const wrappedGetters = store._wrappedGetters
   const computed = {}
+
   forEachValue(wrappedGetters, (fn, key) => {
     // use computed to leverage its lazy-caching mechanism
     computed[key] = () => fn(store)
@@ -96,6 +99,7 @@ const resetStoreVM = (Vue, { store }) => {
     },
     computed,
   })
+
   return store
 }
 
@@ -140,14 +144,14 @@ type VuePlugins = VuePlugin[]
  * local components, plugins, etc.
  *
  * @interface MountOptionsExtensions
- * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+ * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
  */
 interface MountOptionsExtensions {
   /**
    * Extra local components
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @example
    *  import Hello from './Hello.vue'
    *  // imagine Hello needs AppComponent
@@ -165,7 +169,7 @@ interface MountOptionsExtensions {
    * Optional Vue filters to install while mounting the component
    *
    * @memberof MountOptionsExtensions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @example
    *  const filters = {
    *    reverse: (s) => s.split('').reverse().join(''),
@@ -179,7 +183,7 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixins
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   mixin?: VueMixins
 
@@ -188,14 +192,14 @@ interface MountOptionsExtensions {
    *
    * @memberof MountOptionsExtensions
    * @alias mixin
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   mixins?: VueMixins
 
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @alias plugins
    * @memberof MountOptionsExtensions
    */
@@ -204,7 +208,7 @@ interface MountOptionsExtensions {
   /**
    * A single plugin or multiple plugins.
    *
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    * @alias use
    * @memberof MountOptionsExtensions
    */
@@ -262,7 +266,7 @@ interface MountOptions {
    * mounting this component
    *
    * @memberof MountOptions
-   * @see https://github.com/bahmutov/cypress-vue-unit-test#examples
+   * @see https://github.com/cypress-io/cypress/tree/master/npm/vue#examples
    */
   extensions: MountOptionsExtensions
 }
@@ -301,7 +305,7 @@ declare global {
  * @see https://vuejs.org/v2/api/#errorHandler
  * @see https://github.com/cypress-io/cypress/issues/7910
  */
-function failTestOnVueError(err, vm, info) {
+function failTestOnVueError (err, vm, info) {
   console.error(`Vue error`)
   console.error(err)
   console.error('component:', vm)
@@ -337,88 +341,87 @@ export const mount = (
     defaultOptions,
   )
 
-  // display deprecation warnings
-  if (options.vue) {
-    console.warn(stripIndent`
-      [DEPRECATION]: 'vue' option has been deprecated.
-      'node_modules/vue/dis/vue' is always used.
-      Please remove it from your 'mountVue' options.`)
-  }
-
   return cy
-    .window({
-      log: false,
-    })
-    .then((win) => {
-      const localVue = createLocalVue()
+  .window({
+    log: false,
+  })
+  .then((win) => {
+    const localVue = createLocalVue()
+
+    // @ts-ignore
+    win.Vue = localVue
+    localVue.config.errorHandler = failTestOnVueError
+
+    // set global Vue instance:
+    // 1. convenience for debugging in DevTools
+    // 2. some libraries might check for this global
+    // appIframe.contentWindow.Vue = localVue
+
+    // refresh inner Vue instance of Vuex store
+    // @ts-ignore
+    if (hasStore(component)) {
       // @ts-ignore
-      win.Vue = localVue
-      localVue.config.errorHandler = failTestOnVueError
+      component.store = resetStoreVM(localVue, component)
+    }
 
+    // @ts-ignore
+    const document: Document = cy.state('document')
 
-      // set global Vue instance:
-      // 1. convenience for debugging in DevTools
-      // 2. some libraries might check for this global
-      // appIframe.contentWindow.Vue = localVue
+    document.body.innerHTML = ''
+    let el = document.getElementById('cypress-jsdom')
 
-      // refresh inner Vue instance of Vuex store
-      // @ts-ignore
-      if (hasStore(component)) {
-        // @ts-ignore
-        component.store = resetStoreVM(localVue, component)
-      }
+    // If the target div doesn't exist, create it
+    if (!el) {
+      const div = document.createElement('div')
 
-      // @ts-ignore
-      const document: Document = cy.state('document')
-      document.body.innerHTML = ''
-      let el = document.getElementById('cypress-jsdom')
+      div.id = 'cypress-jsdom'
+      document.body.appendChild(div)
+      el = div
+    }
 
-      // If the target div doesn't exist, create it
-      if (!el) {
-        const div = document.createElement('div')
-        div.id = 'cypress-jsdom'
-        document.body.appendChild(div)
-        el = div
-      }
+    if (typeof options.stylesheets === 'string') {
+      options.stylesheets = [options.stylesheets]
+    }
 
-      if (typeof options.stylesheets === 'string') {
-        options.stylesheets = [options.stylesheets]
-      }
-      if (Array.isArray(options.stylesheets)) {
-        options.stylesheets.forEach((href) => {
-          const link = document.createElement('link')
-          link.type = 'text/css'
-          link.rel = 'stylesheet'
-          link.href = href
-          el.append(link)
-        })
-      }
+    if (Array.isArray(options.stylesheets)) {
+      options.stylesheets.forEach((href) => {
+        const link = document.createElement('link')
 
-      if (options.style) {
-        const style = document.createElement('style')
-        style.appendChild(document.createTextNode(options.style))
-        el.append(style)
-      }
+        link.type = 'text/css'
+        link.rel = 'stylesheet'
+        link.href = href
+        el.append(link)
+      })
+    }
 
-      const componentNode = document.createElement('div')
-      el.append(componentNode)
+    if (options.style) {
+      const style = document.createElement('style')
 
-      // setup Vue instance
-      installFilters(localVue, options)
-      installMixins(localVue, options)
-      // @ts-ignore
-      installPlugins(localVue, options, props)
-      registerGlobalComponents(localVue, options)
+      style.appendChild(document.createTextNode(options.style))
+      el.append(style)
+    }
 
-      // @ts-ignore
-      props.attachTo = componentNode
+    const componentNode = document.createElement('div')
 
-      const wrapper = localVue.extend(component as any)
+    el.append(componentNode)
 
-      const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
-      Cypress.vue = VTUWrapper.vm
-      Cypress.vueWrapper = VTUWrapper
-    })
+    // setup Vue instance
+    installFilters(localVue, options)
+    installMixins(localVue, options)
+    // @ts-ignore
+    installPlugins(localVue, options, props)
+    registerGlobalComponents(localVue, options)
+
+    // @ts-ignore
+    props.attachTo = componentNode
+
+    const wrapper = localVue.extend(component as any)
+
+    const VTUWrapper = testUtilsMount(wrapper, { localVue, ...props })
+
+    Cypress.vue = VTUWrapper.vm
+    Cypress.vueWrapper = VTUWrapper
+  })
 }
 
 /**
@@ -430,4 +433,6 @@ export const mount = (
 export const mountCallback = (
   component: VueComponent,
   options?: MountOptionsArgument,
-) => () => mount(component, options)
+) => {
+  return () => mount(component, options)
+}

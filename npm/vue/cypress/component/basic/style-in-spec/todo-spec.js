@@ -20,14 +20,16 @@ it('injects local style', () => {
 
   mount({ template, components }, { style })
   cy.get('input[type=checkbox]')
-    .should('not.be.checked')
-    .check()
-    .should('be.checked')
+  .should('not.be.checked')
+  .check()
+  .should('be.checked')
+
   // once the checkbox is set, there should be class "done" on the component
   cy.get('.todo')
-    .should('have.class', 'done')
-    // and the style was correctly applied
-    .should('have.css', 'text-decoration-line', 'line-through')
+  .should('have.class', 'done')
+  // and the style was correctly applied
+  .should('have.css', 'text-decoration-line', 'line-through')
+
   // and if we uncheck the element, the class should be gone
   cy.get('input[type=checkbox]').uncheck()
   cy.get('.todo').should('not.have.class', 'done')
@@ -43,9 +45,10 @@ it('passes props via options object', () => {
     },
     style,
   }
+
   mount(Todo, options)
   cy.get('.todo')
-    .should('have.class', 'done')
-    // and the style was correctly applied
-    .should('have.css', 'text-decoration-line', 'line-through')
+  .should('have.class', 'done')
+  // and the style was correctly applied
+  .should('have.css', 'text-decoration-line', 'line-through')
 })

@@ -5,7 +5,7 @@ describe('Single render function component', () => {
   // the component definition
   const appComponent = {
     template: '<h1>hi! This is a Render Function Example</h1>',
-    data() {
+    data () {
       return {}
     },
   }
@@ -30,6 +30,7 @@ describe('Single render function component', () => {
       },
       mountOptions,
     )
+
     cy.contains('h1', 'hi!')
   })
 
@@ -47,11 +48,12 @@ describe('Single render function component', () => {
       },
       mountOptions,
     )
+
     cy.get('h1')
-      .should('have.length', 3)
-      .each(($el) => {
-        expect($el).to.contain('hi!')
-      })
+    .should('have.length', 3)
+    .each(($el) => {
+      expect($el).to.contain('hi!')
+    })
   })
 })
 
@@ -59,7 +61,7 @@ describe('Component with slot', () => {
   // the component definition
   const appComponent = {
     template: '<h1><slot></slot></h1>',
-    data() {
+    data () {
       return {}
     },
   }
@@ -84,6 +86,7 @@ describe('Component with slot', () => {
       },
       mountOptions,
     )
+
     cy.contains('h1', 'Hello')
   })
 
@@ -101,27 +104,29 @@ describe('Component with slot', () => {
       },
       mountOptions,
     )
+
     cy.get('h1')
-      .should('have.length', 3)
-      .and(($el) => {
-        expect($el[0]).to.have.text('Hello World')
-        expect($el[1]).to.have.text('Hello John')
-        expect($el[2]).to.have.text('Hello Peter')
-      })
+    .should('have.length', 3)
+    .and(($el) => {
+      expect($el[0]).to.have.text('Hello World')
+      expect($el[1]).to.have.text('Hello John')
+      expect($el[2]).to.have.text('Hello Peter')
+    })
   })
 })
 
 describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
-    render: function (createElement) {
-      var a = this.elementtype.split(',')
+    render (createElement) {
+      let a = this.elementtype.split(',')
+
       return createElement(
         a[0],
         {
           attrs: {
             id: a[3],
-            style: 'color:' + a[1] + ';font-size:' + a[2] + ';',
+            style: `color:${a[1]};font-size:${a[2]};`,
           },
         },
         this.$slots.default || '<EMPTY>',
@@ -179,6 +184,7 @@ describe('Component with arguments', () => {
         elementtype: 'h3,red,30,h3tag',
       },
     })
+
     // the component appears and the styling is applied
     cy.contains('<EMPTY>').should(
       'have.attr',

@@ -21,6 +21,7 @@ describe('Several components', () => {
   const components = {
     hello: Hello,
   }
+
   beforeEach(mountCallback({ template, components }))
 
   it('greets the world 3 times', () => {
