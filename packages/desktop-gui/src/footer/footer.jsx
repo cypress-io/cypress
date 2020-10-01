@@ -3,9 +3,11 @@ import { action } from 'mobx'
 import { observer, useLocalStore } from 'mobx-react'
 import React from 'react'
 
-import UpdateModal from '../update/update-modal'
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
+import { useUpdateChecker } from '../update/use-update-checker'
+
+import UpdateModal from '../update/update-modal'
 
 const openChangelog = () => {
   ipc.externalOpen('https://on.cypress.io/changelog')
@@ -21,6 +23,8 @@ const Footer = observer(() => {
       state.showingModal = false
     }),
   }))
+
+  useUpdateChecker()
 
   return (
     <footer className={cs('footer', { 'update-available': appStore.updateAvailable })}>
