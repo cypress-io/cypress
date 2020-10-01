@@ -1066,6 +1066,28 @@ jobs:
       - run:
           name: Release
           command: yarn semantic-release @cypress/vue
+          
+  npm-react:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/react build
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/react test
+      - store-npm-logs
+
+  npm-react-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/react
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1877,6 +1899,18 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-vue-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-vue
+
+    - npm-react:
+        requires:
+          - build
+    - npm-react-release:
         filters:
           branches:
             only:
