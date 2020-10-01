@@ -1719,6 +1719,7 @@ jobs:
       - store-npm-logs
 
 linux-workflow: &linux-workflow
+  when: << pipeline.parameters.trigger >>
   jobs:
     - build
     - lint:
