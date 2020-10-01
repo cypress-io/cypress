@@ -10,28 +10,32 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const fw = require('find-webpack')
 
 // Preventing chunks because we don't serve static assets
-function preventChunking(options = {}) {
+function preventChunking (options = {}) {
   if (options && options.optimization && options.optimization.splitChunks) {
     delete options.optimization.splitChunks
   }
+
   options.plugins = options.plugins || []
   options.plugins.push(
     new webpack.optimize.LimitChunkCountPlugin({
       maxChunks: 1, // no chunks from dynamic imports -- includes the entry file
     }),
   )
+
   return options
 }
 
 // Base 64 all the things because we don't serve static assets
-function inlineUrlLoadedAssets(options = {}) {
-  const isUrlLoader = (use) =>
-    use && use.loader && use.loader.indexOf('url-loader') > -1
+function inlineUrlLoadedAssets (options = {}) {
+  const isUrlLoader = (use) => {
+    return use && use.loader && use.loader.indexOf('url-loader') > -1
+  }
   const mergeUrlLoaderOptions = (use) => {
     if (isUrlLoader(use)) {
       use.options = use.options || {}
       use.options.limit = Number.MAX_SAFE_INTEGER
     }
+
     return use
   }
 
@@ -40,13 +44,15 @@ function inlineUrlLoadedAssets(options = {}) {
       if (Array.isArray(rule.use)) {
         rule.use = rule.use.map(mergeUrlLoaderOptions)
       }
+
       return rule
     })
   }
+
   return options
 }
 
-function compileTemplate(options = {}) {
+function compileTemplate (options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
   options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
@@ -54,10 +60,28 @@ function compileTemplate(options = {}) {
 
 /**
  * Warning: modifies the input object
+<<<<<<< HEAD
+ * @param {WebpackOptions} options
+ */
+
+function removeForkTsCheckerWebpackPlugin (options) {
+  if (!Array.isArray(options.plugins)) {
+    return
+  }
+
+  options.plugins = options.plugins.filter((plugin) => {
+    return plugin.typescript === undefined
+  })
+}
+
+/**
+ * Warning: modifies the input object
+=======
+>>>>>>> origin
  * @param {Cypress.ConfigOptions} config
  * @param {WebpackOptions} options
  */
-function insertBabelLoader(config, options) {
+function insertBabelLoader (config, options) {
   const skipCodeCoverage = config && config.env && config.env.coverage === false
 
   if (!options.devtool) {
@@ -95,6 +119,7 @@ function insertBabelLoader(config, options) {
         extension: ['.js', '.vue'],
       },
     ]
+
     babelRule.options.plugins.push(instrumentPlugin)
   }
 
@@ -108,6 +133,7 @@ function insertBabelLoader(config, options) {
       plugin.constructor && plugin.constructor.name === VueLoaderPlugin.name
     )
   })
+
   if (!pluginFound) {
     debug('inserting VueLoaderPlugin')
     options.plugins.push(new VueLoaderPlugin())
@@ -119,13 +145,12 @@ function insertBabelLoader(config, options) {
 /**
  * Basic Cypress Vue Webpack file loader for .vue files.
  */
-const onFileDefaultPreprocessor = (config) => {
-  debug('I think the config is', { config })
-  let webpackOptions = fw.getWebpackOptions()
+const onFileDefaultPreprocessor = (config, webpackOptions = fw.getWebpackOptions()) => {
   if (!webpackOptions) {
     debug('Could not find webpack options, starting with default')
     webpackOptions = {}
   }
+
   webpackOptions.mode = 'development'
 
   inlineUrlLoadedAssets(webpackOptions)
@@ -153,7 +178,7 @@ const onFileDefaultPreprocessor = (config) => {
  * @example
  *    const {
  *      onFilePreprocessor
- *    } = require('cypress-vue-unit-test/preprocessor/webpack')
+ *    } = require('@cypress/vue/preprocessor/webpack')
  *    module.exports = on => {
  *      on('file:preprocessor', onFilePreprocessor('../path/to/webpack.config'))
  *    }

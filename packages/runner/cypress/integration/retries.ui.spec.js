@@ -34,6 +34,7 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
     })
     .then(shouldHaveTestResults(2, 0))
 
+    cy.get('.test').should('have.length', 2)
     cy.percySnapshot()
   })
 

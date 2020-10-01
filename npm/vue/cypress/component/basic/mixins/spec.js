@@ -16,6 +16,7 @@ describe('Mixins', () => {
     const extensions = {
       mixin,
     }
+
     beforeEach(mountCallback({ template }, { extensions }))
 
     it('calls mixin "created" method', () => {
@@ -37,6 +38,7 @@ describe('Mixins', () => {
       const extensions = {
         mixin,
       }
+
       mount({ template }, { extensions })
       // use the alias to retrieve the stub to check
       // the "created" will be called twice

@@ -151,6 +151,10 @@ export class CombinedAgent {
 
   // called by Node.js whenever a new request is made internally
   addRequest (req: http.ClientRequest, options: http.RequestOptions, port?: number, localAddress?: string) {
+    // allow requests which contain invalid/malformed headers
+    // https://github.com/cypress-io/cypress/issues/5602
+    req.insecureHTTPParser = true
+
     // Legacy API: addRequest(req, host, port, localAddress)
     // https://github.com/nodejs/node/blob/cb68c04ce1bc4534b2d92bc7319c6ff6dda0180d/lib/_http_agent.js#L148-L155
     if (typeof options === 'string') {

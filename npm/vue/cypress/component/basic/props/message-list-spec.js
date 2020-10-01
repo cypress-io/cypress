@@ -9,13 +9,14 @@ describe('Props', () => {
   context('Set props when mounting', () => {
     it('has props', () => {
       const messages = ['one 🍎', 'two 🍌']
+
       mount(MessageList, { propsData: { messages } })
       getItems()
-        .should('have.length', 2)
-        .then((list) => {
-          expect(list[0].textContent.trim()).to.equal(messages[0])
-          expect(list[1].textContent.trim()).to.equal(messages[1])
-        })
+      .should('have.length', 2)
+      .then((list) => {
+        expect(list[0].textContent.trim()).to.equal(messages[0])
+        expect(list[1].textContent.trim()).to.equal(messages[1])
+      })
     })
   })
 
@@ -32,6 +33,7 @@ describe('Props', () => {
       cy.log('setting messages').then(() => {
         Cypress.vue.messages = ['one', 'two']
       })
+
       getItems().should('have.length', 2)
       cy.then(() => {
         Cypress.vue.messages.push('three')

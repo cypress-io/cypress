@@ -13,7 +13,6 @@ describe('Mocking ES6 imports', () => {
     cy.contains('Hello, world!')
   })
 
-  // https://github.com/bahmutov/cypress-vue-unit-test/issues/328
   it('shows mocked greeting', () => {
     cy.stub(GreetingModule, 'greeting').returns('Cypress').as('greeting')
     mount(Hello)

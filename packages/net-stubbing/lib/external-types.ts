@@ -3,7 +3,6 @@
  */
 export namespace CyHttpMessages {
   interface BaseMessage {
-    // as much stuff from `incomingmessage` as makes sense to serialize and send
     body?: any
     headers: { [key: string]: string }
     url: string
@@ -47,11 +46,31 @@ export namespace CyHttpMessages {
   }
 
   export interface IncomingHttpRequest extends IncomingRequest {
+    /**
+     * Destroy the request and respond with a network error.
+     */
     destroy(): void
+    /**
+     * Control the response to this request.
+     * If a function is passed, the request will be sent outgoing, and the function will be called
+     * with the response from the upstream server.
+     * If a `StaticResponse` is passed, it will be used as the response, and no request will be made
+     * to the upstream server.
+     */
     reply(interceptor?: StaticResponse | HttpResponseInterceptor): void
+    /**
+     * Shortcut to reply to the request with a body and optional headers.
+     */
     reply(body: string | object, headers?: { [key: string]: string }): void
+    /**
+     * Shortcut to reply to the request with an HTTP status code and optional body and headers.
+     */
     reply(status: number, body?: string | object, headers?: { [key: string]: string }): void
-    redirect(location: string, statusCode: number): void
+    /**
+     * Respond to this request with a redirect to a new `location`.
+     * @param statusCode HTTP status code to redirect with. Default: 302
+     */
+    redirect(location: string, statusCode?: number): void
   }
 }
 
@@ -64,9 +83,19 @@ export interface DictMatcher<T> {
  */
 export type GlobPattern = string
 
+/**
+ * Interceptor for an HTTP request. If a Promise is returned, it will be awaited before passing the
+ * request to the next handler (if there is one), otherwise the request will be passed to the next
+ * handler synchronously.
+ */
 export type HttpRequestInterceptor = (req: CyHttpMessages.IncomingHttpRequest) => void | Promise<void>
 
-export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse, send?: () => void) => void | Promise<void>
+/**
+ * Interceptor for an HTTP response. If a Promise is returned, it will be awaited before passing the
+ * request to the next handler (if there is one), otherwise the request will be passed to the next
+ * handler synchronously.
+ */
+export type HttpResponseInterceptor = (res: CyHttpMessages.IncomingHttpResponse) => void | Promise<void>
 
 /**
  * Matches a single number or any of an array of acceptable numbers.

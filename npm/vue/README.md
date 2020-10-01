@@ -2,8 +2,6 @@
 
 [![NPM][npm-icon] ][npm-url]
 
-[![Build status][ci-image] ][ci-url]
-[![Cypress dashboard][cypress-badge] ][cypress-dashboard]
 [![semantic-release][semantic-image] ][semantic-url]
 [![renovate-app badge][renovate-badge]][renovate-app]
 
@@ -11,7 +9,7 @@
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
-**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `cypress-vue-unit-test` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
+**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `@cypress/vue` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
 
 ### What is @cypress/vue?
 This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
@@ -196,7 +194,7 @@ var app4 = new Vue({
 Let's test it. Simple.
 
 ```js
-import { mountCallback } from 'cypress-vue-unit-test'
+import { mountCallback } from '@cypress/vue'
 
 describe('Declarative rendering', () => {
   // List example from https://vuejs.org/v2/guide/#Declarative-Rendering
@@ -684,20 +682,13 @@ Run Cypress with environment variable
 
 ```
 DEBUG=@cypress/vue
-```
+``` 
 
 If some deeply nested objects are abbreviated and do not print fully, set the maximum logging depth
 
 ```
 DEBUG=@cypress/vue DEBUG_DEPTH=10
 ```
-
-<a name="#faq"/>
-
-## FAQ
-
-- If your component's static assets are not loading, you probably need
-  to start and proxy Webpack dev server. See [issue #4](https://github.com/bahmutov/cypress-vue-unit-test/issues/4)
 
 <a name="#related"/>
 
@@ -708,12 +699,6 @@ DEBUG=@cypress/vue DEBUG_DEPTH=10
 - [Cypress API](https://on.cypress.io/api)
 - [Learn TDD in Vue](https://learntdd.in/vue)
 - [@cypress/vue vs vue-test-utils](https://codingitwrong.com/2018/03/04/comparing-vue-component-testing-tools.html)
-
-## Migration guide
-
-### From v2 to v3
-
-- update `cypress/plugins/index.js` file to pass the `on, config` arguments when creating the default preprocessor. See [change](https://github.com/bahmutov/cypress-vue-unit-test/pull/331/files#diff-4bcea4966f5e62ded90298c2b0907445), in general the new way is:
 
 ```js
 const {
@@ -770,11 +755,8 @@ Let the world know your project is using Cypress.io to test with this cool badge
 
 [npm-icon]: https://nodei.co/npm/@cypress/vue.svg?downloads=true
 [npm-url]: https://npmjs.org/package/@cypress/vue
-[ci-image]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master.svg?style=svg
-[ci-url]: https://circleci.com/gh/bahmutov/cypress-vue-unit-test/tree/master
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [cypress-badge]: https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square
-[cypress-dashboard]: https://dashboard.cypress.io/#/projects/134ej7
 [renovate-badge]: https://img.shields.io/badge/renovate-app-blue.svg
 [renovate-app]: https://renovateapp.com/

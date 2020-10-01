@@ -37,5 +37,6 @@ it('renders card', () => {
       stylesheets: '/node_modules/tailwindcss/dist/tailwind.min.css',
     },
   )
+
   cy.contains('.text-xl', 'Can coffee make you a better developer?')
 })

@@ -11,7 +11,7 @@ describe('Declarative rendering', () => {
     </ol>
   `
 
-  function data() {
+  function data () {
     return {
       todos: [
         { text: 'Learn JavaScript' },

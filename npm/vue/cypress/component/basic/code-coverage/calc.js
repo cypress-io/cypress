@@ -10,5 +10,6 @@ export const div = (a, b) => {
   if (b === 0) {
     throw new Error(`Cannot divide ${a} by zero`)
   }
+
   return a / b
 }
