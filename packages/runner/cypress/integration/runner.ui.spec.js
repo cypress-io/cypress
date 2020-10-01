@@ -341,5 +341,25 @@ describe('src/cypress/runner', () => {
         },
       })
     })
+
+    it('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
+      runIsolatedCypress(() => {
+        it('foo', () => {
+          // simulate a page load, ensures reporter state event is properly stubbed
+          cy.then(() => Cypress.action('cy:collect:run:state'))
+          cy.visit('/')
+
+          // ensures runner doesn't wait for nonexist before:screenshot ack
+          cy.screenshot({
+            capture: 'runner',
+          })
+        })
+      },
+      {
+        config: { env: { NO_COMMAND_LOG: '1' } },
+      })
+
+      cy.get('.reporter').should('not.exist')
+    })
   })
 })
