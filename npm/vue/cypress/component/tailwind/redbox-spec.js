@@ -13,9 +13,7 @@ describe('RedBox 1', () => {
     //
     stylesheets: [
       // you can use external links
-      // 'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css'
-      // or local node_modules paths
-      '/node_modules/tailwindcss/dist/tailwind.min.css',
+      'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css',
     ],
   }
 
