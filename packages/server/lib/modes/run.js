@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /* eslint-disable no-console, @cypress/dev/arrow-body-multiline-braces  */
 const _ = require('lodash')
 const la = require('lazy-ass')
@@ -31,6 +33,7 @@ const settings = require('../util/settings')
 const chromePolicyCheck = require('../util/chrome_policy_check')
 const experiments = require('../experiments')
 const objUtils = require('../util/obj_utils')
+const bench = require('../../util/bench').benchmark
 
 const DELAY_TO_LET_VIDEO_FINISH_MS = 1000
 
@@ -1513,6 +1516,14 @@ module.exports = {
   },
 
   run (options) {
+    bench.timeEnd('start')
+    bench.dumpAverages()
+    bench.save()
+
+    process.exit(0)
+
+    return Promise.resolve({})
+
     return electronApp
     .waitForReady()
     .then(() => {

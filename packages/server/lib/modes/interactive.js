@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const bench = require('../../util/bench').benchmark
 
 bench.time('lib/modes/interactive:require:top-level')
@@ -124,6 +126,12 @@ module.exports = {
   },
 
   run (options) {
+    bench.timeEnd('start')
+    bench.dumpAverages()
+    bench.save()
+
+    return process.exit(0)
+
     const waitForReady = () => {
       return new Promise((resolve, reject) => {
         return app.on('ready', resolve)
