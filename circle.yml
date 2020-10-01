@@ -1,5 +1,10 @@
 version: 2.1
 
+parameters:
+  trigger:
+    type: boolean
+    default: true
+
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
 # so just add your branch to the list here to build and test on Mac
