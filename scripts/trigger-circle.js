@@ -66,6 +66,10 @@ const findBase = async (currentBranch) => {
 }
 
 const configByChanged = async (currentBranch) => {
+  // make sure that we have both develop and master pulled down
+  await execa('git', ['fetch', 'origin', 'develop:develop'])
+  await execa('git', ['fetch', 'origin', 'master:master'])
+
   const base = await findBase(currentBranch)
   const changed = await changedPackages(base)
 
