@@ -455,6 +455,8 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
 
+      - run: node scripts/trigger-circle.js
+
       - store-npm-logs
 
       ## save entire folder as artifact for other jobs to run without reinstalling
