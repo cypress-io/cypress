@@ -78,7 +78,7 @@ const configByChanged = async (currentBranch) => {
 const triggerPipeline = async (config, currentBranch) => {
   const response = await got.post(`https://circleci.com/api/v2/project/gh/cypress-io/cypress/pipeline`, {
     headers: {
-      api_key_header: process.env.CIRCLE_TOKEN,
+      'Circle-Token': process.env.CIRCLE_TOKEN,
     },
     json: {
       branch: currentBranch,
