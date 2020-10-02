@@ -105,14 +105,8 @@ const findBase = async (currentBranch) => {
   // so we default to master as the most likely option
 
   const branchesFromDevelop = exec('git branch --contains develop')
-  const isDevelop = branchesFromDevelop.includes(currentBranch)
 
-  if (!isDevelop) {
-    // make sure that we have master pulled down
-    exec('git fetch origin master:master')
-  }
-
-  return isDevelop ? 'develop' : 'master'
+  return branchesFromDevelop.includes(currentBranch) ? 'develop' : 'master'
 }
 
 const configFromCompare = async (compare) => {
@@ -125,6 +119,11 @@ const configFromCompare = async (compare) => {
 
 const configForBranch = async (currentBranch) => {
   const base = await findBase(currentBranch)
+
+  if (base === 'master') {
+    // make sure that we have master pulled down
+    exec('git fetch origin master:master')
+  }
 
   return await configFromCompare(base)
 }
