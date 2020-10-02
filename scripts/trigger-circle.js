@@ -13,8 +13,6 @@ const containsBinary = (changes) => {
 }
 
 const exec = (...args) => {
-  console.log(args[0])
-
   return execSync(...args).toString().trim()
 }
 
@@ -108,22 +106,26 @@ const findBase = async (currentBranch) => {
 
   const branchesFromDevelop = exec('git branch --contains develop')
 
-  console.log(branchesFromDevelop)
+  if (branchesFromDevelop === 'master') {
+    // make sure that we have master pulled down
+    exec('git fetch origin master:master')
+  }
 
   return branchesFromDevelop.includes(currentBranch) ? 'develop' : 'master'
 }
 
-const configByChanged = async (currentBranch) => {
-  // make sure that we have master pulled down
-  exec('git fetch origin master:master')
+const configFromCompare = async (compare) => {
+  console.log(`Comparing to base ${compare}`)
 
-  const base = await findBase(currentBranch)
-
-  console.log(`Comparing to base branch ${base}`)
-
-  const changed = await changedPackages(base)
+  const changed = await changedPackages(compare)
 
   return await generateConfig(changed)
+}
+
+const configForBranch = async (currentBranch) => {
+  const base = await findBase(currentBranch)
+
+  return await configFromCompare(base)
 }
 
 const triggerPipeline = async (config, currentBranch) => {
@@ -143,19 +145,21 @@ const triggerPipeline = async (config, currentBranch) => {
 }
 
 const main = async () => {
-  // if (!process.env.CIRCLECI) {
-  //   console.log('This script should not be run outside of CircleCI!')
-  //   process.exit(1)
-  // }
+  if (!process.env.CIRCLECI) {
+    console.log('This script should not be run outside of CircleCI!')
+    process.exit(1)
+  }
 
   const currentBranch = exec('git rev-parse --abbrev-ref HEAD')
+
+  console.log(`Current branch ${currentBranch}`)
 
   let config
 
   if (currentBranch === 'develop' || currentBranch === 'master') {
-    config = await generateConfig([], true)
+    config = await configFromCompare('HEAD~')
   } else {
-    config = await configByChanged(currentBranch)
+    config = await configForBranch(currentBranch)
   }
 
   console.log('Using configuration:')
