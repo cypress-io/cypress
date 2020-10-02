@@ -864,6 +864,10 @@ module.exports = {
       This was never documented nor supported.
 
       Please go through the public function: ${cmd('state', '...')}`,
+    reserved_command: stripIndent`\
+      Cannot create custom command named: \`{{name}}\`.
+
+      This command name is reserved internally by Cypress.`,
     retry_timed_out: 'Timed out retrying: ',
   },
 

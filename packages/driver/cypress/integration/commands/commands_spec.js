@@ -81,6 +81,18 @@ describe('src/cy/commands/commands', () => {
         expect($ce.get(0)).to.eq(ce.get(0))
       })
     })
+
+    context('errors', () => {
+      it('throws for reserved command names', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.eq(`Cannot create custom command named: \`reset\`.\n\nThis command name is reserved internally by Cypress.`)
+
+          done()
+        })
+
+        Cypress.Commands.add('reset', () => {})
+      })
+    })
   })
 
   context('errors', () => {

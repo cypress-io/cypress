@@ -40,6 +40,11 @@ const builtInCommands = [
   require('../cy/net-stubbing').addCommand,
 ]
 
+const reservedCommandNames = [
+  'getAlias',
+  'reset',
+]
+
 const getTypeByPrevSubject = (prevSubject) => {
   if (prevSubject === 'optional') {
     return 'dual'
@@ -156,6 +161,14 @@ const create = (Cypress, cy, state, config) => {
       if (_.isFunction(options)) {
         fn = options
         options = {}
+      }
+
+      if (_.includes(reservedCommandNames, name)) {
+        $errUtils.throwErrByPath('miscellaneous.reserved_command', {
+          args: {
+            name,
+          },
+        })
       }
 
       const { prevSubject } = options
