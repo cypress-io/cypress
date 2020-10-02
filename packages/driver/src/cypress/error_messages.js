@@ -814,7 +814,7 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/api',
     },
     invalid_overwrite: {
-      message: 'Cannot overwite command for: `{{name}}`. An existing command does not exist by that name.',
+      message: 'Cannot overwrite command for: `{{name}}`. An existing command does not exist by that name.',
       docsUrl: 'https://on.cypress.io/api',
     },
     invoking_child_without_parent (obj) {
