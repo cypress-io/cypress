@@ -1667,7 +1667,7 @@ describe('network stubbing', function () {
       .wait('@foo.bar.request')
     })
 
-    it('can timeout incrementally waiting on requests', function (done) {
+    it('can timeout incrementally waiting on requests', { retries: 1 }, function (done) {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('for the 2nd request to the route')
         done()
