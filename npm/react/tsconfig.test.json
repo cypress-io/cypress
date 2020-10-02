@@ -2,7 +2,8 @@
   "extends": "./tsconfig.bin.json",
   "compilerOptions": {
     "types": [
-      "jest"
+      "mocha",
+      "node"
     ]
   }
 }
