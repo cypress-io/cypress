@@ -16,7 +16,7 @@ const plugins = [
     preferBuiltins: false,
   }),
   json(),
-  nodeGlobals(),
+  nodeGlobals({ process: false, global: false, buffer: false }),
 ]
 
 const output = path.resolve(__dirname, '../../../dist/darwin/bundle.js')
