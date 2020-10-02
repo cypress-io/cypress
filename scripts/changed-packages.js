@@ -1,19 +1,19 @@
-const execa = require('execa')
+const { execSync } = require('child_process')
 const path = require('path')
 
 // lists all packages that have changed from develop
 // and all packages that depend on those
 
-const main = async (base = 'develop', output = false) => {
-  const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
-  const { stdout: diff } = await execa('git', ['merge-base', base, 'HEAD'])
-  const { stdout: filesChanged } = await execa('git', ['diff', '--name-only', diff])
-  const { stdout: depGraph } = await execa('npx', ['lerna', 'la', '--graph'])
-  const { stdout: packs } = await execa('npx', ['lerna', 'la', '--json'])
+const exec = (...args) => {
+  return execSync(...args).toString().trim()
+}
 
-  const files = filesChanged.split('\n')
-  const packages = JSON.parse(packs)
-  const dependencies = JSON.parse(depGraph)
+const main = async (base = 'develop', output = false) => {
+  const root = exec(`git rev-parse --show-toplevel`)
+  const diff = exec(`git merge-base ${base} HEAD`)
+  const files = exec(`git diff --name-only ${diff}`).split('\n')
+  const dependencies = JSON.parse(exec(`npx lerna la --graph`))
+  const packages = JSON.parse(exec(`npx lerna la --json`))
 
   const findDependents = (packs) => {
     const output = [...packs]
