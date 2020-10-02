@@ -51,7 +51,7 @@ const makeHTTPRequest = async (options, data) => {
     })
 
     if (data) {
-      req.write(JSON.stringify(data))
+      req.write(data)
     }
 
     req.end()
