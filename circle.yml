@@ -4,6 +4,18 @@ parameters:
   trigger:
     type: boolean
     default: true
+  binary:
+    type: boolean
+    default: false
+  npm-webpack-preprocessor:
+    type: boolean
+    default: false
+  npm-vue:
+    type: boolean
+    default: false
+  npm-eslint-plugin-dev:
+    type: boolean
+    default: false
 
 # usually we don't build Mac app - it takes a long time
 # but sometimes we want to really confirm we are doing the right thing
