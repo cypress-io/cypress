@@ -28,6 +28,18 @@ const external = new Set([
 
   // breaking on bundle load
   'winston',
+  'sshpk',
+  'postcss',
+  'gifwrap',
+  '@typescript-eslint',
+  'tsutils',
+  'coffeescript',
+  'proxy',
+  'source-list-map',
+  'watchpack',
+  '@webassemblyjs',
+  'typescript-estree',
+  'semver',
 ])
 
 // TODO: Not sure why those aren't captured.
@@ -35,6 +47,6 @@ const external = new Set([
 const extraModules = ['bufferutil', 'utf-8-validate']
 
 module.exports = {
-  external, extraModules,
-
+  external,
+  extraModules,
 }

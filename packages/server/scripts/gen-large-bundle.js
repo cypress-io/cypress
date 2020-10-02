@@ -2,6 +2,7 @@
 
 const { external } = require('./common')
 const path = require('path')
+const { builtinModules } = require('module')
 
 // rollup and needed plugins
 const rollup = require('rollup')
@@ -20,10 +21,18 @@ const plugins = [
 ]
 
 const output = path.resolve(__dirname, '../../../dist/darwin/bundle.js')
+// const input = path.resolve(__dirname, '../../../dist/darwin/index.test.js')
 const input = path.resolve(__dirname, '../../../dist/darwin/index.js')
 
+const appExternal = new Set([
+  require.resolve('../../../dist/darwin/packages/server/lib/exception'),
+])
+
+const ext = Array.from(external).concat(Array.from(appExternal))
+// eslint-disable-next-line
+console.log({ external: ext.slice(builtinModules.length) })
 const config = {
-  external: Array.from(external),
+  external: ext,
   input,
   inlineDynamicImports: true,
   output: [
