@@ -40,6 +40,7 @@ const external = new Set([
   '@webassemblyjs',
   'typescript-estree',
   'semver',
+  'electron',
 ])
 
 // TODO: Not sure why those aren't captured.
