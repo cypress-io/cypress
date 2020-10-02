@@ -51,7 +51,7 @@ export class Example extends React.Component {
 describe('react-bootstrap Modal', () => {
   it('works', () => {
     mount(<Example />, {
-      cssFile: 'node_modules/bootstrap/dist/css/bootstrap.min.css',
+      cssFile: '../../node_modules/bootstrap/dist/css/bootstrap.min.css',
     })
 
     // confirm modal is visible

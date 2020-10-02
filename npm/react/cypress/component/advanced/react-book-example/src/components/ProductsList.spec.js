@@ -5,7 +5,8 @@ import ProductsList from './ProductsList.jsx'
 
 // test similar to
 // https://github.com/softchris/react-book/blob/7bd767bb39f59977b107d07f383a8f4e32a12857/Testing/test-demo/src/Components/__tests__/ProductsList.js
-describe('Selecting by React props and state', () => {
+// NOTE: cypress-react-selector hardcoding path to node_modules and can not be used in monorepo
+describe.skip('Selecting by React props and state', () => {
   context('without delay', () => {
     beforeEach(() => {
       cy.stub(window, 'fetch')

@@ -16,31 +16,6 @@ describe('Mock imported component', () => {
     )
   }
 
-  context('by stubbing React.createElement method', () => {
-    // stubbing like this works, but is less than ideal
-    it('should render contact information', () => {
-      cy.stub(React, 'createElement')
-      .callThrough()
-      .withArgs(Map)
-      .callsFake((constructor, props) => React.createElement(DummyMap, props))
-
-      cy.viewport(500, 500)
-      const center = { lat: 0, long: 0 }
-
-      mount(
-        <Contact
-          name="Joni Baez"
-          email="test@example.com"
-          site="http://test.com"
-          center={center}
-        />,
-      )
-
-      cy.contains('Contact Joni Baez via')
-      cy.contains('[data-testid="map"]', '0:0').should('be.visible')
-    })
-  })
-
   context('via mocking ES6 default import', () => {
     // recommended
     it('renders stubbed Map', () => {

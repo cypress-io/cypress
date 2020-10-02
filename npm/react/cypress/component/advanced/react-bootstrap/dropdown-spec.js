@@ -28,7 +28,7 @@ UserControls.displayName = 'UserControls'
 describe('react-bootstrap Dropdown', () => {
   it('works', () => {
     mount(<UserControls />, {
-      cssFile: 'node_modules/bootstrap/dist/css/bootstrap.min.css',
+      cssFile: '../../node_modules/bootstrap/dist/css/bootstrap.min.css',
     })
 
     cy.contains('Top Toggle').click()

@@ -3,7 +3,7 @@ import { mount } from 'cypress-react-unit-test'
 import Fetcher from './fetcher'
 
 // https://testing-library.com/docs/cypress-testing-library/intro
-import '@testing-library/cypress/add-commands'
+// import '@testing-library/cypress/add-commands'
 
 // NOTE: this doesn't work because of update to the @testing/library v7. Looks like build issue with current webpack config
 it.skip('loads and displays greeting (testing-lib)', () => {
