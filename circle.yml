@@ -431,10 +431,6 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn check-node-version
 
-      - run:
-          name: Trigger CircleCI
-          command: node scripts/trigger-circle.js && circleci-agent step halt
-
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
       ## See the following information
@@ -470,6 +466,10 @@ jobs:
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
+
+      - run:
+          name: Trigger CircleCI
+          command: node scripts/trigger-circle.js
 
       - store-npm-logs
 
