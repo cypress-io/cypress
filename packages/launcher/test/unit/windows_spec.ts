@@ -104,4 +104,27 @@ describe('windows browser detection', () => {
       await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
     })
   })
+
+  context('#getPathData', () => {
+    it('returns path and browserKey given path with browser key', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar.exe:firefox')
+
+      expect(res.path).to.eq('C:\\foo\\bar.exe')
+      expect(res.browserKey).to.eq('firefox')
+    })
+
+    it('returns path and chrome given just path', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar\\chrome.exe')
+
+      expect(res.path).to.eq('C:\\foo\\bar\\chrome.exe')
+      expect(res.browserKey).to.eq('chrome')
+    })
+
+    it('returns path and firefox given just path', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar\\firefox.exe')
+
+      expect(res.path).to.eq('C:\\foo\\bar\\firefox.exe')
+      expect(res.browserKey).to.eq('firefox')
+    })
+  })
 })
