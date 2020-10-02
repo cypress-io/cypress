@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
-const execa = require('execa')
-const got = require('got')
+const { execSync } = require('child_process')
+const https = require('https')
 
 const changedPackages = require('./changed-packages')
 
@@ -12,9 +12,48 @@ const containsBinary = (changes) => {
   return !!changes.find((name) => name === 'cypress' || name.includes('@packages'))
 }
 
+const exec = (...args) => {
+  console.log(args[0])
+
+  return execSync(...args).toString().trim()
+}
+
+const makeHTTPRequest = async (options, data) => {
+  let output = ''
+
+  if (!options.headers || !options.headers['User-Agent']) {
+    options.headers = {
+      'User-Agent': 'curl/7.37.0',
+      ...options.headers,
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    const req = https.request(options, (res) => {
+      res.on('data', (d) => {
+        output += d
+      })
+
+      res.on('end', () => {
+        resolve(output)
+      })
+    })
+
+    req.on('error', (e) => {
+      reject(e)
+    })
+
+    if (data) {
+      req.write(JSON.stringify(data))
+    }
+
+    req.end()
+  })
+}
+
 const generateConfig = async (changes, all = false) => {
   // get list of public packages
-  const { stdout: packs } = await execa('npx', ['lerna', 'la', '--json'])
+  const packs = exec('npx lerna la --json')
   const packages = JSON.parse(packs)
   const publicPackages = packages.filter((p) => p.name.includes('@cypress') && !p.private)
 
@@ -34,12 +73,17 @@ const generateConfig = async (changes, all = false) => {
 }
 
 const getPRBase = async () => {
+  // const pr = process.env.CIRCLE_PULL_REQUEST.match(/\d+/)[0]
+  const pr = 'https://github.com/cypress-io/cypress/pull/8726'.match(/\d+/)[0]
+
   try {
-    const pr = process.env.CIRCLE_PULL_REQUEST.match(/\d+/)[0]
+    const response = await makeHTTPRequest({
+      hostname: 'api.github.com',
+      path: `/repos/cypress-io/cypress/pulls/${pr}`,
+      method: 'GET',
+    })
 
-    const response = await got.get(`https://api.github.com/repos/cypress-io/cypress/pulls/${pr}`, { responseType: 'json' })
-
-    return response.body.base.ref
+    return JSON.parse(response).base.ref
   } catch (e) {
     return null
   }
@@ -49,6 +93,8 @@ const findBase = async (currentBranch) => {
   // if we know there is a PR, find it's base
   if (process.env.CIRCLE_PULL_REQUEST) {
     const prBase = await getPRBase()
+
+    console.log(`Found base of PR on GitHub: ${prBase}`)
 
     if (prBase) {
       return prBase
@@ -60,42 +106,49 @@ const findBase = async (currentBranch) => {
   // and if it is we base off develop, if not then our branch is behind develop
   // so we default to master as the most likely option
 
-  const { stdout: branchesFromDevelop } = await execa('git', ['branch', '--contains', 'develop'])
+  const branchesFromDevelop = exec('git branch --contains develop')
+
+  console.log(branchesFromDevelop)
 
   return branchesFromDevelop.includes(currentBranch) ? 'develop' : 'master'
 }
 
 const configByChanged = async (currentBranch) => {
   // make sure that we have master pulled down
-  await execa('git', ['fetch', 'origin', 'master:master'])
+  exec('git fetch origin master:master')
 
   const base = await findBase(currentBranch)
+
+  console.log(`Comparing to base branch ${base}`)
+
   const changed = await changedPackages(base)
 
   return await generateConfig(changed)
 }
 
 const triggerPipeline = async (config, currentBranch) => {
-  const response = await got.post(`https://circleci.com/api/v2/project/gh/cypress-io/cypress/pipeline`, {
+  const response = await makeHTTPRequest({
+    hostname: 'circleci.com',
+    path: '/api/v2/project/gh/cypress-io/cypress/pipeline',
+    method: 'POST',
     headers: {
       'Circle-Token': process.env.CIRCLE_TOKEN,
     },
-    json: {
-      branch: currentBranch,
-      parameters: config,
-    },
+  }, {
+    branch: currentBranch,
+    parameters: config,
   })
 
   return !!response
 }
 
 const main = async () => {
-  if (!process.env.CIRCLECI) {
-    console.log('This script should not be run outside of CircleCI!')
-    process.exit(1)
-  }
+  // if (!process.env.CIRCLECI) {
+  //   console.log('This script should not be run outside of CircleCI!')
+  //   process.exit(1)
+  // }
 
-  const { stdout: currentBranch } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
+  const currentBranch = exec('git rev-parse --abbrev-ref HEAD')
 
   let config
 
@@ -104,6 +157,9 @@ const main = async () => {
   } else {
     config = await configByChanged(currentBranch)
   }
+
+  console.log('Using configuration:')
+  console.log(config)
 
   const trigger = await triggerPipeline(config, currentBranch)
 

@@ -470,7 +470,6 @@ jobs:
       - run:
           name: Trigger CircleCI
           command: node scripts/trigger-circle.js
-          when: << pipeline.parameters.trigger >>
 
       - store-npm-logs
 
