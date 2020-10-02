@@ -467,7 +467,9 @@ jobs:
           name: Top level packages
           command: yarn list --depth=0 || true
 
-      - run: node scripts/trigger-circle.js
+      - run:
+          name: Trigger CircleCI
+          command: node scripts/trigger-circle.js
 
       - store-npm-logs
 
@@ -1738,7 +1740,6 @@ jobs:
       - store-npm-logs
 
 linux-workflow: &linux-workflow
-  when: << pipeline.parameters.trigger >>
   jobs:
     - build
     - lint:
