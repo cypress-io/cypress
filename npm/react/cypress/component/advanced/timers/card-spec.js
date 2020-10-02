@@ -5,7 +5,12 @@ import { mount } from 'cypress-react-unit-test'
 
 // looking at the clock control from component's hook
 // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-it('should select null after timing out (fast)', () => {
+it('should select null after timing out (fast)', {
+  retries: {
+    runMode: 2,
+    openMode: 2,
+  },
+}, () => {
   const onSelect = cy.stub()
 
   // https://on.cypress.io/clock
