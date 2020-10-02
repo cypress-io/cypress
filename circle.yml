@@ -433,7 +433,7 @@ jobs:
 
       - run:
           name: Trigger CircleCI
-          command: node scripts/trigger-circle.js
+          command: node scripts/trigger-circle.js && circleci-agent step halt
 
       ## make sure the TERM is set to 'xterm' in node (Linux only)
       ## else colors (and tests) will fail
