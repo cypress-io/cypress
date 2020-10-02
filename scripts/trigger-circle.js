@@ -26,6 +26,15 @@ const makeHTTPRequest = async (options, data) => {
     }
   }
 
+  if (data) {
+    data = JSON.stringify(data)
+    options.headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      'Content-Length': data.length,
+    }
+  }
+
   return new Promise((resolve, reject) => {
     const req = https.request(options, (res) => {
       res.on('data', (d) => {
