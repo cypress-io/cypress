@@ -157,6 +157,7 @@
     "cross-env": "6.0.3",
     "devtools-protocol": "0.0.734984",
     "eol": "0.9.1",
+    "esbuild": "^0.7.8",
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
     "express-useragent": "1.0.12",
