@@ -41,6 +41,11 @@ const external = new Set([
   'typescript-estree',
   'semver',
   'electron',
+  'socket.io',
+  'marionette-client',
+  'mocha',
+  'mocha-7.0.1',
+
 ])
 
 // TODO: Not sure why those aren't captured.
