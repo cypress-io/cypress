@@ -37,3 +37,8 @@ Excluded `electron`, `socket.io` and installed the following inside `./dist/darw
 ```
 npm i -D socket.io
 ```
+
+### Results
+
+In order to save benchmark results for each run `mkdir dist/results/` and enable the `save()`
+function inside `packages/server/util/bench.js`.
