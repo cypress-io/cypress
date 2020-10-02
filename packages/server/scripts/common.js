@@ -25,6 +25,9 @@ const external = new Set([
 
   // non-breaking
   'glob',
+
+  // breaking on bundle load
+  'winston',
 ])
 
 // TODO: Not sure why those aren't captured.
