@@ -36,6 +36,11 @@ describe('Footer', () => {
         expect(ipc.externalOpen).to.be.calledWith('https://on.cypress.io/changelog?source=dgui_footer')
       })
     })
+
+    it('blurs changelog button after clicking', () => {
+      cy.contains('button', 'Changelog').click().should('not.be.focused')
+      cy.percySnapshot()
+    })
   })
 
   describe('when on the latest version', () => {
@@ -45,6 +50,7 @@ describe('Footer', () => {
 
     it('does not show update indicator', () => {
       cy.get('.update-indicator').should('not.be.visible')
+      cy.percySnapshot()
     })
 
     it('disables version button', () => {
@@ -61,6 +67,7 @@ describe('Footer', () => {
 
     it('shows update indicator', () => {
       cy.get('.update-indicator').should('be.visible')
+      cy.percySnapshot()
     })
 
     it('enables version button', () => {
@@ -76,6 +83,12 @@ describe('Footer', () => {
       cy.get('.version').click()
       cy.get('.update-modal .close').click()
       cy.get('.update-modal').should('not.exist')
+    })
+
+    it('blurs version button after clicking', () => {
+      cy.get('.version').click().should('not.be.focused')
+      cy.get('.update-modal .close').click()
+      cy.percySnapshot()
     })
   })
 })

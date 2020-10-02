@@ -9,7 +9,9 @@ import { useUpdateChecker } from '../update/use-update-checker'
 
 import UpdateModal from '../update/update-modal'
 
-const openChangelog = () => {
+const openChangelog = (e) => {
+  e.target.blur()
+
   ipc.externalOpen('https://on.cypress.io/changelog?source=dgui_footer')
 }
 
@@ -26,9 +28,15 @@ const Footer = observer(() => {
 
   useUpdateChecker()
 
+  const showModal = (e) => {
+    e.target.blur()
+
+    state.showModal()
+  }
+
   return (
     <footer className={cs('footer', { 'update-available': appStore.updateAvailable })}>
-      <button className='version' onClick={state.showModal} disabled={!appStore.updateAvailable}>
+      <button className='version' onClick={showModal} disabled={!appStore.updateAvailable}>
         <i className='update-indicator fas fa-arrow-alt-circle-up' />
         Version {appStore.displayVersion}
       </button>
