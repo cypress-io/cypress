@@ -1016,7 +1016,7 @@ describe('network stubbing', function () {
       })
 
       it('can timeout in request handler', {
-        defaultCommandTimeout: 50,
+        defaultCommandTimeout: 100,
         retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
@@ -1234,7 +1234,7 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can reply with a JSON fixture', function () {
+    it('can reply with a JSON fixture', { retries: 1 }, function () {
       cy.route2({
         method: 'POST',
         url: '/test-xhr',
@@ -1521,7 +1521,7 @@ describe('network stubbing', function () {
       })
 
       it('can timeout in req.reply handler', {
-        defaultCommandTimeout: 50,
+        defaultCommandTimeout: 100,
         retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
