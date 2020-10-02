@@ -7,24 +7,25 @@ exports['e2e web security / when enabled / fails'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  │ Specs:      1 found (web_security_spec.js)                                                     │
+  │ Searched:   cypress/integration/web_security_spec.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  web_security_spec.coffee                                                        (1 of 1)
+  Running:  web_security_spec.js                                                            (1 of 1)
 
 
   web security
     1) fails when clicking <a> to another origin
     2) fails when submitted a form and being redirected to another origin
     3) fails when using a javascript redirect to another origin
+    4) fails when doing a CORS request cross-origin
 
 
   0 passing
-  3 failing
+  4 failing
 
   1) web security
        fails when clicking <a> to another origin:
@@ -95,38 +96,45 @@ Alternatively you can also disable Chrome Web Security in Chromium-based browser
 https://on.cypress.io/cross-origin-violation
       [stack trace lines]
 
+  4) web security
+       fails when doing a CORS request cross-origin:
+     AssertionError: Timed out retrying: Expected to find content: 'success!' but never did.
+      [stack trace lines]
+
 
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
+  │ Tests:        4                                                                                │
   │ Passing:      0                                                                                │
-  │ Failing:      3                                                                                │
+  │ Failing:      4                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
-  │ Screenshots:  3                                                                                │
+  │ Screenshots:  4                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security_spec.coffee                                                         │
+  │ Spec Ran:     web_security_spec.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
-     when clicking a to another origin (failed).png                                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
-     when submitted a form and being redirected to another origin (failed).png                      
-  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.coffee/web security -- fails      (1280x720)
-     when using a javascript redirect to another origin (failed).png                                
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
+      clicking a to another origin (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
+      submitted a form and being redirected to another origin (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
+      using a javascript redirect to another origin (failed).png                                    
+  -  /XXX/XXX/XXX/cypress/screenshots/web_security_spec.js/web security -- fails when     (1280x720)
+      doing a CORS request cross-origin (failed).png                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -136,9 +144,9 @@ https://on.cypress.io/cross-origin-violation
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  web_security_spec.coffee                 XX:XX        3        -        3        -        - │
+  │ ✖  web_security_spec.js                     XX:XX        4        -        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        3        -        3        -        -  
+    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
 
 
 `
@@ -152,44 +160,45 @@ exports['e2e web security / when disabled / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (web_security_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/web_security_spec.coffee                                       │
+  │ Specs:      1 found (web_security_spec.js)                                                     │
+  │ Searched:   cypress/integration/web_security_spec.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  web_security_spec.coffee                                                        (1 of 1)
+  Running:  web_security_spec.js                                                            (1 of 1)
 
 
   web security
     ✓ fails when clicking <a> to another origin
     ✓ fails when submitted a form and being redirected to another origin
     ✓ fails when using a javascript redirect to another origin
+    ✓ fails when doing a CORS request cross-origin
 
 
-  3 passing
+  4 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
+  │ Tests:        4                                                                                │
+  │ Passing:      4                                                                                │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     web_security_spec.coffee                                                         │
+  │ Spec Ran:     web_security_spec.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.coffee.mp4        (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/web_security_spec.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -199,14 +208,14 @@ exports['e2e web security / when disabled / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  web_security_spec.coffee                 XX:XX        3        3        -        -        - │
+  │ ✔  web_security_spec.js                     XX:XX        4        4        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
+    ✔  All specs passed!                        XX:XX        4        4        -        -        -  
 
 
 `
 
-exports['firefox / displays warning when firefox and chromeWebSecurity:false'] = `
+exports['e2e web security / firefox / displays warning when firefox and chromeWebSecurity:false'] = `
 
 ====================================================================================================
 

@@ -292,6 +292,10 @@ const eventManager = {
     })
 
     Cypress.on('collect:run:state', () => {
+      if (Cypress.env('NO_COMMAND_LOG')) {
+        return Promise.resolve()
+      }
+
       return new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)
       })
@@ -313,6 +317,10 @@ const eventManager = {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
         cb()
+      }
+
+      if (Cypress.env('NO_COMMAND_LOG')) {
+        return beforeThenCb()
       }
 
       const wait = !config.appOnly && config.waitForCommandSynchronization
