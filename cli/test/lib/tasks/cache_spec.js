@@ -20,7 +20,12 @@ describe('lib/tasks/cache', () => {
     mockfs({
       '/.cache/Cypress': {
         '1.2.3': {
-          'Cypress': {},
+          'Cypress': {
+            'file1': Buffer.from(new Array(32 * 1024).fill(1)),
+            'dir': {
+              'file2': Buffer.from(new Array(128 * 1042).fill(2)),
+            },
+          },
         },
         '2.3.4': {
           'Cypress.app': {},
