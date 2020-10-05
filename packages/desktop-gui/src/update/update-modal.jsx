@@ -1,11 +1,12 @@
 import cs from 'classnames'
 import { observer, useLocalStore } from 'mobx-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { action } from 'mobx'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
+import { useLifecycle } from '../lib/use-lifecycle'
 
 const openDownload = (e) => {
   e.preventDefault()
@@ -38,12 +39,14 @@ const UpgradeCommand = observer(({ packageManager, command }) => {
     }, 5000)
   }
 
-  useEffect(() => () => {
-    // clear timeout when component is unmounted
-    if (resetId) {
-      clearTimeout(resetId)
-    }
-  }, [true])
+  useLifecycle({
+    onUnmount () {
+      // clear timeout when component is unmounted
+      if (resetId) {
+        clearTimeout(resetId)
+      }
+    },
+  })
 
   const icon = state.wasCopied ? 'fas fa-check' : 'far fa-copy'
 
