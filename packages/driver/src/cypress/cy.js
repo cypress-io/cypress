@@ -746,6 +746,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     stopped = true
 
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
+
     err.stack = $stackUtils.normalizedStack(err)
 
     err = $errUtils.enhanceStack({
