@@ -31,6 +31,13 @@ class SpecsList extends Component {
 
     const filteredSpecs = specsStore.getFilteredSpecs()
 
+    const integrationSpecsN = _.filter(filteredSpecs, { specType: 'integration' }).length
+    const componentSpecsN = _.filter(filteredSpecs, { specType: 'component' }).length
+
+    // store in the component for ease of sharing with other methods
+    this.integrationLabel = integrationSpecsN === 1 ? 'Run 1 spec' : `Run ${integrationSpecsN} specs`
+    this.componentLabel = componentSpecsN === 1 ? 'Run 1 spec' : `Run ${componentSpecsN} specs`
+
     const hasSpecFilter = specsStore.filter
     const numberOfShownSpecs = filteredSpecs.length
     const hasNoSpecs = !hasSpecFilter && !numberOfShownSpecs
@@ -224,7 +231,7 @@ class SpecsList extends Component {
             {nestingLevel === 0 ? <button style={{ marginLeft: '2em' }}
               onClick={this._selectSpec.bind(this,
                 spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
-              }>Run tests</button> : <></>}
+              }>{spec.displayName === 'integration' ? this.integrationLabel : this.componentLabel }</button> : <></>}
           </div>
           {
             isExpanded ?
