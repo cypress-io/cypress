@@ -162,7 +162,7 @@ class $Cypress {
     this.state = $SetterGetter.create({})
     this.config = $SetterGetter.create(config)
     this.env = $SetterGetter.create(env)
-    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this.config)
+    this.getFirefoxGcInterval = $FirefoxForcedGc.createIntervalGetter(this)
     this.getTestRetries = function () {
       const testRetries = this.config('retries')
 

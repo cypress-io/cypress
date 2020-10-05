@@ -8,6 +8,7 @@
 
 declare namespace CypressCommandLine {
   type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
+
   interface TestError {
     name: string
     message: string
@@ -225,7 +226,7 @@ declare namespace CypressCommandLine {
       startedAt: dateTimeISO
       endedAt: dateTimeISO
       duration: ms
-    },
+    }
     /**
      * Reporter name like "spec"
      */
@@ -255,7 +256,7 @@ declare namespace CypressCommandLine {
        * resolved filename of the spec
        */
       absolute: string
-    },
+    }
     shouldUploadVideo: boolean
   }
 
@@ -358,7 +359,7 @@ declare module 'cypress' {
      })
      ```
      */
-    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>,
+    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.
