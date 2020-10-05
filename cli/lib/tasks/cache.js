@@ -27,6 +27,10 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
+const fileSizeInMB = (size) => {
+  return `${(size / 1024 / 1024).toFixed(1)}MB`
+}
+
 /**
  * Collects all cached versions, finds when each was used
  * and prints a table with results to the terminal
@@ -50,7 +54,7 @@ const list = (showSize) => {
       const row = [versionString, lastUsed]
 
       if (showSize) {
-        const size = colors.size(`${(binary.size / 1024 / 1024).toFixed(1)}MB`)
+        const size = colors.size(fileSizeInMB(binary.size))
 
         row.push(size)
       }
