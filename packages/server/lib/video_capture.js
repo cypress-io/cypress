@@ -72,7 +72,7 @@ module.exports = {
       onError () {},
     })
 
-    const endVideoCapture = function (waitForMoreChunksTimeout = 3000) {
+    const endVideoCapture = function (waitForMoreChunksTimeout = 30000) {
       debugFrames('frames written:', writtenChunksCount)
 
       // in some cases (webm) ffmpeg will crash if fewer than 2 buffers are
