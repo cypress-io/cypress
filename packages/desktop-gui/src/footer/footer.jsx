@@ -31,6 +31,8 @@ const Footer = observer(() => {
   const showModal = (e) => {
     e.target.blur()
 
+    if (!appStore.updateAvailable) return
+
     state.showModal()
   }
 
