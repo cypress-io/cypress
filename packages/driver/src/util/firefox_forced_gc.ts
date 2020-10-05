@@ -1,25 +1,29 @@
-import { get, isNumber, isNull } from 'lodash'
+import { isNumber, isNull } from 'lodash'
 
-export function createIntervalGetter (config) {
+function usingFirefoxWithGcBug (browser: Cypress.Browser) {
+  // @see https://github.com/cypress-io/cypress/issues/8241
+  return browser.family === 'firefox' && browser.majorVersion < 80
+}
+
+export function createIntervalGetter (Cypress: Cypress.Cypress) {
   return () => {
-    if (get(config('browser'), 'family') !== 'firefox') {
+    if (!usingFirefoxWithGcBug(Cypress.browser)) {
       return undefined
     }
 
-    const intervals = config('firefoxGcInterval')
+    const intervals = Cypress.config('firefoxGcInterval')
 
     if (isNumber(intervals) || isNull(intervals)) {
       return intervals
     }
 
-    return intervals[config('isInteractive') ? 'openMode' : 'runMode']
+    // @ts-ignore
+    return intervals[Cypress.config('isInteractive') ? 'openMode' : 'runMode']
   }
 }
 
 export function install (Cypress: Cypress.Cypress & EventEmitter) {
-  // the firefox GC issue was fixed in v80 so we can stop here
-  // @see https://github.com/cypress-io/cypress/issues/8241
-  if (!Cypress.isBrowser('firefox') || Cypress.browser.majorVersion >= 80) {
+  if (!usingFirefoxWithGcBug(Cypress.browser)) {
     return
   }
 

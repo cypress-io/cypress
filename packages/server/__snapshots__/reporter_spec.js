@@ -33,7 +33,16 @@ exports['lib/reporter #stats has reporterName stats, reporterStats, etc 1'] = {
           "state": "failed",
           "error": {
             "message": "foo",
-            "stack": "at foo:1:1\nat bar:1:1\nat baz:1:1"
+            "stack": "at foo:1:1\nat bar:1:1\nat baz:1:1",
+            "codeFrame": {
+              "line": 7,
+              "column": 8,
+              "originalFile": "cypress/integration/spec.js",
+              "relativeFile": "cypress/integration/spec.js",
+              "absoluteFile": "/path/to/cypress/integration/spec.js",
+              "frame": "   5 | \n   6 |   it('fails', () => {\n>  7 |     cy.get('nope', { timeout: 1 })\n     |        ^\n   8 |   })\n   9 | })\n  10 | ",
+              "language": "js"
+            }
           },
           "timings": null,
           "failedFromHookId": null,
