@@ -14,6 +14,7 @@ const reHttp = /^https?:\/\//
 const reWww = /^www/
 const reFile = /^file:\/\//
 const reLocalHost = /^(localhost|0\.0\.0\.0|127\.0\.0\.1)/
+const reQueryParam = /\?[^/]+/
 
 class $Location {
   constructor (remote) {
@@ -145,6 +146,10 @@ class $Location {
   }
 
   static fullyQualifyUrl (url) {
+    if (url.startsWith(window.location.origin)) {
+      return url
+    }
+
     return this.resolve(window.location.origin, url)
   }
 
@@ -196,6 +201,12 @@ class $Location {
     if (baseUrl && !this.isFullyQualifiedUrl(url)) {
       // prepend the root url to it
       url = this.join(baseUrl, url)
+
+      // https://github.com/cypress-io/cypress/issues/2101
+      // Has query param and ends with /
+      if (reQueryParam.test(url) && url[url.length - 1] === '/') {
+        url = url.substring(0, url.length - 1)
+      }
     }
 
     return this.fullyQualifyUrl(url)
