@@ -159,22 +159,24 @@ export type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
 
 export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions {
   /**
-   * Match HTTP basic authentication.
+   * Match against the username and password used in HTTP Basic authentication.
    */
   auth?: { username: S, password: S }
   /**
-   * Match client request headers.
+   * Match against HTTP headers on the request.
    */
   headers?: DictMatcher<S>
   /**
-   * Match based on requested hostname.
+   * Match against the requested HTTP hostname.
    */
   hostname?: S
   /**
-   * Match requests served via HTTPS only.
+   * If 'true', only HTTPS requests will be matched.
+   * If 'false', only HTTP requests will be matched.
    */
   https?: boolean
   /**
+   * Match against the request's HTTP method.
    * @default 'GET'
    */
   method?: S
@@ -187,7 +189,8 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    */
   pathname?: S
   /**
-   * Match based on requested port.
+   * Match based on requested port, or pass an array of ports
+   * to match against any in that array.
    */
   port?: NumberMatcher
   /**
@@ -195,7 +198,9 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    */
   query?: DictMatcher<S>
   /**
-   * Match based on full request URL.
+   * Match against the full request URL.
+   * If a string is passed, it will be used as a substring match,
+   * not an equality match.
    */
   url?: S
 }
@@ -209,34 +214,38 @@ export type RouteHandler = string | StaticResponse | RouteHandlerController | ob
  */
 export type StaticResponse = GenericStaticResponse<string, string | object> & {
   /**
-  * If set, `delayMs` will pass before the response is sent.
-  */
+   * Milliseconds to delay before the response is sent.
+   */
  delayMs?: number
 }
 
 export interface GenericStaticResponse<Fixture, Body> {
   /**
-   * If set, serve a fixture as the response body.
+   * Serve a fixture as the response body.
    */
   fixture?: Fixture
   /**
-   * If set, serve a static string/JSON object as the response body.
+   * Serve a static string/JSON object as the response body.
    */
   body?: Body
   /**
+   * HTTP headers to accompany the response.
    * @default {}
    */
   headers?: { [key: string]: string }
   /**
+   * The HTTP status code to send.
    * @default 200
    */
   statusCode?: number
   /**
-   * If `forceNetworkError` is truthy, Cypress will destroy the connection to the browser and send no response. Useful for simulating a server that is not reachable. Must not be set in combination with other options.
+   * If 'forceNetworkError' is truthy, Cypress will destroy the browser connection
+   * and send no response. Useful for simulating a server that is not reachable.
+   * Must not be set in combination with other options.
    */
   forceNetworkError?: boolean
   /**
-   * If set, the `body` will be sent at `throttleKbps` kbps.
+   * Kilobits per second to send 'body'.
    */
   throttleKbps?: number
 }
