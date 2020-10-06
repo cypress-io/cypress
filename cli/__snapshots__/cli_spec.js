@@ -112,6 +112,8 @@ exports['cli unknown option shows help for cache command - unknown option --foo 
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
+    --size      Used with the list command to show the sizes of the cached
+                folders
     -h, --help  output usage information
   -------
   stderr:
@@ -142,6 +144,8 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
+    --size      Used with the list command to show the sizes of the cached
+                folders
     -h, --help  output usage information
   -------
   stderr:
@@ -170,6 +174,8 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
+    --size      Used with the list command to show the sizes of the cached
+                folders
     -h, --help  output usage information
   -------
   stderr:
