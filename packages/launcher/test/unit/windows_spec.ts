@@ -99,11 +99,11 @@ describe('windows browser detection', () => {
           return gb.name === 'foo-browser'
         }), {
           displayName: 'Custom Foo Browser',
-          info: 'Loaded from /Applications/My Shiny New Browser.app',
+          info: `Loaded from ${HOMEDIR}/foo/bar/browser.exe`,
           custom: true,
-          version: '100.1.2.3',
+          version: '100',
           majorVersion: 100,
-          path: '/Applications/My Shiny New Browser.app',
+          path: `${HOMEDIR}/foo/bar/browser.exe`,
         }),
       )
     })
@@ -111,19 +111,19 @@ describe('windows browser detection', () => {
 
   it('identifies browser if name in path', async () => {
     sinon.stub(os, 'platform').returns('win32')
-    stubBrowser(`${HOMEDIR}/foo/bar/browser.exe`, '100')
+    stubBrowser(`${HOMEDIR}/foo/bar/chrome.exe`, '100')
 
-    return detectByPath(`${HOMEDIR}/foo/chrome.exe`).then((browser) => {
+    return detectByPath(`${HOMEDIR}/foo/bar/chrome.exe`).then((browser) => {
       expect(browser).to.deep.equal(
         Object.assign({}, browsers.find((gb) => {
           return gb.name === 'chrome'
         }), {
           displayName: 'Custom Chrome',
-          info: `Loaded from ${HOMEDIR}/foo/chrome.exe`,
+          info: `Loaded from ${HOMEDIR}/foo/bar/chrome.exe`,
           custom: true,
           version: '100',
           majorVersion: 100,
-          path: `${HOMEDIR}/foo/chrome.exe`,
+          path: `${HOMEDIR}/foo/bar/chrome.exe`,
         }),
       )
     })
