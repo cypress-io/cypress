@@ -64,7 +64,7 @@ function TestHook ({ callback, onError, children }: TestHookProps) {
 /**
  * Mounts a React hook function in a test component for testing.
  *
- * @see https://github.com/bahmutov/@cypress/react#advanced-examples
+ * @see https://github.com/bahmutov/cypress-react-unit-test#advanced-examples
  */
 export const mountHook = (hookFn: (...args: any[]) => any) => {
   const { result, setValue, setError } = resultContainer()

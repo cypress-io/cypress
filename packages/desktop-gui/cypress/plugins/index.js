@@ -1,5 +1,5 @@
 const percyHealthCheck = require('@percy/cypress/task')
-const useMyWebpack = require('@cypress/react/plugins/load-webpack')
+const useMyWebpack = require('cypress-react-unit-test/plugins/load-webpack')
 
 module.exports = (on, config) => {
   on('task', percyHealthCheck)

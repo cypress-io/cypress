@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import styles from './Button.modules.css'
 import { Button } from './Button.jsx'
 

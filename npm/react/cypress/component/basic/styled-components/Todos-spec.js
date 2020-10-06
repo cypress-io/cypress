@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import React, { Component } from 'react'
 import Todos from './Todos'
 

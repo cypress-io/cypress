@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import * as React from 'react'
 import IndexPage from '../../pages/index'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 describe('NextJS page', () => {
   it('Renders page component', () => {

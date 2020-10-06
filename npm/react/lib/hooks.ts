@@ -10,7 +10,7 @@ Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
   if (isComponentSpec()) {
     throw new Error(
       'cy.visit from a component spec is not allowed\n' +
-        'see https://github.com/bahmutov/@cypress/react/issues/286',
+        'see https://github.com/bahmutov/cypress-react-unit-test/issues/286',
     )
   } else {
     // allow regular visit to proceed

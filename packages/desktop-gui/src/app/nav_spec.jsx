@@ -1,6 +1,6 @@
 import React from 'react'
 import Nav from './nav'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 describe('Nav', () => {
   it('renders', () => {

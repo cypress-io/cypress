@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 const RenderInPortal = ({ children }) => {
   return ReactDOM.createPortal(children, document.body)

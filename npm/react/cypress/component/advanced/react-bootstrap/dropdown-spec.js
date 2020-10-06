@@ -1,6 +1,6 @@
 import React from 'react'
 import { Dropdown } from 'react-bootstrap'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 class UserControls extends React.Component {
   constructor (props) {
@@ -24,7 +24,7 @@ class UserControls extends React.Component {
 
 UserControls.displayName = 'UserControls'
 
-// https://github.com/bahmutov/@cypress/react/issues/99
+// https://github.com/bahmutov/cypress-react-unit-test/issues/99
 describe('react-bootstrap Dropdown', () => {
   it('works', () => {
     mount(<UserControls />, {

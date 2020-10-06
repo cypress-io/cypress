@@ -13,10 +13,10 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
     "@mdx-js/loader": "^1.6.16",
     "@next/mdx": "^9.5.3",
     "@zeit/next-sass": "^1.0.1",
+    "cypress-react-unit-test": "file:../..",
     "next": "^9.5.3"
   },
   "license": "MIT"

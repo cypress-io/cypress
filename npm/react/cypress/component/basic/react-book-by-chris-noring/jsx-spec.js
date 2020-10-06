@@ -3,7 +3,7 @@
 
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 const Elem = () => <h1>Some title</h1>
 

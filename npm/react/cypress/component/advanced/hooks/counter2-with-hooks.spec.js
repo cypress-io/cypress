@@ -2,7 +2,7 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import Counter2WithHooks from './counter2-with-hooks.jsx'
 
 describe('Counter2WithHooks', function () {

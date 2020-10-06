@@ -1,10 +1,10 @@
 /// <reference types="cypress" />
 import Card from './card.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 // looking at the clock control from component's hook
-// https://github.com/bahmutov/@cypress/react/issues/200
+// https://github.com/bahmutov/cypress-react-unit-test/issues/200
 it('should select null after timing out (fast)', {
   retries: {
     runMode: 2,

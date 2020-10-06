@@ -1,6 +1,6 @@
 import './todos.css'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import Todos from './Todos'
 
 describe('reactive-state Todos', () => {

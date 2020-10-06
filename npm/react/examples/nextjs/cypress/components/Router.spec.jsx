@@ -4,7 +4,7 @@ import * as React from 'react'
 import RouterPage from '../../pages/router'
 import { createRouter } from 'next/router'
 import { RouterContext } from 'next/dist/next-server/lib/router-context'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 describe('Component with router usage', () => {
   it('renders the component that uses next.js router context', () => {

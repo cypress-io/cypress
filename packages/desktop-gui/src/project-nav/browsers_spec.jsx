@@ -1,7 +1,7 @@
 import React from 'react'
 import Browsers from './browsers'
 import Project from '../project/project-model'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import browsers from '../../cypress/fixtures/browsers.json'
 
 /* global cy */

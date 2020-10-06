@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 const MyInput = ({ inputVal, onInputChanged }) => {
   console.log('MyInput "%s"', inputVal)

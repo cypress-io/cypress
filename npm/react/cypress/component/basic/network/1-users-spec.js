@@ -2,7 +2,7 @@
 /// <reference types="../../lib" />
 import { Users } from './1-users.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 /* eslint-env mocha */
 context('Users', () => {

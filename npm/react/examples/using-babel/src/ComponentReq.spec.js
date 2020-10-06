@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 const React = require('react')
-const { mount } = require('@cypress/react')
+const { mount } = require('cypress-react-unit-test')
 const Component = require('./ComponentReq.jsx').default
 const calc = require('./calc')
 

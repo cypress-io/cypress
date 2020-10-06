@@ -1,7 +1,7 @@
 // from https://softchris.github.io/books/react/components/
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 class Jedi extends React.Component {
   render () {

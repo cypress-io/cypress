@@ -1,5 +1,5 @@
 // @ts-check
-const debug = require('debug')('@cypress/react')
+const debug = require('debug')('cypress-react-unit-test')
 const loadConfig = require('next/dist/next-server/server/config').default
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config')
 .default
@@ -16,7 +16,7 @@ async function getNextWebpackConfig (config) {
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(
     config.projectRoot,
     {
-      buildId: `@cypress/react-${Math.random().toString()}`,
+      buildId: `cypress-react-unit-test-${Math.random().toString()}`,
       config: nextConfig,
       dev: false,
       isServer: false,
@@ -36,7 +36,7 @@ async function getNextWebpackConfig (config) {
       coverage: !coverageIsDisabled,
       // insert Babel plugin to mock named imports
       // disable because causes an error with double definitions
-      // https://github.com/bahmutov/@cypress/react/issues/439
+      // https://github.com/bahmutov/cypress-react-unit-test/issues/439
       looseModules: false,
     },
     nextWebpackConfig,

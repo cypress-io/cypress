@@ -3,7 +3,7 @@
 
 import React from 'react'
 import Button from './pure-component.jsx'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 /* eslint-env mocha */
 describe('Button pure component', function () {

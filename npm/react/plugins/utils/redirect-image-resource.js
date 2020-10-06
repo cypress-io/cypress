@@ -1,4 +1,4 @@
-const debug = require('debug')('@cypress/react')
+const debug = require('debug')('cypress-react-unit-test')
 const path = require('path')
 const mime = require('mime-types')
 const fs = require('fs')

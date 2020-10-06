@@ -1,6 +1,6 @@
 import React from 'react'
 import { unmountComponentAtNode } from 'react-dom'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import LoadingIndicator from './LoadingIndicator'
 
 // compare these tests to Jest + Enzyme tests in

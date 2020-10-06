@@ -10,12 +10,12 @@ export const BabelTemplate: Template = {
     'webpack',
   )} to bundle the components for testing.`,
   getExampleUrl: () => {
-    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/babel'
+    return 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/babel'
   },
   recommendedComponentFolder: 'cypress/component',
   getPluginsCode: () => {
     return [
-      'const preprocessor = require(\'@cypress/react/plugins/babel\')',
+      'const preprocessor = require(\'cypress-react-unit-test/plugins/babel\')',
       'module.exports = (on, config) => {',
       '  preprocessor(on, config)',
       '  // IMPORTANT to return the config object',

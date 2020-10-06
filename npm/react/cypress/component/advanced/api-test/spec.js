@@ -3,7 +3,7 @@
 /// <reference types="@bahmutov/cy-api" />
 import { Users } from './users.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 // adds cy.api command
 import '@bahmutov/cy-api/support'
 

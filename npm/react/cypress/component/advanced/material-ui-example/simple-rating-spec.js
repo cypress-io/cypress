@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 // select example from
 // https://material-ui.com/components/rating/
 

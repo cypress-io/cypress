@@ -1,7 +1,7 @@
 // @ts-check
 /// <reference types="cypress" />
 import { useState, useCallback } from 'react'
-import { mountHook } from '@cypress/react'
+import { mountHook } from 'cypress-react-unit-test'
 
 // testing example hook function from
 // https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#hooks

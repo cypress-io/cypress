@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import { CustomTheme } from './Chart'
 
 describe('Chart', () => {
@@ -8,7 +8,7 @@ describe('Chart', () => {
     // Applitools commands like "cy.eyes*"
     // https://www.npmjs.com/package/@applitools/eyes-cypress
     cy.eyesOpen({
-      appName: '@cypress/react',
+      appName: 'cypress-react-unit-test',
       testName: 'Chart example',
       browser: [
         {

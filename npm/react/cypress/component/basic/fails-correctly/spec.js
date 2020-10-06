@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 // NOTE: compare these tests to Jest + JSDOM tests
 // https://codesandbox.io/s/react-testing-library-demo-forked-z7l2o?file=/src/__tests__/components.js

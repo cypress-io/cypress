@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import Button from '@material-ui/core/Button'
 
 it('renders a button', () => {

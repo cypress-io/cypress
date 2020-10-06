@@ -1,5 +1,5 @@
 // @ts-check
-const debug = require('debug')('@cypress/react')
+const debug = require('debug')('cypress-react-unit-test')
 
 /**
  * Note: modifies the input options object

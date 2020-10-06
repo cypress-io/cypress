@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import MaterialUIPickers from './DatePicker'
 
 describe('Material UI date picker', () => {

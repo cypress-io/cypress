@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React, { Component } from 'react'
-import { mount, unmount } from '@cypress/react'
+import { mount, unmount } from 'cypress-react-unit-test'
 
 class Comp extends Component {
   componentWillUnmount () {

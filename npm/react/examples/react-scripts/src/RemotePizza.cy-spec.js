@@ -1,6 +1,6 @@
 import React from 'react'
 import RemotePizza from './RemotePizza'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 const ingredients = ['bacon', 'tomato', 'mozzarella', 'pineapples']
 

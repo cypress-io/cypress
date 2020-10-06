@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import { ErrorBoundary } from './error-boundary.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 Cypress.on('uncaught:exception', (err, runnable) => {
   return false

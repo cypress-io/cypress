@@ -1,6 +1,6 @@
 import React from 'react'
 import RemotePizza from './RemotePizza'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 // prepare for import mocking
 import * as services from './services'
 

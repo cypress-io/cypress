@@ -18,7 +18,7 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
   message:
     'It looks like you have custom `webpack.config.js`. We can use it to bundle the components for testing.',
   getExampleUrl: () => {
-    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/webpack-file'
+    return 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/webpack-file'
   },
   recommendedComponentFolder: 'cypress/component',
   getPluginsCode: (payload, { cypressProjectRoot }) => {
@@ -28,7 +28,7 @@ export const WebpackTemplate: Template<{ webpackConfigPath: string }> = {
       : './webpack.config.js'
 
     return [
-      'const preprocessor = require(\'@cypress/react/plugins/load-webpack\')',
+      'const preprocessor = require(\'cypress-react-unit-test/plugins/load-webpack\')',
       'module.exports = (on, config) => {',
       includeWarnComment
         ? '// TODO replace with valid webpack config path'

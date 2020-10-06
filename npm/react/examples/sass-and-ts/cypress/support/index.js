@@ -1,1 +1,1 @@
-require('@cypress/react/support')
+require('cypress-react-unit-test/support')

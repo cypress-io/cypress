@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 import ParentComponent from './ParentComponent'
 import * as calc from './calc'
 import * as ChildComponent from './ChildComponent'

@@ -7,12 +7,12 @@ import { MIN_SUPPORTED_VERSION } from '../versions'
 export const NextTemplate: Template = {
   message: 'It looks like you are using next.js.',
   getExampleUrl: () => {
-    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/nextjs'
+    return 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/nextjs'
   },
   recommendedComponentFolder: 'cypress/component',
   getPluginsCode: () => {
     return [
-      'const preprocessor = require(\'@cypress/react/plugins/next\')',
+      'const preprocessor = require(\'cypress-react-unit-test/plugins/next\')',
       'module.exports = (on, config) => {',
       '  preprocessor(on, config)',
       '  // IMPORTANT to return the config object',

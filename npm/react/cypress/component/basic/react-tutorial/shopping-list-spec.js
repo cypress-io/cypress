@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import ShoppingList from './shopping-list.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 describe('Shopping list', () => {
   beforeEach(() => {

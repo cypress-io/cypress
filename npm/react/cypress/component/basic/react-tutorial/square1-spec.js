@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Square from './square1.jsx'
 import React from 'react'
-import { mount } from '@cypress/react'
+import { mount } from 'cypress-react-unit-test'
 
 it('renders', () => {
   mount(<Square />)

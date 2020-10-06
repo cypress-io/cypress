@@ -22,7 +22,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
   message:
     'It looks like you have custom `rollup.config.js`. We can use it to bundle the components for testing.',
   getExampleUrl: () => {
-    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/rollup'
+    return 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/rollup'
   },
   recommendedComponentFolder: 'src',
   getPluginsCode: (payload, { cypressProjectRoot }) => {
@@ -68,7 +68,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
         `  {`,
         `    plugins: [`,
         `      nodeResolve(),`,
-        `      // process @cypress/react-code`,
+        `      // process cypress-react-unit-test-code`,
         `      commonjs(),`,
         `      // required for react sources`,
         `      replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),`,

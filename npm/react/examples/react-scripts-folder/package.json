@@ -9,8 +9,8 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
     "check-code-coverage": "1.9.2",
+    "cypress-react-unit-test": "file:../..",
     "react-scripts": "3.4.1"
   }
 }
