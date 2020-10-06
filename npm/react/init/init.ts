@@ -64,7 +64,7 @@ async function getCypressConfig () {
 
     console.log(
       `\nFind more information about installation at: ${chalk.bold.underline(
-        'https://github.com/bahmutov/cypress-react-unit-test#init',
+        'https://github.com/bahmutov/@cypress/react#init',
       )}`,
     )
 
@@ -105,8 +105,8 @@ function printCypressJsonHelp (
 
 function printSupportHelper (supportFilePath: string) {
   const stepNumber = chalk.bold('2.')
-  const importCode = 'import \'cypress-react-unit-test/support\''
-  const requireCode = 'require(\'cypress-react-unit-test/support\')'
+  const importCode = 'import \'@cypress/react/support\''
+  const requireCode = 'require(\'@cypress/react/support\')'
 
   if (fs.existsSync(supportFilePath)) {
     const fileContent = fs.readFileSync(supportFilePath, { encoding: 'utf-8' })
@@ -150,7 +150,7 @@ export async function main<T> () {
 
   console.log(
     `${chalk.green(
-      `cypress-react-unit-test@${packageVersion}`,
+      `@cypress/react@${packageVersion}`,
     )} init component testing wizard\n`,
   )
 
@@ -233,7 +233,7 @@ export async function main<T> () {
 
   console.log(
     `Docs for different recipes of bundling tools: ${chalk.bold.underline(
-      'https://github.com/bahmutov/cypress-react-unit-test/blob/main/docs/recipes.md',
+      'https://github.com/bahmutov/@cypress/react/blob/main/docs/recipes.md',
     )}`,
   )
 

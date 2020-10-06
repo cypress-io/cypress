@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 const Button = ({ children, ...rest }) => {
   return <button {...rest}>{children}</button>

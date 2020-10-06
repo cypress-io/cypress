@@ -1,7 +1,7 @@
 // compare to Skeleton.story.js
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 import SideBySide from './SideBySide'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'

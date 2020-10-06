@@ -1,7 +1,7 @@
 import React from 'react'
 import Experiments from './experiments'
 import Collapse, { Panel } from 'rc-collapse'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import experiments from '@packages/server/lib/experiments'
 
 /* global cy */

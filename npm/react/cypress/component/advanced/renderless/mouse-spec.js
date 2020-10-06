@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount, unmount } from 'cypress-react-unit-test'
+import { mount, unmount } from '@cypress/react'
 import MouseMovement from './mouse-movement'
 
 describe('Renderless component', () => {

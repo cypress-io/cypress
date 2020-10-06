@@ -1,7 +1,7 @@
 // you can import CSS directly to experiment with component styles
 import './styles/main.generated.css'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Different styles', () => {
   it('shows button styles', () => {

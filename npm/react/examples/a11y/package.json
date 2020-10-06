@@ -7,7 +7,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-axe": "0.8.1",
-    "cypress-react-unit-test": "file:../.."
+    "@cypress/react": "file:../..",
+    "cypress-axe": "0.8.1"
   }
 }

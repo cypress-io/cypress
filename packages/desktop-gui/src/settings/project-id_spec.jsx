@@ -1,6 +1,6 @@
 import React from 'react'
 import ProjectId from './project-id'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Collapse, { Panel } from 'rc-collapse'
 
 import ipc from '../lib/ipc'

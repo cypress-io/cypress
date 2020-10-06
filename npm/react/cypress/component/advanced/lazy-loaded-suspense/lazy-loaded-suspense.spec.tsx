@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { LazyComponent } from './LazyComponent'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 // NOTE: It doesn't work because of chunk splitting issue with webpack
 describe.skip('React.lazy component with <Suspense />', () => {

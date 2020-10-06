@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Fetcher from './fetcher'
 
 // https://testing-library.com/docs/cypress-testing-library/intro

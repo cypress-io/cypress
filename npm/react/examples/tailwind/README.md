@@ -12,7 +12,7 @@ npm install
 npm run build
 ```
 
-2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+2. Run `npm install` in this folder to symlink the `@cypress/react` dependency.
 
 ```bash
 # in this folder

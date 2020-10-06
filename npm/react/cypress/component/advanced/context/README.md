@@ -5,7 +5,7 @@
 We can also create children elements with mock context around them right from the test file. See [Mock-context-spec.js](Mock-context-spec.js) file.
 
 ```js
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { ThemeContext } from './context'
 import { Toolbar } from './Toolbar.jsx'
 

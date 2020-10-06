@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Component from './Component.jsx'
 import * as calc from './calc'
 

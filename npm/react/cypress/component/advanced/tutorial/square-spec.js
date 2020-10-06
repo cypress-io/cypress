@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 // let's put React component right in the spec file
 class Square extends React.Component {

@@ -33,12 +33,12 @@ const injectStyles = (options: MountOptions) => {
  * @function   mount
  * @param      {React.ReactElement}  jsx - component to mount
  * @param      {MountOptions}  [options] - options, like alias, styles
- * @see https://github.com/bahmutov/cypress-react-unit-test
+ * @see https://github.com/bahmutov/@cypress/react
  * @see https://glebbahmutov.com/blog/my-vision-for-component-tests/
  * @example
  ```
   import Hello from './hello.jsx'
-  import {mount} from 'cypress-react-unit-test'
+  import {mount} from '@cypress/react'
   it('works', () => {
     mount(<Hello onClick={cy.stub()} />)
     // use Cypress commands
@@ -77,9 +77,9 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
     if (!el) {
       throw new Error(
         [
-          '[cypress-react-unit-test] 🔥 Hmm, cannot find root element to mount the component.',
+          '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
           'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
+          'Check https://github.com/bahmutov/@cypress/react#install please',
         ].join(' '),
       )
     }
@@ -107,7 +107,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       const logConsoleProps = {
         props: jsx.props,
         description: 'Mounts React component',
-        home: 'https://github.com/bahmutov/cypress-react-unit-test',
+        home: 'https://github.com/bahmutov/@cypress/react',
       }
       const componentElement = el.children[0]
 
@@ -131,7 +131,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       .wrap(userComponent, { log: false })
       .as(displayName)
       // by waiting, we give the component's hook a chance to run
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
+      // https://github.com/bahmutov/@cypress/react/issues/200
       .wait(1, { log: false })
       .then(() => {
         if (logInstance) {
@@ -151,10 +151,10 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
  * Removes the mounted component. Notice this command automatically
  * queues up the `unmount` into Cypress chain, thus you don't need `.then`
  * to call it.
- * @see https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/basic/unmount
+ * @see https://github.com/bahmutov/@cypress/react/tree/main/cypress/component/basic/unmount
  * @example
   ```
-  import { mount, unmount } from 'cypress-react-unit-test'
+  import { mount, unmount } from '@cypress/react'
   it('works', () => {
     mount(...)
     // interact with the component using Cypress commands
@@ -184,7 +184,7 @@ export const unmount = () => {
  * @example
  * ```
  * import Hello from './hello.jsx'
- * import { createMount } from 'cypress-react-unit-test'
+ * import { createMount } from '@cypress/react'
  *
  * const mount = createMount({ strict: true, cssFile: 'path/to/any/css/file.css' })
  *

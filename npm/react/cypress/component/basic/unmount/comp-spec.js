@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Comp from './comp.jsx'
 import React from 'react'
-import { mount, unmount } from 'cypress-react-unit-test'
+import { mount, unmount } from '@cypress/react'
 
 it('calls callbacks on mount and unmount', () => {
   const onMount = cy.stub()

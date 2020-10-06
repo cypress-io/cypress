@@ -9,7 +9,7 @@
 In order to reuse next's webpack configuration and all the custom configuration defined in `next.config.js` connect special plugin in [plugin file](./cypress/plugins/index.js)
 
 ```js
-const preprocessor = require('cypress-react-unit-test/plugins/next')
+const preprocessor = require('@cypress/react/plugins/next')
 
 module.exports = (on, config) => {
   preprocessor(on, config)
@@ -62,7 +62,7 @@ If your components depends on the next.js router (using `useRouter` or `withRout
 It happens because we render the component just like any other react component – without any specific next.js features. In order to make router work it is required to provide specific context that would be picked up by `useRouter`:
 
 ```js
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { RouterContext } from 'next/dist/next-server/lib/router-context'
 
 // Create a router value you need for the components. Here are all available values as for next v9.5
@@ -96,4 +96,4 @@ Find more examples in [Router.spec.jsx](./cypress/components/Router.spec.jsx)
 
 ## Mocking imports
 
-Mocking imports is not working yet, seems the plugin we are inserting for loose mode causes problems, see issue [439](https://github.com/bahmutov/cypress-react-unit-test/issues/439).
+Mocking imports is not working yet, seems the plugin we are inserting for loose mode causes problems, see issue [439](https://github.com/bahmutov/@cypress/react/issues/439).

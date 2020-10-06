@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Card from './card-without-effect.jsx'
 import React from 'react'
-import { mount, unmount } from 'cypress-react-unit-test'
+import { mount, unmount } from '@cypress/react'
 import { unmountComponentAtNode } from 'react-dom'
 
 it('should select null after timing out', () => {

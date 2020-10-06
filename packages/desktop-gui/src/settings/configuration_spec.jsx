@@ -1,7 +1,7 @@
 import 'regenerator-runtime/runtime'
 import Configuration from './configuration'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 /* global cy */
 describe('Configuration', () => {

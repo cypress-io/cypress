@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import * as React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import HelloWorld from '../../components/HelloWorld.mdx'
 
 describe('MDX component', () => {

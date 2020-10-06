@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Calendar from './Calendar'
 import CalendarHeatmap from 'react-calendar-heatmap'
 import 'react-calendar-heatmap/dist/styles.css'
@@ -11,7 +11,7 @@ const toDate = (yyyyMmDd) => Cypress.moment(yyyyMmDd, 'YYYY-MM-DD').utc()
 describe('Calendar heatmap', () => {
   // NOTE: Skipping the test because the tooltip does not get cleaned correctly
   // when the next test starts, see issue
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/206
+  // https://github.com/bahmutov/@cypress/react/issues/206
   it.skip('random data', () => {
     // we cannot really screenshot random data for visual testing
     mount(<Calendar />)

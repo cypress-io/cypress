@@ -1081,6 +1081,8 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
+      - persist_to_workspace:
+        root: ~/
 
   npm-react-e2e-example:
     <<: *defaults

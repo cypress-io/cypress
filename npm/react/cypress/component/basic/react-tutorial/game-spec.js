@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Game, { Board, calculateWinner } from './game.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import './tic-tac-toe.css'
 
 // for now need a constructor, otherwise getting "Weak map" key

@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Users } from './2-users-named.jsx'
 // to mock CommonJS module loaded from `node_modules` use "require" in spec file
 const Axios = require('axios')

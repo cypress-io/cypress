@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 // Component "Contact" has child component "Map" that is expensive to render
 import Contact from './contact'
 import * as MapModule from './map'

@@ -1,5 +1,5 @@
 require('@packages/ui-components/cypress/support/customPercyCommand')
-require('cypress-react-unit-test/dist/hooks')
+require('@cypress/react/dist/hooks')
 
 const BluebirdPromise = require('bluebird')
 

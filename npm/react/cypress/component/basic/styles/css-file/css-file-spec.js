@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { createMount, mount } from 'cypress-react-unit-test'
+import { createMount, mount } from '@cypress/react'
 
 describe('cssFile', () => {
   it('is loaded', () => {

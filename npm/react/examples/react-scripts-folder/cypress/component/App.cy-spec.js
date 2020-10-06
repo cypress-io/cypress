@@ -2,7 +2,7 @@
 // compare to App.test.js
 import React from 'react'
 import App from '../../src/App'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import * as calc from '../../src/calc'
 import * as child from '../../src/Child'
 

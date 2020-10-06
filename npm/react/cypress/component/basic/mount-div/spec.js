@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 /// <reference types="../../lib" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 function Button () {
   return <button>Hello</button>
@@ -13,7 +13,7 @@ describe('mounting a div', () => {
     cy.contains('Works').should('be.visible')
   })
 
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/98
+  // https://github.com/bahmutov/@cypress/react/issues/98
   it('mount multiple components', function () {
     mount(
       <div>

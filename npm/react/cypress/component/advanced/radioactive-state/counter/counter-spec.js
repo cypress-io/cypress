@@ -1,6 +1,6 @@
 import './counter.css'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Counter } from './Counter.jsx'
 
 describe('reactive-state Counter', () => {

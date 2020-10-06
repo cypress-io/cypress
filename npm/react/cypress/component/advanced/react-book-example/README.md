@@ -2,7 +2,7 @@ App and tests modeled from https://github.com/softchris/react-book/tree/7bd767bb
 
 ## Selecting React Components
 
-Typically we suggest selecting DOM elements using public properties likes data attributes, labels, text, CSS class names, or ids. If you really want to select React components using props or state values, combine `cypress-react-unit-test` with [cypress-react-selector](https://github.com/abhinaba-ghosh/cypress-react-selector) plugin.
+Typically we suggest selecting DOM elements using public properties likes data attributes, labels, text, CSS class names, or ids. If you really want to select React components using props or state values, combine `@cypress/react` with [cypress-react-selector](https://github.com/abhinaba-ghosh/cypress-react-selector) plugin.
 
 See file [./src/components/ProductsList.spec.js](./src/components/ProductsList.spec.js) for example.
 

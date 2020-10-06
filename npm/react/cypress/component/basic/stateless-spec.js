@@ -2,7 +2,7 @@
 /// <reference types="../../lib" />
 import HelloWorld from './stateless.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 /* eslint-env mocha */
 describe('Stateless component', () => {

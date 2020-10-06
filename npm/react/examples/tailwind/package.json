@@ -1,5 +1,6 @@
 {
   "name": "example-tailwind",
+  "version": "0.0.0",
   "description": "Component testing with Tailwind CSS",
   "private": true,
   "scripts": {
@@ -10,7 +11,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../..",
+    "@cypress/react": "file:../..",
     "tailwindcss": "1.4.6"
   }
 }

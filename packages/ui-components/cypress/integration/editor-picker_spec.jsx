@@ -53,7 +53,7 @@ describe('<EditorPicker />', () => {
   })
 
   // this doesn't work currently because the tooltip renders in the spec
-  // iframe and not the AUT iframe. need to switch to cypress-react-unit-test
+  // iframe and not the AUT iframe. need to switch to @cypress/react
   // or something similar to get this to work
   it.skip('shows info circle with desciption tooltip when specified', () => {
     cy.render(render, <EditorPicker {...defaultProps} />)
