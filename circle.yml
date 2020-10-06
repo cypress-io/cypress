@@ -1096,24 +1096,23 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - run: 
-         name: Checkout example path
-         command: cd npm/react/<<parameters.path>>
       - restore_cache:
           name: Restore Cache
           keys:
-            - yarn-packages-{{ checksum "<<parameters.path>>/yarn.lock" }}
+            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
       - run:
           name: Install Dependencies
           command: yarn install --frozen-lockfile
+          working_directory: npm/react/<<parameters.path>>
       - save_cache:
           name: Save Cache
-          key: yarn-packages-{{ checksum "<<parameters.path>>/yarn.lock" }}
+          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
           paths:
             - ~/.cache
       - run: 
           name: Run e2e example tests
           command: yarn test
+          working_directory: npm/react/<<parameters.path>>
 
   npm-react-release:
     <<: *defaults
@@ -1948,54 +1947,67 @@ linux-workflow: &linux-workflow
 
     # Run tests for end-to-end react component tests examples
     - npm-react-e2e-example:
+        name: React + Axe component testing
         path: examples/a11y
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + Next component testing
         path: examples/nextjs
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + CRA component testing
         path: examples/react-scripts
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + CRA folder component testing
         path: examples/react-scripts-folder
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + rollup component testing
         path: examples/rollup
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + sass component testing
         path: examples/sass-and-ts
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + snapshots component testing
         path: examples/snapshots
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + tailwind component testing
         path: examples/tailwind
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + applitools component testing
         path: examples/visual-testing-with-applitools
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + percy component testing
         path: examples/visual-testing-with-percy
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + happo component testing
         path: examples/visual-testing-with-happo
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + webpack file component testing
         path: examples/webpack-file
         requires:
           - npm-react
     - npm-react-e2e-example:
+        name: React + webpack opts component testing
         path: examples/webpack-options
         requires:
           - npm-react
