@@ -3,7 +3,7 @@
   "description": "Component testing with Tailwind CSS",
   "private": true,
   "scripts": {
-    "build:css": "../../node_modules/.bin/tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
+    "build:css": "tailwindcss build src/styles/tailwind.css -o src/styles/main.generated.css",
     "precy:open": "npm run build:css",
     "cy:open": "node ../../../../scripts/cypress open",
     "pretest": "npm run build:css",

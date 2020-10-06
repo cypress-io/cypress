@@ -1989,11 +1989,12 @@ linux-workflow: &linux-workflow
         path: examples/tailwind
         requires:
           - npm-react
-    - npm-react-e2e-example:
-        name: React + Applitools component testing
-        path: examples/visual-testing-with-applitools
-        requires:
-          - npm-react
+    # Requires Applitools key in the env
+    # - npm-react-e2e-example:
+    #     name: React + Applitools component testing
+    #     path: examples/visual-testing-with-applitools
+    #     requires:
+    #       - npm-react
     - npm-react-e2e-example:
         name: React + Percy component testing
         path: examples/visual-testing-with-percy
