@@ -193,28 +193,32 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     return sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
   }
 
-  if (notificationOnly) {
-    emitReceived()
-
-    const nextRoute = getNextRoute(state, request.req, frame.routeHandlerId)
-
-    if (!nextRoute) {
-      return request.continueRequest()
+  const ensureBody = (cb: () => void) => {
+    if (frame.req.body) {
+      return cb()
     }
 
-    return _interceptRequest(state, request, nextRoute, socket)
+    request.req.pipe(concatStream((reqBody) => {
+      request.req.body = frame.req.body = reqBody.toString()
+      cb()
+    }))
   }
 
-  // if we already have a body, just emit
-  if (frame.req.body) {
-    return emitReceived()
+  if (notificationOnly) {
+    return ensureBody(() => {
+      emitReceived()
+
+      const nextRoute = getNextRoute(state, request.req, frame.routeHandlerId)
+
+      if (!nextRoute) {
+        return request.continueRequest()
+      }
+
+      _interceptRequest(state, request, nextRoute, socket)
+    })
   }
 
-  // else, buffer the body
-  request.req.pipe(concatStream((reqBody) => {
-    frame.req.body = reqBody.toString()
-    emitReceived()
-  }))
+  ensureBody(emitReceived)
 }
 
 /**

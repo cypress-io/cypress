@@ -1699,6 +1699,25 @@ describe('network stubbing', function () {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/8695
+    context('yields request', function () {
+      it('when not intercepted', function () {
+        cy.route2('/post-only').as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'some body')
+      })
+
+      it('when intercepted', function () {
+        cy.route2('/post-only', (req) => {
+          req.body = 'changed'
+        }).as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'changed')
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8536
     context('yields response', function () {
       const testResponse = (expectedBody, done) => {
