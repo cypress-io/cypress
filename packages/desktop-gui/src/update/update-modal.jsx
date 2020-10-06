@@ -8,11 +8,6 @@ import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
 import { useLifecycle } from '../lib/use-lifecycle'
 
-const openChangelog = (e) => {
-  e.preventDefault()
-  ipc.externalOpen('https://on.cypress.io/changelog?source=dgui_footer')
-}
-
 const openDownload = (e) => {
   e.preventDefault()
   ipc.externalOpen('https://download.cypress.io/desktop')
