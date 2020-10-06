@@ -1102,13 +1102,13 @@ jobs:
       - restore_cache:
           name: Restore Cache
           keys:
-            - yarn-packages-{{ checksum "<<parameters.path>>yarn.lock" }}
+            - yarn-packages-{{ checksum "<<parameters.path>>/yarn.lock" }}
       - run:
           name: Install Dependencies
           command: yarn install --frozen-lockfile
       - save_cache:
           name: Save Cache
-          key: yarn-packages-{{ checksum "yarn.lock" }}
+          key: yarn-packages-{{ checksum "<<parameters.path>>/yarn.lock" }}
           paths:
             - ~/.cache
       - run: 
