@@ -141,39 +141,5 @@ describe('browser detection', () => {
         warning: firefoxGcWarning,
       })
     })
-
-    it('works with :browserName format', async () => {
-      detectByPath('/foo/bar:foo-browser').then((browser) => {
-        expect(browser).to.deep.equal(
-          Object.assign({}, goalBrowsers.find((gb) => {
-            return gb.name === 'foo-browser'
-          }), {
-            displayName: 'Custom Foo Browser',
-            info: 'Loaded from /Applications/My Shiny New Browser.app',
-            custom: true,
-            version: '100.1.2.3',
-            majorVersion: 100,
-            path: '/Applications/My Shiny New Browser.app',
-          }),
-        )
-      })
-    })
-
-    it('identifies browser if name in path', async () => {
-      detectByPath('/foo/foo-browser').then((browser) => {
-        expect(browser).to.deep.equal(
-          Object.assign({}, goalBrowsers.find((gb) => {
-            return gb.name === 'foo-browser'
-          }), {
-            displayName: 'Custom Foo Browser',
-            info: 'Loaded from /Applications/My Shiny New Browser.app',
-            custom: true,
-            version: '100.1.2.3',
-            majorVersion: 100,
-            path: '/Applications/My Shiny New Browser.app',
-          }),
-        )
-      })
-    })
   })
 })
