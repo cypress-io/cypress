@@ -78,6 +78,18 @@ module.exports = {
     })
   },
 
+  getChapters (fileName) {
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve(metadata)
+      })
+    })
+  },
+
   copy (src, dest) {
     debug('copying from %s to %s', src, dest)
 

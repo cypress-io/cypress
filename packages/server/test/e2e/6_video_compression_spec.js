@@ -33,7 +33,7 @@ describe('e2e video compression', () => {
           const videosPath = Fixtures.projectPath('e2e/cypress/videos/*')
 
           return glob(videosPath)
-          .then((files) => {
+          .tap((files) => {
             expect(files).to.have.length(1, `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`)
 
             return videoCapture.getCodecData(files[0])
@@ -43,6 +43,21 @@ describe('e2e video compression', () => {
               expect(durationMs).to.be.ok
 
               expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('15 seconds'))
+            })
+          })
+          .then((files) => {
+            return videoCapture.getChapters(files[0])
+            .then(({ chapters }) => {
+              // There are 40 chapters but we test only the first one
+              // because what we want to check is if chapters are added properly.
+              // In a chapter object, there are properties like 'end' and 'end_time'.
+              // We don't check them here because they return the test time in milliseconds.
+              // They cannot be guessed correctly and they can cause flakiness.
+              expect(chapters[0].id).to.eq(0)
+              expect(chapters[0].start).to.eq(0)
+              expect(chapters[0].start_time).to.eq(0)
+              expect(chapters[0]['TAG:title']).to.eq('num: 1 makes some long tests')
+              expect(chapters[0].time_base).to.eq('1/1000')
             })
           })
         }).get('stdout')
