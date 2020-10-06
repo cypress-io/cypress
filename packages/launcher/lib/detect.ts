@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import { compact, extend, find } from 'lodash'
-import * as os from 'os'
+import os from 'os'
 import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
