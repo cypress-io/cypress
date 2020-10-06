@@ -1016,11 +1016,11 @@ describe('network stubbing', function () {
       })
 
       it('can timeout in request handler', {
-        defaultCommandTimeout: 100,
+        defaultCommandTimeout: 50,
         retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `100ms` to resolve\./)
+          expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
@@ -1234,7 +1234,7 @@ describe('network stubbing', function () {
       })
     })
 
-    it('can reply with a JSON fixture', { retries: 1 }, function () {
+    it('can reply with a JSON fixture', function () {
       cy.route2({
         method: 'POST',
         url: '/test-xhr',
@@ -1521,11 +1521,11 @@ describe('network stubbing', function () {
       })
 
       it('can timeout in req.reply handler', {
-        defaultCommandTimeout: 100,
+        defaultCommandTimeout: 50,
         retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `100ms` to resolve\./)
+          expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
@@ -1667,7 +1667,7 @@ describe('network stubbing', function () {
       .wait('@foo.bar.request')
     })
 
-    it('can timeout incrementally waiting on requests', { retries: 1 }, function (done) {
+    it('can timeout incrementally waiting on requests', function (done) {
       cy.on('fail', (err) => {
         expect(err.message).to.contain('for the 2nd request to the route')
         done()
