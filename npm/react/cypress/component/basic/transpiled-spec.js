@@ -2,7 +2,7 @@
 /// <reference types="../../lib" />
 import { Transpiled } from './transpiled.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 /* eslint-env mocha */
 describe('Transpiled', () => {

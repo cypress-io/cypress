@@ -1,6 +1,6 @@
 // example from https://reactjs.org/docs/testing-recipes.html
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 function Hello (props) {
   if (props.name) {

@@ -2,7 +2,7 @@
 import HelloWorld from './stateless-alert.jsx'
 import React from 'react'
 import ReactDom from 'react-dom'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Stateless alert', () => {
   beforeEach(() => {

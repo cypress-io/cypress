@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('stylesheets', () => {
   const baseUrl = '/__root/cypress/component/basic/styles/css-file/base.css'

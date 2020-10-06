@@ -7,7 +7,7 @@
     "types": ["cypress"],
     // ⚠️ required only for demo purposes, remove from code
     "paths": {
-      "cypress-react-unit-test": ["../../lib/index.ts"]
+      "@cypress/react": ["../../lib/index.ts"]
     }
   },
   "exclude": ["node_modules"],

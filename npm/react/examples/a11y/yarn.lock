@@ -1698,7 +1698,7 @@ cypress-axe@0.8.1:
   resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-0.8.1.tgz#ddb37dca6570c0642dda2388daf678e83b3e8d3f"
   integrity sha512-hX48+r5n7Ns7CHkn601Ag0JiCG1vby5+g7QhlP8X+mkiVYpTLpXAPiiaKFj9QTTCdZSI5+0UqwIxA+ShTsr5tA==
 
-"cypress-react-unit-test@file:../..":
+"@cypress/react@file:../..":
   version "0.0.0-development"
   dependencies:
     "@babel/plugin-transform-modules-commonjs" "7.10.4"

@@ -6,7 +6,7 @@
     "jsx": "react",
     "types": ["cypress"],
     "paths": {
-      "cypress-react-unit-test": ["../lib"]
+      "@cypress/react": ["../lib"]
     }
   }
 }

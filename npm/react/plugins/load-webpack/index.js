@@ -1,6 +1,6 @@
 // @ts-check
 const path = require('path')
-const debug = require('debug')('cypress-react-unit-test')
+const debug = require('debug')('@cypress/react')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const findWebpack = require('find-webpack')
 const { addImageRedirect } = require('../utils/add-image-redirect')

@@ -1,7 +1,7 @@
 /// <reference types="cypress" />
 import Hello from './hello.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 it('says hello to different people', () => {
   mount(<Hello />)

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 export class Example extends React.Component {
   constructor (props, context) {

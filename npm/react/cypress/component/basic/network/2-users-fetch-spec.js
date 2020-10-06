@@ -2,7 +2,7 @@
 /// <reference types="../../lib" />
 import { Users } from './2-users-fetch.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Users with Fetch', () => {
   it('fetches 3 users from remote API', () => {
@@ -11,7 +11,7 @@ describe('Users with Fetch', () => {
     cy.get('li', { timeout: 20000 }).should('have.length', 3)
   })
 
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/347
+  // https://github.com/bahmutov/@cypress/react/issues/347
   context('mocking', () => {
     beforeEach(() => {
       cy.server()

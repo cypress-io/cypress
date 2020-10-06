@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 // test retries from
 // https://github.com/cypress-io/cypress/pull/3968

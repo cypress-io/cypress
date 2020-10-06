@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import PositiveCounter from './PositiveCounter'
 
 // NOTE: current version 1.4.3 of cypress-plugin-snapshots only works with
