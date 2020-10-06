@@ -55,3 +55,13 @@ exports['cache list with warn log level'] = `
 │ 2.3.4   │ unknown   │
 └─────────┴───────────┘
 `
+
+exports['lib/tasks/cache .list shows sizes 1'] = `
+┌─────────┬──────────────┬───────┐
+│ version │ last used    │ size  │
+├─────────┼──────────────┼───────┤
+│ 1.2.3   │ 3 months ago │ 0.2MB │
+├─────────┼──────────────┼───────┤
+│ 2.3.4   │ unknown      │ 0.2MB │
+└─────────┴──────────────┴───────┘
+`
