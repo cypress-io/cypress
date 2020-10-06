@@ -6,14 +6,18 @@
     "build": "next build",
     "build:static": "next build && next out",
     "check-coverage": "../../node_modules/.bin/check-coverage components/Search.jsx && ../../node_modules/.bin/check-coverage pages/index.js && ../../node_modules/.bin/check-coverage pages/router.js",
-    "cy:open": "../../node_modules/.bin/cypress open",
+    "cy:open": "node ../../../../scripts/cypress open",
     "dev": "next",
     "only-covered": "../../node_modules/.bin/only-covered components/Search.jsx pages/index.js pages/router.js",
     "start": "next start",
-    "test": "../../node_modules/.bin/../../node_modules/.bin/cypress-expect run --min-passing 10"
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@mdx-js/loader": "^1.6.16",
+    "@next/mdx": "^9.5.3",
+    "@zeit/next-sass": "^1.0.1",
+    "cypress-react-unit-test": "file:../..",
+    "next": "^9.5.3"
   },
   "license": "MIT"
 }

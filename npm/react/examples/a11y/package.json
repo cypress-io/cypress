@@ -3,10 +3,11 @@
   "description": "Testing component accessibility",
   "private": true,
   "scripts": {
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "test": "../../node_modules/.bin/cypress run"
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
+    "cypress-axe": "0.8.1",
     "cypress-react-unit-test": "file:../.."
   }
 }
