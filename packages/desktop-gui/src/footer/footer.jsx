@@ -1,25 +1,49 @@
-import React, { Component } from 'react'
+import cs from 'classnames'
+import { action } from 'mobx'
+import { observer, useLocalStore } from 'mobx-react'
+import React from 'react'
 
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
+import { useUpdateChecker } from '../update/use-update-checker'
 
-export default class Footer extends Component {
-  render () {
-    return (
-      <footer className='footer'>
-        <div className='container-fluid'>
-          <p className='text-center'>
-            Version {appStore.displayVersion} |{' '}
-            <a onClick={this._openChangelog} href='#'>Changelog</a>
-          </p>
-        </div>
-      </footer>
-    )
-  }
+import UpdateModal from '../update/update-modal'
 
-  _openChangelog (e) {
-    e.preventDefault()
+const openChangelog = (e) => {
+  e.target.blur()
 
-    return ipc.externalOpen('https://on.cypress.io/changelog')
-  }
+  ipc.externalOpen('https://on.cypress.io/changelog?source=dgui_footer')
 }
+
+const Footer = observer(() => {
+  const state = useLocalStore(() => ({
+    showingModal: false,
+    showModal: action(() => {
+      state.showingModal = true
+    }),
+    hideModal: action(() => {
+      state.showingModal = false
+    }),
+  }))
+
+  useUpdateChecker()
+
+  const showModal = (e) => {
+    e.target.blur()
+
+    state.showModal()
+  }
+
+  return (
+    <footer className={cs('footer', { 'update-available': appStore.updateAvailable })}>
+      <button className='version' onClick={showModal} disabled={!appStore.updateAvailable}>
+        <i className='update-indicator fas fa-arrow-alt-circle-up' />
+        Version {appStore.displayVersion}
+      </button>
+      <button className='open-changelog' onClick={openChangelog}>Changelog</button>
+      <UpdateModal show={state.showingModal} onClose={state.hideModal} />
+    </footer>
+  )
+})
+
+export default Footer
