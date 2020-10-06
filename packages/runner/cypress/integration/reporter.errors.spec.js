@@ -1,6 +1,9 @@
 const helpers = require('../support/helpers')
 
-const { verify } = helpers.createCypress({ config: { isTextTerminal: true, retries: 0 } })
+const { verify } = helpers.createCypress({
+  config: { isTextTerminal: true, retries: 0 },
+  visitUrl: 'http://localhost:3500/fixtures/isolated-runner-inner.html',
+})
 
 const verifyInternalFailure = (props) => {
   const { method } = props
@@ -551,7 +554,7 @@ describe('errors ui', () => {
     const file = 'docs_url_spec.js'
     const docsUrl = 'https://on.cypress.io/viewport'
 
-    verify.it('displays as button in interactive mode', {
+    verify.it('displays as button in interactive mode', { retries: 1 }, {
       file,
       verifyFn () {
         cy

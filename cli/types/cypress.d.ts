@@ -2564,7 +2564,7 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
-     * Firefox-only: The number of tests that will run between forced garbage collections.
+     * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
      * @default { runMode: 1, openMode: null }
@@ -5042,7 +5042,7 @@ declare namespace Cypress {
       })
     ```
      */
-    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.IRunnable) => false | void): void
+    (action: 'uncaught:exception', fn: (error: Error, runnable: Mocha.Runnable) => false | void): void
     /**
      * Fires when your app calls the global `window.confirm()` method.
      * Cypress will auto accept confirmations. Return `false` from this event and the confirmation will be canceled.
@@ -5102,7 +5102,7 @@ declare namespace Cypress {
      * Fires when the test has failed. It is technically possible to prevent the test from actually failing by binding to this event and invoking an async `done` callback. However this is **strongly discouraged**. Tests should never legitimately fail. This event exists because it's extremely useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'fail', fn: (error: Error, mocha: Mocha.IRunnable) => void): void
+    (action: 'fail', fn: (error: Error, mocha: Mocha.Runnable) => void): void
     /**
      * Fires whenever the viewport changes via a `cy.viewport()` or naturally when Cypress resets the viewport to the default between tests. Useful for debugging purposes.
      * @see https://on.cypress.io/catalog-of-events#App-Events
@@ -5147,16 +5147,16 @@ declare namespace Cypress {
      * Fires before the test and all **before** and **beforeEach** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:before:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): void
     /**
      * Fires before the test and all **before** and **beforeEach** hooks run. If a `Promise` is returned, it will be awaited before proceeding.
      */
-    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.ITest) => void | Promise<any>): void
+    (action: 'test:before:run:async', fn: (attributes: ObjectLike, test: Mocha.Test) => void | Promise<any>): void
     /**
      * Fires after the test and all **afterEach** and **after** hooks run.
      * @see https://on.cypress.io/catalog-of-events#App-Events
      */
-    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.ITest) => void): void
+    (action: 'test:after:run', fn: (attributes: ObjectLike, test: Mocha.Test) => void): void
   }
 
   // $CommandQueue from `command_queue.coffee` - a lot to type. Might be more useful if it was written in TS

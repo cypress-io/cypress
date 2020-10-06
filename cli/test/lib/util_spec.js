@@ -13,7 +13,7 @@ const util = require(`${lib}/util`)
 const logger = require(`${lib}/logger`)
 
 // https://github.com/cypress-io/cypress/issues/5431
-const expectedNodeOptions = `--max-http-header-size=${1024 * 1024} --http-parser=legacy`
+const expectedNodeOptions = `--max-http-header-size=${1024 * 1024}`
 
 describe('util', () => {
   beforeEach(() => {
@@ -481,10 +481,22 @@ describe('util', () => {
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bar')
     })
 
+    it('prefers env var over .npmrc config even if it\'s an empty string', () => {
+      process.env.CYPRESS_FOO = ''
+      process.env.npm_config_CYPRESS_FOO = 'baz'
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('')
+    })
+
     it('prefers .npmrc config over package config', () => {
       process.env.npm_package_config_CYPRESS_FOO = 'baz'
       process.env.npm_config_CYPRESS_FOO = 'bloop'
       expect(util.getEnv('CYPRESS_FOO')).to.eql('bloop')
+    })
+
+    it('prefers .npmrc config over package config even if it\'s an empty string', () => {
+      process.env.npm_package_config_CYPRESS_FOO = 'baz'
+      process.env.npm_config_CYPRESS_FOO = ''
+      expect(util.getEnv('CYPRESS_FOO')).to.eql('')
     })
 
     it('throws on non-string name', () => {

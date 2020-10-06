@@ -3,11 +3,15 @@ import { createIntervalGetter, install } from '../../../src/util/firefox_forced_
 describe('driver/src/util/firefox_forced_gc', () => {
   describe('#createIntervalGetter returns a function that', () => {
     const run = (configObj) => {
-      const configFn = (key) => {
-        return key ? configObj[key] : configObj
+      const fakeCypress = {
+        config: (key) => {
+          return key ? configObj[key] : configObj
+        },
+        browser: configObj.browser,
       }
 
-      return createIntervalGetter(configFn)()
+      // @ts-ignore
+      return createIntervalGetter(fakeCypress)()
     }
 
     it('returns undefined if not in Firefox', () => {
@@ -22,6 +26,7 @@ describe('driver/src/util/firefox_forced_gc', () => {
       expect(run({
         browser: {
           family: 'firefox',
+          majorVersion: 79,
         },
         firefoxGcInterval: 99,
       })).to.eq(99)
@@ -31,6 +36,7 @@ describe('driver/src/util/firefox_forced_gc', () => {
       expect(run({
         browser: {
           family: 'firefox',
+          majorVersion: 79,
         },
         firefoxGcInterval: null,
       })).to.eq(null)
@@ -40,6 +46,7 @@ describe('driver/src/util/firefox_forced_gc', () => {
       expect(run({
         browser: {
           family: 'firefox',
+          majorVersion: 79,
         },
         firefoxGcInterval: {
           runMode: 10,
@@ -53,6 +60,7 @@ describe('driver/src/util/firefox_forced_gc', () => {
       expect(run({
         browser: {
           family: 'firefox',
+          majorVersion: 79,
         },
         firefoxGcInterval: {
           runMode: 10,
@@ -67,10 +75,10 @@ describe('driver/src/util/firefox_forced_gc', () => {
       firefoxGcInterval: 5,
     }, () => {
       const real = Cypress.getFirefoxGcInterval
-      const fake = createIntervalGetter(Cypress.config)
+      const fake = createIntervalGetter(Cypress)
 
       // conditional, so it can pass in non-ff browsers
-      expect(real()).to.eq(fake()).and.eq(Cypress.isBrowser('firefox') ? 5 : undefined)
+      expect(real()).to.eq(fake()).and.eq(Cypress.isBrowser('firefox') && Cypress.browser.majorVersion < 80 ? 5 : undefined)
     })
   })
 
@@ -83,7 +91,10 @@ describe('driver/src/util/firefox_forced_gc', () => {
       MockCypress = {
         on: cy.stub().throws(),
         emit: cy.stub().throws(),
-        isBrowser: cy.stub().throws(),
+        browser: {
+          family: 'firefox',
+          majorVersion: 79,
+        },
         getFirefoxGcInterval: cy.stub().throws(),
         backend: cy.stub().throws(),
       }
@@ -108,7 +119,16 @@ describe('driver/src/util/firefox_forced_gc', () => {
     }
 
     it('registers no event handlers if not in Firefox', () => {
-      MockCypress.isBrowser.withArgs('firefox').returns(false)
+      MockCypress.browser.family = 'chrome'
+
+      install(MockCypress)
+
+      expect(MockCypress.on).to.not.be.called
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8241
+    it('registers no event handlers if in Firefox >= 80', () => {
+      MockCypress.browser.majorVersion = 80
 
       install(MockCypress)
 
@@ -116,7 +136,6 @@ describe('driver/src/util/firefox_forced_gc', () => {
     })
 
     it('triggers a forced GC correctly with interval = 1', () => {
-      MockCypress.isBrowser.withArgs('firefox').returns(true)
       MockCypress.getFirefoxGcInterval.returns(1)
 
       const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()
@@ -158,7 +177,6 @@ describe('driver/src/util/firefox_forced_gc', () => {
     })
 
     it('triggers a forced GC correctly with interval = 3', () => {
-      MockCypress.isBrowser.withArgs('firefox').returns(true)
       MockCypress.getFirefoxGcInterval.returns(3)
 
       const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()
@@ -191,7 +209,6 @@ describe('driver/src/util/firefox_forced_gc', () => {
     })
 
     it('does not trigger any forced GC with falsy interval', () => {
-      MockCypress.isBrowser.withArgs('firefox').returns(true)
       MockCypress.getFirefoxGcInterval.returns(false)
 
       const forceGc = MockCypress.backend.withArgs('firefox:force:gc').resolves()

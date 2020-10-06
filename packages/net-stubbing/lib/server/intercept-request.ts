@@ -254,7 +254,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   }
 
   if (frame.hasResponseHandler) {
-    backendRequest.sendResponseToDriver = true
+    backendRequest.waitForResponseContinue = true
   }
 
   if (frame.tryNextRoute) {

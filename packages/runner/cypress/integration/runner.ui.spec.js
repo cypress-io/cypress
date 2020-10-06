@@ -315,4 +315,51 @@ describe('src/cypress/runner', () => {
       })
     })
   })
+
+  describe('reporter interaction', () => {
+    // https://github.com/cypress-io/cypress/issues/8621
+    it('user can stop test execution', (done) => {
+      runIsolatedCypress(() => {
+        // eslint-disable-next-line mocha/handle-done-callback
+        it('test stops while running', (done) => {
+          cy.timeout(200)
+          cy.get('.not-exist')
+          setTimeout(() => {
+            cy.$$('button.stop', parent.document).click()
+          }, 100)
+        })
+
+        afterEach(function () {
+          this.currentTest.err = new Error('ran aftereach')
+        })
+      }, {
+        onBeforeRun ({ autCypress }) {
+          autCypress.on('test:after:run', (arg) => {
+            expect(arg.err.message).not.contain('aftereach')
+            done()
+          })
+        },
+      })
+    })
+
+    it('supports disabling command log reporter with env var NO_COMMAND_LOG', () => {
+      runIsolatedCypress(() => {
+        it('foo', () => {
+          // simulate a page load, ensures reporter state event is properly stubbed
+          cy.then(() => Cypress.action('cy:collect:run:state'))
+          cy.visit('/')
+
+          // ensures runner doesn't wait for nonexist before:screenshot ack
+          cy.screenshot({
+            capture: 'runner',
+          })
+        })
+      },
+      {
+        config: { env: { NO_COMMAND_LOG: '1' } },
+      })
+
+      cy.get('.reporter').should('not.exist')
+    })
+  })
 })

@@ -207,7 +207,6 @@ commands:
     description: Post GitHub comment with a blurb on how to install pre-release version
     steps:
       - run: ls -la
-      # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
       - run: cat binary-url.json
       - run: cat npm-package-url.json
@@ -446,6 +445,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             yarn --frozen-lockfile || yarn --frozen-lockfile
+            yarn build-prod
       - run:
           name: Top level packages
           command: yarn list --depth=0 || true
@@ -469,6 +469,7 @@ jobs:
           name: Linting 🧹
           command: |
             . ./scripts/load-nvm.sh
+            git clean -df
             yarn lint
       - run:
           name: cypress info (dev)
@@ -855,11 +856,6 @@ jobs:
           command: yarn build-prod
           working_directory: packages/desktop-gui
       - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
@@ -993,6 +989,96 @@ jobs:
       - run:
           command: node index.js
           working_directory: packages/launcher
+
+  npm-webpack-preprocessor:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-preprocessor test
+      - run:
+          name: Test babelrc
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-babelrc
+      - run:
+          name: Build ts-loader
+          command: yarn install
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Types ts-loader
+          command: yarn types
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Test ts-loader
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/use-ts-loader
+      - run:
+          name: Start React app
+          command: yarn start
+          background: true
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - run:
+          name: Test React app
+          command: yarn test
+          working_directory: npm/webpack-preprocessor/examples/react-app
+      - store-npm-logs
+
+  npm-webpack-preprocessor-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/webpack-preprocessor build
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/webpack-preprocessor
+
+  npm-vue:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/vue build
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/vue test
+      - store-npm-logs
+
+  npm-vue-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/vue
+
+  npm-eslint-plugin-dev:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/eslint-plugin-dev test
+
+  npm-eslint-plugin-dev-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/eslint-plugin-dev
 
   build-binary:
     <<: *defaults
@@ -1769,6 +1855,42 @@ linux-workflow: &linux-workflow
     - run-launcher:
         requires:
           - build
+
+    - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-preprocessor-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-webpack-preprocessor
+
+    - npm-vue:
+        requires:
+          - build
+    - npm-vue-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-vue
+
+    - npm-eslint-plugin-dev:
+        requires:
+          - build
+    - npm-eslint-plugin-dev-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-eslint-plugin-dev
 
     # various testing scenarios, like building full binary
     # and testing it on a real project

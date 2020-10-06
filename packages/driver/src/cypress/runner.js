@@ -63,7 +63,16 @@ const testAfterRun = (test, Cypress) => {
   test.clearTimeout()
   if (!fired(TEST_AFTER_RUN_EVENT, test)) {
     setWallClockDuration(test)
-    fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+    try {
+      fire(TEST_AFTER_RUN_EVENT, test, Cypress)
+    } catch (e) {
+      // if the test:after:run listener throws it's likely spec code
+      // Since the test status has already been emitted this can't affect the test status.
+      // Let's just log the error to console
+      // TODO: revist when we handle uncaught exceptions/rejections between tests
+      // eslint-disable-next-line no-console
+      console.error(e)
+    }
 
     // perf loop only through
     // a tests OWN properties and not
@@ -1143,7 +1152,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // if there's no test, this is likely a rouge before/after hook
       // that should not have run, so skip this runnable
-      if (!test) {
+      if (!test || _runner.stopped) {
         return _next()
       }
 

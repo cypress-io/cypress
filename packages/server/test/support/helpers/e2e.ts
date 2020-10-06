@@ -781,6 +781,22 @@ const e2e = {
     .replace(/using description file: .* \(relative/g, 'using description file: [..] (relative')
     .replace(/Module build failed \(from .*\)/g, 'Module build failed (from [..])')
   },
+
+  normalizeRuns (runs) {
+    runs.forEach((run) => {
+      run.tests.forEach((test) => {
+        test.attempts.forEach((attempt) => {
+          const codeFrame = attempt.error && attempt.error.codeFrame
+
+          if (codeFrame) {
+            codeFrame.absoluteFile = codeFrame.absoluteFile.split(pathUpToProjectName).join('/foo/bar/.projects')
+          }
+        })
+      })
+    })
+
+    return runs
+  },
 }
 
 export {
