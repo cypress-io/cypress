@@ -1,0 +1,9 @@
+{
+  "viewportWidth": 500,
+  "viewportHeight": 500,
+  "video": false,
+  "projectId": "134ej7",
+  "testFiles": "**/*spec.js",
+  "experimentalComponentTesting": true,
+  "experimentalFetchPolyfill": true
+}

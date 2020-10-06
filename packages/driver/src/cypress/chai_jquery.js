@@ -53,11 +53,15 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
     try {
       // reset obj to wrapped
       const orig = ctx._obj
+      const selector = ctx._obj.selector
 
       ctx._obj = wrap(ctx)
 
       if (ctx._obj.length === 0) {
-        ctx._obj = ctx._obj.selector
+        // From jQuery 3.x .selector API is deprecated. (https://api.jquery.com/selector/)
+        // Because of that, wrap() above removes selector property.
+        // That's why we're caching the value of selector above and using it here.
+        ctx._obj = selector
       }
 
       // apply the assertion

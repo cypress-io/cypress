@@ -24,6 +24,13 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
 
   if (request) {
     request.state = 'ResponseReceived'
+
+    if (!request.responseHandler) {
+      // this is notification-only, update the request with the response attributes and end
+      request.response = res
+
+      return
+    }
   }
 
   const continueFrame: NetEventFrames.HttpResponseContinue = {
@@ -32,10 +39,11 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   }
 
   const sendContinueFrame = () => {
-    // copy changeable attributes of userReq to req in frame
+    // copy changeable attributes of userRes to res in frame
+    // if the user is setting a StaticResponse, use that instead
     // @ts-ignore
     request.response = continueFrame.res = {
-      ..._.pick(userRes, SERIALIZABLE_RES_PROPS),
+      ..._.pick(continueFrame.staticResponse || userRes, SERIALIZABLE_RES_PROPS),
     }
 
     if (request) {
@@ -93,6 +101,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   }
 
   const timeout = Cypress.config('defaultCommandTimeout')
+  const curTest = Cypress.state('test')
 
   return Bluebird.try(() => {
     return request.responseHandler!(userRes)
@@ -115,6 +124,11 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
+    if (Cypress.state('test') !== curTest) {
+      // active test has changed, ignore the timeout
+      return
+    }
+
     $errUtils.throwErrByPath('net_stubbing.response_handling.cb_timeout', {
       args: {
         timeout,

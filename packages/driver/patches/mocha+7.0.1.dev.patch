@@ -1,0 +1,13 @@
+diff --git a/node_modules/mocha/lib/mocha.js b/node_modules/mocha/lib/mocha.js
+index 0b43004..588e195 100644
+--- a/node_modules/mocha/lib/mocha.js
++++ b/node_modules/mocha/lib/mocha.js
+@@ -853,7 +853,7 @@ Mocha.prototype.run = function(fn) {
+   options.files = this.files;
+   var runner = new exports.Runner(suite, options.delay);
+   createStatsCollector(runner);
+-  var reporter = new this._reporter(runner, options);
++  var reporter = this._reporter(runner, options);
+   runner.checkLeaks = options.checkLeaks === true;
+   runner.fullStackTrace = options.fullTrace;
+   runner.asyncOnly = options.asyncOnly;

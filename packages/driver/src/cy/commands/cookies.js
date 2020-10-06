@@ -57,6 +57,14 @@ const normalizeSameSite = (sameSite) => {
   return sameSite
 }
 
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#Attributes
+function cookieValidatesHostPrefix (options) {
+  return options.secure === false || (options.path && options.path !== '/')
+}
+function cookieValidatesSecurePrefix (options) {
+  return options.secure === false
+}
+
 module.exports = function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
@@ -283,6 +291,14 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       if (!_.isString(name) || !_.isString(value)) {
         $errUtils.throwErrByPath('setCookie.invalid_arguments', { onFail })
+      }
+
+      if (options.name.startsWith('__Secure-') && cookieValidatesSecurePrefix(options)) {
+        $errUtils.throwErrByPath('setCookie.secure_prefix', { onFail })
+      }
+
+      if (options.name.startsWith('__Host-') && cookieValidatesHostPrefix(options)) {
+        $errUtils.throwErrByPath('setCookie.host_prefix', { onFail })
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)

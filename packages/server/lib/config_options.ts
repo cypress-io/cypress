@@ -70,11 +70,6 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalShadowDomSupport',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalFetchPolyfill',
     defaultValue: false,
     validation: v.isBoolean,
@@ -108,6 +103,10 @@ export const options = [
     name: 'ignoreTestFiles',
     defaultValue: '*.hot-update.js',
     validation: v.isStringOrArrayOfStrings,
+  }, {
+    name: 'includeShadowDom',
+    defaultValue: false,
+    validation: v.isBoolean,
   }, {
     name: 'integrationFolder',
     defaultValue: 'cypress/integration',
@@ -283,9 +282,13 @@ export const breakingOptions = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'blockHosts',
   }, {
-    name: 'videoRecording',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'video',
+    name: 'experimentalGetCookiesSameSite',
+    errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
+    isWarning: true,
+  }, {
+    name: 'experimentalShadowDomSupport',
+    errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
+    isWarning: true,
   }, {
     name: 'screenshotOnHeadlessFailure',
     errorKey: 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED',
@@ -294,8 +297,8 @@ export const breakingOptions = [
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'trashAssetsBeforeRuns',
   }, {
-    name: 'experimentalGetCookiesSameSite',
-    errorKey: 'EXPERIMENTAL_SAMESITE_REMOVED',
-    isWarning: true,
+    name: 'videoRecording',
+    errorKey: 'RENAMED_CONFIG_OPTION',
+    newName: 'video',
   },
 ]

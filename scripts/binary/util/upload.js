@@ -25,16 +25,12 @@ const formHashFromEnvironment = function () {
     env,
   } = process
 
-  if (env.BUILDKITE) {
-    return `buildkite-${env.BUILDKITE_BRANCH}-${env.BUILDKITE_COMMIT}-${env.BUILDKITE_BUILD_NUMBER}`
-  }
-
   if (env.CIRCLECI) {
-    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}-${env.CIRCLE_BUILD_NUM}`
+    return `circle-${env.CIRCLE_BRANCH}-${env.CIRCLE_SHA1}`
   }
 
   if (env.APPVEYOR) {
-    return `appveyor-${env.APPVEYOR_REPO_BRANCH}-${env.APPVEYOR_REPO_COMMIT}-${env.APPVEYOR_BUILD_ID}`
+    return `appveyor-${env.APPVEYOR_REPO_BRANCH}-${env.APPVEYOR_REPO_COMMIT}`
   }
 
   throw new Error('Do not know how to form unique build hash on this CI')

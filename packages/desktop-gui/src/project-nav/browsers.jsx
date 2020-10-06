@@ -74,7 +74,6 @@ export default class Browsers extends Component {
         {prefixText}{' '}
         {browser.displayName}{' '}
         {browser.majorVersion}
-        {browser.family === 'firefox' && <span className='browser-beta'>beta</span>}
         {this._info(browser)}
         {this._warn(browser)}
       </>

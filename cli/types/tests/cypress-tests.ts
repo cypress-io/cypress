@@ -46,6 +46,7 @@ namespace CypressConfigTests {
   Cypress.config({ baseUrl: '.', }) // $ExpectType void
 
   Cypress.config('taskTimeout') // $ExpectType number
+  Cypress.config('includeShadowDom') // $ExpectType boolean
 }
 
 namespace CypressEnvTests {
@@ -75,6 +76,9 @@ namespace CypressCommandsTests {
   })
   Cypress.Commands.add('newCommand', { prevSubject: true }, () => {
     return
+  })
+  Cypress.Commands.add('newCommand', () => {
+    return new Promise((resolve) => {})
   })
   Cypress.Commands.overwrite('newCommand', () => {
     return
@@ -327,36 +331,36 @@ namespace CypressAUTWindowTests {
 namespace CypressOnTests {
   Cypress.on('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.on('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
 namespace CypressOnceTests {
   Cypress.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.once('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
 namespace CypressOffTests {
   Cypress.off('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 
   cy.off('uncaught:exception', (error, runnable) => {
     error // $ExpectType Error
-    runnable // $ExpectType IRunnable
+    runnable // $ExpectType Runnable
   })
 }
 
@@ -381,6 +385,10 @@ namespace CypressScreenshotTests {
     log: true,
     blackout: []
   })
+}
+
+namespace CypressShadowDomTests {
+  cy.get('my-component').shadow()
 }
 
 namespace CypressTriggerTests {

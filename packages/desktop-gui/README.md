@@ -58,15 +58,6 @@ You can also run all of the Desktop GUI's tests locally. We don't really recomme
 
 It's usually easier to run the tests in the GUI, commit, and then see if anything broke elsewhere.
 
-First, start local http server
-
-```bash
-## from repo root
-yarn workspace @packages/desktop-gui start
-```
-
-Then run Cypress with
-
 ```bash
 ## from repo root
 yarn workspace @packages/desktop-gui cypress:run
@@ -78,16 +69,15 @@ yarn workspace @packages/desktop-gui cypress:run
 
 This project is tested with Cypress itself. It acts exactly like any other Cypress project.
 
-First, start local http server
-
-```bash
-## from repo root
-yarn workspace @packages/desktop-gui start
-```
-
-Then open Cypress with
-
 ```bash
 ## from repo root
 yarn workspace @packages/desktop-gui cypress:open
+```
+
+### Component testing
+
+Using [cypress-react-unit-test](https://github.com/bahmutov/cypress-react-unit-test) you can run some of the component tests in this project. You MUST run from the root of the repo using absolute path, no need to start the server.
+
+```bash
+yarn dev --project ~/git/cypress/packages/desktop-gui/
 ```

@@ -237,9 +237,6 @@ describe('network stubbing', function () {
         })
       })
 
-      // Responded: 1 time
-      // "-------": ""
-      // Responses: []
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.route2(/foo/, {}).then(() => {
@@ -260,9 +257,7 @@ describe('network stubbing', function () {
         it('is incremented for each matching request', function () {
           cy.route2(/foo/, {}).then(function () {
             return Promise.all([$.get('/foo'), $.get('/foo'), $.get('/foo')])
-          }).then(function () {
-            expect(this.lastLog.get('numResponses')).to.eq(3)
-          })
+          }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 3)
         })
       })
     })
@@ -400,6 +395,64 @@ describe('network stubbing', function () {
     })
   })
 
+  context('network handling', function () {
+    context('can intercept against any domain', function () {
+      beforeEach(function () {
+        // reset origin
+        cy.visit('http://localhost:3500/fixtures/generic.html')
+      })
+
+      it('different origin (HTTP)', function () {
+        cy.route2('/foo').as('foo')
+        .then(() => {
+          $.get('http://baz.foobar.com:3501/foo')
+        })
+        .wait('@foo')
+      })
+
+      it('different origin with response interception (HTTP)', function () {
+        cy.route2('/xhr.html', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('xhr fixture')
+            res.body = 'replaced the body'
+          })
+        }).as('foo')
+        .then(() => {
+          return $.get('http://baz.foobar.com:3501/fixtures/xhr.html')
+          .then((responseText) => {
+            expect(responseText).to.eq('replaced the body')
+          })
+        })
+        .wait('@foo').its('response.body').should('eq', 'replaced the body')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/8487
+      it('different origin (HTTPS)', function () {
+        cy.route2('/foo', 'somethin').as('foo')
+        .then(() => {
+          $.get('https://bar.foobar.com.invalid:3502/foo')
+        })
+        .wait('@foo')
+      })
+
+      it('different origin with response interception (HTTPS)', function () {
+        cy.route2('/xhr.html', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.include('xhr fixture')
+            res.body = 'replaced the body'
+          })
+        }).as('foo')
+        .then(() => {
+          return $.get('https://bar.foobar.com:3502/fixtures/xhr.html')
+          .then((responseText) => {
+            expect(responseText).to.eq('replaced the body')
+          })
+        })
+        .wait('@foo').its('response.body').should('eq', 'replaced the body')
+      })
+    })
+  })
+
   context('stubbing with static responses', function () {
     it('can stub a response with static body as string', function (done) {
       cy.route2({
@@ -446,8 +499,7 @@ describe('network stubbing', function () {
       cy.route2('/foo', 'foo bar baz').as('getFoo').then(function (win) {
         $.get('/foo')
       }).wait('@getFoo').then(function (res) {
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response.body).to.eq('foo bar baz')
       })
     })
 
@@ -458,12 +510,28 @@ describe('network stubbing', function () {
           method: 'PROPFIND',
         })
       }).wait('@getFoo').then(function (res) {
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response.body).to.eq('foo bar baz')
       })
     })
 
-    it('still works after a cy.visit', function () {
+    it('can stub a response with an array', function (done) {
+      const response = ['foo', 'bar', { foo: 'baz' }]
+
+      cy.route2({
+        url: '*',
+      }, response).then(() => {
+        $.get('/abc123').done((responseJson, _, xhr) => {
+          expect(xhr.status).to.eq(200)
+          expect(responseJson).to.deep.eq(response)
+          expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+          done()
+        })
+      })
+    })
+
+    // TODO: flaky - unable to reproduce outside of CI
+    it('still works after a cy.visit', { retries: 2 }, function () {
       cy.route2(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
@@ -478,6 +546,45 @@ describe('network stubbing', function () {
           $.get('/foo').done(_.ary(resolve, 0))
         })
       }).wait('@getFoo').its('request.url').should('include', '/foo')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8532
+    context('can stub a response with an empty array', function () {
+      const assertEmptyArray = (done) => {
+        return () => {
+          $.get('/abc123').done((responseJson, _, xhr) => {
+            expect(xhr.status).to.eq(200)
+            expect(responseJson).to.deep.eq([])
+            expect(xhr.getResponseHeader('content-type')).to.eq('application/json')
+
+            done()
+          })
+        }
+      }
+
+      it('with explicit StaticResponse', function (done) {
+        cy.route2({
+          url: '*',
+        }, {
+          body: [],
+        }).then(assertEmptyArray(done))
+      })
+
+      it('with body shorthand', function (done) {
+        cy.route2('*', []).then(assertEmptyArray(done))
+      })
+
+      it('with method, url, res shorthand', function (done) {
+        cy.route2('GET', '*', []).then(assertEmptyArray(done))
+      })
+
+      it('in req.reply', function (done) {
+        cy.route2('*', (req) => req.reply([])).then(assertEmptyArray(done))
+      })
+
+      it('in res.send', function (done) {
+        cy.route2('*', (req) => req.reply((res) => res.send(200, []))).then(assertEmptyArray(done))
+      })
     })
 
     context('fixtures', function () {
@@ -667,7 +774,32 @@ describe('network stubbing', function () {
         })
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
-      cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
+    })
+
+    it('can delay and throttle a StaticResponse', function (done) {
+      const payload = 'A'.repeat(10 * 1024)
+      const throttleKbps = 10
+      const delayMs = 250
+      const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+      cy.route2('/timeout', (req) => {
+        this.start = Date.now()
+
+        req.reply({
+          statusCode: 200,
+          body: payload,
+          throttleKbps,
+          delayMs,
+        })
+      }).then(() => {
+        return $.get('/timeout').then((responseText) => {
+          expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 100, 100)
+          expect(responseText).to.eq(payload)
+
+          done()
+        })
+      })
     })
 
     context('matches requests as expected', function () {
@@ -881,6 +1013,7 @@ describe('network stubbing', function () {
 
       it('can timeout in request handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
@@ -926,6 +1059,22 @@ describe('network stubbing', function () {
       .then(() => fetch(url))
       .wait('@redirect')
       .wait('@dest')
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/7967
+    it('can skip redirects via followRedirect', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.route2('/redirect', (req) => {
+        req.followRedirect = true
+        req.reply((res) => {
+          expect(res.body).to.include('Some generic content')
+          expect(res.statusCode).to.eq(200)
+          res.send()
+        })
+      })
+      .then(() => fetch(url))
     })
 
     it('intercepts cached responses as expected', {
@@ -1098,10 +1247,10 @@ describe('network stubbing', function () {
         })
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
-      cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
-    context('with StaticResponse shorthand', function () {
+    context('with StaticResponse', function () {
       it('res.send(body)', function () {
         cy.route2('/custom-headers', function (req) {
           req.reply((res) => {
@@ -1236,6 +1385,34 @@ describe('network stubbing', function () {
           })
         })
       })
+
+      it('can delay and throttle', function (done) {
+        const payload = 'A'.repeat(10 * 1024)
+        const throttleKbps = 50
+        const delayMs = 50
+        const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
+
+        cy.route2('/timeout', (req) => {
+          req.reply((res) => {
+            this.start = Date.now()
+
+            // ensure .throttle and .delay are overridden
+            res.throttle(1e6).delay(1).send({
+              statusCode: 200,
+              body: payload,
+              throttleKbps,
+              delayMs,
+            })
+          })
+        }).then(() => {
+          return $.get('/timeout').then((responseText) => {
+            expect(responseText).to.eq(payload)
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
+
+            done()
+          })
+        })
+      })
     })
 
     context('errors', function () {
@@ -1341,6 +1518,7 @@ describe('network stubbing', function () {
 
       it('can timeout in req.reply handler', {
         defaultCommandTimeout: 50,
+        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
@@ -1506,21 +1684,55 @@ describe('network stubbing', function () {
       cy.route2(/fixtures\/app/).as('getFoo').then(function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
-        let log
-
-        log = cy.queue.logs({
+        const log = cy.queue.logs({
           displayName: 'req',
         })[0]
 
         expect(log.get('alias')).to.eq('getFoo')
 
-        // TODO: determine if response bodies should be eagerly loaded for statically-defined routes
-        // expect(res.responseBody).to.deep.eq({
-        //   some: 'json',
-        //   foo: {
-        //     bar: 'baz',
-        //   },
-        // })
+        expect(JSON.parse(res.response.body as string)).to.deep.eq({
+          some: 'json',
+          foo: {
+            bar: 'baz',
+          },
+        })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8536
+    context('yields response', function () {
+      const testResponse = (expectedBody, done) => {
+        return () => {
+          $.get('/xml')
+
+          cy.wait('@foo').then((request) => {
+            expect(request.response.body).to.eq(expectedBody)
+            done()
+          })
+        }
+      }
+
+      it('when not stubbed', function (done) {
+        cy.route2('/xml').as('foo')
+        .then(testResponse('<foo>bar</foo>', done))
+      })
+
+      it('when stubbed with StaticResponse', function (done) {
+        cy.route2('/xml', 'something different')
+        .as('foo')
+        .then(testResponse('something different', done))
+      })
+
+      it('when stubbed with req.reply', function (done) {
+        cy.route2('/xml', (req) => req.reply('something different'))
+        .as('foo')
+        .then(testResponse('something different', done))
+      })
+
+      it('when stubbed with res.send', function (done) {
+        cy.route2('/xml', (req) => req.reply((res) => res.send('something different')))
+        .as('foo')
+        .then(testResponse('something different', done))
       })
     })
 

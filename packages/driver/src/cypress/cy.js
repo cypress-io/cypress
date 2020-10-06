@@ -656,7 +656,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     args.unshift(subject)
 
-    Cypress.action('cy:next:subject:prepared', subject, args)
+    Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
 
     return args
   }
@@ -745,6 +745,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     let rets
 
     stopped = true
+
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
 
     err.stack = $stackUtils.normalizedStack(err)
 

@@ -1,26 +1,3 @@
-.updates-available {
-  text-align: center;
-  background-color: #D9EDF7;
-  color: #3A87AD;
-  line-height: 35px;
-  font-size: 14px;
-
-  strong {
-    margin-left: 10px;
-
-    &:hover {
-      color: darken(#3A87AD, 15%);
-      cursor: pointer;
-    }
-  }
-}
-
-html.has-updates {
-  .helper-line, .project-content, .intro {
-    bottom: 55px;
-  }
-}
-
 .update-modal {
   a:hover {
     cursor: pointer !important;

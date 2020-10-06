@@ -8,6 +8,7 @@
 
 declare namespace CypressCommandLine {
   type HookName = 'before' | 'beforeEach' | 'afterEach' | 'after'
+
   interface TestError {
     name: string
     message: string
@@ -225,7 +226,7 @@ declare namespace CypressCommandLine {
       startedAt: dateTimeISO
       endedAt: dateTimeISO
       duration: ms
-    },
+    }
     /**
      * Reporter name like "spec"
      */
@@ -255,7 +256,7 @@ declare namespace CypressCommandLine {
        * resolved filename of the spec
        */
       absolute: string
-    },
+    }
     shouldUploadVideo: boolean
   }
 
@@ -264,6 +265,7 @@ declare namespace CypressCommandLine {
    * @see https://on.cypress.io/module-api
    */
   interface CypressRunResult {
+    status: 'finished'
     startedTestsAt: dateTimeISO
     endedTestsAt: dateTimeISO
     totalDuration: ms
@@ -294,7 +296,8 @@ declare namespace CypressCommandLine {
      * @example
       ```
       const result = await cypress.run()
-      if (result.failures) {
+      if (result.status === 'failed') {
+        console.error('failures %d', result.failures)
         console.error(result.message)
         process.exit(result.failures)
       }
@@ -302,6 +305,7 @@ declare namespace CypressCommandLine {
      *
   **/
   interface CypressFailedRunResult {
+    status: 'failed'
     failures: number
     message: string
   }
@@ -347,11 +351,15 @@ declare module 'cypress' {
      cypress.run({
        spec: 'cypress/integration/admin*-spec.js'
      }).then(results => {
-       // inspect results object
+       if (results.status === 'failed') {
+          // Cypress could not run
+        } else {
+          // inspect results object
+       }
      })
      ```
      */
-    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>,
+    run(options?: Partial<CypressCommandLine.CypressRunOptions>): Promise<CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult>
     /**
      * Opens Cypress GUI. Resolves with void when the
      * GUI is closed.

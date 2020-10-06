@@ -1,0 +1,18 @@
+<html>
+<body>
+  <button onclick="onClick()">Show input</button>
+  <script>
+    function onClick() {
+      let input = document.createElement('input')
+      // The type has to be a `number` for the test to fail
+      input.type = 'number' 
+      input.value = 1
+
+      document.body.appendChild(input)
+
+      // The input needs to be forcibly focused for the test to fail
+      document.querySelector('input').focus() 
+    }
+  </script>
+</body>
+</html>
