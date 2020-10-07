@@ -37,6 +37,7 @@ describe('lib/tasks/cache', () => {
 
     sinon.stub(state, 'getCacheDir').returns('/.cache/Cypress')
     sinon.stub(state, 'getBinaryDir').returns('/.cache/Cypress')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
     this.stdout = stdout.capture()
   })
 
@@ -139,6 +140,7 @@ describe('lib/tasks/cache', () => {
         const currentVersion = util.pkgVersion()
 
         fs.readdir('/.cache/Cypress', (error, files) => {
+          expect(files.length).to.eq(1)
           files.forEach((file) => {
             expect(file).to.eq(currentVersion)
           })
