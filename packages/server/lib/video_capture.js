@@ -256,7 +256,7 @@ module.exports = {
     })
   },
 
-  process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
+  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
     const metaFileName = `${name}.meta`
 
     const maybeGenerateMetaFile = Promise.method(() => {
@@ -268,81 +268,80 @@ module.exports = {
       return fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
     })
 
-    return maybeGenerateMetaFile()
-    .then((addChaptersMeta) => {
-      let total = null
+    const addChaptersMeta = await maybeGenerateMetaFile()
 
-      return new Promise((resolve, reject) => {
-        debug('processing video from %s to %s video compression %o',
-          name, cname, videoCompression)
+    let total = null
 
-        const command = ffmpeg()
-        const outputOptions = [
-          '-preset fast',
-          `-crf ${videoCompression}`,
-        ]
+    return new Promise((resolve, reject) => {
+      debug('processing video from %s to %s video compression %o',
+        name, cname, videoCompression)
 
-        if (addChaptersMeta) {
-          command.input(metaFileName)
-          outputOptions.push('-map_metadata 1')
+      const command = ffmpeg()
+      const outputOptions = [
+        '-preset fast',
+        `-crf ${videoCompression}`,
+      ]
+
+      if (addChaptersMeta) {
+        command.input(metaFileName)
+        outputOptions.push('-map_metadata 1')
+      }
+
+      command.input(name)
+      .videoCodec('libx264')
+      .outputOptions(outputOptions)
+      // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
+      .on('start', (command) => {
+        debug('compression started %o', { command })
+      })
+      .on('codecData', (data) => {
+        debug('compression codec data: %o', data)
+
+        total = utils.timemarkToSeconds(data.duration)
+      })
+      .on('stderr', (stderr) => {
+        debug('compression stderr log %o', { message: stderr })
+      })
+      .on('progress', (progress) => {
+        // bail if we dont have total yet
+        if (!total) {
+          return
         }
 
-        command.input(name)
-        .videoCodec('libx264')
-        .outputOptions(outputOptions)
-        // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
-        .on('start', (command) => {
-          debug('compression started %o', { command })
-        })
-        .on('codecData', (data) => {
-          debug('compression codec data: %o', data)
+        debug('compression progress: %o', progress)
 
-          total = utils.timemarkToSeconds(data.duration)
-        })
-        .on('stderr', (stderr) => {
-          debug('compression stderr log %o', { message: stderr })
-        })
-        .on('progress', (progress) => {
-          // bail if we dont have total yet
-          if (!total) {
-            return
-          }
+        const progressed = utils.timemarkToSeconds(progress.timemark)
 
-          debug('compression progress: %o', progress)
+        const percent = progressed / total
 
-          const progressed = utils.timemarkToSeconds(progress.timemark)
-
-          const percent = progressed / total
-
-          if (percent < 1) {
-            return onProgress(percent)
-          }
-        })
-        .on('error', (err, stdout, stderr) => {
-          debug('compression errored: %o', { error: err.message, stdout, stderr })
-
-          return reject(err)
-        })
-        .on('end', () => {
-          debug('compression ended')
-
-          // we are done progressing
-          onProgress(1)
-
-          // rename and obliterate the original
-          return fs.moveAsync(cname, name, {
-            overwrite: true,
-          })
-          .then(() => {
-            if (addChaptersMeta) {
-              return fs.unlink(metaFileName)
-            }
-          })
-          .then(() => {
-            return resolve()
-          })
-        }).save(cname)
+        if (percent < 1) {
+          return onProgress(percent)
+        }
       })
+      .on('error', (err, stdout, stderr) => {
+        debug('compression errored: %o', { error: err.message, stdout, stderr })
+
+        return reject(err)
+      })
+      .on('end', () => {
+        debug('compression ended')
+
+        // we are done progressing
+        onProgress(1)
+
+        // rename and obliterate the original
+        return fs.moveAsync(cname, name, {
+          overwrite: true,
+        })
+        .then(() => {
+          if (addChaptersMeta) {
+            return fs.unlink(metaFileName)
+          }
+        })
+        .then(() => {
+          return resolve()
+        })
+      }).save(cname)
     })
   },
 
