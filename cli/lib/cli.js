@@ -100,7 +100,7 @@ const descriptions = {
   browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
-  cachePurge: 'removes all versions from the binary cache folder but the current one',
+  cachePurge: 'removes all cached binaries but for the current version',
   cacheList: 'list cached binary versions',
   cachePath: 'print the path to the binary cache',
   cacheSize: 'Used with the list command to show the sizes of the cached folders',
