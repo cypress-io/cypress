@@ -16,6 +16,7 @@ const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
 const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
+const session = require('./session')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -317,6 +318,12 @@ class Socket {
       })
 
       socket.on('mocha', (...args) => {
+        // TODO: move this to an event that will be emitted in openMode as well
+        // we need to listen on this event so we can reset certain state
+        if (args[0] === 'test:before:run') {
+          session.resetState()
+        }
+
         return options.onMocha.apply(options, args)
       })
 
@@ -408,6 +415,21 @@ class Socket {
               return exec.run(config.projectRoot, args[0])
             case 'task':
               return task.run(config.pluginsFile, args[0])
+            case 'save:session':
+              return session.saveSession(args[0])
+            case 'get:session':
+              return session.getSession(args[0])
+            case 'stubDomainForAutomation': {
+              const stubDomains = args[0]
+
+              session.getState().stubbedDomainsForAutomation = stubDomains
+              options.closeOpenSocketsForHosts(stubDomains)
+
+              debug('stubbing next connection to:', session.getState())
+
+              return
+            }
+
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

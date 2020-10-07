@@ -36,6 +36,7 @@ const Socket = require('./socket')
 const Request = require('./request')
 const fileServer = require('./file_server')
 const templateEngine = require('./template_engine')
+const session = require('./session')
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -126,6 +127,7 @@ class Server {
     this._fileServer = null
     this._httpsProxy = null
     this._urlResolver = null
+    this._openSockets = {}
   }
 
   createExpressApp (config) {
@@ -292,8 +294,20 @@ class Server {
 
         socket.once('upstream-connected', this._socketAllowed.add)
 
-        return this._httpsProxy.connect(req, socket, head, {
+        const conn = this._httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) => {
+            debug('onDirectConnection', req.url)
+            if (req.url.includes('44665')) {
+              const sessionState = session.getState()
+
+              if (sessionState.stubbedDomainsForAutomation && sessionState.stubbedDomainsForAutomation.includes(req.url)) {
+                sessionState.stubbedDomainsForAutomation = _.without(sessionState.stubbedDomainsForAutomation, req.url)
+                debug('intercepted domain for localstorage access:', req.url)
+
+                return false
+              }
+            }
+
             if (this._netStubbingState && isHostInterceptable(req.url, this._netStubbingState)) {
               debug('CONNECT request may match a net-stubbing route, proxying %o', _.pick(req, 'url'))
 
@@ -330,6 +344,10 @@ class Server {
             return !isMatching
           },
         })
+
+        this._openSockets[req.url] = conn
+
+        return conn
       })
 
       this._server.on('upgrade', onUpgrade)
@@ -439,6 +457,16 @@ class Server {
     debug('Getting remote state: %o', props)
 
     return props
+  }
+
+  _closeOpenSocketsForHosts (hosts) {
+    debug('current open sockets', _.keys(this._openSockets))
+    _.each(hosts, (host) => {
+      if (this._openSockets[host]) {
+        this._openSockets[host].destroy()
+        delete this._openSockets[host]
+      }
+    })
   }
 
   _onRequest (headers, automationRequest, options) {
@@ -895,6 +923,7 @@ class Server {
     options.onResolveUrl = this._onResolveUrl.bind(this)
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this._netStubbingState
+    options.closeOpenSocketsForHosts = this._closeOpenSocketsForHosts.bind(this)
 
     options.onResetServerState = () => {
       this._networkProxy.reset()

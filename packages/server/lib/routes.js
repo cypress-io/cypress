@@ -36,6 +36,10 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     runner.handle(req, res)
   })
 
+  app.get('/__cypress/automation', (req, res) => {
+    res.send('<html><body><script>window.parent.postMessage(JSON.stringify(window.localStorage), "*")</script></body></html>')
+  })
+
   app.get('/__cypress/static/*', (req, res) => {
     staticCtrl.handle(req, res)
   })

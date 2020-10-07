@@ -26,6 +26,7 @@ const $Mouse = require('./cy/mouse')
 const $Runner = require('./cypress/runner')
 const $Server = require('./cypress/server')
 const $Screenshot = require('./cypress/screenshot')
+const $Session = require('./cypress/session')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
@@ -215,6 +216,7 @@ class $Cypress {
 
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
+    this.Session = $Session.create(this)
 
     this.events.proxyTo(this.cy)
 
