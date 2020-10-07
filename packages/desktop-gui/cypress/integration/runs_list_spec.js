@@ -825,6 +825,15 @@ describe('Runs List', function () {
         it('displays "need to set up" message', () => {
           cy.contains('You could see test recordings here')
         })
+
+        it('banner does not cover browser dropdown', () => {
+          // The browser dropdown would sometimes display behind the runs banner
+          cy.contains('.dropdown-chosen', 'Chrome').click()
+          cy.get('.browsers-list')
+          .find('.dropdown-menu li').first().should('be.visible')
+
+          cy.percySnapshot()
+        })
       })
     })
 
