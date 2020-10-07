@@ -41,6 +41,8 @@ binary-url.json
 .eslintrc.js
 cli/visual-snapshots
 
+# Undo some liberal git merge file ignores
+!*.base.js
 
 # Created by https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 # Edit at https://www.gitignore.io/?templates=osx,git,node,windows,intellij,linux
