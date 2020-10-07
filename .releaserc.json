@@ -13,13 +13,14 @@
       {
         "assets": [
           "**/CHANGELOG.md"
-        ]
+        ],
+        "message": "chore: release ${nextRelease.gitTag}\n\n[skip ci]"
       }
     ],
     "@semantic-release/npm"
   ],
   "extends": "semantic-release-monorepo",
   "branches": [
-    "changelog-generation"
+    "master"
   ]
 }
