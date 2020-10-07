@@ -1,3 +1,8 @@
+// ffprobe is necessary to extract chapters data from mp4 files.
+// ffprobe is usually installed with ffmpeg.
+// But in our CI, it doesn't. That's why we're installing ffprobe here.
+require('@ffprobe-installer/ffprobe')
+
 const humanInterval = require('human-interval')
 const e2e = require('../support/helpers/e2e').default
 const glob = require('../../lib/util/glob')
