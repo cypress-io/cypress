@@ -10,6 +10,8 @@ assignees: JessicaSachs
 <!-- 👋 Hello! --> 
 <!-- Cypress Component Testing is still in Alpha, so your feature requests and bug reports will help shape the future of the library. -->
 
+<!-- We're growing the Cypress Community Discord. We have dedicated sections on Component Testing. Join now and let's chat! 👉 https://discord.com/invite/TmzTGUW -->
+
 ### Summary
 <!-- Summarize the issue or feature request. -->
 <!-- This is also where you add additional context for the bug or feature, such as what the issue prevents you from achieving or what the proposed feature may enable to you accomplish -->

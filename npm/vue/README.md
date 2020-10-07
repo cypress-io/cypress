@@ -6,10 +6,10 @@
 [![renovate-app badge][renovate-badge]][renovate-app]
 
 > Browser-based Component Testing for Vue.js with the Open-Source [Cypress.io](https://www.cypress.io/) Test Runner ✌️🌲
+>
+**✨ New** We're growing the Cypress Community Discord. We have dedicated sections on Component Testing. 👉 [Join now](https://discord.com/invite/TmzTGUW) and let's chat!
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
-
-**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `@cypress/vue` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
 
 ### What is @cypress/vue?
 This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.
@@ -652,6 +652,10 @@ If you want to disable code coverage instrumentation and reporting, use `--env c
 ```
 
 **Note ⚠️:** if the component `.vue` file does not have a `<script>` section, it will not have any code coverage information.
+
+## What happened to cypress-vue-unit-test?
+
+We were in the middle of moving into the Cypress NPM org, so any references to `cypress-vue-unit-test` should be switched to `@cypress/vue`. Once complete, the old repository will be archived.
 
 <a name="#development"/>
 
