@@ -27,6 +27,21 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
+const purge = () => {
+  const cacheDir = state.getCacheDir()
+  const currentVersion = util.pkgVersion()
+
+  const files = fs.readdirSync(cacheDir)
+
+  files.forEach((versionDir) => {
+    if (versionDir !== currentVersion) {
+      const dir = join(cacheDir, versionDir)
+
+      fs.removeSync(dir)
+    }
+  })
+}
+
 const fileSizeInMB = (size) => {
   return `${(size / 1024 / 1024).toFixed(1)}MB`
 }
@@ -122,6 +137,7 @@ const getCachedVersions = (showSize) => {
 module.exports = {
   path: logCachePath,
   clear,
+  purge,
   list,
   getCachedVersions,
 }

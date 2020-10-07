@@ -4,6 +4,7 @@ const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
+const util = require(`${lib}/util`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
 const snapshot = require('../../support/snapshot')
@@ -125,6 +126,21 @@ describe('lib/tasks/cache', () => {
         .then((exists) => {
           expect(exists).to.eql(false)
           defaultSnapshot()
+        })
+      })
+    })
+  })
+
+  describe('.purge', () => {
+    it('deletes cache binaries for all version but the current one', () => {
+      return cache.purge()
+      .then(() => {
+        const currentVersion = util.pkgVersion()
+        const files = fs.readdirSync('/.cache/Cypress')
+
+        expect(files.length).to.eq(1)
+        files.forEach((file) => {
+          expect(file).to.eq(currentVersion)
         })
       })
     })
