@@ -195,7 +195,7 @@ const parseOpts = (opts) => {
     'cachePath',
     'cacheList',
     'cacheClear',
-    'cachePurge',
+    'cachePrune',
     'ciBuildId',
     'config',
     'configFile',

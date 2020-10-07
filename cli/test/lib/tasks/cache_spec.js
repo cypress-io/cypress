@@ -133,9 +133,9 @@ describe('lib/tasks/cache', () => {
     })
   })
 
-  describe('.purge', () => {
+  describe('.prune', () => {
     it('deletes cache binaries for all version but the current one', () => {
-      return Promise.all(cache.purge())
+      return Promise.all(cache.prune())
       .then(() => {
         const currentVersion = util.pkgVersion()
 

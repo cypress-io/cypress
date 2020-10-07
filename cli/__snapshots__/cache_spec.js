@@ -2,7 +2,7 @@ exports['lib/tasks/cache .clear deletes cache folder and everything inside it 1'
 [no output]
 `
 
-exports['lib/tasks/cache .purge deletes cache binaries for all version but the current one 1'] = `
+exports['lib/tasks/cache .prune deletes cache binaries for all version but the current one 1'] = `
 [no output]
 `
 

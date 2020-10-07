@@ -27,7 +27,7 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
-const purge = () => {
+const prune = () => {
   const cacheDir = state.getCacheDir()
   const currentVersion = util.pkgVersion()
 
@@ -141,7 +141,7 @@ const getCachedVersions = (showSize) => {
 module.exports = {
   path: logCachePath,
   clear,
-  purge,
+  prune,
   list,
   getCachedVersions,
 }
