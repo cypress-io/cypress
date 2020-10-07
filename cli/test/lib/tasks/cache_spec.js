@@ -13,6 +13,7 @@ const stripAnsi = require('strip-ansi')
 const path = require('path')
 const termToHtml = require('term-to-html')
 const mockedEnv = require('mocked-env')
+const Promise = require('bluebird')
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', 'html')
 
@@ -133,7 +134,7 @@ describe('lib/tasks/cache', () => {
 
   describe('.purge', () => {
     it('deletes cache binaries for all version but the current one', () => {
-      return cache.purge()
+      return Promise.all(cache.purge())
       .then(() => {
         const currentVersion = util.pkgVersion()
 
