@@ -8,7 +8,7 @@ const NUM_TESTS = 40
 const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
 
-describe('e2e video compression', { retries: 1 }, () => {
+describe('e2e video compression', () => {
   e2e.setup()
 
   return [
