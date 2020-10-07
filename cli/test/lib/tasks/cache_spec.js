@@ -136,11 +136,11 @@ describe('lib/tasks/cache', () => {
       return cache.purge()
       .then(() => {
         const currentVersion = util.pkgVersion()
-        const files = fs.readdirSync('/.cache/Cypress')
 
-        expect(files.length).to.eq(1)
-        files.forEach((file) => {
-          expect(file).to.eq(currentVersion)
+        fs.readdir('/.cache/Cypress', (error, files) => {
+          files.forEach((file) => {
+            expect(file).to.eq(currentVersion)
+          })
         })
       })
     })

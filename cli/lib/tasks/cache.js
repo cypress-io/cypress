@@ -31,15 +31,19 @@ const purge = () => {
   const cacheDir = state.getCacheDir()
   const currentVersion = util.pkgVersion()
 
-  const files = fs.readdirSync(cacheDir)
+  const promises = []
 
-  files.forEach((versionDir) => {
-    if (versionDir !== currentVersion) {
-      const dir = join(cacheDir, versionDir)
+  fs.readdir(cacheDir, (error, versions) => {
+    versions.forEach((version) => {
+      if (version !== currentVersion) {
+        const versionDir = join(cacheDir, version)
 
-      fs.removeSync(dir)
-    }
+        promises.push(fs.remove(versionDir))
+      }
+    })
   })
+
+  return promises
 }
 
 const fileSizeInMB = (size) => {
