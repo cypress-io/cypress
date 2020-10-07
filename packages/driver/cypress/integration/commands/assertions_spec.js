@@ -127,6 +127,13 @@ describe('src/cy/commands/assertions', () => {
       }).should('deep.eq', { foo: 'baz' })
     })
 
+    // https://github.com/cypress-io/cypress/issues/5763
+    it('shows selector name used in the test when an element is not found', () => {
+      cy.get('it-should-not-exist').should('not.be.visible').then(function () {
+        expect(this.logs[1].get('message')).to.eq('expected **it-should-not-exist** not to be **visible**')
+      })
+    })
+
     describe('function argument', () => {
       it('waits until function is true', () => {
         const button = cy.$$('button:first')
@@ -429,6 +436,17 @@ describe('src/cy/commands/assertions', () => {
         })
 
         cy.noop({}).should('dee.eq', {})
+      })
+
+      // https://github.com/cypress-io/cypress/issues/7870
+      it('handles when a string literal is thrown', () => {
+        cy.on('fail', (err) => {
+          expect(err.message).eq('error string')
+        })
+
+        cy.then(() => {
+          throw 'error string'
+        })
       })
 
       describe('language chainers err', () => {

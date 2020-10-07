@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "outDir": "./dist/",
+    "noImplicitAny": true,
+    "module": "commonJS",
+    "target": "es5",
+    "jsx": "react",
+    "allowJs": true,
+    "lib": ["ES2015", "DOM"],
+    "types": ["cypress"]
+  },
+}

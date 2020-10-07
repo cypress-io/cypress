@@ -1932,6 +1932,13 @@ describe('src/cy/commands/connectors', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/4921
+      it('dual commands like contains() work after each()', () => {
+        cy.contains('New York')
+        cy.get('span').each(() => {})
+        cy.contains('New York')
+      })
+
       describe('errors', {
         defaultCommandTimeout: 100,
       }, () => {

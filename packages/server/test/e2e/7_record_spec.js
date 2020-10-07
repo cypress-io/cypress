@@ -402,9 +402,11 @@ describe('e2e record', () => {
       expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
       expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.coffee')
 
-      const runs = requests.filter((v) => v.body.tests).map((v) => v.body)
+      let runs = requests.filter((v) => v.body.tests).map((v) => v.body)
 
       expectRunsToHaveCorrectTimings(runs)
+
+      runs = e2e.normalizeRuns(runs)
 
       snapshot(runs)
 
@@ -537,7 +539,7 @@ describe('e2e record', () => {
     setup(routes)
 
     it('passes in parallel with group', function () {
-      this.retries(2)
+      this.retries(3)
 
       return Promise.all([
         e2e.exec(this, {

@@ -722,13 +722,15 @@ module.exports = {
 
           The return value was:
 
-            > ${obj.returned}
+            > {{returned}}
 
           Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
-          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`,
+          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-custom-command',
       }
     },
@@ -739,13 +741,15 @@ module.exports = {
 
           The return value was:
 
-            > ${obj.returned}
+          > {{returned}}
 
           Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
-          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`,
+          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-test',
       }
     },
@@ -1475,6 +1479,14 @@ module.exports = {
           Pass \`secure: true\` to ${cmd('setCookie')} to set a cookie with \`sameSite: '{{value}}'\`.`,
         docsUrl: 'https://on.cypress.io/setcookie',
       }
+    },
+    host_prefix: {
+      message: 'Cookies starting with the `__Host-` prefix must be set with `{ secure: true }`, and the path must be `/`',
+      docsUrl: 'https://on.cypress.io/setcookie',
+    },
+    secure_prefix: {
+      message: 'Cookies starting with the `__Secure-` prefix must be set with `{ secure: true }`',
+      docsUrl: 'https://on.cypress.io/setcookie',
     },
   },
 

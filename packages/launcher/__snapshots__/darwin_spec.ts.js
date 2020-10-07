@@ -59,7 +59,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "stable",
     "displayName": "Firefox",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": "firefox",
     "path": "/Applications/Firefox.app/Contents/MacOS/firefox-bin",
@@ -76,7 +75,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "dev",
     "displayName": "Firefox Developer Edition",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": [
       "firefox-developer-edition",
@@ -96,7 +94,6 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "nightly",
     "displayName": "Firefox Nightly",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": [
       "firefox-nightly",

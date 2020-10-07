@@ -1,0 +1,7 @@
+{
+  "generalConfiguration": {
+    "exclude": [
+      "index.ts"
+    ]
+  }
+}

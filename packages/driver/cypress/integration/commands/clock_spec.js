@@ -237,7 +237,7 @@ describe('src/cy/commands/clock', () => {
         const newWindow = {
           setTimeout () {},
           clearTimeout () {},
-          Date () {},
+          Date: function Date () {},
           XMLHttpRequest: {
             prototype: {},
           },

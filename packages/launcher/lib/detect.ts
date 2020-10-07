@@ -22,23 +22,24 @@ type HasVersion = {
   name: string
 }
 
-// TODO: make this function NOT change its argument
 export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
+  let majorVersion = browser.majorVersion
+
   if (browser.version) {
-    browser.majorVersion = browser.version.split('.')[0]
+    majorVersion = browser.version.split('.')[0]
     log(
       'browser %s version %s major version %s',
       browser.name,
       browser.version,
-      browser.majorVersion,
+      majorVersion,
     )
 
-    if (browser.majorVersion) {
-      browser.majorVersion = parseInt(browser.majorVersion)
+    if (majorVersion) {
+      majorVersion = parseInt(majorVersion)
     }
   }
 
-  return browser
+  return extend({}, browser, { majorVersion })
 }
 
 type PlatformHelper = {
@@ -125,8 +126,20 @@ function checkOneBrowser (browser: Browser): Promise<boolean | FoundBrowser> {
   .then(merge(browser))
   .then(pickBrowserProps)
   .then(tap(logBrowser))
-  .then(setMajorVersion)
+  .then((browser) => setMajorVersion(browser))
+  .then(maybeSetFirefoxWarning)
   .catch(failed)
+}
+
+export const firefoxGcWarning = 'This version of Firefox has a bug that causes excessive memory consumption and will cause your tests to run slowly. It is recommended to upgrade to Firefox 80 or newer. [Learn more.](https://docs.cypress.io/guides/references/configuration.html#firefoxGcInterval)'
+
+// @see https://github.com/cypress-io/cypress/issues/8241
+const maybeSetFirefoxWarning = (browser: FoundBrowser) => {
+  if (browser.family === 'firefox' && Number(browser.majorVersion) < 80) {
+    browser.warning = firefoxGcWarning
+  }
+
+  return browser
 }
 
 /** returns list of detected browsers */
@@ -173,7 +186,7 @@ export const detectByPath = (
 
     const regexExec = browser.versionRegex.exec(stdout) as Array<string>
 
-    const parsedBrowser = {
+    let parsedBrowser = {
       name: browser.name,
       displayName: `Custom ${browser.displayName}`,
       info: `Loaded from ${path}`,
@@ -182,7 +195,7 @@ export const detectByPath = (
       version: regexExec[1],
     }
 
-    setMajorVersion(parsedBrowser)
+    parsedBrowser = setMajorVersion(parsedBrowser)
 
     return extend({}, browser, parsedBrowser)
   }
@@ -190,6 +203,7 @@ export const detectByPath = (
   return helper
   .getVersionString(path)
   .then(detectBrowserByVersionString)
+  .then(maybeSetFirefoxWarning)
   .catch((err: NotDetectedAtPathError) => {
     if (err.notDetectedAtPath) {
       throw err

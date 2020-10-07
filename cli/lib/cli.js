@@ -22,6 +22,10 @@ function unknownOption (flag, type = 'option') {
 }
 commander.Command.prototype.unknownOption = unknownOption
 
+const coerceFalseOrString = (arg) => {
+  return arg !== 'false' ? arg : false
+}
+
 const coerceFalse = (arg) => {
   return arg !== 'false'
 }
@@ -98,6 +102,7 @@ const descriptions = {
   cacheClear: 'delete all cached binaries',
   cacheList: 'list cached binary versions',
   cachePath: 'print the path to the binary cache',
+  cacheSize: 'Used with the list command to show the sizes of the cached folders',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
   configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
@@ -219,7 +224,7 @@ const castCypressRunOptions = (opts) => {
   // boolean arguments
   const result = R.evolve({
     port: coerceAnyStringToInt,
-    configFile: coerceFalse,
+    configFile: coerceFalseOrString,
   })(opts)
 
   return result
@@ -382,6 +387,7 @@ module.exports = {
     .option('list', text('cacheList'))
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
+    .option('--size', text('cacheSize'))
     .action(function (opts, args) {
       if (!args || !args.length) {
         this.outputHelp()
@@ -392,6 +398,12 @@ module.exports = {
 
       if (!_.includes(['list', 'path', 'clear'], command)) {
         unknownOption.call(this, `cache ${command}`, 'command')
+      }
+
+      if (command === 'list') {
+        cache.list(opts.size)
+
+        return
       }
 
       cache[command]()

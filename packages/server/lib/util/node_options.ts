@@ -3,7 +3,7 @@ import debugModule from 'debug'
 
 const debug = debugModule('cypress:server:util:node_options')
 
-export const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2} --http-parser=legacy`
+export const NODE_OPTIONS = `--max-http-header-size=${1024 ** 2}`
 
 /**
  * If Cypress was not launched via CLI, it may be missing certain startup
