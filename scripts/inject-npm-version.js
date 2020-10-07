@@ -28,8 +28,12 @@ const getBinaryVersion = async () => {
 }
 
 const parseSemanticReleaseOutput = (output) => {
+  debug(`Semantic Release Output ${output}`)
   const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
   const nextVersion = (output.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+
+  debug(`Current Version`, currentVersion)
+  debug(`Next Version`, nextVersion)
 
   return nextVersion || currentVersion
 }
