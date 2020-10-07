@@ -58,6 +58,10 @@ describe('e2e video compression', () => {
               expect(chapters[0].start_time).to.eq(0)
               expect(chapters[0]['TAG:title']).to.eq('num: 1 makes some long tests')
               expect(chapters[0].time_base).to.eq('1/1000')
+              expect(chapters[0].end).to.be.a('number')
+              expect(Number.isNaN(chapters[0].end)).to.be.false
+              expect(chapters[0].end_time).to.be.a('number')
+              expect(Number.isNaN(chapters[0].end_time)).to.be.false
             })
           })
         }).get('stdout')
