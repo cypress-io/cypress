@@ -355,6 +355,20 @@ describe('src/cy/commands/querying', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/4757
+    it('subject is restored after within() call', () => {
+      cy.get('#wrapper').within(() => {
+        cy.get('#upper').should('contain.text', 'New York')
+      })
+      .should('have.id', 'wrapper')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/5183
+    it('contains() works after within() call', () => {
+      cy.get(`#wrapper`).within(() => cy.get(`#upper`)).should(`contain.text`, `New York`)
+      cy.contains(`button`, `button`).should(`exist`)
+    })
+
     describe('.log', () => {
       beforeEach(function () {
         this.logs = []

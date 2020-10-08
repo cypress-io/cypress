@@ -856,11 +856,6 @@ jobs:
           command: yarn build-prod
           working_directory: packages/desktop-gui
       - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \

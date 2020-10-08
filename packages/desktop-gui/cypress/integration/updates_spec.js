@@ -3,8 +3,9 @@ const human = require('human-interval')
 const OLD_VERSION = '1.3.3'
 const NEW_VERSION = '1.3.4'
 
-describe('Update Banner', function () {
+describe('Updates', function () {
   beforeEach(function () {
+    cy.viewport(800, 500)
     cy.fixture('user').as('user')
     cy.fixture('projects').as('projects')
     cy.fixture('projects_statuses').as('projectStatuses')
@@ -21,6 +22,7 @@ describe('Update Banner', function () {
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
       cy.stub(this.ipc, 'windowOpen')
       cy.stub(this.ipc, 'externalOpen')
+      cy.stub(this.ipc, 'setClipboardText')
 
       this.updaterCheck = this.util.deferred()
 
@@ -41,24 +43,8 @@ describe('Update Banner', function () {
       })
     })
 
-    it('does not display update banner when no update available', function () {
-      this.updaterCheck.resolve(false)
-
-      cy.get('.updates-available').should('not.exist')
-
-      cy.get('html').should('not.have.class', 'has-updates')
-    })
-
     it('checks for update on show', function () {
       cy.wrap(this.ipc.updaterCheck).should('be.called')
-    })
-
-    it('displays banner if new version is available', function () {
-      this.updaterCheck.resolve(NEW_VERSION)
-      cy.get('.updates-available').should('be.visible')
-      cy.contains('New updates are available')
-
-      cy.get('html').should('have.class', 'has-updates')
     })
 
     it('gracefully handles error', function () {
@@ -69,14 +55,14 @@ describe('Update Banner', function () {
 
     it('opens modal on click of Update link', function () {
       this.updaterCheck.resolve(NEW_VERSION)
-      cy.contains('Update').click()
+      cy.get('.footer .version').click()
 
       cy.get('.modal').should('be.visible')
     })
 
     it('closes modal when X is clicked', function () {
       this.updaterCheck.resolve(NEW_VERSION)
-      cy.contains('Update').click()
+      cy.get('.footer .version').click()
       cy.get('.modal').find('.close').click()
 
       cy.get('.modal').should('not.be.visible')
@@ -89,7 +75,7 @@ describe('Update Banner', function () {
       this.start()
       this.updaterCheck.resolve(NEW_VERSION)
 
-      cy.contains('Update').click()
+      cy.get('.footer .version').click()
     })
 
     it('modal has info about downloading new version', () => {
@@ -104,55 +90,75 @@ describe('Update Banner', function () {
   })
 
   describe('in project mode', function () {
+    const npmCommand = `npm install --save-dev cypress@${NEW_VERSION}`
+    const yarnCommand = `yarn upgrade cypress@${NEW_VERSION}`
+
     beforeEach(function () {
       cy.stub(this.ipc, 'getOptions').resolves({ version: OLD_VERSION, projectRoot: '/foo/bar' })
       this.start()
       this.updaterCheck.resolve(NEW_VERSION)
 
-      cy.contains('Update').click()
+      cy.get('.footer .version').click()
     })
 
-    it('modal has info about updating package.json', function () {
-      cy.get('.modal').contains(`npm install --save-dev cypress@${NEW_VERSION}`)
-
-      cy.get('.modal').contains(`yarn upgrade cypress@${NEW_VERSION}`)
+    it('modal has info about upgrading via package manager', function () {
+      cy.get('.modal').contains(npmCommand)
+      cy.get('.modal').contains(yarnCommand)
       cy.percySnapshot()
     })
 
+    it('copies npm upgrade command to clipboard', function () {
+      cy.contains(npmCommand).find('button').click()
+      .then(() => {
+        expect(this.ipc.setClipboardText).to.be.calledWith(npmCommand)
+      })
+    })
+
+    it('changes npm upgrade button icon after copying', function () {
+      cy.contains(npmCommand).find('button').click()
+      cy.contains(npmCommand).find('button i').should('have.class', 'fa-check')
+    })
+
+    it('disables npm upgrade button after copying', function () {
+      cy.contains(npmCommand).find('button').click().should('be.disabled')
+    })
+
+    it('resets npm upgrade button after 5 seconds', function () {
+      cy.clock()
+      cy.contains(npmCommand).find('button').click()
+      cy.tick(5000)
+      cy.contains(npmCommand).find('button i').should('have.class', 'fa-copy')
+      cy.contains(npmCommand).find('button').should('not.be.disabled')
+    })
+
+    it('copies yarn upgrade command to clipboard', function () {
+      cy.contains(yarnCommand).find('button').click()
+      .then(() => {
+        expect(this.ipc.setClipboardText).to.be.calledWith(yarnCommand)
+      })
+    })
+
+    it('changes yarn upgrade button icon after copying', function () {
+      cy.contains(yarnCommand).find('button').click()
+      cy.contains(yarnCommand).find('button i').should('have.class', 'fa-check')
+    })
+
+    it('disables yarn upgrade button after copying', function () {
+      cy.contains(yarnCommand).find('button').click().should('be.disabled')
+    })
+
+    it('resets yarn upgrade button after 5 seconds', function () {
+      cy.clock()
+      cy.contains(yarnCommand).find('button').click()
+      cy.tick(5000)
+      cy.contains(yarnCommand).find('button i').should('have.class', 'fa-copy')
+      cy.contains(yarnCommand).find('button').should('not.be.disabled')
+    })
+
     it('links to \'open\' doc on click of open command', function () {
-      cy.get('.modal').contains('cypress open').click().then(() => {
+      cy.contains('cypress open').click().then(() => {
         expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/how-to-open-cypress')
       })
-    })
-
-    it('opens changelog when new version is clicked', function () {
-      cy.get('.modal').contains(NEW_VERSION).click().then(() => {
-        expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/changelog')
-      })
-    })
-  })
-
-  describe('in specs list', function () {
-    beforeEach(function () {
-      cy.stub(this.ipc, 'getOptions').resolves({ version: OLD_VERSION, projectRoot: '/foo/bar' })
-      cy.stub(this.ipc, 'openProject').resolves(this.config)
-      cy.stub(this.ipc, 'getSpecs').yields(null, this.specs)
-      this.start()
-      this.updaterCheck.resolve(NEW_VERSION)
-
-      cy.get('.updates-available')
-    })
-
-    it('displays all folders/specs within visible area', () => {
-      cy.get('.folder-name')
-      .last()
-      .scrollIntoView()
-      .should('be.visible')
-
-      cy.get('.file-name')
-      .last()
-      .scrollIntoView()
-      .should('be.visible')
     })
   })
 })
