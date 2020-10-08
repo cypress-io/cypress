@@ -383,7 +383,7 @@ commands:
     steps:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"q  
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>" 
 jobs:
   ## code checkout and yarn installs
   build:
