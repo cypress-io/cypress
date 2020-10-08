@@ -4,8 +4,8 @@
   "description": "Unit test React components using Cypress",
   "main": "dist",
   "scripts": {
-    "build": "yarn transpile && yarn transpile:bin && yarn build:packageJson",
-    "build:packageJson": "node scripts/createDistPackageJson.js",
+    "build": "rimraf dist && yarn transpile && yarn transpile:bin && yarn build:dist-package",
+    "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
     "cy:open": "node ../../scripts/cypress open",
     "percy:test": "percy exec -- node ../../scripts/cypress run",
