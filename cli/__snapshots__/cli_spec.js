@@ -112,7 +112,7 @@ exports['cli unknown option shows help for cache command - unknown option --foo 
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
-    prune       deletes all cached binaries except for the version currently in 
+    prune       deletes all cached binaries except for the version currently in
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
@@ -146,7 +146,7 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
-    prune       deletes all cached binaries except for the version currently in 
+    prune       deletes all cached binaries except for the version currently in
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
@@ -178,7 +178,7 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
     list        list cached binary versions
     path        print the path to the binary cache
     clear       delete all cached binaries
-    prune       deletes all cached binaries except for the version currently in 
+    prune       deletes all cached binaries except for the version currently in
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
