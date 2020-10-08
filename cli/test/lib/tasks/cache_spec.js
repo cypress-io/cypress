@@ -149,7 +149,7 @@ describe('lib/tasks/cache', () => {
     })
 
     it('doesn\'t delete any cache binaries', () => {
-      const dir = path.join(state.getCacheDir, '2.3.4')
+      const dir = path.join(state.getCacheDir(), '2.3.4')
 
       fs.removeAsync(dir)
 
