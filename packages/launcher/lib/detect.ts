@@ -44,6 +44,7 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
 type PlatformHelper = {
   detect: (browser: Browser) => Promise<DetectedBrowser>
   getVersionString: (path: string) => Promise<string>
+  getVersionNumber: (path: string, browser: Browser) => string
   getPathData: (path: string) => PathData
 }
 
@@ -191,8 +192,8 @@ export const detectByPath = (
     })
   }
 
-  const setCustomBrowserData = (browser: Browser, path: string, version: string): FoundBrowser => {
-    const regexExec = browser.versionRegex.exec(version) as Array<string>
+  const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
+    const version = helper.getVersionNumber(versionStr, browser)
 
     const parsedBrowser = {
       name: browser.name,
@@ -200,7 +201,7 @@ export const detectByPath = (
       info: `Loaded from ${path}`,
       custom: true,
       path,
-      version: regexExec[1],
+      version,
     }
 
     setMajorVersion(parsedBrowser)

@@ -185,6 +185,14 @@ export function getVersionString (path: string) {
   .then(trim)
 }
 
+export function getVersionNumber (version: string) {
+  if (version.indexOf('Version=') > -1) {
+    return version.split('=')[1]
+  }
+
+  return version
+}
+
 export function getPathData (pathStr: string): PathData {
   const test = new RegExp(/^.+\.exe:(.+)$/)
   const res = test.exec(pathStr)

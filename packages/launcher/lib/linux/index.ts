@@ -73,6 +73,12 @@ export function getVersionString (path: string) {
   .then(tap(partial(log, ['stdout: "%s"'])))
 }
 
+export function getVersionNumber (version: string, browser: Browser) {
+  const regexExec = browser.versionRegex.exec(version) as Array<string>
+
+  return regexExec ? regexExec[1] : version
+}
+
 export function getPathData (pathStr: string): PathData {
   return { path: pathStr }
 }

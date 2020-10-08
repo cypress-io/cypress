@@ -91,7 +91,7 @@ describe('windows browser detection', () => {
 
   it('works with :browserName format in Windows', () => {
     sinon.stub(os, 'platform').returns('win32')
-    stubBrowser(`${HOMEDIR}/foo/bar/browser.exe`, 'foo-browser v100')
+    stubBrowser(`${HOMEDIR}/foo/bar/browser.exe`, '100')
 
     return detectByPath(`${HOMEDIR}/foo/bar/browser.exe:foo-browser`, goalBrowsers as Browser[]).then((browser) => {
       expect(browser).to.deep.equal(
@@ -111,7 +111,7 @@ describe('windows browser detection', () => {
 
   it('identifies browser if name in path', async () => {
     sinon.stub(os, 'platform').returns('win32')
-    stubBrowser(`${HOMEDIR}/foo/bar/chrome.exe`, 'Google Chrome 100')
+    stubBrowser(`${HOMEDIR}/foo/bar/chrome.exe`, '100')
 
     return detectByPath(`${HOMEDIR}/foo/bar/chrome.exe`).then((browser) => {
       expect(browser).to.deep.equal(
