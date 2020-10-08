@@ -29,6 +29,6 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "@cypress/react": "file:../.."
+    "@cypress/react": "file:../../dist"
   }
 }

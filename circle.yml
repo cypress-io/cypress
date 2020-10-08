@@ -2000,11 +2000,12 @@ linux-workflow: &linux-workflow
         path: examples/visual-testing-with-percy
         requires:
           - npm-react
-    - npm-react-e2e-example:
-        name: React + Happo component testing
-        path: examples/visual-testing-with-happo
-        requires:
-          - npm-react
+    # Requires Happo api key in the env vars
+    # - npm-react-e2e-example:
+    #     name: React + Happo component testing
+    #     path: examples/visual-testing-with-happo
+    #     requires:
+    #       - npm-react
     - npm-react-e2e-example:
         name: React + Webpack file component testing
         path: examples/webpack-file

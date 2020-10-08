@@ -10,7 +10,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
+    "@cypress/react": "file:../../dist",
     "tailwindcss": "1.4.6"
   }
 }

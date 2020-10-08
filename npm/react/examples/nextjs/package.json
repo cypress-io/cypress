@@ -13,7 +13,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
+    "@cypress/react": "file:../../dist",
     "@mdx-js/loader": "^1.6.16",
     "@next/mdx": "^9.5.3",
     "@zeit/next-sass": "^1.0.1",

@@ -10,7 +10,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
+    "@cypress/react": "file:../../dist",
     "check-code-coverage": "1.9.2",
     "react-scripts": "3.4.3"
   },
