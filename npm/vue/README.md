@@ -9,7 +9,7 @@
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Code coverage](#code-coverage), [Development](#development)
 
-**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `@cypress/vue` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
+**🚧 Notice** We are in the middle of moving into the Cypress NPM org, so any references to `cypress-vue-unit-test` should be switched to `@cypress/vue`. Once complete, this repository will be archived.
 
 ### What is @cypress/vue?
 This package allows you to use the [Cypress](https://www.cypress.io/) test runner to mount and test your components within Cypress. It is built on top of the [Vue Test Utils](https://github.com/vuejs/vue-test-utils) package.

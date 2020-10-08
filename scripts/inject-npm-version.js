@@ -1,6 +1,9 @@
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
+const { groupBy } = require('lodash')
+const debug = require('debug')('cypress-build:semantic-release')
+const info = require('debug')('cypress-build:semantic-release:info')
 
 // updates a public package's package.json
 // replaces any local dependencies that have a * version
@@ -25,13 +28,18 @@ const getBinaryVersion = async () => {
 }
 
 const parseSemanticReleaseOutput = (output) => {
+  debug(`Semantic Release Output ${output}`)
   const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
   const nextVersion = (output.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
+
+  debug(`Current Version`, currentVersion)
+  debug(`Next Version`, nextVersion)
 
   return nextVersion || currentVersion
 }
 
 const getPackageVersion = async (pack) => {
+  debug(`package`, pack)
   const { stdout: semrel } = await execa('npx', ['lerna', 'exec', '--scope', pack, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
 
   const version = parseSemanticReleaseOutput(semrel)
@@ -47,9 +55,19 @@ const getPackageVersion = async (pack) => {
 }
 
 const main = async (name) => {
-  console.log(`Setting local npm packages to the correct version in package.json`)
+  if (!name) return
+
+  debug(`Setting local npm packages to the correct version in package.json`)
 
   const packages = await getPackages()
+  const packagesByPrivacy = groupBy(packages, 'private')
+
+  info(`Found these packages...`)
+  info(`Packages that can be independently released:`)
+  packagesByPrivacy.false && packagesByPrivacy.false.forEach((p) => info(`- ${p.name}`))
+  info(`Packages that cannot be released:`)
+  packagesByPrivacy.true && packagesByPrivacy.true.forEach((p) => info(`- ${p.name}`))
+
   const packageNames = packages.map((p) => p.name)
 
   const pack = packages.find((p) => p.name === name)
@@ -88,14 +106,14 @@ const main = async (name) => {
       version = await getPackageVersion(dep)
     }
 
-    console.log(version)
+    debug(version)
 
     packageJson.dependencies[dep] = version
   }
 
   fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2))
 
-  console.log(`package.json updated!`)
+  debug(`package.json updated!`)
 }
 
 // execute main function if called from command line
