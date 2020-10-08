@@ -160,8 +160,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   }
 
   const handler = route.handler as Function
-
   const timeout = Cypress.config('defaultCommandTimeout')
+  const curTest = Cypress.state('test')
 
   // if a Promise is returned, wait for it to resolve. if req.reply()
   // has not been called, continue to the next interceptor
@@ -185,6 +185,11 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   })
   .timeout(timeout)
   .catch(Bluebird.TimeoutError, (err) => {
+    if (Cypress.state('test') !== curTest) {
+      // active test has changed, ignore the timeout
+      return
+    }
+
     $errUtils.throwErrByPath('net_stubbing.request_handling.cb_timeout', { args: { timeout, req, route: route.options } })
   })
   .finally(() => {

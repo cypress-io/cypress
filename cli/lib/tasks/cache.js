@@ -7,12 +7,14 @@ const Table = require('cli-table3')
 const moment = require('moment')
 const chalk = require('chalk')
 const _ = require('lodash')
+const getFolderSize = require('./get-folder-size')
 
 // output colors for the table
 const colors = {
   titles: chalk.white,
   dates: chalk.cyan,
   values: chalk.green,
+  size: chalk.gray,
 }
 
 const logCachePath = () => {
@@ -25,29 +27,46 @@ const clear = () => {
   return fs.removeAsync(state.getCacheDir())
 }
 
+const fileSizeInMB = (size) => {
+  return `${(size / 1024 / 1024).toFixed(1)}MB`
+}
+
 /**
  * Collects all cached versions, finds when each was used
  * and prints a table with results to the terminal
  */
-const list = () => {
-  return getCachedVersions()
+const list = (showSize) => {
+  return getCachedVersions(showSize)
   .then((binaries) => {
+    const head = [colors.titles('version'), colors.titles('last used')]
+
+    if (showSize) {
+      head.push(colors.titles('size'))
+    }
+
     const table = new Table({
-      head: [colors.titles('version'), colors.titles('last used')],
+      head,
     })
 
     binaries.forEach((binary) => {
       const versionString = colors.values(binary.version)
       const lastUsed = binary.accessed ? colors.dates(binary.accessed) : 'unknown'
+      const row = [versionString, lastUsed]
 
-      return table.push([versionString, lastUsed])
+      if (showSize) {
+        const size = colors.size(fileSizeInMB(binary.size))
+
+        row.push(size)
+      }
+
+      return table.push(row)
     })
 
     logger.always(table.toString())
   })
 }
 
-const getCachedVersions = () => {
+const getCachedVersions = (showSize) => {
   const cacheDir = state.getCacheDir()
 
   return fs
@@ -83,6 +102,20 @@ const getCachedVersions = () => {
       // could not find the binary or gets its stats
       return binary
     })
+  })
+  .mapSeries((binary) => {
+    if (showSize) {
+      const binaryDir = state.getBinaryDir(binary.version)
+
+      return getFolderSize(binaryDir).then((size) => {
+        return {
+          ...binary,
+          size,
+        }
+      })
+    }
+
+    return binary
   })
 }
 

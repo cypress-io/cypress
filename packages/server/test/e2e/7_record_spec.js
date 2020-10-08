@@ -402,9 +402,11 @@ describe('e2e record', () => {
       expect(forthInstanceStdout.body.stdout).not.to.include('record_fail_spec.coffee')
       expect(forthInstanceStdout.body.stdout).not.to.include('record_pass_spec.coffee')
 
-      const runs = requests.filter((v) => v.body.tests).map((v) => v.body)
+      let runs = requests.filter((v) => v.body.tests).map((v) => v.body)
 
       expectRunsToHaveCorrectTimings(runs)
+
+      runs = e2e.normalizeRuns(runs)
 
       snapshot(runs)
 

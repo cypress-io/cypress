@@ -362,6 +362,7 @@ class Reporter {
           name: attempt.err.name,
           message: attempt.err.message,
           stack: stackUtils.stackWithoutMessage(attempt.err.stack),
+          codeFrame: attempt.err.codeFrame,
         }
 
         return {

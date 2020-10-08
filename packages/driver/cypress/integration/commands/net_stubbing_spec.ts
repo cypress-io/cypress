@@ -237,9 +237,6 @@ describe('network stubbing', function () {
         })
       })
 
-      // Responded: 1 time
-      // "-------": ""
-      // Responses: []
       describe('numResponses', function () {
         it('is initially 0', function () {
           cy.route2(/foo/, {}).then(() => {
@@ -260,9 +257,7 @@ describe('network stubbing', function () {
         it('is incremented for each matching request', function () {
           cy.route2(/foo/, {}).then(function () {
             return Promise.all([$.get('/foo'), $.get('/foo'), $.get('/foo')])
-          }).then(function () {
-            expect(this.lastLog.get('numResponses')).to.eq(3)
-          })
+          }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 3)
         })
       })
     })
@@ -535,7 +530,8 @@ describe('network stubbing', function () {
       })
     })
 
-    it('still works after a cy.visit', function () {
+    // TODO: flaky - unable to reproduce outside of CI
+    it('still works after a cy.visit', { retries: 2 }, function () {
       cy.route2(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
@@ -778,7 +774,7 @@ describe('network stubbing', function () {
         })
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
-      cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
     it('can delay and throttle a StaticResponse', function (done) {
@@ -1251,7 +1247,7 @@ describe('network stubbing', function () {
         })
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
-      cy.contains('#result', '{"foo":1,"bar":{"baz":"cypress"}}').should('be.visible')
+      cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
     context('with StaticResponse', function () {
@@ -1700,6 +1696,25 @@ describe('network stubbing', function () {
             bar: 'baz',
           },
         })
+      })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8695
+    context('yields request', function () {
+      it('when not intercepted', function () {
+        cy.route2('/post-only').as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'some body')
+      })
+
+      it('when intercepted', function () {
+        cy.route2('/post-only', (req) => {
+          req.body = 'changed'
+        }).as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'changed')
       })
     })
 

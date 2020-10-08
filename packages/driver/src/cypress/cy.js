@@ -656,7 +656,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     args.unshift(subject)
 
-    Cypress.action('cy:next:subject:prepared', subject, args)
+    Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
 
     return args
   }
