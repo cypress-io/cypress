@@ -14,6 +14,8 @@ describe('src/cy/commands/actions/scroll', () => {
     const doc = cy.state('document')
 
     $(doc.body).empty().html(this.body)
+    $(doc.body).removeAttr('style')
+    $(doc.body.parentElement).removeAttr('style')
 
     cy.viewport(600, 200)
   })
@@ -641,6 +643,17 @@ describe('src/cy/commands/actions/scroll', () => {
 
       this.scrollBoth.scrollTop(0)
       this.scrollBoth.scrollLeft(0)
+    })
+
+    it('works with scroll on the body', () => {
+      const doc = cy.state('document')
+
+      $(doc.body).empty().html('<div style="height: 100vh;"><div style="height:2000px"></div><div id="bottom-content">Bottom Content</div></div>')
+      $(doc.body).css({ 'margin': 0, 'overflow-y': 'overlay' })
+      $(doc.body.parentElement).css({ 'overflow-y': 'overlay' })
+      cy.get('#bottom-content').scrollIntoView().then(() => {
+        expect(doc.body.scrollTop).to.be.above(1800)
+      })
     })
 
     it('does not change the subject', () => {

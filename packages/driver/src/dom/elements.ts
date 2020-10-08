@@ -567,7 +567,8 @@ const isAttrType = function (el: HTMLInputElement, type: string) {
 }
 
 const isScrollOrAuto = (prop) => {
-  return prop === 'scroll' || prop === 'auto'
+  // overlay is non-standard but behaves the same as auto but with scrollbars drawn on top of content
+  return prop === 'scroll' || prop === 'auto' || prop === 'overlay'
 }
 
 const isAncestor = ($el, $maybeAncestor) => {

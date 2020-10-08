@@ -11,7 +11,7 @@ const findScrollableParent = ($el, win) => {
 
   // if we're at the body, we just want to pass in
   // window into jQuery scrollTo
-  if ($parent.is('body,html') || $dom.isDocument($parent)) {
+  if ($parent.is('html') || $dom.isDocument($parent)) {
     return win
   }
 
