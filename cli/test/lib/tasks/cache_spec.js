@@ -147,6 +147,24 @@ describe('lib/tasks/cache', () => {
         })
       })
     })
+
+    it('doesn\'t delete any cache binaries', () => {
+      const dir = path.join(state.getCacheDir, '2.3.4')
+
+      fs.removeAsync(dir)
+
+      return Promise.all(cache.prune())
+      .then(() => {
+        const currentVersion = util.pkgVersion()
+
+        fs.readdir('/.cache/Cypress', (error, files) => {
+          expect(files.length).to.eq(1)
+          files.forEach((file) => {
+            expect(file).to.eq(currentVersion)
+          })
+        })
+      })
+    })
   })
 
   describe('.list', () => {

@@ -3,7 +3,11 @@ exports['lib/tasks/cache .clear deletes cache folder and everything inside it 1'
 `
 
 exports['lib/tasks/cache .prune deletes cache binaries for all version but the current one 1'] = `
-[no output]
+Deleted all binary caches except for the 1.2.3 binary cache.
+`
+
+exports['lib/tasks/cache .prune doesn\'t delete any cache binaries 1'] = `
+No binary caches found to prune.
 `
 
 exports['lib/tasks/cache .list lists all versions of cached binary 1'] = `

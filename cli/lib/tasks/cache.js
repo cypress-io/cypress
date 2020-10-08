@@ -32,6 +32,7 @@ const prune = () => {
   const currentVersion = util.pkgVersion()
 
   const promises = []
+  let deletedBinary = false
 
   fs.readdir(cacheDir, (error, versions) => {
     versions.forEach((version) => {
@@ -39,8 +40,16 @@ const prune = () => {
         const versionDir = join(cacheDir, version)
 
         promises.push(fs.remove(versionDir))
+
+        deletedBinary = true
       }
     })
+
+    if (deletedBinary) {
+      logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
+    } else {
+      logger.always(`No binary caches found to prune.`)
+    }
   })
 
   return promises
