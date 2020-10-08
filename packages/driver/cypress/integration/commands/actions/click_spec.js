@@ -886,9 +886,33 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      // caretPositionFromPoint doesn't work on headless mode on Firefox.
-      if (Cypress.isBrowser('chrome')) {
-        describe('point', () => {
+      describe('point', () => {
+        it('fails with <input>', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('only used with contenteditable fields')
+            done()
+          })
+
+          cy.get('input:first').invoke('val', 'foobar').click({
+            caretPosition: 'point',
+          })
+        })
+
+        it('fails with <textarea>', (done) => {
+          cy.on('fail', (err) => {
+            expect(err.message).to.contain('only used with contenteditable fields')
+            done()
+          })
+
+          cy.get('textarea:first').invoke('val', 'foobar').click({
+            caretPosition: 'point',
+          })
+        })
+
+        // caretPositionFromPoint doesn't work on headless mode on Firefox.
+        // It also doesn't work when Firefox GUI cannot be run like CI environment.
+        // That's why we're not testing it here.
+        if (!Cypress.isBrowser('firefox')) {
           it('[contenteditable]', () => {
             cy.get('[contenteditable]:first')
             .invoke('html', '<div><br></div>').click(15, 5, {
@@ -915,8 +939,33 @@ describe('src/cy/commands/actions/click', () => {
             })
             .then(expectCaret(0))
           })
-        })
-      }
+        }
+
+        if (Cypress.isBrowser('firefox')) {
+          describe('caretPosition:point fail on Firefox headless mode', () => {
+            it('test', (done) => {
+              // This is globally set to true at support/defaults.js
+              Cypress.config('isInteractive', false)
+
+              cy.on('fail', (err) => {
+                expect(err.message).to.contain('Skip this test')
+                done()
+              })
+
+              cy.get('[contenteditable]:first')
+              .invoke('html', 'foobar').click(15, 5, {
+                caretPosition: 'point',
+              })
+              .then(expectCaret(2))
+            })
+
+            after(() => {
+              // Restore the value after the test.
+              Cypress.config('isInteractive', true)
+            })
+          })
+        }
+      })
     })
 
     it('can click SVG elements', () => {

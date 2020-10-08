@@ -232,6 +232,14 @@ module.exports = {
       message: `${cmd('{{cmd}}')} cannot be called on a \`<select>\` element. Use ${cmd('select')} command instead to change the value.`,
       docsUrl: 'https://on.cypress.io/select',
     },
+    firefox_caretPosition_point_headless: {
+      message: `caretPosition: 'point' option doesn't work on Firefox headless mode. Skip this test with \`!Cypress.isBrowser('firefox')\` condition.`,
+      docsUrl: 'https://on.cypress.io/click',
+    },
+    caretPosition_point_is_only_for_contentEditable: {
+      message: `caretPosition: 'point' option must be only used with contenteditable fields`,
+      docsUrl: 'https://on.cypress.io/click',
+    },
   },
 
   clock: {

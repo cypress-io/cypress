@@ -2,6 +2,7 @@ const _ = require('lodash')
 const $ = require('jquery')
 const Promise = require('bluebird')
 const $dom = require('../../../dom')
+const $elements = require('../../../dom/elements')
 const $utils = require('../../../cypress/utils')
 const $errUtils = require('../../../cypress/error_utils')
 const $actionability = require('../../actionability')
@@ -93,6 +94,15 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     }
 
     const perform = (el) => {
+      if (options.caretPosition === 'point' && !$elements.isContentEditable(el)) {
+        $errUtils.throwErrByPath('click.caretPosition_point_is_only_for_contentEditable')
+      }
+
+      // caretPosition === 'point' doesn't work with Firefox headless mode.
+      if (options.caretPosition === 'point' && Cypress.isBrowser('firefox') && Cypress.config('isInteractive') === false) {
+        $errUtils.throwErrByPath('click.firefox_caretPosition_point_headless')
+      }
+
       let deltaOptions
       const $el = $dom.wrap(el)
 
