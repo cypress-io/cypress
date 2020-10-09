@@ -44,37 +44,11 @@ class SpecsList extends Component {
 
     const areTestsRunning = this._areTestsRunning()
 
-    let runSpecsLabel = allIntegrationSpecsSpec.displayName
-    let runButtonDisabled = false
-
     // store in the component for ease of sharing with other methods
     const runWord = areTestsRunning ? 'Running' : 'Run'
 
     this.integrationLabel = integrationSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${integrationSpecsN} specs`
     this.componentLabel = componentSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${componentSpecsN} specs`
-
-    if (areTestsRunning && this.runAllSavedLabel) {
-      runSpecsLabel = this.runAllSavedLabel
-    } else {
-      if (hasSpecFilter) {
-        if (numberOfShownSpecs < 1) {
-          runSpecsLabel = 'No specs'
-          runButtonDisabled = true
-        } else {
-          const specLabel = numberOfShownSpecs === 1 ? 'spec' : 'specs'
-
-          runSpecsLabel = `Run ${numberOfShownSpecs} ${specLabel}`
-        }
-      }
-    }
-
-    const runIntegrationTestsButton = (<button onClick={this._selectSpec.bind(this, allIntegrationSpecsSpec)}
-      disabled={runButtonDisabled}
-      title="Run all integration specs together"
-      className={cs('btn-link all-tests', { active: specsStore.isChosen(allIntegrationSpecsSpec) })}>
-      <i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}
-      {runSpecsLabel}
-    </button>)
 
     return (
       <div className='specs'>
@@ -101,7 +75,6 @@ class SpecsList extends Component {
               <a className='clear-filter fas fa-times' onClick={this._clearFilter} />
             </Tooltip>
           </div>
-          {runIntegrationTestsButton}
         </header>
         {this._specsList()}
       </div>
@@ -235,7 +208,7 @@ class SpecsList extends Component {
         title={`${word} ${specType} specs together`}
         onClick={this._selectSpec.bind(this,
           spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
-        }>{buttonText}</button>)
+        }><i className={`fa-fw ${this._allSpecsIcon()}`} />{' '}{buttonText}</button>)
     }
 
     return (
