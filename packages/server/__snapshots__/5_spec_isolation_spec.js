@@ -721,6 +721,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
 }
 
 exports['e2e spec_isolation fails [chrome] 1'] = {
+  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1284,6 +1285,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
 }
 
 exports['e2e spec_isolation fails [firefox] 1'] = {
+  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1847,6 +1849,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
 }
 
 exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
+  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -2291,6 +2294,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
 }
 
 exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
+  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
