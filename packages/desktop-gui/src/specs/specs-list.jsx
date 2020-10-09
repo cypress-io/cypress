@@ -34,10 +34,6 @@ class SpecsList extends Component {
     const integrationSpecsN = _.filter(filteredSpecs, { specType: 'integration' }).length
     const componentSpecsN = _.filter(filteredSpecs, { specType: 'component' }).length
 
-    // store in the component for ease of sharing with other methods
-    this.integrationLabel = integrationSpecsN === 1 ? 'Run 1 spec' : `Run ${integrationSpecsN} specs`
-    this.componentLabel = componentSpecsN === 1 ? 'Run 1 spec' : `Run ${componentSpecsN} specs`
-
     const hasSpecFilter = specsStore.filter
     const numberOfShownSpecs = filteredSpecs.length
     const hasNoSpecs = !hasSpecFilter && !numberOfShownSpecs
@@ -49,6 +45,12 @@ class SpecsList extends Component {
     const areTestsRunning = this._areTestsRunning()
     let runSpecsLabel = allIntegrationSpecsSpec.displayName
     let runButtonDisabled = false
+
+    // store in the component for ease of sharing with other methods
+    const runWord = areTestsRunning ? 'Running' : 'Run'
+
+    this.integrationLabel = integrationSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${integrationSpecsN} specs`
+    this.componentLabel = componentSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${componentSpecsN} specs`
 
     if (areTestsRunning && this.runAllSavedLabel) {
       runSpecsLabel = this.runAllSavedLabel
