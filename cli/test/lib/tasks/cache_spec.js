@@ -13,7 +13,6 @@ const stripAnsi = require('strip-ansi')
 const path = require('path')
 const termToHtml = require('term-to-html')
 const mockedEnv = require('mocked-env')
-const Promise = require('bluebird')
 
 const outputHtmlFolder = path.join(__dirname, '..', '..', 'html')
 
@@ -134,36 +133,39 @@ describe('lib/tasks/cache', () => {
   })
 
   describe('.prune', () => {
-    it('deletes cache binaries for all version but the current one', () => {
-      return Promise.all(cache.prune())
-      .then(() => {
-        const currentVersion = util.pkgVersion()
+    it('deletes cache binaries for all version but the current one', async () => {
+      await cache.prune()
 
-        fs.readdir('/.cache/Cypress', (error, files) => {
-          expect(files.length).to.eq(1)
-          files.forEach((file) => {
-            expect(file).to.eq(currentVersion)
-          })
-        })
+      const currentVersion = util.pkgVersion()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+
+      files.forEach((file) => {
+        expect(file).to.eq(currentVersion)
       })
+
+      defaultSnapshot()
     })
 
-    it('doesn\'t delete any cache binaries', () => {
+    it('doesn\'t delete any cache binaries', async () => {
       const dir = path.join(state.getCacheDir(), '2.3.4')
 
-      fs.removeAsync(dir)
+      await fs.removeAsync(dir)
+      await cache.prune()
 
-      return Promise.all(cache.prune())
-      .then(() => {
-        const currentVersion = util.pkgVersion()
+      const currentVersion = util.pkgVersion()
 
-        fs.readdir('/.cache/Cypress', (error, files) => {
-          expect(files.length).to.eq(1)
-          files.forEach((file) => {
-            expect(file).to.eq(currentVersion)
-          })
-        })
+      const files = await fs.readdirAsync('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+
+      files.forEach((file) => {
+        expect(file).to.eq(currentVersion)
       })
+
+      defaultSnapshot()
     })
   })
 
