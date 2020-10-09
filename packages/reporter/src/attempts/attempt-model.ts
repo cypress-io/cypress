@@ -5,11 +5,12 @@ import Agent, { AgentProps } from '../agents/agent-model'
 import Command, { CommandProps } from '../commands/command-model'
 import Err from '../errors/err-model'
 import Route, { RouteProps } from '../routes/route-model'
-import Test, { UpdatableTestProps, TestProps, TestState } from '../test/test-model'
+import Test, { UpdatableTestProps, TestProps, TestStatus } from '../test/test-model'
 import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
+import { Node } from '../tree/node'
 
 export default class Attempt {
   @observable agents: Agent[] = []
@@ -19,7 +20,7 @@ export default class Attempt {
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
   @observable isActive: boolean | null = null
   @observable routes: Route[] = []
-  @observable _state?: TestState | null = null
+  @observable _status?: TestStatus | null = null
   @observable _invocationCount: number = 0
   @observable invocationDetails?: FileDetails
   @observable hookCount: { [name in HookName]: number } = {
@@ -36,15 +37,19 @@ export default class Attempt {
   testId: string
 
   @observable id: number
+  uniqueId: string
   test: Test
 
   _logs: {[key: string]: Log} = {}
 
+  _logUniqueCounter = 0
+
   constructor (props: TestProps, test: Test) {
     this.testId = props.id
     this.id = props.currentRetry || 0
+    this.uniqueId = [this.id, this.testId].join('-')
     this.test = test
-    this._state = props.state
+    this._status = props.status
     this.err.update(props.err)
 
     this.invocationDetails = props.invocationDetails
@@ -54,6 +59,56 @@ export default class Attempt {
     _.each(props.agents, this.addLog)
     _.each(props.commands, this.addLog)
     _.each(props.routes, this.addLog)
+  }
+
+  @computed get children (): Node[] {
+    let nodes: Node[] = []
+
+    const addCommandLogSection = (title: string, key: string, children: Node[]) => {
+      nodes.push({
+        id: [this.uniqueId, key].join('-'),
+        type: 'command-log-section',
+        title,
+        children,
+      })
+    }
+
+    if (this.agents.length) {
+      addCommandLogSection('Stubs and Spies', 'agents', this.agents.map((agent) => {
+        return {
+          id: this._uniqueLogId(),
+          type: 'agent',
+          agent,
+        }
+      }))
+    }
+
+    if (this.routes.length) {
+      addCommandLogSection('Routes', 'routes', this.routes.map((route) => {
+        return {
+          id: this._uniqueLogId(),
+          type: 'route',
+          route,
+        }
+      }))
+    }
+
+    if (this.hooks.length) {
+      // addCommandLogSection('hooks', this.hooks.map((hook) => {
+      //   return {
+      //     id: this._uniqueLogId(),
+      //     type: 'command-log-section',
+      //     hook,
+      //   }
+      // }))
+    }
+
+    //testError
+    if (this.err.displayMessage) {
+      // TODO: ???
+    }
+
+    return nodes
   }
 
   @computed get hasCommands () {
@@ -70,8 +125,8 @@ export default class Attempt {
     })
   }
 
-  @computed get state () {
-    return this._state || (this.isActive ? 'active' : 'processing')
+  @computed get status () {
+    return this._status || (this.isActive ? 'active' : 'processing')
   }
 
   @computed get isLast () {
@@ -126,8 +181,8 @@ export default class Attempt {
   }
 
   @action update (props: UpdatableTestProps) {
-    if (props.state) {
-      this._state = props.state
+    if (props.status) {
+      this._status = props.status
     }
 
     this.err.update(props.err)
@@ -148,6 +203,10 @@ export default class Attempt {
   @action finish (props: UpdatableTestProps) {
     this.update(props)
     this.isActive = false
+  }
+
+  _uniqueLogId () {
+    return [this.uniqueId, this._logUniqueCounter++].join('-')
   }
 
   _addAgent (props: AgentProps) {

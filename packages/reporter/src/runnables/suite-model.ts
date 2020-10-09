@@ -1,18 +1,18 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 import Runnable, { RunnableProps } from './runnable-model'
-import TestModel, { TestProps, TestState } from '../test/test-model'
+import TestModel, { TestProps, TestStatus } from '../test/test-model'
+import { Node } from '../tree/node'
 
-export interface SuiteProps extends RunnableProps {
-  suites: Array<SuiteProps>
-  tests: Array<TestProps>
-}
+// export interface SuiteProps extends RunnableProps {
+//   children: Array<SuiteProps | TestProps>
+// }
 
-export default class Suite extends Runnable {
+export default class Suite extends Runnable implements Node {
   @observable children: Array<TestModel | Suite> = []
   type = 'suite'
 
-  @computed get state (): TestState {
+  @computed get status (): TestStatus {
     if (this._anyChildrenFailed) {
       return 'failed'
     }
@@ -28,8 +28,8 @@ export default class Suite extends Runnable {
     return 'processing'
   }
 
-  @computed get _childStates () {
-    return _.map(this.children, 'state')
+  @computed get _childStatuses () {
+    return _.map(this.children, 'status')
   }
 
   @computed get hasRetried (): boolean {
@@ -37,21 +37,21 @@ export default class Suite extends Runnable {
   }
 
   @computed get _anyChildrenFailed () {
-    return _.some(this._childStates, (state) => {
-      return state === 'failed'
+    return _.some(this._childStatuses, (status) => {
+      return status === 'failed'
     })
   }
 
   @computed get _allChildrenPassedOrPending () {
-    return !this._childStates.length || _.every(this._childStates, (state) => {
-      return state === 'passed' || state === 'pending'
+    return !this._childStatuses.length || _.every(this._childStatuses, (status) => {
+      return status === 'passed' || status === 'pending'
     })
   }
 
   @computed get _allChildrenPending () {
-    return !!this._childStates.length
-            && _.every(this._childStates, (state) => {
-              return state === 'pending'
+    return !!this._childStatuses.length
+            && _.every(this._childStatuses, (status) => {
+              return status === 'pending'
             })
   }
 }

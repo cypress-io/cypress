@@ -13,6 +13,7 @@ export default class Runnable {
   @observable title?: string
   @observable level: number
   @observable hooks: Array<HookProps> = []
+  state = { expanded: true }
 
   constructor (props: RunnableProps, level: number) {
     this.id = props.id

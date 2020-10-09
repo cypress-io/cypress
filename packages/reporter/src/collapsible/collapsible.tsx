@@ -11,6 +11,7 @@ interface Props {
   headerExtras?: ReactNode
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
+  style?: CSSProperties
 }
 
 interface State {
@@ -39,7 +40,7 @@ class Collapsible extends Component<Props, State> {
 
   render () {
     return (
-      <div className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
+      <div style={this.props.style} className={cs('collapsible', { 'is-open': this.state.isOpen })} ref={this.props.containerRef}>
         <div className={cs('collapsible-header-wrapper', this.props.headerClass)}>
           <div
             aria-expanded={this.state.isOpen}

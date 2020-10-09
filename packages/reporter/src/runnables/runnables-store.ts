@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
+import { action, observable, computed } from 'mobx'
 
 import appState, { AppState } from '../lib/app-state'
 import AgentModel, { AgentProps } from '../agents/agent-model'
@@ -51,6 +51,7 @@ class RunnablesStore {
   [key: string]: any
 
   _tests: Record<string, TestModel> = {}
+  _runnables: Record<string, RunnableModel> = {}
   _logs: Record<string, Log> = {}
   _runnablesQueue: Array<RunnableModel> = []
 
@@ -64,6 +65,7 @@ class RunnablesStore {
 
   setRunnables (rootRunnable: RootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
+    // debugger
     this.isReady = true
 
     const numTests = _.keys(this._tests).length
@@ -96,6 +98,7 @@ class RunnablesStore {
     const suite = new SuiteModel(props, level)
 
     this._runnablesQueue.push(suite)
+    this._runnables[suite.id] = suite
     suite.children = this._createRunnableChildren(props, ++level)
 
     return suite
@@ -105,7 +108,7 @@ class RunnablesStore {
     const test = new TestModel(props, level, this)
 
     this._runnablesQueue.push(test)
-    this._tests[test.id] = test
+    this._tests[test.id] = this._runnables[test.id] = test
 
     return test
   }
@@ -167,6 +170,10 @@ class RunnablesStore {
 
   testById (id: string) {
     return this._tests[id]
+  }
+
+  runnableById = (id: string) => {
+    return this._runnables[id]
   }
 
   addLog (log: LogProps) {

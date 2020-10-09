@@ -100,7 +100,7 @@ const events: Events = {
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
       if (runnable.final) {
-        statsStore.incrementCount(runnable.state!)
+        statsStore.incrementCount(runnable.status!)
       }
     }))
 

@@ -14,28 +14,31 @@ import TestModel from '../test/test-model'
 
 interface SuiteProps {
   model: SuiteModel
+  style?: React.CSSProperties
 }
 
-const Suite = observer(({ model }: SuiteProps) => {
+const Suite = observer(({ model, style }: SuiteProps) => {
   if (!model.shouldRender) return null
 
   return (
     <Collapsible
+      style={style}
       header={<span className='runnable-title'>{model.title}</span>}
       headerClass='runnable-wrapper'
       headerStyle={{ paddingLeft: indent(model.level) }}
       contentClass='runnables-region'
       isOpen={true}
     >
-      <ul className='runnables'>
+      {/* <ul className='runnables'>
         {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-      </ul>
+      </ul> */}
     </Collapsible>
   )
 })
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
+  style?: React.CSSProperties
 }
 
 @observer
@@ -43,18 +46,18 @@ class Runnable extends Component<RunnableProps> {
   @observable isHovering = false
 
   render () {
-    const { model } = this.props
+    const { model, style } = this.props
 
     return (
       <li
-        className={cs(`${model.type} runnable runnable-${model.state}`, {
+        className={cs(`${model.type} runnable runnable-${model.status}`, {
           'runnable-retried': model.hasRetried,
           hover: this.isHovering,
         })}
         onMouseOver={this._hover(true)}
         onMouseOut={this._hover(false)}
       >
-        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+        {model.type === 'test' ? <Test style={style} model={model as TestModel} /> : <Suite style={style} model={model as SuiteModel} />}
       </li>
     )
   }

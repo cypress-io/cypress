@@ -2,6 +2,7 @@ import _ from 'lodash'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tree from 'react-virtualized-tree'
 
 import AnError, { Error } from '../errors/an-error'
 import Runnable from './runnable-and-suite'
@@ -30,19 +31,25 @@ const Loading = () => (
   </div>
 )
 
-interface RunnablesListProps {
-  runnables: RunnableArray
-}
+const RunnablesList = observer(({ runnablesStore }: { runnablesStore: RunnablesStore }) => {
+  const { runnables, runnableById } = runnablesStore
 
-const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
-  <div className='wrap'>
-    <ul className='runnables'>
-      {_.map(runnables, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-    </ul>
-  </div>
-))
+  console.log(runnables)
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+  return (
+    <div className='wrap'>
+      {/* <ul className='runnables'> */}
+      <Tree nodes={runnables}>
+        {({ style, node }) => console.log(node.id, node) || <Runnable style={style} key={node.id} model={runnableById(node.id)} />}
+      </Tree>
+      {/* </ul> */}
+    </div>
+  )
+})
+
+function content (runnablesStore: RunnablesStore, specPath: string, error?: Error) {
+  const { isReady, runnables } = runnablesStore
+
   if (!isReady) {
     return <Loading />
   }
@@ -53,7 +60,7 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <AnError error={error} /> : <RunnablesList runnablesStore={runnablesStore} />
 }
 
 interface RunnablesProps {

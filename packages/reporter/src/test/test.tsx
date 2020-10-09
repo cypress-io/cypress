@@ -19,6 +19,7 @@ interface Props {
   runnablesStore: RunnablesStore
   scroller: Scroller
   model: TestModel
+  style?: React.CSSProperties
 }
 
 @observer
@@ -49,9 +50,9 @@ class Test extends Component<Props> {
 
   _scrollIntoView () {
     const { appState, model, scroller } = this.props
-    const { state, shouldRender } = model
+    const { status, shouldRender } = model
 
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
+    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && status !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
         if (this.containerRef.current) {
@@ -62,12 +63,13 @@ class Test extends Component<Props> {
   }
 
   render () {
-    const { model } = this.props
+    const { model, style } = this.props
 
     if (!model.shouldRender) return null
 
     return (
       <Collapsible
+        style={style}
         containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
@@ -87,7 +89,7 @@ class Test extends Component<Props> {
       <i aria-hidden='true' className='runnable-state fas' />
       <span className='runnable-title'>
         <span>{model.title}</span>
-        <span className='visually-hidden'>{model.state}</span>
+        <span className='visually-hidden'>{model.status}</span>
       </span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
@@ -102,7 +104,6 @@ class Test extends Component<Props> {
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
-
         <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
       </div>
     )

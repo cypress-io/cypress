@@ -10,13 +10,14 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import { Node } from '../tree/node'
 
-export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+export type TestStatus = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
 export type UpdateTestCallback = () => void
 
 export interface TestProps extends RunnableProps {
-  state: TestState | null
+  status: TestStatus | null
   err?: Err
   isOpen?: boolean
   agents?: Array<AgentProps>
@@ -32,7 +33,7 @@ export interface TestProps extends RunnableProps {
 
 export interface UpdatableTestProps {
   id: TestProps['id']
-  state?: TestProps['state']
+  status?: TestProps['status']
   err?: TestProps['err']
   hookId?: string
   isOpen?: TestProps['isOpen']
@@ -40,7 +41,7 @@ export interface UpdatableTestProps {
   retries?: TestProps['retries']
 }
 
-export default class Test extends Runnable {
+export default class Test extends Runnable implements Node {
   type = 'test'
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
@@ -68,6 +69,16 @@ export default class Test extends Runnable {
     this._addAttempt(props)
   }
 
+  @computed get children (): Node[] {
+    return this.attempts.map((attempt) => {
+      return {
+        id: [attempt.testId, attempt.id].join('-'),
+        type: 'attempt',
+        attempt,
+      }
+    })
+  }
+
   @computed get isLongRunning () {
     return _.some(this.attempts, (attempt: Attempt) => {
       return attempt.isLongRunning
@@ -76,7 +87,7 @@ export default class Test extends Runnable {
 
   @computed get isOpen () {
     if (this._isOpen === null) {
-      return Boolean(this.state === 'failed'
+      return Boolean(this.status === 'failed'
       || this.isLongRunning
       || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
       || this.store.hasSingleTest)
@@ -85,8 +96,8 @@ export default class Test extends Runnable {
     return this._isOpen
   }
 
-  @computed get state () {
-    return this.lastAttempt ? this.lastAttempt.state : 'active'
+  @computed get status () {
+    return this.lastAttempt ? this.lastAttempt.status : 'active'
   }
 
   @computed get err () {
@@ -102,7 +113,7 @@ export default class Test extends Runnable {
   }
 
   @computed get hasRetried () {
-    return this.state === 'passed' && this.hasMultipleAttempts
+    return this.status === 'passed' && this.hasMultipleAttempts
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'

@@ -19,7 +19,7 @@ const NoCommands = () => (
   </ul>
 )
 
-const AttemptHeader = ({ index }:{index: number}) => (
+const AttemptHeader = ({ index }: {index: number}) => (
   <span className='attempt-tag'>
     <span className='open-close-indicator'>
       <i className='fa fa-fw fa-angle-up' />
@@ -62,10 +62,9 @@ class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}>
 
     return (
       <li
-
         key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.state}`, {
-          'attempt-failed': model.state === 'failed',
+        className={cs('attempt-item', `attempt-state-${model.status}`, {
+          'attempt-failed': model.status === 'failed',
         })}
         ref="container"
       >
