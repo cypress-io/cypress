@@ -8,6 +8,7 @@ const moment = require('moment')
 const chalk = require('chalk')
 const _ = require('lodash')
 const getFolderSize = require('./get-folder-size')
+const Bluebird = require('bluebird')
 
 // output colors for the table
 const colors = {
@@ -31,28 +32,27 @@ const prune = () => {
   const cacheDir = state.getCacheDir()
   const currentVersion = util.pkgVersion()
 
-  const promises = []
   let deletedBinary = false
 
-  fs.readdir(cacheDir, (error, versions) => {
-    versions.forEach((version) => {
+  return fs.readdirAsync(cacheDir)
+  .then((versions) => {
+    return Bluebird.all(versions.map((version) => {
       if (version !== currentVersion) {
+        deletedBinary = true
+
         const versionDir = join(cacheDir, version)
 
-        promises.push(fs.remove(versionDir))
-
-        deletedBinary = true
+        return fs.removeAsync(versionDir)
       }
-    })
-
+    }))
+  })
+  .then(() => {
     if (deletedBinary) {
       logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
     } else {
       logger.always(`No binary caches found to prune.`)
     }
   })
-
-  return promises
 }
 
 const fileSizeInMB = (size) => {
