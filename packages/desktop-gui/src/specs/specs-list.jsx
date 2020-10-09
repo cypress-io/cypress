@@ -43,6 +43,7 @@ class SpecsList extends Component {
     }
 
     const areTestsRunning = this._areTestsRunning()
+
     let runSpecsLabel = allIntegrationSpecsSpec.displayName
     let runButtonDisabled = false
 
@@ -175,6 +176,8 @@ class SpecsList extends Component {
 
     const { project } = this.props
 
+    this.selectedSpec = spec
+
     if (spec.relative === '__all') {
       if (specsStore.filter) {
         const filteredSpecs = specsStore.getFilteredSpecs()
@@ -209,6 +212,32 @@ class SpecsList extends Component {
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
 
+    const getSpecRunButton = () => {
+      const word = this._areTestsRunning() ? 'Running' : 'Run'
+      const specType = spec.specType || 'integration'
+      let buttonText = spec.displayName === 'integration' ? this.integrationLabel : this.componentLabel
+
+      if (this._areTestsRunning()) {
+        // selected spec must be set
+        // only show the button matching current running spec type
+        if (spec.specType !== this.selectedSpec.specType) {
+          return <></>
+        }
+
+        if (this.selectedSpec.relative !== '__all') {
+          // we are only running 1 spec
+          buttonText = `${word} 1 spec`
+        }
+      }
+
+      return (<button
+        className="btn-link all-tests"
+        title={`${word} ${specType} specs together`}
+        onClick={this._selectSpec.bind(this,
+          spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
+        }>{buttonText}</button>)
+    }
+
     return (
       <li key={spec.path} className={`folder level-${nestingLevel} ${isExpanded ? 'folder-expanded' : 'folder-collapsed'}`}>
         <div>
@@ -230,10 +259,7 @@ class SpecsList extends Component {
                 spec.displayName
             }
             {/* TODO: style these buttons */}
-            {nestingLevel === 0 ? <button style={{ marginLeft: '2em' }}
-              onClick={this._selectSpec.bind(this,
-                spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
-              }>{spec.displayName === 'integration' ? this.integrationLabel : this.componentLabel }</button> : <></>}
+            {nestingLevel === 0 ? getSpecRunButton() : <></>}
           </div>
           {
             isExpanded ?

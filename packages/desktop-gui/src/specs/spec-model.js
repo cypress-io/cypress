@@ -8,7 +8,7 @@ export default class Spec {
   @observable displayName
   // TODO clarify the role of "type" vs "specType"
   @observable type
-  @observable specType // integration | component
+  @observable specType // "integration" | "component"
   @observable isChosen = false
 
   constructor ({ path, name, absolute, relative, displayName, type, specType }) {
@@ -18,7 +18,7 @@ export default class Spec {
     this.relative = relative
     this.displayName = displayName
     this.type = type
-    this.specType = specType
+    this.specType = specType || 'integration'
   }
 
   @computed get hasChildren () {

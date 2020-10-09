@@ -159,7 +159,12 @@ export class SpecsStore {
         segmentsPassed.push(segment)
         const currentPath = path.join(...segmentsPassed)
         const isCurrentAFile = i === segments.length - 1
-        const props = { path: currentPath, displayName: segment }
+
+        const props = {
+          path: currentPath,
+          displayName: segment,
+          specType: file.specType,
+        }
 
         let existing = _.find(placeholder, (file) => {
           return pathsEqual(file.path, currentPath)
