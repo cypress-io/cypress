@@ -53,6 +53,9 @@ const prune = () => {
       logger.always(`No binary caches found to prune.`)
     }
   })
+  .catch({ code: 'ENOENT' }, () => {
+    logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
+  })
 }
 
 const fileSizeInMB = (size) => {

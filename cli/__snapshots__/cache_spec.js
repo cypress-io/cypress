@@ -10,6 +10,10 @@ exports['lib/tasks/cache .prune doesn\'t delete any cache binaries 1'] = `
 No binary caches found to prune.
 `
 
+exports['lib/tasks/cache .prune exits cleanly if cache dir DNE 1'] = `
+No Cypress cache was found at /.cache/Cypress. Nothing to prune.
+`
+
 exports['lib/tasks/cache .list lists all versions of cached binary 1'] = `
 ┌─────────┬───────────┐
 │ version │ last used │

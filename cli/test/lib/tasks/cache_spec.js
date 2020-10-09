@@ -167,6 +167,13 @@ describe('lib/tasks/cache', () => {
 
       defaultSnapshot()
     })
+
+    it('exits cleanly if cache dir DNE', async () => {
+      await fs.removeAsync(state.getCacheDir())
+      await cache.prune()
+
+      defaultSnapshot()
+    })
   })
 
   describe('.list', () => {
