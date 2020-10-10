@@ -1,140 +1,72 @@
 require('../spec_helper')
-require(`${root}lib/cwd`)
 
-const nmi = require('node-machine-id')
-const request = require('@cypress/request')
+const machineId = require(`${root}lib/util/machine_id`)
+const rp = require('@cypress/request-promise')
 const Updater = require(`${root}lib/updater`)
 const pkg = require('@packages/root')
-const _ = require('lodash')
 
 describe('lib/updater', () => {
-  context('interface', () => {
-    it('returns an updater instance', () => {
-      const u = new Updater({})
+  context('_getManifest', () => {
+    it('sends the right headers', () => {
+      sinon.stub(rp, 'get').resolves({})
 
-      expect(u).to.be.instanceof(Updater)
+      Updater._getManifest('machine-id')
+
+      expect(rp.get).to.be.calledWithMatch({
+        headers: {
+          'x-cypress-version': pkg.version,
+          'x-machine-id': 'machine-id',
+        },
+      })
     })
   })
 
-  context('#getPackage', () => {
-    beforeEach(function () {
-      pkg.foo = 'bar'
-      this.updater = new Updater({})
+  context('check', () => {
+    const version = pkg.version
+
+    beforeEach(() => {
+      pkg.version = '5.0.0'
+      sinon.stub(machineId, 'machineId').resolves('machine-id')
     })
 
     afterEach(() => {
-      return delete pkg.foo
+      pkg.version = version
     })
 
-    it('inserts manifestUrl to package.json', function () {
-      const expected = _.extend({}, pkg, {
-        foo: 'bar',
-        manifestUrl: 'https://download.cypress.io/desktop.json',
-      })
+    it('calls onNewVersion when local version is lower than manifest\'s version', async () => {
+      sinon.stub(rp, 'get').resolves({ version: '5.1.0' })
+      const onNewVersion = sinon.spy()
 
-      expect(this.updater.getPackage()).to.deep.eq(expected)
-    })
-  })
+      await Updater.check({ onNewVersion })
 
-  context('#getClient', () => {
-    it('sets .client to new Updater', () => {
-      const u = new Updater({})
-
-      u.getClient()
-
-      expect(u.client).to.have.property('checkNewVersion')
+      expect(onNewVersion).to.be.calledWithMatch({ version: '5.1.0' })
     })
 
-    it('returns .client if exists', () => {
-      const u = new Updater({})
-      const client = u.getClient()
-      const client2 = u.getClient()
+    it('calls onNoNewVersion when local version is same as the manifest\'s version', async () => {
+      sinon.stub(rp, 'get').resolves({ version: '5.0.0' })
+      const onNoNewVersion = sinon.spy()
 
-      expect(client).to.eq(client2)
-    })
-  })
+      await Updater.check({ onNoNewVersion })
 
-  context('#checkNewVersion', () => {
-    beforeEach(function () {
-      this.get = sinon.spy(request, 'get')
-
-      this.updater = new Updater({})
+      expect(onNoNewVersion).to.be.calledWithMatch()
     })
 
-    it('sends x-cypress-version', function (done) {
-      this.updater.getClient().checkNewVersion(() => {
-        expect(this.get).to.be.calledWithMatch({
-          headers: {
-            'x-cypress-version': pkg.version,
-          },
-        })
+    it('calls onNoNewVersion when manifest is invalid', async () => {
+      sinon.stub(rp, 'get').resolves({})
+      const onNoNewVersion = sinon.spy()
 
-        return done()
-      })
+      await Updater.check({ onNoNewVersion })
+
+      expect(onNoNewVersion).to.be.calledWithMatch()
     })
 
-    it('sends x-machine-id', function (done) {
-      nmi.machineId()
-      .then((id) => {
-        return this.updater.getClient().checkNewVersion(() => {
-          expect(this.get).to.be.calledWithMatch({
-            headers: {
-              'x-machine-id': id,
-            },
-          })
+    it('calls onNoNewVersion when fetching the manifest throws an error', async () => {
+      sinon.stub(rp, 'get').rejects(new Error())
+      const onNoNewVersion = sinon.spy()
 
-          return done()
-        })
-      })
-    })
+      await Updater.check({ onNoNewVersion })
 
-    it('sends x-machine-id as null on error', function (done) {
-      sinon.stub(nmi, 'machineId').rejects(new Error())
-
-      this.updater.getClient().checkNewVersion(() => {
-        expect(this.get).to.be.calledWithMatch({
-          headers: {
-            'x-machine-id': null,
-          },
-        })
-
-        return done()
-      })
-    })
-  })
-
-  context('#check', () => {
-    beforeEach(function () {
-      this.updater = new Updater({ quit: sinon.spy() })
-      this.updater.getClient()
-
-      return sinon.stub(this.updater.client, 'checkNewVersion')
-    })
-
-    it('calls checkNewVersion', function () {
-      this.updater.check()
-
-      expect(this.updater.client.checkNewVersion).to.be.called
-    })
-
-    it('calls options.newVersionExists when there is a no version', function () {
-      this.updater.client.checkNewVersion.yields(null, true, {})
-
-      const options = { onNewVersion: sinon.spy() }
-
-      this.updater.check(options)
-
-      expect(options.onNewVersion).to.be.calledWith({})
-    })
-
-    it('calls options.newVersionExists when there is a no version', function () {
-      this.updater.client.checkNewVersion.yields(null, false)
-
-      const options = { onNoNewVersion: sinon.spy() }
-
-      this.updater.check(options)
-
-      expect(options.onNoNewVersion).to.be.called
+      expect(onNoNewVersion).to.be.calledWithMatch()
     })
   })
 })
