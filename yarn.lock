@@ -2493,6 +2493,54 @@
   resolved "https://registry.yarnpkg.com/@ffmpeg-installer/win32-x64/-/win32-x64-4.1.0.tgz#17e8699b5798d4c60e36e2d6326a8ebe5e95a2c5"
   integrity sha512-Drt5u2vzDnIONf4ZEkKtFlbvwj6rI3kxw1Ck9fpudmtgaZIHD4ucsWB2lCZBXRxJgXR+2IMSti+4rtM4C4rXgg==
 
+"@ffprobe-installer/darwin-x64@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/darwin-x64/-/darwin-x64-4.1.0.tgz#025c5108faf3e456e6a407dd65b798f8dcc805dd"
+  integrity sha512-ESwvOnbGVGK0r7bUdThSZAYipQOH0X79M4SoNZ5Tg77lq/RVbEdpObNEM2oRfLINbMlQQrezA4VYzt0n/DOkcQ==
+
+"@ffprobe-installer/ffprobe@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/ffprobe/-/ffprobe-1.1.0.tgz#a2f6fbd383f90d9359dc6c0552dca9793a884b3c"
+  integrity sha512-koiZrWEC4hrzCuN+/ijHkeiyx7CnUr/cnGynQAgHMDphsDgZkXivNzZrtT6VI5Nf0SkQqC2ZPU5rx3nZ8yEqLQ==
+  optionalDependencies:
+    "@ffprobe-installer/darwin-x64" "4.1.0"
+    "@ffprobe-installer/linux-arm" "4.3.2"
+    "@ffprobe-installer/linux-arm64" "4.3.2"
+    "@ffprobe-installer/linux-ia32" "4.1.0"
+    "@ffprobe-installer/linux-x64" "4.1.0"
+    "@ffprobe-installer/win32-ia32" "4.1.0"
+    "@ffprobe-installer/win32-x64" "4.1.0"
+
+"@ffprobe-installer/linux-arm64@4.3.2":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/linux-arm64/-/linux-arm64-4.3.2.tgz#a64ed27672d55460bdea59bc63da0cf3731f19e8"
+  integrity sha512-9mCINruqx30UqB7kRvc75sj0yAPiDy21Fowow8bQDaAYAuO39MrFt/caLJrX11vCUfx2awolxKeuzTqcO9JjMQ==
+
+"@ffprobe-installer/linux-arm@4.3.2":
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/linux-arm/-/linux-arm-4.3.2.tgz#09347e67539544168d9815486cd543c3e88cba29"
+  integrity sha512-nZJbpTdh29swlgjVWi2fcV5jvbDFgo2y6a7X/uBsbely/TB158Fg0AncWJm7BbC0CwasGmSdqBsLtoSwXIcrlQ==
+
+"@ffprobe-installer/linux-ia32@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/linux-ia32/-/linux-ia32-4.1.0.tgz#50b5952927b8b1bc42c3f2edd788b995e8470d17"
+  integrity sha512-V2NeZpnly4HP1IU5IrsbbcRg8SWzC/SS0YDNSCjmhxGV2U8MUpW8c8KREE6nX56Dml8B8do5NNkTnaYCDPt3Xw==
+
+"@ffprobe-installer/linux-x64@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/linux-x64/-/linux-x64-4.1.0.tgz#b67c96748457677171ca31b0fb83e4bd3c644ab5"
+  integrity sha512-Id+irHoI+Arq6tb3sHNQyzRrgUVVDgbmwpREDqQ+GDydiCw5ca7VnvRGXE/tBM2mVQ3/6m9wWHR7+xaW3gKJlA==
+
+"@ffprobe-installer/win32-ia32@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/win32-ia32/-/win32-ia32-4.1.0.tgz#19cc6d1043f7e54c2764ada6af8f7f26f98bbad8"
+  integrity sha512-G1pbRfk7XDi9EioT0gSR+O4ARdppS9kSXRzhnJOojUFD6x1k8Qv27RoOXeE5DtIE7TdX6UTywj8qA1BXI5zUUA==
+
+"@ffprobe-installer/win32-x64@4.1.0":
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/@ffprobe-installer/win32-x64/-/win32-x64-4.1.0.tgz#ed3e8a329eeb6c0625ac439e31ad9ec43001b33c"
+  integrity sha512-gPW2FZxexzCAOhGch0JFkeSSln+wcL5d1JDlJwfSJVEAShHf9MmxiWq0NpHoCSzFvK5qwl0C58KG180eKvd3mA==
+
 "@fortawesome/fontawesome-free@5.11.2":
   version "5.11.2"
   resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.11.2.tgz#8644bc25b19475779a7b7c1fc104bc0a794f4465"

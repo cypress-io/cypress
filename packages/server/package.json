@@ -127,6 +127,7 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/json-schemas": "5.35.0",
     "@cypress/sinon-chai": "1.1.0",
+    "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/desktop-gui": "*",
     "@packages/electron": "*",
     "@packages/example": "*",
