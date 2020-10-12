@@ -33,8 +33,14 @@ const filterSpecs = (filter, files) => {
     return files
   }
 
+  let regexFilter
+
+  try {
+    regexFilter = new RegExp(filter)
+  } catch (error) {} // eslint-disable-line no-empty
+
   const filteredFiles = _.filter(files, (spec) => {
-    return spec.name.toLowerCase().includes(filter.toLowerCase())
+    return spec.name.toLowerCase().includes(filter.toLowerCase()) || (regexFilter && regexFilter.test(spec.name))
   })
 
   return filteredFiles
