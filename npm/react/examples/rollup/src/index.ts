@@ -1,0 +1,1 @@
+export { MyAwesomeComponent } from './MyAwesomeComponent'
