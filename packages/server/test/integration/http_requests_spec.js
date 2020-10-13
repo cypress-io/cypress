@@ -122,6 +122,8 @@ describe('Routes', () => {
         const open = () => {
           this.project = new Project('/path/to/project')
 
+          cfg.pluginsFile = false
+
           return Promise.all([
             // open our https server
             httpsServer.start(8443),
@@ -140,6 +142,10 @@ describe('Routes', () => {
               this.session = session(this.srv)
 
               this.proxy = `http://localhost:${port}`
+            }),
+
+            pluginsModule.init(cfg, {
+              projectRoot: cfg.projectRoot,
             }),
           ])
         }
