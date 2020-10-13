@@ -89,19 +89,7 @@ describe('Proxy', () => {
     })
   })
 
-  // this will fail due to dynamic cert
-  // generation when strict ssl is true
-  it('can pass directly through', () => {
-    return request({
-      strictSSL: false,
-      url: 'https://localhost:8444/replace',
-      proxy: 'http://localhost:3333',
-    })
-    .then((html) => {
-      expect(html).to.include('https server')
-    })
-  })
-
+  // TODO
   it('retries 5 times', function () {
     this.sandbox.spy(net, 'connect')
 
@@ -117,6 +105,7 @@ describe('Proxy', () => {
     })
   })
 
+  // TODO
   it('closes outgoing connections when client disconnects', function () {
     this.sandbox.spy(net, 'connect')
 
@@ -227,6 +216,7 @@ describe('Proxy', () => {
     })
   })
 
+  // TODO
   context('with an upstream proxy', () => {
     beforeEach(function () {
       // PROXY vars should override npm_config vars, so set them to cause failures if they are used

@@ -76,24 +76,10 @@ class Server {
     })
   }
 
-  _onFirstHeadBytes (req, browserSocket, head, options) {
-    let odc
-
+  _onFirstHeadBytes (req, browserSocket, head) {
     debug('Got first head bytes %o', { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
 
     browserSocket.pause()
-
-    odc = options.onDirectConnection
-
-    if (odc) {
-      // if onDirectConnection return true
-      // then dont proxy, just pass this through
-      if (odc.call(this, req, browserSocket, head) === true) {
-        return this._makeDirectConnection(req, browserSocket, head)
-      }
-
-      debug('Not making direct connection %o', { url: req.url })
-    }
 
     return this._onServerConnectData(req, browserSocket, head)
   }
