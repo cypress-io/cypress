@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import { compact, extend, find } from 'lodash'
-import * as os from 'os'
+import os from 'os'
 import { flatten, merge, pick, props, tap, uniqBy } from 'ramda'
 import { browsers } from './browsers'
 import * as darwinHelper from './darwin'
@@ -12,7 +12,7 @@ import {
   DetectedBrowser,
   FoundBrowser,
   NotDetectedAtPathError,
-  NotInstalledError,
+  NotInstalledError, PathData,
 } from './types'
 import * as windowsHelper from './windows'
 
@@ -45,6 +45,8 @@ export const setMajorVersion = <T extends HasVersion>(browser: T): T => {
 type PlatformHelper = {
   detect: (browser: Browser) => Promise<DetectedBrowser>
   getVersionString: (path: string) => Promise<string>
+  getVersionNumber: (path: string, browser: Browser) => string
+  getPathData: (path: string) => PathData
 }
 
 type Helpers = {
@@ -175,16 +177,24 @@ export const detectByPath = (
 
   const helper = getHelper()
 
-  const detectBrowserByVersionString = (stdout: string): FoundBrowser => {
-    const browser = find(goalBrowsers, (goalBrowser: Browser) => {
+  const detectBrowserByVersionString = (stdout: string): Browser | undefined => {
+    return find(goalBrowsers, (goalBrowser: Browser) => {
       return goalBrowser.versionRegex.test(stdout)
     })
+  }
 
-    if (!browser) {
-      throw notDetectedAtPathErr(stdout)
-    }
+  const detectBrowserFromKey = (browserKey): Browser | undefined => {
+    return find(goalBrowsers, (goalBrowser) => {
+      return (
+        goalBrowser.name === browserKey ||
+        goalBrowser.displayName === browserKey ||
+        goalBrowser.binary.indexOf(browserKey) > -1
+      )
+    })
+  }
 
-    const regexExec = browser.versionRegex.exec(stdout) as Array<string>
+  const setCustomBrowserData = (browser: Browser, path: string, versionStr: string): FoundBrowser => {
+    const version = helper.getVersionNumber(versionStr, browser)
 
     let parsedBrowser = {
       name: browser.name,
@@ -192,7 +202,7 @@ export const detectByPath = (
       info: `Loaded from ${path}`,
       custom: true,
       path,
-      version: regexExec[1],
+      version,
     }
 
     parsedBrowser = setMajorVersion(parsedBrowser)
@@ -200,9 +210,26 @@ export const detectByPath = (
     return extend({}, browser, parsedBrowser)
   }
 
-  return helper
-  .getVersionString(path)
-  .then(detectBrowserByVersionString)
+  const pathData = helper.getPathData(path)
+
+  return helper.getVersionString(pathData.path)
+  .then((version) => {
+    let browser
+
+    if (pathData.browserKey) {
+      browser = detectBrowserFromKey(pathData.browserKey)
+    }
+
+    if (!browser) {
+      browser = detectBrowserByVersionString(version)
+    }
+
+    if (!browser) {
+      throw notDetectedAtPathErr(`Unable to find browser with path ${path}`)
+    }
+
+    return setCustomBrowserData(browser, pathData.path, version)
+  })
   .then(maybeSetFirefoxWarning)
   .catch((err: NotDetectedAtPathError) => {
     if (err.notDetectedAtPath) {
