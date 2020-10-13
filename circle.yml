@@ -120,6 +120,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -161,6 +162,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -188,6 +190,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn workspace @packages/server test ./test/e2e/<<parameters.chunk>>*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -285,6 +288,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -385,6 +389,23 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
+  check-halt-binary:
+    description: Halt CI if binary is unchanged
+    steps:
+      - run:
+          name: Check if binary is changed
+          command: yarn check-halt || circleci-agent step halt
+
+  check-halt-package:
+    description: Halt CI if binary is unchanged
+    parameters:
+      package:
+        type: string
+    steps:
+      - run:
+          name: Check if package or binary is changed
+          command: yarn check-halt << parameters.package >> || circleci-agent step halt
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -457,6 +478,7 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - .ssh
 
   lint:
     <<: *defaults
@@ -475,6 +497,15 @@ jobs:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  list-changed-packages:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: List changed packages
+          command: node scripts/changed-packages.js
 
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
@@ -513,6 +544,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -537,6 +569,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -582,6 +615,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - install-required-node
       - run:
           name: Mocha tests
@@ -601,6 +635,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -614,6 +649,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -626,6 +662,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -852,6 +889,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -882,6 +920,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -916,6 +955,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -949,6 +989,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -970,6 +1011,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -991,6 +1033,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -1000,6 +1043,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/webpack-preprocessor"
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1038,6 +1083,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/webpack-preprocessor"
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -1050,6 +1097,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/vue"
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
@@ -1063,6 +1112,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/vue"
       - run:
           name: Release
           command: yarn semantic-release @cypress/vue
@@ -1072,6 +1123,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/eslint-plugin-dev"
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1081,6 +1134,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/eslint-plugin-dev"
       - run:
           name: Release
           command: yarn semantic-release @cypress/eslint-plugin-dev
@@ -1118,6 +1173,7 @@ jobs:
 
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: $(yarn bin)/print-arch
       - install-required-node
       - run:
@@ -1150,6 +1206,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: ls -l
       - run:
           name: upload unique binary
@@ -1167,6 +1224,7 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
+      - check-halt-binary
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -1193,6 +1251,7 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
+      - check-halt-binary
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - run:
@@ -1217,6 +1276,7 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
+      - check-halt-binary
       - clone-repo-and-checkout-release-branch:
           repo: cypress-test-tiny
       - run:
@@ -1233,6 +1293,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - install-required-node
       - run:
           name: Check next dev version
@@ -1279,6 +1340,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: ls -l
       # NPM package file should have filename cypress-<version>.tgz
       - run:
@@ -1301,6 +1363,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1338,6 +1401,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: ls -la
       - post-install-comment
 
@@ -1346,6 +1410,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1381,6 +1446,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1422,6 +1488,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1465,6 +1532,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1508,6 +1576,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1540,6 +1609,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1675,6 +1745,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-binary
       # the user should be "node"
       - run: whoami
       - run: pwd
@@ -1723,6 +1794,9 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
+        requires:
+          - build
+    - list-changed-packages:
         requires:
           - build
     - percy-finalize:
@@ -1870,7 +1944,6 @@ linux-workflow: &linux-workflow
             only:
               - master
         requires:
-          - build
           - npm-webpack-preprocessor
 
     - npm-vue:
@@ -1882,7 +1955,6 @@ linux-workflow: &linux-workflow
             only:
               - master
         requires:
-          - build
           - npm-vue
 
     - npm-eslint-plugin-dev:
@@ -1894,7 +1966,6 @@ linux-workflow: &linux-workflow
             only:
               - master
         requires:
-          - build
           - npm-eslint-plugin-dev
 
     # various testing scenarios, like building full binary
