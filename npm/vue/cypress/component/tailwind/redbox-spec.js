@@ -18,7 +18,6 @@ describe('RedBox 1', () => {
   }
 
   it('displays red Hello RedBox', () => {
-    console.log('mounting red box')
     mount({ template }, options)
 
     cy.contains('Hello RedBox')

@@ -5,7 +5,6 @@ require('@cypress/code-coverage/support')
 
 let headInnerHTML = document.head.innerHTML
 
-// let headInnerHTML
 /** Initialize an empty document with root element */
 function renderTestingPlatform () {
   const document = cy.state('document')
