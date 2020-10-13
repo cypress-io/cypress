@@ -67,9 +67,8 @@ const getDefaultWebpackOptions = (file, options = {}) => {
   if (options.typescript) {
     const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
     // node will try to load a projects tsconfig.json instead of the node
-    // package using require('tsconfig')
-    const tsconfig = require(require.resolve('./node_modules/tsconfig'))
-    const configFile = tsconfig.findSync(path.dirname(file.filePath))
+    // package using require('tsconfig'), so we alias it as 'tsconfig-package'
+    const configFile = require('tsconfig-package').findSync(path.dirname(file.filePath))
 
     config.module.rules.push({
       test: /\.tsx?$/,

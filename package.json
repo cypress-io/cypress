@@ -27,7 +27,7 @@
     "coffee-loader": "^0.9.0",
     "coffeescript": "^1.12.7",
     "ts-loader": "^8.0.2",
-    "tsconfig": "^7.0.0",
+    "tsconfig-package": "npm:tsconfig@^7.0.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
     "webpack": "^4.44.1"
   },
