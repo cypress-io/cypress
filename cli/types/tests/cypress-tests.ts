@@ -605,12 +605,12 @@ namespace CypressShadowTests {
 }
 
 namespace CypressTaskTests {
-  cy.task('foo') // $ExpectType Cypress.Chainable<unknown>
+  cy.task('foo') // $ExpectType Chainable<unknown>
   cy.task('foo').then((val) => {
     val // $ExpectType unknown
   })
 
-  cy.task<number>('foo') // $ExpectType Cypress.Chainable<number>
+  cy.task<number>('foo') // $ExpectType Chainable<number>
   cy.task<number>('foo').then((val) => {
     val // $ExpectType number
   })
