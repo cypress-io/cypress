@@ -3,19 +3,12 @@ import unfetch from 'unfetch'
 
 require('@cypress/code-coverage/support')
 
+const headInnerHTML = document.head.innerHTML
+
 /** Initialize an empty document with root element */
 function renderTestingPlatform () {
-  const document = cy.state('document')
-  const el = document.getElementById('cypress-jsdom')
-
-  if (el) {
-    // clean the element before each test
-    while (el.hasChildNodes()) {
-      el.removeChild(el.lastChild)
-    }
-
-    return
-  }
+  document.body.innerHTML = ''
+  document.head.innerHTML = headInnerHTML
 
   const rootNode = document.createElement('div')
 
