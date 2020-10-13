@@ -3,12 +3,16 @@ import unfetch from 'unfetch'
 
 require('@cypress/code-coverage/support')
 
-const headInnerHTML = document.head.innerHTML
+let headInnerHTML = document.head.innerHTML
 
+// let headInnerHTML
 /** Initialize an empty document with root element */
 function renderTestingPlatform () {
-  document.body.innerHTML = ''
-  document.head.innerHTML = headInnerHTML
+  const document = cy.state('document')
+
+  if (document.body) document.body.innerHTML = ''
+
+  if (document.head) document.head.innerHTML = headInnerHTML
 
   const rootNode = document.createElement('div')
 
@@ -39,4 +43,11 @@ function polyfillFetchIfNeeded () {
 beforeEach(() => {
   renderTestingPlatform()
   polyfillFetchIfNeeded()
+})
+
+before(() => {
+  // after the root imports are done
+  const document = cy.state('document')
+
+  headInnerHTML = document.head && document.head.innerHTML
 })
