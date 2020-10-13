@@ -3,11 +3,11 @@
 
 import React from 'react'
 import ReactDom from 'react-dom'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import CounterWithHooks from './counter-with-hooks.jsx'
 
-describe('CounterWithHooks component', function() {
-  it('works', function() {
+describe('CounterWithHooks component', function () {
+  it('works', function () {
     mount(<CounterWithHooks initialCount={3} />, { React, ReactDom })
     cy.contains('3')
   })

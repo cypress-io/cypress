@@ -1,16 +1,27 @@
+import { expect, use } from 'chai'
+import sinon, { SinonStub, SinonSpy, SinonSpyCallApi } from 'sinon'
 import chalk from 'chalk'
+import mockFs from 'mock-fs'
 import highlight from 'cli-highlight'
-import { main, guessTemplateForUsedFramework } from './init'
+import { main } from './init'
 import inquirer from 'inquirer'
-import { mockFs, clearMockedFs } from './test/mockFs'
+import sinonChai from 'sinon-chai'
 
-jest.mock('fs')
-jest.mock('inquirer')
-jest.spyOn(global.console, 'log')
+use(sinonChai)
 
-describe('end-to-end tests for init script', () => {
-  beforeEach(clearMockedFs)
-  afterEach(() => jest.clearAllMocks())
+describe('init script', () => {
+  let promptSpy: SinonStub<any> | null = null
+  let logSpy: SinonSpy | null = null
+
+  beforeEach(() => {
+    logSpy = sinon.spy(global.console, 'log')
+  })
+
+  afterEach(() => {
+    mockFs.restore()
+    logSpy?.restore()
+    promptSpy?.restore()
+  })
 
   it('automatically suggests to the user which config to use', async () => {
     mockFs({
@@ -18,20 +29,16 @@ describe('end-to-end tests for init script', () => {
       'webpack.config.js': 'module.exports = { }',
     })
 
-    // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
-        chosenTemplateName: 'create-react-app',
-        componentFolder: 'cypress/component',
-      }),
-    )
+    promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'create-react-app',
+      componentFolder: 'cypress/component',
+    }) as any)
 
     await main()
+    const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
-    const [{ choices, message }] = (inquirer.prompt as any).mock.calls[0][0]
-
-    expect(choices[0]).toBe('webpack')
-    expect(message).toContain(
+    expect(choices[0]).to.equal('webpack')
+    expect(message).to.contain(
       `Press ${chalk.inverse(' Enter ')} to continue with ${chalk.green(
         'webpack',
       )} configuration`,
@@ -46,20 +53,17 @@ describe('end-to-end tests for init script', () => {
       'package.json': JSON.stringify({ dependencies: { next: '^9.2.0' } }),
     })
 
-    // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
-        chosenTemplateName: 'next.js',
-        componentFolder: 'src',
-      }),
-    )
+    promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'next.js',
+      componentFolder: 'src',
+    }) as any)
 
     await main()
 
-    const [{ choices, message }] = (inquirer.prompt as any).mock.calls[0][0]
+    const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
-    expect(choices[0]).toBe('next.js')
-    expect(message).toContain(
+    expect(choices[0]).to.equal('next.js')
+    expect(message).to.contain(
       `Press ${chalk.inverse(' Enter ')} to continue with ${chalk.green(
         'next.js',
       )} configuration`,
@@ -71,27 +75,26 @@ describe('end-to-end tests for init script', () => {
       'cypress.json': '{}',
     })
 
-    // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
-        chosenTemplateName: 'create-react-app',
-        componentFolder: 'src',
-      }),
-    )
+    promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'create-react-app',
+      componentFolder: 'src',
+    }) as any)
 
     await main()
-
     expect(
       // @ts-ignore
-      global.console.log.mock.calls.some(
-        ([call]: string[]) =>
-          // Make sure that link to the example of right template was logged
-          call.includes('create-react-app') &&
+      global.console.log.getCalls().some(
+        // Make sure that link to the example of right template was logged
+        (spy: SinonSpyCallApi<string[]>) => {
+          const call = spy.args[0] || ''
+
+          return call.includes('create-react-app') &&
           call.includes(
-            'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/react-scripts',
-          ),
+            'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts',
+          )
+        },
       ),
-    ).toBe(true)
+    ).to.equal(true)
   })
 
   it('suggests right docs example and cypress.json config based on the `componentFolder` answer', async () => {
@@ -99,13 +102,10 @@ describe('end-to-end tests for init script', () => {
       'cypress.json': '{}',
     })
 
-    // @ts-ignore
-    inquirer.prompt = jest.fn(() =>
-      Promise.resolve({
-        chosenTemplateName: 'create-react-app',
-        componentFolder: 'cypress/component',
-      }),
-    )
+    sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
+      chosenTemplateName: 'create-react-app',
+      componentFolder: 'cypress/component',
+    }) as any)
 
     await main()
 
@@ -122,6 +122,6 @@ describe('end-to-end tests for init script', () => {
       { language: 'json' },
     )
 
-    expect(global.console.log).toBeCalledWith(`\n${expectedCode}\n`)
+    expect(global.console.log).to.be.calledWith(`\n${expectedCode}\n`)
   })
 })

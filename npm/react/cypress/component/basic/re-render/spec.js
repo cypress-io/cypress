@@ -1,14 +1,15 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 const MyInput = ({ inputVal, onInputChanged }) => {
   console.log('MyInput "%s"', inputVal)
+
   return (
     <>
       <input
         type="text"
         value={inputVal}
-        onChange={e => onInputChanged(e.target.value)}
+        onChange={(e) => onInputChanged(e.target.value)}
       />
       <p>You entered {inputVal} </p>
     </>
@@ -21,18 +22,21 @@ describe('My Input', () => {
     // that checks if the MyInput is re-rendering?
     const App = () => {
       const [message, setMessage] = React.useState('')
+
       return (
         <>
           <MyInput
             inputVal={message}
-            onInputChanged={newValue => {
+            onInputChanged={(newValue) => {
               setMessage(newValue)
+
               return null
             }}
           />
         </>
       )
     }
+
     mount(<App />)
 
     /* Update props */

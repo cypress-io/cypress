@@ -1,17 +1,17 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Calendar from './Calendar'
 import CalendarHeatmap from 'react-calendar-heatmap'
 import 'react-calendar-heatmap/dist/styles.css'
 
 // parse the date consistently
-const toDate = yyyyMmDd => Cypress.moment(yyyyMmDd, 'YYYY-MM-DD').utc()
+const toDate = (yyyyMmDd) => Cypress.moment(yyyyMmDd, 'YYYY-MM-DD').utc()
 
 describe('Calendar heatmap', () => {
-  // Skipping the test because the tooltip does not get cleaned correctly
+  // NOTE: Skipping the test because the tooltip does not get cleaned correctly
   // when the next test starts, see issue
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/206
+  // https://github.com/bahmutov/@cypress/react/issues/206
   it.skip('random data', () => {
     // we cannot really screenshot random data for visual testing
     mount(<Calendar />)
@@ -30,7 +30,8 @@ describe('Calendar heatmap', () => {
   // stable but random sequence from
   // http://indiegamr.com/generate-repeatable-random-numbers-in-js/
   let seed = 6
-  function seededRandom(max, min) {
+
+  function seededRandom (max, min) {
     max = max || 1
     min = min || 0
 
@@ -45,14 +46,14 @@ describe('Calendar heatmap', () => {
     const startDate = new Date(2019, 10, 1) // year, month, day
     const endDate = new Date(2020, 3, 1)
 
-    const values = Cypress._.range(1, 30).map(days => {
+    const values = Cypress._.range(1, 30).map((days) => {
       return {
         date: new Date(2020, 0, days),
         count: Math.floor(seededRandom() * 4),
       }
     })
 
-    const classForValue = value => {
+    const classForValue = (value) => {
       if (!value || !value.count) {
         return 'color-empty'
       }
@@ -83,7 +84,7 @@ describe('Calendar heatmap', () => {
     const startDate = toDate('2019-10-26')
     const endDate = toDate('2020-05-02')
 
-    const classForValue = value => {
+    const classForValue = (value) => {
       if (!value || !value.count) {
         return 'color-empty'
       }
@@ -91,17 +92,18 @@ describe('Calendar heatmap', () => {
       return `heart`
     }
 
-    const titleForValue = value => {
+    const titleForValue = (value) => {
       return value && value.date ? `${value.date}` : ''
     }
 
-    cy.fixture('cypress-work').then(values => {
-      values = values.map(v => {
+    cy.fixture('cypress-work').then((values) => {
+      values = values.map((v) => {
         return {
           date: toDate(v.date),
           count: v.count,
         }
       })
+
       mount(
         <>
           <center>
@@ -125,6 +127,7 @@ describe('Calendar heatmap', () => {
         },
       )
     })
+
     cy.contains('Cypress ❤️ 🦛').should('be.visible')
     // now that UI has refreshed, take a snapshot
     cy.get('.react-calendar-heatmap').happoScreenshot({

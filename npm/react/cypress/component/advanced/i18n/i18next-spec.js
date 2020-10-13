@@ -2,7 +2,7 @@
 import * as React from 'react'
 import i18n from './i18n'
 import { LocalizedComponent } from './LocalizedComponent'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { I18nextProvider } from 'react-i18next'
 
 describe('i18n', () => {

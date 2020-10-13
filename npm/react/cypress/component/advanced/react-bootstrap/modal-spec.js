@@ -1,9 +1,9 @@
 import React from 'react'
 import { Button, Modal } from 'react-bootstrap'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 export class Example extends React.Component {
-  constructor(props, context) {
+  constructor (props, context) {
     super(props, context)
 
     this.handleShow = this.handleShow.bind(this)
@@ -14,15 +14,15 @@ export class Example extends React.Component {
     }
   }
 
-  handleClose() {
+  handleClose () {
     this.setState({ show: false })
   }
 
-  handleShow() {
+  handleShow () {
     this.setState({ show: true })
   }
 
-  render() {
+  render () {
     return (
       <div>
         This text is all that renders. And the modal is not rendered, regardless
@@ -51,8 +51,9 @@ export class Example extends React.Component {
 describe('react-bootstrap Modal', () => {
   it('works', () => {
     mount(<Example />, {
-      cssFile: 'node_modules/bootstrap/dist/css/bootstrap.min.css',
+      cssFile: '../../node_modules/bootstrap/dist/css/bootstrap.min.css',
     })
+
     // confirm modal is visible
     cy.contains('h4', 'Text in a modal').should('be.visible')
     cy.contains('button', 'Close').click()

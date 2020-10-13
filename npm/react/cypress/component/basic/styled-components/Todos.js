@@ -17,11 +17,12 @@ class Todos extends Component {
     todos: this.props.todos,
   }
 
-  handleChecked = todo => {
-    const newTodos = this.state.todos.map(t => {
+  handleChecked = (todo) => {
+    const newTodos = this.state.todos.map((t) => {
       if (t.id === todo.id) {
         return { ...t, done: !t.done }
       }
+
       return t
     })
 
@@ -30,13 +31,15 @@ class Todos extends Component {
     })
   }
 
-  render() {
+  render () {
     return (
       <TodosContainer>
         <h2>Todos</h2>
-        {this.state.todos.map(todo => (
-          <Todo todo={todo} key={todo.id} handleChecked={this.handleChecked} />
-        ))}
+        {this.state.todos.map((todo) => {
+          return (
+            <Todo todo={todo} key={todo.id} handleChecked={this.handleChecked} />
+          )
+        })}
       </TodosContainer>
     )
   }

@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { ThemeContext } from './context'
 import { Toolbar } from './Toolbar.jsx'
 
@@ -10,6 +10,7 @@ describe('Mocking context', () => {
         <Toolbar />
       </ThemeContext.Provider>,
     )
+
     // the label "mocked" was passed through React context
     cy.contains('button', 'mocked').should('be.visible')
   })

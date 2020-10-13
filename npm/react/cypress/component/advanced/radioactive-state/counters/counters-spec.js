@@ -1,6 +1,6 @@
 import './counters.css'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Counters from './Counters.jsx'
 
 describe('reactive-state Counters', () => {
@@ -10,10 +10,12 @@ describe('reactive-state Counters', () => {
         <Counters />
       </div>,
     )
+
     cy.contains('.count', '0')
-      .click()
-      .click()
-      .click()
+    .click()
+    .click()
+    .click()
+
     // increments the counter itself
     cy.contains('.count', '3')
     // increments the sum
@@ -21,17 +23,20 @@ describe('reactive-state Counters', () => {
 
     // add two more counters
     cy.contains('Add Counter')
-      .click()
-      .click()
+    .click()
+    .click()
+
     cy.get('.counts .count').should('have.length', 3)
     // clicking the new counters increments the sum
     cy.get('.count')
-      .eq(1)
-      .click()
+    .eq(1)
+    .click()
+
     cy.contains('.sum', '4')
     cy.get('.count')
-      .eq(2)
-      .click()
+    .eq(2)
+    .click()
+
     cy.contains('.sum', '5')
   })
 })

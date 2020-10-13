@@ -1,4 +1,4 @@
-# cypress-react-unit-test [![CircleCI](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/main.svg?style=svg)](https://circleci.com/gh/bahmutov/cypress-react-unit-test/tree/main) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
+# @cypress/react [![CircleCI](https://circleci.com/gh/bahmutov/@cypress/react/tree/main.svg?style=svg)](https://circleci.com/gh/bahmutov/@cypress/react/tree/main) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
 
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
@@ -21,7 +21,7 @@ Hi there! We are trying to collect feedback from Cypress users who need componen
 ## Comparison
 
 <!-- prettier-ignore-start -->
-Feature | Jest / Enzyme / RTL | Cypress + `cypress-react-unit-test`
+Feature | Jest / Enzyme / RTL | Cypress + `@cypress/react`
 --- | --- | ---
 Test runs in real browser | ❌ | ✅
 Supports shallow mount | ✅ | ❌
@@ -49,25 +49,25 @@ If you are coming from Enzyme world, check out the [enzyme](cypress/component/ba
 
 - [My Vision for Component Tests in Cypress](https://glebbahmutov.com/blog/my-vision-for-component-tests/)
 - [Unit Testing React components with Cypress](https://itnext.io/unit-testing-react-components-with-cypress-4d4cf8cd59a0)
-- [Test React Component with cypress-react-unit-test Example](https://dev.to/bahmutov/test-react-component-with-cypress-react-unit-test-example-4d99)
+- [Test React Component with @cypress/react Example](https://dev.to/bahmutov/test-react-component-with-@cypress/react-example-4d99)
 - [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
 - [Using .env and .env.test from React component tests](https://medium.com/@bahmutov/using-env-and-env-test-from-react-component-tests-c11aa2040bc8)
 - [Visual testing for React components using open source tools](https://glebbahmutov.com/blog/open-source-visual-testing-of-components/)
-- [12 Recipes for testing React applications using cypress-react-unit-test](https://dev.to/bahmutov/12-recipes-for-testing-react-applications-using-cypress-react-unit-test-46g6) (compare to [12 Recipes for testing React applications using Testing Library](https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#portal))
+- [12 Recipes for testing React applications using @cypress/react](https://dev.to/bahmutov/12-recipes-for-testing-react-applications-using-@cypress/react-46g6) (compare to [12 Recipes for testing React applications using Testing Library](https://dev.to/jooforja/12-recipes-for-testing-react-applications-using-testing-library-1bh2#portal))
 - [Cypress Unit Testing React Components With TypeScript](https://medium.com/swlh/cypress-unit-testing-react-components-with-typescript-77b38e5043b3)
-- [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/) compares Jest + React Testing Library to cypress-react-unit-test + Cypress Testing Library
+- [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/) compares Jest + React Testing Library to @cypress/react + Cypress Testing Library
 - [Components People Test](https://glebbahmutov.com/blog/components-people-test/) about testing a component inside a Next.js-powered blog
 
 ## Known problems
 
-See issues labeled [v4](https://github.com/bahmutov/cypress-react-unit-test/labels/v4)
+See issues labeled [v4](https://github.com/bahmutov/@cypress/react/labels/v4)
 
 ## Install
 
 Requires [Node](https://nodejs.org/en/) version 8 or above.
 
 ```sh
-npm install --save-dev cypress cypress-react-unit-test
+npm install --save-dev cypress @cypress/react
 ```
 
 ## Init
@@ -75,7 +75,7 @@ npm install --save-dev cypress cypress-react-unit-test
 You can use our command line wizard to give you instructions on configuring this plugin. It will try to determine which framework or bundling tool you are using and give you instructions on right configuration.
 
 ```sh
-cypress-react-unit-test init
+@cypress/react init
 ```
 
 Or continue with manual installation:
@@ -83,7 +83,7 @@ Or continue with manual installation:
 1. Include this plugin from your project's `cypress/support/index.js`
 
 ```js
-require('cypress-react-unit-test/support')
+require('@cypress/react/support')
 ```
 
 2. Tell Cypress how your React application is transpiled or bundled (using Webpack), so Cypress can load your components. For example, if you use `react-scripts` (even after ejecting) do:
@@ -91,7 +91,7 @@ require('cypress-react-unit-test/support')
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
-  require('cypress-react-unit-test/plugins/react-scripts')(on, config)
+  require('@cypress/react/plugins/react-scripts')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -120,7 +120,7 @@ See [Recipes](./docs/recipes.md) for more examples.
 
 ```js
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { HelloWorld } from './hello-world.jsx'
 describe('HelloWorld component', () => {
   it('works', () => {
@@ -255,14 +255,14 @@ Repo | Description
 [mobx-react-typescript-boilerplate](https://github.com/bahmutov/mobx-react-typescript-boilerplate) | Fork of the official Mobx example, shows clock control
 [bahmutov/test-react-hook-form](https://github.com/bahmutov/test-react-hook-form) | Testing forms created using [react-hook-form](https://github.com/react-hook-form/react-hook-form)
 [bahmutov/react-with-rollup](https://github.com/bahmutov/react-with-rollup) | Testing a React application bundled with Rollup by using [@bahmutov/cy-rollup](https://github.com/bahmutov/cy-rollup) preprocessor
-[bahmutov/testing-react-example](https://github.com/bahmutov/testing-react-example) | Described in blog post [Test React Component with cypress-react-unit-test Example](https://dev.to/bahmutov/test-react-component-with-cypress-react-unit-test-example-4d99)
+[bahmutov/testing-react-example](https://github.com/bahmutov/testing-react-example) | Described in blog post [Test React Component with @cypress/react Example](https://dev.to/bahmutov/test-react-component-with-@cypress/react-example-4d99)
 [ejected-react-scripts-example](https://github.com/bahmutov/ejected-react-scripts-example) | Using component testing after ejecting `react-scripts`
 [tic-tac-toe](https://github.com/bahmutov/react-tic-tac-toe-example) | Component and unit tests for Tic-Tac-Toe, read [Tic-Tac-Toe Component Tests](https://glebbahmutov.com/blog/tic-tac-toe-component-tests/)
 [react-hooks-file-upload](https://github.com/bahmutov/react-hooks-file-upload) | Upload a file from the component while stubbing the server
 [react-query-example](https://github.com/bahmutov/react-query-example) | Quick test example for components that use `react-query` with mock clock control
 <!-- prettier-ignore-end -->
 
-To find more examples, see GitHub topic [cypress-react-unit-test-example](https://github.com/topics/cypress-react-unit-test-example)
+To find more examples, see GitHub topic [@cypress/react-example](https://github.com/topics/@cypress/react-example)
 
 ## Options
 
@@ -301,7 +301,7 @@ If your React and React DOM libraries are installed in non-standard paths (think
 ```json
 {
   "env": {
-    "cypress-react-unit-test": {
+    "@cypress/react": {
       "react": "node_modules/react/umd/react.development.js",
       "react-dom": "node_modules/react-dom/umd/react-dom.development.js"
     }
@@ -392,7 +392,7 @@ const webpackOptions = {
 }
 ```
 
-Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unit-test/issues/156) for more information.
+Keep your eye on issue [#156](https://github.com/bahmutov/@cypress/react/issues/156) for more information.
 
 </details>
 
@@ -401,14 +401,14 @@ Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unit-tes
 
 If you are using your custom Webpack, this plugin might be missing code coverage information because the code was not instrumented. We try to insert the `babel-plugin-istanbul` plugin automatically, but your bundling might not use Babel, or configure it differently, preventing plugin insertion. Please let us know by opening an issue with full reproducible details.
 
-See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
+See related issue [#141](https://github.com/bahmutov/@cypress/react/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
 
 </details>
 
 <details id="gatsby-not-supported">
   <summary>Gatsby.js projects not supported</summary>
 
-Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/cypress-react-unit-test/issues/307)
+Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/@cypress/react/issues/307)
 
 </details>
 
@@ -429,23 +429,23 @@ See [docs/development.md](./docs/development.md)
 You can see verbose logs from this plugin by running with environment variable
 
 ```
-DEBUG=cypress-react-unit-test
+DEBUG=@cypress/react
 ```
 
 Because finding and modifying Webpack settings while running this plugin is done by [find-webpack](https://github.com/bahmutov/find-webpack) module, you might want to enable its debug messages too.
 
 ```
-DEBUG=cypress-react-unit-test,find-webpack
+DEBUG=@cypress/react,find-webpack
 ```
 
 ## Migration guide
 
 ### From v3 to v4
 
-The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/cypress-react-unit-test/tree/v3)
+The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/@cypress/react/tree/v3)
 
-- the `cy.mount` is now simply `import { mount } from 'cypress-react-unit-test'`
-- the support file is simply `require('cypress-react-unit-test/support')`
+- the `cy.mount` is now simply `import { mount } from '@cypress/react'`
+- the support file is simply `require('@cypress/react/support')`
 
 ## Related tools
 

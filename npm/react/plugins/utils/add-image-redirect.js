@@ -1,17 +1,19 @@
 // @ts-check
-const debug = require('debug')('cypress-react-unit-test')
+const debug = require('debug')('@cypress/react')
 
 /**
  * Note: modifies the input options object
  */
-function addImageRedirect(webpackOptions) {
+function addImageRedirect (webpackOptions) {
   if (!webpackOptions.module) {
     debug('webpack options has no "module"')
+
     return
   }
 
   if (!Array.isArray(webpackOptions.module.rules)) {
     debug('webpack module rules is not an array')
+
     return
   }
 
@@ -22,9 +24,9 @@ function addImageRedirect(webpackOptions) {
   // for anything like "/_root/<path>" which is perfect - because
   // importing a static image gives us that <path>!
   // insert our loader first before any built-in loaders kick in
-  const loaderRules = webpackOptions.module.rules.find(rule =>
-    Array.isArray(rule.oneOf),
-  )
+  const loaderRules = webpackOptions.module.rules.find((rule) => {
+    return Array.isArray(rule.oneOf)
+  })
 
   const imageRedirectLoaderRule = {
     test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/, /\.svg$/],
@@ -39,6 +41,7 @@ function addImageRedirect(webpackOptions) {
     // while we are here, let's change file loader
     // to point it at the /__root/... path
     const fileLoader = loaderRules.oneOf[loaderRules.oneOf.length - 1]
+
     if (
       fileLoader &&
       fileLoader.loader &&

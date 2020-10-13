@@ -1,4 +1,4 @@
-With `cypress-react-unit-test`, you can add styles to your component in three ways:
+With `@cypress/react`, you can add styles to your component in three ways:
 
 ```js
 mount(<Component />, {

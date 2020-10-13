@@ -6,10 +6,11 @@ class Note extends React.Component {
     saved: '',
   }
 
-  onChange = evt => {
+  onChange = (evt) => {
     this.setState({
       content: evt.target.value,
     })
+
     console.log('updating content')
   }
 
@@ -20,7 +21,8 @@ class Note extends React.Component {
   }
 
   load = () => {
-    var me = this
+    let me = this
+
     setTimeout(() => {
       me.setState({
         data: [{ title: 'test' }, { title: 'test2' }],
@@ -28,7 +30,7 @@ class Note extends React.Component {
     }, 3000)
   }
 
-  render() {
+  render () {
     return (
       <React.Fragment>
         <label htmlFor="change">Change text</label>
@@ -36,11 +38,13 @@ class Note extends React.Component {
         <div data-testid="saved">{this.state.saved}</div>
         {this.state.data && (
           <div data-testid="data">
-            {this.state.data.map(item => (
-              <div data-testid="item" className="item">
-                {item.title}
-              </div>
-            ))}
+            {this.state.data.map((item) => {
+              return (
+                <div data-testid="item" className="item">
+                  {item.title}
+                </div>
+              )
+            })}
           </div>
         )}
         <div>

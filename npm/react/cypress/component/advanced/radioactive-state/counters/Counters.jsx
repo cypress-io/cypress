@@ -8,7 +8,7 @@ const Counters = () => {
     sum: 0,
   })
 
-  const increment = i => {
+  const increment = (i) => {
     state.counts[i]++
     state.sum++
   }

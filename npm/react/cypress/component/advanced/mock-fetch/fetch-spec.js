@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import User from './user'
 
 it('renders user data', () => {
@@ -10,14 +10,14 @@ it('renders user data', () => {
   }
 
   // window.fetch
-  cy.window().then(win => {
+  cy.window().then((win) => {
     // Cypress cleans up stubs automatically after each test
     // https://on.cypress.io/stub
     cy.stub(win, 'fetch')
-      .withArgs('/123')
-      .resolves({
-        json: () => Promise.resolve(fakeUser),
-      })
+    .withArgs('/123')
+    .resolves({
+      json: () => Promise.resolve(fakeUser),
+    })
   })
 
   mount(<User id="123" />)

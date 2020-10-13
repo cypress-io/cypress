@@ -1,2 +1,2 @@
-require('cypress-react-unit-test/support')
+require('@cypress/react/support')
 require('cypress-axe')

@@ -6,6 +6,7 @@ describe('Lodash/fp', () => {
     const person = {
       name: 'Joe',
     }
+
     expect(_.get(person, 'name'), 'regular Lodash').to.equal('Joe')
     expect(get('name')(person), 'lodash/fp').to.equal('Joe')
   })

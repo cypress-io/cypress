@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 import * as calc from './calc'
 import SideBySide from './SideBySide'
@@ -10,8 +10,8 @@ import { SkeletonTheme } from 'react-loading-skeleton'
 describe('Post skeletons', () => {
   it('mocks the es6 import', () => {
     cy.stub(calc, 'getRandomNumber')
-      .as('lucky')
-      .returns(777)
+    .as('lucky')
+    .returns(777)
 
     mount(<Post />)
     cy.contains('.random', '777')
@@ -44,16 +44,18 @@ describe('Post skeletons', () => {
   })
 
   it('different colors', () => {
-    const Test = () => (
-      <div>
-        <SkeletonTheme color="#1D5CA6" highlightColor="#164999">
-          <Post />
-        </SkeletonTheme>
-        <SkeletonTheme color="#333" highlightColor="#4a4a4a">
-          <Post />
-        </SkeletonTheme>
-      </div>
-    )
+    const Test = () => {
+      return (
+        <div>
+          <SkeletonTheme color="#1D5CA6" highlightColor="#164999">
+            <Post />
+          </SkeletonTheme>
+          <SkeletonTheme color="#333" highlightColor="#4a4a4a">
+            <Post />
+          </SkeletonTheme>
+        </div>
+      )
+    }
 
     mount(<Test />)
   })
@@ -79,6 +81,7 @@ describe('Post skeletons', () => {
 
       return <Post title={title} children={text} />
     }
+
     mount(<Demo />)
     // at first, the title and the text are 💀
     cy.get('h1 .react-loading-skeleton').should('have.length', 1)

@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import React, { Component } from 'react'
 import Todos from './Todos'
 
@@ -17,7 +17,7 @@ const todos = [
 ]
 
 class App extends Component {
-  render() {
+  render () {
     return <Todos todos={todos} />
   }
 }
@@ -26,9 +26,10 @@ it('renders todos', () => {
   cy.viewport(400, 500)
   mount(<App />)
   cy.contains('[data-cy="todo"]', 'clean')
-    .find('input[type=checkbox]')
-    .should('not.be.checked')
+  .find('input[type=checkbox]')
+  .should('not.be.checked')
+
   cy.contains('[data-cy="todo"]', 'do the dishes')
-    .find('input[type=checkbox]')
-    .should('be.checked')
+  .find('input[type=checkbox]')
+  .should('be.checked')
 })

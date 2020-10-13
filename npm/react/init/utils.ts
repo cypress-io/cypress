@@ -5,7 +5,7 @@ import chalk from 'chalk'
  * Compare available version range with the provided version from package.json
  * @param packageName Package name used to display a helper message to user.
  */
-export function validateSemverVersion(
+export function validateSemverVersion (
   version: string,
   allowedVersionRange: string,
   packageName?: string,

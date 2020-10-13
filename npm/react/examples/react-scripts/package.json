@@ -3,14 +3,16 @@
   "description": "Component testing with specs inside the src folder",
   "private": true,
   "scripts": {
-    "start": "../../node_modules/.bin/react-scripts start",
-    "test": "../../node_modules/.bin/cypress-expect run --min-passing 13",
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
-    "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js"
+    "check-coverage": "check-coverage src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "only-covered": "only-covered src/App.js src/calc.js src/Child.js src/services.js src/RemotePizza.js cypress/fixtures/add.js",
+    "start": "react-scripts start",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@cypress/react": "file:../..",
+    "check-code-coverage": "1.9.2",
+    "react-scripts": "3.4.3"
   },
   "browserslist": {
     "production": [

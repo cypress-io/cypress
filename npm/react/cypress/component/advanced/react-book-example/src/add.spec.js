@@ -3,6 +3,7 @@ import add from './add'
 describe('add', () => {
   it('testing addition', () => {
     const actual = add(1, 2)
+
     expect(actual).to.equal(3)
   })
 

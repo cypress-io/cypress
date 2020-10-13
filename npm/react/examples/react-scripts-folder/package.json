@@ -3,12 +3,14 @@
   "description": "Handles component tests from cypress folder",
   "private": true,
   "scripts": {
-    "test": "../../node_modules/.bin/cypress-expect run --min-passing 5",
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "check-coverage": "../../node_modules/.bin/check-coverage src/App.js src/calc.js src/Child.js",
-    "only-covered": "../../node_modules/.bin/only-covered src/App.js src/calc.js src/Child.js"
+    "check-coverage": "check-coverage src/App.js src/calc.js src/Child.js",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "only-covered": "only-covered src/App.js src/calc.js src/Child.js",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@cypress/react": "file:../..",
+    "check-code-coverage": "1.9.2",
+    "react-scripts": "3.4.1"
   }
 }

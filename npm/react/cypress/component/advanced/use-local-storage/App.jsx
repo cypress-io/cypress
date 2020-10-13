@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import * as React from 'react'
 
-export default function App() {
-  const [cart, setCart] = useState(
+export default function App () {
+  const [cart, setCart] = React.useState(
     JSON.parse(localStorage.getItem('cart')) || ['kiwi 🥝'],
   )
 
   const addJuice = () => {
     const updatedCart = cart.concat('juice 🧃')
+
     setCart(updatedCart)
     localStorage.setItem('cart', JSON.stringify(updatedCart))
   }

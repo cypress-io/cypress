@@ -2,11 +2,11 @@
 
 This folder shows several examples from [Enzyme docs](https://enzymejs.github.io/enzyme/).
 
-In general if you are migrating from Enzyme to `cypress-react-unit-test`:
+In general if you are migrating from Enzyme to `@cypress/react`:
 
-- there is no shallow mounting, only the full mounting. Thus `cypress-react-unit-test` has `mount` which is similar to the Enzyme's `render`. It renders the full HTML and CSS output of your component. 
-- you can mock [children components](https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/advanced/mocking-component) if you want to avoid running "expensive" components during tests
-- the test is running as a "mini" web application. Thus if you want to set a context around component, then set the [context around the component](https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/advanced/context)
+- there is no shallow mounting, only the full mounting. Thus `@cypress/react` has `mount` which is similar to the Enzyme's `render`. It renders the full HTML and CSS output of your component. 
+- you can mock [children components](https://github.com/bahmutov/@cypress/react/tree/main/cypress/component/advanced/mocking-component) if you want to avoid running "expensive" components during tests
+- the test is running as a "mini" web application. Thus if you want to set a context around component, then set the [context around the component](https://github.com/bahmutov/@cypress/react/tree/main/cypress/component/advanced/context)
 
 ## setState
 
@@ -67,7 +67,7 @@ function SimpleComponent(props, context) {
 }
 ```
 
-Since the above syntax is [deprecated](https://reactjs.org/docs/legacy-context.html), `cypress-react-unit-test` does not support it. Instead use `createContext` and `Context.Provider` to surround the mounted component, just like you would do in a regular application code.
+Since the above syntax is [deprecated](https://reactjs.org/docs/legacy-context.html), `@cypress/react` does not support it. Instead use `createContext` and `Context.Provider` to surround the mounted component, just like you would do in a regular application code.
 
 ```js
 mount(

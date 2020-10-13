@@ -1,11 +1,11 @@
 import React from 'react'
 import { fetchIngredients as defaultFetchIngredients } from './services'
 
-export default function PizzaProps({ fetchIngredients }) {
+export default function PizzaProps ({ fetchIngredients }) {
   const [ingredients, setIngredients] = React.useState([])
 
   const handleCook = () => {
-    fetchIngredients().then(response => {
+    fetchIngredients().then((response) => {
       setIngredients(response.args.ingredients)
     })
   }
@@ -16,9 +16,11 @@ export default function PizzaProps({ fetchIngredients }) {
       <button onClick={handleCook}>Cook</button>
       {ingredients.length > 0 && (
         <ul>
-          {ingredients.map(ingredient => (
-            <li key={ingredient}>{ingredient}</li>
-          ))}
+          {ingredients.map((ingredient) => {
+            return (
+              <li key={ingredient}>{ingredient}</li>
+            )
+          })}
         </ul>
       )}
     </>

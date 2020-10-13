@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import React from 'react'
 import Todos from './Todos'
 import pretty from 'pretty'
@@ -15,6 +15,7 @@ it('Todo - should create snapshot', () => {
       ]}
     />,
   )
+
   cy.get('[data-testid=item]').should('have.length', 2)
   // disabled snapshot commands for now
   // to speed up bundling
@@ -23,25 +24,26 @@ it('Todo - should create snapshot', () => {
 
   // entire test area
   cy.get('#cypress-root')
-    .invoke('html')
-    .then(pretty)
-    .should(
-      'equal',
-      stripIndent`
+  .invoke('html')
+  .then(pretty)
+  .should(
+    'equal',
+    stripIndent`
         <h3 data-testid="item" class="">item1</h3>
         <div>an item</div><button>Select</button>
         <h3 data-testid="item" class="">item2</h3>
         <div>another item</div><button>Select</button>
       `,
-    )
+  )
 
   cy.contains('[data-testid=item]', 'item1').should('be.visible')
   // selecting works
   cy.contains('[data-testid=item]', 'item2')
-    .next()
-    .should('have.text', 'another item')
-    .next()
-    .should('have.text', 'Select')
-    .click()
+  .next()
+  .should('have.text', 'another item')
+  .next()
+  .should('have.text', 'Select')
+  .click()
+
   cy.contains('[data-testid=item]', 'item2').should('have.class', 'selected')
 })
