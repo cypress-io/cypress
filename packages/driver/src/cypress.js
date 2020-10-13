@@ -216,7 +216,7 @@ class $Cypress {
 
     // wire up command create to cy
     this.Commands = $Commands.create(this, this.cy, this.state, this.config)
-    this.Session = $Session.create(this)
+    this.Session = $Session.create(this, this.state)
 
     this.events.proxyTo(this.cy)
 

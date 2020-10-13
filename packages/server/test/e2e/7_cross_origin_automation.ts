@@ -9,12 +9,12 @@ const onServer = function (app) {
     res.send('<html><h1>cross origin</h1></html>')
   })
 
-  app.get('/cross_domain_iframe', (req, res) => {
+  app.get('/cross_origin_iframe', (req, res) => {
     res.send('<html><body><iframe src="https://127.0.0.2:44665/set-localstorage"</body></html>')
   })
 
   app.get('/set-localstorage', (req, res) => {
-    res.send('<html><body><script>window.localStorage.foo = "bar"</script></body></html>')
+    res.send('<html><body><script>window.localStorage.clear(); window.localStorage.foo = "bar"</script></body></html>')
   })
 
   app.get('/form', (req, res) => {
@@ -76,7 +76,7 @@ describe('e2e cross domain automations', () => {
   })
 
   e2e.it('backup localStorage', {
-    spec: 'cross_domain_automation_spec.js',
+    spec: 'cross_origin_automation_spec.js',
     snapshot: true,
   })
 })

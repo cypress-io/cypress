@@ -36,8 +36,32 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     runner.handle(req, res)
   })
 
-  app.get('/__cypress/automation', (req, res) => {
-    res.send('<html><body><script>window.parent.postMessage(JSON.stringify(window.localStorage), "*")</script></body></html>')
+  app.get('/__cypress/automation/getLocalStorage', (req, res) => {
+    res.send('<html><body><script>window.parent.postMessage({value: JSON.stringify(window.localStorage), type: "localStorage"}, "*")</script></body></html>')
+  })
+
+  app.get('/__cypress/automation/setLocalStorage', (req, res) => {
+    res.send(`<html><body><script>(${(function () {
+      window.onmessage = function (event) {
+        const data = event.data
+
+        if (data.type === 'set:localStorage:data') {
+          if (data.clear) {
+            window.localStorage.clear()
+          }
+
+          if (data.value) {
+            Object.keys(data.value).forEach((key) => {
+              window.localStorage.setItem(key, data.value[key])
+            })
+          }
+
+          window.parent.postMessage({ type: 'set:localStorage:complete' }, '*')
+        }
+      }
+
+      window.parent.postMessage({ type: 'set:localStorage:load' }, '*')
+    }).toString()})()</script></body></html>`)
   })
 
   app.get('/__cypress/static/*', (req, res) => {

@@ -425,7 +425,7 @@ class Socket {
               session.getState().stubbedDomainsForAutomation = stubDomains
               options.closeOpenSocketsForHosts(stubDomains)
 
-              debug('stubbing next connection to:', session.getState())
+              console.log('stubbing next connection to:', session.getState())
 
               return
             }

@@ -12,7 +12,7 @@ const httpProxy = require('http-proxy')
 const la = require('lazy-ass')
 const httpsProxy = require('@packages/https-proxy')
 const compression = require('compression')
-const debug = require('debug')('cypress:server:server')
+const debug = require('debug/src/browser')('cypress:server:server')
 const {
   agent,
   blocked,
@@ -37,6 +37,9 @@ const Request = require('./request')
 const fileServer = require('./file_server')
 const templateEngine = require('./template_engine')
 const session = require('./session')
+const { hostAndPort } = require('@packages/https-proxy/lib/util/parse')
+
+debug.log = console.log.bind(console)
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -296,13 +299,13 @@ class Server {
 
         const conn = this._httpsProxy.connect(req, socket, head, {
           onDirectConnection: (req) => {
-            debug('onDirectConnection', req.url)
+            console.log('onDirectConnection', req.url)
             if (req.url.includes('44665')) {
               const sessionState = session.getState()
 
               if (sessionState.stubbedDomainsForAutomation && sessionState.stubbedDomainsForAutomation.includes(req.url)) {
-                sessionState.stubbedDomainsForAutomation = _.without(sessionState.stubbedDomainsForAutomation, req.url)
-                debug('intercepted domain for localstorage access:', req.url)
+                _.remove(sessionState.stubbedDomainsForAutomation, req.url)
+                console.log('intercepted domain for localstorage access:', req.url)
 
                 return false
               }
@@ -460,9 +463,10 @@ class Server {
   }
 
   _closeOpenSocketsForHosts (hosts) {
-    debug('current open sockets', _.keys(this._openSockets))
+    console.log('current open sockets', _.keys(this._openSockets))
     _.each(hosts, (host) => {
       if (this._openSockets[host]) {
+        console.log('deleting host', host)
         this._openSockets[host].destroy()
         delete this._openSockets[host]
       }
