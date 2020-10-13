@@ -513,8 +513,8 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-        name: Lint public packages for `yarn test-e2e`
-        command: node scripts/lint-test-e2e.js
+          name: Lint public packages for `yarn test-e2e`
+          command: node scripts/lint-test-e2e.js
 
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
