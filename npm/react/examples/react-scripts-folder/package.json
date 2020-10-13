@@ -1,5 +1,6 @@
 {
   "name": "example-react-scripts-folder",
+  "version": "1.0.0",
   "description": "Handles component tests from cypress folder",
   "private": true,
   "scripts": {

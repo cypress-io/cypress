@@ -64,7 +64,7 @@ async function getCypressConfig () {
 
     console.log(
       `\nFind more information about installation at: ${chalk.bold.underline(
-        'https://github.com/bahmutov/@cypress/react#init',
+        'https://github.com/cypress-io/cypress/tree/develop/npm/react#init',
       )}`,
     )
 
@@ -233,7 +233,7 @@ export async function main<T> () {
 
   console.log(
     `Docs for different recipes of bundling tools: ${chalk.bold.underline(
-      'https://github.com/bahmutov/@cypress/react/blob/main/docs/recipes.md',
+      'https://github.com/cypress-io/cypress/tree/develop/npm/react/docs/recipes.md',
     )}`,
   )
 

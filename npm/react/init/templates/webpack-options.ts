@@ -5,7 +5,7 @@ export const WebpackOptions: Template = {
   // this should never show ideally
   message: `Unable to detect where webpack options are.`,
   getExampleUrl: () => {
-    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/webpack-options'
+    return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/webpack-options'
   },
   test: () => ({ success: false }),
   recommendedComponentFolder: 'src',

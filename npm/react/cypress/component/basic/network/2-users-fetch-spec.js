@@ -11,7 +11,7 @@ describe('Users with Fetch', () => {
     cy.get('li', { timeout: 20000 }).should('have.length', 3)
   })
 
-  // https://github.com/bahmutov/@cypress/react/issues/347
+  // https://github.com/bahmutov/cypress-react-unit-test/issues/347
   context('mocking', () => {
     beforeEach(() => {
       cy.server()

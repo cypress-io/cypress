@@ -25,7 +25,7 @@ describe('static resources', () => {
   })
 
   it('loads font', () => {
-    // https://github.com/bahmutov/@cypress/react/issues/284
+    // https://github.com/bahmutov/cypress-react-unit-test/issues/284
     mount(<App />)
 
     cy.wrap().should(() => {
