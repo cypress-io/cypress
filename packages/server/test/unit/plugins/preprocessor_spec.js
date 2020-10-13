@@ -83,24 +83,6 @@ describe('lib/plugins/preprocessor', () => {
 
       expect(this.plugin).to.be.calledOnce
     })
-
-    it('uses default preprocessor if none registered', function () {
-      plugins._reset()
-      sinon.stub(plugins, 'register')
-      sinon.stub(plugins, 'execute').returns(() => {})
-
-      const userPreprocessorFn = function () {}
-      const userPreprocessor = sinon.stub().returns(userPreprocessorFn)
-
-      userPreprocessor.defaultOptions = {}
-
-      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', userPreprocessor)
-
-      preprocessor.getFile(this.filePath, this.config)
-
-      expect(plugins.register).to.be.calledWith('file:preprocessor', userPreprocessorFn)
-      expect(userPreprocessor).to.be.called
-    })
   })
 
   context('#removeFile', () => {
