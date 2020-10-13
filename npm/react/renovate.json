@@ -1,0 +1,31 @@
+{
+  "extends": [
+    "config:base"
+  ],
+  "automerge": true,
+  "major": {
+    "automerge": false
+  },
+  "schedule": [
+    "before 2am"
+  ],
+  "updateNotScheduled": false,
+  "timezone": "America/New_York",
+  "masterIssue": true,
+  "packageRules": [
+    {
+      "packagePatterns": ["*"],
+      "excludePackagePatterns": [
+        "@babel/plugin-transform-modules-commonjs",
+        "@cypress/code-coverage",
+        "@cypress/webpack-preprocessor",
+        "babel-plugin-istanbul",
+        "find-webpack",
+        "cypress",
+        "semantic-release",
+        "typescript"
+      ],
+      "enabled": false
+    }
+  ]
+}
