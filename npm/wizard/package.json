@@ -1,0 +1,31 @@
+{
+  "name": "@cypress/wizard",
+  "version": "1.0.0",
+  "description": "Smart installation wizard",
+  "private": false,
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc -p ./tsconfig.json && chmod +x dist/init.js",
+    "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json src/**/*.test.ts"
+  },
+  "dependencies": {
+    "chalk": "4.1.0",
+    "cli-highlight": "2.1.4",
+    "find-up": "5.0.0",
+    "inquirer": "7.3.3"
+  },
+  "devDependencies": {
+    "@types/inquirer": "7.3.1",
+    "@types/mock-fs": "4.10.0",
+    "@types/node": "9.6.49",
+    "mocha": "7.1.1",
+    "mock-fs": "4.13.0",
+    "typescript": "4.0.3"
+  },
+  "bin": {
+    "init": "dist/init.js"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/cypress-io/cypress.git",
+  "author": "Cypress.io team"
+}

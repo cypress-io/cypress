@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "strict": true,
+    "strictNullChecks": true,
+    "module": "CommonJS",
+    "target": "ES2018",
+    "types": [
+      "node",
+    ],
+    "lib": [
+      "ES2018"
+    ],
+    "noImplicitAny": true
+  },
+  "exclude": [
+    "./src/**/*.test.ts"
+  ],
+  "include": [
+    "./src/**/*.ts"
+  ]
+}
