@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.bin.json",
+  "compilerOptions": {
+    "types": ["jest"]
+  }
+}
