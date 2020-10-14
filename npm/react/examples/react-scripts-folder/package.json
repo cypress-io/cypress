@@ -1,5 +1,6 @@
 {
   "name": "example-react-scripts-folder",
+  "version": "1.0.0",
   "description": "Handles component tests from cypress folder",
   "private": true,
   "scripts": {
@@ -9,7 +10,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../..",
+    "@cypress/react": "file:../../dist",
     "check-code-coverage": "1.9.2",
     "react-scripts": "3.4.1"
   }

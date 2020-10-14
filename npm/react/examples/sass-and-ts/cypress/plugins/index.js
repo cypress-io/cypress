@@ -1,5 +1,5 @@
 // load Webpack file preprocessor that comes with this plugin
-// https://github.com/bahmutov/@cypress/react#install
+// https://github.com/bahmutov/cypress-react-unit-test#install
 const preprocessor = require('@cypress/react/plugins/load-webpack')
 
 module.exports = (on, config) => {

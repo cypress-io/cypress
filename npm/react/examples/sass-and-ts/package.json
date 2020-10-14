@@ -8,9 +8,11 @@
     "only-covered": "only-covered src/App.tsx",
     "test": "node ../../../../scripts/cypress run"
   },
+  "dependencies": {
+    "sass-loader": "10.0.2"
+  },
   "devDependencies": {
-    "@cypress/react": "file:../..",
-    "node-sass": "4.14.1",
-    "sass-loader": "10.0.3"
+    "@cypress/react": "file:../../dist",
+    "node-sass": "4.14.1"
   }
 }

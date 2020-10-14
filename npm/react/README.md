@@ -1,5 +1,3 @@
-# @cypress/react [![CircleCI](https://circleci.com/gh/bahmutov/@cypress/react/tree/main.svg?style=svg)](https://circleci.com/gh/bahmutov/@cypress/react/tree/main) [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=flat-square)](https://dashboard.cypress.io/#/projects/z9dxah) [![renovate-app badge][renovate-badge]][renovate-app]
-
 > A little helper to unit test React components in the open source [Cypress.io](https://www.cypress.io/) E2E test runner **v4.5.0+**
 
 **Jump to:** [Comparison](#comparison), [Blog posts](#blog-posts), [Install](#install), Examples: [basic](#basic-examples), [advanced](#advanced-examples), [full](#full-examples), [external](#external-examples), [Style options](#options), [Code coverage](#code-coverage), [Visual testing](#visual-testing), [Common problems](#common-problems), [Chat](#chat)
@@ -57,10 +55,6 @@ If you are coming from Enzyme world, check out the [enzyme](cypress/component/ba
 - [Cypress Unit Testing React Components With TypeScript](https://medium.com/swlh/cypress-unit-testing-react-components-with-typescript-77b38e5043b3)
 - [Test The Interface Not The Implementation](https://glebbahmutov.com/blog/test-the-interface/) compares Jest + React Testing Library to @cypress/react + Cypress Testing Library
 - [Components People Test](https://glebbahmutov.com/blog/components-people-test/) about testing a component inside a Next.js-powered blog
-
-## Known problems
-
-See issues labeled [v4](https://github.com/bahmutov/@cypress/react/labels/v4)
 
 ## Install
 
@@ -392,7 +386,8 @@ const webpackOptions = {
 }
 ```
 
-Keep your eye on issue [#156](https://github.com/bahmutov/@cypress/react/issues/156) for more information.
+<!--  TODO FIX THE LINK -->
+Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unut-test/issues/156) for more information.
 
 </details>
 
@@ -401,7 +396,7 @@ Keep your eye on issue [#156](https://github.com/bahmutov/@cypress/react/issues/
 
 If you are using your custom Webpack, this plugin might be missing code coverage information because the code was not instrumented. We try to insert the `babel-plugin-istanbul` plugin automatically, but your bundling might not use Babel, or configure it differently, preventing plugin insertion. Please let us know by opening an issue with full reproducible details.
 
-See related issue [#141](https://github.com/bahmutov/@cypress/react/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
+See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/react/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
 
 </details>
 

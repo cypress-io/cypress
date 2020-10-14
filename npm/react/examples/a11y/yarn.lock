@@ -807,6 +807,23 @@
     js-yaml "3.14.0"
     nyc "15.1.0"
 
+"@cypress/react@file:../../dist":
+  version "0.0.0-development"
+  dependencies:
+    "@babel/plugin-transform-modules-commonjs" "7.10.4"
+    "@cypress/code-coverage" "3.8.1"
+    "@cypress/webpack-preprocessor" "*"
+    babel-plugin-istanbul "6.0.0"
+    chalk "4.1.0"
+    cli-highlight "2.1.4"
+    debug "4.1.1"
+    find-up "5.0.0"
+    find-webpack "2.1.0"
+    inquirer "7.3.3"
+    mime-types "2.1.26"
+    semver "7.3.2"
+    unfetch "4.1.0"
+
 "@cypress/webpack-preprocessor@*":
   version "5.4.6"
   resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.6.tgz#667f8007cbe6ee219ce7e45a7f1400d3e2401032"
@@ -1697,23 +1714,6 @@ cypress-axe@0.8.1:
   version "0.8.1"
   resolved "https://registry.yarnpkg.com/cypress-axe/-/cypress-axe-0.8.1.tgz#ddb37dca6570c0642dda2388daf678e83b3e8d3f"
   integrity sha512-hX48+r5n7Ns7CHkn601Ag0JiCG1vby5+g7QhlP8X+mkiVYpTLpXAPiiaKFj9QTTCdZSI5+0UqwIxA+ShTsr5tA==
-
-"@cypress/react@file:../..":
-  version "0.0.0-development"
-  dependencies:
-    "@babel/plugin-transform-modules-commonjs" "7.10.4"
-    "@cypress/code-coverage" "3.8.1"
-    "@cypress/webpack-preprocessor" "*"
-    babel-plugin-istanbul "6.0.0"
-    chalk "4.1.0"
-    cli-highlight "2.1.4"
-    debug "4.1.1"
-    find-up "5.0.0"
-    find-webpack "2.1.0"
-    inquirer "7.3.3"
-    mime-types "2.1.26"
-    semver "7.3.2"
-    unfetch "4.1.0"
 
 dash-ast@^1.0.0:
   version "1.0.0"

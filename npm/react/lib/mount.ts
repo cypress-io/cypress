@@ -79,7 +79,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
         [
           '[@cypress/react] 🔥 Hmm, cannot find root element to mount the component.',
           'Did you forget to include the support file?',
-          'Check https://github.com/bahmutov/@cypress/react#install please',
+          'Check https://github.com/bahmutov/cypress-react-unit-test#install please',
         ].join(' '),
       )
     }
@@ -107,7 +107,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       const logConsoleProps = {
         props: jsx.props,
         description: 'Mounts React component',
-        home: 'https://github.com/bahmutov/@cypress/react',
+        home: 'https://github.com/bahmutov/cypress-react-unit-test',
       }
       const componentElement = el.children[0]
 
@@ -131,7 +131,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
       .wrap(userComponent, { log: false })
       .as(displayName)
       // by waiting, we give the component's hook a chance to run
-      // https://github.com/bahmutov/@cypress/react/issues/200
+      // https://github.com/bahmutov/cypress-react-unit-test/issues/200
       .wait(1, { log: false })
       .then(() => {
         if (logInstance) {

@@ -7,6 +7,6 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../.."
+    "@cypress/react": "file:../../dist"
   }
 }

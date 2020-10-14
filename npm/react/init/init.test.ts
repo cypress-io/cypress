@@ -90,7 +90,7 @@ describe('init script', () => {
 
           return call.includes('create-react-app') &&
           call.includes(
-            'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts',
+            'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts',
           )
         },
       ),

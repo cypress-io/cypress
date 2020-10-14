@@ -163,6 +163,7 @@ const _providerCiParams = () => {
       'BITBUCKET_REPO_SLUG',
       'BITBUCKET_REPO_OWNER',
       'BITBUCKET_BUILD_NUMBER',
+      'BITBUCKET_PARALLEL_STEP',
     ]),
     buildkite: extract([
       'BUILDKITE_REPO',

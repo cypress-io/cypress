@@ -9,8 +9,8 @@ export const ReactScriptsTemplate: Template = {
   message: 'It looks like you are using create-react-app.',
   getExampleUrl: ({ componentFolder }) => {
     return componentFolder === 'src'
-      ? 'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts'
-      : 'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts-folder'
+      ? 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'
+      : 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts-folder'
   },
   getPluginsCode: () => {
     return [

@@ -4,16 +4,17 @@
   "description": "Unit test React components using Cypress",
   "main": "dist",
   "scripts": {
-    "build": "npm run transpile && npm run transpile:bin && chmod +x bin/init.js",
+    "build": "rimraf dist && yarn transpile && yarn transpile:bin && yarn build:dist-package",
+    "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
     "cy:open": "node ../../scripts/cypress open",
     "percy:test": "percy exec -- node ../../scripts/cypress run",
     "semantic-release": "semantic-release",
-    "pretest": "npm run transpile",
+    "pretest": "yarn transpile",
     "test": "node ../../scripts/cypress run",
     "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json init/**/*.test.ts",
     "transpile": "tsc",
-    "transpile:bin": "tsc -p tsconfig.bin.json",
+    "transpile:bin": "tsc -p tsconfig.bin.json && chmod +x bin/init.js",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -32,7 +33,6 @@
     "unfetch": "4.1.0"
   },
   "devDependencies": {
-    "@applitools/eyes-cypress": "3.14.0",
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",

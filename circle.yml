@@ -383,7 +383,7 @@ commands:
     steps:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"q  
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>" 
 jobs:
   ## code checkout and yarn installs
   build:
@@ -854,11 +854,6 @@ jobs:
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -2000,11 +1995,12 @@ linux-workflow: &linux-workflow
         path: examples/visual-testing-with-percy
         requires:
           - npm-react
-    - npm-react-e2e-example:
-        name: React + Happo component testing
-        path: examples/visual-testing-with-happo
-        requires:
-          - npm-react
+    # Requires Happo api key in the env vars
+    # - npm-react-e2e-example:
+    #     name: React + Happo component testing
+    #     path: examples/visual-testing-with-happo
+    #     requires:
+    #       - npm-react
     - npm-react-e2e-example:
         name: React + Webpack file component testing
         path: examples/webpack-file
