@@ -53,6 +53,8 @@ jobs:
           pr_body: |
             There was a merge conflict when trying to automatically merge master into develop. Please resolve the conflict and complete the merge.
 
+            DO NOT SQUASH AND MERGE
+
             @${{ github.actor }}
           pr_reviewer: ${{ github.actor }}
           pr_label: "auto-merge"
