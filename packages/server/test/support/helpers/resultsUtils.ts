@@ -185,7 +185,12 @@ export const expectRunsToHaveCorrectTimings = (runs = []) => {
 export const expectCorrectModuleApiResult = (json, opts: {
   e2ePath: string
   runs: number
+  video: boolean
 }) => {
+  if (opts.video == null) {
+    opts.video = true
+  }
+
   // should be n runs
   expect(json.runs).to.have.length(opts.runs)
 
@@ -281,8 +286,10 @@ export const expectCorrectModuleApiResult = (json, opts: {
         expect(d.toJSON()).to.eq(attempt.startedAt)
         attempt.startedAt = STATIC_DATE
 
-        expect(attempt.videoTimestamp).to.be.a('number')
-        attempt.videoTimestamp = 9999
+        if (opts.video) {
+          expect(attempt.videoTimestamp).to.be.a('number')
+          attempt.videoTimestamp = 9999
+        }
       }
 
       attempt.screenshots.forEach((screenshot) => {
@@ -303,7 +310,9 @@ export const expectCorrectModuleApiResult = (json, opts: {
       }
     })
 
-    // normalize video path
-    run.video = e2e.normalizeStdout(run.video)
+    if (opts.video) {
+      // normalize video path
+      run.video = e2e.normalizeStdout(run.video)
+    }
   })
 }

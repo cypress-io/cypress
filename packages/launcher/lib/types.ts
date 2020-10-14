@@ -73,3 +73,8 @@ export type LauncherApi = {
   ) => Promise<FoundBrowser>
   launch: (browser: FoundBrowser, url: string, args: string[]) => ChildProcess
 }
+
+export type PathData = {
+  path: string
+  browserKey?: string
+}
