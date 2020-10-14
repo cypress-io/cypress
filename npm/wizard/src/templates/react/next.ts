@@ -1,8 +1,8 @@
 import chalk from 'chalk'
-import { createFindPackageJsonIterator } from '../findPackageJson'
+import { createFindPackageJsonIterator } from '../../findPackageJson'
 import { Template } from '../Template'
-import { validateSemverVersion } from '../utils'
-import { MIN_SUPPORTED_VERSION } from '../versions'
+import { validateSemverVersion } from '../../utils'
+import { MIN_SUPPORTED_VERSION } from '../../versions'
 
 export const NextTemplate: Template = {
   message: 'It looks like you are using next.js.',

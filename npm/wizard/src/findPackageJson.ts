@@ -90,3 +90,21 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
     },
   }
 }
+
+export function scanFSForAvailableDependency (cwd: string, deps: string[]) {
+  const { success } = createFindPackageJsonIterator(cwd)
+  .map(({ dependencies, devDependencies }, path) => {
+    if (!dependencies || !devDependencies) {
+      return { continue: true }
+    }
+
+    return {
+      continue: !Object.keys({ ...dependencies, ...devDependencies })
+      .some((dependency) => deps.includes(dependency)),
+    }
+  })
+
+  return success
+}
+
+export type PackageJsonIterator = ReturnType<typeof createFindPackageJsonIterator>

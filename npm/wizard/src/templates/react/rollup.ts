@@ -2,7 +2,7 @@ import path from 'path'
 import chalk from 'chalk'
 import findUp from 'find-up'
 import highlight from 'cli-highlight'
-import { createFindPackageJsonIterator } from '../findPackageJson'
+import { createFindPackageJsonIterator } from '../../findPackageJson'
 import { Template } from '../Template'
 
 export function extractRollupConfigPathFromScript (script: string) {

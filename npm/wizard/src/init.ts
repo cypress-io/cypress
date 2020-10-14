@@ -5,46 +5,16 @@ import chalk from 'chalk'
 import findUp from 'find-up'
 import inqueier from 'inquirer'
 import highlight from 'cli-highlight'
-import { Template } from './Template'
-import { NextTemplate } from './templates/next'
-import { WebpackTemplate } from './templates/webpack-file'
-import { ReactScriptsTemplate } from './templates/react-scripts'
-import { BabelTemplate } from './templates/babel'
-import { WebpackOptions } from './templates/webpack-options'
+import { Template } from './templates/Template'
+import { reactTemplates } from './templates/react'
+import { guessTemplate } from './templates/guessTemplate'
 
-const templates: Record<string, Template<any>> = {
-  'next.js': NextTemplate,
-  'create-react-app': ReactScriptsTemplate,
-  webpack: WebpackTemplate,
-  babel: BabelTemplate,
-  'default (webpack options)': WebpackOptions,
-}
+const templates = { ...reactTemplates }
 
 type TemplateGuess<T> = {
   defaultTemplate: Template<T> | null
   defaultTemplateName: string | null
   templatePayload: T | null
-}
-
-export function guessTemplateForUsedFramework<T> (): TemplateGuess<T> {
-  for (const [name, template] of Object.entries(templates)) {
-    const typedTemplate = template as Template<T>
-    const { success, payload } = typedTemplate.test(process.cwd())
-
-    if (success) {
-      return {
-        defaultTemplate: typedTemplate,
-        defaultTemplateName: name,
-        templatePayload: payload ?? null,
-      }
-    }
-  }
-
-  return {
-    templatePayload: null,
-    defaultTemplate: null,
-    defaultTemplateName: null,
-  }
 }
 
 async function getCypressConfig () {
@@ -155,13 +125,13 @@ export async function main<T> () {
   )
 
   const { config, cypressConfigPath } = await getCypressConfig()
+  const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
   const {
     defaultTemplate,
     defaultTemplateName,
     templatePayload,
-  } = guessTemplateForUsedFramework<T>()
+  } = await guessTemplate<T>(cypressProjectRoot)
 
-  const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
   const pluginsFilePath = path.resolve(
     cypressProjectRoot,
     config.pluginsFile ?? './cypress/plugins/index.js',

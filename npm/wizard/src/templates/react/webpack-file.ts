@@ -1,6 +1,6 @@
 import path from 'path'
 import findUp from 'find-up'
-import { createFindPackageJsonIterator } from '../findPackageJson'
+import { createFindPackageJsonIterator } from '../../findPackageJson'
 import { Template } from '../Template'
 
 export function extractWebpackConfigPathFromScript (script: string) {
