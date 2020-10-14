@@ -518,17 +518,22 @@ module.exports = function (Commands, Cypress, cy, state) {
       const next = state('current').get('next')
 
       if (next) {
-        const checkSubject = (newSubject, args) => {
+        const checkSubject = (newSubject, args, firstCall) => {
           if (state('current') !== next) {
             return
           }
 
-          // find the new subject and splice it out
-          // with our existing subject
-          const index = _.indexOf(args, newSubject)
+          // https://github.com/cypress-io/cypress/issues/4921
+          // When dual commands like contains() is used as the firstCall (cy.contains() style),
+          // we should not prepend subject.
+          if (!firstCall) {
+            // find the new subject and splice it out
+            // with our existing subject
+            const index = _.indexOf(args, newSubject)
 
-          if (index > -1) {
-            args.splice(index, 1, subject)
+            if (index > -1) {
+              args.splice(index, 1, subject)
+            }
           }
 
           return cy.removeListener('next:subject:prepared', checkSubject)
