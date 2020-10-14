@@ -61,7 +61,7 @@ describe('e2e video compression', () => {
 
               expect(durationMs).to.be.ok
 
-              expect(durationMs).to.be.closeTo(EXPECTED_DURATION_MS, humanInterval('15 seconds'))
+              expect(durationMs).to.be.above(EXPECTED_DURATION_MS).and.below(EXPECTED_DURATION_MS + humanInterval('10 seconds'))
             })
           })
           .then((files) => {
