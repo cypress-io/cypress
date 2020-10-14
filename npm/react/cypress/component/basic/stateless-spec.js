@@ -2,7 +2,7 @@
 /// <reference types="../../lib" />
 import HelloWorld from './stateless.jsx'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 /* eslint-env mocha */
 describe('Stateless component', () => {
@@ -10,6 +10,7 @@ describe('Stateless component', () => {
     // pass spy and save it under an alias
     // so we can easily get it later with cy.get('@greeting')
     const spy = cy.spy().as('greeting')
+
     mount(<HelloWorld name="Test Aficionado" click={spy} />)
   })
 

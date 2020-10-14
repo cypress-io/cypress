@@ -3,7 +3,7 @@ import React from 'react'
 import { VictoryLabel, VictoryAxis, VictoryLine } from 'victory'
 
 export class CustomTheme extends React.Component {
-  render() {
+  render () {
     const styles = this.getStyles()
     const dataSetOne = this.getDataSetOne()
     const dataSetTwo = this.getDataSetTwo()
@@ -38,15 +38,16 @@ export class CustomTheme extends React.Component {
             standalone={false}
             style={styles.axisYears}
             tickValues={tickValues}
-            tickFormat={x => {
+            tickFormat={(x) => {
               if (x.getFullYear() === 2000) {
                 return x.getFullYear()
               }
+
               if (x.getFullYear() % 5 === 0) {
                 return x
-                  .getFullYear()
-                  .toString()
-                  .slice(2)
+                .getFullYear()
+                .toString()
+                .slice(2)
               }
             }}
           />
@@ -121,7 +122,7 @@ export class CustomTheme extends React.Component {
     )
   }
 
-  getDataSetOne() {
+  getDataSetOne () {
     return [
       { x: new Date(2000, 1, 1), y: 12 },
       { x: new Date(2000, 6, 1), y: 10 },
@@ -142,7 +143,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getDataSetTwo() {
+  getDataSetTwo () {
     return [
       { x: new Date(2000, 1, 1), y: 5 },
       { x: new Date(2003, 1, 1), y: 6 },
@@ -158,7 +159,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getTickValues() {
+  getTickValues () {
     return [
       new Date(1999, 1, 1),
       new Date(2000, 1, 1),
@@ -181,7 +182,7 @@ export class CustomTheme extends React.Component {
     ]
   }
 
-  getStyles() {
+  getStyles () {
     const BLUE_COLOR = '#00a3de'
     const RED_COLOR = '#7c270b'
 
@@ -191,7 +192,7 @@ export class CustomTheme extends React.Component {
         boxSizing: 'border-box',
         display: 'inline',
         padding: 0,
-        fontFamily: "'Fira Sans', sans-serif",
+        fontFamily: '\'Fira Sans\', sans-serif',
       },
       title: {
         textAnchor: 'start',
@@ -214,6 +215,7 @@ export class CustomTheme extends React.Component {
         ticks: {
           size: ({ tick }) => {
             const tickSize = tick.getFullYear() % 5 === 0 ? 10 : 5
+
             return tickSize
           },
           stroke: 'black',

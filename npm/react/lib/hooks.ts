@@ -10,7 +10,7 @@ Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
   if (isComponentSpec()) {
     throw new Error(
       'cy.visit from a component spec is not allowed\n' +
-        'see https://github.com/bahmutov/cypress-react-unit-test/issues/286',
+        'see https://github.com/bahmutov/@cypress/react/issues/286',
     )
   } else {
     // allow regular visit to proceed
@@ -19,20 +19,23 @@ Cypress.Commands.overwrite('visit', (visit, ...args: any[]) => {
 })
 
 /** Initialize an empty document with root element */
-function renderTestingPlatform() {
+function renderTestingPlatform () {
   // Let's mount components under a new div with this id
   const rootId = 'cypress-root'
 
   const document = cy.state('document') as Document
+
   if (document.getElementById(rootId)) {
     return
   }
 
   const rootNode = document.createElement('div')
+
   rootNode.setAttribute('id', rootId)
   document.getElementsByTagName('body')[0].prepend(rootNode)
 
-  const selector = '#' + rootId
+  const selector = `#${rootId}`
+
   return cy.get(selector, { log: false })
 }
 
@@ -41,7 +44,7 @@ function renderTestingPlatform() {
  * that Cypress can spy on and stub
  * @see https://www.cypress.io/blog/2020/06/29/experimental-fetch-polyfill/
  */
-function polyfillFetchIfNeeded() {
+function polyfillFetchIfNeeded () {
   // @ts-ignore
   if (Cypress.config('experimentalFetchPolyfill')) {
     if (!cy.state('fetchPolyfilled')) {
@@ -69,21 +72,24 @@ before(() => {
  * left from any previous test
  *
  */
-function cleanupStyles() {
+function cleanupStyles () {
   if (!isComponentSpec()) {
     return
   }
+
   const document = cy.state('document') as Document
 
   const styles = document.body.querySelectorAll('style')
-  styles.forEach(styleElement => {
+
+  styles.forEach((styleElement) => {
     if (styleElement.parentElement) {
       styleElement.parentElement.removeChild(styleElement)
     }
   })
 
   const links = document.body.querySelectorAll('link[rel=stylesheet]')
-  links.forEach(link => {
+
+  links.forEach((link) => {
     if (link.parentElement) {
       link.parentElement.removeChild(link)
     }

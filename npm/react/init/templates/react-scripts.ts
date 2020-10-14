@@ -7,19 +7,21 @@ import { MIN_SUPPORTED_VERSION } from '../versions'
 export const ReactScriptsTemplate: Template = {
   recommendedComponentFolder: 'src',
   message: 'It looks like you are using create-react-app.',
-  getExampleUrl: ({ componentFolder }) =>
-    componentFolder === 'src'
-      ? 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/react-scripts'
-      : 'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/react-scripts-folder',
-  getPluginsCode: () =>
-    [
-      "const preprocessor = require('cypress-react-unit-test/plugins/react-scripts')",
+  getExampleUrl: ({ componentFolder }) => {
+    return componentFolder === 'src'
+      ? 'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts'
+      : 'https://github.com/bahmutov/@cypress/react/tree/main/examples/react-scripts-folder'
+  },
+  getPluginsCode: () => {
+    return [
+      'const preprocessor = require(\'@cypress/react/plugins/react-scripts\')',
       'module.exports = (on, config) => {',
       '   preprocessor(on, config)',
       '  // IMPORTANT to return the config object',
       '  return config',
       '}',
-    ].join('\n'),
+    ].join('\n')
+  },
   test: () => {
     // TODO also determine ejected create react app
     const packageJsonIterator = createFindPackageJsonIterator(process.cwd())

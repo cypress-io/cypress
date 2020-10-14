@@ -16,7 +16,7 @@ npm install
 npm run build
 ```
 
-2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+2. Run `npm install` in this folder to symlink the `@cypress/react` dependency.
 
 ```bash
 # in this folder
@@ -33,7 +33,7 @@ npm test
 
 ## Notes
 
-Here's an example PR with code a change where we forgot to update the styles with additional classes: [#210](https://github.com/bahmutov/cypress-react-unit-test/pull/210)
+Here's an example PR with code a change where we forgot to update the styles with additional classes: [#210](https://github.com/bahmutov/@cypress/react/pull/210)
 
 Notice that CircleCI passes the test, because functionally it worked, but the Happo CI check shows a failure:
 

@@ -5,11 +5,11 @@ import highlight from 'cli-highlight'
 import { createFindPackageJsonIterator } from '../findPackageJson'
 import { Template } from '../Template'
 
-export function extractRollupConfigPathFromScript(script: string) {
+export function extractRollupConfigPathFromScript (script: string) {
   if (script.includes('rollup ')) {
-    const cliArgs = script.split(' ').map(part => part.trim())
+    const cliArgs = script.split(' ').map((part) => part.trim())
     const configArgIndex = cliArgs.findIndex(
-      arg => arg === '--config' || arg === '-c',
+      (arg) => arg === '--config' || arg === '-c',
     )
 
     return configArgIndex === -1 ? null : cliArgs[configArgIndex + 1]
@@ -21,11 +21,12 @@ export function extractRollupConfigPathFromScript(script: string) {
 export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
   message:
     'It looks like you have custom `rollup.config.js`. We can use it to bundle the components for testing.',
-  getExampleUrl: () =>
-    'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/rollup',
+  getExampleUrl: () => {
+    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/rollup'
+  },
   recommendedComponentFolder: 'src',
   getPluginsCode: (payload, { cypressProjectRoot }) => {
-    const includeWarnComment = !Boolean(payload)
+    const includeWarnComment = !payload
     const rollupConfigPath = payload
       ? path.relative(cypressProjectRoot, payload.rollupConfigPath)
       : 'rollup.config.js'
@@ -67,7 +68,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
         `  {`,
         `    plugins: [`,
         `      nodeResolve(),`,
-        `      // process cypress-react-unit-test-code`,
+        `      // process @cypress/react-code`,
         `      commonjs(),`,
         `      // required for react sources`,
         `      replace({ 'process.env.NODE_ENV': JSON.stringify('development') }),`,
@@ -80,8 +81,9 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
 
     console.log(`\n${code}\n`)
   },
-  test: root => {
+  test: (root) => {
     const rollupConfigPath = findUp.sync('rollup.config.js', { cwd: root })
+
     if (rollupConfigPath) {
       return {
         success: true,
@@ -90,6 +92,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
     }
 
     const packageJsonIterator = createFindPackageJsonIterator(root)
+
     return packageJsonIterator.map(({ scripts }, packageJsonPath) => {
       if (!scripts) {
         return { continue: true }

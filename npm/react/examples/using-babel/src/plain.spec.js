@@ -4,8 +4,8 @@ import * as calc from './calc'
 describe('plain', () => {
   it('mocks es6 import', () => {
     cy.stub(calc, 'getRandomNumber')
-      .as('lucky')
-      .returns(777)
+    .as('lucky')
+    .returns(777)
 
     cy.then(() => {
       return calc.getRandomNumber()

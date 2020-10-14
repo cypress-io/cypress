@@ -3,10 +3,10 @@
   "description": "Component testing for TypeScript projects using Babel config",
   "private": true,
   "scripts": {
-    "test": "../../node_modules/.bin/cypress-expect run --min-passing 1",
-    "cy:open": "../../node_modules/.bin/cypress open"
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@cypress/react": "file:../.."
   }
 }

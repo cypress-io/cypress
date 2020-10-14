@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import App from './App.tsx'
 
 describe('Sass and TS App', () => {

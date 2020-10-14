@@ -9,19 +9,21 @@ export const BabelTemplate: Template = {
   )} This is not a replacement for bundling tool. We will use ${chalk.red(
     'webpack',
   )} to bundle the components for testing.`,
-  getExampleUrl: () =>
-    'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/babel',
+  getExampleUrl: () => {
+    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/babel'
+  },
   recommendedComponentFolder: 'cypress/component',
-  getPluginsCode: () =>
-    [
-      "const preprocessor = require('cypress-react-unit-test/plugins/babel')",
+  getPluginsCode: () => {
+    return [
+      'const preprocessor = require(\'@cypress/react/plugins/babel\')',
       'module.exports = (on, config) => {',
       '  preprocessor(on, config)',
       '  // IMPORTANT to return the config object',
       '  return config',
       '}',
-    ].join('\n'),
-  test: cwd => {
+    ].join('\n')
+  },
+  test: (cwd) => {
     const babelConfig = findUp.sync(
       ['babel.config.js', 'babel.config.json', '.babelrc', '.babelrc.json'],
       { type: 'file', cwd },
@@ -33,8 +35,11 @@ export const BabelTemplate: Template = {
 
     // babel config can also be declared in package.json with `babel` key https://babeljs.io/docs/en/configuration#packagejson
     const packageJsonIterator = createFindPackageJsonIterator(cwd)
-    return packageJsonIterator.map(({ babel }) => ({
-      continue: !Boolean(babel),
-    }))
+
+    return packageJsonIterator.map(({ babel }) => {
+      return {
+        continue: !babel,
+      }
+    })
   },
 }

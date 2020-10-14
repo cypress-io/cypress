@@ -1,4 +1,4 @@
-# example: visual-testing [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/bahmutov/cypress-react-unit-test)
+# example: visual-testing [![This project is using Percy.io for visual regression testing.](https://percy.io/static/images/percy-badge.svg)](https://percy.io/bahmutov/@cypress/react)
 
 > Uses [@percy/cypress](https://github.com/percy/percy-cypress) to run visual tests for a demo of Material UI date pickers from https://material-ui.com/components/pickers/. Every pull request shows the visual diff (if any) and allows us to confirm that styles and layouts have not changed.
 
@@ -12,7 +12,7 @@ npm install
 npm run build
 ```
 
-2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+2. Run `npm install` in this folder to symlink the `@cypress/react` dependency.
 
 ```bash
 # in this folder

@@ -2,7 +2,7 @@
 // compare to App.test.js
 import React from 'react'
 import App from './App'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import * as calc from './calc'
 import * as Child from './Child'
 
@@ -27,8 +27,9 @@ describe('App', () => {
   it('can mock the child component', () => {
     // Child component we want to stub is the default export
     cy.stub(Child, 'default')
-      .as('child')
-      .returns(<div className="mock-child">Mock Child component</div>)
+    .as('child')
+    .returns(<div className="mock-child">Mock Child component</div>)
+
     mount(<App />)
     cy.contains('.mock-child', 'Mock Child')
   })

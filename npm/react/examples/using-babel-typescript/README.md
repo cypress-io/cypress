@@ -14,7 +14,7 @@ npm install
 npm run build
 ```
 
-2. Run `npm install` in this folder to symlink the `cypress-react-unit-test` dependency.
+2. Run `npm install` in this folder to symlink the `@cypress/react` dependency.
 
 ```bash
 # in this folder
@@ -36,7 +36,7 @@ See spec files [src/\*.spec.js](src). The specs are bundled using [babel.config.
 ```js
 // let's bundle spec files and the components they include using
 // the same bundling settings as the project by loading .babelrc
-const preprocessor = require('cypress-react-unit-test/plugins/babelrc')
+const preprocessor = require('@cypress/react/plugins/babelrc')
 module.exports = (on, config) => {
   preprocessor(on, config)
   // IMPORTANT to return the config object

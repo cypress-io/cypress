@@ -1,10 +1,12 @@
 import React from 'react'
 const calc = require('./calc')
 
-const Child = () => (
-  <div className="child">
+const Child = () => {
+  return (
+    <div className="child">
     Real child component, random {calc.getRandomNumber()}
-  </div>
-)
+    </div>
+  )
+}
 
 export default Child

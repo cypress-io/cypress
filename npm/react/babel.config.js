@@ -21,7 +21,7 @@ module.exports = {
       'module-resolver',
       {
         alias: {
-          'cypress-react-unit-test': './dist',
+          '@cypress/react': './dist',
         },
       },
     ],

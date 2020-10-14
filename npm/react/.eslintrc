@@ -1,0 +1,52 @@
+{
+  "plugins": [
+    "cypress",
+    "@cypress/dev"
+  ],
+  "extends": [
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests",
+    "plugin:@cypress/dev/react"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "env": {
+    "cypress/globals": true
+  },
+  "globals": {
+    "jest": "readonly"
+  },
+  "rules": {
+    "no-console": "off",
+    "mocha/no-global-tests": "off",
+    "@typescript-eslint/no-unused-vars": "off",
+    "react/jsx-filename-extension": [
+      "warn",
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".tsx"
+        ]
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "lib/*"
+      ],
+      "rules": {
+        "no-console": 1
+      }
+    },
+    {
+      "files": [
+        "**/*.json"
+      ],
+      "rules": {
+        "quotes": "off",
+        "comma-dangle": "off"
+      }
+    }
+  ]
+}

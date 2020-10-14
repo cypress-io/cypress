@@ -2,7 +2,7 @@
 // the code taken from https://codepen.io/gaearon/pen/LyyXgK
 import React from 'react'
 
-export function calculateWinner(squares) {
+export function calculateWinner (squares) {
   const lines = [
     [0, 1, 2],
     [3, 4, 5],
@@ -13,16 +13,19 @@ export function calculateWinner(squares) {
     [0, 4, 8],
     [2, 4, 6],
   ]
+
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i]
+
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a]
     }
   }
+
   return null
 }
 
-function Square(props) {
+function Square (props) {
   return (
     <button className="square" onClick={props.onClick}>
       {props.value}
@@ -31,7 +34,7 @@ function Square(props) {
 }
 
 export class Board extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       squares: Array(9).fill(null),
@@ -39,19 +42,21 @@ export class Board extends React.Component {
     }
   }
 
-  handleClick(i) {
+  handleClick (i) {
     const squares = this.state.squares.slice()
+
     if (calculateWinner(squares) || squares[i]) {
       return
     }
+
     squares[i] = this.state.xIsNext ? 'X' : 'O'
     this.setState({
-      squares: squares,
+      squares,
       xIsNext: !this.state.xIsNext,
     })
   }
 
-  renderSquare(i) {
+  renderSquare (i) {
     return (
       <Square
         value={this.state.squares[i]}
@@ -60,13 +65,14 @@ export class Board extends React.Component {
     )
   }
 
-  render() {
+  render () {
     const winner = calculateWinner(this.state.squares)
     let status
+
     if (winner) {
-      status = 'Winner: ' + winner
+      status = `Winner: ${winner}`
     } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O')
+      status = `Next player: ${this.state.xIsNext ? 'X' : 'O'}`
     }
 
     return (
@@ -93,7 +99,7 @@ export class Board extends React.Component {
 }
 
 export class Game extends React.Component {
-  render() {
+  render () {
     return (
       <div className="game">
         <div className="game-board">

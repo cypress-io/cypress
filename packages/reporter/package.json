@@ -22,7 +22,6 @@
     "@packages/web-config": "*",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
-    "@types/chai-enzyme": "0.6.7",
     "chai": "3.5.0",
     "chai-enzyme": "1.0.0-beta.1",
     "classnames": "2.2.6",

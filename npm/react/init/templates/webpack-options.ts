@@ -4,12 +4,13 @@ import { Template } from '../Template'
 export const WebpackOptions: Template = {
   // this should never show ideally
   message: `Unable to detect where webpack options are.`,
-  getExampleUrl: () =>
-    'https://github.com/bahmutov/cypress-react-unit-test/tree/main/examples/webpack-options',
+  getExampleUrl: () => {
+    return 'https://github.com/bahmutov/@cypress/react/tree/main/examples/webpack-options'
+  },
   test: () => ({ success: false }),
   recommendedComponentFolder: 'src',
-  getPluginsCode: () =>
-    [
+  getPluginsCode: () => {
+    return [
       `const webpackPreprocessor = require('@cypress/webpack-preprocessor')`,
       ``,
       `// Cypress Webpack preprocessor includes Babel env preset,`,
@@ -44,7 +45,8 @@ export const WebpackOptions: Template = {
       `  // if adding code coverage, important to return updated config`,
       `  return config`,
       `}`,
-    ].join('\n'),
+    ].join('\n')
+  },
   printHelper: () => {
     console.log(
       `${chalk.inverse('Important:')} this configuration is using ${chalk.blue(

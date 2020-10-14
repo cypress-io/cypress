@@ -2,12 +2,12 @@
 import React from 'react'
 import Map from './map'
 
-export default function Contact(props) {
+export default function Contact (props) {
   return (
     <div>
       <address>
         Contact {props.name} via{' '}
-        <a data-testid="email" href={'mailto:' + props.email}>
+        <a data-testid="email" href={`mailto:${props.email}`}>
           email
         </a>{' '}
         or on their{' '}

@@ -1,4 +1,4 @@
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 // select example from
 // https://material-ui.com/components/selects/
 import React from 'react'
@@ -9,27 +9,30 @@ import FormHelperText from '@material-ui/core/FormHelperText'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
 
-const useStyles = makeStyles(theme => ({
-  formControl: {
-    margin: theme.spacing(1),
-    minWidth: 120,
-  },
-  selectEmpty: {
-    marginTop: theme.spacing(2),
-  },
-}))
+const useStyles = makeStyles((theme) => {
+  return {
+    formControl: {
+      margin: theme.spacing(1),
+      minWidth: 120,
+    },
+    selectEmpty: {
+      marginTop: theme.spacing(2),
+    },
+  }
+})
 
-export default function SimpleSelect() {
+export default function SimpleSelect () {
   const classes = useStyles()
   const [age, setAge] = React.useState('')
 
   const inputLabel = React.useRef(null)
   const [labelWidth, setLabelWidth] = React.useState(0)
+
   React.useEffect(() => {
     setLabelWidth(inputLabel.current.offsetWidth)
   }, [])
 
-  const handleChange = event => {
+  const handleChange = (event) => {
     setAge(event.target.value)
   }
 
@@ -126,7 +129,7 @@ export default function SimpleSelect() {
           id="demo-simple-select-error"
           value={age}
           onChange={handleChange}
-          renderValue={value => `⚠️  - ${value}`}
+          renderValue={(value) => `⚠️  - ${value}`}
         >
           <MenuItem value="">
             <em>None</em>
@@ -255,10 +258,12 @@ it('renders selects', () => {
       'https://fonts.googleapis.com/icon?family=Material+Icons',
     ],
   })
+
   cy.get('#demo-simple-select').click()
   cy.contains('[role=option]', 'Twenty')
-    .should('be.visible')
-    .click()
+  .should('be.visible')
+  .click()
+
   // check that other select has changed
   cy.contains('#demo-simple-select-outlined', 'Twenty').should('be.visible')
 })

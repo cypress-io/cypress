@@ -26,7 +26,7 @@ That's why it can be a really nice solution to make your own `mount` or even `cr
 // test-utils.ts
 import * as React from 'react'
 import { createTheme } from './somewhere'
-import { mount, MountOptions } from 'cypress-react-unit-test'
+import { mount, MountOptions } from '@cypress/react'
 
 export type CustomMountOptions = MountOptions & {
   mode: 'dark' | 'light'
@@ -51,7 +51,7 @@ export const createMount = (
 }
 ```
 
-2. In your test file import the `createMount` hook instead of cypress-react-unit-test's `mount`
+2. In your test file import the `createMount` hook instead of @cypress/react's `mount`
 
 ```tsx
 // Button.spec.tsx

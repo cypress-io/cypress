@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import App from './App.jsx'
 
 describe('App', () => {
@@ -11,6 +11,7 @@ describe('App', () => {
 
   it('uses cart from localStorage', () => {
     const items = ['apples 🍎', 'oranges 🍊', 'grapes 🍇']
+
     localStorage.setItem('cart', JSON.stringify(items))
     mount(<App />)
     cy.get('.item').should('have.length', 3)
@@ -27,7 +28,7 @@ describe('App', () => {
     // is updated after a delay, the assertion waits for it
     // https://on.cypress.io/retry-ability
     cy.wrap(localStorage)
-      .invoke('getItem', 'cart')
-      .should('equal', JSON.stringify(['kiwi 🥝', 'juice 🧃']))
+    .invoke('getItem', 'cart')
+    .should('equal', JSON.stringify(['kiwi 🥝', 'juice 🧃']))
   })
 })
