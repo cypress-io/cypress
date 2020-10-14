@@ -91,6 +91,13 @@ function isNumberMatcher (obj): obj is NumberMatcher {
   return Array.isArray(obj) ? _.every(obj, _.isNumber) : _.isNumber(obj)
 }
 
+function isMethod (arg: string) {
+  const httpRequestMethods = ['get', 'head', 'post', 'put', 'delete', 'connect', 'options', 'trace', 'patch']
+  const webDAVMethods = ['copy', 'lock', 'mkcol', 'move', 'propfind', 'proppatch', 'unlock']
+
+  return httpRequestMethods.includes(arg.toLowerCase()) || webDAVMethods.includes(arg.toLowerCase())
+}
+
 function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isValid: boolean, message?: string } {
   const err = (message) => {
     return { isValid: false, message }
@@ -246,7 +253,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && isStringMatcher(handler) && arg2) {
+      if (_.isString(matcher) && isMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
         const url = handler as StringMatcher
 
