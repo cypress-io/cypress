@@ -748,7 +748,6 @@ class Server {
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
     // bail if this is our own namespaced socket.io request
-    let host; let remoteOrigin
 
     if (req.url.startsWith(socketIoRoute)) {
       if (!this._socketAllowed.isRequestAllowed(req)) {
@@ -760,13 +759,12 @@ class Server {
       return
     }
 
-    if ((host = req.headers.host) && this._remoteProps && (remoteOrigin = this._remoteOrigin)) {
-      // get the port from @_remoteProps
-      // get the protocol from remoteOrigin
-      // get the hostname from host header
-      const { port } = this._remoteProps
-      const { protocol } = url.parse(remoteOrigin)
-      const { hostname } = url.parse(`http://${host}`)
+    const host = req.headers.host
+
+    if (host) {
+      // get the protocol using req.connection.encrypted
+      // get the port & hostname from host header
+      const { port, hostname, protocol } = url.parse(`${req.connection.encrypted ? 'https' : 'http'}://${host}`)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })

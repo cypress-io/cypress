@@ -9,10 +9,10 @@ shouldCloseUrlWithCode = (win, url, code) ->
       if evt.code is code
         resolve()
       else
-        reject("websocket connection should have been closed with code #{code} for url: #{url} but was instead closed with code: #{evt.code}")
+        reject(new Error "websocket connection should have been closed with code #{code} for url: #{url} but was instead closed with code: #{evt.code}")
 
     ws.onopen = (evt) ->
-      reject("websocket connection should not have opened for url: #{url}")
+      reject(new Error "websocket connection should not have opened for url: #{url}")
 
 describe "websockets", ->
   it "does not crash", ->
@@ -35,7 +35,7 @@ describe "websockets", ->
         ws = new win.WebSocket("ws://localhost:3039/")
         ws.onmessage = (evt) ->
           resolve(evt.data)
-        ws.onerror = reject
+        ws.onerror = -> reject(new Error 'connection failed, check console for error')
         ws.onopen = ->
           ws.send("foo")
     .should("eq", "foobar")

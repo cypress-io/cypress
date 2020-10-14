@@ -1,5 +1,5 @@
 const _ = require('lodash')
-const { agent, allowDestroy, connect } = require('@packages/network')
+const { allowDestroy, connect } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
 const {
   getProxyForUrl,
@@ -85,6 +85,7 @@ class Server {
   }
 
   _onUpgrade (fn, req, browserSocket, head) {
+    debug('upgrade', req.url)
     if (fn) {
       return fn.call(this, req, browserSocket, head)
     }
@@ -128,7 +129,6 @@ class Server {
   }
 
   _makeConnection (browserSocket, head, port, hostname) {
-    let upstreamProxy
     const onSocket = (err, upstreamSocket) => {
       debug('received upstreamSocket callback for request %o', { port, hostname, err })
 
@@ -158,26 +158,6 @@ class Server {
 
     if (!port) {
       port = '443'
-    }
-
-    upstreamProxy = this._getProxyForUrl(`https://${hostname}:${port}`)
-
-    if (upstreamProxy) {
-      // todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
-      debug('making proxied connection %o', {
-        host: `${hostname}:${port}`,
-        proxy: upstreamProxy,
-      })
-
-      return agent.httpsAgent.createUpstreamProxyConnection({
-        proxy: upstreamProxy,
-        href: `https://${hostname}:${port}`,
-        uri: {
-          port,
-          hostname,
-        },
-        shouldRetry: true,
-      }, onSocket)
     }
 
     return connect.createRetryingSocket({ port, host: hostname }, onSocket)

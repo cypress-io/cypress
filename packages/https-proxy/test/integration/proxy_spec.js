@@ -89,23 +89,6 @@ describe('Proxy', () => {
     })
   })
 
-  // TODO
-  it('retries 5 times', function () {
-    this.sandbox.spy(net, 'connect')
-
-    return request({
-      strictSSL: false,
-      url: 'https://localhost:12344',
-      proxy: 'http://localhost:3333',
-    })
-    .then(() => {
-      throw new Error('should not reach')
-    }).catch(() => {
-      expect(net.connect).to.have.callCount(5)
-    })
-  })
-
-  // TODO
   it('closes outgoing connections when client disconnects', function () {
     this.sandbox.spy(net, 'connect')
 
@@ -119,12 +102,8 @@ describe('Proxy', () => {
       // ensure client has disconnected
       expect(res.socket.destroyed).to.be.true
       // ensure the outgoing socket created for this connection was destroyed
-      const socket = net.connect.getCalls()
-      .find((call) => {
-        return (call.args[0].port === '8444') && (call.args[0].host === 'localhost')
-      }).returnValue
-
-      expect(socket.destroyed).to.be.true
+      expect(net.connect).calledOnce
+      expect(net.connect.getCalls()[0].returnValue.destroyed).to.be.true
     })
   })
 
@@ -290,10 +269,8 @@ describe('Proxy', () => {
         expect(res.socket.destroyed).to.be.true
 
         // ensure the outgoing socket created for this connection was destroyed
-        const socket = net.connect.getCalls()
-        .find((call) => {
-          return (call.args[0].port === 9001) && (call.args[0].host === 'localhost')
-        }).returnValue
+        expect(net.connect).calledOnce
+        const socket = net.connect.getCalls()[0].returnValue
 
         return new Promise((resolve) => {
           return socket.on('close', () => {

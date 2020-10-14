@@ -293,14 +293,13 @@ class HttpsAgent extends https.Agent {
       if (originalErr) {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
 
-        err[0] = originalErr
-        err.upstreamProxyConnect = true
+        err.originalErr = originalErr
 
         return cb(err, undefined)
       }
 
       const onClose = () => {
-        triggerRetry(new Error('The upstream proxy closed the socket after connecting but before sending a response.'))
+        triggerRetry(new Error('ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.'))
       }
 
       const onError = (err: Error) => {
