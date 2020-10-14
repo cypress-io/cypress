@@ -46,7 +46,7 @@ it('should select null after timing out (fast)', {
   })
 
   cy.log('5 seconds passed')
-  cy.tick(1000).then(() => {
+  cy.tick(6000).then(() => {
     // NOW
     expect(onSelect).to.have.been.calledWith(null)
   })

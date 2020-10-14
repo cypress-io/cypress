@@ -11,7 +11,7 @@ describe('Mocking Axios', () => {
     cy.get('li').should('have.length', 3)
   })
 
-  // https://github.com/bahmutov/cypress-react-unit-test/issues/338
+  // https://github.com/bahmutov/@cypress/react/issues/338
   it('mocks axios.get', () => {
     cy.stub(Axios, 'get')
     .resolves({

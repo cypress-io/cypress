@@ -3,7 +3,7 @@
 import React from 'react'
 import { mount } from '@cypress/react'
 
-// https://github.com/bahmutov/cypress-react-unit-test/issues/184
+// https://github.com/bahmutov/@cypress/react/issues/184
 Cypress.Commands.add('myMount', () => {
   return mount(<div>My mount</div>)
 })
