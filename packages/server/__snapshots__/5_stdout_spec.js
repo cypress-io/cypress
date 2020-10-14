@@ -137,7 +137,7 @@ exports['e2e stdout displays errors from exiting early due to bundle errors 1'] 
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
+  cypress/integration/stdout_exit_early_failing_spec.js
 
 The error was:
 
