@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import axios from 'axios'
 
-export default function Fetcher({ url }) {
+export default function Fetcher ({ url }) {
   const [greeting, setGreeting] = useState('')
   const [buttonClicked, setButtonClicked] = useState(false)
 
   const fetchGreeting = () => {
-    axios.get(url).then(response => {
+    axios.get(url).then((response) => {
       const data = response.data
       const { greeting } = data
+
       setGreeting(greeting)
       setButtonClicked(true)
     })

@@ -7,11 +7,13 @@ const AddTodo = ({ onAdd }) => {
   })
 
   // handle events
-  const handleEnter = e => e.key === 'Enter' && handleAdd()
+  const handleEnter = (e) => e.key === 'Enter' && handleAdd()
 
   const handleAdd = () => {
     if (!state.input) return // ignore empty input
+
     const todo = { title: state.input, completed: false } // make todo
+
     onAdd(todo) // add it
     state.input = '' // clear input
   }

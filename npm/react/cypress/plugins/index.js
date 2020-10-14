@@ -1,4 +1,3 @@
-const path = require('path')
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const babelConfig = require('../../babel.config.js')
 
@@ -6,9 +5,6 @@ const babelConfig = require('../../babel.config.js')
 const webpackOptions = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
-    alias: {
-      react: path.resolve('./node_modules/react'),
-    },
   },
   mode: 'development',
   devtool: false,
@@ -68,5 +64,6 @@ const options = {
 
 module.exports = (on, config) => {
   on('file:preprocessor', webpackPreprocessor(options))
+
   return config
 }

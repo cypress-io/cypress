@@ -11,7 +11,7 @@ export default Footer = () => ...
 // Footer.spec.js
 import React from 'react'
 import Footer from './Footer.jsx'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 it('is stylish', () => {
   mount(<Footer />)
@@ -31,7 +31,7 @@ export default Footer = () => ...
 
 // Footer.spec.js
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import Footer from './Footer.jsx'
 import './main.css' // <== style import
 
@@ -57,7 +57,7 @@ The global style might assume a certain DOM structure. You can "mimic" this stru
 
 ```js
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Footer } from './footer'
 // import app's style so the footer looks real
 import 'todomvc-app-css/index.css'

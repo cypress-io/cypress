@@ -3,10 +3,11 @@
   "description": "Visual diffing for component testing using Applittols",
   "private": true,
   "scripts": {
-    "test": "../../node_modules/.bin/cypress run",
-    "cy:open": "../../node_modules/.bin/cypress open"
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@applitools/eyes-cypress": "3.14.0",
+    "@cypress/react": "file:../../dist"
   }
 }

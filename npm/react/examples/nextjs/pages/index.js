@@ -1,7 +1,8 @@
+import * as React from 'react'
 import { Search } from '../components/Search'
 import HelloWorld from '../components/HelloWorld.mdx'
 
-function IndexPage({ asyncProp }) {
+function IndexPage ({ asyncProp }) {
   return (
     <main>
       <h1>Welcome to Next.js</h1>
@@ -18,7 +19,7 @@ function IndexPage({ asyncProp }) {
   )
 }
 
-IndexPage.getInitialProps = async ctx => {
+IndexPage.getInitialProps = async (ctx) => {
   return { asyncProp: true }
 }
 

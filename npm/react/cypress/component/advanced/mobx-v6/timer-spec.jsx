@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Timer } from './Timer'
 import { TimerView } from './timer-view'
 
@@ -7,11 +7,13 @@ describe('MobX v6', { viewportWidth: 200, viewportHeight: 100 }, () => {
   context('TimerView', () => {
     it('increments every second', () => {
       const myTimer = new Timer()
+
       mount(<TimerView timer={myTimer} />)
       cy.contains('Seconds passed: 0').then(() => {
         // we can increment the timer from outside
         myTimer.increaseTimer()
       })
+
       cy.contains('Seconds passed: 1')
 
       // by wrapping the timer and giving it an alias
@@ -30,8 +32,8 @@ describe('MobX v6', { viewportWidth: 200, viewportHeight: 100 }, () => {
       // we can also ask the timer for the current value
       cy.get('@timer').invoke('increaseTimer')
       cy.get('@timer')
-        .its('secondsPassed')
-        .should('equal', 5)
+      .its('secondsPassed')
+      .should('equal', 5)
     })
   })
 })

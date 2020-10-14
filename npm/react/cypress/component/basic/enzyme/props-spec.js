@@ -1,9 +1,9 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 class Foo extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -11,16 +11,17 @@ class Foo extends React.Component {
     }
   }
 
-  componentDidMount() {
+  componentDidMount () {
     console.log('componentDidMount called')
   }
 
-  componentDidUpdate() {
+  componentDidUpdate () {
     console.log('componentDidUpdate called')
   }
 
-  render() {
+  render () {
     const { id, foo } = this.props
+
     return (
       <div className={id}>
         {foo} count {this.state.count}
@@ -39,19 +40,20 @@ describe('Enzyme', () => {
       cy.contains('initial').should('be.visible')
 
       cy.get('@Foo')
-        .its('props')
-        .then(props => {
-          console.log('current props', props)
-          expect(props).to.deep.equal({
-            id: 'foo',
-            foo: 'initial',
-          })
-          // you can get current props of the component
-          // but not change them - they are read-only
-          expect(() => {
-            props.foo = 'change 1'
-          }).to.throw()
+      .its('props')
+      .then((props) => {
+        console.log('current props', props)
+        expect(props).to.deep.equal({
+          id: 'foo',
+          foo: 'initial',
         })
+
+        // you can get current props of the component
+        // but not change them - they are read-only
+        expect(() => {
+          props.foo = 'change 1'
+        }).to.throw()
+      })
     })
 
     it('mounts component with new props', () => {
@@ -64,10 +66,12 @@ describe('Enzyme', () => {
 
     it('mounts cloned component', () => {
       const cmp = <Foo id="foo" foo="initial" />
+
       mount(cmp)
       cy.contains('initial').should('be.visible')
 
       const cloned = Cypress._.cloneDeep(cmp)
+
       // change a property, leaving the rest unchanged
       cloned.props.foo = 'second'
       mount(cloned)

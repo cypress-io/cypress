@@ -8,8 +8,8 @@ const Todos = () => {
     todos: [],
   })
 
-  const removeTodo = i => state.todos.splice(i, 1)
-  const addTodo = todo => state.todos.push(todo)
+  const removeTodo = (i) => state.todos.splice(i, 1)
+  const addTodo = (todo) => state.todos.push(todo)
 
   return (
     <div className="container">
@@ -18,9 +18,11 @@ const Todos = () => {
       {!state.todos.length && <div className="no-todos"> No Todos added </div>}
 
       <div className="todos">
-        {state.todos.map((todo, i) => (
-          <Todo todo={todo} key={i} onRemove={() => removeTodo(i)} />
-        ))}
+        {state.todos.map((todo, i) => {
+          return (
+            <Todo todo={todo} key={i} onRemove={() => removeTodo(i)} />
+          )
+        })}
       </div>
     </div>
   )

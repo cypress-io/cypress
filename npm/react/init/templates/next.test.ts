@@ -1,14 +1,26 @@
-import { mockFs, clearMockedFs } from '../test/mockFs'
+import sinon, { SinonSpy } from 'sinon'
+import { expect, use } from 'chai'
+import sinonChai from 'sinon-chai'
+import mockFs from 'mock-fs'
 import { NextTemplate } from './next'
 
-jest.spyOn(global.console, 'warn')
+use(sinonChai)
 
-describe.only('next.js install template', () => {
-  beforeEach(clearMockedFs)
+describe('next.js install template', () => {
+  let warnSpy: SinonSpy | null = null
+
+  beforeEach(() => {
+    warnSpy = sinon.spy(global.console, 'warn')
+  })
+
+  afterEach(() => {
+    mockFs.restore()
+    warnSpy?.restore()
+  })
 
   it('finds the closest package.json and checks that next is declared as dependency', () => {
     mockFs({
-      'package.json': JSON.stringify({
+      '/package.json': JSON.stringify({
         dependencies: {
           next: '^9.2.3',
         },
@@ -19,7 +31,8 @@ describe.only('next.js install template', () => {
     })
 
     const { success } = NextTemplate.test('/')
-    expect(success).toBe(true)
+
+    expect(success).to.equal(true)
   })
 
   it('works if next is declared in the devDependencies as well', () => {
@@ -35,7 +48,8 @@ describe.only('next.js install template', () => {
     })
 
     const { success } = NextTemplate.test(process.cwd())
-    expect(success).toBe(true)
+
+    expect(success).to.equal(true)
   })
 
   it('warns and fails if version is not supported', () => {
@@ -52,7 +66,9 @@ describe.only('next.js install template', () => {
 
     const { success } = NextTemplate.test('i/am/in/some/deep/folder')
 
-    expect(success).toBe(false)
-    expect(global.console.warn).toBeCalled()
+    console.log(global.console.warn)
+    expect(success).to.equal(false)
+
+    expect(global.console.warn).to.be.called
   })
 })

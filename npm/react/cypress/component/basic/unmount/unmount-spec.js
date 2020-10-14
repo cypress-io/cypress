@@ -1,14 +1,14 @@
 /// <reference types="cypress" />
 import React, { Component } from 'react'
-import { mount, unmount } from 'cypress-react-unit-test'
+import { mount, unmount } from '@cypress/react'
 
 class Comp extends Component {
-  componentWillUnmount() {
+  componentWillUnmount () {
     // simply calls the prop
     this.props.onUnmount()
   }
 
-  render() {
+  render () {
     return <div>My component</div>
   }
 }

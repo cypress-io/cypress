@@ -1,14 +1,26 @@
-import { mockFs, clearMockedFs } from '../test/mockFs'
+import sinon, { SinonSpy } from 'sinon'
+import { expect, use } from 'chai'
+import sinonChai from 'sinon-chai'
+import mockFs from 'mock-fs'
 import { ReactScriptsTemplate } from './react-scripts'
 
-jest.spyOn(global.console, 'warn')
+use(sinonChai)
 
 describe('create-react-app install template', () => {
-  beforeEach(clearMockedFs)
+  let warnSpy: SinonSpy | null = null
+
+  beforeEach(() => {
+    warnSpy = sinon.spy(global.console, 'warn')
+  })
+
+  afterEach(() => {
+    mockFs.restore()
+    warnSpy?.restore()
+  })
 
   it('finds the closest package.json and checks that react-scripts is declared as dependency', () => {
     mockFs({
-      'package.json': JSON.stringify({
+      '/package.json': JSON.stringify({
         dependencies: {
           'react-scripts': '^3.2.3',
         },
@@ -16,7 +28,8 @@ describe('create-react-app install template', () => {
     })
 
     const { success } = ReactScriptsTemplate.test(process.cwd())
-    expect(success).toBe(true)
+
+    expect(success).to.equal(true)
   })
 
   it('works if react-scripts is declared in the devDependencies as well', () => {
@@ -29,7 +42,8 @@ describe('create-react-app install template', () => {
     })
 
     const { success } = ReactScriptsTemplate.test(process.cwd())
-    expect(success).toBe(true)
+
+    expect(success).to.equal(true)
   })
 
   it('warns and fails if version is not supported', () => {
@@ -43,7 +57,7 @@ describe('create-react-app install template', () => {
 
     const { success } = ReactScriptsTemplate.test(process.cwd())
 
-    expect(success).toBe(false)
-    expect(global.console.warn).toBeCalled()
+    expect(success).to.equal(false)
+    expect(global.console.warn).to.be.called
   })
 })

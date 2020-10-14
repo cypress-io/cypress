@@ -1,18 +1,18 @@
 import React, { Component } from 'react'
 
 export default class Card extends Component {
-  componentDidMount() {
+  componentDidMount () {
     this._timeoutID = setTimeout(() => {
       this.props.onSelect(null)
     }, 5000)
   }
 
-  componentWillUnmount() {
+  componentWillUnmount () {
     clearTimeout(this._timeoutID)
   }
 
-  render() {
-    return [1, 2, 3, 4].map(choice => (
+  render () {
+    return [1, 2, 3, 4].map((choice) => (
       <button
         key={choice}
         data-testid={choice}

@@ -1,13 +1,14 @@
 /**
  * Insert links to external style resources.
  */
-function insertStylesheets(
+function insertStylesheets (
   stylesheets: string[],
   document: Document,
   el: HTMLElement,
 ) {
-  stylesheets.forEach(href => {
+  stylesheets.forEach((href) => {
     const link = document.createElement('link')
+
     link.type = 'text/css'
     link.rel = 'stylesheet'
     link.href = href
@@ -18,22 +19,24 @@ function insertStylesheets(
 /**
  * Inserts a single stylesheet element
  */
-function insertStyles(styles: string[], document: Document, el: HTMLElement) {
-  styles.forEach(style => {
+function insertStyles (styles: string[], document: Document, el: HTMLElement) {
+  styles.forEach((style) => {
     const styleElement = document.createElement('style')
+
     styleElement.appendChild(document.createTextNode(style))
     document.body.insertBefore(styleElement, el)
   })
 }
 
-function insertSingleCssFile(
+function insertSingleCssFile (
   cssFilename: string,
   document: Document,
   el: HTMLElement,
   log?: boolean,
 ) {
-  return cy.readFile(cssFilename, { log }).then(css => {
+  return cy.readFile(cssFilename, { log }).then((css) => {
     const style = document.createElement('style')
+
     style.appendChild(document.createTextNode(css))
     document.body.insertBefore(style, el)
   })
@@ -43,15 +46,15 @@ function insertSingleCssFile(
  * Reads the given CSS file from local file system
  * and adds the loaded style text as an element.
  */
-function insertLocalCssFiles(
+function insertLocalCssFiles (
   cssFilenames: string[],
   document: Document,
   el: HTMLElement,
   log?: boolean,
 ) {
-  return Cypress.Promise.mapSeries(cssFilenames, cssFilename =>
-    insertSingleCssFile(cssFilename, document, el, log),
-  )
+  return Cypress.Promise.mapSeries(cssFilenames, (cssFilename) => {
+    return insertSingleCssFile(cssFilename, document, el, log)
+  })
 }
 
 /**
@@ -75,6 +78,7 @@ export const injectStylesBeforeElement = (
   if (typeof options.stylesheets === 'string') {
     options.stylesheets = [options.stylesheets]
   }
+
   if (options.stylesheets) {
     stylesheets = stylesheets.concat(options.stylesheets)
   }
@@ -83,11 +87,13 @@ export const injectStylesBeforeElement = (
 
   // insert any styles as <style>...</style> elements
   let styles: string[] = []
+
   if (typeof options.style === 'string') {
     styles.push(options.style)
   } else if (Array.isArray(options.style)) {
     styles = styles.concat(options.style)
   }
+
   if (typeof options.styles === 'string') {
     styles.push(options.styles)
   } else if (Array.isArray(options.styles)) {

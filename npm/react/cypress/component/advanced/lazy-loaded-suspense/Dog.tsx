@@ -4,7 +4,7 @@ import SamoyedImage from './samoyed.jpg'
 
 interface DogProps {}
 
-export const Dog: React.FC<DogProps> = ({}) => {
+export const Dog: React.FC<DogProps> = () => {
   return (
     <div>
       <h1> Your dog is Samoyed: </h1>

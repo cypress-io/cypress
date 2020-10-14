@@ -2,8 +2,8 @@ const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
 const { groupBy } = require('lodash')
-const debug = require('debug')('cypress-build:semantic-release')
-const info = require('debug')('cypress-build:semantic-release:info')
+const debug = require('debug')('cypress:semantic-release')
+const info = require('debug')('cypress:semantic-release:info')
 
 // updates a public package's package.json
 // replaces any local dependencies that have a * version

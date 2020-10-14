@@ -1,10 +1,11 @@
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 // test retries from
 // https://github.com/cypress-io/cypress/pull/3968
 // you can skip the tests if there is no retries feature
 const describeOrSkip = Cypress.getTestRetries ? describe : describe.skip
+
 describeOrSkip('Test', () => {
   const Hello = () => {
     // this is how you can get the current retry number
@@ -15,6 +16,7 @@ describeOrSkip('Test', () => {
     const n = cy.state('test').currentRetry
       ? cy.state('test').currentRetry()
       : 0
+
     return <div>retry {n}</div>
   }
 

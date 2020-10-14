@@ -1,8 +1,9 @@
-import { mockFs, clearMockedFs } from '../test/mockFs'
+import { expect } from 'chai'
+import mockFs from 'mock-fs'
 import { RollupTemplate } from './rollup'
 
 describe('rollup-file install template', () => {
-  afterEach(clearMockedFs)
+  afterEach(mockFs.restore)
 
   it('suggests the right code', () => {
     expect(
@@ -12,23 +13,24 @@ describe('rollup-file install template', () => {
         },
         { cypressProjectRoot: '/' },
       ),
-    ).toContain("configFile: 'configs/rollup.config.js'")
+    ).to.contain('configFile: \'configs/rollup.config.js\'')
   })
 
   it('resolves rollup.config.js', () => {
     mockFs({
-      'rollup.config.js': 'module.exports = { }',
+      '/rollup.config.js': 'module.exports = { }',
     })
 
     const { success, payload } = RollupTemplate.test(process.cwd())
-    expect(success).toBe(true)
-    expect(payload?.rollupConfigPath).toBe('/rollup.config.js')
+
+    expect(success).to.equal(true)
+    expect(payload?.rollupConfigPath).to.equal('/rollup.config.js')
   })
 
   it('finds the closest package.json and tries to fetch rollup config path from scrips', () => {
     mockFs({
-      'configs/rollup.js': 'module.exports = { }',
-      'package.json': JSON.stringify({
+      '/configs/rollup.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({
         scripts: {
           build: 'rollup --config configs/rollup.js',
         },
@@ -37,15 +39,15 @@ describe('rollup-file install template', () => {
 
     const { success, payload } = RollupTemplate.test(process.cwd())
 
-    expect(success).toBe(true)
-    expect(payload?.rollupConfigPath).toBe('/configs/rollup.js')
+    expect(success).to.equal(true)
+    expect(payload?.rollupConfigPath).to.equal('/configs/rollup.js')
   })
 
   it('looks for package.json in the upper folder', () => {
     mockFs({
-      'i/am/in/some/deep/folder/withFile': 'test',
-      'somewhere/configs/rollup.js': 'module.exports = { }',
-      'package.json': JSON.stringify({
+      '/i/am/in/some/deep/folder/withFile': 'test',
+      '/somewhere/configs/rollup.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({
         scripts: {
           build: 'rollup --config somewhere/configs/rollup.js',
         },
@@ -54,18 +56,19 @@ describe('rollup-file install template', () => {
 
     const { success, payload } = RollupTemplate.test('i/am/in/some/deep/folder')
 
-    expect(success).toBe(true)
-    expect(payload?.rollupConfigPath).toBe('/somewhere/configs/rollup.js')
+    expect(success).to.equal(true)
+    expect(payload?.rollupConfigPath).to.equal('/somewhere/configs/rollup.js')
   })
 
   it('returns success:false if cannot find rollup config', () => {
     mockFs({
-      'a.js': '1',
-      'b.js': '2',
+      '/b.js': '2',
+      '/a.js': '1',
     })
 
     const { success, payload } = RollupTemplate.test('/')
-    expect(success).toBe(false)
-    expect(payload).toBe(undefined)
+
+    expect(success).to.equal(false)
+    expect(payload).to.equal(undefined)
   })
 })

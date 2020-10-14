@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Users } from './3-users-api.jsx'
 import * as Axios from './axios-api'
 
@@ -13,15 +13,15 @@ describe('Mocking wrapped Axios', () => {
   it('mocks get', () => {
     console.log('Axios', Axios)
     cy.stub(Axios, 'get')
-      .resolves({
-        data: [
-          {
-            id: 101,
-            name: 'Test User',
-          },
-        ],
-      })
-      .as('get')
+    .resolves({
+      data: [
+        {
+          id: 101,
+          name: 'Test User',
+        },
+      ],
+    })
+    .as('get')
 
     mount(<Users />)
     // only the test user should be shown

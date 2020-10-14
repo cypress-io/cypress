@@ -1,59 +1,38 @@
 {
-  "name": "cypress-react-unit-test",
+  "name": "@cypress/react",
   "version": "0.0.0-development",
   "description": "Unit test React components using Cypress",
   "main": "dist",
-  "no-module-for-now": "lib",
-  "types": "lib",
   "scripts": {
-    "test": "cypress run",
-    "test:unit": "jest --runInBand",
-    "percy:test": "percy exec -- cypress run",
-    "build": "npm run transpile && npm run transpile:bin && chmod +x bin/init.js",
-    "cy:open": "cypress open",
-    "transpile": "tsc",
-    "transpile:bin": "tsc -p tsconfig.bin.json",
-    "watch": "tsc -w",
-    "pretest": "npm run lint && npm run transpile",
-    "lint": "standard --verbose --fix *.js src cypress/integration",
-    "semantic-release": "semantic-release",
-    "format": "prettier --write '*.js', 'src/*.jsx' 'cypress/**/*.js' 'cypress/**/*.jsx' 'lib/*.ts'",
+    "build": "rimraf dist && yarn transpile && yarn transpile:bin && yarn build:dist-package",
+    "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
-    "stop-only": "stop-only --folder cypress",
-    "warn-only": "stop-only --warn --folder cypress"
+    "cy:open": "node ../../scripts/cypress open",
+    "percy:test": "percy exec -- node ../../scripts/cypress run",
+    "semantic-release": "semantic-release",
+    "pretest": "yarn transpile",
+    "test": "node ../../scripts/cypress run",
+    "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json init/**/*.test.ts",
+    "transpile": "tsc",
+    "transpile:bin": "tsc -p tsconfig.bin.json && chmod +x bin/init.js",
+    "watch": "tsc -w"
   },
-  "bin": {
-    "init": "./bin/init.js"
+  "dependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.10.4",
+    "@cypress/code-coverage": "3.8.1",
+    "@cypress/webpack-preprocessor": "*",
+    "babel-plugin-istanbul": "6.0.0",
+    "chalk": "4.1.0",
+    "cli-highlight": "2.1.4",
+    "debug": "4.1.1",
+    "find-up": "5.0.0",
+    "find-webpack": "2.1.0",
+    "inquirer": "7.3.3",
+    "mime-types": "2.1.26",
+    "semver": "7.3.2",
+    "unfetch": "4.1.0"
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged && npm run warn-only",
-      "pre-push": "npm run stop-only"
-    }
-  },
-  "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "git add"
-    ]
-  },
-  "files": [
-    "dist",
-    "lib",
-    "support",
-    "plugins"
-  ],
-  "keywords": [
-    "react",
-    "cypress",
-    "cypress-io",
-    "test",
-    "testing"
-  ],
-  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "license": "MIT",
   "devDependencies": {
-    "@applitools/eyes-cypress": "3.14.0",
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",
@@ -69,23 +48,13 @@
     "@material-ui/icons": "4.5.1",
     "@material-ui/lab": "4.0.0-alpha.39",
     "@material-ui/pickers": "3.2.10",
-    "@mdx-js/loader": "^1.6.16",
-    "@next/mdx": "^9.5.3",
     "@percy/cypress": "2.3.2",
-    "@rollup/plugin-babel": "5.2.1",
-    "@rollup/plugin-commonjs": "15.1.0",
-    "@rollup/plugin-node-resolve": "9.0.0",
-    "@rollup/plugin-replace": "2.3.3",
-    "@testing-library/cypress": "5.3.1",
+    "@testing-library/cypress": "7.0.1",
     "@types/chalk": "2.2.0",
     "@types/inquirer": "7.3.1",
-    "@types/jest": "26.0.14",
     "@types/mock-fs": "4.10.0",
     "@types/node": "9.6.49",
-    "@types/react": "16.9.16",
-    "@types/react-dom": "16.9.4",
     "@types/semver": "7.3.4",
-    "@zeit/next-sass": "^1.0.1",
     "arg": "4.1.3",
     "autoprefixer": "9.7.6",
     "axios": "0.18.1",
@@ -95,36 +64,27 @@
     "check-code-coverage": "1.9.2",
     "common-tags": "1.8.0",
     "css-loader": "2.1.1",
-    "cypress": "5.3.0",
-    "cypress-axe": "0.8.1",
+    "cypress": "*",
     "cypress-expect": "2.0.0",
     "cypress-image-snapshot": "3.1.1",
     "cypress-plugin-snapshots": "1.4.4",
     "cypress-react-selector": "2.0.4",
     "date-fns": "2.13.0",
     "framer-motion": "2.6.13",
-    "happo-cypress": "1.9.1",
-    "happo.io": "5.6.1",
-    "husky": "3.1.0",
     "i18next": "19.7.0",
-    "jest": "26.4.2",
-    "lint-staged": "9.5.0",
     "lodash": "4.17.15",
     "markdown-link-check": "3.8.1",
-    "memfs": "3.2.0",
     "mobx": "6.0.0",
     "mobx-react-lite": "3.0.0",
+    "mocha": "7.1.1",
     "mock-fs": "4.13.0",
-    "next": "^9.5.3",
-    "node-sass": "4.14.1",
-    "prettier": "1.19.1",
     "pretty": "2.0.0",
     "prop-types": "15.7.2",
     "radioactive-state": "1.3.4",
-    "react": "^16.13.1",
+    "react": "16.8.6",
     "react-bootstrap": "1.0.1",
     "react-calendar-heatmap": "1.8.1",
-    "react-dom": "^16.13.1",
+    "react-dom": "16.8.6",
     "react-google-maps": "9.4.5",
     "react-i18next": "11.7.2",
     "react-loading-skeleton": "2.0.1",
@@ -135,47 +95,18 @@
     "rollup": "2.28.1",
     "rollup-plugin-istanbul": "2.0.1",
     "semantic-release": "17.1.2",
-    "standard": "14.3.3",
-    "stop-only": "3.1.0",
     "style-loader": "0.23.1",
     "styled-components": "5.0.0",
     "svg-url-loader": "3.0.3",
-    "tailwindcss": "1.4.6",
-    "ts-jest": "26.4.0",
     "typescript": "4.0.3",
     "victory": "34.3.6",
     "webpack": "4.44.1",
     "webpack-cli": "3.3.9"
   },
-  "standard": {
-    "globals": [
-      "Cypress",
-      "cy",
-      "expect"
-    ]
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/bahmutov/cypress-react-unit-test.git"
-  },
-  "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "5.4.6",
-    "babel-plugin-istanbul": "6.0.0",
-    "chalk": "4.1.0",
-    "cli-highlight": "2.1.4",
-    "debug": "4.1.1",
-    "find-up": "5.0.0",
-    "find-webpack": "2.1.0",
-    "inquirer": "7.3.3",
-    "semver": "7.3.2",
-    "mime-types": "2.1.26",
-    "unfetch": "4.1.0"
-  },
   "peerDependencies": {
     "@babel/core": "^=7.x",
     "@babel/preset-env": "^=7.x",
+    "@types/react": "^16.9.16",
     "babel-loader": "^=8.x",
     "cypress": "*",
     "next": "^=8.x",
@@ -183,6 +114,31 @@
     "react-dom": "^=16.x",
     "webpack": "^=3.x"
   },
+  "files": [
+    "dist",
+    "lib",
+    "support",
+    "plugins"
+  ],
+  "bin": {
+    "init": "./bin/init.js"
+  },
+  "types": "lib",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cypress-io/cypress.git"
+  },
+  "homepage": "https://on.cypress.io/component-testing",
+  "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=JessicaSachs&labels=experiment%3A+component+testing,npm%3A%20%40cypress%2Freact&template=component-testing.md&title=",
+  "keywords": [
+    "react",
+    "cypress",
+    "cypress-io",
+    "test",
+    "testing"
+  ],
   "peerDependenciesMeta": {
     "@babel/core": {
       "optional": true
@@ -196,17 +152,18 @@
     "next": {
       "optional": true
     },
+    "types/react": {
+      "optional": true
+    },
     "webpack": {
       "optional": true
     }
   },
-  "release": {
-    "branches": [
-      "main",
-      {
-        "name": "feature/cypress-mount-mode",
-        "prerelease": "cypress-mount-mode"
-      }
+  "standard": {
+    "globals": [
+      "Cypress",
+      "cy",
+      "expect"
     ]
   }
 }

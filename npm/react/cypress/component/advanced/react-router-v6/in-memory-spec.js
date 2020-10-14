@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { App } from './app.jsx'
 import { MemoryRouter } from 'react-router-dom'
 

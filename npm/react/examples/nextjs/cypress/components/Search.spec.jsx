@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
-// import * as React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import * as React from 'react'
+import { mount } from '@cypress/react'
 import { Search } from '../../components/Search'
 
 describe('<Search /> NextJS component', () => {

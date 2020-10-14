@@ -1,6 +1,6 @@
 import './counter.css'
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Counter } from './Counter.jsx'
 
 describe('reactive-state Counter', () => {
@@ -10,10 +10,12 @@ describe('reactive-state Counter', () => {
         <Counter />
       </div>,
     )
+
     cy.contains('.count', '0')
-      .click()
-      .click()
-      .click()
+    .click()
+    .click()
+    .click()
+
     cy.contains('.count', '3')
   })
 })

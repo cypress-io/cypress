@@ -27,9 +27,10 @@ type FindPackageJsonResult =
  *
  * @returns {Object} Value, filename and indication if the iteration is done.
  */
-export function createFindPackageJsonIterator(rootPath = process.cwd()) {
-  function scanForPackageJson(cwd: string): FindPackageJsonResult {
+export function createFindPackageJsonIterator (rootPath = process.cwd()) {
+  function scanForPackageJson (cwd: string): FindPackageJsonResult {
     const packageJsonPath = findUp.sync('package.json', { cwd })
+
     if (!packageJsonPath) {
       return {
         packageData: undefined,
@@ -56,10 +57,11 @@ export function createFindPackageJsonIterator(rootPath = process.cwd()) {
       cb: (
         data: PackageJsonLike,
         packageJsonPath: string,
-      ) => { continue: boolean; payload?: TPayload },
+      ) => { continue: boolean, payload?: TPayload },
     ) => {
       let stepPathToScan = rootPath
 
+      // eslint-disable-next-line
       while (true) {
         const result = scanForPackageJson(stepPathToScan)
 
@@ -70,12 +72,14 @@ export function createFindPackageJsonIterator(rootPath = process.cwd()) {
 
         if (result.packageData) {
           const cbResult = cb(result.packageData, result.filename)
+
           if (!cbResult.continue) {
             return { success: true, payload: cbResult.payload }
           }
         }
 
         const nextStepPathToScan = path.resolve(stepPathToScan, '..')
+
         if (nextStepPathToScan === stepPathToScan) {
           // we are at the root. Give up
           return { success: false }

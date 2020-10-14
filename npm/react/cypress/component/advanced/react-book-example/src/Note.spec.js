@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import React from 'react'
 import Select from './Note'
 
@@ -17,9 +17,9 @@ describe('Note', () => {
     // there is a built-in delay in loading the data
     // but we don't worry about it - we just check if the text eventually appears
     cy.get('[data-testid=item]')
-      .should('have.length', 2)
-      .and('be.visible')
-      .first()
-      .should('have.text', 'test')
+    .should('have.length', 2)
+    .and('be.visible')
+    .first()
+    .should('have.text', 'test')
   })
 })
