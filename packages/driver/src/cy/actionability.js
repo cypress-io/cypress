@@ -76,6 +76,11 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
       // use the initial coords fromElViewport
       return ensureDescendents(fromElViewport)
     } catch (err) {
+      // if scrolling to element is off we re-throw as there is nothing to do
+      if (options.scrollToElement === false) {
+        throw err
+      }
+
       // if we're being covered by a fixed position element then
       // we're going to attempt to continously scroll the element
       // from underneath this fixed position element until we can't
@@ -312,13 +317,14 @@ const verify = function (cy, $el, options, callbacks) {
           cy.ensureNotDisabled($el, _log)
         }
 
-        // scroll the element into view
-        $el.get(0).scrollIntoView()
+        if (options.scrollToElement !== false) {
+          // scroll the element into view
+          $el.get(0).scrollIntoView()
+          debug('scrollIntoView:', $el[0])
 
-        debug('scrollIntoView:', $el[0])
-
-        if (onScroll) {
-          onScroll($el, 'element')
+          if (onScroll) {
+            onScroll($el, 'element')
+          }
         }
 
         // ensure its visible

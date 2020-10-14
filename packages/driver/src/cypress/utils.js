@@ -18,6 +18,7 @@ const defaultOptions = {
   multiple: false,
   waitForAnimations: true,
   animationDistanceThreshold: 5,
+  scrollToElement: true,
 }
 
 const USER_FRIENDLY_TYPE_DETECTORS = _.map([

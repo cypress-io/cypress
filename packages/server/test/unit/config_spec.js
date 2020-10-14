@@ -649,6 +649,20 @@ describe('lib/config', () => {
         })
       })
 
+      context('scrollToElement', () => {
+        it('passes if a boolean', function () {
+          this.setup({ scrollToElement: false })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a boolean', function () {
+          this.setup({ scrollToElement: 42 })
+
+          return this.expectValidationFails('be a boolean')
+        })
+      })
+
       context('watchForFileChanges', () => {
         it('passes if a boolean', function () {
           this.setup({ watchForFileChanges: false })
@@ -947,6 +961,10 @@ describe('lib/config', () => {
       return this.defaults('waitForAnimations', true)
     })
 
+    it('scrollToElement=true', function () {
+      return this.defaults('scrollToElement', true)
+    })
+
     it('animationDistanceThreshold=5', function () {
       return this.defaults('animationDistanceThreshold', 5)
     })
@@ -1202,6 +1220,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollToElement: { value: true, from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })
@@ -1307,6 +1326,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollToElement: { value: true, from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })

@@ -377,6 +377,42 @@ describe('src/cy/commands/actions/type - #type', () => {
         expect(args[2]).to.eq(animationDistanceThreshold)
       })
     })
+
+    it('does not scroll when scrollToElement is false in options', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo', { scrollToElement: false })
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('calls scrollIntoView by default', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.called
+      })
+    })
   })
 
   describe('input types where no extra formatting required', () => {

@@ -29,6 +29,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       parseSpecialCharSequences: true,
       waitForAnimations: config('waitForAnimations'),
       animationDistanceThreshold: config('animationDistanceThreshold'),
+      scrollToElement: config('scrollToElement'),
     })
 
     if (options.log) {
@@ -471,6 +472,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
     options = _.defaults({}, userOptions, {
       log: true,
       force: false,
+      waitForAnimations: config('waitForAnimations'),
+      animationDistanceThreshold: config('animationDistanceThreshold'),
+      scrollToElement: config('scrollToElement'),
     })
 
     // blow up if any member of the subject

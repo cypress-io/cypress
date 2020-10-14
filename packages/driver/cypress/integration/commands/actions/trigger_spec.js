@@ -592,6 +592,42 @@ describe('src/cy/commands/actions/trigger', () => {
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
+
+      it('does not scroll when scrollToElement is false in options', () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover', { scrollToElement: false })
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('calls scrollIntoView by default', () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.called
+        })
+      })
     })
 
     describe('assertion verification', {

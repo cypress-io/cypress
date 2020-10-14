@@ -384,6 +384,10 @@
       "from": "default",
       "value": true
     },
+    "scrollToElement": {
+      "from": "default",
+      "value": true
+    },
     "watchForFileChanges": {
       "from": "default",
       "value": true
@@ -411,6 +415,7 @@
   "viewportHeight": 660,
   "viewportWidth": 1000,
   "waitForAnimations": true,
+  "scrollToElement": true,
   "watchForFileChanges": true,
   "xhrRoute": "/xhrs/",
   "xhrUrl": "__cypress/xhrs/"

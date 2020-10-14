@@ -1178,6 +1178,42 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('does not scroll when scrollToElement is false in options', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollToElement: false })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('calls scrollIntoView by default', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click()
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.called
+        })
+      })
+
       it('can force click on hidden elements', () => {
         cy.get('button:first').invoke('hide').click({ force: true })
       })
