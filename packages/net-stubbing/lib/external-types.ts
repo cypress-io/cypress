@@ -1,12 +1,19 @@
 /**
  * HTTP request/response types.
  */
+type HTTPRequestMethod = 'get' | 'head' | 'post' | 'put' | 'delete' | 'connect' | 'options' | 'trace' | 'patch' |
+  'GET' | 'HEAD' | 'POST' | 'PUT' | 'DELETE' | 'CONNECT' | 'OPTIONS' | 'TRACE' | 'PATCH'
+type WebDAVMethod = 'copy' | 'lock' | 'mkcol' | 'move' | 'propfind' | 'proppatch' | 'unlock' |
+  'COPY' | 'LOCK' | 'MKCOL' | 'MOVE' | 'PROPFIND' | 'PROPPATCH' | 'UNLOCK'
+
+type Method = HTTPRequestMethod | WebDAVMethod
+
 export namespace CyHttpMessages {
   interface BaseMessage {
     body?: any
     headers: { [key: string]: string }
     url: string
-    method?: string
+    method?: Method
     httpVersion?: string
   }
 
@@ -176,8 +183,8 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    */
   https?: boolean
   /**
-   * Match against the request's HTTP method.
-   * @default 'GET'
+   * Match against the request's HTTP or WebDAV method.
+   * @default '*'
    */
   method?: S
   /**
@@ -289,7 +296,7 @@ declare global {
        * @example
        *    cy.route2('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
-      route2(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
     }
   }
 }
