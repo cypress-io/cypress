@@ -87,6 +87,7 @@
     "@semantic-release/changelog": "5.0.1",
     "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
+    "@types/chai-enzyme": "0.6.7",
     "@types/classnames": "2.2.9",
     "@types/debug": "4.1.5",
     "@types/enzyme": "3.9.1",
@@ -97,10 +98,11 @@
     "@types/lodash": "4.14.149",
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "0.8.0",
+    "@types/mocha": "8.0.3",
     "@types/node": "12.12.50",
     "@types/prismjs": "1.16.0",
     "@types/ramda": "0.25.47",
-    "@types/react": "16.9.42",
+    "@types/react": "16.9.50",
     "@types/react-dom": "16.9.8",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
@@ -244,6 +246,8 @@
     ]
   },
   "resolutions": {
-    "**/jquery": "3.1.1"
+    "**/@types/react": "16.9.50",
+    "**/jquery": "3.1.1",
+    "**/pretty-format": "26.4.0"
   }
 }

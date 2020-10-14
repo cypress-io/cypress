@@ -1,0 +1,13 @@
+{
+  "name": "example-a11y",
+  "description": "Testing component accessibility",
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "devDependencies": {
+    "@cypress/react": "file:../../dist",
+    "cypress-axe": "0.8.1"
+  }
+}

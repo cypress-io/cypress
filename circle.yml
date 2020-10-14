@@ -383,8 +383,7 @@ commands:
     steps:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
-
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>" 
 jobs:
   ## code checkout and yarn installs
   build:
@@ -1061,6 +1060,66 @@ jobs:
       - run:
           name: Release
           command: yarn semantic-release @cypress/vue
+          
+  npm-react:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/react build
+      - run:
+          name: Run unit test
+          command: yarn workspace @cypress/react test:unit 
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/react test
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths: cypress/npm/react
+
+  npm-react-e2e-example:
+    <<: *defaults
+    description: Run react component testing end-to-end examples
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      path:
+        description: relative to npm/react path of example
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          name: Restore Cache
+          keys:
+            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: yarn install --frozen-lockfile
+          working_directory: npm/react/<<parameters.path>>
+      - save_cache:
+          name: Save Cache
+          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+          paths:
+            - ~/.cache
+      - run: 
+          name: Run e2e example tests
+          command: yarn test
+          working_directory: npm/react/<<parameters.path>>
+
+  npm-react-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/react
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1872,6 +1931,88 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-vue-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-vue
+
+    - npm-react:
+        requires:
+          - build
+
+    # Run tests for end-to-end react component tests examples
+    - npm-react-e2e-example:
+        name: React + Axe component testing
+        path: examples/a11y
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Next component testing
+        path: examples/nextjs
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + CRA component testing
+        path: examples/react-scripts
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + CRA folder component testing
+        path: examples/react-scripts-folder
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Rollup component testing
+        path: examples/rollup
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Sass + TS component testing
+        path: examples/sass-and-ts
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Snapshots component testing
+        path: examples/snapshots
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Tailwind component testing
+        path: examples/tailwind
+        requires:
+          - npm-react
+    # Requires Applitools key in the env
+    # - npm-react-e2e-example:
+    #     name: React + Applitools component testing
+    #     path: examples/visual-testing-with-applitools
+    #     requires:
+    #       - npm-react
+    - npm-react-e2e-example:
+        name: React + Percy component testing
+        path: examples/visual-testing-with-percy
+        requires:
+          - npm-react
+    # Requires Happo api key in the env vars
+    # - npm-react-e2e-example:
+    #     name: React + Happo component testing
+    #     path: examples/visual-testing-with-happo
+    #     requires:
+    #       - npm-react
+    - npm-react-e2e-example:
+        name: React + Webpack file component testing
+        path: examples/webpack-file
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Webpack options component testing
+        path: examples/webpack-options
+        requires:
+          - npm-react
+
+    - npm-react-release:
         filters:
           branches:
             only:

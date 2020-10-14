@@ -32,6 +32,10 @@ packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
+# from npm/react
+/npm/react/bin/*
+/npm/react/cypress/videos
+
 # Building app binary
 scripts/support
 package-lock.json
@@ -312,4 +316,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
