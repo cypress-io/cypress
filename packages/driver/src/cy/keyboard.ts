@@ -44,7 +44,7 @@ type SimulatedDefault = (
 
 interface KeyDetails {
   key: string
-  text: string
+  text: string | null
   code: string
   keyCode: number
   location: number
@@ -202,10 +202,10 @@ const getKeyDetails = (onKeyNotFound) => {
         key: '',
         keyCode: 0,
         code: '',
-        text: '',
+        text: null,
         location: 0,
         events: {},
-      })
+      }) as KeyDetails
 
       if (getTextLength(details.key) === 1) {
         details.text = details.key
@@ -608,8 +608,10 @@ export interface typeOptions {
 }
 
 export class Keyboard {
-  constructor (private state: State) {
-    null
+  private SUPPORTS_BEFOREINPUT_EVENT
+
+  constructor (private Cypress, private state: State) {
+    this.SUPPORTS_BEFOREINPUT_EVENT = Cypress.isBrowser({ family: 'chromium' })
   }
 
   type (opts: typeOptions) {
@@ -649,7 +651,7 @@ export class Keyboard {
         options.chars.split(charsBetweenCurlyBracesRe),
         (chars) => {
           if (charsBetweenCurlyBracesRe.test(chars)) {
-            // allow special chars and modifiers to be case-insensitive
+          // allow special chars and modifiers to be case-insensitive
             return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
           }
 
@@ -795,7 +797,7 @@ export class Keyboard {
     let charCode: number | undefined
     let keyCode: number | undefined
     let which: number | undefined
-    let data: string | undefined
+    let data: Nullable<string> | undefined
     let location: number | undefined = keyDetails.location || 0
     let key: string | undefined
     let code: string | undefined = keyDetails.code
@@ -815,7 +817,7 @@ export class Keyboard {
       }
 
       case 'keypress': {
-        const charCodeAt = keyDetails.text.charCodeAt(0)
+        const charCodeAt = text!.charCodeAt(0)
 
         charCode = charCodeAt
         keyCode = charCodeAt
@@ -831,21 +833,23 @@ export class Keyboard {
         keyCode = 0
         which = 0
         location = undefined
-        data = text
+        data = text === '\r' ? '↵' : text
         break
 
       case 'beforeinput':
         eventConstructor = 'InputEvent'
         addModifiers = false
-        data = text
+        data = text === '\r' ? null : text
+        code = undefined
         location = undefined
-        cancelable = false
-        inputType = this.getInputType(keyDetails.code)
+        cancelable = true
+        inputType = this.getInputType(keyDetails.code, $elements.isContentEditable(el))
         break
+
       case 'input':
         eventConstructor = 'InputEvent'
         addModifiers = false
-        data = text
+        data = text === '\r' ? null : text
         location = undefined
         cancelable = false
         break
@@ -933,51 +937,51 @@ export class Keyboard {
     return dispatched
   }
 
-  getInputType (code) {
+  getInputType (code, isContentEditable) {
+  // TODO: we DO set inputType for the following but DO NOT perform the correct default action
+  // e.g: we don't delete the entire word with `{ctrl}{del}` but send correct inputType:
+  // - deleteWordForward
+  // - deleteWordBackward
+  // - deleteHardLineForward
+  // - deleteHardLineBackward
+  //
+  // TODO: we do NOT set the following input types at all, since we don't yet support copy/paste actions
+  // e.g. we dont actually paste clipboard contents when typing '{ctrl}v':
+  // - insertFromPaste
+  // - deleteByCut
+  // - historyUndo
+  // - historyRedo
+  //
+  // @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/beforeinput_event
+
     const { shift, ctrl } = this.getActiveModifiers()
 
-    if (shift && ctrl && code === 'Delete') {
-      return 'deleteHardLineForward'
-    }
-
-    if (ctrl && code === 'Delete') {
-      return 'deleteWordForward'
-    }
-
-    if (code === 'Delete') {
-      return 'deleteContentForward'
-    }
-
-    if (shift && ctrl && code === 'Backspace') {
-      return 'deleteHardLineBackward'
-    }
-
-    if (ctrl && code === 'Backspace') {
-      return 'deleteWordBackward'
+    if (code === 'Enter') {
+      return isContentEditable ? 'insertParagraph' : 'insertLineBreak'
     }
 
     if (code === 'Backspace') {
+      if (shift && ctrl) {
+        return 'deleteHardLineBackward'
+      }
+
+      if (ctrl) {
+        return 'deleteWordBackward'
+      }
+
       return 'deleteContentBackward'
     }
 
-    if (code === 'Enter') {
-      return 'insertLineBreak'
-    }
+    if (code === 'Delete') {
+      if (shift && ctrl) {
+        return 'deleteHardLineForward'
+      }
 
-    if (ctrl && code === 'KeyV') {
-      return 'insertFromPaste'
-    }
+      if (ctrl) {
+        return 'deleteWordForward'
+      }
 
-    if (ctrl && code === 'KeyX') {
-      return 'deleteByCut'
-    }
-
-    if (ctrl && code === 'KeyZ') {
-      return 'historyUndo'
-    }
-
-    if (ctrl && code === 'KeyY') {
-      return 'historyRedo'
+      return 'deleteContentForward'
     }
 
     return 'insertText'
@@ -1048,13 +1052,9 @@ export class Keyboard {
     if (!key.text) {
       key.events.keypress = false
       key.events.textInput = false
-      key.events.beforeinput = false
       if (key.key !== 'Backspace' && key.key !== 'Delete') {
         key.events.input = false
-      }
-
-      if (key.key === 'Backspace' || key.key === 'Delete') {
-        key.events.beforeinput = true
+        key.events.beforeinput = false
       }
     }
 
@@ -1089,6 +1089,7 @@ export class Keyboard {
         this.fireSimulatedEvent(elToType, 'keypress', key, options)
       ) {
         if (
+          !this.SUPPORTS_BEFOREINPUT_EVENT ||
           shouldIgnoreEvent('beforeinput', key.events) ||
           this.fireSimulatedEvent(elToType, 'beforeinput', key, options)
         ) {
@@ -1190,7 +1191,7 @@ export class Keyboard {
           options.onValueChange(curText, el)
         }
       } else {
-        // el is contenteditable
+      // el is contenteditable
         simulatedDefault(el, key, options)
       }
 
@@ -1206,8 +1207,8 @@ export class Keyboard {
   }
 }
 
-const create = (state) => {
-  return new Keyboard(state)
+const create = (Cypress, state) => {
+  return new Keyboard(Cypress, state)
 }
 
 export {
