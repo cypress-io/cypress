@@ -1127,6 +1127,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/react"
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -1155,6 +1157,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/react"
       - restore_cache:
           name: Restore Cache
           keys:
@@ -1178,6 +1182,8 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt-package:
+          package: "@cypress/react"
       - run:
           name: Release
           command: yarn semantic-release @cypress/react
