@@ -184,9 +184,8 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      # the node indexes for the parallel job are 0-based, but our e2e test chunks are 1-based, so increment the CIRCLE_NODE_INDEX to select chunk to run
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX + 1 ))_*spec* --browser <<parameters.browser>>
+          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
