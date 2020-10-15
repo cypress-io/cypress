@@ -1,6 +1,6 @@
 import { Template } from '../Template'
 import { NextTemplate } from './next'
-import { WebpackTemplate } from './webpack-file'
+import { WebpackTemplate } from './reactWebpackFile'
 import { ReactScriptsTemplate } from './react-scripts'
 import { BabelTemplate } from './babel'
 import { WebpackOptions } from './webpack-options'

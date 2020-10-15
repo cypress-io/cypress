@@ -3,6 +3,7 @@ import inquirer from 'inquirer'
 import { Template } from './Template'
 import { scanFSForAvailableDependency } from '../findPackageJson'
 import { reactTemplates } from './react'
+import { vueTemplates } from './vue'
 
 async function guessOrAskForFramework (cwd: string) {
   // please sort this alphabetically
@@ -38,7 +39,7 @@ async function guessOrAskForFramework (cwd: string) {
 
 const allTemplates = {
   react: reactTemplates,
-  vue: { },
+  vue: vueTemplates,
 }
 
 export async function guessTemplate<T> (cwd: string) {
@@ -55,6 +56,7 @@ export async function guessTemplate<T> (cwd: string) {
         defaultTemplate: typedTemplate,
         defaultTemplateName: name,
         templatePayload: payload ?? null,
+        possibleTemplates: templates,
       }
     }
   }
@@ -63,5 +65,6 @@ export async function guessTemplate<T> (cwd: string) {
     templatePayload: null,
     defaultTemplate: null,
     defaultTemplateName: null,
+    possibleTemplates: templates,
   }
 }

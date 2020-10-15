@@ -6,16 +6,7 @@ import findUp from 'find-up'
 import inqueier from 'inquirer'
 import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
-import { reactTemplates } from './templates/react'
 import { guessTemplate } from './templates/guessTemplate'
-
-const templates = { ...reactTemplates }
-
-type TemplateGuess<T> = {
-  defaultTemplate: Template<T> | null
-  defaultTemplateName: string | null
-  templatePayload: T | null
-}
 
 async function getCypressConfig () {
   const cypressJsonPath = await findUp('cypress.json')
@@ -127,6 +118,7 @@ export async function main<T> () {
   const { config, cypressConfigPath } = await getCypressConfig()
   const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
   const {
+    possibleTemplates,
     defaultTemplate,
     defaultTemplateName,
     templatePayload,
@@ -142,7 +134,7 @@ export async function main<T> () {
     config.supportFile ?? './cypress/support/index.js',
   )
 
-  const templateChoices = Object.keys(templates).sort((key) => {
+  const templateChoices = Object.keys(possibleTemplates).sort((key) => {
     return key === defaultTemplateName ? -1 : 0
   })
 
@@ -173,13 +165,13 @@ export async function main<T> () {
           : true
       },
       message: 'Which folder would you like to use for your component tests?',
-      default: (answers: { chosenTemplateName: keyof typeof templates }) => {
-        return templates[answers.chosenTemplateName].recommendedComponentFolder
+      default: (answers: { chosenTemplateName: keyof typeof possibleTemplates }) => {
+        return possibleTemplates[answers.chosenTemplateName].recommendedComponentFolder
       },
     },
   ])
 
-  const chosenTemplate = templates[chosenTemplateName] as Template<T>
+  const chosenTemplate = possibleTemplates[chosenTemplateName] as Template<T>
 
   printCypressJsonHelp(cypressConfigPath, componentFolder)
   printSupportHelper(supportFilePath)
