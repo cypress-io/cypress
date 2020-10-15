@@ -1,4 +1,4 @@
-const preprocessor = require('cypress-react-unit-test/plugins/next')
+const preprocessor = require('@cypress/react/plugins/next')
 
 /**
  * @type {Cypress.PluginConfig}

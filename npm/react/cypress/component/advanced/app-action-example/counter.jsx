@@ -1,7 +1,7 @@
 import React from 'react'
 
 export class Counter extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
       count: 0,
@@ -15,6 +15,7 @@ export class Counter extends React.Component {
         'set window.counter to this component in window',
         window.location.pathname,
       )
+
       window.counter = this
     } else {
       console.log('running outside Cypress')
@@ -27,7 +28,7 @@ export class Counter extends React.Component {
     })
   }
 
-  render() {
+  render () {
     return <p onClick={this.click}>count: {this.state.count}</p>
   }
 }

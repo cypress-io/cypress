@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Accessibility', () => {
   before(() => {
@@ -10,7 +10,7 @@ describe('Accessibility', () => {
 
   // https://www.w3.org/WAI/standards-guidelines/aria/
   context('aria', () => {
-    // skip a failing test on purpose
+    // NOTE: skip a failing test on purpose
     it.skip('catches missing aria-* label', () => {
       mount(<input type="text" value="John Smith" name="name" />)
       cy.checkA11y('input', {
@@ -31,6 +31,7 @@ describe('Accessibility', () => {
           name="name"
         />,
       )
+
       cy.checkA11y('input', {
         runOnly: {
           type: 'tag',

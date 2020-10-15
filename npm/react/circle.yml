@@ -205,27 +205,27 @@ workflows:
                   npm run only-covered
                 working_directory: examples/webpack-options
 
-      - cypress/run:
-          name: Example Sass
-          requires:
-            - Install
-          # we need the same OS version as in install job
-          # because we will use native Sass dependency
-          executor: cypress/base-12
-          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
-          install-command: npm install  --no-bin-links
-          verify-command: echo 'Already verified'
-          no-workspace: true
-          working_directory: examples/sass-and-ts
-          command: npm test
-          store_artifacts: true
-          post-steps:
-            - run:
-                name: Check coverage 📈
-                command: |
-                  npm run check-coverage
-                  npm run only-covered
-                working_directory: examples/sass-and-ts
+#      - cypress/run:
+#          name: Example Sass
+#          requires:
+#            - Install
+#          # we need the same OS version as in install job
+#          # because we will use native Sass dependency
+#          executor: cypress/base-12
+#          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+#          install-command: npm install  --no-bin-links
+#          verify-command: echo 'Already verified'
+#          no-workspace: true
+#          working_directory: examples/sass-and-ts
+#          command: npm test
+#          store_artifacts: true
+#          post-steps:
+#            - run:
+#                name: Check coverage 📈
+#                command: |
+#                  npm run check-coverage
+#                  npm run only-covered
+#                working_directory: examples/sass-and-ts
 
       - cypress/run:
           name: Example Snapshots
@@ -346,7 +346,7 @@ workflows:
             - Example Babel
             - Example Component Folder
             - Example React Scripts
-            - Example Sass
+            # - Example Sass
             - Example Snapshots
             - Example Tailwind
             - Example Webpack file

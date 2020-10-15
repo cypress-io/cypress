@@ -26,7 +26,7 @@ type TemplateGuess<T> = {
   templatePayload: T | null
 }
 
-export function guessTemplateForUsedFramework<T>(): TemplateGuess<T> {
+export function guessTemplateForUsedFramework<T> (): TemplateGuess<T> {
   for (const [name, template] of Object.entries(templates)) {
     const typedTemplate = template as Template<T>
     const { success, payload } = typedTemplate.test(process.cwd())
@@ -47,7 +47,7 @@ export function guessTemplateForUsedFramework<T>(): TemplateGuess<T> {
   }
 }
 
-async function getCypressConfig() {
+async function getCypressConfig () {
   const cypressJsonPath = await findUp('cypress.json')
 
   // TODO figure out how to work with newly installed cypress
@@ -64,7 +64,7 @@ async function getCypressConfig() {
 
     console.log(
       `\nFind more information about installation at: ${chalk.bold.underline(
-        'https://github.com/bahmutov/cypress-react-unit-test#init',
+        'https://github.com/cypress-io/cypress/tree/develop/npm/react#init',
       )}`,
     )
 
@@ -79,7 +79,7 @@ async function getCypressConfig() {
   }
 }
 
-function printCypressJsonHelp(
+function printCypressJsonHelp (
   cypressJsonPath: string,
   componentFolder: string,
 ) {
@@ -103,10 +103,10 @@ function printCypressJsonHelp(
   console.log(`\n${highlightedCode}\n`)
 }
 
-function printSupportHelper(supportFilePath: string) {
+function printSupportHelper (supportFilePath: string) {
   const stepNumber = chalk.bold('2.')
-  const importCode = "import 'cypress-react-unit-test/support'"
-  const requireCode = "require('cypress-react-unit-test/support')"
+  const importCode = 'import \'@cypress/react/support\''
+  const requireCode = 'require(\'@cypress/react/support\')'
 
   if (fs.existsSync(supportFilePath)) {
     const fileContent = fs.readFileSync(supportFilePath, { encoding: 'utf-8' })
@@ -119,6 +119,7 @@ function printSupportHelper(supportFilePath: string) {
     console.log(
       `\n${stepNumber} This to the ${chalk.green(relativeSupportPath)}:`,
     )
+
     console.log(
       `\n${highlight(importCodeWithPreferredStyle, { language: 'js' })}\n`,
     )
@@ -131,7 +132,7 @@ function printSupportHelper(supportFilePath: string) {
   }
 }
 
-function printPluginHelper(pluginCode: string, pluginsFilePath: string) {
+function printPluginHelper (pluginCode: string, pluginsFilePath: string) {
   const highlightedPluginCode = highlight(pluginCode, { language: 'js' })
   const relativePluginsFilePath = path.relative(process.cwd(), pluginsFilePath)
 
@@ -143,13 +144,13 @@ function printPluginHelper(pluginCode: string, pluginsFilePath: string) {
   console.log(`\n${highlightedPluginCode}\n`)
 }
 
-export async function main<T>() {
+export async function main<T> () {
   const packageVersion =
     process.env.npm_package_version ?? require('../package.json').version
 
   console.log(
     `${chalk.green(
-      `cypress-react-unit-test@${packageVersion}`,
+      `@cypress/react@${packageVersion}`,
     )} init component testing wizard\n`,
   )
 
@@ -171,9 +172,9 @@ export async function main<T>() {
     config.supportFile ?? './cypress/support/index.js',
   )
 
-  const templateChoices = Object.keys(templates).sort(key =>
-    key === defaultTemplateName ? -1 : 0,
-  )
+  const templateChoices = Object.keys(templates).sort((key) => {
+    return key === defaultTemplateName ? -1 : 0
+  })
 
   const {
     chosenTemplateName,
@@ -186,23 +187,25 @@ export async function main<T>() {
       default: defaultTemplate ? 0 : undefined,
       message: defaultTemplate?.message
         ? `${defaultTemplate?.message}\n\n Press ${chalk.inverse(
-            ' Enter ',
-          )} to continue with ${chalk.green(
-            defaultTemplateName,
-          )} configuration or select another template from the list:`
+          ' Enter ',
+        )} to continue with ${chalk.green(
+          defaultTemplateName,
+        )} configuration or select another template from the list:`
         : 'We were not able to automatically determine which framework or bundling tool you are using. Please choose one from the list:',
     },
     {
       type: 'input',
       name: 'componentFolder',
-      filter: input => input.trim(),
-      validate: input =>
-        input === '' || !/^[a-zA-Z].*/.test(input)
+      filter: (input) => input.trim(),
+      validate: (input) => {
+        return input === '' || !/^[a-zA-Z].*/.test(input)
           ? `Directory "${input}" is invalid`
-          : true,
+          : true
+      },
       message: 'Which folder would you like to use for your component tests?',
-      default: (answers: { chosenTemplateName: keyof typeof templates }) =>
-        templates[answers.chosenTemplateName].recommendedComponentFolder,
+      default: (answers: { chosenTemplateName: keyof typeof templates }) => {
+        return templates[answers.chosenTemplateName].recommendedComponentFolder
+      },
     },
   ])
 
@@ -230,7 +233,7 @@ export async function main<T>() {
 
   console.log(
     `Docs for different recipes of bundling tools: ${chalk.bold.underline(
-      'https://github.com/bahmutov/cypress-react-unit-test/blob/main/docs/recipes.md',
+      'https://github.com/cypress-io/cypress/tree/develop/npm/react/docs/recipes.md',
     )}`,
   )
 
@@ -238,5 +241,5 @@ export async function main<T>() {
 }
 
 if (process.env.NODE_ENV !== 'test') {
-  main().catch(e => console.error(e))
+  main().catch((e) => console.error(e))
 }

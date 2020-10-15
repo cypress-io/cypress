@@ -14,6 +14,7 @@ const arrowStyle = {
 
 export default ({ children }) => {
   const childrenWithArrows = []
+
   React.Children.forEach(children, (child, index) => {
     if (index > 0) {
       childrenWithArrows.push(
@@ -22,7 +23,9 @@ export default ({ children }) => {
         </div>,
       )
     }
+
     childrenWithArrows.push(child)
   })
+
   return <div style={style}>{childrenWithArrows}</div>
 }

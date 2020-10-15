@@ -100,8 +100,10 @@ const descriptions = {
   browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
+  cachePrune: 'deletes all cached binaries except for the version currently in use',
   cacheList: 'list cached binary versions',
   cachePath: 'print the path to the binary cache',
+  cacheSize: 'Used with the list command to show the sizes of the cached folders',
   ciBuildId: 'the unique identifier for a run on your CI provider. typically a "BUILD_ID" env var. this value is automatically detected for most CI providers',
   config: 'sets configuration values. separate multiple values with a comma. overrides any value in cypress.json.',
   configFile: 'path to JSON file where configuration values are set. defaults to "cypress.json". pass "false" to disable.',
@@ -386,6 +388,8 @@ module.exports = {
     .option('list', text('cacheList'))
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
+    .option('prune', text('cachePrune'))
+    .option('--size', text('cacheSize'))
     .action(function (opts, args) {
       if (!args || !args.length) {
         this.outputHelp()
@@ -394,8 +398,14 @@ module.exports = {
 
       const [command] = args
 
-      if (!_.includes(['list', 'path', 'clear'], command)) {
+      if (!_.includes(['list', 'path', 'clear', 'prune'], command)) {
         unknownOption.call(this, `cache ${command}`, 'command')
+      }
+
+      if (command === 'list') {
+        cache.list(opts.size)
+
+        return
       }
 
       cache[command]()

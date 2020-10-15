@@ -306,4 +306,25 @@ describe('src/cypress/runner', () => {
       })
     })
   })
+
+  describe('event listeners', () => {
+    // https://github.com/cypress-io/cypress/issues/8701
+    it('does not hang when error thrown in test:after:run', () => {
+      runIsolatedCypress(() => {
+        Cypress.on('test:after:run', (test) => {
+          throw new Error('I am throwing')
+        })
+
+        describe('page', { defaultCommandTimeout: 400 }, () => {
+          it('t1', { retries: 2 }, () => {
+            assert(false)
+          })
+
+          it('t2', () => {
+            assert(true)
+          })
+        })
+      })
+    })
+  })
 })

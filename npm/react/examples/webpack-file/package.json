@@ -3,12 +3,12 @@
   "description": "Using default Webpack options to transpile simple tests",
   "private": true,
   "scripts": {
-    "test": "../../node_modules/.bin/cypress run",
-    "cy:open": "../../node_modules/.bin/cypress open",
-    "check-coverage": "../../node_modules/.bin/check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
-    "only-covered": "../../node_modules/.bin/only-covered Test.js calc.js ParentComponent.js ChildComponent.js"
+    "check-coverage": "check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "only-covered": "only-covered Test.js calc.js ParentComponent.js ChildComponent.js",
+    "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "cypress-react-unit-test": "file:../.."
+    "@cypress/react": "file:../../dist"
   }
 }

@@ -14,19 +14,20 @@ export default class Post extends Component {
     size: 'small',
   }
 
-  getStyle() {
+  getStyle () {
     const { size } = this.props
     const baseStyle = {
       padding: 8,
       width: '20em',
     }
+
     return Object.assign(baseStyle, {
       fontSize: size === 'small' ? 16 : 25,
       lineHeight: size === 'small' ? 'normal' : 2,
     })
   }
 
-  render() {
+  render () {
     return (
       <div style={this.getStyle()}>
         <h1>{this.props.title || <Skeleton />}</h1>

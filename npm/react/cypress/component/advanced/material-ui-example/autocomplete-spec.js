@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 // select example from
 // https://material-ui.com/components/autocomplete/
 
@@ -9,16 +9,18 @@ import TextField from '@material-ui/core/TextField'
 import Autocomplete from '@material-ui/lab/Autocomplete'
 import { top100Films } from './top-100-movies'
 
-export default function ComboBox() {
+export default function ComboBox () {
   return (
     <Autocomplete
       id="combo-box-demo"
       options={top100Films}
-      getOptionLabel={option => option.title}
+      getOptionLabel={(option) => option.title}
       style={{ width: 300 }}
-      renderInput={params => (
-        <TextField {...params} label="Combo box" variant="outlined" fullWidth />
-      )}
+      renderInput={(params) => {
+        return (
+          <TextField {...params} label="Combo box" variant="outlined" fullWidth />
+        )
+      }}
     />
   )
 }
@@ -29,11 +31,13 @@ it('finds my favorite movie', () => {
     <Autocomplete
       id="combo-box-demo"
       options={top100Films}
-      getOptionLabel={option => option.title}
+      getOptionLabel={(option) => option.title}
       style={{ width: 300 }}
-      renderInput={params => (
-        <TextField {...params} label="Combo box" variant="outlined" fullWidth />
-      )}
+      renderInput={(params) => {
+        return (
+          <TextField {...params} label="Combo box" variant="outlined" fullWidth />
+        )
+      }}
     />,
     {
       stylesheets: [
@@ -46,8 +50,9 @@ it('finds my favorite movie', () => {
   cy.get('#combo-box-demo').click()
   cy.focused().type('god')
   cy.contains('The Godfather')
-    .should('be.visible')
-    .and('have.class', 'MuiAutocomplete-option')
-    .click()
+  .should('be.visible')
+  .and('have.class', 'MuiAutocomplete-option')
+  .click()
+
   cy.get('#combo-box-demo').should('have.value', 'The Godfather')
 })

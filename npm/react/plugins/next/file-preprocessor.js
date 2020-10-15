@@ -1,12 +1,12 @@
 // @ts-check
-const debug = require('debug')('cypress-react-unit-test')
+const debug = require('debug')('@cypress/react')
 const loadConfig = require('next/dist/next-server/server/config').default
 const getNextJsBaseWebpackConfig = require('next/dist/build/webpack-config')
-  .default
+.default
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const findWebpack = require('find-webpack')
 
-async function getNextWebpackConfig(config) {
+async function getNextWebpackConfig (config) {
   const coverageIsDisabled =
     config && config.env && config.env.coverage === false
 
@@ -16,7 +16,7 @@ async function getNextWebpackConfig(config) {
   const nextWebpackConfig = await getNextJsBaseWebpackConfig(
     config.projectRoot,
     {
-      buildId: `cypress-react-unit-test-${Math.random().toString()}`,
+      buildId: `@cypress/react-${Math.random().toString()}`,
       config: nextConfig,
       dev: false,
       isServer: false,
@@ -36,26 +36,28 @@ async function getNextWebpackConfig(config) {
       coverage: !coverageIsDisabled,
       // insert Babel plugin to mock named imports
       // disable because causes an error with double definitions
-      // https://github.com/bahmutov/cypress-react-unit-test/issues/439
+      // https://github.com/bahmutov/@cypress/react/issues/439
       looseModules: false,
     },
     nextWebpackConfig,
   )
 
   debug('final webpack options %o', nextWebpackConfig)
+
   return nextWebpackConfig
 }
 
 let webpackConfigCache = null
 
 /** Resolving next.js webpack and all config with plugin takes long, so cache the webpack configuration */
-async function getCachedWebpackPreprocessor(config) {
+async function getCachedWebpackPreprocessor (config) {
   // ⛔️ ⛔️ Comment this `if` for debugging
   if (webpackConfigCache !== null) {
     return webpackConfigCache
   }
 
   const webpackOptions = await getNextWebpackConfig(config)
+
   webpackConfigCache = webpackPreprocessor({ webpackOptions })
 
   debug('created and cached webpack preprocessor based on next.config.js')
@@ -63,8 +65,10 @@ async function getCachedWebpackPreprocessor(config) {
   return webpackConfigCache
 }
 
-module.exports = config => async fileEvent => {
-  const preprocessor = await getCachedWebpackPreprocessor(config)
+module.exports = (config) => {
+  return async (fileEvent) => {
+    const preprocessor = await getCachedWebpackPreprocessor(config)
 
-  return preprocessor(fileEvent)
+    return preprocessor(fileEvent)
+  }
 }

@@ -14,7 +14,7 @@ import { Child } from './Child'
 // import giantImage from '/__root/src/vans.jpg'
 // <img src={giantImage} alt="cypress-logo" />
 
-function App() {
+function App () {
   return (
     <div className="App">
       <img src={cypressLogo} className="Cypress-log" />

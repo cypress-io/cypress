@@ -2,7 +2,7 @@
 // the code taken from https://codepen.io/gaearon/pen/LyyXgK
 /// <reference types="cypress" />
 import React from 'react'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import { Game } from './tic-tac-toe.jsx'
 
 describe('Tic Tac Toe', () => {
@@ -16,10 +16,12 @@ describe('Tic Tac Toe', () => {
   beforeEach(() => {
     cy.viewport(200, 200)
   })
+
   it('starts and lets X win', () => {
     mount(<Game />, {
       cssFile: 'cypress/component/advanced/tutorial/tic-tac-toe.css',
     })
+
     cy.contains('.status', 'Next player: X')
     clickSquare(0, 0).click()
     cy.contains('.status', 'Next player: O')

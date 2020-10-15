@@ -3,7 +3,7 @@
 If you need to test what the component is doing when it is being unmounted, use `unmount` function.
 
 ```js
-import { mount, unmount } from 'cypress-react-unit-test'
+import { mount, unmount } from '@cypress/react'
 it('calls unmount prop', () => {
   // async command
   mount(...)

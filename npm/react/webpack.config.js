@@ -6,7 +6,7 @@ const APP_DIR = path.resolve(__dirname, 'src')
 
 /** @type import("webpack").Configuration */
 const config = {
-  entry: APP_DIR + '/index.jsx',
+  entry: `${APP_DIR}/index.jsx`,
   output: {
     path: BUILD_DIR,
     filename: 'bundle.js',

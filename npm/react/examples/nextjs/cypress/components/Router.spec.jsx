@@ -4,7 +4,7 @@ import * as React from 'react'
 import RouterPage from '../../pages/router'
 import { createRouter } from 'next/router'
 import { RouterContext } from 'next/dist/next-server/lib/router-context'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Component with router usage', () => {
   it('renders the component that uses next.js router context', () => {
@@ -86,10 +86,10 @@ describe('Component with router usage', () => {
     )
 
     cy.get('button')
-      .click()
-      .then(() => {
-        // Make sure that `.then` here is required to make an assertion after component mount and retrying button
-        expect(router.push).to.be.called
-      })
+    .click()
+    .then(() => {
+      // Make sure that `.then` here is required to make an assertion after component mount and retrying button
+      expect(router.push).to.be.called
+    })
   })
 })

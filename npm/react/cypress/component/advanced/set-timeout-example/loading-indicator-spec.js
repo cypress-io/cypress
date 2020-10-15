@@ -1,6 +1,6 @@
 import React from 'react'
 import { unmountComponentAtNode } from 'react-dom'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 import LoadingIndicator from './LoadingIndicator'
 
 // compare these tests to Jest + Enzyme tests in
@@ -14,6 +14,7 @@ describe('LoadingIndicator', () => {
           <div>ahoy!</div>
         </LoadingIndicator>,
       )
+
       cy.contains('div', 'ahoy!')
     })
   })
@@ -26,6 +27,7 @@ describe('LoadingIndicator', () => {
             <div>ahoy!</div>
           </LoadingIndicator>,
         )
+
         cy.contains('loading...').should('be.visible')
         cy.contains('ahoy!').should('not.exist')
       })
@@ -38,6 +40,7 @@ describe('LoadingIndicator', () => {
             <div>ahoy!</div>
           </LoadingIndicator>,
         )
+
         // this test runs for 2 seconds, since it just waits for the
         // loading indicator to show up after "setTimeout"
         cy.contains('loading...', { timeout: 2100 }).should('be.visible')
@@ -50,6 +53,7 @@ describe('LoadingIndicator', () => {
             <div>ahoy!</div>
           </LoadingIndicator>,
         )
+
         // force 2 seconds to pass instantly
         // and component's setTimeout to fire
         cy.tick(2010)
@@ -61,23 +65,25 @@ describe('LoadingIndicator', () => {
   describe('on unmount', () => {
     it('should clear timeout', () => {
       cy.clock()
-      cy.window().then(win => cy.spy(win, 'clearTimeout').as('clearTimeout'))
+      cy.window().then((win) => cy.spy(win, 'clearTimeout').as('clearTimeout'))
 
       mount(
         <LoadingIndicator isLoading={true}>
           <div>ahoy!</div>
         </LoadingIndicator>,
       )
+
       cy.tick(2010)
-      cy.get('#cypress-root').then($el => {
+      cy.get('#cypress-root').then(($el) => {
         unmountComponentAtNode($el[0])
       })
+
       cy.get('@clearTimeout').should('have.been.calledOnce')
     })
   })
 
   afterEach(() => {
-    cy.get('#cypress-root').then($el => {
+    cy.get('#cypress-root').then(($el) => {
       unmountComponentAtNode($el[0])
     })
   })

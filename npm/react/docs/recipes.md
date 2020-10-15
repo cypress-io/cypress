@@ -21,7 +21,7 @@ If you are using Create-React-App v3 or `react-scripts`, and want to reuse the b
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
-  require('cypress-react-unit-test/plugins/react-scripts')(on, config)
+  require('@cypress/react/plugins/react-scripts')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -37,7 +37,7 @@ See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/t
 ```js
 // cypress/plugins/index.js
 module.exports = (on, config) => {
-  require('cypress-react-unit-test/plugins/next')(on, config)
+  require('@cypress/react/plugins/next')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -55,7 +55,7 @@ If you have your own webpack config, you can use included plugins file to load i
 module.exports = (on, config) => {
   // from the root of the project (folder with cypress.json file)
   config.env.webpackFilename = 'webpack.config.js'
-  require('cypress-react-unit-test/plugins/load-webpack')(on, config)
+  require('@cypress/react/plugins/load-webpack')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -72,7 +72,7 @@ If you are using Babel without Webpack to transpile, you can use the plugin that
 // cypress/plugins/index.js
 module.exports = (on, config) => {
   // tell Cypress to bundle specs and components using project's .babelrc file
-  require('cypress-react-unit-test/plugins/babelrc')(on, config)
+  require('@cypress/react/plugins/babelrc')(on, config)
   // IMPORTANT to return the config object
   // with the any changed environment variables
   return config
@@ -83,9 +83,9 @@ See example in the folder [examples/using-babel](examples/using-babel) and [exam
 
 ### Add Babel plugins
 
-If you want to use code instrumentation, add the [babel-plugin-istanbul](https://github.com/istanbuljs/babel-plugin-istanbul) to your `.babelrc` setup. You do not even need to install it separately, as it is already included in `cypress-react-unit-test` as a dependency.
+If you want to use code instrumentation, add the [babel-plugin-istanbul](https://github.com/istanbuljs/babel-plugin-istanbul) to your `.babelrc` setup. You do not even need to install it separately, as it is already included in `@cypress/react` as a dependency.
 
-If you want to use ES6 import mocking, add the [@babel/plugin-transform-modules-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-modules-commonjs) to the list of plugins. This module is also included in `cypress-react-unit-test` as a dependency.
+If you want to use ES6 import mocking, add the [@babel/plugin-transform-modules-commonjs](https://github.com/babel/babel/tree/master/packages/babel-plugin-transform-modules-commonjs) to the list of plugins. This module is also included in `@cypress/react` as a dependency.
 
 ```json
 {
@@ -102,7 +102,7 @@ If you want to use ES6 import mocking, add the [@babel/plugin-transform-modules-
 }
 ```
 
-When loading your `.babelrc` settings, `cypress-react-unit-test` sets `BABEL_ENV` and `NODE_ENV` to `test` if they are not set already. Thus you can move the above plugins into the `test` environment to exclude them from being used in production bundle.
+When loading your `.babelrc` settings, `@cypress/react` sets `BABEL_ENV` and `NODE_ENV` to `test` if they are not set already. Thus you can move the above plugins into the `test` environment to exclude them from being used in production bundle.
 
 ```json
 {
