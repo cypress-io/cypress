@@ -3,19 +3,15 @@ import unfetch from 'unfetch'
 
 require('@cypress/code-coverage/support')
 
+let headInnerHTML = document.head.innerHTML
+
 /** Initialize an empty document with root element */
 function renderTestingPlatform () {
   const document = cy.state('document')
-  const el = document.getElementById('cypress-jsdom')
 
-  if (el) {
-    // clean the element before each test
-    while (el.hasChildNodes()) {
-      el.removeChild(el.lastChild)
-    }
+  if (document.body) document.body.innerHTML = ''
 
-    return
-  }
+  if (document.head) document.head.innerHTML = headInnerHTML
 
   const rootNode = document.createElement('div')
 
@@ -46,4 +42,11 @@ function polyfillFetchIfNeeded () {
 beforeEach(() => {
   renderTestingPlatform()
   polyfillFetchIfNeeded()
+})
+
+before(() => {
+  // after the root imports are done
+  const document = cy.state('document')
+
+  headInnerHTML = document.head && document.head.innerHTML
 })

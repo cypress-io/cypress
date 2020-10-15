@@ -12,7 +12,7 @@
     "dev": "yarn start-test 5005 cypress:open",
     "postinstall": "echo '@packages/desktop-gui needs: yarn build'",
     "start": "http-server -p 5005 dist",
-    "watch": "yarn build -- --watch --progress"
+    "watch": "yarn build --watch --progress"
   },
   "devDependencies": {
     "@babel/polyfill": "7.8.7",
@@ -45,6 +45,7 @@
     "react-inspector": "5.0.1",
     "react-loader": "2.4.7",
     "react-select": "3.1.0",
+    "react-transition-group": "4.4.1",
     "webpack": "4.35.3",
     "webpack-cli": "3.3.2"
   },

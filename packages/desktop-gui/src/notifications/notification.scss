@@ -1,0 +1,99 @@
+.notification {
+  bottom: 4.8rem;
+  padding-right: 1.2rem;
+  position: fixed;
+  right: 0;
+  z-index: 1020;
+
+  .notification-wrap {
+    align-items: center;
+    background: #252831;
+    border-radius: 3px;
+    display: flex;
+    padding: 0.8rem 1.2rem 0.8rem 1.5rem;
+  }
+
+  .content {
+    align-items: center;
+    color: #EFF0F3;
+    display: flex;
+    font-size: 1.3rem;
+
+    i {
+      color: #5393E9;
+      font-size: 2.2rem;
+      margin-right: 1rem;
+    }
+
+    a {
+      color: #8EBCF9;
+      margin-left: 1rem;
+
+      &:hover,
+      &:focus {
+        color: #accdf9;
+      }
+    }
+  }
+
+  .notification-close {
+    background: none;
+    border: none;
+    color: #8A8C92;
+    font-size: 2.4rem;
+    margin-left: 3rem;
+    padding: 0 0.4rem;
+
+    &:hover,
+    &:focus {
+      color: #fff;
+    }
+  }
+
+  // transitions for react-transition-group
+  // slide in from right on enter, fade/shrink away on exit
+  &,
+  &-enter {
+    transform: translate(110%);
+  }
+
+  &-enter {
+    opacity: 1;
+  }
+
+  &-enter-active {
+    transform: translate(0);
+    transition: transform 500ms ease-out;
+  }
+
+  &-enter-done {
+    transform: translate(0);
+  }
+
+  &-exit {
+    opacity: 1;
+    transform: translate(0);
+  }
+
+  &-exit-active {
+    opacity: 0;
+    transform: translate(0) scale(0.7);
+    transition: all 300ms ease-out;
+  }
+
+  &-exit-done {
+    opacity: 0;
+    transform: translate(110%);
+  }
+}
+
+.notification-exit-done.notification-exit-active {
+  background: red;
+}
+
+.open-notice {
+  position: fixed;
+  bottom: 16rem;
+  right: 1rem;
+  z-index: 9999;
+}
