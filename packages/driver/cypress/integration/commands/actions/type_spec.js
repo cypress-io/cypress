@@ -3233,7 +3233,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           // eslint-disable-next-line
             console.table(table.data, table.columns)
 
-          const beforeInput = isChromium ? ' beforeinput, ' : ''
+          const beforeInput = isChromium ? 'beforeinput, ' : ''
 
           expect(table.name).to.eq('Keyboard Events')
           const expectedTable = {
@@ -3262,7 +3262,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
-          const beforeInput = isChromium ? ' beforeinput, ' : ''
+          const beforeInput = isChromium ? 'beforeinput, ' : ''
 
           expect(table.data).to.deep.eq({
             1: { Typed: 'f', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
