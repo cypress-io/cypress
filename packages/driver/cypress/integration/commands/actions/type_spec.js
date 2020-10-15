@@ -1849,7 +1849,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('input:first')
         .then(($el) => {
           $el.val('foo bar baz')
-          // $el[0].addEventListener('beforeinput', console.log)
           $el[0].addEventListener('beforeinput', stub)
         })
         .type(' f\n{backspace}')
@@ -1898,7 +1897,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('textarea:first')
         .then(($el) => {
           $el.val('foo bar baz')
-          // $el[0].addEventListener('beforeinput', console.log)
           $el[0].addEventListener('beforeinput', stub)
         })
         .type(' f\n{backspace}')
@@ -1947,7 +1945,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#input-types [contenteditable]')
         .then(($el) => {
           $el.text('foo bar baz')
-          // $el[0].addEventListener('beforeinput', console.log)
           $el[0].addEventListener('beforeinput', stub)
         })
         .type(' f\n{backspace}')
@@ -1991,7 +1988,6 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get('#input-types [contenteditable]')
         .then(($el) => {
           $el.text('foo bar baz')
-          // $el[0].addEventListener('beforeinput', console.log)
           $el[0].addEventListener('beforeinput', stub)
         })
         .type('{ctrl}{del}')
