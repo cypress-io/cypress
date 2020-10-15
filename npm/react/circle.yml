@@ -1,0 +1,371 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1.26.0
+
+workflows:
+  build:
+    jobs:
+      # install and cache dependencies in this job
+      # AND build the library once
+      # then the workspace will be passed to other jobs
+      - cypress/install:
+          name: Install
+          executor: cypress/base-12
+          build: npm run transpile
+          post-steps:
+            - run:
+                name: Show info 📺
+                command: npx cypress info
+            - run:
+                name: Linting code 🧹
+                command: npm run lint
+            - run:
+                name: Stop exclusive tests 1️⃣
+                command: npm run stop-only
+            - run:
+                name: Build folder 🏗
+                command: npm run build
+            - run:
+                name: Run unit tests 👷
+                command: npm run test:unit
+
+      - cypress/run:
+          name: Example A11y
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/a11y
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Example Babel
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: false
+          working_directory: examples/using-babel
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Example Babel + Typescript
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/using-babel-typescript
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Example React Scripts
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/react-scripts
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/react-scripts
+
+      - cypress/run:
+          name: Example Next.js
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/nextjs
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/nextjs
+
+      - cypress/run:
+          # react-scripts example with component tests not in "src" folder
+          # but in "cypress/component" folder
+          name: Example Component Folder
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/react-scripts-folder
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/react-scripts-folder
+
+      - cypress/run:
+          name: Example Tailwind
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/tailwind
+          command: |
+            DEBUG=cypress-react-unit-test,find-webpack npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  ls -la
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/tailwind
+
+      - cypress/run:
+          name: Example Webpack file
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/webpack-file
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/webpack-file
+
+      - cypress/run:
+          name: Example Rollup
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
+          install-command: npm install --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/rollup
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Example Webpack options
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          executor: cypress/base-12
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/webpack-options
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - run:
+                name: Check coverage 📈
+                command: |
+                  npm run check-coverage
+                  npm run only-covered
+                working_directory: examples/webpack-options
+
+#      - cypress/run:
+#          name: Example Sass
+#          requires:
+#            - Install
+#          # we need the same OS version as in install job
+#          # because we will use native Sass dependency
+#          executor: cypress/base-12
+#          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+#          install-command: npm install  --no-bin-links
+#          verify-command: echo 'Already verified'
+#          no-workspace: true
+#          working_directory: examples/sass-and-ts
+#          command: npm test
+#          store_artifacts: true
+#          post-steps:
+#            - run:
+#                name: Check coverage 📈
+#                command: |
+#                  npm run check-coverage
+#                  npm run only-covered
+#                working_directory: examples/sass-and-ts
+
+      - cypress/run:
+          name: Example Snapshots
+          requires:
+            - Install
+          executor: cypress/base-12
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/snapshots
+          command: npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Visual Sudoku
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-sudoku
+          command: npm test
+          store_artifacts: true
+          post-steps:
+            - store_artifacts:
+                path: examples/visual-sudoku/cypress/snapshots
+
+      - cypress/run:
+          name: Visual with Applitools
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-applitools
+          # to correctly run this job, we need Applitools token
+          # external pull requests do not have environment variables set
+          # thus the job will always fail. Let's skip this job if the
+          # environment variable is missing
+          command: |
+            if [ -z "$APPLITOOLS_API_KEY" ]; then
+              echo "Skipping Applitools test job, missing environment variable APPLITOOLS_API_KEY"
+            else
+              npm test
+            fi
+          store_artifacts: true
+
+      - cypress/run:
+          name: Visual with Percy
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-percy
+          # run Percy agent and then run Cypress component tests
+          # https://docs.percy.io/docs/cypress
+          command: npx percy exec -- npm test
+          store_artifacts: true
+
+      - cypress/run:
+          name: Visual with Happo
+          executor: cypress/base-12
+          requires:
+            - Install
+          # each example installs "cypress-react-unit-test" as a local dependency (symlink)
+          install-command: npm install  --no-bin-links
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          working_directory: examples/visual-testing-with-happo
+          command: npm run test:happo
+          store_artifacts: true
+
+      - cypress/run:
+          name: Component Tests
+          executor: cypress/base-12
+          parallelism: 4
+          requires:
+            - Install
+          # notice a trick to avoid re-installing dependencies
+          # in this job - a do-nothing "install-command" parameter
+          install-command: echo 'Nothing to install in this job'
+          # we are not going to use results from this job anywhere else
+          no-workspace: true
+          record: false
+          store_artifacts: true
+          # following examples from
+          # https://circleci.com/docs/2.0/parallelism-faster-jobs/
+          # TODO probably only run component tests and move integration sanity checks into own job
+          command: |
+            TESTFILES=$(circleci tests glob "cypress/{component,integration}/**/*spec.{js,jsx,ts,tsx}" | circleci tests split --total=4)
+            echo "Test files for this machine are $TESTFILES"
+            npx cypress run --spec $TESTFILES
+
+      # this job attaches the workspace left by the install job
+      # so it is ready to run Cypress tests
+      # only we will run semantic release script instead
+      - cypress/run:
+          name: NPM release
+          # only run NPM release from specific branch(es)
+          filters:
+            branches:
+              only:
+                - main
+          # we need newer Node for semantic release
+          executor: cypress/base-12
+          requires:
+            - Install
+            - Component Tests
+            - Example A11y
+            - Example Babel
+            - Example Component Folder
+            - Example React Scripts
+            # - Example Sass
+            - Example Snapshots
+            - Example Tailwind
+            - Example Webpack file
+            - Example Webpack options
+            - Example Rollup
+            - Visual Sudoku
+            - Visual with Percy
+            - Visual with Happo
+            - Visual with Applitools
+          install-command: echo 'Already installed'
+          verify-command: echo 'Already verified'
+          no-workspace: true
+          # instead of "cypress run" do NPM release 😁
+          # clear environment variables to trick semantic-release
+          # into thinking this is NOT a pull request.
+          # (under the hood the module env-ci is used to check if this is a PR)
+          command: |
+            npm run build
+            CIRCLE_PR_NUMBER= \
+            CIRCLE_PULL_REQUEST= \
+            CI_PULL_REQUEST= \
+            npm run semantic-release

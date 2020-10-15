@@ -1,8 +1,8 @@
-import { useEffect } from 'react'
 import human from 'human-interval'
 
 import appStore from '../lib/app-store'
 import ipc from '../lib/ipc'
+import { useLifecycle } from '../lib/use-lifecycle'
 
 const checkForUpdate = () => {
   ipc.offUpdaterCheck()
@@ -17,19 +17,21 @@ const checkForUpdate = () => {
 }
 
 export const useUpdateChecker = () => {
-  useEffect(() => {
-    let checkId
+  let checkId
 
-    if (!appStore.isDev) {
-      checkId = setInterval(checkForUpdate, human('60 minutes'))
-      checkForUpdate()
-    }
+  useLifecycle({
+    onMount () {
+      if (!appStore.isDev) {
+        checkId = setInterval(checkForUpdate, human('60 minutes'))
+        checkForUpdate()
+      }
+    },
 
-    return () => {
+    onUnmount () {
       if (!appStore.isDev) {
         ipc.offUpdaterCheck()
-        clearInterval(checkId)
+        if (checkId) clearInterval(checkId)
       }
-    }
-  }, [true])
+    },
+  })
 }

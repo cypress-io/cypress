@@ -29,7 +29,7 @@
     "babel-loader": "8.1.0",
     "ban-sensitive-files": "1.9.7",
     "css-loader": "3.4.2",
-    "cypress": "5.2.0",
+    "cypress": "*",
     "dependency-check": "3.4.1",
     "deps-ok": "1.4.1",
     "eslint-plugin-vue": "^6.2.2",
