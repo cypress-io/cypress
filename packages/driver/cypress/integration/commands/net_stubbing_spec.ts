@@ -322,7 +322,7 @@ describe('network stubbing', function () {
           done()
         })
 
-        cy.route2('posts', '/foo', {})
+        cy.route2('post', '/foo', {})
       })
 
       it('requires a url when given a response', function (done) {
