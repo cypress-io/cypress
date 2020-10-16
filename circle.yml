@@ -179,17 +179,13 @@ commands:
   run-e2e-tests:
     parameters:
       browser:
-        default: "electron"
         description: browser shortname to target
-        type: string
-      chunk:
-        description: e2e test chunk number
         type: string
     steps:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/<<parameters.chunk>>*spec* --browser <<parameters.browser>>
+          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -383,7 +379,8 @@ commands:
     steps:
       - run:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
-          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>" 
+          command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -635,179 +632,40 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-e2e-tests-chrome-1:
+  server-e2e-tests-chrome:
     <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: "1"
 
-  server-e2e-tests-chrome-2:
+  server-e2e-tests-electron:
     <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "2"
-
-  server-e2e-tests-chrome-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "3"
-
-  server-e2e-tests-chrome-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "4"
-
-  server-e2e-tests-chrome-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "5"
-
-  server-e2e-tests-chrome-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "6"
-
-  server-e2e-tests-chrome-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "7"
-
-  server-e2e-tests-chrome-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "8"
-
-  server-e2e-tests-electron-1:
-    <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: "1"
 
-  server-e2e-tests-electron-2:
+  server-e2e-tests-firefox:
     <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
-          browser: electron
-          chunk: "2"
-
-  server-e2e-tests-electron-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "3"
-
-  server-e2e-tests-electron-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "4"
-
-  server-e2e-tests-electron-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "5"
-
-  server-e2e-tests-electron-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "6"
-
-  server-e2e-tests-electron-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "7"
-
-  server-e2e-tests-electron-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "8"
+          browser: firefox
 
   server-e2e-tests-non-root:
     <<: *defaults
     steps:
-      - run-e2e-tests:
-          chunk: non_root
-
-  server-e2e-tests-firefox-1:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "1"
-
-  server-e2e-tests-firefox-2:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "2"
-
-  server-e2e-tests-firefox-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "3"
-
-  server-e2e-tests-firefox-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "4"
-
-  server-e2e-tests-firefox-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "5"
-
-  server-e2e-tests-firefox-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "6"
-
-  server-e2e-tests-firefox-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "7"
-
-  server-e2e-tests-firefox-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "8"
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
 
   runner-integration-tests-chrome:
     <<: *defaults
@@ -830,13 +688,6 @@ jobs:
     steps:
       - run-driver-integration-tests:
           browser: chrome
-
-  # driver-integration-tests-electron:
-  #   <<: *defaults
-  #   parallelism: 5
-  #   steps:
-  #     - run-driver-integration-tests:
-  #         browser: electron
 
   driver-integration-tests-firefox:
     <<: *defaults
@@ -1060,7 +911,7 @@ jobs:
       - run:
           name: Release
           command: yarn semantic-release @cypress/vue
-          
+
   npm-react:
     <<: *defaults
     steps:
@@ -1071,7 +922,7 @@ jobs:
           command: yarn workspace @cypress/react build
       - run:
           name: Run unit test
-          command: yarn workspace @cypress/react test:unit 
+          command: yarn workspace @cypress/react test:unit
       - run:
           name: Run tests
           command: yarn workspace @cypress/react test
@@ -1107,7 +958,7 @@ jobs:
           key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
           paths:
             - ~/.cache
-      - run: 
+      - run:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
@@ -1806,80 +1657,17 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-chrome-1:
+    - server-e2e-tests-chrome:
         requires:
           - build
-    - server-e2e-tests-chrome-2:
+    - server-e2e-tests-electron:
         requires:
           - build
-    - server-e2e-tests-chrome-3:
-        requires:
-          - build
-    - server-e2e-tests-chrome-4:
-        requires:
-          - build
-    - server-e2e-tests-chrome-5:
-        requires:
-          - build
-    - server-e2e-tests-chrome-6:
-        requires:
-          - build
-    - server-e2e-tests-chrome-7:
-        requires:
-          - build
-    - server-e2e-tests-chrome-8:
-        requires:
-          - build
-    - server-e2e-tests-electron-1:
-        requires:
-          - build
-    - server-e2e-tests-electron-2:
-        requires:
-          - build
-    - server-e2e-tests-electron-3:
-        requires:
-          - build
-    - server-e2e-tests-electron-4:
-        requires:
-          - build
-    - server-e2e-tests-electron-5:
-        requires:
-          - build
-    - server-e2e-tests-electron-6:
-        requires:
-          - build
-    - server-e2e-tests-electron-7:
-        requires:
-          - build
-    - server-e2e-tests-electron-8:
+    - server-e2e-tests-firefox:
         requires:
           - build
     - server-e2e-tests-non-root:
         executor: non-root-docker-user
-        requires:
-          - build
-    - server-e2e-tests-firefox-1:
-        requires:
-          - build
-    - server-e2e-tests-firefox-2:
-        requires:
-          - build
-    - server-e2e-tests-firefox-3:
-        requires:
-          - build
-    - server-e2e-tests-firefox-4:
-        requires:
-          - build
-    - server-e2e-tests-firefox-5:
-        requires:
-          - build
-    - server-e2e-tests-firefox-6:
-        requires:
-          - build
-    - server-e2e-tests-firefox-7:
-        requires:
-          - build
-    - server-e2e-tests-firefox-8:
         requires:
           - build
     - driver-integration-tests-chrome:
