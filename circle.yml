@@ -596,7 +596,7 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -609,7 +609,7 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
