@@ -1,0 +1,34 @@
+{
+  "name": "sudoku",
+  "version": "1.0.0",
+  "private": true,
+  "homepage": "https://raravi.github.io/sudoku",
+  "license": "MIT",
+  "author": "Amith Raravi <amith.raravi@gmail.com>",
+  "scripts": {
+    "build": "react-scripts build",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "docker:run": "docker run -it -v $PWD/../..:/e2e -w /e2e/examples/visual-sudoku cypress/included:4.5.0",
+    "eject": "react-scripts eject",
+    "start": "react-scripts start",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "devDependencies": {
+    "@cypress/react": "file:../../dist"
+  }
+}
