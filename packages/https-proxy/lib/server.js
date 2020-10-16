@@ -1,9 +1,6 @@
 const _ = require('lodash')
 const { allowDestroy, connect } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
-const {
-  getProxyForUrl,
-} = require('proxy-from-env')
 const https = require('https')
 const net = require('net')
 const parse = require('./util/parse')
@@ -103,21 +100,6 @@ class Server {
     if (fn) {
       return fn.call(this, req, res)
     }
-  }
-
-  _getProxyForUrl (urlStr) {
-    const port = Number(_.get(url.parse(urlStr), 'port'))
-
-    debug('getting proxy URL %o', { port, serverPort: this._port, sniPort: this._sniPort, url: urlStr })
-
-    if ([this._sniPort, this._port].includes(port)) {
-      // https://github.com/cypress-io/cypress/issues/4257
-      // this is a tunnel to the SNI server or to the main server,
-      // it should never go through a proxy
-      return undefined
-    }
-
-    return getProxyForUrl(urlStr)
   }
 
   _makeConnection (browserSocket, head, port, hostname) {
