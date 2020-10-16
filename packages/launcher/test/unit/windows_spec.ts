@@ -10,6 +10,8 @@ import fse from 'fs-extra'
 import os from 'os'
 import snapshot from 'snap-shot-it'
 import { Browser } from '../../lib/types'
+import { detectByPath } from '../../lib/detect'
+import { goalBrowsers } from '../fixtures'
 
 function stubBrowser (path: string, version: string) {
   path = normalize(path.replace(/\\/g, '\\\\'))
@@ -87,6 +89,46 @@ describe('windows browser detection', () => {
     snapshot(await detect(firefoxes))
   })
 
+  it('works with :browserName format in Windows', () => {
+    sinon.stub(os, 'platform').returns('win32')
+    stubBrowser(`${HOMEDIR}/foo/bar/browser.exe`, '100')
+
+    return detectByPath(`${HOMEDIR}/foo/bar/browser.exe:foo-browser`, goalBrowsers as Browser[]).then((browser) => {
+      expect(browser).to.deep.equal(
+        Object.assign({}, goalBrowsers.find((gb) => {
+          return gb.name === 'foo-browser'
+        }), {
+          displayName: 'Custom Foo Browser',
+          info: `Loaded from ${HOMEDIR}/foo/bar/browser.exe`,
+          custom: true,
+          version: '100',
+          majorVersion: 100,
+          path: `${HOMEDIR}/foo/bar/browser.exe`,
+        }),
+      )
+    })
+  })
+
+  it('identifies browser if name in path', async () => {
+    sinon.stub(os, 'platform').returns('win32')
+    stubBrowser(`${HOMEDIR}/foo/bar/chrome.exe`, '100')
+
+    return detectByPath(`${HOMEDIR}/foo/bar/chrome.exe`).then((browser) => {
+      expect(browser).to.deep.equal(
+        Object.assign({}, browsers.find((gb) => {
+          return gb.name === 'chrome'
+        }), {
+          displayName: 'Custom Chrome',
+          info: `Loaded from ${HOMEDIR}/foo/bar/chrome.exe`,
+          custom: true,
+          version: '100',
+          majorVersion: 100,
+          path: `${HOMEDIR}/foo/bar/chrome.exe`,
+        }),
+      )
+    })
+  })
+
   context('#getVersionString', () => {
     it('runs wmic and returns output', async () => {
       stubBrowser('foo', 'bar')
@@ -102,6 +144,29 @@ describe('windows browser detection', () => {
       .rejects(err)
 
       await expect(windowsHelper.getVersionString('foo')).to.be.rejectedWith(err)
+    })
+  })
+
+  context('#getPathData', () => {
+    it('returns path and browserKey given path with browser key', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar.exe:firefox')
+
+      expect(res.path).to.eq('C:\\foo\\bar.exe')
+      expect(res.browserKey).to.eq('firefox')
+    })
+
+    it('returns path and chrome given just path', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar\\chrome.exe')
+
+      expect(res.path).to.eq('C:\\foo\\bar\\chrome.exe')
+      expect(res.browserKey).to.eq('chrome')
+    })
+
+    it('returns path and firefox given just path', () => {
+      const res = windowsHelper.getPathData('C:\\foo\\bar\\firefox.exe')
+
+      expect(res.path).to.eq('C:\\foo\\bar\\firefox.exe')
+      expect(res.browserKey).to.eq('firefox')
     })
   })
 })

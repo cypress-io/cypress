@@ -20,6 +20,9 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# npm packages
+npm/**/cypress/screenshots
+
 # from example
 packages/example/app
 packages/example/build
@@ -316,4 +319,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux

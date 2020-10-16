@@ -96,4 +96,4 @@ Find more examples in [Router.spec.jsx](./cypress/components/Router.spec.jsx)
 
 ## Mocking imports
 
-Mocking imports is not working yet, seems the plugin we are inserting for loose mode causes problems, see issue [439](https://github.com/bahmutov/cypress-react-unit-test/issues/439).
+Mocking imports is not working yet, seems the plugin we are inserting for loose mode causes problems, see issue [439](https://github.com/bahmutov/@cypress/react/issues/439).

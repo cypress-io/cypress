@@ -396,14 +396,14 @@ Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unut-tes
 
 If you are using your custom Webpack, this plugin might be missing code coverage information because the code was not instrumented. We try to insert the `babel-plugin-istanbul` plugin automatically, but your bundling might not use Babel, or configure it differently, preventing plugin insertion. Please let us know by opening an issue with full reproducible details.
 
-See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
+See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/react/issues/141). You can also debug the plugin's behavior by running it with `DEBUG` environment variable, see [#debugging](#debugging) section.
 
 </details>
 
 <details id="gatsby-not-supported">
   <summary>Gatsby.js projects not supported</summary>
 
-Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/cypress-react-unit-test/issues/307)
+Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/@cypress/react/issues/307)
 
 </details>
 
@@ -437,7 +437,7 @@ DEBUG=@cypress/react,find-webpack
 
 ### From v3 to v4
 
-The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/cypress-react-unit-test/tree/v3)
+The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/@cypress/react/tree/v3)
 
 - the `cy.mount` is now simply `import { mount } from '@cypress/react'`
 - the support file is simply `require('@cypress/react/support')`

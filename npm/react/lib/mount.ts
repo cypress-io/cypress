@@ -33,7 +33,7 @@ const injectStyles = (options: MountOptions) => {
  * @function   mount
  * @param      {React.ReactElement}  jsx - component to mount
  * @param      {MountOptions}  [options] - options, like alias, styles
- * @see https://github.com/bahmutov/cypress-react-unit-test
+ * @see https://github.com/bahmutov/@cypress/react
  * @see https://glebbahmutov.com/blog/my-vision-for-component-tests/
  * @example
  ```
@@ -151,7 +151,7 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
  * Removes the mounted component. Notice this command automatically
  * queues up the `unmount` into Cypress chain, thus you don't need `.then`
  * to call it.
- * @see https://github.com/bahmutov/cypress-react-unit-test/tree/main/cypress/component/basic/unmount
+ * @see https://github.com/bahmutov/@cypress/react/tree/main/cypress/component/basic/unmount
  * @example
   ```
   import { mount, unmount } from '@cypress/react'
