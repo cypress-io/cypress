@@ -1115,9 +1115,6 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-        name: Run unit test
-        command: yarn workspace @cypress/wizard test:unit 
-      - run:
           name: Release
           command: yarn semantic-release @cypress/react
 
@@ -1127,10 +1124,9 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Run tests
-          command: yarn workspace @cypress/eslint-plugin-dev test
+          name: Run unit test
+          command: yarn workspace @cypress/wizard test:unit 
 
-                  
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -2030,7 +2026,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
           - npm-vue
-
+    - npm-wizard:
+        requires:
+          - build
     - npm-eslint-plugin-dev:
         requires:
           - build
