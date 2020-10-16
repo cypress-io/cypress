@@ -294,6 +294,7 @@ class HttpsAgent extends https.Agent {
         const err: any = new Error(`A connection to the upstream proxy could not be established: ${originalErr.message}`)
 
         err.originalErr = originalErr
+        err.upstreamProxyConnect = true
 
         return cb(err, undefined)
       }

@@ -86,6 +86,7 @@ describe('Web Sockets', () => {
       })
     })
 
+    // FIXME
     it('proxies https messages', function (done) {
       this.server._onDomainSet(`https://localhost:${wssPort}`)
 

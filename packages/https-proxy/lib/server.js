@@ -120,14 +120,6 @@ class Server {
     return getProxyForUrl(urlStr)
   }
 
-  _makeDirectConnection (req, browserSocket, head) {
-    const { port, hostname } = url.parse(`https://${req.url}`)
-
-    debug(`Making connection to ${hostname}:${port}`)
-
-    return this._makeConnection(browserSocket, head, port, hostname)
-  }
-
   _makeConnection (browserSocket, head, port, hostname) {
     const onSocket = (err, upstreamSocket) => {
       debug('received upstreamSocket callback for request %o', { port, hostname, err })

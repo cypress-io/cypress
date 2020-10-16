@@ -764,7 +764,9 @@ class Server {
     if (host) {
       // get the protocol using req.connection.encrypted
       // get the port & hostname from host header
-      const { port, hostname, protocol } = url.parse(`${req.connection.encrypted ? 'https' : 'http'}://${host}`)
+      const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
+      const { hostname, protocol } = url.parse(fullUrl)
+      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
