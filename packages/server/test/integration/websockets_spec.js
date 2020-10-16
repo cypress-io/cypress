@@ -86,9 +86,8 @@ describe('Web Sockets', () => {
       })
     })
 
-    // FIXME
     it('proxies https messages', function (done) {
-      this.server._onDomainSet(`https://localhost:${wssPort}`)
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -96,7 +95,7 @@ describe('Web Sockets', () => {
         })
       })
 
-      const client = new ws(`ws://localhost:${cyPort}`)
+      const client = new ws(`wss://localhost:${wssPort}`, { agent })
 
       client.on('message', (data) => {
         expect(data).to.eq('response:foo')
