@@ -2,6 +2,8 @@ const fs = require('../fs')
 const { join } = require('path')
 const Bluebird = require('bluebird')
 
+require('regenerator-runtime/runtime')
+
 /**
  * Get the size of a folder or a file.
  *
