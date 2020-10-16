@@ -95,7 +95,7 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
 
     return packageJsonIterator.map(({ scripts }, packageJsonPath) => {
       if (!scripts) {
-        return { continue: true }
+        return { success: false }
       }
 
       for (const script of Object.values(scripts)) {
@@ -111,13 +111,13 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
           )
 
           return {
-            continue: false,
+            success: true,
             payload: { rollupConfigPath },
           }
         }
       }
 
-      return { continue: true }
+      return { success: false }
     })
   },
 }

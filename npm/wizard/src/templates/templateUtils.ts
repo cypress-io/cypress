@@ -24,7 +24,7 @@ export function findWebpackConfig (root: string) {
 
   const { success, payload } = packageJsonIterator.map(({ scripts }, packageJsonPath) => {
     if (!scripts) {
-      return { continue: true }
+      return { success: false }
     }
 
     for (const script of Object.values(scripts)) {
@@ -40,13 +40,13 @@ export function findWebpackConfig (root: string) {
         )
 
         return {
-          continue: false,
+          success: true,
           payload: { webpackConfigPath },
         }
       }
     }
 
-    return { continue: true }
+    return { success: false }
   })
 
   return success ? payload?.webpackConfigPath : null

@@ -38,7 +38,7 @@ export const BabelTemplate: Template = {
 
     return packageJsonIterator.map(({ babel }) => {
       return {
-        continue: !babel,
+        success: Boolean(babel),
       }
     })
   },

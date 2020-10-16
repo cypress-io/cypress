@@ -31,7 +31,7 @@ export const ReactScriptsTemplate: Template = {
         const allDeps = { ...devDependencies, ...dependencies } || {}
 
         if (!allDeps['react-scripts']) {
-          return { continue: true }
+          return { success: false }
         }
 
         if (
@@ -49,13 +49,13 @@ export const ReactScriptsTemplate: Template = {
           )
 
           // yey found the template
-          return { continue: true }
+          return { success: false }
         }
 
-        return { continue: false }
+        return { success: true }
       }
 
-      return { continue: true }
+      return { success: false }
     })
   },
 }

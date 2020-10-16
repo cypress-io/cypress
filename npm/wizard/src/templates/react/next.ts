@@ -25,7 +25,7 @@ export const NextTemplate: Template = {
 
     return packageJsonIterator.map(({ dependencies, devDependencies }) => {
       if (!dependencies && !devDependencies) {
-        return { continue: true }
+        return { success: false }
       }
 
       const allDeps = {
@@ -36,7 +36,7 @@ export const NextTemplate: Template = {
       const nextVersion = allDeps['next']
 
       if (!nextVersion) {
-        return { continue: true }
+        return { success: false }
       }
 
       if (
@@ -46,11 +46,11 @@ export const NextTemplate: Template = {
           'next',
         )
       ) {
-        return { continue: true }
+        return { success: false }
       }
 
       // yey found the next
-      return { continue: false }
+      return { success: true }
     })
   },
 }

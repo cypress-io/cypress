@@ -57,7 +57,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
       cb: (
         data: PackageJsonLike,
         packageJsonPath: string,
-      ) => { continue: boolean, payload?: TPayload },
+      ) => { success: boolean, payload?: TPayload },
     ) => {
       let stepPathToScan = rootPath
 
@@ -73,7 +73,7 @@ export function createFindPackageJsonIterator (rootPath = process.cwd()) {
         if (result.packageData) {
           const cbResult = cb(result.packageData, result.filename)
 
-          if (!cbResult.continue) {
+          if (cbResult.success) {
             return { success: true, payload: cbResult.payload }
           }
         }
@@ -95,11 +95,11 @@ export function scanFSForAvailableDependency (cwd: string, deps: string[]) {
   const { success } = createFindPackageJsonIterator(cwd)
   .map(({ dependencies, devDependencies }, path) => {
     if (!dependencies && !devDependencies) {
-      return { continue: true }
+      return { success: false }
     }
 
     return {
-      continue: !Object.keys({ ...dependencies, ...devDependencies })
+      success: Object.keys({ ...dependencies, ...devDependencies })
       .some((dependency) => deps.includes(dependency)),
     }
   })
