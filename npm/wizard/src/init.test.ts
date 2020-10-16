@@ -9,6 +9,15 @@ import sinonChai from 'sinon-chai'
 
 use(sinonChai)
 
+function someOfSpyCallsIncludes (spy: any, logPart: string) {
+  return spy.getCalls().some(
+    // Make sure that link to the example of right template was logged
+    (spy: SinonSpyCallApi<unknown[]>) => {
+      return spy.args.some((callArg) => typeof callArg === 'string' && callArg.includes(logPart))
+    },
+  )
+}
+
 describe('init script', () => {
   let promptSpy: SinonStub<any> | null = null
   let logSpy: SinonSpy | null = null
@@ -25,9 +34,14 @@ describe('init script', () => {
 
   it('automatically suggests to the user which config to use', async () => {
     mockFs({
-      'cypress.json': '{}',
-      'webpack.config.js': 'module.exports = { }',
-    })
+      '/cypress.json': '{}',
+      '/package.json': JSON.stringify({
+        dependencies: {
+          react: '^16.10.0',
+        },
+      }),
+      '/webpack.config.js': 'module.exports = { }',
+    }, { createCwd: true })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
       chosenTemplateName: 'create-react-app',
@@ -50,7 +64,7 @@ describe('init script', () => {
       'cypress.json': '{}',
       // For next.js user will have babel config, but we want to suggest to use the closest config for the application code
       'babel.config.js': 'module.exports = { }',
-      'package.json': JSON.stringify({ dependencies: { next: '^9.2.0' } }),
+      'package.json': JSON.stringify({ dependencies: { react: '^17.x', next: '^9.2.0' } }),
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
@@ -70,9 +84,64 @@ describe('init script', () => {
     )
   })
 
+  it('Asks for framework if can not determine the right one', async () => {
+    mockFs({
+      '/cypress.json': '{}',
+      '/webpack.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { } }),
+    })
+
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      framework: 'vue',
+    }) as any)
+    .onCall(1)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'webpack',
+      componentFolder: 'src',
+    }) as any)
+
+    await main()
+
+    expect(
+      someOfSpyCallsIncludes(global.console.log, 'We were unable to automatically determine your framework 😿'),
+    ).to.be.true
+  })
+
+  it('Asks for framework if more than 1 option was auto detected', async () => {
+    mockFs({
+      '/cypress.json': '{}',
+      '/webpack.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { react: '*', vue: '*' } }),
+    })
+
+    promptSpy = sinon.stub(inquirer, 'prompt')
+    .onCall(0)
+    .returns(Promise.resolve({
+      framework: 'vue',
+    }) as any)
+    .onCall(1)
+    .returns(Promise.resolve({
+      chosenTemplateName: 'webpack',
+      componentFolder: 'src',
+    }) as any)
+
+    await main()
+
+    expect(
+      someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue')} are available from this directory.`),
+    ).to.be.true
+  })
+
   it('suggest the right instruction based on user template choice', async () => {
     mockFs({
-      'cypress.json': '{}',
+      '/package.json': JSON.stringify({
+        dependencies: {
+          react: '^16.0.0',
+        },
+      }),
+      '/cypress.json': '{}',
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
@@ -82,24 +151,18 @@ describe('init script', () => {
 
     await main()
     expect(
-      // @ts-ignore
-      global.console.log.getCalls().some(
-        // Make sure that link to the example of right template was logged
-        (spy: SinonSpyCallApi<string[]>) => {
-          const call = spy.args[0] || ''
-
-          return call.includes('create-react-app') &&
-          call.includes(
-            'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts',
-          )
-        },
-      ),
-    ).to.equal(true)
+      someOfSpyCallsIncludes(global.console.log, 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'),
+    ).to.be.true
   })
 
   it('suggests right docs example and cypress.json config based on the `componentFolder` answer', async () => {
     mockFs({
       'cypress.json': '{}',
+      'package.json': JSON.stringify({
+        dependencies: {
+          react: '^16.0.0',
+        },
+      }),
     })
 
     sinon.stub(inquirer, 'prompt').returns(Promise.resolve({

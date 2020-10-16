@@ -25,6 +25,10 @@ async function guessOrAskForFramework (cwd: string) {
     console.log(`We were unable to automatically determine your framework 😿. ${chalk.grey('Make sure to run this command from the directory where your components located in order to make smart detection works. Or continue with manual setup:')}`)
   }
 
+  if (guesses.length > 0) {
+    console.log(`It looks like all these frameworks: ${chalk.yellow(guesses.join(', '))} are available from this directory. ${chalk.grey('Make sure to run this command from the directory where your components located in order to make smart detection works. Or continue with manual setup:')}`)
+  }
+
   const { framework } = await inquirer.prompt([
     {
       type: 'list',

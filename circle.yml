@@ -1070,9 +1070,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/react build
       - run:
-          name: Run unit test
-          command: yarn workspace @cypress/react test:unit 
-      - run:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
@@ -1118,9 +1115,22 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
+        name: Run unit test
+        command: yarn workspace @cypress/wizard test:unit 
+      - run:
           name: Release
           command: yarn semantic-release @cypress/react
 
+  npm-wizard:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/eslint-plugin-dev test
+
+                  
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:

@@ -17,7 +17,7 @@ export function findWebpackConfig (root: string) {
   const webpackConfigPath = findUp.sync('webpack.config.js', { cwd: root })
 
   if (webpackConfigPath) {
-    return null
+    return webpackConfigPath
   }
 
   const packageJsonIterator = createFindPackageJsonIterator(root)

@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
-import { WebpackTemplate } from './webpack-file'
+import { WebpackTemplate } from './reactWebpackFile'
 
 describe('webpack-file install template', () => {
   afterEach(mockFs.restore)
