@@ -21,6 +21,7 @@ import {
 } from './static-response-utils'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -246,7 +247,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     }
 
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && isStringMatcher(handler) && arg2) {
+      if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
         const url = handler as StringMatcher
 
