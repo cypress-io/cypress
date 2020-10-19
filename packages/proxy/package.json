@@ -25,7 +25,7 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@cypress/sinon-chai": "2.9.0",
-    "@types/express": "4.17.2",
+    "@types/express": "4.17.8",
     "typescript": "3.5.3"
   },
   "files": [
