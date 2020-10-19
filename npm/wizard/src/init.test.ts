@@ -21,15 +21,20 @@ function someOfSpyCallsIncludes (spy: any, logPart: string) {
 describe('init script', () => {
   let promptSpy: SinonStub<any> | null = null
   let logSpy: SinonSpy | null = null
+  let processExitStub: SinonStub<any> | null = null
 
   beforeEach(() => {
     logSpy = sinon.spy(global.console, 'log')
+    processExitStub = sinon.stub(process, 'exit').callsFake(() => {
+      throw new Error(`${chalk.red('process.exit')} should not be called`)
+    })
   })
 
   afterEach(() => {
     mockFs.restore()
     logSpy?.restore()
     promptSpy?.restore()
+    processExitStub?.restore()
   })
 
   it('automatically suggests to the user which config to use', async () => {
