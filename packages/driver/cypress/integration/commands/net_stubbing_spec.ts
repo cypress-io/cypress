@@ -184,7 +184,7 @@ describe('network stubbing', function () {
         )
       })
 
-      cy.wait('@create') // wait times out
+      cy.wait('@create')
     })
 
     // TODO: implement warning in cy.route2 if appropriate
