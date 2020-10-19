@@ -67,7 +67,7 @@ type Method =
     | 'unbind'
     | 'unlink'
     | 'unlock'
-    | 'unsubscribe';
+    | 'unsubscribe'
 
 export namespace CyHttpMessages {
   interface BaseMessage {
