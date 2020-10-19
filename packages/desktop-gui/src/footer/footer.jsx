@@ -8,6 +8,7 @@ import appStore from '../lib/app-store'
 import { useUpdateChecker } from '../update/use-update-checker'
 
 import UpdateModal from '../update/update-modal'
+import UpdateNotice from '../update/update-notice'
 
 const openChangelog = (e) => {
   e.target.blur()
@@ -44,6 +45,7 @@ const Footer = observer(() => {
       </button>
       <button className='open-changelog' onClick={openChangelog}>Changelog</button>
       <UpdateModal show={state.showingModal} onClose={state.hideModal} />
+      <UpdateNotice onOpenUpdatesModal={state.showModal} />
     </footer>
   )
 })

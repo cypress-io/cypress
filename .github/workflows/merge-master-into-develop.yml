@@ -12,12 +12,12 @@ jobs:
         with:
           fetch-depth: 0
           token: ${{ secrets.DEVELOP_PUSH_TOKEN }}
-      - name: Checkout develop branch
-        run: git checkout develop
       - name: Set committer info
         run: |
           git config --local user.email "$(git log --format='%ae' HEAD^!)"
           git config --local user.name "$(git log --format='%an' HEAD^!)"
+      - name: Checkout develop branch
+        run: git checkout develop
       - name: Check for merge conflict
         id: check-conflict
         run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<')"
@@ -52,6 +52,8 @@ jobs:
             chore: merge master - ${{ steps.gen-names.outputs.sha }} into develop
           pr_body: |
             There was a merge conflict when trying to automatically merge master into develop. Please resolve the conflict and complete the merge.
+
+            DO NOT SQUASH AND MERGE
 
             @${{ github.actor }}
           pr_reviewer: ${{ github.actor }}
