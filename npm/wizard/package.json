@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc -p ./tsconfig.json && chmod +x dist/init.js",
-    "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json src/**/*.test.ts"
+    "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json src/**/*.test.ts"
   },
   "dependencies": {
     "chalk": "4.1.0",

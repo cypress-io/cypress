@@ -1125,7 +1125,7 @@ jobs:
           at: ~/
       - run:
           name: Run unit test
-          command: yarn workspace @cypress/wizard test:unit 
+          command: yarn workspace @cypress/wizard test 
 
   npm-eslint-plugin-dev:
     <<: *defaults

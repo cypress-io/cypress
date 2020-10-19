@@ -61,10 +61,10 @@ describe('init script', () => {
 
   it('determines more presumable configuration to suggest', async () => {
     mockFs({
-      'cypress.json': '{}',
+      '/cypress.json': '{}',
       // For next.js user will have babel config, but we want to suggest to use the closest config for the application code
-      'babel.config.js': 'module.exports = { }',
-      'package.json': JSON.stringify({ dependencies: { react: '^17.x', next: '^9.2.0' } }),
+      '/babel.config.js': 'module.exports = { }',
+      '/package.json': JSON.stringify({ dependencies: { react: '^17.x', next: '^9.2.0' } }),
     })
 
     promptSpy = sinon.stub(inquirer, 'prompt').returns(Promise.resolve({
@@ -157,8 +157,8 @@ describe('init script', () => {
 
   it('suggests right docs example and cypress.json config based on the `componentFolder` answer', async () => {
     mockFs({
-      'cypress.json': '{}',
-      'package.json': JSON.stringify({
+      '/cypress.json': '{}',
+      '/package.json': JSON.stringify({
         dependencies: {
           react: '^16.0.0',
         },
