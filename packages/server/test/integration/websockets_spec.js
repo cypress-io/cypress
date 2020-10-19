@@ -111,6 +111,7 @@ describe('Web Sockets', () => {
       })
 
       const client = new ws(`ws://localhost:${wsPort}`, {
+        rejectUnauthorized: false,
         agent,
       })
 
