@@ -80,12 +80,6 @@ export function create (Cypress, state) {
         return results
       }
 
-      const httpsDomains = _.filter(urls, (v) => v.startsWith('https')).map((v) => v.replace('https://', ''))
-
-      if (httpsDomains.length) {
-        await Cypress.backend('stubDomainForAutomation', httpsDomains)
-      }
-
       const iframes: JQuery<HTMLElement>[] = []
 
       const $iframeContainer = $(`<div style="display:none"></div>`).appendTo($('body', specWindow.document))
@@ -101,9 +95,7 @@ export function create (Cypress, state) {
       const crossOriginResults = await new Promise((resolve) => {
         const crossOriginResults: LocalStorageResult[] = []
 
-        // window.addEventListener('message', ()=>)
         onPostMessage = ((event) => {
-          debugger
           const data = event.data
 
           if (data.type !== 'localStorage') return
@@ -152,12 +144,6 @@ export function create (Cypress, state) {
       }
 
       const origins = originOptions.map((v) => v.origin)
-
-      const httpsDomains = _.filter(origins, (v) => v.startsWith('https')).map((v) => v.replace('https://', ''))
-
-      if (httpsDomains.length) {
-        await Cypress.backend('stubDomainForAutomation', httpsDomains)
-      }
 
       const iframes: JQuery<HTMLElement>[] = []
 

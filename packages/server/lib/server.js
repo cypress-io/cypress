@@ -12,7 +12,7 @@ const httpProxy = require('http-proxy')
 const la = require('lazy-ass')
 const httpsProxy = require('@packages/https-proxy')
 const compression = require('compression')
-const debug = require('debug/src/browser')('cypress:server:server')
+const debug = require('debug')('cypress:server:server')
 const {
   agent,
   concatStream,
@@ -35,10 +35,6 @@ const Socket = require('./socket')
 const Request = require('./request')
 const fileServer = require('./file_server')
 const templateEngine = require('./template_engine')
-const session = require('./session')
-const { hostAndPort } = require('@packages/https-proxy/lib/util/parse')
-
-debug.log = console.log.bind(console)
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -129,7 +125,6 @@ class Server {
     this._fileServer = null
     this._httpsProxy = null
     this._urlResolver = null
-    this._openSockets = {}
   }
 
   createExpressApp (config) {
@@ -406,17 +401,6 @@ class Server {
     debug('Getting remote state: %o', props)
 
     return props
-  }
-
-  _closeOpenSocketsForHosts (hosts) {
-    console.log('current open sockets', _.keys(this._openSockets))
-    _.each(hosts, (host) => {
-      if (this._openSockets[host]) {
-        console.log('deleting host', host)
-        this._openSockets[host].destroy()
-        delete this._openSockets[host]
-      }
-    })
   }
 
   _onRequest (headers, automationRequest, options) {
@@ -873,7 +857,6 @@ class Server {
     options.onResolveUrl = this._onResolveUrl.bind(this)
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this._netStubbingState
-    options.closeOpenSocketsForHosts = this._closeOpenSocketsForHosts.bind(this)
 
     options.onResetServerState = () => {
       this._networkProxy.reset()

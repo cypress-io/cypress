@@ -17,7 +17,7 @@ exports['e2e requests / passes'] = `
   Running:  session_spec.js                                                                 (1 of 1)
 
 
-  session utilities
+  Cypress.Session utilities
     ✓ can capture session from point in the test
 
 

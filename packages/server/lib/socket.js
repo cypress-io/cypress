@@ -419,17 +419,6 @@ class Socket {
               return session.saveSession(args[0])
             case 'get:session':
               return session.getSession(args[0])
-            case 'stubDomainForAutomation': {
-              const stubDomains = args[0]
-
-              session.getState().stubbedDomainsForAutomation = stubDomains
-              options.closeOpenSocketsForHosts(stubDomains)
-
-              console.log('stubbing next connection to:', session.getState())
-
-              return
-            }
-
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
