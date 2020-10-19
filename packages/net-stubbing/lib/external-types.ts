@@ -244,7 +244,7 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    */
   https?: boolean
   /**
-   * Match against the request's HTTP or WebDAV method.
+   * Match against the request's HTTP method.
    * @default '*'
    */
   method?: S
