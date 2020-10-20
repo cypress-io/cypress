@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 const execa = require('execa')
+const fs = require('fs')
 const path = require('path')
 
 // lists all packages that have changed from develop
@@ -40,6 +41,18 @@ const convertPackagesToBinary = (packages) => {
   return output
 }
 
+const getCurrentBranch = async () => {
+  const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
+
+  return stdout
+}
+
+const getLernaPackages = async () => {
+  const { stdout } = await execa('npx', ['lerna', 'la', '--json'])
+
+  return JSON.parse(stdout)
+}
+
 // gets all files that have changed since the current branch diverged from some base branch
 const getChangedFiles = async (base = 'develop', output = false) => {
   const { stdout: diff } = await execa('git', ['merge-base', base, 'HEAD'])
@@ -56,26 +69,9 @@ const getChangedFiles = async (base = 'develop', output = false) => {
 
 const getChangedPackages = async (base = 'develop', output = false) => {
   const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
-  const { stdout: depGraph } = await execa('npx', ['lerna', 'la', '--graph'])
-  const { stdout: packs } = await execa('npx', ['lerna', 'la', '--json'])
 
+  const packages = await getLernaPackages()
   const files = await getChangedFiles(base, output)
-  const packages = JSON.parse(packs)
-  const dependencies = JSON.parse(depGraph)
-
-  // return array of packages that depend on the inputted packages
-  // includes the inputted packages in the result
-  const findDependents = (packs) => {
-    const output = [...packs]
-
-    for (let d of Object.keys(dependencies)) {
-      if (!packs.includes(d) && packs.some((p) => dependencies[d].includes(p))) {
-        output.push(d)
-      }
-    }
-
-    return output.length === packs.length ? output : findDependents(output)
-  }
 
   // checks if a lerna package is changed
   const isChanged = ({ location }) => {
@@ -84,32 +80,75 @@ const getChangedPackages = async (base = 'develop', output = false) => {
     return !!files.find((f) => f.includes(dir))
   }
 
-  let changed = []
-
-  for (let pack of packages) {
-    // dependents will contain pack
-    const dependents = findDependents([pack.name])
-
-    for (let dep of dependents) {
-      if (!changed.includes(dep) && isChanged((packages.find((p) => p.name === dep)))) {
-        changed.push(dep)
-      }
-    }
-  }
+  let changed = packages.filter(isChanged).map((p) => p.name)
 
   changed = convertPackagesToBinary(changed)
 
   if (!changed.includes('cypress') && containsBinaryOutsideLerna(files)) {
-    changed.push('cypress')
+    changed.unshift('cypress')
   }
 
   if (output) {
     console.log()
-    console.log(`The following packages were either directly changed or had a dependency changed:`)
+    console.log(`The following packages were changed:`)
     console.log(changed.join('\n'))
   }
 
   return changed
+}
+
+// finds dependents as defined in the 'ci-pipeline-dependents' field
+// within the package.json of the package - see CONTRIBUTING.md for docs
+const getPackageDependents = async (name) => {
+  const packages = await getLernaPackages()
+  const currentBranch = await getCurrentBranch()
+
+  const pack = packages.find((p) => p.name === name)
+
+  if (!pack) {
+    throw new Error('Could not find that package!')
+  }
+
+  const packageJson = JSON.parse(fs.readFileSync(path.join(pack.location, 'package.json')))
+
+  const dependents = packageJson['ci-pipeline-dependents'] || []
+
+  return dependents.map((elem) => {
+    if (typeof elem === 'string') {
+      elem = {
+        name: elem,
+        branches: [currentBranch],
+      }
+    }
+
+    if (!elem.branches) {
+      elem.branches = [currentBranch]
+    }
+
+    return elem
+  })
+  .filter((elem) => elem.branches.includes(currentBranch))
+  .map((elem) => elem.name)
+}
+
+const getChangedPackagesAndDependents = async (base = 'develop', output = false) => {
+  const changedPackages = await getChangedPackages(base, output)
+
+  const dependents = {}
+
+  for (const pack of changedPackages) {
+    dependents[pack] = await getPackageDependents(pack)
+  }
+
+  if (output) {
+    console.log()
+    console.log(`Changed packages and their dependents:`)
+    for (const pack in dependents) {
+      console.log(`${pack}: ${dependents[pack].join(',') || 'none'}`)
+    }
+  }
+
+  return dependents
 }
 
 // execute main function if called from command line
@@ -117,7 +156,7 @@ if (require.main === module) {
   const argv = require('minimist')(process.argv.slice(2))
   const base = argv._[0]
 
-  getChangedPackages(base, true)
+  getChangedPackagesAndDependents(base, true)
 }
 
-module.exports = getChangedPackages
+module.exports = getChangedPackagesAndDependents

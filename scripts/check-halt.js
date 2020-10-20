@@ -2,9 +2,7 @@
 const execa = require('execa')
 const argv = require('minimist')(process.argv.slice(2))
 
-const getChangedPackages = require('./changed-packages')
-
-const pack = argv._[0]
+const changedPackages = require('./changed-packages')
 
 const runTests = () => {
   process.exit(0)
@@ -14,7 +12,7 @@ const skipTests = () => {
   process.exit(1)
 }
 
-const main = async () => {
+const main = async (pack = 'cypress') => {
   const { stdout: currentBranch } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
 
   if (currentBranch === 'develop' || currentBranch === 'master') {
@@ -22,25 +20,30 @@ const main = async () => {
     runTests()
   }
 
-  const changed = await getChangedPackages()
+  const changed = await changedPackages()
 
-  if (changed.includes('cypress')) {
-    console.log(`Binary was changed - all tests run`)
+  if (Object.keys(changed).includes(pack)) {
+    console.log(`${pack} was directly changed, tests run`)
     runTests()
   }
 
-  if (pack) {
-    if (changed.includes(pack)) {
-      console.log(`${pack} was changed, tests run`)
-      runTests()
-    }
+  const dependenciesChanged = []
 
-    console.log(`${pack} and the binary are unchanged, so skip tests`)
-    skipTests()
+  for (const c in changed) {
+    if (changed[c].includes(pack)) {
+      dependenciesChanged.push(c)
+    }
   }
 
-  console.log(`The binary is unchanged, so skip tests`)
+  if (dependenciesChanged.length) {
+    console.log(`${pack} is listed as a dependant of ${dependenciesChanged.join(', ')}, so tests run.`)
+    runTests()
+  }
+
+  console.log(`${pack} is unchanged and not dependent on any changed packages, so tests do not run.`)
   skipTests()
 }
 
-main()
+const pack = argv._[0]
+
+main(pack)
