@@ -825,7 +825,7 @@ describe('src/cy/commands/window', () => {
           done()
         })
 
-        cy.viewport('macbook-15')
+        cy.viewport('macbook-16')
       })
     })
 
