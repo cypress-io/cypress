@@ -1,25 +1,24 @@
 ---
-name: "\U0001F41B Bug report"
-about: Create a report to help us improve
+name: "🐛 Bug report"
+about: Report a bug found while using Cypress
 title: ''
-labels: ''
+labels: 'type: bug'
 assignees: ''
-
 ---
 
-<!-- Is this a question? Questions WILL BE CLOSED. Ask in our chat https://on.cypress.io/chat  -->
+<!-- Use the template below to report a bug. Fill in as much info as possible. As an open source project with a small maintainer team, it may take some time for your issue to be addressed. Please be patient and we will respond as soon as we can. -->
 
 ### Current behavior
-<!-- A description including screenshots, stack traces, DEBUG logs, etc -->
+<!-- A description including screenshots, stack traces, DEBUG logs, etc. See our Troubleshooting Guide: https://on.cypress.io/troubleshooting-->
 
 ### Desired behavior
-<!-- A clear description of what you want to happen -->
+<!-- Remember, we are not familiar with the application you're testing, so please provide a clear description of what should happen. -->
 
 ### Test code to reproduce
-<!-- If we cannot fully run the tests as provided the issue WILL BE CLOSED -->
-<!-- Issues without a reproducible example WILL BE CLOSED -->
+<!-- Provide test code that we can copy, paste, and run on our machine to see the issue. -->
 
-<!-- You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then link to your fork -->
+<!-- You could also provide a repo that we can clone and run. You can fork https://github.com/cypress-io/cypress-test-tiny repo, set up a failing test, then link to your fork. -->
 
 ### Versions
-<!-- Cypress, operating system, browser -->
+
+<!-- Cypress version, last known working Cypress version (if applicable), Browser and version, Operating System, CI Provider, etc -->
