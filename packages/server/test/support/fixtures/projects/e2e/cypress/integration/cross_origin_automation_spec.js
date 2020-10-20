@@ -38,4 +38,17 @@ describe('automations', function () {
       ])
     })
   })
+
+  it.only('get localStorage from all origins', () => {
+    cy.visit('http://localhost:4466/cross_origin_iframe')
+    // .then(() => {
+    //   localStorage.key1 = 'val1'
+    // })
+
+    // cy.getLocalStorage({ origin: '*' })
+    // .then((result) => {
+    //   console.log(result)
+    //   expect(result).deep.eq([{ origin: 'http://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.2:44665', value: { foo: 'bar' } }])
+    // })
+  })
 })

@@ -857,6 +857,7 @@ class Server {
     options.onResolveUrl = this._onResolveUrl.bind(this)
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this._netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy.http.getRenderedHTMLOrigins.bind(this._networkProxy.http)
 
     options.onResetServerState = () => {
       this._networkProxy.reset()

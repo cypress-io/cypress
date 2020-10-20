@@ -10,7 +10,9 @@ const onServer = function (app) {
   })
 
   app.get('/cross_origin_iframe', (req, res) => {
-    res.send('<html><body><iframe src="https://127.0.0.2:44665/set-localstorage"</body></html>')
+    res.send(`<html><body>
+    <iframe src="https://127.0.0.2:44665/set-localstorage"
+    </body></html>`)
   })
 
   app.get('/set-localstorage', (req, res) => {

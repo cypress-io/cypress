@@ -318,12 +318,6 @@ class Socket {
       })
 
       socket.on('mocha', (...args) => {
-        // TODO: move this to an event that will be emitted in openMode as well
-        // we need to listen on this event so we can reset certain state
-        if (args[0] === 'test:before:run') {
-          session.resetState()
-        }
-
         return options.onMocha.apply(options, args)
       })
 
@@ -419,6 +413,8 @@ class Socket {
               return session.saveSession(args[0])
             case 'get:session':
               return session.getSession(args[0])
+            case 'get:fetchedHTMLOrigins':
+              return options.getRenderedHTMLOrigins()
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,

@@ -59,6 +59,12 @@ export function create (Cypress, state) {
         origin: 'current_origin',
       })
 
+      const res = await Cypress.backend('get:fetchedHTMLOrigins')
+
+      debugger
+
+      return
+
       const current_origin = $Location.create(window.location.href).originPolicy
 
       const urls = _.chain([] as string[])

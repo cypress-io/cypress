@@ -44,6 +44,7 @@ export type ServerCtx = Readonly<{
   config: CyServer.Config
   getFileServerToken: () => string
   getRemoteState: CyServer.getRemoteState
+  getRenderedHTMLOrigins: Http['getRenderedHTMLOrigins']
   netStubbingState: NetStubbingState
   middleware: HttpMiddlewareStacks
   socket: CyServer.Socket
@@ -183,6 +184,7 @@ export class Http {
   netStubbingState: NetStubbingState
   request: any
   socket: CyServer.Socket
+  originsRenderedHTML: {[key: string]: boolean} = {}
 
   constructor (opts: ServerCtx & { middleware?: HttpMiddlewareStacks }) {
     this.buffers = new HttpBuffers()
@@ -236,6 +238,10 @@ export class Http {
     })
   }
 
+  getRenderedHTMLOrigins () {
+    return this.originsRenderedHTML
+  }
+
   async handleSourceMapRequest (req: Request, res: Response) {
     try {
       const sm = await this.deferredSourceMapCache.resolve(req.params.id, req.headers)
@@ -251,6 +257,7 @@ export class Http {
   }
 
   reset () {
+    this.originsRenderedHTML = {}
     this.buffers.reset()
   }
 
