@@ -651,7 +651,7 @@ export class Keyboard {
         options.chars.split(charsBetweenCurlyBracesRe),
         (chars) => {
           if (charsBetweenCurlyBracesRe.test(chars)) {
-          // allow special chars and modifiers to be case-insensitive
+            // allow special chars and modifiers to be case-insensitive
             return parseCharsBetweenCurlyBraces(chars) //.toLowerCase()
           }
 
@@ -1191,7 +1191,7 @@ export class Keyboard {
           options.onValueChange(curText, el)
         }
       } else {
-      // el is contenteditable
+        // el is contenteditable
         simulatedDefault(el, key, options)
       }
 
