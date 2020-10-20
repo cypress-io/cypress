@@ -818,6 +818,15 @@ describe('src/cy/commands/window', () => {
 
         cy.viewport('samsung-note9')
       })
+      it('macbook-15', (done) => {
+        cy.on('viewport:changed', (viewport) => {
+          expect(viewport).to.deep.eq({ viewportWidth: 1536, viewportHeight: 960 })
+
+          done()
+        })
+
+        cy.viewport('macbook-15')
+      })
     })
 
     context('errors', {
