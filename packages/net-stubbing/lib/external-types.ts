@@ -1,12 +1,80 @@
-/**
- * HTTP request/response types.
- */
+// Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/methods/index.d.ts
+type Method =
+    | 'ACL'
+    | 'BIND'
+    | 'CHECKOUT'
+    | 'CONNECT'
+    | 'COPY'
+    | 'DELETE'
+    | 'GET'
+    | 'HEAD'
+    | 'LINK'
+    | 'LOCK'
+    | 'M-SEARCH'
+    | 'MERGE'
+    | 'MKACTIVITY'
+    | 'MKCALENDAR'
+    | 'MKCOL'
+    | 'MOVE'
+    | 'NOTIFY'
+    | 'OPTIONS'
+    | 'PATCH'
+    | 'POST'
+    | 'PROPFIND'
+    | 'PROPPATCH'
+    | 'PURGE'
+    | 'PUT'
+    | 'REBIND'
+    | 'REPORT'
+    | 'SEARCH'
+    | 'SOURCE'
+    | 'SUBSCRIBE'
+    | 'TRACE'
+    | 'UNBIND'
+    | 'UNLINK'
+    | 'UNLOCK'
+    | 'UNSUBSCRIBE'
+    | 'acl'
+    | 'bind'
+    | 'checkout'
+    | 'connect'
+    | 'copy'
+    | 'delete'
+    | 'get'
+    | 'head'
+    | 'link'
+    | 'lock'
+    | 'm-search'
+    | 'merge'
+    | 'mkactivity'
+    | 'mkcalendar'
+    | 'mkcol'
+    | 'move'
+    | 'notify'
+    | 'options'
+    | 'patch'
+    | 'post'
+    | 'propfind'
+    | 'proppatch'
+    | 'purge'
+    | 'put'
+    | 'rebind'
+    | 'report'
+    | 'search'
+    | 'source'
+    | 'subscribe'
+    | 'trace'
+    | 'unbind'
+    | 'unlink'
+    | 'unlock'
+    | 'unsubscribe'
+
 export namespace CyHttpMessages {
   interface BaseMessage {
     body?: any
     headers: { [key: string]: string }
     url: string
-    method?: string
+    method?: Method
     httpVersion?: string
   }
 
@@ -177,7 +245,7 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
   https?: boolean
   /**
    * Match against the request's HTTP method.
-   * @default 'GET'
+   * @default '*'
    */
   method?: S
   /**
@@ -289,7 +357,7 @@ declare global {
        * @example
        *    cy.route2('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
-      route2(method: string, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
     }
   }
 }
