@@ -84,6 +84,7 @@ describe('Web Sockets', () => {
       })
 
       const client = new ws(`wss://localhost:${wssPort}`, {
+        rejectUnauthorized: false,
         agent,
       })
 
@@ -111,7 +112,6 @@ describe('Web Sockets', () => {
       })
 
       const client = new ws(`ws://localhost:${wsPort}`, {
-        rejectUnauthorized: false,
         agent,
       })
 
