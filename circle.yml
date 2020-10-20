@@ -385,7 +385,6 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-<<<<<<< HEAD
   check-halt-binary:
     description: Halt CI if binary is unchanged
     steps:
@@ -403,8 +402,6 @@ commands:
           name: Check if package or binary is changed
           command: yarn check-halt << parameters.package >> || circleci-agent step halt
 
-=======
->>>>>>> master
 jobs:
   ## code checkout and yarn installs
   build:
