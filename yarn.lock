@@ -12031,6 +12031,11 @@ daty@^1.0.7:
     diff-dates "^1.0.0"
     formatoid "^1.0.0"
 
+dayjs@^1.9.3:
+  version "1.9.3"
+  resolved "https://registry.yarnpkg.com/dayjs/-/dayjs-1.9.3.tgz#b7f94b22ad2a136a4ca02a01ab68ae893fe1a268"
+  integrity sha512-V+1SyIvkS+HmNbN1G7A9+ERbFTV9KTXu6Oor98v2xHmzzpp52OIJhQuJSTywWuBY5pyAEmlwbCi1Me87n/SLOw==
+
 days@^1.0.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/days/-/days-1.1.1.tgz#b039d1e5ad5335ca689401855546f02d4cfcb362"
