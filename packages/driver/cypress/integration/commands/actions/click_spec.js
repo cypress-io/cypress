@@ -1214,6 +1214,29 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('errors when scrollToElement is false and element is out of view and is clicked', (done) => {
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.click()` failed because the center of this element is hidden from view')
+          expect(cy.state('window').scrollY).to.equal(0)
+          expect(cy.state('window').scrollX).to.equal(0)
+
+          done()
+        })
+
+        // make sure the input is out of view
+        const $body = cy.$$('body')
+
+        $('<div>Long block 5</div>')
+        .css({
+          height: '500px',
+          border: '1px solid red',
+          marginTop: '10px',
+          width: '100%',
+        }).prependTo($body)
+
+        cy.get('input:first').click({ scrollToElement: false, timeout: 200 })
+      })
+
       it('can force click on hidden elements', () => {
         cy.get('button:first').invoke('hide').click({ force: true })
       })

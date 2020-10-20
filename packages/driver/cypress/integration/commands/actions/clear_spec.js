@@ -76,6 +76,42 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
   })
 
+  it('does not scroll when scrollToElement is false in options', () => {
+    cy.get('input:first').then((el) => {
+      cy.spy(el[0], 'scrollIntoView')
+    })
+
+    cy.get('input:first').clear({ scrollToElement: false })
+
+    cy.get('input:first').then((el) => {
+      expect(el[0].scrollIntoView).not.to.be.called
+    })
+  })
+
+  it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+    cy.get('input:first').then((el) => {
+      cy.spy(el[0], 'scrollIntoView')
+    })
+
+    cy.get('input:first').clear()
+
+    cy.get('input:first').then((el) => {
+      expect(el[0].scrollIntoView).not.to.be.called
+    })
+  })
+
+  it('calls scrollIntoView by default', () => {
+    cy.get('input:first').then((el) => {
+      cy.spy(el[0], 'scrollIntoView')
+    })
+
+    cy.get('input:first').clear()
+
+    cy.get('input:first').then((el) => {
+      expect(el[0].scrollIntoView).to.be.called
+    })
+  })
+
   // https://github.com/cypress-io/cypress/issues/5835
   it('can force clear when hidden in input', () => {
     const input = cy.$$('input:first')

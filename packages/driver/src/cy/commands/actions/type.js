@@ -519,6 +519,9 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         force: options.force,
         timeout: options.timeout,
         interval: options.interval,
+        waitForAnimations: options.waitForAnimations,
+        animationDistanceThreshold: options.animationDistanceThreshold,
+        scrollToElement: options.scrollToElement,
       }).then(() => {
         if (options._log) {
           options._log.snapshot().end()

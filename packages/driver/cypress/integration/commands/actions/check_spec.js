@@ -173,6 +173,42 @@ describe('src/cy/commands/actions/check', () => {
       cy.get('#checkbox-covered-in-span').check({ timeout: 1000, interval: 60 })
     })
 
+    it('does not scroll when scrollToElement is false in options', () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check({ scrollToElement: false })
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('calls scrollIntoView by default', () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.called
+      })
+    })
+
     it('waits until element is no longer disabled', () => {
       const chk = $(':checkbox:first').prop('disabled', true)
 
