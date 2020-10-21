@@ -594,6 +594,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('does not scroll when scrollToElement is false in options', () => {
+        cy.scrollTo('top')
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -606,6 +607,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+        cy.scrollTo('top')
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -618,6 +620,7 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('calls scrollIntoView by default', () => {
+        cy.scrollTo('top')
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -630,6 +633,8 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('errors when scrollToElement is false and element is out of view and is clicked', (done) => {
+        cy.scrollTo('top')
+
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.trigger()` failed because the center of this element is hidden from view')
           expect(cy.state('window').scrollY).to.equal(0)
