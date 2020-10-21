@@ -127,7 +127,7 @@ describe('webpack preprocessor - e2e', () => {
 
     await fs.outputFile(file.filePath, 'console.log()')
 
-    await retry(() => expect(_emit).calledWith('rerun'), 2000)
+    await retry(() => expect(_emit).calledWith('rerun'), 20000)
   })
 })
 
