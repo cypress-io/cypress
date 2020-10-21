@@ -1,6 +1,6 @@
 ---
 name: "🐛 Bug report"
-about: Report a bug found while using Cypress
+about: Report a bug found while using Cypress.
 title: ''
 labels: ''
 assignees: ''

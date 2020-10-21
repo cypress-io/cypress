@@ -1,6 +1,6 @@
 ---
 name: "✨ Feature"
-about: Suggest a feature or enhancement to improve Cypress
+about: Suggest a feature or enhancement to improve Cypress.
 title: ''
 labels: ''
 assignees: ''
