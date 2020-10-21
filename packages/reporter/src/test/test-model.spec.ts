@@ -1,7 +1,8 @@
-import Err from '../errors/err-model'
 import _ from 'lodash'
-import TestModel, { TestProps, UpdatableTestProps } from './test-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
+
+import { ErrModel } from '../errors/err-model'
+import { TestModel, TestProps, UpdatableTestProps } from './test-model'
+import { CommandModel, CommandProps } from '../commands/command-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore } from '../runnables/runnables-store'
 import { AgentProps } from '../agents/agent-model'
@@ -276,7 +277,7 @@ describe('Test model', () => {
       test.addLog(createCommand({ err: {} as Err, hookId: 'h1' }))
       test.addLog(createCommand({ err: { message: 'SomeError' } as Err, hookId: 'h1' }))
       test.addLog(createCommand({ err: {} as Err, hookId: 'h2' }))
-      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as Err, hookId: 'h2' }))
+      test.addLog(createCommand({ name: 'The One', err: { message: 'SomeError' } as ErrModel, hookId: 'h2' }))
       expect(test.commandMatchingErr()!.name).to.equal('The One')
     })
 

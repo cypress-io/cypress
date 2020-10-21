@@ -2,23 +2,24 @@ import _ from 'lodash'
 import { action, computed, observable } from 'mobx'
 import { FileDetails } from '@packages/ui-components'
 
-import Attempt from '../attempts/attempt-model'
-import Err from '../errors/err-model'
+import { AttemptModel } from '../attempts/attempt-model'
+import { ErrModel } from '../errors/err-model'
 import { HookProps } from '../hooks/hook-model'
-import Runnable, { RunnableProps } from '../runnables/runnable-model'
+import { RunnableModel } from '../runnables/runnable-model'
 import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { Node } from '../tree/node'
+import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualNodeModel } from '../tree/virtual-node-model'
 
-export type TestStatus = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
+export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
 export type UpdateTestCallback = () => void
 
-export interface TestProps extends RunnableProps {
-  status: TestStatus | null
-  err?: Err
+export interface TestProps extends RunnableModel {
+  state: TestState | null
+  err?: ErrModel
   isOpen?: boolean
   agents?: Array<AgentProps>
   commands?: Array<CommandProps>
@@ -33,7 +34,7 @@ export interface TestProps extends RunnableProps {
 
 export interface UpdatableTestProps {
   id: TestProps['id']
-  status?: TestProps['status']
+  state?: TestProps['state']
   err?: TestProps['err']
   hookId?: string
   isOpen?: TestProps['isOpen']
@@ -41,20 +42,26 @@ export interface UpdatableTestProps {
   retries?: TestProps['retries']
 }
 
-export default class Test extends Runnable implements Node {
+export class TestModel extends RunnableModel {
   type = 'test'
+  virtualType = VirtualizableType.Test
 
   _callbackAfterUpdate: UpdateTestCallback | null = null
   hooks: HookProps[]
   invocationDetails?: FileDetails
 
-  @observable attempts: Attempt[] = []
+  @observable attempts: AttemptModel[] = []
   @observable _isOpen: boolean | null = null
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
+  @observable virtualNode: VirtualNodeModel
+  onCreateModel: Function
 
-  constructor (props: TestProps, level: number, private store: RunnablesStore) {
+  constructor (props: TestProps, private store: RunnablesStore, level: number, onCreateModel: Function) {
     super(props, level)
+
+    this.virtualNode = new VirtualNodeModel(this.id, this.virtualType)
+    this.onCreateModel = onCreateModel
 
     this.invocationDetails = props.invocationDetails
 
@@ -69,25 +76,15 @@ export default class Test extends Runnable implements Node {
     this._addAttempt(props)
   }
 
-  @computed get children (): Node[] {
-    return this.attempts.map((attempt) => {
-      return {
-        id: [attempt.testId, attempt.id].join('-'),
-        type: 'attempt',
-        attempt,
-      }
-    })
-  }
-
   @computed get isLongRunning () {
-    return _.some(this.attempts, (attempt: Attempt) => {
+    return _.some(this.attempts, (attempt: AttemptModel) => {
       return attempt.isLongRunning
     })
   }
 
   @computed get isOpen () {
     if (this._isOpen === null) {
-      return Boolean(this.status === 'failed'
+      return Boolean(this.state === 'failed'
       || this.isLongRunning
       || this.isActive && (this.hasMultipleAttempts || this.isOpenWhenActive)
       || this.store.hasSingleTest)
@@ -96,16 +93,16 @@ export default class Test extends Runnable implements Node {
     return this._isOpen
   }
 
-  @computed get status () {
-    return this.lastAttempt ? this.lastAttempt.status : 'active'
+  @computed get state () {
+    return this.lastAttempt ? this.lastAttempt.state : 'active'
   }
 
   @computed get err () {
-    return this.lastAttempt ? this.lastAttempt.err : new Err({})
+    return this.lastAttempt?.err
   }
 
   @computed get lastAttempt () {
-    return _.last(this.attempts) as Attempt
+    return _.last(this.attempts) as AttemptModel
   }
 
   @computed get hasMultipleAttempts () {
@@ -113,7 +110,7 @@ export default class Test extends Runnable implements Node {
   }
 
   @computed get hasRetried () {
-    return this.status === 'passed' && this.hasMultipleAttempts
+    return this.state === 'passed' && this.hasMultipleAttempts
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'
@@ -125,18 +122,18 @@ export default class Test extends Runnable implements Node {
     return this.attempts.length - 1
   }
 
-  isLastAttempt (attemptModel: Attempt) {
+  isLastAttempt (attemptModel: AttemptModel) {
     return this.lastAttempt === attemptModel
   }
 
   addLog = (props: LogProps) => {
-    return this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+    return this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
       return attempt.addLog(props)
     })
   }
 
   updateLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry, (attempt: AttemptModel) => {
       attempt.updateLog(props)
     })
   }
@@ -181,7 +178,7 @@ export default class Test extends Runnable implements Node {
   @action finish (props: UpdatableTestProps) {
     this._isFinished = !(props.retries && props.currentRetry) || props.currentRetry >= props.retries
 
-    this._withAttempt(props.currentRetry || 0, (attempt: Attempt) => {
+    this._withAttempt(props.currentRetry || 0, (attempt: AttemptModel) => {
       attempt.finish(props)
     })
   }
@@ -199,14 +196,16 @@ export default class Test extends Runnable implements Node {
   _addAttempt = (props: TestProps) => {
     props.invocationDetails = this.invocationDetails
     props.hooks = this.hooks
-    const attempt = new Attempt(props, this)
+    const attempt = new AttemptModel(props, this, this.onCreateModel)
 
     this.attempts.push(attempt)
+    this.virtualNode.children.push(attempt.virtualNode)
+    this.onCreateModel(attempt)
 
     return attempt
   }
 
-  _withAttempt<T> (attemptIndex: number, cb: (attempt: Attempt) => T) {
+  _withAttempt<T> (attemptIndex: number, cb: (attempt: AttemptModel) => T) {
     const attempt = this.getAttemptByIndex(attemptIndex)
 
     if (attempt) return cb(attempt)

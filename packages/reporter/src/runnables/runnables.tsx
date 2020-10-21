@@ -1,13 +1,13 @@
 import _ from 'lodash'
-import { action } from 'mobx'
+import { action, toJS } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tree from 'react-virtualized-tree'
 
 import AnError, { Error } from '../errors/an-error'
-import Runnable from './runnable-and-suite'
+import { Virtualizable } from '../tree/virtualizable'
 import RunnableHeader from './runnable-header'
-import { RunnablesStore, RunnableArray } from './runnables-store'
+import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
 
@@ -32,22 +32,24 @@ const Loading = () => (
 )
 
 const RunnablesList = observer(({ runnablesStore }: { runnablesStore: RunnablesStore }) => {
-  const { runnables, runnableById } = runnablesStore
+  const { runnables, modelById } = runnablesStore
 
-  console.log(runnables)
+  console.log('render RunnablesList', toJS(runnables))
 
   return (
-    <div className='wrap'>
-      {/* <ul className='runnables'> */}
-      <Tree nodes={runnables}>
-        {({ style, node }) => console.log(node.id, node) || <Runnable style={style} key={node.id} model={runnableById(node.id)} />}
+    <div className='runnables'>
+      <Tree nodes={runnables} nodeMarginLeft={0} onChange={(...args) => {
+        console.log('onChange:', ...args)
+      }}>
+        {({ node, index, measure, onChange, style }) => {
+          return <Virtualizable key={node.id} model={modelById(node.id)} node={node} index={index} measure={measure} onChange={onChange} style={style} />
+        }}
       </Tree>
-      {/* </ul> */}
     </div>
   )
 })
 
-function content (runnablesStore: RunnablesStore, specPath: string, error?: Error) {
+const RunnableContent = observer(({ runnablesStore, specPath, error }: { runnablesStore: RunnablesStore, specPath: string, error?: Error }) => {
   const { isReady, runnables } = runnablesStore
 
   if (!isReady) {
@@ -61,7 +63,7 @@ function content (runnablesStore: RunnablesStore, specPath: string, error?: Erro
   }
 
   return error ? <AnError error={error} /> : <RunnablesList runnablesStore={runnablesStore} />
-}
+})
 
 interface RunnablesProps {
   error?: Error
@@ -79,7 +81,7 @@ class Runnables extends Component<RunnablesProps> {
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
-        {content(runnablesStore, spec.relative, error)}
+        <RunnableContent runnablesStore={runnablesStore} specPath={spec.relative} error={error} />
       </div>
     )
   }

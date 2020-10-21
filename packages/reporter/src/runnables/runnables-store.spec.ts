@@ -1,11 +1,11 @@
 import sinon, { SinonSpy } from 'sinon'
 
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from './runnables-store'
-import SuiteModel, { SuiteProps } from './suite-model'
+import { SuiteModel, SuiteProps } from './suite-model'
 
 import { AppState } from '../lib/app-state'
 import { Scroller } from '../lib/scroller'
-import TestModel, { TestProps } from '../test/test-model'
+import { TestModel, TestProps } from '../test/test-model'
 import { AgentProps } from '../agents/agent-model'
 import { CommandProps } from '../commands/command-model'
 import { RouteProps } from '../routes/route-model'

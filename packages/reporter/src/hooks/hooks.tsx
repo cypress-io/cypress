@@ -4,9 +4,9 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import { FileDetails } from '@packages/ui-components'
 
-import Command from '../commands/command'
+// import { Command } from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
-import HookModel, { HookName } from './hook-model'
+import { HookModel, HookName } from './hook-model'
 import FileOpener from '../lib/file-opener'
 
 export interface HookHeaderProps {
@@ -14,7 +14,7 @@ export interface HookHeaderProps {
   number?: number
 }
 
-const HookHeader = ({ name, number }: HookHeaderProps) => (
+export const HookHeader = ({ name, number }: HookHeaderProps) => (
   <span className='hook-name'>
     {name} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
   </span>
@@ -33,19 +33,20 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
 export interface HookProps {
   model: HookModel
   showNumber: boolean
+  style: React.CSSProperties
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+export const Hook = observer(({ model, showNumber, style }: HookProps) => (
+  <li className={cs('hook-item', { 'hook-failed': model.failed })} style={style}>
     <Collapsible
       header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
       headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
       isOpen={true}
     >
-      <ul className='commands-container'>
+      {/* <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-      </ul>
+      </ul> */}
     </Collapsible>
   </li>
 ))
@@ -64,7 +65,5 @@ const Hooks = observer(({ model }: HooksProps) => (
     {_.map(model.hooks, (hook) => hook.commands.length ? <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} /> : undefined)}
   </ul>
 ))
-
-export { Hook, HookHeader }
 
 export default Hooks

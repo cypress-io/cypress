@@ -3,6 +3,8 @@ import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
 import { FileDetails } from '@packages/ui-components'
+import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualNodeModel } from './../tree/virtual-node-model'
 
 interface ParsedStackMessageLine {
   message: string
@@ -33,7 +35,9 @@ export interface ErrProps {
   codeFrame: CodeFrame
 }
 
-export default class Err {
+export class ErrModel {
+  virtualType = VirtualizableType.Error
+
   @observable name = ''
   @observable message = ''
   @observable stack = ''
@@ -41,11 +45,15 @@ export default class Err {
   @observable.ref parsedStack = [] as ParsedStackLine[]
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
-  // @ts-ignore
-  @observable.ref codeFrame: CodeFrame
+  @observable.ref codeFrame?: CodeFrame
+  @observable level: number
+  @observable virtualNode: VirtualNodeModel
 
-  constructor (props?: Partial<ErrProps>) {
+  constructor (props: Partial<ErrProps> = {}, id: string = 'error', level = 0) {
     this.update(props)
+
+    this.level = level
+    this.virtualNode = new VirtualNodeModel(id, this.virtualType)
   }
 
   @computed get displayMessage () {

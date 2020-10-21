@@ -1,113 +1,60 @@
 import { observer } from 'mobx-react'
-import React, { Component, createRef, RefObject } from 'react'
+import React, { createRef, useEffect } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import events, { Events } from '../lib/events'
-import appState, { AppState } from '../lib/app-state'
-import Collapsible from '../collapsible/collapsible'
-import { indent } from '../lib/util'
-import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
-import TestModel from './test-model'
-import scroller, { Scroller } from '../lib/scroller'
+import appState from '../lib/app-state'
+import { TestModel } from './test-model'
+import scroller from '../lib/scroller'
 
-import Attempts from '../attempts/attempts'
+// TODO:
+// - handle scrollintoview from Attempts somehow
+//   <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+// - model.isOpen for expansion
 
-interface Props {
-  events: Events
-  appState: AppState
-  runnablesStore: RunnablesStore
-  scroller: Scroller
+interface TestProps {
   model: TestModel
-  style?: React.CSSProperties
 }
 
-@observer
-class Test extends Component<Props> {
-  static defaultProps = {
-    events,
-    appState,
-    runnablesStore,
-    scroller,
-  }
+export const Test = observer(({ model }: TestProps) => {
+  const containerRef = createRef<HTMLDivElement>()
 
-  containerRef: RefObject<HTMLDivElement>
+  const scrollIntoView = () => {
+    const { state, shouldRender } = model
 
-  constructor (props: Props) {
-    super(props)
-
-    this.containerRef = createRef<HTMLDivElement>()
-  }
-
-  componentDidMount () {
-    this._scrollIntoView()
-  }
-
-  componentDidUpdate () {
-    this._scrollIntoView()
-    this.props.model.callbackAfterUpdate()
-  }
-
-  _scrollIntoView () {
-    const { appState, model, scroller } = this.props
-    const { status, shouldRender } = model
-
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && status !== 'processing') {
+    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
       window.requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
-        if (this.containerRef.current) {
-          scroller.scrollIntoView(this.containerRef.current as HTMLElement)
+        if (containerRef.current) {
+          scroller.scrollIntoView(containerRef.current as HTMLElement)
         }
       })
     }
   }
 
-  render () {
-    const { model, style } = this.props
+  useEffect(() => {
+    scrollIntoView()
+  }, [true])
 
-    if (!model.shouldRender) return null
+  useEffect(() => {
+    scrollIntoView()
+    model.callbackAfterUpdate()
+  })
 
-    return (
-      <Collapsible
-        style={style}
-        containerRef={this.containerRef}
-        header={this._header()}
-        headerClass='runnable-wrapper'
-        headerStyle={{ paddingLeft: indent(model.level) }}
-        contentClass='runnable-instruments'
-        isOpen={model.isOpen}
-      >
-        {this._contents()}
-      </Collapsible>
-    )
+  if (model.err?.stack) {
+    console.error(model.err?.stack)
   }
 
-  _header () {
-    const { model } = this.props
-
-    return (<>
+  return (
+    <div className='runnable-title'>
       <i aria-hidden='true' className='runnable-state fas' />
-      <span className='runnable-title'>
-        <span>{model.title}</span>
-        <span className='visually-hidden'>{model.status}</span>
-      </span>
+      {model.title}
+      <span className='visually-hidden'>{model.state}</span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
           <i className='fas fa-exclamation-triangle' />
         </Tooltip>
       </span>
-    </>)
-  }
-
-  _contents () {
-    const { model } = this.props
-
-    return (
-      <div style={{ paddingLeft: indent(model.level) }}>
-        <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
-      </div>
-    )
-  }
-}
-
-export default Test
+    </div>
+  )
+})

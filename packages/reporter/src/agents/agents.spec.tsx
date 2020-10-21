@@ -2,8 +2,8 @@ import _ from 'lodash'
 import React from 'react'
 import { shallow } from 'enzyme'
 
-import Agents, { Agent, AgentsList, AgentsModel } from './agents'
-import AgentModel from './agent-model'
+import { Agents, Agent, AgentsList, AgentsModel } from './agents'
+import { AgentModel } from './agent-model'
 
 const agentModel = (props?: Partial<AgentModel>) => {
   return _.extend<AgentModel>({

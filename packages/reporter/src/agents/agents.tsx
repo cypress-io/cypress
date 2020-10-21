@@ -3,15 +3,18 @@ import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
 import Collapsible from '../collapsible/collapsible'
+import { FlattenedNode } from 'react-virtualized-tree'
 
-import AgentModel from './agent-model'
+import { AgentModel } from './agent-model'
 import { Alias } from '../instruments/instrument-model'
+import { indentPadding } from '../lib/util'
+import { Collection } from '../tree/virtual-collection'
 
 export interface AgentProps {
   model: AgentModel
 }
 
-const Agent = observer(({ model }: AgentProps) => (
+export const Agent = observer(({ model }: AgentProps) => (
   <tr className={cs({ 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
@@ -20,33 +23,33 @@ const Agent = observer(({ model }: AgentProps) => (
   </tr>
 ))
 
-export interface AgentsModel {
-  agents: Array<AgentModel>
-}
-
 export interface AgentsProps {
-  model: AgentsModel
+  model: Collection<AgentModel>
+  style: React.CSSProperties
+  measure: Function
 }
 
-const AgentsList = observer(({ model }: AgentsProps) => (
-  <tbody>
-    {_.map(model.agents, (agent) => <Agent key={agent.id} model={agent} />)}
-  </tbody>
-))
+export const Agents = observer(({ model, style, measure }: AgentsProps) => {
+  const onToggle = () => {
+    requestAnimationFrame(() => {
+      measure()
+    })
+  }
 
-const Agents = observer(({ model }: AgentsProps) => (
-  <div
-    className={cs('runnable-agents-region', {
-      'no-agents': !model.agents.length,
-    })}
-  >
-    <div className='instruments-container'>
+  return (
+    <div
+      className={cs('runnable-agents-region', {
+        'no-agents': !model.items.length,
+      })}
+      style={indentPadding(style, model.level)}
+    >
       <ul className='hooks-container'>
         <li className='hook-item'>
           <Collapsible
-            header={`Spies / Stubs (${model.agents.length})`}
+            header={`Spies / Stubs (${model.items.length})`}
             headerClass='hook-header'
             contentClass='instrument-content'
+            onToggle={onToggle}
           >
             <table>
               <thead>
@@ -57,15 +60,13 @@ const Agents = observer(({ model }: AgentsProps) => (
                   <th># Calls</th>
                 </tr>
               </thead>
-              <AgentsList model={model} />
+              <tbody>
+                {_.map(model.items, (agent: AgentModel) => <Agent key={agent.id} model={agent} />)}
+              </tbody>
             </table>
           </Collapsible>
         </li>
       </ul>
     </div>
-  </div>
-))
-
-export { Agent, AgentsList }
-
-export default Agents
+  )
+})

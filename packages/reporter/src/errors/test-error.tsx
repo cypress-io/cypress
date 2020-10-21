@@ -10,7 +10,7 @@ import ErrorStack from '../errors/error-stack'
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { onEnterOrSpace } from '../lib/util'
-import Attempt from '../attempts/attempt-model'
+import { AttemptModel } from '../attempts/attempt-model'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -31,11 +31,12 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: Attempt
+  model: AttemptModel
+  style: React.CSSProperties
   isTestError?: boolean
 }
 
-const TestError = observer((props: TestErrorProps) => {
+export const TestError = observer((props: TestErrorProps) => {
   const md = new Markdown('zero')
 
   md.enable(['backticks', 'emphasis', 'escape'])
@@ -55,12 +56,15 @@ const TestError = observer((props: TestErrorProps) => {
   }
 
   const { err } = props.model
+
+  if (!err) return null
+
   const { codeFrame } = err
 
   if (!err.displayMessage) return null
 
   return (
-    <div className='runnable-err-wrapper'>
+    <div className='runnable-err-wrapper' style={props.style}>
       <div className='runnable-err'>
         <div className='runnable-err-header'>
           <div className='runnable-err-name'>
@@ -98,5 +102,3 @@ const TestError = observer((props: TestErrorProps) => {
     </div>
   )
 })
-
-export default TestError

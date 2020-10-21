@@ -4,8 +4,10 @@ import { observable, computed } from 'mobx'
 import { FileDetails } from '@packages/ui-components'
 
 import { Alias } from '../instruments/instrument-model'
-import Err from '../errors/err-model'
-import CommandModel from '../commands/command-model'
+import { ErrModel } from '../errors/err-model'
+import { CommandModel } from '../commands/command-model'
+import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualNodeModel } from '../tree/virtual-node-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
 
@@ -15,7 +17,9 @@ export interface HookProps {
   invocationDetails?: FileDetails
 }
 
-export default class Hook implements HookProps {
+export class HookModel implements HookProps {
+  virtualType = VirtualizableType.Hook
+
   @observable hookId: string
   @observable hookName: HookName
   @observable hookNumber?: number
@@ -23,14 +27,18 @@ export default class Hook implements HookProps {
   @observable invocationOrder?: number
   @observable commands: Array<CommandModel> = []
   @observable failed = false
+  @observable virtualNode: VirtualNodeModel
+  onCreateModel: Function
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: HookProps) {
+  constructor (props: HookProps, onCreateModel: Function) {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
+    this.virtualNode = new VirtualNodeModel(`${this.hookId}-${this.hookName}`, VirtualizableType.Hook)
+    this.onCreateModel = onCreateModel
   }
 
   @computed get aliasesWithDuplicates () {
@@ -82,11 +90,18 @@ export default class Hook implements HookProps {
     } else {
       this.commands.push(command)
     }
+
+    this.virtualNode.children.push(command.virtualNode)
+    this.onCreateModel(command)
   }
 
-  commandMatchingErr (errToMatch: Err) {
+  commandMatchingErr (errToMatch?: ErrModel) {
+    if (!errToMatch) return
+
     return _(this.commands)
     .filter(({ err }) => {
+      if (!err) return false
+
       return err && err.message === errToMatch.message && err.message !== undefined
     })
     .last()

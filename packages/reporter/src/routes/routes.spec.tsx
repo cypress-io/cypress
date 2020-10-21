@@ -2,8 +2,8 @@ import _ from 'lodash'
 import { shallow } from 'enzyme'
 import React from 'react'
 
-import Routes, { RoutesList, Route, RouteListModel } from './routes'
-import RouteModel from './route-model'
+import { Routes, RoutesList, Route, RouteListModel } from './routes'
+import { RouteModel } from './route-model'
 
 const routeModel = (props?: Partial<RouteModel>) => {
   return _.extend<RouteModel>({

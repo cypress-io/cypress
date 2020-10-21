@@ -12,6 +12,7 @@ interface Props {
   containerRef?: RefObject<HTMLDivElement>
   contentClass?: string
   style?: CSSProperties
+  onToggle?: Function
 }
 
 interface State {
@@ -72,6 +73,10 @@ class Collapsible extends Component<Props, State> {
 
   _toggleOpen = () => {
     this.setState({ isOpen: !this.state.isOpen })
+
+    if (this.props.onToggle) {
+      this.props.onToggle(!this.state.isOpen)
+    }
   }
 
   _onClick = (e: MouseEvent) => {

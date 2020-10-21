@@ -2,7 +2,7 @@ import { shallow } from 'enzyme'
 import _ from 'lodash'
 import React from 'react'
 
-import HookModel from './hook-model'
+import { HookModel } from './hook-model'
 import Hooks, { Hook, HookHeader, HooksModel } from './hooks'
 
 const commandModel = () => {

@@ -1,16 +1,13 @@
 .reporter {
-  .attempts {
-    .attempt-item > .collapsible > .collapsible-header-wrapper {
+  .attempt {
+    .attempt-header {
       display: none;
+      margin-bottom: 7px;
     }
 
-    &.has-multiple-attempts .attempt-item > .collapsible > .collapsible-header-wrapper {
+    &.show .attempt-header {
       display: flex;
     }
-  }
-
-  .attempt-item {
-    margin-bottom: 7px;
 
     > .collapsible {
       position: relative;
@@ -18,7 +15,7 @@
       .collapsible-header-inner {
         outline: none;
       }
-      
+
       &:before {
         border-left: 1px solid #dcdcdc;
         content: '';
@@ -41,7 +38,7 @@
         i.fa-angle-down {
           margin-top: 0;
         }
-  
+
         i.fa-angle-up {
           order: 1;
           margin-top: -4px;
@@ -51,10 +48,10 @@
     .open-close-indicator {
       display: flex;
       flex-direction: column;
-  
+
       i {
         margin-right: 5px;
-  
+
         &.fa-angle-down {
           margin-top: -4px;
         }
@@ -62,42 +59,41 @@
     }
   }
 
-
   .attempt-state-active {
     .attempt-state {
 
     @include runnable-state-active;
     }
   }
+
   .attempt-state-processing {
     .attempt-state {
 
     @include runnable-state-processing;
     }
   }
+
   .attempt-state-failed {
     .attempt-state {
       @include runnable-state-failed;
     }
 
-    .attempt-name:after {
+    .attempt-header:after {
       color: $fail;
     }
   }
+
   .attempt-state-passed {
     .attempt-state {
-
-    @include runnable-state-passed;
+      @include runnable-state-passed;
     }
 
-
-    .attempt-name:after {
+    .attempt-header:after {
       color: $pass;
     }
   }
 
-
-  .attempt-name {
+  .attempt-header {
     display: flex;
     justify-content: flex-end;
     position: relative;

@@ -1,8 +1,10 @@
 import { action, computed, observable } from 'mobx'
 
-import Err from '../errors/err-model'
-import Instrument, { InstrumentProps } from '../instruments/instrument-model'
+import { ErrModel } from '../errors/err-model'
+import { InstrumentModel, InstrumentProps } from '../instruments/instrument-model'
 import { TimeoutID } from '../lib/types'
+import { VirtualNodeModel } from '../tree/virtual-node-model'
+import { VirtualizableType } from '../tree/virtualizable'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -12,7 +14,7 @@ interface RenderProps {
 }
 
 export interface CommandProps extends InstrumentProps {
-  err?: Err
+  err?: ErrModel
   event?: boolean
   number?: number
   numElements: number
@@ -23,9 +25,11 @@ export interface CommandProps extends InstrumentProps {
   hookId: string
 }
 
-export default class Command extends Instrument {
+export class CommandModel extends InstrumentModel {
+  virtualType = VirtualizableType.Command
+
   @observable.struct renderProps: RenderProps = {}
-  @observable err = new Err({})
+  @observable err?: ErrModel
   @observable event?: boolean = false
   @observable isLongRunning = false
   @observable number?: number
@@ -33,10 +37,12 @@ export default class Command extends Instrument {
   @observable timeout: number
   @observable visible?: boolean = true
   @observable wallClockStartedAt: string
-  @observable duplicates: Array<Command> = []
+  @observable duplicates: Array<CommandModel> = []
   @observable isDuplicate = false
   @observable hookId: string
+  @observable virtualNode: VirtualNodeModel
 
+  private _id: string
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
 
@@ -56,7 +62,7 @@ export default class Command extends Instrument {
   constructor (props: CommandProps) {
     super(props)
 
-    this.err.update(props.err)
+    this._id = `command-${props.hookId}-${props.id}`
     this.event = props.event
     this.number = props.number
     this.numElements = props.numElements
@@ -65,6 +71,11 @@ export default class Command extends Instrument {
     this.visible = props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
+    this.virtualNode = new VirtualNodeModel(this._id, VirtualizableType.Command)
+
+    if (props.err) {
+      this.err = new ErrModel(props.err, this._id)
+    }
 
     this._checkLongRunning()
   }
@@ -72,26 +83,29 @@ export default class Command extends Instrument {
   update (props: CommandProps) {
     super.update(props)
 
-    this.err.update(props.err)
     this.event = props.event
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
     this.timeout = props.timeout
 
+    if (props.err) {
+      this.err = new ErrModel(props.err, this._id)
+    }
+
     this._checkLongRunning()
   }
 
-  isMatchingEvent (command: Command) {
+  isMatchingEvent (command: CommandModel) {
     return command.event && this.matches(command)
   }
 
-  addDuplicate (command: Command) {
+  addDuplicate (command: CommandModel) {
     command.isDuplicate = true
     this.duplicates.push(command)
   }
 
-  matches (command: Command) {
+  matches (command: CommandModel) {
     return (
       command.type === this.type &&
       command.name === this.name &&

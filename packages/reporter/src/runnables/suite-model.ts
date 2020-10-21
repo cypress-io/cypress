@@ -1,18 +1,25 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
-import Runnable, { RunnableProps } from './runnable-model'
-import TestModel, { TestProps, TestStatus } from '../test/test-model'
-import { Node } from '../tree/node'
 
-// export interface SuiteProps extends RunnableProps {
-//   children: Array<SuiteProps | TestProps>
-// }
+import { RunnableModel } from './runnable-model'
+import { TestModel, TestState } from '../test/test-model'
+import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualNodeModel } from '../tree/virtual-node-model'
 
-export default class Suite extends Runnable implements Node {
-  @observable children: Array<TestModel | Suite> = []
+export class SuiteModel extends RunnableModel {
   type = 'suite'
+  virtualType = VirtualizableType.Suite
 
-  @computed get status (): TestStatus {
+  @observable children: Array<TestModel | SuiteModel> = []
+  @observable virtualNode: VirtualNodeModel
+
+  constructor (props: RunnableModel, level: number) {
+    super(props, level)
+
+    this.virtualNode = new VirtualNodeModel(this.id, this.virtualType)
+  }
+
+  @computed get state (): TestState {
     if (this._anyChildrenFailed) {
       return 'failed'
     }
@@ -28,8 +35,8 @@ export default class Suite extends Runnable implements Node {
     return 'processing'
   }
 
-  @computed get _childStatuses () {
-    return _.map(this.children, 'status')
+  @computed get _childStates () {
+    return _.map(this.children, 'state')
   }
 
   @computed get hasRetried (): boolean {
@@ -37,21 +44,21 @@ export default class Suite extends Runnable implements Node {
   }
 
   @computed get _anyChildrenFailed () {
-    return _.some(this._childStatuses, (status) => {
-      return status === 'failed'
+    return _.some(this._childStates, (state) => {
+      return state === 'failed'
     })
   }
 
   @computed get _allChildrenPassedOrPending () {
-    return !this._childStatuses.length || _.every(this._childStatuses, (status) => {
-      return status === 'passed' || status === 'pending'
+    return !this._childStates.length || _.every(this._childStates, (state) => {
+      return state === 'passed' || state === 'pending'
     })
   }
 
   @computed get _allChildrenPending () {
-    return !!this._childStatuses.length
-            && _.every(this._childStatuses, (status) => {
-              return status === 'pending'
+    return !!this._childStates.length
+            && _.every(this._childStates, (state) => {
+              return state === 'pending'
             })
   }
 }

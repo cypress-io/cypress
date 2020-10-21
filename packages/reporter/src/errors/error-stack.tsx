@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
-import Err from './err-model'
+import { ErrModel } from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
 

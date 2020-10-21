@@ -1,15 +1,17 @@
 import _ from 'lodash'
-import { action, observable, computed } from 'mobx'
+import { action, observable } from 'mobx'
+import { Node } from 'react-virtualized-tree'
 
 import appState, { AppState } from '../lib/app-state'
-import AgentModel, { AgentProps } from '../agents/agent-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
-import RouteModel, { RouteProps } from '../routes/route-model'
+import { AgentModel, AgentProps } from '../agents/agent-model'
+import { CommandModel, CommandProps } from '../commands/command-model'
+import { RouteModel, RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
 import { HookProps } from '../hooks/hook-model'
-import SuiteModel, { SuiteProps } from './suite-model'
-import TestModel, { TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
-import RunnableModel from './runnable-model'
+import { SuiteModel } from './suite-model'
+import { TestModel, TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
+import { RunnableModel } from './runnable-model'
+import { Virtualizable } from './../tree/virtualizable'
 
 const defaults = {
   hasSingleTest: false,
@@ -27,22 +29,20 @@ interface Props {
 
 export type LogProps = AgentProps | CommandProps | RouteProps
 
-export type RunnableArray = Array<TestModel | SuiteModel>
-
 export type Log = AgentModel | CommandModel | RouteModel
 
 export interface RootRunnable {
-  hooks?: Array<HookProps>
-  tests?: Array<TestProps>
-  suites?: Array<SuiteProps>
+  hooks?: HookProps[]
+  tests?: TestProps[]
+  suites?: SuiteModel[]
 }
 
 type RunnableType = 'test' | 'suite'
-type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
+type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteModel
 
 class RunnablesStore {
   @observable isReady = defaults.isReady
-  @observable runnables: RunnableArray = []
+  @observable runnables: Node[] = []
   hasTests: boolean = false
   hasSingleTest: boolean = false
 
@@ -51,7 +51,7 @@ class RunnablesStore {
   [key: string]: any
 
   _tests: Record<string, TestModel> = {}
-  _runnables: Record<string, RunnableModel> = {}
+  _models: Record<string, Virtualizable> = {}
   _logs: Record<string, Log> = {}
   _runnablesQueue: Array<RunnableModel> = []
 
@@ -65,7 +65,6 @@ class RunnablesStore {
 
   setRunnables (rootRunnable: RootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
-    // debugger
     this.isReady = true
 
     const numTests = _.keys(this._tests).length
@@ -78,7 +77,7 @@ class RunnablesStore {
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
     return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level).concat(
-      this._createRunnables<SuiteProps>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
+      this._createRunnables<SuiteModel>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
     )
   }
 
@@ -91,28 +90,37 @@ class RunnablesStore {
   _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number) {
     props.hooks = _.unionBy(props.hooks, hooks, 'hookId')
 
-    return type === 'suite' ? this._createSuite(props as SuiteProps, level) : this._createTest(props as TestProps, level)
+    return type === 'suite' ? this._createSuite(props as SuiteModel, level) : this._createTest(props as TestProps, level)
   }
 
-  _createSuite (props: SuiteProps, level: number) {
+  _createSuite (props: SuiteModel, level: number) {
     const suite = new SuiteModel(props, level)
 
     this._runnablesQueue.push(suite)
-    this._runnables[suite.id] = suite
-    suite.children = this._createRunnableChildren(props, ++level)
+    this._addModel(suite)
+    this._models[suite.virtualNode.id] = suite
+    suite.virtualNode.children = this._createRunnableChildren(props, ++level)
 
-    return suite
+    return suite.virtualNode
   }
 
   _createTest (props: TestProps, level: number) {
-    const test = new TestModel(props, level, this)
+    const test = new TestModel(props, this, level, this._addModel)
 
     this._runnablesQueue.push(test)
-    this._tests[test.id] = this._runnables[test.id] = test
+    this._tests[test.id] = test
+    this._addModel(test)
 
-    return test
+    return test.virtualNode
   }
 
+  _addModel = (model: Virtualizable) => {
+    console.log('add model:', model.virtualType, model.virtualNode.id)
+    this._models[model.virtualNode.id] = model
+  }
+
+  // QUESTION: is this necessary with virtualization? Does it get in the way of virtualization?
+  //
   // progressively renders the runnables instead of all of them being rendered
   // at once. this prevents a noticeable lag in initial rendering when there
   // is a large number of tests
@@ -172,8 +180,8 @@ class RunnablesStore {
     return this._tests[id]
   }
 
-  runnableById = (id: string) => {
-    return this._runnables[id]
+  modelById = (id: string | number) => {
+    return this._models[id]
   }
 
   addLog (log: LogProps) {
@@ -185,7 +193,7 @@ class RunnablesStore {
   _withTest (id: string, cb: ((test: TestModel) => void)) {
     // we get events for suites and tests, but only tests change during a run,
     // so if the id isn't found in this._tests, we ignore it b/c it's a suite
-    const test = this._tests[id]
+    const test = this.testById(id)
 
     if (test) cb(test)
   }
@@ -203,6 +211,7 @@ class RunnablesStore {
 
     this.runnables = []
     this._tests = {}
+    this._models = {}
     this._runnablesQueue = []
   }
 }

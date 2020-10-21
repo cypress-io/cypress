@@ -1,15 +1,15 @@
 import sinon from 'sinon'
 
-import Hook from './hook-model'
+import { HookModel } from './hook-model'
 
-import CommandModel from '../commands/command-model'
-import ErrModel from '../errors/err-model'
+import { CommandModel } from '../commands/command-model'
+import { ErrModel } from '../errors/err-model'
 
 describe('Hook model', () => {
-  let hook: Hook
+  let hook: HookModel
 
   beforeEach(() => {
-    hook = new Hook({
+    hook = new HookModel({
       hookId: 'h1',
       hookName: 'before each',
     })

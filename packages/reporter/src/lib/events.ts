@@ -100,7 +100,7 @@ const events: Events = {
     runner.on('test:after:run', action('test:after:run', (runnable: TestProps) => {
       runnablesStore.runnableFinished(runnable)
       if (runnable.final) {
-        statsStore.incrementCount(runnable.status!)
+        statsStore.incrementCount(runnable.state!)
       }
     }))
 
@@ -163,7 +163,7 @@ const events: Events = {
     })
 
     localBus.on('show:error', (test: TestModel) => {
-      const command = test.err.isCommandErr ? test.commandMatchingErr() : null
+      const command = test.err?.isCommandErr ? test.commandMatchingErr() : null
 
       runner.emit('runner:console:error', {
         err: test.err,

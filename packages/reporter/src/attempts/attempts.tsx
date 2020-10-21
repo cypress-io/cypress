@@ -1,101 +1,69 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { useEffect } from 'react'
+import { FlattenedNode } from 'react-virtualized-tree'
 
-import Agents from '../agents/agents'
-import Collapsible from '../collapsible/collapsible'
-import Hooks from '../hooks/hooks'
-import Routes from '../routes/routes'
-import TestError from '../errors/test-error'
-import TestModel from '../test/test-model'
-import AttemptModel from './attempt-model'
+import { AttemptModel } from './attempt-model'
+import { VirtualExpandable, ExpandableProps } from '../collapsible/expandable'
+
+// TODO:
+// - handle scrollIntoView
+// - use model.isOpen for expandable?
+// - does NoCommands work properly?
 
 const NoCommands = () => (
-  <ul className='hooks-container'>
-    <li className='no-commands'>
-      No commands were issued in this test.
-    </li>
-  </ul>
+  <div className='no-commands'>
+    No commands were issued in this test.
+  </div>
 )
 
-const AttemptHeader = ({ index }: {index: number}) => (
-  <span className='attempt-tag'>
-    <span className='open-close-indicator'>
-      <i className='fa fa-fw fa-angle-up' />
-      <i className='fa fa-fw fa-angle-down' />
-    </span>
-    Attempt {index + 1}
-    <i className="attempt-state fa fa-fw" />
-  </span>
-)
+interface AttemptProps {
+  model: AttemptModel
+  style: React.CSSProperties
+  expandableProps: ExpandableProps
+  // scrollIntoView: Function
+}
 
-function renderAttemptContent (model: AttemptModel) {
-  // performance optimization - don't render contents if not open
+export const Attempt = observer(({ model, style, expandableProps }: AttemptProps) => {
+  useEffect(() => {
+    // scrollIntoView()
+    requestAnimationFrame(() => {
+      // FIXME: can't do this, it causes a render loop
+      expandableProps.measure()
+    })
+  }, [true])
+
+  // QUESTION: is this still necessary? can it be done without a hack?
+  // HACK: causes component update when command log is added
+  model.commands.length
+
+  if (!model.test.hasMultipleAttempts || model.hasCommands) {
+    return <div className='attempt'></div>
+  }
 
   return (
-    <div className={`attempt-${model.id + 1}`}>
-      <Agents model={model} />
-      <Routes model={model} />
-      <div ref='commands' className='runnable-commands-region'>
-        {model.hasCommands ? <Hooks model={model} /> : <NoCommands />}
-      </div>
-
-      <div className='attempt-error-region'>
-        <TestError model={model} isTestError={model.isLast} />
-      </div>
-    </div>
-  )
-}
-
-@observer
-class Attempt extends Component<{model: AttemptModel, scrollIntoView: Function}> {
-  componentDidUpdate () {
-    this.props.scrollIntoView()
-  }
-
-  render () {
-    const { model } = this.props
-
-    // HACK: causes component update when command log is added
-    model.commands.length
-
-    return (
-      <li
+    <VirtualExpandable {...expandableProps}>
+      <div
         key={model.id}
-        className={cs('attempt-item', `attempt-state-${model.status}`, {
-          'attempt-failed': model.status === 'failed',
+        className={cs('attempt', `attempt-state-${model.state}`, {
+          'attempt-failed': model.state === 'failed',
+          'show': model.test.hasMultipleAttempts,
         })}
-        ref="container"
+        style={style}
       >
-        <Collapsible
-          header={<AttemptHeader index={model.id}/>}
-          headerClass='attempt-name'
-          isOpen={model.isOpen}
-        >
-          {renderAttemptContent(model)}
-        </Collapsible>
-      </li>
-    )
-  }
-}
-
-const Attempts = observer(({ test, scrollIntoView }: {test: TestModel, scrollIntoView: Function}) => {
-  return (<ul className={cs('attempts', {
-    'has-multiple-attempts': test.hasMultipleAttempts,
-  })}>
-    {_.map(test.attempts, (attempt) => {
-      return (
-        <Attempt
-          key={attempt.id}
-          scrollIntoView={scrollIntoView}
-          model={attempt}
-        />
-      )
-    })}
-  </ul>)
+        <div className='attempt-header'>
+          <div className='attempt-tag'>
+            <div className='open-close-indicator'>
+              <i className='fa fa-fw fa-angle-up' />
+              <i className='fa fa-fw fa-angle-down' />
+            </div>
+            Attempt {model.index + 1}
+            <i className="attempt-state fa fa-fw" />
+          </div>
+        </div>
+        {!model.hasCommands && <NoCommands />}
+      </div>
+    </VirtualExpandable>
+  )
 })
-
-export { Attempt, AttemptHeader, NoCommands }
-
-export default Attempts

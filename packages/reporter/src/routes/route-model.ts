@@ -1,5 +1,6 @@
 import { observable } from 'mobx'
-import Instrument, { InstrumentProps } from '../instruments/instrument-model'
+
+import { InstrumentModel, InstrumentProps, InstrumentCollection } from '../instruments/instrument-model'
 
 export interface RouteProps extends InstrumentProps {
   isStubbed: boolean
@@ -8,7 +9,7 @@ export interface RouteProps extends InstrumentProps {
   url: string
 }
 
-export default class Route extends Instrument {
+export class RouteModel extends InstrumentModel {
   @observable isStubbed: boolean
   @observable method: string
   @observable numResponses: number = 0

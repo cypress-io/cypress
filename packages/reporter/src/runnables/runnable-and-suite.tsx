@@ -1,73 +1,46 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent } from 'react'
+import React from 'react'
+import { FlattenedNode } from 'react-virtualized-tree'
 
-import { indent } from '../lib/util'
+import { indentPadding } from '../lib/util'
+import { SuiteModel } from './suite-model'
+import { TestModel } from '../test/test-model'
 
-import Test from '../test/test'
-import Collapsible from '../collapsible/collapsible'
-
-import SuiteModel from './suite-model'
-import TestModel from '../test/test-model'
+import { Expandable, ExpandableProps } from '../collapsible/expandable'
+import { Test } from '../test/test'
 
 interface SuiteProps {
   model: SuiteModel
   style?: React.CSSProperties
 }
 
-const Suite = observer(({ model, style }: SuiteProps) => {
+export const Suite = observer(({ model }: SuiteProps) => {
   if (!model.shouldRender) return null
 
   return (
-    <Collapsible
-      style={style}
-      header={<span className='runnable-title'>{model.title}</span>}
-      headerClass='runnable-wrapper'
-      headerStyle={{ paddingLeft: indent(model.level) }}
-      contentClass='runnables-region'
-      isOpen={true}
-    >
-      {/* <ul className='runnables'>
-        {_.map(model.children, (runnable) => <Runnable key={runnable.id} model={runnable} />)}
-      </ul> */}
-    </Collapsible>
+    <div className='runnable-title'>
+      {model.title}
+    </div>
   )
 })
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
-  style?: React.CSSProperties
+  style: React.CSSProperties
+  expandableProps: ExpandableProps
 }
 
-@observer
-class Runnable extends Component<RunnableProps> {
-  @observable isHovering = false
-
-  render () {
-    const { model, style } = this.props
-
-    return (
-      <li
-        className={cs(`${model.type} runnable runnable-${model.status}`, {
-          'runnable-retried': model.hasRetried,
-          hover: this.isHovering,
-        })}
-        onMouseOver={this._hover(true)}
-        onMouseOut={this._hover(false)}
-      >
-        {model.type === 'test' ? <Test style={style} model={model as TestModel} /> : <Suite style={style} model={model as SuiteModel} />}
-      </li>
-    )
-  }
-
-  _hover = (shouldHover: boolean) => action('runnable:hover', (e: MouseEvent) => {
-    e.stopPropagation()
-    this.isHovering = shouldHover
-  })
-}
-
-export { Suite }
-
-export default Runnable
+export const Runnable = observer(({ model, style = {}, expandableProps }: RunnableProps) => (
+  <div
+    className={cs(`${model.type} runnable runnable-${model.state}`, {
+      'runnable-retried': model.hasRetried,
+    })}
+    style={indentPadding(style, model.level)}
+  >
+    <Expandable expandableProps={expandableProps}>
+      {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+    </Expandable>
+  </div>
+))

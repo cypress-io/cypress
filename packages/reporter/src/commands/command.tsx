@@ -14,7 +14,7 @@ import { TimeoutID } from '../lib/types'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
-import CommandModel from './command-model'
+import { CommandModel } from './command-model'
 
 const md = new Markdown()
 
@@ -132,13 +132,14 @@ const Progress = observer(({ model }: ProgressProps) => {
 interface Props {
   model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
-  appState: AppState
-  events: Events
-  runnablesStore: RunnablesStore
+  style: React.CSSProperties
+  appState?: AppState
+  events?: Events
+  runnablesStore?: RunnablesStore
 }
 
 @observer
-class Command extends Component<Props> {
+export class Command extends Component<Props> {
   @observable isOpen = false
   private _showTimeout?: TimeoutID
 
@@ -149,7 +150,7 @@ class Command extends Component<Props> {
   }
 
   render () {
-    const { model, aliasesWithDuplicates } = this.props
+    const { model, aliasesWithDuplicates, style } = this.props
     const message = model.displayMessage
 
     return (
@@ -176,6 +177,7 @@ class Command extends Component<Props> {
         )}
         onMouseOver={() => this._snapshot(true)}
         onMouseOut={() => this._snapshot(false)}
+        style={style}
       >
         <FlashOnClick
           message='Printed output to your console'
@@ -224,6 +226,8 @@ class Command extends Component<Props> {
   }
 
   _duplicates () {
+    return null
+
     const { appState, events, model, runnablesStore } = this.props
 
     if (!this.isOpen || !model.hasDuplicates) return null
@@ -324,5 +328,3 @@ class Command extends Component<Props> {
 }
 
 export { Aliases, AliasesReferences, Message, Progress }
-
-export default Command

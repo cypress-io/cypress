@@ -1,4 +1,4 @@
-import Err from './err-model'
+import { ErrModel } from './err-model'
 
 describe('Err model', () => {
   context('.displayMessage', () => {

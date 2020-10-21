@@ -1,12 +1,12 @@
 import _ from 'lodash'
 import sinon, { SinonFakeTimers } from 'sinon'
 
-import CommandModel, { CommandProps as CommandModelProps } from './command-model'
+import { CommandModel, CommandProps } from './command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
-const commandProps = (props?: Partial<CommandModelProps>) => {
-  return _.extend<CommandModelProps>({
+const commandProps = (props?: Partial<CommandProps>) => {
+  return _.extend<CommandProps>({
     renderProps: {},
     err: {},
     event: false,
@@ -55,7 +55,7 @@ describe('Command model', () => {
     beforeEach(() => {
       command = new CommandModel(commandProps({ state: null }))
       clock.tick(300)
-      command.update({ state: 'pending' } as CommandModelProps)
+      command.update({ state: 'pending' } as CommandProps)
     })
 
     it('sets isLongRunning to true if model is still pending', () => {

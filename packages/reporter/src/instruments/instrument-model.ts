@@ -23,7 +23,7 @@ export interface InstrumentProps {
   testId: string
 }
 
-export default class Log {
+export class InstrumentModel {
   @observable.ref alias?: Alias = null
   @observable aliasType?: string | null = null
   @observable displayName?: string
