@@ -212,6 +212,7 @@ export class Http {
       req,
       res,
 
+      getRenderedHTMLOrigins: this.getRenderedHTMLOrigins.bind(this),
       buffers: this.buffers,
       config: this.config,
       getFileServerToken: this.getFileServerToken,

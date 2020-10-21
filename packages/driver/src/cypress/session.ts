@@ -7,6 +7,21 @@ type LocalStorageOptions = {origin: string, value: object, clear?: boolean}
 
 export function create (Cypress, state) {
   const { Promise } = Cypress
+
+  async function mapOrigins (origins) {
+    const current_origin = $Location.create(window.location.href).originPolicy
+
+    return _.uniq(_.flatten(await Promise.map(
+      ([] as string[]).concat(origins), async (v) => {
+        if (v === '*') {
+          return _.keys(await Cypress.backend('get:fetchedHTMLOrigins'))
+        }
+
+        return v === 'current_origin' ? current_origin : $Location.create(v).originPolicy
+      },
+    )))
+  }
+
   const session = {
 
     async clearCurrentSessionData () {
@@ -59,19 +74,9 @@ export function create (Cypress, state) {
         origin: 'current_origin',
       })
 
-      const res = await Cypress.backend('get:fetchedHTMLOrigins')
-
-      debugger
-
-      return
-
       const current_origin = $Location.create(window.location.href).originPolicy
 
-      const urls = _.chain([] as string[])
-      .concat(opts.origin)
-      .map((v) => v === 'current_origin' ? current_origin : $Location.create(v).originPolicy)
-      .uniq()
-      .value()
+      const urls = await mapOrigins(opts.origin)
 
       const results = [] as LocalStorageResult[]
 
