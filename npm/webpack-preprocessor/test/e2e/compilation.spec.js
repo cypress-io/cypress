@@ -105,7 +105,8 @@ describe('webpack preprocessor - e2e', () => {
     })
   })
 
-  xit('triggers rerun on syntax error', async () => {
+  // eslint-disable-next-line
+  it.skip('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
     const _emit = sinon.spy(file, 'emit')
 
