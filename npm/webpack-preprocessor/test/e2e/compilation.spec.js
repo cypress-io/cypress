@@ -107,10 +107,9 @@ describe('webpack preprocessor - e2e', () => {
 
   xit('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
+    const _emit = sinon.spy(file, 'emit')
 
     await preprocessor()(file)
-
-    const _emit = sinon.spy(file, 'emit')
 
     await fs.outputFile(file.filePath, '{')
 
@@ -118,8 +117,9 @@ describe('webpack preprocessor - e2e', () => {
   })
 
   it('does not call rerun on initial build, but on subsequent builds', async () => {
-    file = createFile({ shouldWatch: true })
     const _emit = sinon.spy(file, 'emit')
+
+    file = createFile({ shouldWatch: true })
 
     await preprocessor()(file)
 

@@ -851,12 +851,14 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - checkout
+      - run: yarn
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/webpack-preprocessor test
+          command: DEBUG=cypress:webpack yarn workspace @cypress/webpack-preprocessor test
       - run:
           name: Test babelrc
           command: yarn test
