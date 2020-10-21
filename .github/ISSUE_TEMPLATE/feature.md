@@ -2,7 +2,7 @@
 name: "✨ Feature"
 about: Suggest a feature or enhancement to improve Cypress
 title: ''
-labels: 'type: feature'
+labels: ''
 assignees: ''
 ---
 

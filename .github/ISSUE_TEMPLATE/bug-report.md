@@ -2,7 +2,7 @@
 name: "🐛 Bug report"
 about: Report a bug found while using Cypress
 title: ''
-labels: 'type: bug'
+labels: ''
 assignees: ''
 ---
 
