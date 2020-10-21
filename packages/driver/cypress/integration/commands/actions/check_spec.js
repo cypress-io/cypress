@@ -174,7 +174,7 @@ describe('src/cy/commands/actions/check', () => {
     })
 
     it('does not scroll when scrollToElement is false in options', () => {
-      cy.scrollTo('top')
+      cy.get(':checkbox:first').scrollIntoView()
       cy.get(':checkbox:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
       })
@@ -187,7 +187,7 @@ describe('src/cy/commands/actions/check', () => {
     })
 
     it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
-      cy.scrollTo('top')
+      cy.get(':checkbox:first').scrollIntoView()
       cy.get(':checkbox:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
       })
