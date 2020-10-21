@@ -20,6 +20,9 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# npm packages
+npm/**/cypress/screenshots
+
 # from example
 packages/example/app
 packages/example/build
