@@ -133,9 +133,14 @@ describe('webpack preprocessor - e2e', () => {
 
 function retry (fn, timeout = 1000) {
   let timedOut = false
+  let count = 0
 
   setTimeout(() => timedOut = true, timeout)
   const tryFn = () => {
+    count++
+    // eslint-disable-next-line
+    console.log('Try ', count)
+
     return Bluebird.try(() => {
       return fn()
     })
