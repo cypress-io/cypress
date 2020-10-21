@@ -104,7 +104,7 @@ export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, static
   function getBody (): string {
     // NOTE: for backwards compatibility with cy.route
     if (data === null) {
-      return ''
+      return JSON.stringify('')
     }
 
     if (!_.isBuffer(data) && !_.isString(data)) {
