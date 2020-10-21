@@ -7,13 +7,14 @@ import { renderTargets, renderMochaTarget } from './render-target'
 
 const state = {}
 
-function setupEnvironment() {
+function setupEnvironment () {
   // Exposed for HMR
   window.runAllSpecs = runAllSpecs
   window.mocha = new Mocha({ reporter: 'HTML', ui: 'bdd' })
   window.mocha.suite.emit('pre-require', window, null, window.mocha)
   window.chai = chai
   const { expect, should, assert } = window.chai
+
   window.expect = expect
   window.should = should
   window.assert = assert
@@ -21,7 +22,7 @@ function setupEnvironment() {
   window.mocha.cleanReferencesAfterRun()
 }
 
-function setState(specMap, support) {
+function setState (specMap, support) {
   // Globals, used for HMR
   window.specNames = state.specNames = Object.keys(specMap)
   window.support = state.support = support
@@ -32,8 +33,8 @@ function executeSpecs () {
   window.mocha.run()
 }
 
-function clearCache() {
-  state.specNames.forEach(s => state.specs[s].reset())
+function clearCache () {
+  state.specNames.forEach((s) => state.specs[s].reset())
 }
 
 function runAllSpecs () {
@@ -42,11 +43,11 @@ function runAllSpecs () {
   renderTargets()
   setupEnvironment()
   Promise.all(
-    state.specNames.map(name => load(state, name))
+    state.specNames.map((name) => load(state, name)),
   ).then(executeSpecs)
 }
 
-export default function init(specMap, support) {
+export default function init (specMap, support) {
   setState(specMap, support)
   renderMochaTarget()
   createApp(state.specNames, { runAllSpecs })

@@ -1,11 +1,11 @@
 import $ from 'cash-dom'
 import './assets/styles.scss'
 
-export function createApp(specNames, { runAllSpecs }) {
+export function createApp (specNames, { runAllSpecs }) {
   const $app = $(`<section id="evergreen"><hr/><h2>Spec Files</h2></section>`)
 
   const $nav = $(`<nav>
-    ${ specNames.map(s => `<p>${s}</p>`).join('') }
+    ${specNames.map((s) => `<p>${s}</p>`).join('')}
   </nav>`)
 
   $app.append($nav)

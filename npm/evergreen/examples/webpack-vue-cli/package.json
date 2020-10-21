@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve",
     "test": "node --preserve-symlinks ./evergreen.js",
     "test:watch": "watch 'yarn test' ../../dist --wait=1"
   },

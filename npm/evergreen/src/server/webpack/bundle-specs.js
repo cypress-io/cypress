@@ -1,5 +1,6 @@
 const path = require('path')
-export default async function bundleSpecs({ files, projectRoot, support }, loaderContext) {
+
+export default async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
   const makeImport = (file, fileKey, chunkName) => {
     // If we want to rename the chunks, we can use this
     const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
@@ -18,35 +19,38 @@ export default async function bundleSpecs({ files, projectRoot, support }, loade
     }`
   }
 
-  function buildSpecs(files) {
-    return '{' + files.map(f => {
+  function buildSpecs (files) {
+    return `{${files.map((f) => {
       return makeImport(f, f.relativeToProject, f.chunkName)
-    }).join(',') + '}'
+    }).join(',')}}`
   }
 
-  function buildSupport(file) {
+  function buildSupport (file) {
     return makeImport(file, 'support', 'support')
   }
 
   files = [
     ...files,
-    support
-  ].map((p, idx) => ({
-    ...p,
-    relativeToProject: path.relative(projectRoot, p.path),
-    relativeToThisFile: path.relative(__dirname, p.path),
-    chunkName: `${idx}-spec`,
-    spec: support != p,
-  }))
+    support,
+  ].map((p, idx) => {
+    return {
+      ...p,
+      relativeToProject: path.relative(projectRoot, p.path),
+      relativeToThisFile: path.relative(__dirname, p.path),
+      chunkName: `${idx}-spec`,
+      spec: support !== p,
+    }
+  })
 
-  const supportImport = buildSupport(files.filter(f => !f.spec)[0])
+  const supportImport = buildSupport(files.filter((f) => !f.spec)[0])
+
   return {
     code: `
     ${require('./hmr-client.js')(files)}
     module.exports = {
-      files: ${buildSpecs(files.filter(f => f.spec))},
+      files: ${buildSpecs(files.filter((f) => f.spec))},
       ${supportImport}
     }
-    `
+    `,
   }
 }

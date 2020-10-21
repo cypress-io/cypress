@@ -8,4 +8,3 @@ if (module.hot) {
     window.runAllSpecs()
   })
 }
-

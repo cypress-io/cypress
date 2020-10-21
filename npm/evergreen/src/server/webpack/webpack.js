@@ -18,7 +18,7 @@ async function getFiles (glob) {
 
   debug(`Files`, files)
 
-  files = files.map(f => ({ path: f.path, absolute: path.resolve(f.path) }))
+  files = files.map((f) => ({ path: f.path, absolute: path.resolve(f.path) }))
 
   debug(`Found files`, files)
 
@@ -52,7 +52,7 @@ async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportF
         options: {
           support,
           files,
-          projectRoot: projectRoot,
+          projectRoot,
         },
       },
     ],

@@ -1,11 +1,11 @@
-const path = require('path');
+const path = require('path')
 
 module.exports = {
   mode: 'development',
   plugins: [
   ],
   entry: {
-    main: './src/client/runner.js'
+    main: './src/client/runner.js',
   },
   module: {
     rules: [
@@ -19,11 +19,11 @@ module.exports = {
           {
             loader: 'css-loader',
             // options: {
-              // Run `postcss-loader` on each CSS `@import`, do not forget that `sass-loader` compile non CSS `@import`'s into a single file
-              // If you need run `sass-loader` and `postcss-loader` on each CSS `@import` please set it to `2`
-              // importLoaders: 1,
-              // Automatically enable css modules for files satisfying `/\.module\.\w+$/i` RegExp.
-              // modules: { auto: true },
+            // Run `postcss-loader` on each CSS `@import`, do not forget that `sass-loader` compile non CSS `@import`'s into a single file
+            // If you need run `sass-loader` and `postcss-loader` on each CSS `@import` please set it to `2`
+            // importLoaders: 1,
+            // Automatically enable css modules for files satisfying `/\.module\.\w+$/i` RegExp.
+            // modules: { auto: true },
             // },
           },
           // Can be `less-loader`
@@ -52,12 +52,12 @@ module.exports = {
     ],
   },
   resolve: {
-    extensions: [ '.tsx', '.ts', '.js', '.jsx', '.json' ],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'],
   },
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
     library: 'evergreen',
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   },
-};
+}
