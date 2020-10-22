@@ -15,18 +15,20 @@ const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
-if (!process.env.CIRCLE_TOKEN) {
-  console.error('Cannot find CIRCLE_TOKEN')
-  process.exit(1)
-}
-
-if (!process.env.CIRCLE_WORKFLOW_ID) {
-  console.error('Cannot find CIRCLE_WORKFLOW_ID')
-  process.exit(1)
-}
-
 const seconds = (s) => s * 1000
 const minutes = (m) => m * 60 * 1000
+
+const verifyCI = () => {
+  if (!process.env.CIRCLE_TOKEN) {
+    console.error('Cannot find CIRCLE_TOKEN')
+    process.exit(1)
+  }
+
+  if (!process.env.CIRCLE_WORKFLOW_ID) {
+    console.error('Cannot find CIRCLE_WORKFLOW_ID')
+    process.exit(1)
+  }
+}
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {
@@ -127,6 +129,8 @@ const waitForAllJobs = async (jobNames, workflowId) => {
 }
 
 const waitForJobToPass = async (jobName, workflow = workflowId) => {
+  verifyCI()
+
   let response
 
   try {
@@ -158,6 +162,8 @@ const waitForJobToPass = async (jobName, workflow = workflowId) => {
 }
 
 const main = () => {
+  verifyCI()
+
   const args = minimist(process.argv.slice(2), { boolean: false })
 
   const jobNames = _

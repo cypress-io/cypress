@@ -120,7 +120,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -162,7 +162,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -186,7 +186,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -284,7 +284,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -385,22 +385,12 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-  check-halt-binary:
-    description: Halt CI if binary is unchanged
+  check-halt:
+    description: Halt CI if the package that this job corresponds to is unchanged
     steps:
       - run:
-          name: Check if binary is changed
+          name: Check if job should run is changed
           command: yarn check-halt || circleci-agent step halt
-
-  check-halt-package:
-    description: Halt CI if binary is unchanged
-    parameters:
-      package:
-        type: string
-    steps:
-      - run:
-          name: Check if package or binary is changed
-          command: yarn check-halt << parameters.package >> || circleci-agent step halt
 
 jobs:
   ## code checkout and yarn installs
@@ -540,7 +530,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -565,7 +555,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -611,7 +601,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - install-required-node
       - run:
           name: Mocha tests
@@ -631,7 +621,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -645,7 +635,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -658,7 +648,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -739,7 +729,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -765,7 +755,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -800,7 +790,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -834,7 +824,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -856,7 +846,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -878,7 +868,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -888,8 +878,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/webpack-preprocessor"
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -928,8 +917,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/vue"
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
@@ -943,8 +931,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/react"
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -973,8 +960,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/react"
+      - check-halt
       - restore_cache:
           name: Restore Cache
           keys:
@@ -998,8 +984,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/eslint-plugin-dev"
+      - check-halt
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1046,7 +1031,7 @@ jobs:
 
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: $(yarn bin)/print-arch
       - install-required-node
       - run:
@@ -1079,7 +1064,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: ls -l
       - run:
           name: upload unique binary
@@ -1097,7 +1082,7 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - check-halt-binary
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -1124,7 +1109,7 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - check-halt-binary
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - run:
@@ -1149,7 +1134,7 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
-      - check-halt-binary
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-test-tiny
       - run:
@@ -1166,7 +1151,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - install-required-node
       - run:
           name: Check next dev version
@@ -1213,7 +1198,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: ls -l
       # NPM package file should have filename cypress-<version>.tgz
       - run:
@@ -1236,7 +1221,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1274,7 +1259,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: ls -la
       - post-install-comment
 
@@ -1283,7 +1268,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1319,7 +1304,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1361,7 +1346,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1405,7 +1390,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1449,7 +1434,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1482,7 +1467,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1618,7 +1603,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-binary
+      - check-halt
       # the user should be "node"
       - run: whoami
       - run: pwd

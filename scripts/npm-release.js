@@ -4,24 +4,18 @@ const fs = require('fs')
 const path = require('path')
 const semverRcompare = require('semver/functions/rcompare')
 
-const { getPackageDependents } = require('./changed-packages')
+const { getLernaPackages, getPackageDependents } = require('./changed-packages')
 const { minutes, waitForJobToPass } = require('./wait-on-circle-jobs')
 
 const error = (message) => {
   if (require.main === module) {
-    console.log(`\nERROR!`)
-    console.log(message)
+    console.error(`\nERROR!`)
+    console.error(message)
 
     process.exit(1)
   } else {
     throw new Error(message)
   }
-}
-
-const getPackages = async () => {
-  const { stdout } = await execa('npx', ['lerna', 'la', '--json'])
-
-  return JSON.parse(stdout)
 }
 
 const getCurrentBranch = async () => {
@@ -162,8 +156,6 @@ const waitOnTests = async (names, packageInfo) => {
 
   console.log(`\nWaiting on the following CI jobs: ${jobs.join(', ')}`)
 
-  // TODO: WAIT ON ACTUAL CI JOBS
-
   return Promise.all(jobs.map((job) => {
     waitForJobToPass(job)
     .timeout(minutes(30))
@@ -195,8 +187,16 @@ const releasePackages = async (packages) => {
 }
 
 // goes through the release process for all of our independent npm projects
-const release = async () => {
-  const packages = await getPackages()
+const main = async () => {
+  if (!process.env.CIRCLECI) {
+    error(`Cannot run release process outside of Circle CI`)
+  }
+
+  if (process.env.CIRCLE_PULL_REQUEST) {
+    return console.log(`Release process cannot be run on a PR`)
+  }
+
+  const packages = await getLernaPackages()
   const publicPackages = packages
   .filter((pack) => !pack.private && !pack.name.includes('@packages'))
   .map((pack) => pack.name)
@@ -223,10 +223,10 @@ const release = async () => {
 
 // execute main function if called from command line
 if (require.main === module) {
-  release()
+  main()
 }
 
 module.exports = {
   parseSemanticReleaseOutput,
-  release,
+  readPackageJson,
 }

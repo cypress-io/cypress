@@ -1,8 +1,8 @@
 /* eslint-disable no-console */
 const execa = require('execa')
-const argv = require('minimist')(process.argv.slice(2))
 
-const { getChangedPackagesAndDependents } = require('./changed-packages')
+const { getChangedPackagesAndDependents, getLernaPackages } = require('./changed-packages')
+const { readPackageJson } = require('./npm-release')
 
 const runTests = () => {
   process.exit(0)
@@ -12,7 +12,12 @@ const skipTests = () => {
   process.exit(1)
 }
 
-const main = async (pack = 'cypress') => {
+const main = async (ciJob) => {
+  if (!ciJob) {
+    console.log(`Could not get current CI job`)
+    skipTests()
+  }
+
   const { stdout: currentBranch } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
 
   if (currentBranch === 'develop' || currentBranch === 'master') {
@@ -20,10 +25,24 @@ const main = async (pack = 'cypress') => {
     runTests()
   }
 
+  const packages = await getLernaPackages()
   const changed = await getChangedPackagesAndDependents()
 
+  const packageInfo = packages
+  .filter((pack) => !pack.private && !pack.name.includes('@packages'))
+  .find((p) => {
+    const packageJson = readPackageJson(p)
+
+    return packageJson.ciJobs && packageJson.ciJobs.includes(ciJob)
+  })
+
+  // default to binary if we don't find an independent package
+  const pack = packageInfo ? packageInfo.name : 'cypress'
+
+  console.log(`Found package ${pack} that corresponds to current job ${ciJob}.`)
+
   if (Object.keys(changed).includes(pack)) {
-    console.log(`${pack} was directly changed, tests run`)
+    console.log(`${pack} was directly changed, so tests run.`)
     runTests()
   }
 
@@ -44,6 +63,4 @@ const main = async (pack = 'cypress') => {
   skipTests()
 }
 
-const pack = argv._[0]
-
-main(pack)
+main(process.env.CIRCLE_JOB)

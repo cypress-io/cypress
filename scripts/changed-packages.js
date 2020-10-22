@@ -41,12 +41,6 @@ const convertPackagesToBinary = (packages) => {
   return output
 }
 
-const getCurrentBranch = async () => {
-  const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
-
-  return stdout
-}
-
 const getLernaPackages = async () => {
   const { stdout } = await execa('npx', ['lerna', 'la', '--json'])
 
@@ -101,8 +95,6 @@ const getChangedPackages = async (base = 'origin/develop', output = false) => {
 // within the package.json of the package - see CONTRIBUTING.md for docs
 const getPackageDependents = async (name) => {
   const packages = await getLernaPackages()
-  const currentBranch = await getCurrentBranch()
-
   const pack = packages.find((p) => p.name === name)
 
   if (!pack) {
@@ -111,24 +103,7 @@ const getPackageDependents = async (name) => {
 
   const packageJson = JSON.parse(fs.readFileSync(path.join(pack.location, 'package.json')))
 
-  const dependents = packageJson['ciDependents'] || []
-
-  return dependents.map((elem) => {
-    if (typeof elem === 'string') {
-      elem = {
-        name: elem,
-        branches: [currentBranch],
-      }
-    }
-
-    if (!elem.branches) {
-      elem.branches = [currentBranch]
-    }
-
-    return elem
-  })
-  .filter((elem) => elem.branches.includes(currentBranch))
-  .map((elem) => elem.name)
+  return packageJson['ciDependents'] || []
 }
 
 const getChangedPackagesAndDependents = async (base = 'origin/develop', output = false) => {
@@ -160,6 +135,7 @@ if (require.main === module) {
 }
 
 module.exports = {
+  getLernaPackages,
   getChangedPackages,
   getPackageDependents,
   getChangedPackagesAndDependents,
