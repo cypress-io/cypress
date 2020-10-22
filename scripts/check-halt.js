@@ -2,7 +2,7 @@
 const execa = require('execa')
 const argv = require('minimist')(process.argv.slice(2))
 
-const changedPackages = require('./changed-packages')
+const { getChangedPackagesAndDependents } = require('./changed-packages')
 
 const runTests = () => {
   process.exit(0)
@@ -20,7 +20,7 @@ const main = async (pack = 'cypress') => {
     runTests()
   }
 
-  const changed = await changedPackages()
+  const changed = await getChangedPackagesAndDependents()
 
   if (Object.keys(changed).includes(pack)) {
     console.log(`${pack} was directly changed, tests run`)
