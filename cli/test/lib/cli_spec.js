@@ -7,6 +7,7 @@ const logger = require(`${lib}/logger`)
 const info = require(`${lib}/exec/info`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
+const cache = require(`${lib}/tasks/cache`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
@@ -506,6 +507,20 @@ describe('cli', () => {
     it('calls info start', () => {
       this.exec('info')
       expect(info.start).to.have.been.calledWith()
+    })
+  })
+
+  context('cypress cache list', () => {
+    it('catches rejection and exits', (done) => {
+      const err = new Error('cache list failed badly')
+
+      sinon.stub(cache, 'list').rejects(err)
+      this.exec('cache list')
+
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
 })
