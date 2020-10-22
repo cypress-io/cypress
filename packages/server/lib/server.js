@@ -15,13 +15,12 @@ const compression = require('compression')
 const debug = require('debug')('cypress:server:server')
 const {
   agent,
-  blocked,
   concatStream,
   cors,
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
-const { netStubbingState, isHostInterceptable } = require('@packages/net-stubbing')
+const { netStubbingState } = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')
@@ -252,7 +251,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Promise((resolve, reject) => {
-      const { port, fileServerFolder, socketIoRoute, baseUrl, blockHosts } = config
+      const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
       this._server = http.createServer(app)
 
@@ -292,44 +291,7 @@ class Server {
 
         socket.once('upstream-connected', this._socketAllowed.add)
 
-        return this._httpsProxy.connect(req, socket, head, {
-          onDirectConnection: (req) => {
-            if (this._netStubbingState && isHostInterceptable(req.url, this._netStubbingState)) {
-              debug('CONNECT request may match a net-stubbing route, proxying %o', _.pick(req, 'url'))
-
-              return false
-            }
-
-            const urlToCheck = `https://${req.url}`
-
-            let isMatching = cors.urlMatchesOriginPolicyProps(urlToCheck, this._remoteProps)
-
-            const word = isMatching ? 'does' : 'does not'
-
-            debug(`HTTPS request ${word} match URL: ${urlToCheck} with props: %o`, this._remoteProps)
-
-            // if we are currently matching then we're
-            // not making a direct connection anyway
-            // so we only need to check this if we
-            // have blocked hosts and are not matching.
-            //
-            // if we have blocked hosts lets
-            // see if this matches - if so then
-            // we cannot allow it to make a direct
-            // connection
-
-            if (blockHosts && !isMatching) {
-              isMatching = blocked.matches(urlToCheck, blockHosts)
-
-              debug(`HTTPS request ${urlToCheck} matches blockHosts?`, isMatching)
-            }
-
-            // make a direct connection only if
-            // our req url does not match the origin policy
-            // which is the superDomain + port
-            return !isMatching
-          },
-        })
+        return this._httpsProxy.connect(req, socket, head)
       })
 
       this._server.on('upgrade', onUpgrade)
@@ -786,7 +748,6 @@ class Server {
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
     // bail if this is our own namespaced socket.io request
-    let host; let remoteOrigin
 
     if (req.url.startsWith(socketIoRoute)) {
       if (!this._socketAllowed.isRequestAllowed(req)) {
@@ -798,13 +759,14 @@ class Server {
       return
     }
 
-    if ((host = req.headers.host) && this._remoteProps && (remoteOrigin = this._remoteOrigin)) {
-      // get the port from @_remoteProps
-      // get the protocol from remoteOrigin
-      // get the hostname from host header
-      const { port } = this._remoteProps
-      const { protocol } = url.parse(remoteOrigin)
-      const { hostname } = url.parse(`http://${host}`)
+    const host = req.headers.host
+
+    if (host) {
+      // get the protocol using req.connection.encrypted
+      // get the port & hostname from host header
+      const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
+      const { hostname, protocol } = url.parse(fullUrl)
+      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
 
       const onProxyErr = (err, req, res) => {
         return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })

@@ -172,6 +172,21 @@ describe('network stubbing', function () {
       this.testRoute(options, handler, expectedEvent, expectedRoute)
     })
 
+    // https://github.com/cypress-io/cypress/issues/8729
+    it('resolve ambiguity between overloaded definitions', () => {
+      cy.route2('POST', 'http://dummy.restapiexample.com/api/v1/create').as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("http://dummy.restapiexample.com/api/v1/create", {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create')
+    })
+
     // TODO: implement warning in cy.route2 if appropriate
     // https://github.com/cypress-io/cypress/issues/2372
     it.skip('warns if a percent-encoded URL is used', function () {
@@ -307,7 +322,7 @@ describe('network stubbing', function () {
           done()
         })
 
-        cy.route2('posts', '/foo', {})
+        cy.route2('post', '/foo', {})
       })
 
       it('requires a url when given a response', function (done) {
