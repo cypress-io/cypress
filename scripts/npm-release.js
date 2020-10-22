@@ -194,21 +194,6 @@ const releasePackages = async (packages) => {
 
 // goes through the release process for all of our independent npm projects
 const release = async () => {
-  // for testing
-  try {
-    await waitForJobToPass('lint-types')
-    console.log('worked')
-  } catch (e) {
-    console.log(e)
-  }
-
-  try {
-    await waitForJobToPass('runner-integration-tests-chrome')
-    console.log('worked 2')
-  } catch (e) {
-    console.log(e)
-  }
-
   const packages = await getPackages()
   const publicPackages = packages
   .filter((pack) => !pack.private && !pack.name.includes('@packages'))
