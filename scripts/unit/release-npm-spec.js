@@ -1,6 +1,6 @@
 const la = require('lazy-ass')
 
-const { parseSemanticReleaseOutput } = require('../inject-npm-version')
+const { parseSemanticReleaseOutput } = require('../release-npm')
 
 const semanticReleaseNoUpdate = (version) => {
   return `
@@ -127,38 +127,43 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 `
 }
 
-describe('inject npm version', () => {
+describe('semantic release', () => {
   describe('parses old version number when there are no updates', () => {
     it('works with standard version number', () => {
       const version = '1.2.3'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
-      la(version === result, 'Expected version to be', version, 'but got', result, 'instead')
+      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
     })
 
     it('works with version 0.x.x', () => {
       const version = '0.0.1'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
-      la(version === result, 'Expected version to be', version, 'but got', result, 'instead')
+      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
     })
 
     it('works with postfix alpha/beta version', () => {
       const version = '0.1.2-alpha1.2'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
 
-      la(version === result, 'Expected version to be', version, 'but got', result, 'instead')
+      la(currentVersion === version, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
     })
 
-    it('does not work with non-semver version', () => {
+    it('does not work with non-semver version', (done) => {
       const version = 'abc'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
-
-      la(typeof result === 'undefined', 'Expected version to be undefined but got', result, 'instead')
+      try {
+        parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+      } catch (e) {
+        done()
+      }
     })
   })
 
@@ -167,50 +172,50 @@ describe('inject npm version', () => {
       const oldVersion = '1.2.3'
       const newVersion = '1.2.4'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(oldVersion !== result, 'Expected version not to be', oldVersion, 'but got', result)
-      la(newVersion === result, 'Expected version to be', newVersion, 'but got', result, 'instead')
+      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
     it('works with 0.x.x version numbers', () => {
       const oldVersion = '0.0.1'
       const newVersion = '0.1.0'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(oldVersion !== result, 'Expected version not to be', oldVersion, 'but got', result)
-      la(newVersion === result, 'Expected version to be', newVersion, 'but got', result, 'instead')
+      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
     it('works with 0.x.x -> 1.0.0 version numbers', () => {
       const oldVersion = '0.2.4'
       const newVersion = '1.0.0'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(oldVersion !== result, 'Expected version not to be', oldVersion, 'but got', result)
-      la(newVersion === result, 'Expected version to be', newVersion, 'but got', result, 'instead')
+      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
     it('works with postfix alpha/beta versions', () => {
       const oldVersion = '0.2.4-alpha'
       const newVersion = '0.3.0-beta'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(oldVersion !== result, 'Expected version not to be', oldVersion, 'but got', result)
-      la(newVersion === result, 'Expected version to be', newVersion, 'but got', result, 'instead')
+      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
 
     it('works with postfix alpha/beta version -> 1.0.0', () => {
       const oldVersion = '0.2.4-alpha'
       const newVersion = '1.0.0'
 
-      const result = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseUpdate(oldVersion, newVersion))
 
-      la(oldVersion !== result, 'Expected version not to be', oldVersion, 'but got', result)
-      la(newVersion === result, 'Expected version to be', newVersion, 'but got', result, 'instead')
+      la(currentVersion === oldVersion, 'Expected current version to be', oldVersion, 'but got', currentVersion, 'instead')
+      la(nextVersion === newVersion, 'Expected next version to be', newVersion, 'but got', nextVersion, 'instead')
     })
   })
 })

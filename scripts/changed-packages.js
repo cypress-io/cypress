@@ -111,7 +111,7 @@ const getPackageDependents = async (name) => {
 
   const packageJson = JSON.parse(fs.readFileSync(path.join(pack.location, 'package.json')))
 
-  const dependents = packageJson['ci-pipeline-dependents'] || []
+  const dependents = packageJson['ciPipelineDependents'] || []
 
   return dependents.map((elem) => {
     if (typeof elem === 'string') {
@@ -159,4 +159,8 @@ if (require.main === module) {
   getChangedPackagesAndDependents(base, true)
 }
 
-module.exports = getChangedPackagesAndDependents
+module.exports = {
+  getChangedPackages,
+  getPackageDependents,
+  getChangedPackagesAndDependents,
+}
