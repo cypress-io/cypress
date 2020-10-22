@@ -327,14 +327,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     if (file.shouldWatch) {
       debug('watching')
 
-      if (compiler.hooks) {
-        // TODO compile.tap takes "string | Tap"
-        // so seems we just need to pass plugin.name
-        // @ts-ignore
-        compiler.hooks.compile.tap(plugin, onCompile)
-      } else {
-        compiler.plugin('compile', onCompile)
-      }
+      compiler.hooks.compile.tap(plugin.name, onCompile)
     }
 
     const bundler = file.shouldWatch ? compiler.watch(watchOptions, handle) : compiler.run(handle)
