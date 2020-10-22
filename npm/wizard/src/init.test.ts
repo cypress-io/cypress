@@ -11,7 +11,6 @@ use(sinonChai)
 
 function someOfSpyCallsIncludes (spy: any, logPart: string) {
   return spy.getCalls().some(
-    // Make sure that link to the example of right template was logged
     (spy: SinonSpyCallApi<unknown[]>) => {
       return spy.args.some((callArg) => typeof callArg === 'string' && callArg.includes(logPart))
     },

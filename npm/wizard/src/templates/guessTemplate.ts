@@ -50,7 +50,6 @@ export async function guessTemplate<T> (cwd: string) {
   let framework: keyof typeof allTemplates = await guessOrAskForFramework(cwd)
   const templates = allTemplates[framework]
 
-  // babel config can also be declared in package.json with `babel` key https://babeljs.io/docs/en/configuration#packagejson
   for (const [name, template] of Object.entries(templates)) {
     const typedTemplate = template as Template<T>
     const { success, payload } = typedTemplate.test(process.cwd())
