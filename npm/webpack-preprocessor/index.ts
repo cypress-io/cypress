@@ -340,7 +340,7 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       if (file.shouldWatch) {
         // in this case the bundler is webpack.Compiler.Watching
-        (bundler as webpack.Compiler.Watching).close(cb)
+        (bundler as webpack.Compiler['watching']).close(cb)
       }
     })
 
@@ -368,8 +368,10 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+function cleanseError (err: string | Error) {
+  const errorMessage = typeof err === 'string' ? err : err.message
+
+  return errorMessage.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 export = preprocessor
