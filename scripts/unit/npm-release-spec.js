@@ -2,9 +2,22 @@ const la = require('lazy-ass')
 
 const { parseSemanticReleaseOutput } = require('../npm-release')
 
+const semanticReleasePullRequest = `
+[semantic-release] › ℹ  Running semantic-release version 17.1.1
+[semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/changelog"
+[semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/git"
+[semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/changelog"
+[semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/git"
+[semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
+[semantic-release] › ✔  Loaded plugin "addChannel" from "@semantic-release/npm"
+[semantic-release] › ℹ  This run was triggered by a pull request and therefore a new version won't be published.
+`
+
 const semanticReleaseNoUpdate = (version) => {
   return `
-[semantic-release] › ℹ  Running semantic-release version 17.0.4
+[semantic-release] › ℹ  Running semantic-release version 17.1.1
 [semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
@@ -45,7 +58,7 @@ const semanticReleaseNoUpdate = (version) => {
 
 const semanticReleaseUpdate = (oldVersion, newVersion) => {
   return `
-[semantic-release] › ℹ  Running semantic-release version 17.0.4
+[semantic-release] › ℹ  Running semantic-release version 17.1.1
 [semantic-release] › ✔  Loaded plugin "verifyConditions" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "prepare" from "@semantic-release/npm"
 [semantic-release] › ✔  Loaded plugin "publish" from "@semantic-release/npm"
@@ -128,6 +141,12 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 }
 
 describe('semantic release', () => {
+  it('ends with no output if triggered by a pull request', () => {
+    const output = parseSemanticReleaseOutput(semanticReleasePullRequest)
+
+    la(output === undefined, 'Expected current version to be', undefined, 'but got', output, 'instead')
+  })
+
   describe('parses old version number when there are no updates', () => {
     it('works with standard version number', () => {
       const version = '1.2.3'
@@ -156,14 +175,13 @@ describe('semantic release', () => {
       la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
     })
 
-    it('does not work with non-semver version', (done) => {
+    it('does not work with non-semver version', () => {
       const version = 'abc'
 
-      try {
-        parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
-      } catch (e) {
-        done()
-      }
+      const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleaseNoUpdate(version))
+
+      la(currentVersion === undefined, 'Expected current version to be', version, 'but got', currentVersion, 'instead')
+      la(nextVersion === undefined, 'Expected next version to be', version, 'but got', nextVersion, 'instead')
     })
   })
 

@@ -51,8 +51,13 @@ const parseSemanticReleaseOutput = (output) => {
   const currentVersion = (output.match(/associated with version (\d+\.\d+\.\d+-?\S*)/) || [])[1]
   const nextVersion = (output.match(/The next release version is (\d+\.\d+\.\d+-?\S*)/) || [])[1]
 
-  if (!currentVersion) {
-    error(`Semantic release ran into an issue:\n${output}`)
+  if (output.includes(`This run was triggered by a pull request and therefore a new version won't be published.`)) {
+    if (require.main === module) {
+      console.log(`\n\nThis run was triggered by a pull request so nothing needs to be released.`)
+      process.exit(0)
+    }
+
+    return
   }
 
   return {
