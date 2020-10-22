@@ -1,6 +1,6 @@
 const la = require('lazy-ass')
 
-const { parseSemanticReleaseOutput } = require('../release-npm')
+const { parseSemanticReleaseOutput } = require('../npm-release')
 
 const semanticReleaseNoUpdate = (version) => {
   return `

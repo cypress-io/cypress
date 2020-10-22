@@ -42,7 +42,7 @@
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
-    "release-npm": "node scripts/release-npm.js",
+    "npm-release": "node scripts/npm-release.js",
     "semantic-release": "node ./scripts/semantic-release.js",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",

@@ -1040,16 +1040,14 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
 
-  npm-eslint-plugin-dev-release:
+  npm-release:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt-package:
-          package: "@cypress/eslint-plugin-dev"
       - run:
-          name: Release
-          command: yarn semantic-release @cypress/eslint-plugin-dev
+          name: Release packages
+          command: yarn npm-release
 
   build-binary:
     <<: *defaults
@@ -1786,29 +1784,12 @@ linux-workflow: &linux-workflow
     - npm-webpack-preprocessor:
         requires:
           - build
-    - npm-webpack-preprocessor-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - npm-webpack-preprocessor
-
     - npm-vue:
         requires:
           - build
-    - npm-vue-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - npm-vue
-
     - npm-react:
         requires:
           - build
-
     # Run tests for end-to-end react component tests examples
     - npm-react-e2e-example:
         name: React + Axe component testing
@@ -1878,25 +1859,13 @@ linux-workflow: &linux-workflow
         requires:
           - npm-react
 
-    - npm-react-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - build
-          - npm-vue
-
     - npm-eslint-plugin-dev:
         requires:
           - build
-    - npm-eslint-plugin-dev-release:
-        filters:
-          branches:
-            only:
-              - master
+
+    - npm-release:
         requires:
-          - npm-eslint-plugin-dev
+          - build
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
