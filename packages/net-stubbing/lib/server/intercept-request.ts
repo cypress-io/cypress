@@ -19,7 +19,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getAllStringMatcherFields, sendStaticResponse, emit, setBodyFromFixture } from './util'
+import { getAllStringMatcherFields, sendStaticResponse, emit, setResponseFromFixture } from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -279,7 +279,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   }
 
   if (frame.staticResponse) {
-    await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
+    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
     return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
   }
