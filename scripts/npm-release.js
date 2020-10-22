@@ -5,6 +5,7 @@ const path = require('path')
 const semverRcompare = require('semver/functions/rcompare')
 
 const { getPackageDependents } = require('./changed-packages')
+const { waitForJobToPass } = require('./wait-on-circle-jobs')
 
 const error = (message) => {
   if (require.main === module) {
@@ -164,9 +165,7 @@ const waitOnTests = async (names, packageInfo) => {
   // TODO: WAIT ON ACTUAL CI JOBS
 
   return Promise.all(jobs.map((job) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(resolve, Math.floor(Math.random() * 5000))
-    }).then(() => {
+    waitForJobToPass(job).then(() => {
       console.log(`${job} passed`)
     }).catch(() => {
       error(`${job} failed - cannot release`)
@@ -195,6 +194,21 @@ const releasePackages = async (packages) => {
 
 // goes through the release process for all of our independent npm projects
 const release = async () => {
+  // for testing
+  try {
+    await waitForJobToPass('lint-types')
+    console.log('worked')
+  } catch (e) {
+    console.log(e)
+  }
+
+  try {
+    await waitForJobToPass('runner-integration-tests-chrome')
+    console.log('worked 2')
+  } catch (e) {
+    console.log(e)
+  }
+
   const packages = await getPackages()
   const publicPackages = packages
   .filter((pack) => !pack.private && !pack.name.includes('@packages'))
