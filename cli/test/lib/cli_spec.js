@@ -451,27 +451,29 @@ describe('cli', () => {
     })
   })
 
-  it('install calls install.start without forcing', () => {
-    sinon.stub(install, 'start').resolves()
-    this.exec('install')
-    expect(install.start).not.to.be.calledWith({ force: true })
-  })
+  context('cypress install', () => {
+    it('calls install.start without forcing', () => {
+      sinon.stub(install, 'start').resolves()
+      this.exec('install')
+      expect(install.start).not.to.be.calledWith({ force: true })
+    })
 
-  it('install calls install.start with force: true when passed', () => {
-    sinon.stub(install, 'start').resolves()
-    this.exec('install --force')
-    expect(install.start).to.be.calledWith({ force: true })
-  })
+    it('calls install.start with force: true when passed', () => {
+      sinon.stub(install, 'start').resolves()
+      this.exec('install --force')
+      expect(install.start).to.be.calledWith({ force: true })
+    })
 
-  it('install calls install.start + catches errors', (done) => {
-    const err = new Error('foo')
+    it('install calls install.start + catches errors', (done) => {
+      const err = new Error('foo')
 
-    sinon.stub(install, 'start').rejects(err)
-    this.exec('install')
+      sinon.stub(install, 'start').rejects(err)
+      this.exec('install')
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
 
