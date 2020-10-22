@@ -126,11 +126,11 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   return Promise.reject(new Error('Jobs have not finished'))
 }
 
-const waitForJobToPass = async (jobName, workflowId = workflowId) => {
+const waitForJobToPass = async (jobName, workflow = workflowId) => {
   let response
 
   try {
-    response = await getJobStatus(workflowId)
+    response = await getJobStatus(workflow)
   } catch (e) {
     console.error(e)
     process.exit(1)
@@ -154,7 +154,7 @@ const waitForJobToPass = async (jobName, workflowId = workflowId) => {
 
   await Promise.delay(seconds(30))
 
-  return waitForJobToPass(jobName, workflowId)
+  return waitForJobToPass(jobName, workflow)
 }
 
 const main = () => {
