@@ -310,6 +310,7 @@ describe('network stubbing', function () {
 
         // @ts-ignore: should fail
         cy.route2({
+          // @ts-ignore
           url: {},
         })
       })
@@ -369,6 +370,7 @@ describe('network stubbing', function () {
             done()
           })
 
+          // @ts-ignore this is invalid on purpose
           cy.route2({
             headers: {
               good: 'string',
