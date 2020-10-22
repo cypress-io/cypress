@@ -419,6 +419,7 @@ describe('network stubbing', function () {
       const url1 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url2)}`
 
       cy.visit(url1)
+      .location('href').should('eq', url4)
     })
 
     context('can intercept against any domain', function () {
