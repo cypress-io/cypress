@@ -54,7 +54,7 @@ const getLernaPackages = async () => {
 }
 
 // gets all files that have changed since the current branch diverged from some base branch
-const getChangedFiles = async (base = 'develop', output = false) => {
+const getChangedFiles = async (base = 'origin/develop', output = false) => {
   const { stdout: diff } = await execa('git', ['merge-base', base, 'HEAD'])
   const { stdout: filesChanged } = await execa('git', ['diff', '--name-only', diff])
 
@@ -67,7 +67,7 @@ const getChangedFiles = async (base = 'develop', output = false) => {
   return filesChanged.split('\n')
 }
 
-const getChangedPackages = async (base = 'develop', output = false) => {
+const getChangedPackages = async (base = 'origin/develop', output = false) => {
   const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
 
   const packages = await getLernaPackages()
@@ -131,7 +131,7 @@ const getPackageDependents = async (name) => {
   .map((elem) => elem.name)
 }
 
-const getChangedPackagesAndDependents = async (base = 'develop', output = false) => {
+const getChangedPackagesAndDependents = async (base = 'origin/develop', output = false) => {
   const changedPackages = await getChangedPackages(base, output)
 
   const dependents = {}
