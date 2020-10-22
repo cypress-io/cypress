@@ -111,7 +111,7 @@ const getPackageDependents = async (name) => {
 
   const packageJson = JSON.parse(fs.readFileSync(path.join(pack.location, 'package.json')))
 
-  const dependents = packageJson['ciPipelineDependents'] || []
+  const dependents = packageJson['ciDependents'] || []
 
   return dependents.map((elem) => {
     if (typeof elem === 'string') {

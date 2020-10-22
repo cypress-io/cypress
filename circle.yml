@@ -923,20 +923,6 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
-  npm-webpack-preprocessor-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-halt-package:
-          package: "@cypress/webpack-preprocessor"
-      - run:
-          name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/webpack-preprocessor
-
   npm-vue:
     <<: *defaults
     steps:
@@ -951,17 +937,6 @@ jobs:
           name: Run tests
           command: yarn workspace @cypress/vue test
       - store-npm-logs
-
-  npm-vue-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-halt-package:
-          package: "@cypress/vue"
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/vue
 
   npm-react:
     <<: *defaults
@@ -1017,17 +992,6 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
-
-  npm-react-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-halt-package:
-          package: "@cypress/react"
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/react
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1792,42 +1756,42 @@ linux-workflow: &linux-workflow
           - build
     # Run tests for end-to-end react component tests examples
     - npm-react-e2e-example:
-        name: React + Axe component testing
+        name: npm-react-axe
         path: examples/a11y
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Next component testing
+        name: npm-react-next
         path: examples/nextjs
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + CRA component testing
+        name: npm-react-cra
         path: examples/react-scripts
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + CRA folder component testing
+        name: npm-react-cra-folder
         path: examples/react-scripts-folder
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Rollup component testing
+        name: npm-react-rollup
         path: examples/rollup
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Sass + TS component testing
+        name: npm-react-sass-ts
         path: examples/sass-and-ts
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Snapshots component testing
+        name: npm-react-snapshots
         path: examples/snapshots
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Tailwind component testing
+        name: npm-react-tailwind
         path: examples/tailwind
         requires:
           - npm-react
@@ -1838,7 +1802,7 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - npm-react
     - npm-react-e2e-example:
-        name: React + Percy component testing
+        name: npm-react-percy
         path: examples/visual-testing-with-percy
         requires:
           - npm-react
@@ -1849,12 +1813,12 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - npm-react
     - npm-react-e2e-example:
-        name: React + Webpack file component testing
+        name: npm-react-webpack-file
         path: examples/webpack-file
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Webpack options component testing
+        name: npm-react-webpack-options
         path: examples/webpack-options
         requires:
           - npm-react

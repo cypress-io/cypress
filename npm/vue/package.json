@@ -73,5 +73,8 @@
   ],
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"
-  }
+  },
+  "ciJobs": [
+    "npm-vue"
+  ]
 }
