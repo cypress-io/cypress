@@ -5,7 +5,7 @@ const path = require('path')
 const semverRcompare = require('semver/functions/rcompare')
 
 const { getPackageDependents } = require('./changed-packages')
-const { waitForJobToPass } = require('./wait-on-circle-jobs')
+const { minutes, waitForJobToPass } = require('./wait-on-circle-jobs')
 
 const error = (message) => {
   if (require.main === module) {
@@ -165,7 +165,9 @@ const waitOnTests = async (names, packageInfo) => {
   // TODO: WAIT ON ACTUAL CI JOBS
 
   return Promise.all(jobs.map((job) => {
-    waitForJobToPass(job).then(() => {
+    waitForJobToPass(job)
+    .timeout(minutes(30))
+    .then(() => {
       console.log(`${job} passed`)
     }).catch(() => {
       error(`${job} failed - cannot release`)

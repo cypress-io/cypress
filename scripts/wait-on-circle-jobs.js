@@ -205,5 +205,6 @@ if (require.main === module) {
 }
 
 module.exports = {
+  minutes,
   waitForJobToPass,
 }
