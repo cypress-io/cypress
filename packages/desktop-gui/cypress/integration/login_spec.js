@@ -303,7 +303,7 @@ describe('Login', function () {
 
     describe('api help link', () => {
       it('goes to external api help link', () => {
-        cy.contains('Learn more').click().then(function () {
+        cy.get('.login').contains('Learn more').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/help-connect-to-api')
         })
       })

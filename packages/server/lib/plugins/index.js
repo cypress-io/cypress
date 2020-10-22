@@ -68,7 +68,7 @@ const init = (config, options) => {
     const reject = fulfill(_reject)
 
     if (!config.pluginsFile) {
-      return resolve()
+      debug('no user plugins file')
     }
 
     if (pluginsProcess) {
@@ -78,8 +78,9 @@ const init = (config, options) => {
 
     registeredEvents = {}
 
+    const pluginsFile = config.pluginsFile || path.join(__dirname, 'child', 'default_plugins_file.js')
     const childIndexFilename = path.join(__dirname, 'child', 'index.js')
-    const childArguments = ['--file', config.pluginsFile, '--projectRoot', options.projectRoot]
+    const childArguments = ['--file', pluginsFile, '--projectRoot', options.projectRoot]
     const childOptions = {
       stdio: 'inherit',
     }
