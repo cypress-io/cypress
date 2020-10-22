@@ -514,6 +514,30 @@ describe('Specs List', function () {
         })
       })
 
+      describe('typing a regex filter', function () {
+        beforeEach(function () {
+          this.ipc.getSpecs.yields(null, this.specs)
+          this.openProject.resolve(this.config)
+        })
+
+        it('displays matching files with a regex filter', function () {
+          cy.get('.filter').type('(one|two)')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 2)
+          .and('contain', 'one_list_spec.coffee')
+          .and('contain', 'two_list_spec.coffee')
+        })
+
+        it('displays only matching files by file path regex', function () {
+          cy.get('.filter').type('^admin_users\/[^/]*$')
+
+          cy.get('.specs-list .file')
+          .should('have.length', 1)
+          .and('contain', 'admin_users_list_spec.coffee')
+        })
+      })
+
       describe('when there\'s a saved filter', function () {
         beforeEach(function () {
           this.ipc.getSpecs.yields(null, this.specs)
