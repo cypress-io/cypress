@@ -142,9 +142,10 @@ const semanticReleaseUpdate = (oldVersion, newVersion) => {
 
 describe('semantic release', () => {
   it('ends with no output if triggered by a pull request', () => {
-    const output = parseSemanticReleaseOutput(semanticReleasePullRequest)
+    const { currentVersion, nextVersion } = parseSemanticReleaseOutput(semanticReleasePullRequest)
 
-    la(output === undefined, 'Expected current version to be', undefined, 'but got', output, 'instead')
+    la(currentVersion === undefined, 'Expected current version to be', undefined, 'but got', currentVersion, 'instead')
+    la(nextVersion === undefined, 'Expected current version to be', undefined, 'but got', nextVersion, 'instead')
   })
 
   describe('parses old version number when there are no updates', () => {
