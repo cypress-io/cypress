@@ -1995,7 +1995,5 @@ module.exports = {
     aborted: 'This XHR was aborted by your code -- check this stack trace below.',
     missing: '`XMLHttpRequest#xhr` is missing.',
     network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
-    requestjson_deprecated: '`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`.',
-    responsejson_deprecated: '`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`.',
   },
 }

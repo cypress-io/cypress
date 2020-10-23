@@ -161,22 +161,6 @@ Object.defineProperties(XMLHttpRequest.prototype, {
       return this.response?.body
     },
   },
-
-  requestJSON: {
-    get () {
-      $errUtils.warnByPath('xhr.requestjson_deprecated')
-
-      return this.requestBody
-    },
-  },
-
-  responseJSON: {
-    get () {
-      $errUtils.warnByPath('xhr.responsejson_deprecated')
-
-      return this.responseBody
-    },
-  },
 })
 
 const create = (xhr) => {
