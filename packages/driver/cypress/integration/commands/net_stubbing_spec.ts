@@ -649,6 +649,15 @@ describe('network stubbing', function () {
 
         cy.contains('#result', '""').should('be.visible')
       })
+
+      // @see https://github.com/cypress-io/cypress/issues/8623
+      it('works with images', function () {
+        cy.visit('/fixtures/img-embed.html')
+        .contains('div', 'error loading image')
+        .route2('non-existing-image.png', { fixture: 'media/cypress.png' })
+        .reload()
+        .contains('div', 'it loaded')
+      })
     })
   })
 
