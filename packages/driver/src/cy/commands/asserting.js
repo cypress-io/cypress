@@ -5,7 +5,6 @@ const $dom = require('../../dom')
 const $errUtils = require('../../cypress/error_utils')
 
 const reExistence = /exist/
-const reEventually = /^eventually/
 const reHaveLength = /length/
 
 module.exports = function (Commands, Cypress, cy, state) {
@@ -54,12 +53,6 @@ module.exports = function (Commands, Cypress, cy, state) {
     // backup the original assertion subject
     const originalObj = exp._obj
     let err
-
-    if (reEventually.test(chainers)) {
-      err = $errUtils.cypressErrByPath('should.eventually_deprecated')
-      err.retry = false
-      throwAndLogErr(err)
-    }
 
     const isCheckingExistence = reExistence.test(chainers)
     const isCheckingLengthOrExistence = isCheckingExistence || reHaveLength.test(chainers)
