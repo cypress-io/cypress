@@ -125,7 +125,7 @@
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.0",
     "@cypress/debugging-proxy": "2.0.1",
-    "@cypress/json-schemas": "5.35.0",
+    "@cypress/json-schemas": "5.35.1",
     "@cypress/sinon-chai": "1.1.0",
     "@ffprobe-installer/ffprobe": "1.1.0",
     "@packages/desktop-gui": "*",

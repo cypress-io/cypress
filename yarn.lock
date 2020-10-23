@@ -1733,12 +1733,12 @@
   resolved "https://registry.yarnpkg.com/@cypress/icons/-/icons-0.7.0.tgz#415d3729a8dc8c7eb5cd24f79f2404a65751d303"
   integrity sha1-QV03KajcjH61zST3nyQEpldR0wM=
 
-"@cypress/json-schemas@5.35.0":
-  version "5.35.0"
-  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.35.0.tgz#9a699f680a7c58809f743b951f02107fd7b29b80"
-  integrity sha512-EyCPTw9k3fOkDu1n3zWwRdIGQp6ehZRbCNwYCFtFXxgXW1IK/jTO6ese1mDAIjcfQgLOpBKnj77+ahIC093p7w==
+"@cypress/json-schemas@5.35.1":
+  version "5.35.1"
+  resolved "https://registry.yarnpkg.com/@cypress/json-schemas/-/json-schemas-5.35.1.tgz#f72762f44c4d8d1daa334983eec194ff0c5b40ef"
+  integrity sha512-gklLVVRDzs1F9zBNj7cezjh058rra8n7AifERwOyGYTjaguqXKL1O+UJgA3CaJ3MSPYkaerM1n38FspEU6xU3Q==
   dependencies:
-    "@cypress/schema-tools" "4.7.4"
+    "@cypress/schema-tools" "4.7.5"
     lodash.clonedeep "^4.5.0"
     lodash.merge "^4.6.2"
     lodash.omit "^4.5.0"
@@ -1821,15 +1821,15 @@
     tunnel-agent "^0.6.0"
     uuid "^3.3.2"
 
-"@cypress/schema-tools@4.7.4":
-  version "4.7.4"
-  resolved "https://registry.yarnpkg.com/@cypress/schema-tools/-/schema-tools-4.7.4.tgz#900af79e9d66da7b3acd7bfea8894ac0d0c9103d"
-  integrity sha512-Dz2KKwV9Wok1jzSLOhS9eGla11sWT3qF2L4t64QlmtPoiXfQr+y89j16y5PQni+N5a1KJDGKBqUDqFqFlfoYCg==
+"@cypress/schema-tools@4.7.5":
+  version "4.7.5"
+  resolved "https://registry.yarnpkg.com/@cypress/schema-tools/-/schema-tools-4.7.5.tgz#f9ed612876b649eeed253285bd68d3772785a470"
+  integrity sha512-EY8144iTpGd+GKrRaN5gx6YLuyk2L7vjDmLHRZxubHmfENq/bhvXjpatUn0Q4rbeYgU7Mjgy0AIGenX36cQvtA==
   dependencies:
     "@bahmutov/all-paths" "1.0.2"
     "@bahmutov/is-my-json-valid" "2.17.3"
     "@types/ramda" "0.25.47"
-    debug "4.1.1"
+    debug "4.2.0"
     json-stable-stringify "1.0.1"
     json2md "1.6.3"
     lodash.camelcase "4.3.0"
