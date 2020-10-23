@@ -91,7 +91,7 @@ const getChangedPackages = async (base = 'origin/develop', output = false) => {
   return changed
 }
 
-// finds dependents as defined in the 'ci-pipeline-dependents' field
+// finds dependents as defined in the `ciDependents` field
 // within the package.json of the package - see CONTRIBUTING.md for docs
 const getPackageDependents = async (name) => {
   const packages = await getLernaPackages()
@@ -106,6 +106,7 @@ const getPackageDependents = async (name) => {
   return packageJson['ciDependents'] || []
 }
 
+// gets all of the changed packages and their corresponding dependents
 const getChangedPackagesAndDependents = async (base = 'origin/develop', output = false) => {
   const changedPackages = await getChangedPackages(base, output)
 
@@ -119,7 +120,7 @@ const getChangedPackagesAndDependents = async (base = 'origin/develop', output =
     console.log()
     console.log(`Changed packages and their dependents:`)
     for (const pack in dependents) {
-      console.log(`${pack}: ${dependents[pack].join(',') || 'none'}`)
+      console.log(`${pack}: ${dependents[pack].join(', ') || 'none'}`)
     }
   }
 

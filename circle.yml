@@ -389,7 +389,7 @@ commands:
     description: Halt CI if the package that this job corresponds to is unchanged
     steps:
       - run:
-          name: Check if job should run is changed
+          name: Check if job should run
           command: yarn check-halt || circleci-agent step halt
 
 jobs:

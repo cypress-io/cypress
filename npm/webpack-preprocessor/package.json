@@ -89,7 +89,7 @@
     "cypress-preprocessor",
     "webpack"
   ],
-  "ciDepenents": [
+  "ciDependents": [
     "@cypress/react",
     "@cypress/vue"
   ],
