@@ -105,7 +105,7 @@ const processRunOptions = (options = {}) => {
   // if key is set use that - else attempt to find it by environment variable
   if (options.key == null) {
     debug('--key is not set, looking up environment variable CYPRESS_RECORD_KEY')
-    options.key = util.getEnv('CYPRESS_RECORD_KEY') || util.getEnv('CYPRESS_CI_KEY')
+    options.key = util.getEnv('CYPRESS_RECORD_KEY')
   }
 
   // if we have a key assume we're in record mode
