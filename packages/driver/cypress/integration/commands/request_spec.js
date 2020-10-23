@@ -430,26 +430,6 @@ describe('src/cy/commands/request', () => {
       })
     })
 
-    describe('failOnStatus', () => {
-      it('is deprecated but does not fail even on 500 when failOnStatus=false', () => {
-        const warning = cy.spy(Cypress.utils, 'warning')
-
-        Cypress.backend
-        .withArgs('http:request')
-        .resolves({ isOkStatusCode: false, status: 500 })
-
-        cy.request({
-          url: 'http://localhost:1234/foo',
-          failOnStatus: false,
-        })
-        .then((resp) => {
-          // make sure it really was 500!
-          expect(resp.status).to.eq(500)
-          expect(warning.lastCall.args[0]).to.include('The `cy.request()` `failOnStatus` option has been renamed to `failOnStatusCode`. Please update your code. This option will be removed at a later time.')
-        })
-      })
-    })
-
     describe('failOnStatusCode', () => {
       it('does not fail on status 401', () => {
         Cypress.backend

@@ -1106,10 +1106,6 @@ module.exports = {
       message: `${cmd('request')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
       docsUrl: 'https://on.cypress.io/request',
     },
-    failonstatus_deprecated_warning: {
-      message: `The ${cmd('request')} \`failOnStatus\` option has been renamed to \`failOnStatusCode\`. Please update your code. This option will be removed at a later time.`,
-      docsUrl: 'https://on.cypress.io/request',
-    },
     form_invalid: {
       message: stripIndent`\
         ${cmd('request')} requires the \`form\` option to be a boolean.
