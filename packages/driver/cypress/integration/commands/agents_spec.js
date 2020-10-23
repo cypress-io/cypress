@@ -705,22 +705,4 @@ describe('src/cy/commands/agents', () => {
       })
     })
   })
-
-  context('.agents', () => {
-    beforeEach(function () {
-      cy.spy(top.console, 'warn')
-      this.agents = cy.agents()
-    })
-
-    it('logs deprecation warning', () => {
-      expect(top.console.warn).to.be.calledWith('Cypress Warning: `cy.agents()` is deprecated. Use `cy.stub()` and `cy.spy()` instead.')
-    })
-
-    it('synchronously returns #spy and #stub methods', function () {
-      expect(this.agents.spy).to.be.a('function')
-      expect(this.agents.spy().callCount).to.be.a('number')
-      expect(this.agents.stub).to.be.a('function')
-      expect(this.agents.stub().returns).to.be.a('function')
-    })
-  })
 })
