@@ -1433,10 +1433,6 @@ module.exports = {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
       docsUrl: 'https://on.cypress.io/server',
     },
-    stub_deprecated: {
-      message: 'Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.',
-      docsUrl: 'https://on.cypress.io/deprecated-stub-false-on-{{type}}',
-    },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
     whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
