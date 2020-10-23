@@ -53,12 +53,6 @@ const isAbortedThroughUnload = (xhr) => {
   xhr.responseText === ''
 }
 
-const warnOnForce404Default = (obj) => {
-  if (obj.force404 === false) {
-    return $errUtils.warnByPath('server.force404_deprecated')
-  }
-}
-
 const warnOnWhitelistRenamed = (obj, type) => {
   if (obj.whitelist) {
     return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type } })
@@ -410,7 +404,6 @@ const create = (options = {}) => {
     },
 
     set (obj) {
-      warnOnForce404Default(obj)
       warnOnWhitelistRenamed(obj, 'server')
 
       // handle enable=true|false

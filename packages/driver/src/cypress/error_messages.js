@@ -1428,7 +1428,6 @@ module.exports = {
   },
 
   server: {
-    force404_deprecated: 'Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.',
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
       docsUrl: 'https://on.cypress.io/server',
