@@ -66,14 +66,6 @@ const processRunOptions = (options = {}) => {
     args.push('--browser', options.browser)
   }
 
-  if (options.ci) {
-    // push to display the deprecation message
-    args.push('--ci')
-
-    // also automatically record
-    args.push('--record', true)
-  }
-
   if (options.ciBuildId) {
     args.push('--ci-build-id', options.ciBuildId)
   }
@@ -139,7 +131,7 @@ const processRunOptions = (options = {}) => {
 
   // if record is defined and we're not
   // already in ci mode, then send it up
-  if (options.record != null && !options.ci) {
+  if (options.record != null) {
     args.push('--record', options.record)
   }
 

@@ -396,24 +396,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
           ${chalk.yellow('cypress run --record false')}
 
         https://on.cypress.io/recording-project-runs`
-    case 'CYPRESS_CI_DEPRECATED':
-      return stripIndent`\
-        You are using the deprecated command: ${chalk.yellow('cypress ci <key>')}
-
-        Please switch and use: ${chalk.blue('cypress run --record --key <record_key>')}
-
-        https://on.cypress.io/cypress-ci-deprecated`
-    case 'CYPRESS_CI_DEPRECATED_ENV_VAR':
-      return stripIndent`\
-        1. You are using the deprecated command: ${chalk.yellow('cypress ci')}
-
-            Please switch and use: ${chalk.blue('cypress run --record')}
-
-        2. You are also using the environment variable: ${chalk.yellow('CYPRESS_CI_KEY')}
-
-            Please rename this environment variable to: ${chalk.blue('CYPRESS_RECORD_KEY')}
-
-        https://on.cypress.io/cypress-ci-deprecated`
     case 'DASHBOARD_INVALID_RUN_REQUEST':
       return stripIndent`\
         Recording this run failed because the request was invalid.
