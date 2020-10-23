@@ -39,7 +39,7 @@ export const getFormattedTimeFromNow = (timeAsIsoString) => {
   return dayjs(timeAsIsoString).fromNow()
 }
 
-export let durationFormatted = (durationInMs) => {
+export const durationFormatted = (durationInMs) => {
   if (durationInMs < 1000) {
     return `${durationInMs}ms`
   }
