@@ -677,23 +677,6 @@ module.exports = {
   },
 
   miscellaneous: {
-    custom_command_interface_changed (obj) {
-      return {
-        message: stripIndent`\
-          Cypress.${obj.method}(...) has been removed and replaced by:
-
-          \`Cypress.Commands.add(...)\`
-
-          Instead of indicating \`parent\`, \`child\`, or \`dual\` commands, you pass an \`options\` object
-          to describe the requirements around the previous subject. You can also enforce specific
-          subject types such as requiring the subject to be a DOM element.
-
-          To rewrite this custom command you'd likely write:
-
-          \`Cypress.Commands.add(${obj.signature})\``,
-        docsUrl: 'https://on.cypress.io/custom-command-interface-changed',
-      }
-    },
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\
