@@ -1,0 +1,27 @@
+<html>
+<body>
+  <div id="a"></div>
+  <div id="b"></div>
+</body>
+<script>
+  fetch('/api/v1/create', {
+    method: 'POST',
+    body: '123456',
+  })
+  .then(res => res.text()) 
+  .then(data => {
+    const a = document.getElementById('a')
+    a.innerText = data
+  })
+
+  fetch('/api/v1/test', {
+    method: 'post',
+    body: 'asdfg'
+  })
+  .then(res => res.text()) 
+  .then(data => {
+    const b = document.getElementById('b')
+    b.innerText = data
+  })
+</script>
+</html>

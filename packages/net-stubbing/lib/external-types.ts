@@ -231,6 +231,10 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    */
   auth?: { username: S, password: S }
   /**
+   * Match against the request body content.
+   */
+  body?: S
+  /**
    * Match against HTTP headers on the request.
    */
   headers?: DictMatcher<S>

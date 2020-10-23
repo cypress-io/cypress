@@ -52,7 +52,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
       continue
     }
 
-    if (field === 'url') {
+    if (field === 'url' || field === 'body') {
       if (value.includes(matcher)) {
         continue
       }
@@ -120,6 +120,8 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
   if (!matchable.port) {
     matchable.port = matchable.https ? 443 : 80
   }
+
+  matchable.body = req.rawBody
 
   return matchable
 }

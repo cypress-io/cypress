@@ -25,6 +25,7 @@ describe('intercept-request', function () {
           username: 'foo',
           password: 'bar',
         },
+        body: undefined,
         method: req.method,
         headers: req.headers,
         hostname: 'google.com',
@@ -135,6 +136,42 @@ describe('intercept-request', function () {
       expect(_doesRouteMatch({
         url: '*',
       }, req)).to.be.true
+    })
+
+    context('body RouteMatcher option', function () {
+      it('type: string', function () {
+        const req = {
+          headers: {},
+          method: 'POST',
+          proxiedUrl: '/abc',
+          rawBody: '1234567890',
+        } as unknown as CypressIncomingRequest
+
+        expect(_doesRouteMatch({
+          body: '1234',
+        }, req)).to.be.true
+
+        expect(_doesRouteMatch({
+          body: '777',
+        }, req)).to.be.false
+      })
+
+      it('type: RegExp', function () {
+        const req = {
+          headers: {},
+          method: 'POST',
+          proxiedUrl: '/abc',
+          rawBody: '1234567890',
+        } as unknown as CypressIncomingRequest
+
+        expect(_doesRouteMatch({
+          body: /\d+/,
+        }, req)).to.be.true
+
+        expect(_doesRouteMatch({
+          body: /^[123]+$/,
+        }, req)).to.be.false
+      })
     })
   })
 })

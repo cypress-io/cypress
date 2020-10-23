@@ -9,6 +9,7 @@ export type CypressIncomingRequest = Request & {
   abort: () => void
   requestId: string
   body?: string
+  rawBody: string
   responseTimeout?: number
   followRedirect?: boolean
 }

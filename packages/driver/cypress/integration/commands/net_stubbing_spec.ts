@@ -202,6 +202,23 @@ describe('network stubbing', function () {
       })
     })
 
+    it('body option', () => {
+      cy.route2({
+        url: '/api/v1/create',
+        body: '1234',
+      }, 'numbers')
+
+      cy.route2({
+        url: '/api/v1/test',
+        body: /[as]+/,
+      }, 'alphabet')
+
+      cy.visit('fixtures/route-body.html')
+
+      cy.get('#a').should('have.text', 'numbers')
+      cy.get('#b').should('have.text', 'alphabet')
+    })
+
     context('logging', function () {
       beforeEach(function () {
         this.logs = []

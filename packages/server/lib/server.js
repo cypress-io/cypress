@@ -131,6 +131,13 @@ class Server {
     const { morgan, clientRoute } = config
     const app = express()
 
+    app.use(function (req, res, next) {
+      req.pipe(concatStream((reqBody) => {
+        req.rawBody = reqBody.toString()
+        next()
+      }))
+    })
+
     // set the cypress config from the cypress.json file
     app.set('view engine', 'html')
 

@@ -33,7 +33,7 @@ export const SERIALIZABLE_RES_PROPS = _.concat(
 
 export const DICT_STRING_MATCHER_FIELDS = ['headers', 'query']
 
-export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'hostname', 'method', 'path', 'pathname', 'url']
+export const STRING_MATCHER_FIELDS = ['auth.username', 'auth.password', 'body', 'hostname', 'method', 'path', 'pathname', 'url']
 
 /**
  * Serializable `StringMatcher` type.
