@@ -39,7 +39,20 @@ const getMouseCoords = (state) => {
   return state('mouseCoords')
 }
 
-const create = (state, keyboard, focused, Cypress) => {
+const fakeFocused = {
+  needsFocus: () => false,
+  getFocused: () => false,
+}
+
+const fakeKeyboard = { getActiveModifiers: () => ({}) }
+
+const fakeCypress = { browser: { family: 'chrome' } }
+
+const create = (state = () => {},
+  keyboard = fakeKeyboard,
+  focused = fakeFocused,
+  Cypress = fakeCypress) => {
+
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {
@@ -737,7 +750,7 @@ const formatReasonNotFired = (reason) => {
   return `⚠️ not fired (${reason})`
 }
 
-const toCoordsEventOptions = (x, y, win) => {
+const toCoordsEventOptions = (x, y, win = window) => {
   // these are the coords from the element's window,
   // ignoring scroll position
   const { scrollX, scrollY } = win

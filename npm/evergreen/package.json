@@ -5,7 +5,7 @@
   "main": "dist/evergreen.js",
   "scripts": {
     "build": "tsc && webpack",
-    "build:watch": "watch 'yarn build' ./src",
+    "build:watch": "watch 'yarn build' ./src ../../packages",
     "test": "echo success"
   },
   "dependencies": {
@@ -22,7 +22,8 @@
     "val-loader": "^2.1.2",
     "webpack-chain": "4.12.1",
     "webpack-dev-server": "^3.11.0",
-    "webpack-merge": "^5.2.0"
+    "webpack-merge": "^5.2.0",
+    "@packages/driver": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.12.3",

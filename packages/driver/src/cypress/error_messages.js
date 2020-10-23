@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
-const { normalizedStack } = require('./stack_utils')
+// const { normalizedStack } = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -1008,8 +1008,6 @@ module.exports = {
         return cyStripIndent(`\
           \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
 
-          ${normalizedStack(innerErr)}
-
           Route: ${format(route)}
 
           Intercepted request: ${format(req)}`, 10)
@@ -1017,8 +1015,6 @@ module.exports = {
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
-
-          ${normalizedStack(innerErr)}
 
           Route: ${format(route)}
 

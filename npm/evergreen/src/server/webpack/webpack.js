@@ -26,7 +26,6 @@ async function getFiles (glob) {
 }
 
 async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportFile, testFiles, projectRoot }) {
-  console.log(`HELLO WORLD`, projectRoot)
   debug(`User passed in webpack config with values`, userWebpackConfig)
 
   const evergreenWebpackConfig = require('./webpack.config')

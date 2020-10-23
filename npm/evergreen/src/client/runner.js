@@ -1,5 +1,6 @@
 import { Mocha } from 'mocha'
 import chai from 'chai'
+import drive from './driver'
 
 import { createApp } from './app'
 import { load } from './load-specs'

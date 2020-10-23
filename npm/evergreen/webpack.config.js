@@ -53,6 +53,9 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'],
+    alias: {
+      '@packages': path.resolve(__dirname, '../../packages')
+    },
   },
   output: {
     filename: '[name].bundle.js',
