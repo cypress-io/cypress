@@ -289,19 +289,6 @@ module.exports = {
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
     },
-    removed_method: {
-      message: stripIndent`\
-        The \`Cypress.Cookies.{{method}}()\` method has been removed.
-
-        Setting, getting, and clearing cookies is now an asynchronous operation.
-
-        Replace this call with the appropriate command such as:
-          - \`cy.getCookie()\`
-          - \`cy.getCookies()\`
-          - \`cy.setCookie()\`
-          - \`cy.clearCookie()\`
-          - \`cy.clearCookies()\``,
-    },
     whitelist_renamed (obj) {
       return {
         message: `\`${obj.type}\` \`whitelist\` option has been renamed to \`preserve\`. Please rename \`whitelist\` to \`preserve\`.`,
