@@ -375,8 +375,8 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+function cleanseError (err: Error) {
+  return err.message replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
 }
 
 export = preprocessor
