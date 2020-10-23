@@ -858,12 +858,6 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/cannot-execute-commands-outside-test',
     },
     private_custom_command_interface: 'You cannot use the undocumented private command interface: `{{method}}`',
-    private_property: stripIndent`\
-      You are accessing a private property directly on \`cy\` which has been renamed.
-
-      This was never documented nor supported.
-
-      Please go through the public function: ${cmd('state', '...')}`,
     retry_timed_out: 'Timed out retrying: ',
   },
 
