@@ -12,18 +12,6 @@ https://on.cypress.io/installing-cypress
 
 `
 
-exports['error for removed CYPRESS_BINARY_VERSION 1'] = `
-Error: The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version 3.0.0
-
-You should set CYPRESS_INSTALL_BINARY instead.
-
-----------
-
-Platform: darwin (Foo-OsVersion)
-Cypress Version: 1.2.3
-
-`
-
 exports['forcing true always installs 1'] = `
 
 Cypress 1.2.3 is installed in /cache/Cypress/1.2.3
