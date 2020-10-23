@@ -42,12 +42,6 @@ const jqueryProxyFn = function (...args) {
   return this.cy.$$.apply(this.cy, args)
 }
 
-// provide the old interface and
-// throw a deprecation message
-$Log.command = () => {
-  return $errUtils.throwErrByPath('miscellaneous.command_log_renamed')
-}
-
 const throwDeprecatedCommandInterface = (key = 'commandName', method) => {
   let signature = ''
 

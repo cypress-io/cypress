@@ -789,10 +789,6 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-test',
       }
     },
-    command_log_renamed: stripIndent`\
-      \`Cypress.Log.command()\` has been renamed to \`Cypress.log()\`
-
-      Please update your code. You should be able to safely do a find/replace.`,
     dangling_commands: {
       message: stripIndent`\
         Oops, Cypress detected something wrong with your test code.

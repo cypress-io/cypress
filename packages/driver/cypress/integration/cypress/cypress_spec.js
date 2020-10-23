@@ -105,14 +105,6 @@ describe('driver/src/cypress/index', () => {
   })
 
   context('.Log', () => {
-    it('throws when using Cypress.Log.command()', () => {
-      const fn = () => {
-        Cypress.Log.command({})
-      }
-
-      expect(fn).to.throw('has been renamed to `Cypress.log()`')
-    })
-
     it('throws when passing non-object to Cypress.log()', () => {
       const fn = () => {
         Cypress.log('My Log')
