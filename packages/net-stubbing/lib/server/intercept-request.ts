@@ -19,7 +19,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getAllStringMatcherFields, sendStaticResponse, emit, setBodyFromFixture } from './util'
+import { getAllStringMatcherFields, sendStaticResponse, emit, setResponseFromFixture } from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -27,18 +27,16 @@ const debug = Debug('cypress:net-stubbing:server:intercept-request')
 /**
  * Returns `true` if `req` matches all supplied properties on `routeMatcher`, `false` otherwise.
  */
-// TODO: optimize to short-circuit on route not match
 export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: CypressIncomingRequest) {
   const matchable = _getMatchableForRequest(req)
-
-  let match = true
 
   // get a list of all the fields which exist where a rule needs to be succeed
   const stringMatcherFields = getAllStringMatcherFields(routeMatcher)
   const booleanFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['https', 'webSocket']))
   const numberFields = _.filter(_.keys(routeMatcher), _.partial(_.includes, ['port']))
 
-  stringMatcherFields.forEach((field) => {
+  for (let i = 0; i < stringMatcherFields.length; i++) {
+    const field = stringMatcherFields[i]
     const matcher = _.get(routeMatcher, field)
     let value = _.get(matchable, field, '')
 
@@ -47,44 +45,53 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     }
 
     if (matcher.test) {
-      // value is a regex
-      match = match && matcher.test(value)
+      if (!matcher.test(value)) {
+        return false
+      }
 
-      return
+      continue
     }
 
     if (field === 'url') {
-      // for urls, check that it appears anywhere in the string
       if (value.includes(matcher)) {
-        return
+        continue
       }
     }
 
-    match = match && minimatch(value, matcher, { matchBase: true })
-  })
+    if (!minimatch(value, matcher, { matchBase: true })) {
+      return false
+    }
+  }
 
-  booleanFields.forEach((field) => {
+  for (let i = 0; i < booleanFields.length; i++) {
+    const field = booleanFields[i]
     const matcher = _.get(routeMatcher, field)
     const value = _.get(matchable, field)
 
-    match = match && (matcher === value)
-  })
+    if (matcher !== value) {
+      return false
+    }
+  }
 
-  numberFields.forEach((field) => {
+  for (let i = 0; i < numberFields.length; i++) {
+    const field = numberFields[i]
     const matcher = _.get(routeMatcher, field)
     const value = _.get(matchable, field)
 
     if (matcher.length) {
-      // list of numbers, any one can match
-      match = match && matcher.includes(value)
+      if (!matcher.includes(value)) {
+        return false
+      }
 
-      return
+      continue
     }
 
-    match = match && (matcher === value)
-  })
+    if (matcher !== value) {
+      return false
+    }
+  }
 
-  return match
+  return true
 }
 
 export function _getMatchableForRequest (req: CypressIncomingRequest) {
@@ -272,7 +279,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   }
 
   if (frame.staticResponse) {
-    await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
+    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
     return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
   }

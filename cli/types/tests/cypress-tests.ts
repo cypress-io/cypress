@@ -564,6 +564,11 @@ namespace CypressTestConfigOverridesTests {
     }
   }, () => { })
   it('test', {
+    retries: {
+      runMode: 3,
+    }
+  }, () => { })
+  it('test', {
     retries: { run: 3 } // $ExpectError
   }, () => { })
 

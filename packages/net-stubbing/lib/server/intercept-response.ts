@@ -17,7 +17,7 @@ import {
 import {
   emit,
   sendStaticResponse,
-  setBodyFromFixture,
+  setResponseFromFixture,
   getBodyStream,
 } from './util'
 
@@ -94,7 +94,7 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
 
   if (frame.staticResponse) {
     // replacing response with a staticResponse
-    await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
+    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
     const staticResponse = _.chain(frame.staticResponse).clone().assign({ continueResponseAt, throttleKbps }).value()
 
