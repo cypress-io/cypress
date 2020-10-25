@@ -9,6 +9,7 @@
     "test:watch": "watch 'yarn test' ../../dist --wait=1"
   },
   "dependencies": {
+    "@testing-library/vue": "5.1.0",
     "core-js": "^3.6.5",
     "vue": "^2.6.11"
   },

@@ -9,6 +9,6 @@ describe('HelloWorld', () => {
       { propsData: { msg: 'Hello, BenK!!' }, attachTo: '#root' })
 
     expect(wrapper.exists()).to.be.ok
-    mouse.click($cyDom.getElementCoordinatesByPosition(wrapper.vm.$el).fromElViewport)
   })
 })
+

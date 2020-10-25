@@ -1,8 +1,8 @@
 @charset "utf-8";
 
 #mocha {
-  font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  margin: 60px 50px;
+  //font: 20px/1.5 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  //margin: 60px 50px;
 
   ul,
   li {
@@ -22,7 +22,7 @@
   h1 {
     margin-top: 15px;
     font-size: 1em;
-    font-weight: 200;
+    //font-weight: 200;
   }
 
   h1 a {
@@ -248,10 +248,7 @@
   }
 
   #mocha-stats {
-    position: fixed;
-    top: 15px;
-    right: 10px;
-    font-size: 12px;
+    font-size: 0.8rem;
     margin: 0;
     color: #888;
     z-index: 1;

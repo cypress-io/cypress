@@ -1,8 +1,10 @@
 const path = require('path')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
   mode: 'development',
   plugins: [
+    new VueLoaderPlugin()
   ],
   entry: {
     main: './src/client/runner.js',
@@ -49,10 +51,21 @@ module.exports = {
         use: 'ts-loader',
         exclude: /node_modules/,
       },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
+      {
+        test: /\.css$/,
+        use: [
+          'vue-style-loader',
+          'css-loader'
+        ]
+      }
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx', '.json', '.vue'],
     alias: {
       '@packages': path.resolve(__dirname, '../../packages')
     },
@@ -62,5 +75,5 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     library: 'evergreen',
     libraryTarget: 'umd',
-  },
+  }
 }

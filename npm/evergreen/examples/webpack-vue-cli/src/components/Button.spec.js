@@ -1,6 +1,6 @@
 import Button from './Button'
-import { mount } from '@vue/test-utils'
-import $ from 'cash-dom'
+import { mount } from '@cypress/evergreen/dist/main.bundle'
+import docs from '../../tests/plugins/docs'
 
 async function retry(fn, n = 0) {
   try {
@@ -12,16 +12,22 @@ async function retry(fn, n = 0) {
   }
 }
 
-describe.only('Button',  () => {
+docs(Button)
+
+describe('Button', () => {
   it('works', async () => {
-    const wrapper = mount(Button, { attachTo: '#root' })
+    console.log('hello!!!')
+    const wrapper = mount(Button)
+
     expect(wrapper.exists()).to.be.ok
 
-    await mouse.click(
-      $cyDom.getElementCoordinatesByPosition($(wrapper.vm.$el))
-        .fromElViewport
-    )
+    // This fails... because of some owner document issue.
+    // await mouse.click(
+    //   $cyDom.getElementCoordinatesByPosition($(wrapper.vm.$el))
+    //     .fromElViewport
+    // )
 
+    await wrapper.trigger('click')
     const getElementByTestId = id => document.querySelectorAll(`[data-testid=${id}`)[0]
 
     await retry(() => expect(getElementByTestId('byeButton').innerText).to.contain('Goodbye'))

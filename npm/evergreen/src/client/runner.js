@@ -1,6 +1,6 @@
 import { Mocha } from 'mocha'
 import chai from 'chai'
-import drive from './driver'
+import driver from './driver'
 
 import { createApp } from './app'
 import { load } from './load-specs'
@@ -54,3 +54,6 @@ export default function init (specMap, support) {
   createApp(state.specNames, { runAllSpecs })
   renderTargets()
 }
+
+export * from './plugins'
+export * from './mount'

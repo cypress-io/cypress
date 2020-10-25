@@ -23,9 +23,16 @@
     "webpack-chain": "4.12.1",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.2.0",
-    "@packages/driver": "*"
+    "@packages/driver": "*",
+    "vue-docgen-loader": "^1.5.0",
+    "vue-docgen-api": "^4.33.4",
+    "vue": "2.6.12",
+    "@vue/test-utils": "^1.1.0",
+    "vue-live": "^1.15.1"
   },
   "devDependencies": {
+    "vue-loader": "^15.9.3",
+    "vue-template-compiler": "^2.6.12",
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
     "babel-loader": "8.1.0",
