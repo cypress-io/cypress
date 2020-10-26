@@ -1,11 +1,13 @@
-const _ = require('lodash')
-const { codeFrameColumns } = require('@babel/code-frame')
-const errorStackParser = require('error-stack-parser')
-const path = require('path')
+// See: ./errorScenarios.md for details about error messages and stack traces
 
-const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
-const $sourceMapUtils = require('./source_map_utils')
+const _ = require('lodash')
+const path = require('path')
+const errorStackParser = require('error-stack-parser')
+const { codeFrameColumns } = require('@babel/code-frame')
+
 const $utils = require('./utils')
+const $sourceMapUtils = require('./source_map_utils')
+const { getStackLines, replacedStack, stackWithoutMessage, splitStack, unsplitStack } = require('@packages/server/lib/util/stack_utils')
 
 const whitespaceRegex = /^(\s*)*/
 const stackLineRegex = /^\s*(at )?.*@?\(?.*\:\d+\:\d+\)?$/
@@ -46,15 +48,14 @@ const stackWithLinesRemoved = (stack, cb) => {
   return unsplitStack(messageLines, remainingStackLines)
 }
 
-const stackWithLinesDroppedFromMarker = (stack, marker) => {
+const stackWithLinesDroppedFromMarker = (stack, marker, includeLast = false) => {
   return stackWithLinesRemoved(stack, (lines) => {
     // drop lines above the marker
     const withAboveMarkerRemoved = _.dropWhile(lines, (line) => {
       return !_.includes(line, marker)
     })
 
-    // remove the first line because it includes the marker
-    return withAboveMarkerRemoved.slice(1)
+    return includeLast ? withAboveMarkerRemoved : withAboveMarkerRemoved.slice(1)
   })
 }
 
@@ -109,6 +110,24 @@ const getCodeFrameFromSource = (sourceCode, { line, column, relativeFile, absolu
     frame,
     language: getLanguageFromExtension(relativeFile),
   }
+}
+
+const captureUserInvocationStack = (ErrorConstructor, userInvocationStack) => {
+  if (!userInvocationStack) {
+    const newErr = new ErrorConstructor('userInvocationStack')
+
+    // if browser natively supports Error.captureStackTrace, use it (chrome) (must be bound)
+    // otherwise use our polyfill on top.Error
+    const captureStackTrace = ErrorConstructor.captureStackTrace ? ErrorConstructor.captureStackTrace.bind(ErrorConstructor) : Error.captureStackTrace
+
+    captureStackTrace(newErr, captureUserInvocationStack)
+
+    userInvocationStack = newErr.stack
+  }
+
+  userInvocationStack = normalizedUserInvocationStack(userInvocationStack)
+
+  return userInvocationStack
 }
 
 const getCodeFrameStackLine = (err, stackIndex) => {
@@ -288,6 +307,11 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   // whereas Chromium browsers have the user's line first
   const stackLines = getStackLines(userInvocationStack)
   const winnowedStackLines = _.reject(stackLines, (line) => {
+    // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTOIN
+    // stacks in developemnt builds look like:
+    //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
+    // stacks in prod builds look like:
+    //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
     return line.includes('cy[name]') || line.includes('Chainer.prototype[key]')
   }).join('\n')
 
@@ -308,4 +332,5 @@ module.exports = {
   stackWithoutMessage,
   stackWithReplacementMarkerLineRemoved,
   stackWithUserInvocationStackSpliced,
+  captureUserInvocationStack,
 }

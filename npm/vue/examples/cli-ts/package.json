@@ -1,0 +1,25 @@
+{
+  "name": "cli-ts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "cy:open": "../../node_modules/.bin/cypress open",
+    "cy:run": "../../node_modules/.bin/cypress run",
+    "serve": "vue-cli-service serve"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "vue": "^2.6.11",
+    "vue-class-component": "^7.2.3",
+    "vue-property-decorator": "^8.4.2"
+  },
+  "devDependencies": {
+    "@cypress/vue": "file:../../dist",
+    "@vue/cli-plugin-babel": "~4.4.0",
+    "@vue/cli-plugin-typescript": "~4.4.0",
+    "@vue/cli-service": "~4.4.0",
+    "typescript": "~3.9.3",
+    "vue-template-compiler": "^2.6.11"
+  }
+}

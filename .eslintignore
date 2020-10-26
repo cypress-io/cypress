@@ -2,6 +2,7 @@
 !.*
 
 **/__snapshots__
+**/_test-output
 **/build
 **/cypress/fixtures
 **/dist
@@ -28,6 +29,9 @@ packages/server/lib/scaffold/support/commands.js
 packages/server/test/support/fixtures/projects/e2e/cypress/integration/stdout_exit_early_failing_spec.js
 packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescript_syntax_error_spec.ts
 
+npm/webpack-preprocessor/cypress/tests/e2e/compile-error.js
+npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
+
 **/.projects
 **/*.d.ts
 **/package-lock.json
@@ -36,3 +40,5 @@ packages/server/test/support/fixtures/projects/e2e/cypress/integration/typescrip
 **/.history
 **/.cy
 **/.git
+
+/npm/react/bin/*

@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
+const { normalizedStack } = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -721,13 +722,15 @@ module.exports = {
 
           The return value was:
 
-            > ${obj.returned}
+            > {{returned}}
 
           Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
-          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`,
+          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-custom-command',
       }
     },
@@ -738,13 +741,15 @@ module.exports = {
 
           The return value was:
 
-            > ${obj.returned}
+          > {{returned}}
 
           Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 
           For convenience, you can also simply omit any return value or return \`undefined\` and Cypress will not error.
 
-          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`,
+          In previous versions of Cypress we automatically detected this and forced the cy commands to be returned. To make things less magical and clearer, we are now throwing an error.`
+        // since obj.returned can be multi-lined, it can mess up stripIndent, so we replace it after
+        .replace('{{returned}}', obj.returned),
         docsUrl: 'https://on.cypress.io/returning-value-and-commands-in-test',
       }
     },
@@ -901,6 +906,11 @@ module.exports = {
 
     https://on.cypress.io/test-retries
     `,
+    hook_registered_late: stripIndent`\
+    Cypress detected you registered a(n) \`{{hookTitle}}\` hook while a test was running (possibly a hook nested inside another hook). All hooks must be registered before a test begins executing.
+
+    Move the \`{{hookTitle}}\` into a suite callback or the global scope.
+    `,
 
   },
 
@@ -939,6 +949,119 @@ module.exports = {
         Browsers will not fire the \`load\` event until all stylesheets and scripts are done downloading.
 
         When this \`load\` event occurs, Cypress will continue running commands.`
+    },
+  },
+
+  net_stubbing: {
+    invalid_static_response: ({ cmd, message, staticResponse }) => {
+      return cyStripIndent(`\
+        An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
+
+        You passed: ${format(staticResponse)}`, 8)
+    },
+    route2: {
+      needs_experimental: stripIndent`\
+        ${cmd('route2')} requires experimental network mocking to be enabled.
+
+        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
+
+        Read more: https://on.cypress.io/experiments`,
+      invalid_handler: ({ handler }) => {
+        return stripIndent`\
+          ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
+
+          You passed: ${format(handler)}`
+      },
+      invalid_route_matcher: ({ message, matcher }) => {
+        return stripIndent`\
+          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${message}
+
+          You passed: ${format(matcher)}`
+      },
+    },
+    request_handling: {
+      cb_failed: ({ err, req, route }) => {
+        return cyStripIndent(`\
+          A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
+
+          ${err.message}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
+      cb_timeout: ({ timeout, req, route }) => {
+        return cyStripIndent(`\
+          A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+
+          If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
+      multiple_reply_calls: `\`req.reply()\` was called multiple times in a request handler, but a request can only be replied to once.`,
+      reply_called_after_resolved: `\`req.reply()\` was called after the request handler finished executing, but \`req.reply()\` can not be called after the request has been passed on.`,
+    },
+    request_error: {
+      network_error: ({ innerErr, req, route }) => {
+        return cyStripIndent(`\
+          \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
+
+          ${normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
+      timeout: ({ innerErr, req, route }) => {
+        return cyStripIndent(`\
+          \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+
+          ${normalizedStack(innerErr)}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}`, 10)
+      },
+    },
+    response_handling: {
+      cb_failed: ({ err, req, res, route }) => {
+        return cyStripIndent(`\
+          A response callback passed to \`req.reply()\` threw an error while intercepting a response:
+
+          ${err.message}
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}
+
+          Intercepted response: ${format(res)}`, 10)
+      },
+      cb_timeout: ({ timeout, req, res, route }) => {
+        return cyStripIndent(`\
+          A response callback passed to \`req.reply()\` timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+
+          If the response callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
+
+          Route: ${format(route)}
+
+          Intercepted request: ${format(req)}
+
+          Intercepted response: ${format(res)}`, 10)
+      },
+      multiple_send_calls: ({ res }) => {
+        return cyStripIndent(`\
+          \`res.send()\` was called multiple times in a response handler, but the response can only be sent once.
+
+          Response: ${format(res)}`, 10)
+      },
+      send_called_after_resolved: ({ res }) => {
+        return cyStripIndent(`\
+          \`res.send()\` was called after the response handler finished executing, but \`res.send()\` can not be called after the response has been passed on.
+
+          Intercepted response: ${format(res)}`, 10)
+      },
     },
   },
 
@@ -1357,6 +1480,21 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/setcookie',
       }
     },
+    host_prefix: {
+      message: 'Cookies starting with the `__Host-` prefix must be set with `{ secure: true }`, and the path must be `/`',
+      docsUrl: 'https://on.cypress.io/setcookie',
+    },
+    secure_prefix: {
+      message: 'Cookies starting with the `__Secure-` prefix must be set with `{ secure: true }`',
+      docsUrl: 'https://on.cypress.io/setcookie',
+    },
+  },
+
+  shadow: {
+    no_shadow_root: {
+      message: 'Expected the subject to host a shadow root, but never found it.',
+      docsUrl: 'https://on.cypress.io/shadow',
+    },
   },
 
   should: {
@@ -1507,6 +1645,10 @@ module.exports = {
     },
     multiple_elements: {
       message: `${cmd('trigger')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/trigger',
+    },
+    invalid_event_type: {
+      message: `${cmd('trigger')} \`eventConstructor\` option must be a valid event (e.g. 'MouseEvent', 'KeyboardEvent'). You passed: \`{{eventConstructor}}\``,
       docsUrl: 'https://on.cypress.io/trigger',
     },
   },

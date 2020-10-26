@@ -814,7 +814,7 @@ module.exports = {
     console.log('')
   },
 
-  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet) {
+  async postProcessRecording (name, cname, videoCompression, shouldUploadVideo, quiet, ffmpegChaptersConfig) {
     debug('ending the video recording %o', { name, videoCompression, shouldUploadVideo })
 
     // once this ended promises resolves
@@ -826,7 +826,7 @@ module.exports = {
     }
 
     function continueProcessing (onProgress = undefined) {
-      return videoCapture.process(name, cname, videoCompression, onProgress)
+      return videoCapture.process(name, cname, videoCompression, ffmpegChaptersConfig, onProgress)
     }
 
     if (quiet) {
@@ -1153,12 +1153,15 @@ module.exports = {
       await openProject.closeBrowser()
 
       if (endVideoCapture && !videoCaptureFailed) {
+        const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(obj.tests)
+
         await this.postProcessRecording(
           videoName,
           compressedVideoName,
           videoCompression,
           suv,
           quiet,
+          ffmpegChaptersConfig,
         )
         .catch(warnVideoRecordingFailed)
       }
@@ -1248,6 +1251,7 @@ module.exports = {
       beforeSpecRun,
     })
     .then((runs = []) => {
+      results.status = 'finished'
       results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
       results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
       results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')

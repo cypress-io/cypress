@@ -59,7 +59,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "stable",
     "displayName": "Firefox",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": "firefox",
     "path": "C:/Program Files/Mozilla Firefox/firefox.exe",
@@ -76,7 +75,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "dev",
     "displayName": "Firefox Developer Edition",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": [
       "firefox-developer-edition",
@@ -96,7 +94,6 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "family": "firefox",
     "channel": "nightly",
     "displayName": "Firefox Nightly",
-    "info": "Firefox support is currently in beta! You can help us continue to improve the Cypress + Firefox experience by [reporting any issues you find](https://on.cypress.io/new-issue).",
     "versionRegex": {},
     "binary": [
       "firefox-nightly",
@@ -172,6 +169,69 @@ exports['windows browser detection detects browsers as expected 1'] = [
       "appName": "Microsoft Edge Dev.app",
       "executable": "Contents/MacOS/Microsoft Edge Dev",
       "appId": "com.microsoft.Edge.Dev",
+      "versionProperty": "CFBundleShortVersionString"
+    }
+  }
+]
+
+exports['windows browser detection detects new Chrome 64-bit app path 1'] = {
+  "name": "chrome",
+  "version": "4.4.4",
+  "path": "C:/Program Files/Google/Chrome/Application/chrome.exe"
+}
+
+exports['windows browser detection detects local Firefox installs 1'] = [
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "stable",
+    "displayName": "Firefox",
+    "versionRegex": {},
+    "binary": "firefox",
+    "path": "C:/Users/flotwig/AppData/Local/Mozilla Firefox/firefox.exe",
+    "version": "100",
+    "findAppParams": {
+      "appName": "Firefox.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefox",
+      "versionProperty": "CFBundleShortVersionString"
+    }
+  },
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "dev",
+    "displayName": "Firefox Developer Edition",
+    "versionRegex": {},
+    "binary": [
+      "firefox-developer-edition",
+      "firefox"
+    ],
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Developer Edition/firefox.exe",
+    "version": "300",
+    "findAppParams": {
+      "appName": "Firefox Developer Edition.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.firefoxdeveloperedition",
+      "versionProperty": "CFBundleShortVersionString"
+    }
+  },
+  {
+    "name": "firefox",
+    "family": "firefox",
+    "channel": "nightly",
+    "displayName": "Firefox Nightly",
+    "versionRegex": {},
+    "binary": [
+      "firefox-nightly",
+      "firefox-trunk"
+    ],
+    "path": "C:/Users/flotwig/AppData/Local/Firefox Nightly/firefox.exe",
+    "version": "200",
+    "findAppParams": {
+      "appName": "Firefox Nightly.app",
+      "executable": "Contents/MacOS/firefox-bin",
+      "appId": "org.mozilla.nightly",
       "versionProperty": "CFBundleShortVersionString"
     }
   }

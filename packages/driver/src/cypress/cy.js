@@ -150,7 +150,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
   const focused = $Focused.create(state)
-  const keyboard = $Keyboard.create(state)
+  const keyboard = $Keyboard.create(Cypress, state)
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
@@ -656,7 +656,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
     args.unshift(subject)
 
-    Cypress.action('cy:next:subject:prepared', subject, args)
+    Cypress.action('cy:next:subject:prepared', subject, args, firstCall)
 
     return args
   }
@@ -713,7 +713,8 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     // attached to the error thrown from chai
     // command errors and command assertion errors (default assertion or cy.should)
     // have the invocation stack attached to the current command
-    let userInvocationStack = state('currentAssertionUserInvocationStack')
+    // prefer err.userInvocation stack if it's been set
+    let userInvocationStack = $errUtils.getUserInvocationStack(err) || state('currentAssertionUserInvocationStack')
 
     // if there is no user invocation stack from an assertion or it is the default
     // assertion, meaning it came from a command (e.g. cy.get), prefer the
@@ -744,6 +745,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     let rets
 
     stopped = true
+
+    if (typeof err === 'string') {
+      err = new Error(err)
+    }
 
     err.stack = $stackUtils.normalizedStack(err)
 
@@ -1044,9 +1049,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       }
 
       cy[name] = function (...args) {
-        const userInvocationStack = $stackUtils.normalizedUserInvocationStack(
-          (new specWindow.Error('command invocation stack')).stack,
-        )
+        const userInvocationStack = $stackUtils.captureUserInvocationStack(specWindow.Error)
 
         let ret
 

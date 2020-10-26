@@ -122,6 +122,8 @@ describe('Routes', () => {
         const open = () => {
           this.project = new Project('/path/to/project')
 
+          cfg.pluginsFile = false
+
           return Promise.all([
             // open our https server
             httpsServer.start(8443),
@@ -140,6 +142,10 @@ describe('Routes', () => {
               this.session = session(this.srv)
 
               this.proxy = `http://localhost:${port}`
+            }),
+
+            pluginsModule.init(cfg, {
+              projectRoot: cfg.projectRoot,
             }),
           ])
         }
@@ -2011,6 +2017,27 @@ describe('Routes', () => {
           expect(res.statusCode).to.eq(200)
 
           expect(res.headers).not.to.have.property('content-security-policy')
+        })
+      })
+
+      it('omits content-security-policy-report-only', function () {
+        nock(this.server._remoteOrigin)
+        .get('/bar')
+        .reply(200, 'OK', {
+          'Content-Type': 'text/html',
+          'content-security-policy-report-only': 'foobar;',
+        })
+
+        return this.rp({
+          url: 'http://localhost:8080/bar',
+          headers: {
+            'Cookie': '__cypress.initial=false',
+          },
+        })
+        .then((res) => {
+          expect(res.statusCode).to.eq(200)
+
+          expect(res.headers).not.to.have.property('content-security-policy-report-only')
         })
       })
 

@@ -42,3 +42,13 @@ cypress.run({ config: runConfig })
 cypress.run({}).then((results) => {
   results as CypressCommandLine.CypressRunResult // $ExpectType CypressRunResult
 })
+
+// the caller can determine if Cypress ran or failed to launch
+cypress.run().then(results => {
+  if (results.status === 'failed') {
+    results // $ExpectType CypressFailedRunResult
+  } else {
+    results // $ExpectType CypressRunResult
+    results.status // $ExpectType "finished"
+  }
+})

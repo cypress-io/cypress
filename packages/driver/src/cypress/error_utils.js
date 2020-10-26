@@ -1,10 +1,15 @@
-const _ = require('lodash')
+// See: ./errorScenarios.md for details about error messages and stack traces
 
-const $errorMessages = require('./error_messages')
+const _ = require('lodash')
+const chai = require('chai')
+
+const $dom = require('../dom')
 const $utils = require('./utils')
 const $stackUtils = require('./stack_utils')
+const $errorMessages = require('./error_messages')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
+const ERR_PREPARED_FOR_SERIALIZATION = Symbol('ERR_PREPARED_FOR_SERIALIZATION')
 
 if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
@@ -14,8 +19,38 @@ if (!Error.captureStackTrace) {
   }
 }
 
+const prepareErrorForSerialization = (err) => {
+  if (err[ERR_PREPARED_FOR_SERIALIZATION]) {
+    return err
+  }
+
+  if (err.type === 'existence' || $dom.isDom(err.actual) || $dom.isDom(err.expected)) {
+    err.showDiff = false
+  }
+
+  if (err.showDiff === true) {
+    if (err.actual) {
+      err.actual = chai.util.inspect(err.actual)
+    }
+
+    if (err.expected) {
+      err.expected = chai.util.inspect(err.expected)
+    }
+  } else {
+    delete err.actual
+    delete err.expected
+    delete err.showDiff
+  }
+
+  err[ERR_PREPARED_FOR_SERIALIZATION] = true
+
+  return err
+}
+
 const wrapErr = (err) => {
   if (!err) return
+
+  prepareErrorForSerialization(err)
 
   return $utils.reduceProps(err, ERROR_PROPS)
 }
@@ -187,6 +222,16 @@ class CypressError extends Error {
       Error.captureStackTrace(this, CypressError)
     }
   }
+
+  setUserInvocationStack (stack) {
+    this.userInvocationStack = stack
+
+    return this
+  }
+}
+
+const getUserInvocationStack = (err) => {
+  return err.userInvocationStack
 }
 
 const internalErr = (err) => {
@@ -254,7 +299,8 @@ const errByPath = (msgPath, args) => {
 }
 
 const createUncaughtException = (type, err) => {
-  const errPath = type === 'spec' ? 'uncaught.fromSpec' : 'uncaught.fromApp'
+  // FIXME: `fromSpec` is a dirty hack to get uncaught exceptions in `top` to say they're from the spec
+  const errPath = (type === 'spec' || err.fromSpec) ? 'uncaught.fromSpec' : 'uncaught.fromApp'
   let uncaughtErr = errByPath(errPath, {
     errMsg: err.message,
   })
@@ -338,4 +384,5 @@ module.exports = {
   throwErrByPath,
   warnByPath,
   wrapErr,
+  getUserInvocationStack,
 }

@@ -196,7 +196,7 @@ describe('controls', function () {
           cy.get('.command-progress').should('be.visible')
         })
 
-        it('calculates correct width', function () {
+        it('calculates correct scale factor', function () {
           const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
 
           // take the wallClockStartedAt of this command and add 2500 milliseconds to it
@@ -207,14 +207,15 @@ describe('controls', function () {
           cy.get('.runnable-active').click()
           cy.get('.command-progress > span').should(($span) => {
             expect($span.attr('style')).to.contain('animation-duration: 1500ms')
-            expect($span.attr('style')).to.contain('width: 37.5%')
+            expect($span.attr('style')).to.contain('transform: scaleX(0.375)')
 
-            // ensures that actual width hits 0 within default timeout
-            expect($span).to.have.css('width', '0px')
+            // ensures that actual scale factor hits 0 within default timeout
+            // this matrix is equivalent to scaleX(0)
+            expect($span).to.have.css('transform', 'matrix(0, 0, 0, 1, 0, 0)')
           })
         })
 
-        it('recalculates correct width after being closed', function () {
+        it('recalculates correct scale factor after being closed', function () {
           const { wallClockStartedAt } = this.runnables.suites[0].suites[0].tests[1].commands[0]
 
           // take the wallClockStartedAt of this command and add 1000 milliseconds to it
@@ -225,7 +226,7 @@ describe('controls', function () {
           cy.get('.runnable-active').click()
           cy.get('.command-progress > span').should(($span) => {
             expect($span.attr('style')).to.contain('animation-duration: 3000ms')
-            expect($span.attr('style')).to.contain('width: 75%')
+            expect($span.attr('style')).to.contain('transform: scaleX(0.75)')
           })
 
           // set the clock ahead as if time has passed
@@ -234,7 +235,7 @@ describe('controls', function () {
           cy.get('.runnable-active > .collapsible > .runnable-wrapper').click().click()
           cy.get('.command-progress > span').should(($span) => {
             expect($span.attr('style')).to.contain('animation-duration: 1000ms')
-            expect($span.attr('style')).to.contain('width: 25%')
+            expect($span.attr('style')).to.contain('transform: scaleX(0.25)')
           })
         })
       })

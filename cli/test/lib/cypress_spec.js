@@ -68,6 +68,24 @@ describe('cypress', function () {
     })
   })
 
+  context('.run fails to write results file', function () {
+    it('resolves with error object', function () {
+      const outputPath = path.join(os.tmpdir(), 'cypress/monorepo/cypress_spec/output.json')
+
+      sinon.stub(tmp, 'fileAsync').resolves(outputPath)
+      sinon.stub(run, 'start').resolves(2)
+      sinon.stub(fs, 'readJsonAsync').withArgs(outputPath).resolves()
+
+      return cypress.run().then((result) => {
+        expect(result).to.deep.equal({
+          status: 'failed',
+          failures: 2,
+          message: 'Could not find Cypress test run results',
+        })
+      })
+    })
+  })
+
   context('.run', function () {
     let outputPath
 
@@ -204,6 +222,24 @@ describe('cypress', function () {
         expect(options).to.deep.equal({
           record: false,
           dev: true,
+        })
+      })
+
+      it('coerces --config-file false to boolean', async () => {
+        const args = 'cypress run --config-file false'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          configFile: false,
+        })
+      })
+
+      it('coerces --config-file cypress.json to string', async () => {
+        const args = 'cypress run --config-file cypress.json'.split(' ')
+        const options = await cypress.cli.parseRunArguments(args)
+
+        expect(options).to.deep.equal({
+          configFile: 'cypress.json',
         })
       })
 

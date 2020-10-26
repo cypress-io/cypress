@@ -6,6 +6,9 @@ import { utils as driverUtils } from '@packages/driver'
 import State from './lib/state'
 import Container from './app/container'
 
+// to support async/await
+import 'regenerator-runtime/runtime'
+
 configure({ enforceActions: 'always' })
 
 const Runner = {
@@ -13,7 +16,9 @@ const Runner = {
     action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
-      const state = new State((config.state || {}).reporterWidth)
+      const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
+
+      const state = new State(NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth)
 
       Runner.state = state
       Runner.configureMobx = configure

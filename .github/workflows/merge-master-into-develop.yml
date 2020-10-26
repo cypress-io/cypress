@@ -1,0 +1,61 @@
+name: merge-master-into-develop
+on:
+  push:
+    branches:
+      - master
+jobs:
+  merge-master-into-develop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.DEVELOP_PUSH_TOKEN }}
+      - name: Set committer info
+        run: |
+          git config --local user.email "$(git log --format='%ae' HEAD^!)"
+          git config --local user.name "$(git log --format='%an' HEAD^!)"
+      - name: Checkout develop branch
+        run: git checkout develop
+      - name: Check for merge conflict
+        id: check-conflict
+        run: echo "::set-output name=merge_conflict::$(git merge-tree $(git merge-base HEAD master) master HEAD | egrep '<<')"
+      - name: Merge master into develop
+        run: git merge master
+        if: ${{ !steps.check-conflict.outputs.merge_conflict }}
+      - name: Push
+        run: git push
+        if: ${{ !steps.check-conflict.outputs.merge_conflict }}
+      - name: Checkout master
+        run: git checkout master
+        if: ${{ steps.check-conflict.outputs.merge_conflict }}
+      - name: Determine name of new branch
+        id: gen-names
+        run: |
+          echo "::set-output name=sha::$(git rev-parse --short HEAD)"
+          echo "::set-output name=branch_name::$(git rev-parse --short HEAD)-master-into-develop"
+        if: ${{ steps.check-conflict.outputs.merge_conflict }}
+      - name: Create a copy of master on a new branch
+        run: git checkout -b ${{ steps.gen-names.outputs.branch_name }} master
+        if: ${{ steps.check-conflict.outputs.merge_conflict }}
+      - name: Push branch to remote
+        run: git push origin ${{ steps.gen-names.outputs.branch_name }}
+        if: ${{ steps.check-conflict.outputs.merge_conflict }}
+      - name: Create Pull Request
+        uses: repo-sync/pull-request@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          source_branch: ${{ steps.gen-names.outputs.branch_name }}
+          destination_branch: "develop"
+          pr_title: |
+            chore: merge master - ${{ steps.gen-names.outputs.sha }} into develop
+          pr_body: |
+            There was a merge conflict when trying to automatically merge master into develop. Please resolve the conflict and complete the merge.
+
+            DO NOT SQUASH AND MERGE
+
+            @${{ github.actor }}
+          pr_reviewer: ${{ github.actor }}
+          pr_label: "auto-merge"
+        if: ${{ steps.check-conflict.outputs.merge_conflict }}

@@ -60,13 +60,6 @@ describe('Project Nav', function () {
       cy.percySnapshot()
     })
 
-    it('displays "Tests" page when switching to a beta browser', () => {
-      cy.get('.browsers .dropdown-chosen').click()
-      cy.contains('.browsers', 'beta').first().click()
-      cy.get('.list-as-table').should('be.visible')
-      cy.percySnapshot()
-    })
-
     describe('runs page', function () {
       beforeEach(function () {
         cy.fixture('runs').as('runs')
@@ -151,12 +144,7 @@ describe('Project Nav', function () {
           })
         })
 
-        it('shows beta text for firefox', function () {
-          cy.get('.browsers li').contains('Firefox')
-          .contains('beta')
-        })
-
-        it('shows info icon with tooltip for browsder with info', function () {
+        it('shows info icon with tooltip for browser with info', function () {
           const browserWithInfo = _.find(this.config.browsers, (b) => !!b.info)
 
           cy.get('.browsers-list .dropdown-chosen').click()

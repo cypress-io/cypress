@@ -141,7 +141,9 @@ describe('src/cy/commands/navigation', () => {
         return null
       })
 
-      it('logs once on failure', function (done) {
+      it('logs once on failure', {
+        defaultCommandTimeout: 200,
+      }, function (done) {
         cy.on('fail', (err) => {
           expect(this.logs.length).to.eq(1)
 
@@ -164,7 +166,7 @@ describe('src/cy/commands/navigation', () => {
         cy.reload(1, 2, 3)
       })
 
-      it('throws passing 2 invalid arguments', (done) => {
+      it('throws passing 2 invalid arguments', { defaultCommandTimeout: 200, retries: 1 }, (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.eq('`cy.reload()` can only accept a boolean or `options` as its arguments.')
           expect(err.docsUrl).to.eq('https://on.cypress.io/reload')

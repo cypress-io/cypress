@@ -26,6 +26,7 @@ const driverToSocketEvents = 'backend:request automation:request mocha recorder:
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
 const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketToDriverEvents = 'net:event'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
@@ -87,6 +88,12 @@ const eventManager = {
 
     _.each(socketRerunEvents, (event) => {
       ws.on(event, rerun)
+    })
+
+    _.each(socketToDriverEvents, (event) => {
+      ws.on(event, (...args) => {
+        Cypress.emit(event, ...args)
+      })
     })
 
     const logCommand = (logId) => {
@@ -285,6 +292,10 @@ const eventManager = {
     })
 
     Cypress.on('collect:run:state', () => {
+      if (Cypress.env('NO_COMMAND_LOG')) {
+        return Promise.resolve()
+      }
+
       return new Promise((resolve) => {
         reporterBus.emit('reporter:collect:run:state', resolve)
       })
@@ -306,6 +317,10 @@ const eventManager = {
       const beforeThenCb = () => {
         localBus.emit('before:screenshot', config)
         cb()
+      }
+
+      if (Cypress.env('NO_COMMAND_LOG')) {
+        return beforeThenCb()
       }
 
       const wait = !config.appOnly && config.waitForCommandSynchronization

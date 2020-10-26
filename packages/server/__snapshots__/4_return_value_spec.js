@@ -29,7 +29,7 @@ exports['e2e return value failing1 1'] = `
 
 The return value was:
 
-  > {}, 1, 2, foo, function(){}
+> {}, 1, 2, foo, function(){}
 
 Because cy commands are asynchronous and are queued to be run later, it doesn't make sense to return anything else.
 

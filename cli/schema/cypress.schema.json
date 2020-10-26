@@ -234,10 +234,10 @@
       "default": false,
       "description": "Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm."
     },
-    "experimentalShadowDomSupport": {
+    "experimentalNetworkStubbing": {
       "type": "boolean",
       "default": false,
-      "description": "Enables shadow DOM support. Adds the `cy.shadow()` command and the `ignoreShadowBoundaries` option to some DOM commands."
+      "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
     },
     "experimentalFetchPolyfill": {
       "type": "boolean",
@@ -255,6 +255,11 @@
         "openMode": 0
       },
       "description": "The number of times to retry a failing. Can be configured to apply only in runMode or openMode"
+    },
+    "includeShadowDom": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables including elements within the shadow DOM when using querying commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json, per-suite or per-test in the test configuration object, or programmatically with Cypress.config()"
     }
   }
 }

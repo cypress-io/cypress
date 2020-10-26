@@ -88,6 +88,10 @@ const hasRetriableStatusCodeFailure = (res, retryOnStatusCodeFailure) => {
   ])
 }
 
+const isErrEmptyResponseError = (err) => {
+  return _.startsWith(err.message, 'ERR_EMPTY_RESPONSE')
+}
+
 const isRetriableError = (err = {}, retryOnNetworkFailure) => {
   return _.every([
     retryOnNetworkFailure,
@@ -116,7 +120,7 @@ const maybeRetryOnNetworkFailure = function (err, options = {}) {
     opts.minVersion = 'TLSv1'
   }
 
-  if (!isTlsVersionError && !isRetriableError(err, retryOnNetworkFailure)) {
+  if (!isTlsVersionError && !isErrEmptyResponseError(err.originalErr || err) && !isRetriableError(err, retryOnNetworkFailure)) {
     return onElse()
   }
 
@@ -602,6 +606,7 @@ module.exports = function (options = {}) {
 
       _.defaults(options, {
         headers: {},
+        followAllRedirects: true,
         onBeforeReqInit (fn) {
           return fn()
         },

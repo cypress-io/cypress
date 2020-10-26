@@ -1,6 +1,6 @@
 import { log } from '../log'
 import { partial, trim, tap, prop } from 'ramda'
-import { FoundBrowser, Browser } from '../types'
+import { FoundBrowser, Browser, PathData } from '../types'
 import { notInstalledErr } from '../errors'
 import { utils } from '../utils'
 import os from 'os'
@@ -71,6 +71,16 @@ export function getVersionString (path: string) {
   .then(prop('stdout'))
   .then(trim)
   .then(tap(partial(log, ['stdout: "%s"'])))
+}
+
+export function getVersionNumber (version: string, browser: Browser) {
+  const regexExec = browser.versionRegex.exec(version) as Array<string>
+
+  return regexExec ? regexExec[1] : version
+}
+
+export function getPathData (pathStr: string): PathData {
+  return { path: pathStr }
 }
 
 export function detect (browser: Browser) {

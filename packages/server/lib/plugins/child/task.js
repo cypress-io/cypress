@@ -32,7 +32,13 @@ const merge = (prevEvents, events) => {
 
 const wrap = (ipc, events, ids, args) => {
   const task = args[0]
-  const arg = args[1]
+  let arg = args[1]
+
+  // ipc converts undefined to null.
+  // we're restoring it.
+  if (arg && arg.__cypress_task_no_argument__) {
+    arg = undefined
+  }
 
   const invoke = (eventId, args = []) => {
     const handler = _.get(events, `${eventId}.handler.${task}`)

@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "5.0.0",
+  "version": "5.4.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -36,18 +36,19 @@
     "docker": "./scripts/run-docker-local.sh",
     "effective:circle:config": "circleci config process circle.yml | sed /^#/d",
     "ensure-deps": "./scripts/ensure-dependencies.sh",
-    "postinstall": "yarn build",
+    "postinstall": "./scripts/run-if-not-ci.sh yarn build",
     "jscodeshift": "jscodeshift -t ./node_modules/js-codemod/transforms/arrow-function-arguments.js",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx,.json .",
     "lint-changed": "lint-changed",
     "move-binaries": "node ./scripts/binary.js move-binaries",
+    "semantic-release": "node ./scripts/semantic-release.js",
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.ts,cypress-tests.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,network,proxy,rewriter,reporter,runner,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,reporter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
@@ -81,10 +82,12 @@
     "@cypress/questions-remain": "1.0.1",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@cypress/webpack-preprocessor": "5.4.4",
     "@fellow/eslint-plugin-coffee": "0.4.13",
-    "@percy/cypress": "2.3.1",
+    "@percy/cypress": "2.3.2",
+    "@semantic-release/changelog": "5.0.1",
+    "@semantic-release/git": "9.0.0",
     "@types/bluebird": "3.5.29",
+    "@types/chai-enzyme": "0.6.7",
     "@types/classnames": "2.2.9",
     "@types/debug": "4.1.5",
     "@types/enzyme": "3.9.1",
@@ -95,10 +98,11 @@
     "@types/lodash": "4.14.149",
     "@types/markdown-it": "0.0.9",
     "@types/mini-css-extract-plugin": "0.8.0",
+    "@types/mocha": "8.0.3",
     "@types/node": "12.12.50",
     "@types/prismjs": "1.16.0",
     "@types/ramda": "0.25.47",
-    "@types/react": "16.9.42",
+    "@types/react": "16.9.50",
     "@types/react-dom": "16.9.8",
     "@types/request-promise": "4.1.45",
     "@types/sinon-chai": "3.2.3",
@@ -174,6 +178,8 @@
     "print-arch": "1.0.0",
     "proxyquire": "2.1.3",
     "ramda": "0.24.1",
+    "semantic-release": "17.1.1",
+    "semantic-release-monorepo": "7.0.3",
     "shelljs": "0.8.3",
     "shx": "0.3.2",
     "sinon": "7.3.2",
@@ -220,7 +226,8 @@
   "workspaces": {
     "packages": [
       "cli",
-      "packages/*"
+      "packages/*",
+      "npm/*"
     ],
     "nohoist": [
       "**/@ffmpeg-installer",
@@ -239,6 +246,8 @@
     ]
   },
   "resolutions": {
-    "**/jquery": "3.1.1"
+    "**/@types/react": "16.9.50",
+    "**/jquery": "3.1.1",
+    "**/pretty-format": "26.4.0"
   }
 }
