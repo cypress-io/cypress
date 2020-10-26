@@ -118,11 +118,11 @@ describe('network stubbing', function () {
             },
           },
           headers: {
-            'Accept-Language': {
+            'accept-language': {
               type: 'regex',
               value: '/hylian/i',
             },
-            'Content-Encoding': {
+            'content-encoding': {
               type: 'glob',
               value: options.headers['Content-Encoding'],
             },
@@ -310,6 +310,7 @@ describe('network stubbing', function () {
 
         // @ts-ignore: should fail
         cy.route2({
+          // @ts-ignore
           url: {},
         })
       })
@@ -344,6 +345,41 @@ describe('network stubbing', function () {
 
         // @ts-ignore - should fail
         cy.route2()
+      })
+
+      context('with invalid RouteMatcher', function () {
+        it('requires unique header names', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`FOO` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).')
+
+            done()
+          })
+
+          cy.route2({
+            headers: {
+              foo: 'bar',
+              FOO: 'bar',
+            },
+          })
+        })
+
+        it('requires StringMatcher header values', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`headers.wrong` must be a string or a regular expression.')
+
+            done()
+          })
+
+          // @ts-ignore this is invalid on purpose
+          cy.route2({
+            headers: {
+              good: 'string',
+              fine: /regexp/,
+              // @ts-ignore
+              wrong: 3,
+            },
+          })
+        })
       })
 
       context('with invalid handler', function () {
@@ -411,6 +447,17 @@ describe('network stubbing', function () {
   })
 
   context('network handling', function () {
+    // @see https://github.com/cypress-io/cypress/issues/8497
+    it('can load transfer-encoding: chunked redirects', function () {
+      const url4 = 'http://localhost:3501/fixtures/generic.html'
+      const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
+      const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
+      const url1 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url2)}`
+
+      cy.visit(url1)
+      .location('href').should('eq', url4)
+    })
+
     context('can intercept against any domain', function () {
       beforeEach(function () {
         // reset origin
@@ -638,6 +685,15 @@ describe('network stubbing', function () {
 
         cy.contains('#result', '""').should('be.visible')
       })
+
+      // @see https://github.com/cypress-io/cypress/issues/8623
+      it('works with images', function () {
+        cy.visit('/fixtures/img-embed.html')
+        .contains('div', 'error loading image')
+        .route2('non-existing-image.png', { fixture: 'media/cypress.png' })
+        .reload()
+        .contains('div', 'it loaded')
+      })
     })
   })
 
@@ -839,6 +895,25 @@ describe('network stubbing', function () {
         .wait('@second')
         .wait('@third')
         .wait('@final')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/8921
+      it('with case-insensitive header matching', function () {
+        cy.route2({
+          headers: {
+            'X-some-Thing': 'foo',
+          },
+        })
+        .as('foo')
+        .then(() => {
+          $.get({
+            url: '/foo',
+            headers: {
+              'X-SOME-THING': 'foo',
+            },
+          })
+        })
+        .wait('@foo')
       })
     })
 
