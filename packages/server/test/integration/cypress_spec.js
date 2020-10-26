@@ -891,14 +891,6 @@ describe('lib/cypress', () => {
 
     const renamedConfigs = [
       {
-        old: 'trashAssetsBeforeHeadlessRuns',
-        new: 'trashAssetsBeforeRuns',
-      },
-      {
-        old: 'videoRecording',
-        new: 'video',
-      },
-      {
         old: 'blacklistHosts',
         new: 'blockHosts',
       },
@@ -914,17 +906,6 @@ describe('lib/cypress', () => {
           this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
           this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
         })
-      })
-    })
-
-    it('logs error and exits when using screenshotOnHeadlessFailure', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=screenshotOnHeadlessFailure=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'screenshotOnHeadlessFailure')
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'You now configure this behavior in your test code')
       })
     })
 
@@ -1297,7 +1278,7 @@ describe('lib/cypress', () => {
 
   // most record mode logic is covered in e2e tests.
   // we only need to cover the edge cases / warnings
-  context('--record or --ci', () => {
+  context('--record', () => {
     beforeEach(function () {
       sinon.stub(api, 'createRun').resolves()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
@@ -1365,40 +1346,6 @@ describe('lib/cypress', () => {
         })
 
         expect(errors.warning).not.to.be.called
-        this.expectExitWith(3)
-      })
-    })
-
-    it('logs warning when using deprecated --ci arg and no env var', function () {
-      return cypress.start([
-        `--run-project=${this.recordPath}`,
-        '--key=token-123',
-        '--ci',
-      ])
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED')
-        expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        expect(console.log).to.be.calledWithMatch('cypress run --record --key <record_key>')
-        expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION')
-        this.expectExitWith(3)
-      })
-    })
-
-    it('logs warning when using deprecated --ci arg and env var', function () {
-      sinon.stub(env, 'get')
-      .withArgs('CYPRESS_CI_KEY')
-      .returns('asdf123foobarbaz')
-
-      return cypress.start([
-        `--run-project=${this.recordPath}`,
-        '--key=token-123',
-        '--ci',
-      ])
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED_ENV_VAR')
-        expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        expect(console.log).to.be.calledWithMatch('cypress ci')
-        expect(console.log).to.be.calledWithMatch('cypress run --record')
         this.expectExitWith(3)
       })
     })

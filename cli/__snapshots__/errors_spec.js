@@ -42,7 +42,6 @@ exports['errors individual has the following errors 1'] = [
   "missingXvfb",
   "nonZeroExitCodeXvfb",
   "notInstalledCI",
-  "removed",
   "smokeTestFailure",
   "unexpected",
   "unknownError",

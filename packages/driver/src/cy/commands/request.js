@@ -103,11 +103,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         $errUtils.throwErrByPath('request.status_code_flags_invalid')
       }
 
-      if (_.has(options, 'failOnStatus')) {
-        $errUtils.warnByPath('request.failonstatus_deprecated_warning')
-        options.failOnStatusCode = options.failOnStatus
-      }
-
       // normalize followRedirects -> followRedirect
       // because we are nice
       if (_.has(options, 'followRedirects')) {

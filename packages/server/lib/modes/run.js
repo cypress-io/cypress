@@ -1404,9 +1404,6 @@ module.exports = {
     // alias and coerce to null
     let specPattern = options.spec || null
 
-    // warn if we're using deprecated --ci flag
-    recordMode.warnIfCiFlag(options.ci)
-
     // ensure the project exists
     // and open up the project
     return browserUtils.getAllBrowsersWith()

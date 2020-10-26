@@ -281,11 +281,5 @@ module.exports = function (Commands, Cypress, cy, state) {
     spy,
 
     stub,
-
-    agents () {
-      $errUtils.warnByPath('agents.deprecated_warning')
-
-      return { stub, spy }
-    },
   })
 }

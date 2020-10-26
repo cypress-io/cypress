@@ -53,18 +53,6 @@ const isAbortedThroughUnload = (xhr) => {
   xhr.responseText === ''
 }
 
-const warnOnStubDeprecation = (obj, type) => {
-  if (_.has(obj, 'stub')) {
-    return $errUtils.warnByPath('server.stub_deprecated', { args: { type } })
-  }
-}
-
-const warnOnForce404Default = (obj) => {
-  if (obj.force404 === false) {
-    return $errUtils.warnByPath('server.force404_deprecated')
-  }
-}
-
 const warnOnWhitelistRenamed = (obj, type) => {
   if (obj.whitelist) {
     return $errUtils.throwErrByPath('server.whitelist_renamed', { args: { type } })
@@ -240,8 +228,6 @@ const create = (options = {}) => {
     },
 
     route (attrs = {}) {
-      warnOnStubDeprecation(attrs, 'route')
-
       // merge attrs with the server's defaults
       // so we preserve the state of the attrs
       // at the time they're created since we
@@ -418,8 +404,6 @@ const create = (options = {}) => {
     },
 
     set (obj) {
-      warnOnStubDeprecation(obj, 'server')
-      warnOnForce404Default(obj)
       warnOnWhitelistRenamed(obj, 'server')
 
       // handle enable=true|false

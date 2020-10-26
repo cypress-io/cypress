@@ -33,11 +33,6 @@ const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
 const { registerFetch } = require('unfetch')
 
-const privateProps = {
-  props: { name: 'state', url: true },
-  privates: { name: 'state', url: false },
-}
-
 const noArgsAreAFunction = (args) => {
   return !_.some(args, _.isFunction)
 }
@@ -1409,16 +1404,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         }
       }
     },
-  })
-
-  _.each(privateProps, (obj, key) => {
-    return Object.defineProperty(cy, key, {
-      get () {
-        return $errUtils.throwErrByPath('miscellaneous.private_property', {
-          args: obj,
-        })
-      },
-    })
   })
 
   setTopOnError(cy)
