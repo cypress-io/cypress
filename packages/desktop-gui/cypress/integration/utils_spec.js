@@ -31,10 +31,7 @@ describe('durationFormatted', function () {
 describe('getFormattedTimeFromNow', function () {
   it('displays time a minute ago', () => {
     const now = dayjs()
-
     const dateInPast = now.subtract(1, 'minute').toISOString()
-
-    cy.clock(now.valueOf())
 
     expect(utils.getFormattedTimeFromNow(dateInPast)).to.eq('a min ago')
   })
