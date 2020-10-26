@@ -628,22 +628,6 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         We found an invalid configuration value:
 
         ${chalk.yellow(arg1)}`
-    case 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED':
-      return stripIndent`\
-        In Cypress version 3.0.0 we removed the configuration option ${chalk.yellow('\`screenshotOnHeadlessFailure\`')}
-
-        You now configure this behavior in your test code.
-
-        Example:
-
-        \`\`\`
-        // cypress/support/index.js
-        Cypress.Screenshot.defaults({
-          screenshotOnRunFailure: false
-        })
-        \`\`\`
-
-        Learn more at https://on.cypress.io/screenshot-api`
     case 'RENAMED_CONFIG_OPTION':
       return stripIndent`\
         The ${chalk.yellow(arg1)} configuration option you have supplied has been renamed.

@@ -917,17 +917,6 @@ describe('lib/cypress', () => {
       })
     })
 
-    it('logs error and exits when using screenshotOnHeadlessFailure', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=screenshotOnHeadlessFailure=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'screenshotOnHeadlessFailure')
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'You now configure this behavior in your test code')
-      })
-    })
-
     // TODO: make sure we have integration tests around this
     // for headed projects!
     // also make sure we test the rest of the integration functionality

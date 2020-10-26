@@ -290,9 +290,6 @@ export const breakingOptions = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'screenshotOnHeadlessFailure',
-    errorKey: 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED',
-  }, {
     name: 'trashAssetsBeforeHeadlessRuns',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'trashAssetsBeforeRuns',
