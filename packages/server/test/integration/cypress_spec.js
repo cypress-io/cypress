@@ -891,10 +891,6 @@ describe('lib/cypress', () => {
 
     const renamedConfigs = [
       {
-        old: 'videoRecording',
-        new: 'video',
-      },
-      {
         old: 'blacklistHosts',
         new: 'blockHosts',
       },
