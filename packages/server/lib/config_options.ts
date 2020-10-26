@@ -290,10 +290,6 @@ export const breakingOptions = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'trashAssetsBeforeHeadlessRuns',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'trashAssetsBeforeRuns',
-  }, {
     name: 'videoRecording',
     errorKey: 'RENAMED_CONFIG_OPTION',
     newName: 'video',

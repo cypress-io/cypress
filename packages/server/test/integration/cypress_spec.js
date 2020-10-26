@@ -891,10 +891,6 @@ describe('lib/cypress', () => {
 
     const renamedConfigs = [
       {
-        old: 'trashAssetsBeforeHeadlessRuns',
-        new: 'trashAssetsBeforeRuns',
-      },
-      {
         old: 'videoRecording',
         new: 'video',
       },
