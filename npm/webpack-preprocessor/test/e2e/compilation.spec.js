@@ -29,6 +29,8 @@ const createFile = ({ name = 'example_spec.js', shouldWatch = false } = {}) => {
   })
 }
 
+const nextTick = () => new Promise((resolve) => setTimeout(resolve, 0))
+
 describe('webpack preprocessor - e2e', () => {
   let file
 
@@ -105,11 +107,12 @@ describe('webpack preprocessor - e2e', () => {
     })
   })
 
-  xit('triggers rerun on syntax error', async () => {
+  it('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
 
     await preprocessor()(file)
 
+    await nextTick()
     const _emit = sinon.spy(file, 'emit')
 
     await fs.outputFile(file.filePath, '{')
@@ -125,6 +128,7 @@ describe('webpack preprocessor - e2e', () => {
 
     expect(_emit).not.to.be.calledWith('rerun')
 
+    await nextTick()
     await fs.outputFile(file.filePath, 'console.log()')
 
     await retry(() => expect(_emit).calledWith('rerun'))
