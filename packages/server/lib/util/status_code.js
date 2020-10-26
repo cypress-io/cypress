@@ -1,5 +1,4 @@
-const statuses = require('http-status-codes')
-
+const { getReasonPhrase } = require('http-status-codes')
 const isOkStatusCodeRe = /^[2|3]\d+$/
 
 module.exports = {
@@ -7,10 +6,9 @@ module.exports = {
     return code && isOkStatusCodeRe.test(code)
   },
 
-  // TODO: test this method
   getText (code) {
     try {
-      return statuses.getStatusText(code)
+      return getReasonPhrase(code)
     } catch (e) {
       return 'Unknown Status Code'
     }
