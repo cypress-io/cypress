@@ -56,6 +56,8 @@ export function registerEvents (Cypress: Cypress.Cypress) {
   Cypress.on('test:before:run', () => {
     // wipe out callbacks, requests, and routes when tests start
     state('routes', {})
+    state('requests', {})
+    state('aliasedRequests', [])
   })
 
   Cypress.on('net:event', (eventName, frame: NetEventFrames.BaseHttp) => {

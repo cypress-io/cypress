@@ -60,6 +60,7 @@ declare namespace Cypress {
   interface State {
     (k: '$autIframe', v?: JQuery<HTMLIFrameElement>): JQuery<HTMLIFrameElement> | undefined
     (k: 'routes', v?: RouteMap): RouteMap
+    (k: 'aliasedRequests', v?: AliasedRequest[]): AliasedRequest[]
     (k: 'document', v?: Document): Document
     (k: 'window', v?: Window): Window
     (k: string, v?: any): any
@@ -71,4 +72,9 @@ declare namespace Cypress {
     $autIframe: JQuery<HTMLIFrameElement>
     document: Document
   }
+}
+
+type AliasedRequest = {
+  alias: string
+  request: any
 }
