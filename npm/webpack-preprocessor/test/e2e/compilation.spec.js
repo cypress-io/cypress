@@ -105,12 +105,12 @@ describe('webpack preprocessor - e2e', () => {
     })
   })
 
-  xit('triggers rerun on syntax error', async () => {
+  // eslint-disable-next-line
+  it.skip('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
+    const _emit = sinon.spy(file, 'emit')
 
     await preprocessor()(file)
-
-    const _emit = sinon.spy(file, 'emit')
 
     await fs.outputFile(file.filePath, '{')
 
@@ -118,8 +118,9 @@ describe('webpack preprocessor - e2e', () => {
   })
 
   it('does not call rerun on initial build, but on subsequent builds', async () => {
-    file = createFile({ shouldWatch: true })
     const _emit = sinon.spy(file, 'emit')
+
+    file = createFile({ shouldWatch: true })
 
     await preprocessor()(file)
 
@@ -127,15 +128,20 @@ describe('webpack preprocessor - e2e', () => {
 
     await fs.outputFile(file.filePath, 'console.log()')
 
-    await retry(() => expect(_emit).calledWith('rerun'))
+    await retry(() => expect(_emit).calledWith('rerun'), 20000)
   })
 })
 
 function retry (fn, timeout = 1000) {
   let timedOut = false
+  let count = 0
 
   setTimeout(() => timedOut = true, timeout)
   const tryFn = () => {
+    count++
+    // eslint-disable-next-line
+    console.log('Try ', count)
+
     return Bluebird.try(() => {
       return fn()
     })
