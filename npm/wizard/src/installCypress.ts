@@ -17,7 +17,11 @@ async function copyFiles ({ ignoreExamples }: InstallCypressOpts) {
   const supportFiles: string[] = await example.getPathToSupportFiles()
 
   await Promise.all(
-    supportFiles.map((supportFilePath) => fs.copy(supportFilePath, path.resolve('cypress', 'support'))),
+    supportFiles.map((supportFilePath) => {
+      const newSupportFilePath = path.resolve('cypress', 'support', path.basename(supportFilePath))
+
+      return fs.copy(supportFilePath, newSupportFilePath)
+    }),
   )
 }
 

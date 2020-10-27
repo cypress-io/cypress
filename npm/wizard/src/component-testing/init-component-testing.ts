@@ -138,6 +138,9 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
 
   const chosenTemplate = possibleTemplates[chosenTemplateName] as Template<T>
 
+  console.log()
+  console.log(`Here are instructions of how to get started with component testing for ${chalk.cyan(chosenTemplateName)}:`)
+
   printCypressJsonHelp(cypressConfigPath, componentFolder)
   printSupportHelper(supportFilePath)
   printPluginHelper(
@@ -154,13 +157,16 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(
     `Find examples of component tests for ${chalk.green(
       chosenTemplateName,
-    )} in ${chalk.underline(chosenTemplate.getExampleUrl({ componentFolder }))}.
-    \n`,
+    )} in ${chalk.underline(chosenTemplate.getExampleUrl({ componentFolder }))}.`,
   )
 
-  console.log(
-    `Docs for different recipes of bundling tools: ${chalk.bold.underline(
-      'https://github.com/cypress-io/cypress/tree/develop/npm/react/docs/recipes.md',
-    )}`,
-  )
+  if (framework === 'react') {
+    console.log()
+
+    console.log(
+      `Docs for different recipes of bundling tools: ${chalk.bold.underline(
+        'https://github.com/cypress-io/cypress/tree/develop/npm/react/docs/recipes.md',
+      )}`,
+    )
+  }
 }

@@ -32,10 +32,22 @@ async function askForComponentTesting () {
   const { shouldSetupComponentTesting } = await inqueier.prompt({
     type: 'confirm',
     name: 'shouldSetupComponentTesting',
-    message: `Do you want to setup ${chalk.cyan('component testing')}? ${chalk.grey('You can do this later by running this command')}.`,
+    message: `Do you want to setup ${chalk.cyan('component testing')}? ${chalk.grey('You can do this later by rerunning this command')}.`,
   })
 
   return shouldSetupComponentTesting
+}
+
+function printCypressCommandsHelper ({ useYarn }: { useYarn: boolean }) {
+  const displayedCommand = useYarn ? 'yarn' : 'npx'
+
+  console.log('Inside this directory, you can run several commands:')
+  console.log()
+  console.log(chalk.cyan(`  ${displayedCommand} cypress open`))
+  console.log('    Opens cypress local development app.')
+  console.log()
+  console.log(chalk.cyan(`  ${displayedCommand} cypress run`))
+  console.log('    Runs test in headless mode.')
 }
 
 export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExamples }: MainArgv) {
@@ -58,7 +70,8 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
     await initComponentTesting({ config, cypressConfigPath, useYarn })
   }
 
-  console.log(`✅ Cypress is installed and ready to use!`)
+  console.log(`\n✅ Success! Cypress is installed and ready to run tests.`)
+  printCypressCommandsHelper({ useYarn })
 
   console.log(`\nHappy testing with ${chalk.green('cypress.io')} 🌲\n`)
 }

@@ -45,13 +45,13 @@ export function validateSemverVersion (
 const execAsync = util.promisify(exec)
 
 export async function installDependency (name: string, options: { useYarn: boolean}) {
-  let cliSpinner = ora(`Installing ${name}`).start()
-  const commandToRun = options.useYarn ? 'yarn add cypress --dev' : 'npm install -D cypress'
+  const commandToRun = options.useYarn ? `yarn add ${name} --dev` : `npm install -D ${name}`
+  let cliSpinner = ora(`Installing ${name} ${chalk.gray(`(${commandToRun})`)}`).start()
 
   try {
     await execAsync(commandToRun)
   } catch (e) {
-    cliSpinner.fail(`Can not install cypress using ${chalk.inverse(commandToRun)}`)
+    cliSpinner.fail(`Can not install ${name} using ${chalk.inverse(commandToRun)})}`)
     console.log(e)
 
     process.exit(1)

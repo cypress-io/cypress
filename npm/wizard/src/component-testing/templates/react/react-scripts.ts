@@ -42,7 +42,7 @@ export const ReactScriptsTemplate: Template = {
         ) {
           console.warn(
             `It looks like you are using ${chalk.green(
-              'crate-react-app',
+              'create-react-app',
             )}, but we support only projects with version ${chalk.bold(
               MIN_SUPPORTED_VERSION['react-scripts'],
             )} of react-scripts.`,
