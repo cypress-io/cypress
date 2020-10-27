@@ -3,7 +3,7 @@ import sinon, { SinonStub, SinonSpy, SinonSpyCallApi } from 'sinon'
 import chalk from 'chalk'
 import mockFs from 'mock-fs'
 import highlight from 'cli-highlight'
-import { main } from './init'
+import { initComponentTesting } from './init-component-testing'
 import inquirer from 'inquirer'
 import sinonChai from 'sinon-chai'
 
@@ -52,7 +52,7 @@ describe('init script', () => {
       componentFolder: 'cypress/component',
     }) as any)
 
-    await main()
+    await initComponentTesting()
     const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
     expect(choices[0]).to.equal('webpack')
@@ -76,7 +76,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await main()
+    await initComponentTesting()
 
     const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
@@ -106,7 +106,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await main()
+    await initComponentTesting()
 
     expect(
       someOfSpyCallsIncludes(global.console.log, 'We were unable to automatically determine your framework 😿'),
@@ -131,7 +131,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await main()
+    await initComponentTesting()
 
     expect(
       someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue')} are available from this directory.`),
@@ -153,7 +153,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await main()
+    await initComponentTesting()
     expect(
       someOfSpyCallsIncludes(global.console.log, 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'),
     ).to.be.true
@@ -174,7 +174,7 @@ describe('init script', () => {
       componentFolder: 'cypress/component',
     }) as any)
 
-    await main()
+    await initComponentTesting()
 
     const expectedCode = highlight(
       JSON.stringify(

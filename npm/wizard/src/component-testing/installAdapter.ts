@@ -1,11 +1,9 @@
 import chalk from 'chalk'
 import inquirer from 'inquirer'
-import { Template } from './Template'
 import { scanFSForAvailableDependency } from '../findPackageJson'
-import { reactTemplates } from './react'
-import { vueTemplates } from './vue'
+import { installDependency } from '../utils'
 
-async function guessOrAskForFramework (cwd: string) {
+async function guessOrAskForFramework (cwd: string): Promise<'react' | 'vue'> {
   // please sort this alphabetically
   const frameworks = {
     react: () => scanFSForAvailableDependency(cwd, ['react', 'react-dom']),
@@ -14,11 +12,15 @@ async function guessOrAskForFramework (cwd: string) {
 
   const guesses = Object.keys(frameworks).filter((framework) => {
     return frameworks[framework as keyof typeof frameworks]()
-  })
+  }) as Array<'react' | 'vue'>
 
   // found 1 precise guess. Continue
   if (guesses.length === 1) {
-    return guesses[0]
+    const framework = guesses[0]
+
+    console.log(`\nThis project is using ${chalk.bold.cyan(framework)}. Let's install the right adapter:`)
+
+    return framework
   }
 
   if (guesses.length === 0) {
@@ -41,33 +43,14 @@ async function guessOrAskForFramework (cwd: string) {
   return framework
 }
 
-const allTemplates = {
-  react: reactTemplates,
-  vue: vueTemplates,
+type InstallAdapterOptions = {
+  useYarn: boolean
 }
 
-export async function guessTemplate<T> (cwd: string) {
-  let framework: keyof typeof allTemplates = await guessOrAskForFramework(cwd)
-  const templates = allTemplates[framework]
+export async function installAdapter (cwd: string, options: InstallAdapterOptions) {
+  const framework = await guessOrAskForFramework(cwd)
 
-  for (const [name, template] of Object.entries(templates)) {
-    const typedTemplate = template as Template<T>
-    const { success, payload } = typedTemplate.test(process.cwd())
+  await installDependency(`@cypress/${framework}`, options)
 
-    if (success) {
-      return {
-        defaultTemplate: typedTemplate,
-        defaultTemplateName: name,
-        templatePayload: payload ?? null,
-        possibleTemplates: templates,
-      }
-    }
-  }
-
-  return {
-    templatePayload: null,
-    defaultTemplate: null,
-    defaultTemplateName: null,
-    possibleTemplates: templates,
-  }
+  return framework
 }

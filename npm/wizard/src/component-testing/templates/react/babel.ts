@@ -1,7 +1,7 @@
 import chalk from 'chalk'
 import findUp from 'find-up'
 import { Template } from '../Template'
-import { createFindPackageJsonIterator } from '../../findPackageJson'
+import { createFindPackageJsonIterator } from '../../../findPackageJson'
 
 export const BabelTemplate: Template = {
   message: `It looks like you have babel config defined. We can use it to transpile your components for testing.\n ${chalk.red(

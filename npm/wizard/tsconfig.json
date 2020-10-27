@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
@@ -19,9 +19,11 @@
     "noImplicitAny": true
   },
   "exclude": [
-    "./src/**/*.test.ts"
+    "./src/**/*.test.ts",
+    "node_modules"
   ],
   "include": [
-    "./src/**/*.ts"
+    "./src/**/*.ts",
+    "./initial-template/*"
   ]
 }

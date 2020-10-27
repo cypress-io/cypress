@@ -1,7 +1,6 @@
-import chalk from 'chalk'
-import { createFindPackageJsonIterator } from '../../findPackageJson'
+import { createFindPackageJsonIterator } from '../../../findPackageJson'
 import { Template } from '../Template'
-import { validateSemverVersion } from '../../utils'
+import { validateSemverVersion } from '../../../utils'
 import { MIN_SUPPORTED_VERSION } from '../../versions'
 
 export const NextTemplate: Template = {
@@ -43,13 +42,12 @@ export const NextTemplate: Template = {
         !validateSemverVersion(
           nextVersion,
           MIN_SUPPORTED_VERSION['next'],
-          'next',
+          'next.js',
         )
       ) {
         return { success: false }
       }
 
-      // yey found the next
       return { success: true }
     })
   },

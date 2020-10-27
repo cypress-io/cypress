@@ -1,44 +1,11 @@
-#!/usr/bin/env node
 import fs from 'fs'
 import path from 'path'
 import chalk from 'chalk'
-import findUp from 'find-up'
 import inqueier from 'inquirer'
 import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
-
-async function getCypressConfig () {
-  const cypressJsonPath = await findUp('cypress.json')
-
-  // TODO figure out how to work with newly installed cypress
-  if (!cypressJsonPath) {
-    console.log(
-      `\nIt looks like Cypress is not installed because we were unable to find ${chalk.green(
-        'cypress.json',
-      )} in this project. Please install Cypress via ${chalk.inverse(
-        ' yarn add cypress -D ',
-      )} (or via npm), then run ${chalk.inverse(
-        ' cypress open ',
-      )} and rerun this script.`,
-    )
-
-    console.log(
-      `\nFind more information about installation at: ${chalk.bold.underline(
-        'https://github.com/cypress-io/cypress/tree/develop/npm/react#init',
-      )}`,
-    )
-
-    process.exit(1)
-  }
-
-  return {
-    cypressConfigPath: cypressJsonPath,
-    config: JSON.parse(
-      fs.readFileSync(cypressJsonPath!, { encoding: 'utf-8' }).toString(),
-    ) as Record<string, string>,
-  }
-}
+import { installAdapter } from './installAdapter'
 
 function printCypressJsonHelp (
   cypressJsonPath: string,
@@ -105,24 +72,22 @@ function printPluginHelper (pluginCode: string, pluginsFilePath: string) {
   console.log(`\n${highlightedPluginCode}\n`)
 }
 
-export async function main<T> () {
-  const packageVersion =
-    process.env.npm_package_version ?? require('../package.json').version
+type InitComponentTestingOptions = {
+  config: Record<string, string>
+  cypressConfigPath: string
+  useYarn: boolean
+}
 
-  console.log(
-    `${chalk.green(
-      `@cypress/react@${packageVersion}`,
-    )} init component testing wizard\n`,
-  )
-
-  const { config, cypressConfigPath } = await getCypressConfig()
+export async function initComponentTesting<T> ({ config, useYarn, cypressConfigPath }: InitComponentTestingOptions) {
   const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
+
+  const framework = await installAdapter(cypressProjectRoot, { useYarn })
   const {
     possibleTemplates,
     defaultTemplate,
     defaultTemplateName,
     templatePayload,
-  } = await guessTemplate<T>(cypressProjectRoot)
+  } = await guessTemplate<T>(framework, cypressProjectRoot)
 
   const pluginsFilePath = path.resolve(
     cypressProjectRoot,
@@ -198,10 +163,4 @@ export async function main<T> () {
       'https://github.com/cypress-io/cypress/tree/develop/npm/react/docs/recipes.md',
     )}`,
   )
-
-  console.log(`\nHappy testing with ${chalk.green('cypress.io')} ⚛️🌲\n`)
-}
-
-if (process.env.NODE_ENV !== 'test') {
-  main().catch((e) => console.error(e))
 }
