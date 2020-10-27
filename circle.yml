@@ -459,6 +459,12 @@ jobs:
 
       - store-npm-logs
 
+      - save_cache:
+          name: Save yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache
+
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
           root: ~/
@@ -617,7 +623,7 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -631,7 +637,7 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/

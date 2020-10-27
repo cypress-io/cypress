@@ -1,9 +1,6 @@
 const _ = require('lodash')
-const { agent, allowDestroy, connect } = require('@packages/network')
+const { allowDestroy, connect } = require('@packages/network')
 const debug = require('debug')('cypress:https-proxy')
-const {
-  getProxyForUrl,
-} = require('proxy-from-env')
 const https = require('https')
 const net = require('net')
 const parse = require('./util/parse')
@@ -76,29 +73,16 @@ class Server {
     })
   }
 
-  _onFirstHeadBytes (req, browserSocket, head, options) {
-    let odc
-
+  _onFirstHeadBytes (req, browserSocket, head) {
     debug('Got first head bytes %o', { url: req.url, head: _.chain(head).invoke('toString').slice(0, 64).join('').value() })
 
     browserSocket.pause()
-
-    odc = options.onDirectConnection
-
-    if (odc) {
-      // if onDirectConnection return true
-      // then dont proxy, just pass this through
-      if (odc.call(this, req, browserSocket, head) === true) {
-        return this._makeDirectConnection(req, browserSocket, head)
-      }
-
-      debug('Not making direct connection %o', { url: req.url })
-    }
 
     return this._onServerConnectData(req, browserSocket, head)
   }
 
   _onUpgrade (fn, req, browserSocket, head) {
+    debug('upgrade', req.url)
     if (fn) {
       return fn.call(this, req, browserSocket, head)
     }
@@ -118,31 +102,7 @@ class Server {
     }
   }
 
-  _getProxyForUrl (urlStr) {
-    const port = Number(_.get(url.parse(urlStr), 'port'))
-
-    debug('getting proxy URL %o', { port, serverPort: this._port, sniPort: this._sniPort, url: urlStr })
-
-    if ([this._sniPort, this._port].includes(port)) {
-      // https://github.com/cypress-io/cypress/issues/4257
-      // this is a tunnel to the SNI server or to the main server,
-      // it should never go through a proxy
-      return undefined
-    }
-
-    return getProxyForUrl(urlStr)
-  }
-
-  _makeDirectConnection (req, browserSocket, head) {
-    const { port, hostname } = url.parse(`https://${req.url}`)
-
-    debug(`Making connection to ${hostname}:${port}`)
-
-    return this._makeConnection(browserSocket, head, port, hostname)
-  }
-
   _makeConnection (browserSocket, head, port, hostname) {
-    let upstreamProxy
     const onSocket = (err, upstreamSocket) => {
       debug('received upstreamSocket callback for request %o', { port, hostname, err })
 
@@ -172,26 +132,6 @@ class Server {
 
     if (!port) {
       port = '443'
-    }
-
-    upstreamProxy = this._getProxyForUrl(`https://${hostname}:${port}`)
-
-    if (upstreamProxy) {
-      // todo: as soon as all requests are intercepted, this can go away since this is just for pass-through
-      debug('making proxied connection %o', {
-        host: `${hostname}:${port}`,
-        proxy: upstreamProxy,
-      })
-
-      return agent.httpsAgent.createUpstreamProxyConnection({
-        proxy: upstreamProxy,
-        href: `https://${hostname}:${port}`,
-        uri: {
-          port,
-          hostname,
-        },
-        shouldRetry: true,
-      }, onSocket)
     }
 
     return connect.createRetryingSocket({ port, host: hostname }, onSocket)

@@ -42,7 +42,14 @@ const createApp = (port) => {
   })
 
   app.get('/redirect', (req, res) => {
-    res.redirect(301, req.query.href)
+    if (req.query.chunked) {
+      res.setHeader('transfer-encoding', 'chunked')
+      res.removeHeader('content-length')
+    }
+
+    res.statusCode = 301
+    res.setHeader('Location', req.query.href)
+    res.end()
   })
 
   // allows us to serve the testrunner into an iframe for testing
