@@ -1,4 +1,4 @@
-const { getReasonPhrase } = require('http-status-codes')
+const http = require('http')
 const isOkStatusCodeRe = /^[2|3]\d+$/
 
 module.exports = {
@@ -7,10 +7,6 @@ module.exports = {
   },
 
   getText (code) {
-    try {
-      return getReasonPhrase(code)
-    } catch (e) {
-      return 'Unknown Status Code'
-    }
+    return http.STATUS_CODES[code] || 'Unknown Status Code'
   },
 }
