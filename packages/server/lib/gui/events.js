@@ -22,6 +22,7 @@ const browsers = require('../browsers')
 const konfig = require('../konfig')
 const editors = require('../util/editors')
 const fileOpener = require('../util/file-opener')
+const api = require('../api')
 
 const nullifyUnserializableValues = (obj) => {
   // nullify values that cannot be cloned
@@ -201,6 +202,11 @@ const handleEvent = function (options, bus, event, id, type, arg) {
           return send(false)
         },
       })
+
+    case 'get:release:notes':
+      return api.getReleaseNotes(arg)
+      .then(send)
+      .catch(sendNull)
 
     case 'get:logs':
       return logs.get()

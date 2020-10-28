@@ -7,12 +7,15 @@ default:
 
 development: &development
   api_url: "http://localhost:1234/"
+  on_url: "http://localhost:8080/"
 
 test:
   <<: *development
 
 staging:
   api_url: "https://api-staging.cypress.io/"
+  on_url: "https://on.cypress.io/"
 
 production:
   api_url: "https://api.cypress.io/"
+  on_url: "https://on.cypress.io/"

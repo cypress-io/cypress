@@ -1,14 +1,12 @@
 import { action, computed, observable } from 'mobx'
 import localData from '../lib/local-data'
+import updateStore from '../update/update-store'
 
 class AppStore {
   @observable cypressEnv
   @observable os
   @observable projectRoot = null
-  @observable newVersion
-  @observable version
   @observable localInstallNoticeDismissed = localData.get('local-install-notice-dimissed')
-  @observable dismissedUpdateVersion = localData.get('dismissed-update-version')
   @observable error
   @observable proxyServer
   @observable proxyBypassList
@@ -21,7 +19,7 @@ class AppStore {
   }
 
   @computed get displayVersion () {
-    return this.isDev ? `${this.version} (dev)` : this.version
+    return this.isDev ? `${updateStore.version} (dev)` : updateStore.version
   }
 
   @computed get isDev () {
@@ -32,14 +30,6 @@ class AppStore {
     return !this.projectRoot
   }
 
-  @computed get updateAvailable () {
-    return this.version !== this.newVersion
-  }
-
-  @computed get nonDismissedUpdateAvailable () {
-    return this.updateAvailable && this.newVersion !== this.dismissedUpdateVersion
-  }
-
   @action set (props) {
     if (props.cypressEnv != null) this.cypressEnv = props.cypressEnv
 
@@ -47,25 +37,14 @@ class AppStore {
 
     if (props.projectRoot != null) this.projectRoot = props.projectRoot
 
-    if (props.version != null) this.version = this.newVersion = props.version
-
     this.proxyServer = props.proxyServer || this.proxyServer
     this.proxyBypassList = props.proxyBypassList || this.proxyBypassList
     this.proxySource = props.proxySource || this.proxySource
   }
 
-  @action setNewVersion (newVersion) {
-    this.newVersion = newVersion
-  }
-
   @action setLocalInstallNoticeDismissed (isDismissed) {
     this.localInstallNoticeDismissed = isDismissed
     localData.set('local-install-notice-dimissed', isDismissed)
-  }
-
-  @action setDismissedUpdateVersion () {
-    this.dismissedUpdateVersion = this.newVersion
-    localData.set('dismissed-update-version', this.newVersion)
   }
 
   @action setError (err) {
