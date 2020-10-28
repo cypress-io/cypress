@@ -136,3 +136,18 @@ pre.line-nums {
     }
   }
 }
+
+pre.copy-to-clipboard {
+  span, code {
+    padding-right: 15px;
+  }
+  
+  .action-copy {
+    float: right;
+    color: white;
+
+    &:hover {
+      color: #E2E8F0;
+    }
+  }
+}
