@@ -539,7 +539,7 @@ describe('e2e record', () => {
     setup(routes)
 
     it('passes in parallel with group', function () {
-      this.retries(2)
+      this.retries(3)
 
       return Promise.all([
         e2e.exec(this, {

@@ -22,7 +22,7 @@ exports['e2e record passing passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
+  cypress/integration/record_error_spec.coffee
 
 The error was:
 
@@ -970,7 +970,7 @@ exports['e2e record parallelization passes in parallel with group 2'] = `
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/record_error_spec.coffee
+  cypress/integration/record_error_spec.coffee
 
 The error was:
 

@@ -21,7 +21,6 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
     })
 
     request.state = 'Errored'
-    request.log.snapshot('error').error(err)
 
     if (request.responseHandler) {
       // if req.reply was used to register a response handler, the user is implicitly
@@ -34,5 +33,4 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
   }
 
   request.state = 'Complete'
-  request.log.snapshot('response').end()
 }

@@ -179,17 +179,13 @@ commands:
   run-e2e-tests:
     parameters:
       browser:
-        default: "electron"
         description: browser shortname to target
-        type: string
-      chunk:
-        description: e2e test chunk number
         type: string
     steps:
       - attach_workspace:
           at: ~/
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/<<parameters.chunk>>*spec* --browser <<parameters.browser>>
+          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -452,6 +448,12 @@ jobs:
 
       - store-npm-logs
 
+      - save_cache:
+          name: Save yarn cache
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache
+
       ## save entire folder as artifact for other jobs to run without reinstalling
       - persist_to_workspace:
           root: ~/
@@ -597,7 +599,7 @@ jobs:
 
   server-unit-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -610,7 +612,7 @@ jobs:
 
   server-integration-tests:
     <<: *defaults
-    parallelism: 2
+    parallelism: 1
     steps:
       - attach_workspace:
           at: ~/
@@ -636,179 +638,40 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  server-e2e-tests-chrome-1:
+  server-e2e-tests-chrome:
     <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: chrome
-          chunk: "1"
 
-  server-e2e-tests-chrome-2:
+  server-e2e-tests-electron:
     <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "2"
-
-  server-e2e-tests-chrome-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "3"
-
-  server-e2e-tests-chrome-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "4"
-
-  server-e2e-tests-chrome-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "5"
-
-  server-e2e-tests-chrome-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "6"
-
-  server-e2e-tests-chrome-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "7"
-
-  server-e2e-tests-chrome-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: chrome
-          chunk: "8"
-
-  server-e2e-tests-electron-1:
-    <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: electron
-          chunk: "1"
 
-  server-e2e-tests-electron-2:
+  server-e2e-tests-firefox:
     <<: *defaults
+    parallelism: 8
     steps:
       - run-e2e-tests:
-          browser: electron
-          chunk: "2"
-
-  server-e2e-tests-electron-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "3"
-
-  server-e2e-tests-electron-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "4"
-
-  server-e2e-tests-electron-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "5"
-
-  server-e2e-tests-electron-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "6"
-
-  server-e2e-tests-electron-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "7"
-
-  server-e2e-tests-electron-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: electron
-          chunk: "8"
+          browser: firefox
 
   server-e2e-tests-non-root:
     <<: *defaults
     steps:
-      - run-e2e-tests:
-          chunk: non_root
-
-  server-e2e-tests-firefox-1:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "1"
-
-  server-e2e-tests-firefox-2:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "2"
-
-  server-e2e-tests-firefox-3:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "3"
-
-  server-e2e-tests-firefox-4:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "4"
-
-  server-e2e-tests-firefox-5:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "5"
-
-  server-e2e-tests-firefox-6:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "6"
-
-  server-e2e-tests-firefox-7:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "7"
-
-  server-e2e-tests-firefox-8:
-    <<: *defaults
-    steps:
-      - run-e2e-tests:
-          browser: firefox
-          chunk: "8"
+      - attach_workspace:
+          at: ~/
+      - run:
+          command: yarn workspace @packages/server test ./test/e2e/non_root*spec* --browser electron
+      - verify-mocha-results
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+      - store-npm-logs
 
   runner-integration-tests-chrome:
     <<: *defaults
@@ -832,13 +695,6 @@ jobs:
       - run-driver-integration-tests:
           browser: chrome
 
-  # driver-integration-tests-electron:
-  #   <<: *defaults
-  #   parallelism: 5
-  #   steps:
-  #     - run-driver-integration-tests:
-  #         browser: electron
-
   driver-integration-tests-firefox:
     <<: *defaults
     parallelism: 5
@@ -855,11 +711,6 @@ jobs:
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
       - run:
           command: |
             CYPRESS_KONFIG_ENV=production \
@@ -1066,6 +917,66 @@ jobs:
       - run:
           name: Release
           command: yarn semantic-release @cypress/vue
+
+  npm-react:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Build
+          command: yarn workspace @cypress/react build
+      - run:
+          name: Run unit test
+          command: yarn workspace @cypress/react test:unit
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/react test
+      - store-npm-logs
+      - persist_to_workspace:
+          root: ~/
+          paths: cypress/npm/react
+
+  npm-react-e2e-example:
+    <<: *defaults
+    description: Run react component testing end-to-end examples
+    parameters:
+      executor:
+        description: Executor name to use
+        type: executor
+        default: cy-doc
+      path:
+        description: relative to npm/react path of example
+        type: string
+    steps:
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          name: Restore Cache
+          keys:
+            - yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: yarn install --frozen-lockfile
+          working_directory: npm/react/<<parameters.path>>
+      - save_cache:
+          name: Save Cache
+          key: yarn-packages-{{ checksum "npm/react/<<parameters.path>>/yarn.lock" }}
+          paths:
+            - ~/.cache
+      - run:
+          name: Run e2e example tests
+          command: yarn test
+          working_directory: npm/react/<<parameters.path>>
+
+  npm-react-release:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Release
+          command: yarn semantic-release @cypress/react
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1752,80 +1663,17 @@ linux-workflow: &linux-workflow
     - server-performance-tests:
         requires:
           - build
-    - server-e2e-tests-chrome-1:
+    - server-e2e-tests-chrome:
         requires:
           - build
-    - server-e2e-tests-chrome-2:
+    - server-e2e-tests-electron:
         requires:
           - build
-    - server-e2e-tests-chrome-3:
-        requires:
-          - build
-    - server-e2e-tests-chrome-4:
-        requires:
-          - build
-    - server-e2e-tests-chrome-5:
-        requires:
-          - build
-    - server-e2e-tests-chrome-6:
-        requires:
-          - build
-    - server-e2e-tests-chrome-7:
-        requires:
-          - build
-    - server-e2e-tests-chrome-8:
-        requires:
-          - build
-    - server-e2e-tests-electron-1:
-        requires:
-          - build
-    - server-e2e-tests-electron-2:
-        requires:
-          - build
-    - server-e2e-tests-electron-3:
-        requires:
-          - build
-    - server-e2e-tests-electron-4:
-        requires:
-          - build
-    - server-e2e-tests-electron-5:
-        requires:
-          - build
-    - server-e2e-tests-electron-6:
-        requires:
-          - build
-    - server-e2e-tests-electron-7:
-        requires:
-          - build
-    - server-e2e-tests-electron-8:
+    - server-e2e-tests-firefox:
         requires:
           - build
     - server-e2e-tests-non-root:
         executor: non-root-docker-user
-        requires:
-          - build
-    - server-e2e-tests-firefox-1:
-        requires:
-          - build
-    - server-e2e-tests-firefox-2:
-        requires:
-          - build
-    - server-e2e-tests-firefox-3:
-        requires:
-          - build
-    - server-e2e-tests-firefox-4:
-        requires:
-          - build
-    - server-e2e-tests-firefox-5:
-        requires:
-          - build
-    - server-e2e-tests-firefox-6:
-        requires:
-          - build
-    - server-e2e-tests-firefox-7:
-        requires:
-          - build
-    - server-e2e-tests-firefox-8:
         requires:
           - build
     - driver-integration-tests-chrome:
@@ -1877,6 +1725,88 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - npm-vue-release:
+        filters:
+          branches:
+            only:
+              - master
+        requires:
+          - build
+          - npm-vue
+
+    - npm-react:
+        requires:
+          - build
+
+    # Run tests for end-to-end react component tests examples
+    - npm-react-e2e-example:
+        name: React + Axe component testing
+        path: examples/a11y
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Next component testing
+        path: examples/nextjs
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + CRA component testing
+        path: examples/react-scripts
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + CRA folder component testing
+        path: examples/react-scripts-folder
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Rollup component testing
+        path: examples/rollup
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Sass + TS component testing
+        path: examples/sass-and-ts
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Snapshots component testing
+        path: examples/snapshots
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Tailwind component testing
+        path: examples/tailwind
+        requires:
+          - npm-react
+    # Requires Applitools key in the env
+    # - npm-react-e2e-example:
+    #     name: React + Applitools component testing
+    #     path: examples/visual-testing-with-applitools
+    #     requires:
+    #       - npm-react
+    - npm-react-e2e-example:
+        name: React + Percy component testing
+        path: examples/visual-testing-with-percy
+        requires:
+          - npm-react
+    # Requires Happo api key in the env vars
+    # - npm-react-e2e-example:
+    #     name: React + Happo component testing
+    #     path: examples/visual-testing-with-happo
+    #     requires:
+    #       - npm-react
+    - npm-react-e2e-example:
+        name: React + Webpack file component testing
+        path: examples/webpack-file
+        requires:
+          - npm-react
+    - npm-react-e2e-example:
+        name: React + Webpack options component testing
+        path: examples/webpack-options
+        requires:
+          - npm-react
+
+    - npm-react-release:
         filters:
           branches:
             only:

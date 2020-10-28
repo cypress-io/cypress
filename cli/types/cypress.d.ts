@@ -2587,7 +2587,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
+    retries: Nullable<number | {runMode?: Nullable<number>, openMode?: Nullable<number>}>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
@@ -5295,7 +5295,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
+  type ViewportPreset = 'macbook-16' | 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-se2' | 'iphone-8' | 'iphone-7' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number
     left: number

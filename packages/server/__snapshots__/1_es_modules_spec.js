@@ -82,7 +82,7 @@ exports['e2e es modules fails 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/e2e/cypress/integration/es_module_import_failing_spec.js
+  cypress/integration/es_module_import_failing_spec.js
 
 The error was:
 
@@ -94,7 +94,6 @@ SyntaxError: /foo/bar/.projects/e2e/lib/fail.js: Unexpected token (2:0)
   1 | export default {
 > 2 | 
     | ^
-
  @ ./cypress/integration/es_module_import_failing_spec.js 3:0-25
 
 This occurred while Cypress was compiling and bundling your test code. This is usually caused by:

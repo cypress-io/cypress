@@ -4,6 +4,7 @@ const path = require('path')
 const os = require('os')
 const snapshot = require('snap-shot-it')
 const stripAnsi = require('strip-ansi')
+const minimist = require('minimist')
 const argsUtil = require(`${root}lib/util/args`)
 const getWindowsProxyUtil = require(`${root}lib/util/get-windows-proxy`)
 
@@ -14,6 +15,43 @@ describe('lib/util/args', () => {
     this.setup = (...args) => {
       return argsUtil.toObject(args)
     }
+  })
+
+  context('minimist behavior', () => {
+    it('casts numbers by default', () => {
+      const options = minimist(['--ci-build-id', '1e100'])
+
+      expect(options).to.deep.equal({
+        _: [],
+        'ci-build-id': 1e+100,
+      })
+    })
+
+    it('does not cast strings if specified', () => {
+      const options = minimist(['--ci-build-id', '1e100'], {
+        string: ['ci-build-id'],
+      })
+
+      expect(options).to.deep.equal({
+        _: [],
+        'ci-build-id': '1e100',
+      })
+    })
+
+    it('does not cast alias strings if specified', () => {
+      const options = minimist(['--ciBuildId', '1e100'], {
+        string: ['ci-build-id'],
+        alias: {
+          'ci-build-id': 'ciBuildId',
+        },
+      })
+
+      expect(options).to.deep.equal({
+        _: [],
+        'ci-build-id': '1e100',
+        ciBuildId: '1e100',
+      })
+    })
   })
 
   context('--smoke-test', () => {
@@ -420,6 +458,18 @@ describe('lib/util/args', () => {
         invokedFromCli: true,
         config: this.config,
         spec: this.specs,
+      })
+    })
+
+    it('does not coerce --ci-build-id', function () {
+      const result = argsUtil.toObject(['--ci-build-id', '1e100'])
+
+      expect(result).to.deep.equal({
+        ciBuildId: '1e100',
+        cwd,
+        _: [],
+        invokedFromCli: false,
+        config: {},
       })
     })
   })

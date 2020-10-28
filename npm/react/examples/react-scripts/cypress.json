@@ -1,0 +1,8 @@
+{
+  "testFiles": "**/*cy-spec.js",
+  "viewportWidth": 500,
+  "viewportHeight": 800,
+  "experimentalComponentTesting": true,
+  "experimentalFetchPolyfill": true,
+  "componentFolder": "src"
+}
