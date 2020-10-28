@@ -15,7 +15,7 @@ module.exports = {
     alias: {
       // this enables loading the "full" version of vue
       // instead of only loading the vue runtime
-      vue$: "vue/dist/vue.esm.js",
+      vue$: 'vue/dist/vue.esm.js',
     },
   },
 

@@ -1,6 +1,5 @@
 <template>
   <aside id="evergreen">
-    <h1>Plugins 🔌</h1>
     <SpecList :specs="specs"/>
 
     <!-- Plugins will be mounted in here. Perhaps later on -->
@@ -18,4 +17,3 @@
     }
   }
 </script>
-

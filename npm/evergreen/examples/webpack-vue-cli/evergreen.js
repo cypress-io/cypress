@@ -7,5 +7,5 @@ const projectRoot = __dirname
 startEvergreen(webpackConfig,
   {
     projectRoot,
-    ...require('./cypress'),
+    ...require('./cypress.json'),
   })
