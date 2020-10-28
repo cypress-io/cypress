@@ -159,6 +159,20 @@
       "optional": true
     }
   },
+  "ciJobs": [
+    "npm-react",
+    "npm-react-axe",
+    "npm-react-next",
+    "npm-react-cra",
+    "npm-react-cra-folder",
+    "npm-react-rollup",
+    "npm-react-sass-ts",
+    "npm-react-snapshots",
+    "npm-react-tailwind",
+    "npm-react-percy",
+    "npm-react-webpack-file",
+    "npm-react-webpack-options"
+  ],
   "standard": {
     "globals": [
       "Cypress",
