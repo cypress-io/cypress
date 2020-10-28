@@ -1,6 +1,6 @@
 {
-  "name": "create-cypress-tests-alpha",
-  "version": "0.0.4",
+  "name": "create-cypress-tests",
+  "version": "0.0.0",
   "description": "Smart installation wizard",
   "private": false,
   "main": "index.js",

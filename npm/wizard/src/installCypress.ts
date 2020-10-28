@@ -3,6 +3,8 @@ import findUp from 'find-up'
 import path from 'path'
 import example from '../initial-template'
 import { installDependency } from './utils'
+import chalk from 'chalk'
+import ora from 'ora'
 
 type InstallCypressOpts = {
   useYarn: boolean
@@ -11,6 +13,8 @@ type InstallCypressOpts = {
 }
 
 async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts) {
+  let fileSpinner = ora('Creating config files').start()
+
   await fs.outputFile(path.resolve(process.cwd(), 'cypress.json'), '{}\n')
   await fs.copy(example.getPathToPlugins(), path.resolve('cypress', 'plugins/index.js'))
   const supportFiles: string[] = await example.getPathToSupportFiles()
@@ -26,6 +30,21 @@ async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts)
   if (useTypescript) {
     await fs.copy(example.getPathToTsConfig(), path.resolve('cypress', 'tsconfig.json'))
   }
+
+  // TODO think about better approach
+  if (ignoreExamples) {
+    const dummySpec = `
+describe("Spec", () => {
+  
+})
+`
+    const specFileToCreate = path.resolve('cypress', 'integration', useTypescript ? 'spec.js' : 'spec.ts')
+
+    await fs.outputFile(path.resolve('cypress', 'integration', useTypescript ? 'spec.js' : 'spec.ts'), dummySpec)
+    console.log(`In order to ignore examples a spec file ${chalk.green(path.relative(process.cwd(), specFileToCreate))}.`)
+  }
+
+  fileSpinner.succeed()
 }
 
 export async function findInstalledOrInstallCypress (options: InstallCypressOpts) {
