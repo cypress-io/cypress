@@ -10,7 +10,7 @@
     "test-unit": "mocha -r @packages/ts/register -r test/pretest.ts --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json --exit test/unit/**/*"
   },
   "dependencies": {
-    "bluebird": "3.5.3",
+    "bluebird": "3.7.2",
     "charset": "1.0.1",
     "common-tags": "1.8.0",
     "debug": "4.1.1",
