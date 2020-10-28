@@ -219,7 +219,7 @@ module.exports = {
     // the file and not have it re-generated each time
     //
     // this is ideal because users who are upgrading to newer cypress version
-    // will still a the files scaffolded but existing users won't be
+    // will still get the files scaffolded but existing users won't be
     // annoyed by new example files coming into their projects unnecessarily
     // console.debug('-- verify', folder)
     debug(`verify scaffolding in ${folder}`)
