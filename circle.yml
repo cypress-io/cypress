@@ -1820,7 +1820,7 @@ linux-workflow: &linux-workflow
         requires:
           - build
           - npm-vue
-    - npm-wizard:
+    - npm-create-cypress-tests:
         requires:
           - build
     - npm-eslint-plugin-dev:
