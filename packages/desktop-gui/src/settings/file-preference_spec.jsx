@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime'
 import FilePreference from './file-preference'
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'

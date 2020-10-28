@@ -6,9 +6,6 @@ import { utils as driverUtils } from '@packages/driver'
 import State from './lib/state'
 import Container from './app/container'
 
-// to support async/await
-import 'regenerator-runtime/runtime'
-
 configure({ enforceActions: 'always' })
 
 const Runner = {
