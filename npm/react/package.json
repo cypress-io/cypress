@@ -131,7 +131,7 @@
   },
   "homepage": "https://on.cypress.io/component-testing",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=JessicaSachs&labels=experiment%3A+component+testing,npm%3A%20%40cypress%2Freact&template=component-testing.md&title=",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=JessicaSachs&labels=experiment%3A+component+testing,npm%3A%20%40cypress%2Freact&template=bug-report.md",
   "keywords": [
     "react",
     "cypress",
