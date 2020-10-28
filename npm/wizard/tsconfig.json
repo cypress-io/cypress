@@ -24,6 +24,6 @@
   ],
   "include": [
     "./src/**/*.ts",
-    "./initial-template/*"
+    "src/initial-template/*"
   ]
 }

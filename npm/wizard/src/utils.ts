@@ -42,13 +42,14 @@ export function validateSemverVersion (
   return isValid
 }
 
-const execAsync = util.promisify(exec)
-
 export async function installDependency (name: string, options: { useYarn: boolean}) {
   const commandToRun = options.useYarn ? `yarn add ${name} --dev` : `npm install -D ${name}`
   let cliSpinner = ora(`Installing ${name} ${chalk.gray(`(${commandToRun})`)}`).start()
 
   try {
+    // do this inside function for test stubbing
+    const execAsync = util.promisify(exec)
+
     await execAsync(commandToRun)
   } catch (e) {
     cliSpinner.fail(`Can not install ${name} using ${chalk.inverse(commandToRun)})}`)

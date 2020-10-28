@@ -1,9 +1,10 @@
 import fs from 'fs'
 import findUp from 'find-up'
 import chalk from 'chalk'
+import util from 'util'
 import inqueier from 'inquirer'
 import { initComponentTesting } from './component-testing/init-component-testing'
-import { execSync } from 'child_process'
+import { exec } from 'child_process'
 import { scanFSForAvailableDependency } from './findPackageJson'
 import { findInstalledOrInstallCypress } from './installCypress'
 
@@ -14,14 +15,12 @@ type MainArgv = {
   setupComponentTesting: boolean
 }
 
-function shouldUseYarn () {
-  try {
-    execSync('yarnpkg --version', { stdio: 'ignore' })
+async function shouldUseYarn () {
+  const execAsync = util.promisify(exec)
 
-    return true
-  } catch (e) {
-    return false
-  }
+  return execAsync('yarn --version')
+  .then(() => true)
+  .catch(() => false)
 }
 
 function shouldUseTypescript () {
@@ -47,21 +46,21 @@ function printCypressCommandsHelper ({ useYarn }: { useYarn: boolean }) {
   console.log('    Opens cypress local development app.')
   console.log()
   console.log(chalk.cyan(`  ${displayedCommand} cypress run`))
-  console.log('    Runs test in headless mode.')
+  console.log('    Runs tests in headless mode.')
 }
 
 export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExamples }: MainArgv) {
   const rootPackageJsonPath = await findUp('package.json')
-  const useYarn = useNpm ? false : shouldUseYarn()
+  const useYarn = useNpm === true ? false : await shouldUseYarn()
   const useTypescript = ignoreTs ? false : shouldUseTypescript()
 
   if (!rootPackageJsonPath) {
     throw new Error(`It looks like you are running this script outside of npm module. If you want to install cypress in this folder please run ${chalk.inverse('npm init')} first`)
   }
 
-  const { name, version } = JSON.parse(fs.readFileSync(rootPackageJsonPath).toString())
+  const { name = 'unknown', version = '0.0.0' } = JSON.parse(fs.readFileSync(rootPackageJsonPath).toString())
 
-  console.log(`Running ${chalk.green('cypress 🌲')} installation wizard for ${chalk.cyan(`${name}@${version}`)}...`)
+  console.log(`Running ${chalk.green('cypress 🌲')} installation wizard for ${chalk.cyan(`${name}@${version}`)}`)
 
   const { config, cypressConfigPath } = await findInstalledOrInstallCypress({ useYarn, useTypescript, ignoreExamples })
   const shouldSetupComponentTesting = setupComponentTesting ?? await askForComponentTesting()

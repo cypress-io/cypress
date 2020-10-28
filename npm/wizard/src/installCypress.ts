@@ -1,7 +1,6 @@
 import fs from 'fs-extra'
 import findUp from 'find-up'
 import path from 'path'
-// @ts-ignore
 import example from '../initial-template'
 import { installDependency } from './utils'
 
@@ -11,7 +10,7 @@ type InstallCypressOpts = {
   ignoreExamples: boolean
 }
 
-async function copyFiles ({ ignoreExamples }: InstallCypressOpts) {
+async function copyFiles ({ ignoreExamples, useTypescript }: InstallCypressOpts) {
   await fs.outputFile(path.resolve(process.cwd(), 'cypress.json'), '{}\n')
   await fs.copy(example.getPathToPlugins(), path.resolve('cypress', 'plugins/index.js'))
   const supportFiles: string[] = await example.getPathToSupportFiles()
@@ -23,6 +22,10 @@ async function copyFiles ({ ignoreExamples }: InstallCypressOpts) {
       return fs.copy(supportFilePath, newSupportFilePath)
     }),
   )
+
+  if (useTypescript) {
+    await fs.copy(example.getPathToTsConfig(), path.resolve('cypress', 'tsconfig.json'))
+  }
 }
 
 export async function findInstalledOrInstallCypress (options: InstallCypressOpts) {

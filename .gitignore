@@ -26,7 +26,6 @@ npm/**/cypress/screenshots
 # from example
 packages/example/app
 packages/example/build
-packages/example/cypress
 
 # from server
 packages/server/.cy
@@ -41,6 +40,7 @@ packages/server/test/support/fixtures/server/libs
 
 # from npm/wizard
 /npm/wizard/initial-template
+/npm/wizard/src/test-output
 
 # Building app binary
 scripts/support

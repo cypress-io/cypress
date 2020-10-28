@@ -31,10 +31,10 @@ function printCypressJsonHelp (
   console.log(`\n${highlightedCode}\n`)
 }
 
-function printSupportHelper (supportFilePath: string) {
+function printSupportHelper (supportFilePath: string, framework: string) {
   const stepNumber = chalk.bold('2.')
-  const importCode = 'import \'@cypress/react/support\''
-  const requireCode = 'require(\'@cypress/react/support\')'
+  const importCode = `import \'@cypress/${framework}/support\'`
+  const requireCode = `require(\'@cypress/${framework}/support\')`
 
   if (fs.existsSync(supportFilePath)) {
     const fileContent = fs.readFileSync(supportFilePath, { encoding: 'utf-8' })
@@ -142,7 +142,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Here are instructions of how to get started with component testing for ${chalk.cyan(chosenTemplateName)}:`)
 
   printCypressJsonHelp(cypressConfigPath, componentFolder)
-  printSupportHelper(supportFilePath)
+  printSupportHelper(supportFilePath, framework)
   printPluginHelper(
     chosenTemplate.getPluginsCode(templatePayload, {
       cypressProjectRoot,

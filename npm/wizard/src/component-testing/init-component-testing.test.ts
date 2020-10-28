@@ -1,29 +1,26 @@
 import { expect, use } from 'chai'
-import sinon, { SinonStub, SinonSpy, SinonSpyCallApi } from 'sinon'
+import sinon, { SinonStub, SinonSpy } from 'sinon'
 import chalk from 'chalk'
 import mockFs from 'mock-fs'
 import highlight from 'cli-highlight'
 import { initComponentTesting } from './init-component-testing'
 import inquirer from 'inquirer'
 import sinonChai from 'sinon-chai'
+import childProcess from 'child_process'
+import { someOfSpyCallsIncludes } from '../test-utils'
 
 use(sinonChai)
 
-function someOfSpyCallsIncludes (spy: any, logPart: string) {
-  return spy.getCalls().some(
-    (spy: SinonSpyCallApi<unknown[]>) => {
-      return spy.args.some((callArg) => typeof callArg === 'string' && callArg.includes(logPart))
-    },
-  )
-}
-
-describe('init script', () => {
+describe('init component tests script', () => {
   let promptSpy: SinonStub<any> | null = null
   let logSpy: SinonSpy | null = null
   let processExitStub: SinonStub<any> | null = null
+  let execStub: SinonStub | null = null
 
   beforeEach(() => {
     logSpy = sinon.spy(global.console, 'log')
+    // @ts-ignores
+    execStub = sinon.stub(childProcess, 'exec').callsFake((command, callback) => callback())
     processExitStub = sinon.stub(process, 'exit').callsFake(() => {
       throw new Error(`${chalk.red('process.exit')} should not be called`)
     })
@@ -34,6 +31,7 @@ describe('init script', () => {
     logSpy?.restore()
     promptSpy?.restore()
     processExitStub?.restore()
+    execStub?.restore()
   })
 
   it('automatically suggests to the user which config to use', async () => {
@@ -52,7 +50,7 @@ describe('init script', () => {
       componentFolder: 'cypress/component',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
     const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
     expect(choices[0]).to.equal('webpack')
@@ -76,7 +74,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
 
     const [{ choices, message }] = (inquirer.prompt as any).args[0][0]
 
@@ -106,7 +104,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
 
     expect(
       someOfSpyCallsIncludes(global.console.log, 'We were unable to automatically determine your framework 😿'),
@@ -131,7 +129,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
 
     expect(
       someOfSpyCallsIncludes(global.console.log, `It looks like all these frameworks: ${chalk.yellow('react, vue')} are available from this directory.`),
@@ -153,7 +151,7 @@ describe('init script', () => {
       componentFolder: 'src',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
     expect(
       someOfSpyCallsIncludes(global.console.log, 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'),
     ).to.be.true
@@ -174,7 +172,7 @@ describe('init script', () => {
       componentFolder: 'cypress/component',
     }) as any)
 
-    await initComponentTesting()
+    await initComponentTesting({ config: {}, cypressConfigPath: '/', useYarn: true })
 
     const expectedCode = highlight(
       JSON.stringify(
