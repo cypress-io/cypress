@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const semverSortNewestFirst = require('semver/functions/rcompare')
 
-const { getCurrentBranch, getPackagePath, readPackageJson, minutes } = require('./utils')
+const { getCurrentBranch, getPackagePath, readPackageJson, minutes, independentTagRegex } = require('./utils')
 const { getLernaPackages, getPackageDependents } = require('./changed-packages')
 const { waitForJobToPass } = require('./wait-on-circle-jobs')
 
@@ -46,6 +46,8 @@ const parseSemanticReleaseOutput = (output) => {
 // in addition to getting the next version that's going to be released
 // this serves as a good double check that the release will work before we actually do it
 const getNextVersion = async (name) => {
+  // we cannot use the semantic-release javascript api
+  // since it will break semantic-release-monorepo plugin
   const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release', '--dry-run'])
 
   return parseSemanticReleaseOutput(stdout).nextVersion
@@ -57,7 +59,7 @@ const getCurrentVersion = async (name) => {
   const tags = await getTags()
 
   const versions = tags
-  .map((tag) => (tag.match(new RegExp(`^${name}-v(.+)`)) || [])[1])
+  .map((tag) => (tag.match(independentTagRegex(name)) || [])[1])
   .filter((tag) => tag)
   .sort(semverSortNewestFirst)
 
@@ -78,22 +80,16 @@ const getPackageVersions = async (packages) => {
     },
   }
 
-  for (const pack of packages) {
-    console.log(`\n${pack}`)
+  for (const name of packages) {
+    console.log(`\n${name}`)
 
-    const currentVersion = await getCurrentVersion(pack)
+    const currentVersion = await getCurrentVersion(name)
+    const nextVersion = await getNextVersion(name)
 
-    if (!currentVersion) {
-      return error(`Couldn't find a current version for ${pack}`)
-    }
-
-    console.log(`Current version: ${currentVersion}`)
-
-    const nextVersion = await getNextVersion(pack)
-
+    console.log(`Current version: ${currentVersion || 'N/A'}`)
     console.log(`Next version: ${nextVersion || 'N/A'}`)
 
-    versions[pack] = {
+    versions[name] = {
       currentVersion,
       nextVersion,
     }
@@ -121,11 +117,13 @@ const injectVersions = (packagesToRelease, versions, packages) => {
         if (packageJson.dependencies[dependency] === '*') {
           const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
-          if (version) {
-            packageJson.dependencies[dependency] = version
-
-            console.log(`\t${dependency}: ${version}`)
+          if (!version) {
+            return error(`Could not inject a version for ${dependency} since it has no current or next version`)
           }
+
+          packageJson.dependencies[dependency] = version
+
+          console.log(`\t${dependency}: ${version}`)
         }
       }
 
@@ -142,16 +140,16 @@ const waitOnTests = async (names, packageInfo) => {
   const packages = names.concat(...await Promise.all(names.map(getPackageDependents)))
 
   const jobs = [...new Set([].concat(...packages.map((name) => {
-    const pack = packageInfo.find((p) => p.name === name)
+    const pkg = packageInfo.find((p) => p.name === name)
 
-    return readPackageJson(pack).ciJobs || []
+    return readPackageJson(pkg).ciJobs || []
   })))]
 
   console.log(`\nWaiting on the following CI jobs: ${jobs.join(', ')}`)
 
   return Promise.all(jobs.map((job) => {
     waitForJobToPass(job)
-    .timeout(minutes(30))
+    .timeout(minutes(60))
     .then(() => {
       console.log(`${job} passed`)
     }).catch(() => {
@@ -170,7 +168,7 @@ const releasePackages = async (packages) => {
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release', '--no-ci'])
+    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
 
     console.log(`Released ${name} successfully:`)
     console.log(stdout)
@@ -191,8 +189,8 @@ const main = async () => {
 
   const packages = await getLernaPackages()
   const publicPackages = packages
-  .filter((pack) => !pack.private && !pack.name.includes('@packages'))
-  .map((pack) => pack.name)
+  .filter((pkg) => !pkg.private && !pkg.name.includes('@packages'))
+  .map((pkg) => pkg.name)
 
   console.log(`Found the following public packages: ${publicPackages.join(', ')}\n`)
 

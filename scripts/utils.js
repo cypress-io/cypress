@@ -127,15 +127,18 @@ const getPackagePath = ({ location }) => path.join(location, 'package.json')
 
 const readPackageJson = (pack) => JSON.parse(fs.readFileSync(getPackagePath(pack)))
 
+const independentTagRegex = (name) => new RegExp(`^${name}-v(.+)`)
+
 module.exports = {
   getNameAndBinary,
   getJustVersion,
   getShortCommit,
   getCIName,
   getCIBuildUrl,
+  seconds,
+  minutes,
   getCurrentBranch,
   getPackagePath,
   readPackageJson,
-  seconds,
-  minutes,
+  independentTagRegex,
 }
