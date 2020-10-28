@@ -105,7 +105,7 @@ describe('webpack preprocessor - e2e', () => {
     })
   })
 
-  xit('triggers rerun on syntax error', async () => {
+  it('triggers rerun on syntax error', async () => {
     file = createFile({ shouldWatch: true })
 
     await preprocessor()(file)

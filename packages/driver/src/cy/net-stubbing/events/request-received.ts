@@ -82,7 +82,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   }
 
   request.log = getRequestLog(route, request as Omit<Request, 'log'>)
-  request.log.snapshot('request')
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
