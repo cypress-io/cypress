@@ -182,6 +182,7 @@ module.exports = {
       'run-mode': 'isTextTerminal',
       'run-project': 'runProject',
       'smoke-test': 'smokeTest',
+      'component-testing': 'componentTesting',
     }
 
     // takes an array of args and converts

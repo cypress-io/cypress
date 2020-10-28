@@ -1,5 +1,7 @@
 module.exports = (mode, options) => {
   switch (mode) {
+    case 'componentTesting':
+      return require('./component-testing').run(options)
     case 'record':
       return require('./record').run(options)
     case 'run':

@@ -59,7 +59,7 @@ module.exports = {
       // that means we're already running in electron
       // like in production and we shouldn't spawn a new
       // process
-      if (this.isCurrentlyRunningElectron()) {
+      if (options.componentTesting || this.isCurrentlyRunningElectron()) {
         // if we weren't invoked from the CLI
         // then display a warning to the user
         if (!options.invokedFromCli) {
@@ -150,7 +150,9 @@ module.exports = {
       // and normalize this mode
       let mode = options.mode || 'interactive'
 
-      if (options.version) {
+      if (options.componentTesting) {
+        mode = 'componentTesting'
+      } else if (options.version) {
         mode = 'version'
       } else if (options.smokeTest) {
         mode = 'smokeTest'
@@ -257,6 +259,7 @@ module.exports = {
         .catch(exitErr)
 
       case 'interactive':
+      case 'componentTesting':
         return this.runElectron(mode, options)
 
       case 'openProject':
