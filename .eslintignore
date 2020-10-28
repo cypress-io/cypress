@@ -44,4 +44,4 @@ npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 /npm/react/bin/*
 /npm/react/**/coverage
 **/.next/**
-/npm/wizard/initial-template
+/npm/create-cypress-tests/initial-template
