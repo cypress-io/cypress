@@ -1,9 +1,10 @@
 declare const example: {
-  getPathToExamples(): Promise<{ fullPaths: string[] }>;
+  getPathToExamples(): Promise<string[]>;
   getFolderName(): string;
   getPathToPlugins(): string;
   getPathToSupportFiles(): Promise<string[]>;
   getPathToTsConfig(): string;
+  getPathToFixture(): string;
 }
 
 export default example;

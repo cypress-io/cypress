@@ -157,7 +157,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
 
-      return this._copy('fixtures/example.json', folder, config)
+      return this._copy(cypressEx.getPathToFixture(), folder, config)
     })
   },
 
@@ -172,10 +172,14 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)
 
-      return Promise.join(
-        this._copy('support/commands.js', folder, config),
-        this._copy('support/index.js', folder, config),
-      )
+      return cypressEx.getPathToSupportFiles()
+      .then((supportFiles) => {
+        return Promise.all(
+          supportFiles.map((supportFilePath) => {
+            return this._copy(supportFilePath, folder, config)
+          }),
+        )
+      })
     })
   },
 
@@ -190,7 +194,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying index.js into ${folder}`)
 
-      return this._copy('plugins/index.js', folder, config)
+      return this._copy(cypressEx.getPathToPlugins(), folder, config)
     })
   },
 
@@ -215,7 +219,7 @@ module.exports = {
     // the file and not have it re-generated each time
     //
     // this is ideal because users who are upgrading to newer cypress version
-    // will still get the files scaffolded but existing users won't be
+    // will still a the files scaffolded but existing users won't be
     // annoyed by new example files coming into their projects unnecessarily
     // console.debug('-- verify', folder)
     debug(`verify scaffolding in ${folder}`)
