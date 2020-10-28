@@ -42,11 +42,12 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     // copy changeable attributes of userRes to res in frame
     // if the user is setting a StaticResponse, use that instead
     // @ts-ignore
-    request.response = continueFrame.res = {
+    continueFrame.res = {
       ..._.pick(continueFrame.staticResponse || userRes, SERIALIZABLE_RES_PROPS),
     }
 
     if (request) {
+      request.response = continueFrame.res
       request.state = 'ResponseIntercepted'
     }
 
