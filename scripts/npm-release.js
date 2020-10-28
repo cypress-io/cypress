@@ -2,10 +2,11 @@
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
-const semverRcompare = require('semver/functions/rcompare')
+const semverSortNewestFirst = require('semver/functions/rcompare')
 
+const { getCurrentBranch, getPackagePath, readPackageJson, minutes } = require('./utils')
 const { getLernaPackages, getPackageDependents } = require('./changed-packages')
-const { minutes, waitForJobToPass } = require('./wait-on-circle-jobs')
+const { waitForJobToPass } = require('./wait-on-circle-jobs')
 
 const error = (message) => {
   if (require.main === module) {
@@ -18,21 +19,11 @@ const error = (message) => {
   }
 }
 
-const getCurrentBranch = async () => {
-  const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
-
-  return stdout
-}
-
 const getTags = async () => {
   const { stdout } = await execa('git', ['tag', '--merged', await getCurrentBranch()])
 
   return stdout.split('\n')
 }
-
-const getPackagePath = ({ location }) => path.join(location, 'package.json')
-
-const readPackageJson = (pack) => JSON.parse(fs.readFileSync(getPackagePath(pack)))
 
 const getBinaryVersion = async () => {
   const { stdout: root } = await execa('git', ['rev-parse', '--show-toplevel'])
@@ -68,9 +59,9 @@ const getCurrentVersion = async (name) => {
   const versions = tags
   .map((tag) => (tag.match(new RegExp(`^${name}-v(.+)`)) || [])[1])
   .filter((tag) => tag)
-  .sort(semverRcompare)
+  .sort(semverSortNewestFirst)
 
-  return versions[0] || null
+  return versions[0]
 }
 
 const getPackageVersions = async (packages) => {
@@ -93,7 +84,7 @@ const getPackageVersions = async (packages) => {
     const currentVersion = await getCurrentVersion(pack)
 
     if (!currentVersion) {
-      error(`Couldn't find a current version for ${pack}`)
+      return error(`Couldn't find a current version for ${pack}`)
     }
 
     console.log(`Current version: ${currentVersion}`)
@@ -125,19 +116,21 @@ const injectVersions = (packagesToRelease, versions, packages) => {
     const info = packages.find((p) => p.name === name)
     const packageJson = readPackageJson(info)
 
-    for (const dependency in packageJson.dependencies) {
-      if (packageJson.dependencies[dependency] === '*') {
-        const version = versions[dependency].nextVersion || versions[dependency].currentVersion
+    if (packageJson.dependencies) {
+      for (const dependency in packageJson.dependencies) {
+        if (packageJson.dependencies[dependency] === '*') {
+          const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
-        if (version) {
-          packageJson.dependencies[dependency] = version
+          if (version) {
+            packageJson.dependencies[dependency] = version
 
-          console.log(`\t${dependency}: ${version}`)
+            console.log(`\t${dependency}: ${version}`)
+          }
         }
       }
-    }
 
-    fs.writeFileSync(getPackagePath(info), JSON.stringify(packageJson, null, 2))
+      fs.writeFileSync(getPackagePath(info), JSON.stringify(packageJson, null, 2))
+    }
   }
 }
 
@@ -189,7 +182,7 @@ const releasePackages = async (packages) => {
 // goes through the release process for all of our independent npm projects
 const main = async () => {
   if (!process.env.CIRCLECI) {
-    error(`Cannot run release process outside of Circle CI`)
+    return error(`Cannot run release process outside of Circle CI`)
   }
 
   if (process.env.CIRCLE_PULL_REQUEST) {

@@ -8,15 +8,14 @@ const got = require('got')
 // always print the debug logs
 const debug = require('debug')('*')
 
+const { seconds, minutes } = require('./utils')
+
 // we expect CircleCI to set the current polling job name
 const jobName = process.env.CIRCLE_JOB || 'wait-on-circle-jobs'
 
 const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
-
-const seconds = (s) => s * 1000
-const minutes = (m) => m * 60 * 1000
 
 const verifyCI = () => {
   if (!process.env.CIRCLE_TOKEN) {

@@ -3,6 +3,7 @@ const la = require('lazy-ass')
 const is = require('check-more-types')
 const path = require('path')
 const fs = require('fs')
+const execa = require('execa')
 
 /* eslint-disable no-console */
 
@@ -113,10 +114,28 @@ const getCIBuildUrl = () => {
   }
 }
 
+const seconds = (s) => s * 1000
+const minutes = (m) => m * 60 * 1000
+
+const getCurrentBranch = async () => {
+  const { stdout } = await execa('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
+
+  return stdout
+}
+
+const getPackagePath = ({ location }) => path.join(location, 'package.json')
+
+const readPackageJson = (pack) => JSON.parse(fs.readFileSync(getPackagePath(pack)))
+
 module.exports = {
   getNameAndBinary,
   getJustVersion,
   getShortCommit,
   getCIName,
   getCIBuildUrl,
+  getCurrentBranch,
+  getPackagePath,
+  readPackageJson,
+  seconds,
+  minutes,
 }
