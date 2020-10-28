@@ -27,7 +27,7 @@ describe('lib/util/status_code', () => {
     })
 
     it('is Server Error', () => {
-      expect(statusCode.getText(500)).to.eq('Server Error')
+      expect(statusCode.getText(500)).to.eq('Internal Server Error')
     })
 
     it('is Unknown Status Code', () => {
