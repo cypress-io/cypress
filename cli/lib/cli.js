@@ -410,7 +410,7 @@ module.exports = {
 
         return cache.list(opts.size)
         .catch({ code: 'ENOENT' }, () => {
-          logger.always('No binary cached versions were found.')
+          logger.always('No cached binary versions were found.')
           process.exit(0)
         })
         .catch((e) => {
