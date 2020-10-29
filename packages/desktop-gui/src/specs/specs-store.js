@@ -9,7 +9,7 @@ import Folder from './folder-model'
 const pathSeparatorRe = /[\\\/]/g
 
 export const allIntegrationSpecsSpec = new Spec({
-  name: 'All Specs',
+  name: 'All Integration Specs',
   absolute: '__all',
   relative: '__all',
   displayName: 'Run all specs',

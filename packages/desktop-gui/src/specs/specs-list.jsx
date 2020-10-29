@@ -1,3 +1,5 @@
+// @ts-check
+
 import cs from 'classnames'
 import _ from 'lodash'
 import React, { Component } from 'react'
@@ -10,6 +12,19 @@ import ipc from '../lib/ipc'
 import projectsApi from '../projects/projects-api'
 import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './specs-store'
 
+/**
+ * Returns a label text for a button.
+ * @param {boolean} areTestsAlreadyRunning To form the message "running" vs "run"
+ * @param {number} specsN Number of specs to run or already running
+*/
+const formRunButtonLabel = (areTestsAlreadyRunning, specsN) => {
+  const runWord = areTestsAlreadyRunning ? 'Running' : 'Run'
+
+  const label = specsN === 1 ? `${runWord} 1 spec` : `${runWord} ${specsN} specs`
+
+  return label
+}
+
 @observer
 class SpecsList extends Component {
   constructor (props) {
@@ -20,8 +35,10 @@ class SpecsList extends Component {
     // is currently running
     this.runAllSavedLabel = null
 
+    // @ts-ignore
     if (window.Cypress) {
       // expose project object for testing
+      // @ts-ignore
       window.__project = this.props.project
     }
   }
@@ -45,10 +62,8 @@ class SpecsList extends Component {
     const areTestsRunning = this._areTestsRunning()
 
     // store in the component for ease of sharing with other methods
-    const runWord = areTestsRunning ? 'Running' : 'Run'
-
-    this.integrationLabel = integrationSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${integrationSpecsN} specs`
-    this.componentLabel = componentSpecsN === 1 ? `${runWord} 1 spec` : `${runWord} ${componentSpecsN} specs`
+    this.integrationLabel = formRunButtonLabel(areTestsRunning, integrationSpecsN)
+    this.componentLabel = formRunButtonLabel(areTestsRunning, componentSpecsN)
 
     return (
       <div className='specs'>
