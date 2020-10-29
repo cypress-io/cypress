@@ -453,5 +453,5 @@ Cypress binary version: X.Y.Z
 `
 
 exports['prints explanation when no cache'] = `
-No binary cached versions were found.
+No cached binary versions were found.
 `
