@@ -319,9 +319,9 @@ class RunsList extends Component {
   _empty () {
     const recordCommand = `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
 
-    const projectIdJsonConfig = `{'
-  "projectId": "${this.props.project.id || '<projectId>'}"
-}`
+    const projectIdJsonConfig = {
+      projectId: this.props.project.id || '<projectId>',
+    }
 
     return (
       <div>
@@ -339,8 +339,8 @@ class RunsList extends Component {
               Why?
             </a>
           </h5>
-          <pre className='line-nums copy-to-clipboard'>
-            <a className="action-copy" onClick={() => ipc.setClipboardText(projectIdJsonConfig)}>
+          <pre id="code-project-id-config" className='line-nums copy-to-clipboard'>
+            <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
               <i className='fas fa-clipboard'></i>
             </a>
             <span>{'{'}</span>
@@ -356,7 +356,7 @@ class RunsList extends Component {
               Need help?
             </a>
           </h5>
-          <pre className="copy-to-clipboard">
+          <pre id="code-record-command" className="copy-to-clipboard">
             <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
               <i className='fas fa-clipboard'></i>
             </a>

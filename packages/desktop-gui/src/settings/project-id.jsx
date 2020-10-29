@@ -12,9 +12,9 @@ const openProjectIdHelp = (e) => {
 const ProjectId = observer(({ project }) => {
   if (!project.id) return null
 
-  const projectIdJsonConfig = `{
-  "projectId": "${project.id}"
-}`
+  const projectIdJsonConfig = {
+    projectId: project.id,
+  }
 
   return (
     <div data-cy="project-id">
@@ -26,7 +26,7 @@ const ProjectId = observer(({ project }) => {
         It identifies your project and should not be changed.
       </p>
       <pre className='line-nums copy-to-clipboard'>
-        <a className="action-copy" onClick={() => ipc.setClipboardText(projectIdJsonConfig)}>
+        <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
           <i className='fas fa-clipboard'></i>
         </a>
         <span>{'{'}</span>
