@@ -72,7 +72,7 @@ export class SpecsStore {
   @action setSpecs (specsByType) {
     this._files = _.flatten(_.map(specsByType, (specs, type) => {
       return _.map(specs, (spec) => {
-        return _.extend({}, spec, { type })
+        return _.extend({}, spec, { specType: type })
       })
     }))
 
@@ -150,7 +150,7 @@ export class SpecsStore {
     files = filterSpecs(this.filter, files)
 
     const tree = _.reduce(files, (root, file) => {
-      const segments = [file.type].concat(file.name.split(pathSeparatorRe))
+      const segments = [file.specType].concat(file.name.split(pathSeparatorRe))
       const segmentsPassed = []
 
       let placeholder = root

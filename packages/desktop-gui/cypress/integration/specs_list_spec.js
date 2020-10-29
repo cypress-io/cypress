@@ -190,7 +190,7 @@ describe('Specs List', function () {
       })
 
       context('run all specs', function () {
-        it('displays run all specs button', () => {
+        it.only('displays run all specs button', () => {
           cy.contains('.all-tests', 'Run all specs').should('have.attr', 'title')
         })
 

@@ -15,12 +15,13 @@ import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './sp
 /**
  * Returns a label text for a button.
  * @param {boolean} areTestsAlreadyRunning To form the message "running" vs "run"
+ * @param {'integration'|'component'} specType Spec type should be included in the label
  * @param {number} specsN Number of specs to run or already running
 */
-const formRunButtonLabel = (areTestsAlreadyRunning, specsN) => {
+const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
   const runWord = areTestsAlreadyRunning ? 'Running' : 'Run'
 
-  const label = specsN === 1 ? `${runWord} 1 spec` : `${runWord} ${specsN} specs`
+  const label = specsN === 1 ? `${runWord} 1 ${specType} spec` : `${runWord} ${specsN} ${specType} specs`
 
   return label
 }
@@ -62,8 +63,8 @@ class SpecsList extends Component {
     const areTestsRunning = this._areTestsRunning()
 
     // store in the component for ease of sharing with other methods
-    this.integrationLabel = formRunButtonLabel(areTestsRunning, integrationSpecsN)
-    this.componentLabel = formRunButtonLabel(areTestsRunning, componentSpecsN)
+    this.integrationLabel = formRunButtonLabel(areTestsRunning, 'integration', integrationSpecsN)
+    this.componentLabel = formRunButtonLabel(areTestsRunning, 'component', componentSpecsN)
 
     return (
       <div className='specs'>
