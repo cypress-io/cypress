@@ -114,7 +114,10 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "binary": "edge",
+    "binary": [
+      "edge",
+      "microsoft-edge"
+    ],
     "path": "/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge",
     "version": "someVersion",
     "findAppParams": {
@@ -162,7 +165,10 @@ exports['darwin browser detection detects browsers as expected 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "binary": "edge-dev",
+    "binary": [
+      "edge-dev",
+      "microsoft-edge-dev"
+    ],
     "path": "/Applications/Microsoft Edge Dev.app/Contents/MacOS/Microsoft Edge Dev",
     "version": "someVersion",
     "findAppParams": {

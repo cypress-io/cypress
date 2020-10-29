@@ -66,7 +66,10 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "binary": "edge"
+    "binary": [
+      "edge",
+      "microsoft-edge"
+    ]
   },
   {
     "name": "edge",
@@ -90,6 +93,9 @@ exports['browsers returns the expected list of browsers 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "binary": "edge-dev"
+    "binary": [
+      "edge-dev",
+      "microsoft-edge-dev"
+    ]
   }
 ]

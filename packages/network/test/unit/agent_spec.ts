@@ -321,7 +321,7 @@ describe('lib/agent', function () {
           throw new Error('should not succeed')
         })
         .catch((e) => {
-          expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: The upstream proxy closed the socket after connecting but before sending a response.')
+          expect(e.message).to.eq('Error: A connection to the upstream proxy could not be established: ERR_EMPTY_RESPONSE: The upstream proxy closed the socket after connecting but before sending a response.')
 
           return proxy.destroyAsync()
         })

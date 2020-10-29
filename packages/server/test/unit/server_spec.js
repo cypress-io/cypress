@@ -355,6 +355,9 @@ describe('lib/server', () => {
       this.server._onDomainSet('https://www.google.com')
 
       const req = {
+        connection: {
+          encrypted: true,
+        },
         url: '/',
         headers: {
           host: 'www.google.com',

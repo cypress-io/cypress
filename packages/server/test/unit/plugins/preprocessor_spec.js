@@ -1,6 +1,5 @@
 require('../../spec_helper')
 
-const resolve = require('resolve')
 const Fixtures = require('../../support/helpers/fixtures')
 const path = require('path')
 const appData = require(`${root}../lib/util/app_data`)
@@ -83,24 +82,6 @@ describe('lib/plugins/preprocessor', () => {
       preprocessor.getFile(this.filePath, this.config)
 
       expect(this.plugin).to.be.calledOnce
-    })
-
-    it('uses default preprocessor if none registered', function () {
-      plugins._reset()
-      sinon.stub(plugins, 'register')
-      sinon.stub(plugins, 'execute').returns(() => {})
-
-      const userPreprocessorFn = function () {}
-      const userPreprocessor = sinon.stub().returns(userPreprocessorFn)
-
-      userPreprocessor.defaultOptions = {}
-
-      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', userPreprocessor)
-
-      preprocessor.getFile(this.filePath, this.config)
-
-      expect(plugins.register).to.be.calledWith('file:preprocessor', userPreprocessorFn)
-      expect(userPreprocessor).to.be.called
     })
   })
 
@@ -206,43 +187,6 @@ describe('lib/plugins/preprocessor', () => {
 
     it('removes stack lines', () => {
       expect(preprocessor.errorMessage('foo\n  at what.ever (foo 23:30)\n baz\n    at where.ever (bar 1:5)')).to.equal('foo\n baz')
-    })
-  })
-
-  context('#setDefaultPreprocessor', () => {
-    it('finds TypeScript in the project root', function () {
-      const mockPlugin = {}
-
-      sinon.stub(plugins, 'register')
-      sinon.stub(preprocessor, 'createPreprocessor').returns(mockPlugin)
-
-      preprocessor.setDefaultPreprocessor(this.config)
-
-      expect(plugins.register).to.be.calledWithExactly('file:preprocessor', mockPlugin)
-      // in this mock project, the TypeScript should be found
-      // from the monorepo
-      const monorepoRoot = path.join(__dirname, '../../../../..')
-      const typescript = resolve.sync('typescript', {
-        basedir: monorepoRoot,
-      })
-
-      expect(preprocessor.createPreprocessor).to.be.calledWith({ typescript })
-    })
-
-    it('does not have typescript if not found', function () {
-      const mockPlugin = {}
-
-      sinon.stub(plugins, 'register')
-      sinon.stub(preprocessor, 'createPreprocessor').returns(mockPlugin)
-      sinon.stub(resolve, 'sync')
-      .withArgs('typescript', { basedir: this.todosPath })
-      .throws(new Error('TypeScript not found'))
-
-      preprocessor.setDefaultPreprocessor(this.config)
-
-      expect(plugins.register).to.be.calledWithExactly('file:preprocessor', mockPlugin)
-
-      expect(preprocessor.createPreprocessor).to.be.calledWith({ typescript: null })
     })
   })
 })

@@ -1,16 +1,16 @@
 import { observable, computed, action } from 'mobx'
-import moment from 'moment'
 
 import Timer from './duration-timer-model'
+import dayjs from 'dayjs'
 
-class DurationTimer {
+class TimerStore {
   @observable isRunning = false
   @observable timer
   @observable startTime
 
   constructor (startTime) {
     this.timer = new Timer()
-    this.startTime = moment(startTime)
+    this.startTime = dayjs(startTime)
   }
 
   @computed get mainDisplay () {
@@ -20,7 +20,7 @@ class DurationTimer {
   @action measure () {
     if (!this.isRunning) return
 
-    this.timer.milliseconds = moment().diff(this.startTime)
+    this.timer.milliseconds = dayjs().diff(this.startTime)
 
     this.timerId = setTimeout(() => {
       return this.measure()
@@ -41,4 +41,4 @@ class DurationTimer {
   }
 }
 
-export default DurationTimer
+export default TimerStore
