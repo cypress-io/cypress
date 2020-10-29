@@ -1688,17 +1688,6 @@
     debug "3.1.0"
     lazy-ass "1.6.0"
 
-"@cypress/eslint-plugin-dev@5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@cypress/eslint-plugin-dev/-/eslint-plugin-dev-5.0.0.tgz#0b42f8056d24d7f09e690a818b47796c51c8c1ae"
-  integrity sha512-wAvXudTesd75WKnO8PWtCy7bRuoG1v2JctfedtXn8uNN7M862WvkdXZaluW8Ex/Ahj6VI6fh4hfhdFzxhlF83Q==
-  dependencies:
-    bluebird "^3.5.5"
-    chalk "^2.4.2"
-    eslint-rule-composer "^0.3.0"
-    lodash "^4.17.15"
-    shelljs "^0.8.3"
-
 "@cypress/get-windows-proxy@1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.1.tgz#61a29d0271b38deaafc24b22a661bab684b6743f"
