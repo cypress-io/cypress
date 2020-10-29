@@ -127,7 +127,7 @@ const waitForAllJobs = async (jobNames, workflowId) => {
   return Promise.reject(new Error('Jobs have not finished'))
 }
 
-const waitForJobToPass = async (jobName, workflow = workflowId) => {
+const waitForJobToPass = Promise.method(async (jobName, workflow = workflowId) => {
   verifyCI()
 
   let response
@@ -158,7 +158,7 @@ const waitForJobToPass = async (jobName, workflow = workflowId) => {
   await Promise.delay(seconds(30))
 
   return waitForJobToPass(jobName, workflow)
-}
+})
 
 const main = () => {
   verifyCI()
