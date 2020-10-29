@@ -8,6 +8,9 @@ const path = require('path')
 const Promise = require('bluebird')
 const { useFixedFirefoxResolution } = require('../../../utils')
 
+/**
+ * @type {Cypress.PluginConfig}
+ */
 module.exports = (on, config) => {
   let performance = {
     track: () => Promise.resolve(),

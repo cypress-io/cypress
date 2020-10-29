@@ -202,6 +202,10 @@ const startServer = function (obj) {
 
   app.use(morgan('dev'))
 
+  if (obj.cors) {
+    app.use(require('cors')())
+  }
+
   const s = obj.static
 
   if (s) {
