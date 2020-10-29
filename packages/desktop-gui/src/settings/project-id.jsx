@@ -13,8 +13,8 @@ const ProjectId = observer(({ project }) => {
   if (!project.id) return null
 
   const projectIdJsonConfig = `{
-    "projectId": "${project.id}"
-  }`
+  "projectId": "${project.id}"
+}`
 
   return (
     <div data-cy="project-id">
