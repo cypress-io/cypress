@@ -35,5 +35,6 @@ Fill in as much info as possible. As an open source project with a small maintai
 
 ### Other
 
+- [ ] I'm installing latest Cypress version <!--Please update to latest first 👉 https://on.cypress.io/changelog -->
 - [ ] I'm behind a proxy <!--Configure your proxy first 👉 https://on.cypress.io/proxy-configuration -->
 - [ ] This only occurs in CI <!--specify CI provider -->
