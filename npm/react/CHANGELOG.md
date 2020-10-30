@@ -1,3 +1,10 @@
+# [@cypress/react-v4.15.14](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.13...@cypress/react-v4.15.14) (2020-10-30)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9046](https://github.com/cypress-io/cypress/issues/9046)) ([462829b](https://github.com/cypress-io/cypress/commit/462829bea1d903b0f1666d4ef2dd85e56636b725))
+
 # [@cypress/react-v4.15.13](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.12...@cypress/react-v4.15.13) (2020-10-29)
 
 
