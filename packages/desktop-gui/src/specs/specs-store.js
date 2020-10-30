@@ -25,7 +25,7 @@ export const allComponentSpecsSpec = new Spec({
 })
 
 const formRelativePath = (spec) => {
-  return spec === spec.type ? path.join(spec.type, spec.name) : spec.relative
+  return spec.relative
 }
 
 const pathsEqual = (path1, path2) => {
@@ -84,7 +84,23 @@ export class SpecsStore {
   }
 
   @action setChosenSpecByRelativePath (relativePath) {
-    this.chosenSpecPath = relativePath
+    // find an actual spec using relative path
+    if (relativePath === allIntegrationSpecsSpec.relative) {
+      this.chosenSpecPath = relativePath
+    } else if (relativePath === allComponentSpecsSpec.relative) {
+      this.chosenSpecPath = relativePath
+    } else {
+      const foundSpec = this._files.find((file) => {
+        return file.relative.endsWith(relativePath)
+      })
+
+      if (foundSpec) {
+        this.chosenSpecPath = foundSpec.relative
+      } else {
+        // a problem: could not find chosen spec
+        this.chosenSpecPath = null
+      }
+    }
   }
 
   @action setExpandSpecFolder (spec, isExpanded) {
