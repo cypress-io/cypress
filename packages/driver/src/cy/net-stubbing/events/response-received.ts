@@ -25,6 +25,8 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
   if (request) {
     request.state = 'ResponseReceived'
 
+    request.log.fireChangeEvent()
+
     if (!request.responseHandler) {
       // this is notification-only, update the request with the response attributes and end
       request.response = res
@@ -49,6 +51,7 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     if (request) {
       request.response = continueFrame.res
       request.state = 'ResponseIntercepted'
+      request.log.fireChangeEvent()
     }
 
     emitNetEvent('http:response:continue', continueFrame)

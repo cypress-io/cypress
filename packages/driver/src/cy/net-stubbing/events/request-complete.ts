@@ -33,4 +33,7 @@ export const onRequestComplete: HandlerFn<NetEventFrames.HttpRequestComplete> = 
   }
 
   request.state = 'Complete'
+
+  request.log.fireChangeEvent()
+  request.log.end()
 }

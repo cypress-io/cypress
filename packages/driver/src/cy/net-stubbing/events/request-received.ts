@@ -26,6 +26,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       aliasType: 'route',
       type: 'parent',
       event: true,
+      method: request.request.method,
+      timeout: undefined,
       consoleProps: () => {
         return {
           Alias: route.alias,
@@ -69,6 +71,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
       emitNetEvent('http:request:continue', continueFrame)
     }
+
+    request.log.fireChangeEvent()
   }
 
   if (!route) {
