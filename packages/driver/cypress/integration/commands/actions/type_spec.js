@@ -3098,7 +3098,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       const expectToHaveValueAndCoords = () => {
         const cmd = cy.queue.find({ name: 'type' })
         const log = cmd.get('logs')[0]
-        const txt = log.get('snapshots')[1].body.find('#comments')
+        const txt = log.get('snapshots')[1].body.get().find('#comments')
 
         expect(txt).to.have.value('foobarbaz')
 
@@ -3117,7 +3117,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       const expectToHaveValueAndNoCoords = () => {
         const cmd = cy.queue.find({ name: 'type' })
         const log = cmd.get('logs')[0]
-        const txt = log.get('snapshots')[1].body.find('#comments')
+        const txt = log.get('snapshots')[1].body.get().find('#comments')
 
         expect(txt).to.have.value('foobarbaz')
 

@@ -121,7 +121,7 @@ describe('driver/src/cy/snapshots', () => {
       .then(() => {
         cy.createSnapshot(null, this.$el)
       })
-      .wait(1)
+      .wait(500)
       .then(() => {
         expect(timesRequested).to.equal(1)
       })
