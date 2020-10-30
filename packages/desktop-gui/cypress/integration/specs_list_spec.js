@@ -189,25 +189,28 @@ describe('Specs List', function () {
         this.openProject.resolve(this.config)
       })
 
-      context('run all specs', function () {
-        it.only('displays run all specs button', () => {
-          cy.contains('.all-tests', 'Run all specs').should('have.attr', 'title')
+      context.only('run all specs', function () {
+        const runAllIntegrationSpecsLabel = 'Run 5 integration specs'
+
+        it('displays run all specs button', () => {
+          cy.contains('.all-tests', runAllIntegrationSpecsLabel)
+            .should('have.attr', 'title', 'Run integration specs together')
         })
 
         it('has play icon', () => {
-          cy.contains('.all-tests', 'Run all specs')
+          cy.contains('.all-tests', runAllIntegrationSpecsLabel)
           .find('i').should('have.class', 'fa-play')
         })
 
         it('triggers browser launch on click of button', () => {
-          cy.contains('.all-tests', 'Run all specs').click()
+          cy.contains('.all-tests', runAllIntegrationSpecsLabel).click()
           .find('.fa-dot-circle')
           .then(function () {
             const launchArgs = this.ipc.launchBrowser.lastCall.args
 
             expect(launchArgs[0].browser.name, 'browser name').to.eq('chrome')
 
-            expect(launchArgs[0].spec.name, 'spec name').to.eq('All Specs')
+            expect(launchArgs[0].spec.name, 'spec name').to.eq('All Integration Specs')
 
             expect(launchArgs[0].specFilter, 'spec filter').to.eq(null)
           })
@@ -215,7 +218,7 @@ describe('Specs List', function () {
 
         describe('all specs running in browser', function () {
           beforeEach(() => {
-            cy.contains('.all-tests', 'Run all specs').as('allSpecs').click()
+            cy.contains('.all-tests', runAllIntegrationSpecsLabel).as('allSpecs').click()
           })
 
           it('updates spec icon', function () {

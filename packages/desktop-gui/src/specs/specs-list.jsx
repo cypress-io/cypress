@@ -200,10 +200,11 @@ class SpecsList extends Component {
 
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
+    const specType = spec.specType || 'integration'
 
+    // only applied to the top level for "integration" and "component" specs
     const getSpecRunButton = () => {
       const word = this._areTestsRunning() ? 'Running' : 'Run'
-      const specType = spec.specType || 'integration'
       let buttonText = spec.displayName === 'integration' ? this.integrationLabel : this.componentLabel
 
       if (this._areTestsRunning()) {
@@ -219,8 +220,13 @@ class SpecsList extends Component {
         }
       }
 
+      const isActive = specType === 'integration'
+        ? specsStore.isChosen(allIntegrationSpecsSpec)
+        : specsStore.isChosen(allComponentSpecsSpec)
+      const className = cs('btn-link all-tests', { active: isActive })
+
       return (<button
-        className="btn-link all-tests"
+        className={className}
         title={`${word} ${specType} specs together`}
         onClick={this._selectSpec.bind(this,
           spec.displayName === 'integration' ? allIntegrationSpecsSpec : allComponentSpecsSpec)
@@ -247,7 +253,6 @@ class SpecsList extends Component {
                 </> :
                 spec.displayName
             }
-            {/* TODO: style these buttons */}
             {nestingLevel === 0 ? getSpecRunButton() : <></>}
           </div>
           {
