@@ -19,9 +19,11 @@ import specsStore, { allIntegrationSpecsSpec, allComponentSpecsSpec } from './sp
  * @param {number} specsN Number of specs to run or already running
 */
 const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
-  const runWord = areTestsAlreadyRunning ? 'Running' : 'Run'
+  if (areTestsAlreadyRunning) {
+    return `Running ${specType} tests`
+  }
 
-  const label = specsN === 1 ? `${runWord} 1 ${specType} spec` : `${runWord} ${specsN} ${specType} specs`
+  const label = specsN === 1 ? `Run 1 ${specType} spec` : `Run ${specsN} ${specType} specs`
 
   return label
 }
