@@ -277,8 +277,11 @@ class SpecsList extends Component {
       relativeFile: spec.relative,
     }
 
+    const isActive = specsStore.isChosen(spec)
+    const className = cs(`file level-${nestingLevel}`, { active: isActive })
+
     return (
-      <li key={spec.path} className={cs(`file level-${nestingLevel}`, { active: specsStore.isChosen(spec) })}>
+      <li key={spec.path} className={className}>
         <a href='#' onClick={this._selectSpec.bind(this, spec)} className="file-name-wrapper">
           <div className="file-name">
             <i className={`fa-fw ${this._specIcon(specsStore.isChosen(spec))}`} />
