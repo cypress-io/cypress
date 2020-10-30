@@ -7,6 +7,7 @@
   "scripts": {
     "ban": "ban",
     "build": "rm -rf dist && tsc",
+    "build-prod": "yarn build",
     "deps": "deps-ok && dependency-check --no-dev .",
     "license": "license-checker --production --onlyunknown --csv",
     "secure": "nsp check",
@@ -82,11 +83,18 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme",
   "author": "Chris Breiding <chris@cypress.io>",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=&title=",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
+  ],
+  "ciDependents": [
+    "@cypress/react",
+    "@cypress/vue"
+  ],
+  "ciJobs": [
+    "npm-webpack-preprocessor"
   ]
 }

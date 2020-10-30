@@ -408,8 +408,14 @@ module.exports = {
           size: opts.size,
         })
 
-        return cache.list(opts.size).catch((e) => {
+        return cache.list(opts.size)
+        .catch({ code: 'ENOENT' }, () => {
+          logger.always('No cached binary versions were found.')
+          process.exit(0)
+        })
+        .catch((e) => {
           debug('cache list command failed with "%s"', e.message)
+
           util.logErrorExit1(e)
         })
       }

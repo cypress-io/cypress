@@ -35,7 +35,7 @@ exports['shows help for open --foo 1'] = `
     -P, --project <project-path>     path to the project
     --dev                            runs cypress in development and bypasses
                                      binary check
-    -h, --help                       output usage information
+    -h, --help                       display help for command
   -------
   stderr:
   -------
@@ -82,7 +82,7 @@ exports['shows help for run --foo 1'] = `
     -s, --spec <spec>                          runs specific spec file(s). defaults to "all"
     -t, --tag <tag>                            named tag(s) for recorded runs in the Cypress Dashboard
     --dev                                      runs cypress in development and bypasses binary check
-    -h, --help                                 output usage information
+    -h, --help                                 display help for command
   -------
   stderr:
   -------
@@ -116,7 +116,7 @@ exports['cli unknown option shows help for cache command - unknown option --foo 
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
-    -h, --help  output usage information
+    -h, --help  display help for command
   -------
   stderr:
   -------
@@ -150,7 +150,7 @@ exports['cli unknown option shows help for cache command - unknown sub-command f
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
-    -h, --help  output usage information
+    -h, --help  display help for command
   -------
   stderr:
   -------
@@ -182,7 +182,7 @@ exports['cli unknown option shows help for cache command - no sub-command 1'] = 
                 use
     --size      Used with the list command to show the sizes of the cached
                 folders
-    -h, --help  output usage information
+    -h, --help  display help for command
   -------
   stderr:
   -------
@@ -206,7 +206,7 @@ exports['cli help command shows help 1'] = `
 
   Options:
     -v, --version      prints Cypress version
-    -h, --help         output usage information
+    -h, --help         display help for command
 
   Commands:
     help               Shows CLI help and exits
@@ -242,7 +242,7 @@ exports['cli help command shows help for -h 1'] = `
 
   Options:
     -v, --version      prints Cypress version
-    -h, --help         output usage information
+    -h, --help         display help for command
 
   Commands:
     help               Shows CLI help and exits
@@ -278,7 +278,7 @@ exports['cli help command shows help for --help 1'] = `
 
   Options:
     -v, --version      prints Cypress version
-    -h, --help         output usage information
+    -h, --help         display help for command
 
   Commands:
     help               Shows CLI help and exits
@@ -315,7 +315,7 @@ exports['cli unknown command shows usage and exits 1'] = `
 
   Options:
     -v, --version      prints Cypress version
-    -h, --help         output usage information
+    -h, --help         display help for command
 
   Commands:
     help               Shows CLI help and exits
@@ -421,7 +421,7 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
 
   Options:
     -v, --version      prints Cypress version
-    -h, --help         output usage information
+    -h, --help         display help for command
 
   Commands:
     help               Shows CLI help and exits
@@ -450,4 +450,8 @@ Cypress binary version: X.Y.Z
 exports['cli version and binary version with npm log warn'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+`
+
+exports['prints explanation when no cache'] = `
+No cached binary versions were found.
 `
