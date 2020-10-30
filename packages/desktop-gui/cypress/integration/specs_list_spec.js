@@ -2,7 +2,7 @@ describe('Specs List', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
     cy.fixture('config').as('config')
-    cy.fixture('specs').as('specs')
+    cy.fixture('specs_with_components').as('specs')
     cy.fixture('specs_windows').as('specsWindows')
 
     cy.visitIndex().then(function (win) {
