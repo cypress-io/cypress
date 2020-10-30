@@ -8,6 +8,8 @@ const got = require('got')
 // always print the debug logs
 const debug = require('debug')('*')
 
+const { seconds, minutes } = require('./utils')
+
 // we expect CircleCI to set the current polling job name
 const jobName = process.env.CIRCLE_JOB || 'wait-on-circle-jobs'
 
@@ -15,33 +17,17 @@ const workflowId = process.env.CIRCLE_WORKFLOW_ID
 
 const getAuth = () => `${process.env.CIRCLE_TOKEN}:`
 
-if (!process.env.CIRCLE_TOKEN) {
-  console.error('Cannot find CIRCLE_TOKEN')
-  process.exit(1)
+const verifyCI = () => {
+  if (!process.env.CIRCLE_TOKEN) {
+    console.error('Cannot find CIRCLE_TOKEN')
+    process.exit(1)
+  }
+
+  if (!process.env.CIRCLE_WORKFLOW_ID) {
+    console.error('Cannot find CIRCLE_WORKFLOW_ID')
+    process.exit(1)
+  }
 }
-
-if (!process.env.CIRCLE_WORKFLOW_ID) {
-  console.error('Cannot find CIRCLE_WORKFLOW_ID')
-  process.exit(1)
-}
-
-const args = minimist(process.argv.slice(2), { boolean: false })
-
-const jobNames = _
-.chain(args['job-names'])
-.split(',')
-.without('true')
-.map(_.trim)
-.compact()
-.value()
-
-if (!jobNames.length) {
-  console.error('Missing argument: --job-names')
-  console.error('You must pass a comma separated list of Circle CI job names to wait for.')
-  process.exit(1)
-}
-
-debug('received circle jobs: %o', jobNames)
 
 /* eslint-disable-next-line no-unused-vars */
 const getWorkflow = async (workflowId) => {
@@ -71,7 +57,7 @@ const getWorkflow = async (workflowId) => {
  *  - running (currently running)
  *  - failed | success
 */
-const getJobStatus = async (workfowId) => {
+const getJobStatus = async (workflowId) => {
   const auth = getAuth()
   // typo at https://circleci.com/docs/2.0/api-intro/
   // to retrieve all jobs, the url is "/workflow/:id/job"
@@ -98,7 +84,7 @@ const getJobStatus = async (workfowId) => {
   return response
 }
 
-const waitForAllJobs = async (workflowId) => {
+const waitForAllJobs = async (jobNames, workflowId) => {
   let response
 
   try {
@@ -141,27 +127,89 @@ const waitForAllJobs = async (workflowId) => {
   return Promise.reject(new Error('Jobs have not finished'))
 }
 
-// finished, has one failed job
-// const workflowId = '566ffe9a-62d4-45cd-9a27-9882139e0121'
-// pending workflow
-// jobs that have not run have "status: 'blocked'"
+const waitForJobToPass = Promise.method(async (jobName, workflow = workflowId) => {
+  verifyCI()
 
-// getWorkflow(workflowId).then(console.log, console.error)
-// getWorkflowJobs(workflowId).then(console.log, console.error)
+  let response
 
-const seconds = (s) => s * 1000
-const minutes = (m) => m * 60 * 1000
+  try {
+    response = await getJobStatus(workflow)
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
 
-// https://github.com/demmer/bluebird-retry
-retry(waitForAllJobs.bind(null, workflowId), {
-  timeout: minutes(30), // max time for this job
-  interval: seconds(30), // poll intervals
-  max_interval: seconds(30),
-}).then(() => {
-  console.log('all done')
-}, (err) => {
-  console.error(err)
-  process.exit(1)
+  const job = _.find(response.items, { name: jobName })
+
+  if (!job) {
+    return Promise.reject(new Error('Job not found'))
+  }
+
+  const { status } = job
+
+  if (status === 'success') {
+    return Promise.resolve()
+  }
+
+  if (status === 'failed') {
+    return Promise.reject(new Error('Job failed'))
+  }
+
+  await Promise.delay(seconds(30))
+
+  return waitForJobToPass(jobName, workflow)
 })
 
-// getJobStatus(workflowId).then(console.log, console.error)
+const main = () => {
+  verifyCI()
+
+  const args = minimist(process.argv.slice(2), { boolean: false })
+
+  const jobNames = _
+  .chain(args['job-names'])
+  .split(',')
+  .without('true')
+  .map(_.trim)
+  .compact()
+  .value()
+
+  if (!jobNames.length) {
+    console.error('Missing argument: --job-names')
+    console.error('You must pass a comma separated list of Circle CI job names to wait for.')
+    process.exit(1)
+  }
+
+  debug('received circle jobs: %o', jobNames)
+
+  // finished, has one failed job
+  // const workflowId = '566ffe9a-62d4-45cd-9a27-9882139e0121'
+  // pending workflow
+  // jobs that have not run have "status: 'blocked'"
+
+  // getWorkflow(workflowId).then(console.log, console.error)
+  // getWorkflowJobs(workflowId).then(console.log, console.error)
+
+  // https://github.com/demmer/bluebird-retry
+  retry(waitForAllJobs.bind(null, jobNames, workflowId), {
+    timeout: minutes(30), // max time for this job
+    interval: seconds(30), // poll intervals
+    max_interval: seconds(30),
+  }).then(() => {
+    console.log('all done')
+  }, (err) => {
+    console.error(err)
+    process.exit(1)
+  })
+
+  // getJobStatus(workflowId).then(console.log, console.error)
+}
+
+// execute main function if called from command line
+if (require.main === module) {
+  main()
+}
+
+module.exports = {
+  minutes,
+  waitForJobToPass,
+}
