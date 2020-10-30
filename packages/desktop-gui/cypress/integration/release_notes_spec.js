@@ -10,6 +10,7 @@ describe('Release Notes', () => {
 
     cy.fixture('user').then((theUser) => user = theUser)
     cy.fixture('release_notes').then((theReleaseNotes) => releaseNotes = theReleaseNotes)
+    cy.route2('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
 
     cy.visitIndex().then((win) => {
       ipc = win.App.ipc
@@ -58,8 +59,12 @@ describe('Release Notes', () => {
       cy.contains(releaseNotes.title)
     })
 
+    it('title handles emoji', () => {
+      cy.get('.release-notes h4').should('include.text', '😀')
+    })
+
     it('shows banner image', () => {
-      cy.get('.release-notes img').should('have.attr', 'src', 'https://placekitten.com/1000/200')
+      cy.get('.release-notes img').should('have.attr', 'src', releaseNotes.bannerImage)
       cy.get('.release-notes img').should('have.attr', 'width', '548')
     })
 
@@ -68,6 +73,13 @@ describe('Release Notes', () => {
       .shadow()
       .find('h1')
       .should('have.text', 'This is a great release')
+    })
+
+    it('content handles emoji', () => {
+      cy.get('.release-notes .contents')
+      .shadow()
+      .find('h2')
+      .should('include.text', '😀 4️⃣ 👽 👍 🌎')
     })
 
     it('opens links in content externally', () => {
@@ -97,6 +109,11 @@ describe('Release Notes', () => {
       .should('be.visible')
       .find('button')
       .should('have.text', releaseNotes.externalLinkText)
+    })
+
+    it('external link text handles emoji', () => {
+      cy.get('.release-notes .external-link')
+      .should('include.text', '👍')
     })
 
     it('opens external link externally', () => {
