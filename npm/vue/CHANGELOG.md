@@ -1,3 +1,10 @@
+# [@cypress/vue-v1.0.1-alpha.5](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.4...@cypress/vue-v1.0.1-alpha.5) (2020-10-29)
+
+
+### Bug Fixes
+
+* update bugs link in package.json ([#9015](https://github.com/cypress-io/cypress/issues/9015)) ([34186cb](https://github.com/cypress-io/cypress/commit/34186cb8b76c230a2506cabb0358d44c3205e0c4))
+
 # [@cypress/vue-v1.0.1-alpha.4](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.3...@cypress/vue-v1.0.1-alpha.4) (2020-10-14)
 
 
