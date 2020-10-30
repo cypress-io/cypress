@@ -189,7 +189,7 @@ describe('Specs List', function () {
         this.openProject.resolve(this.config)
       })
 
-      context.only('run all specs', function () {
+      context('run all specs', function () {
         const runAllIntegrationSpecsLabel = 'Run 5 integration specs'
 
         it('displays run all specs button', () => {
@@ -591,7 +591,7 @@ describe('Specs List', function () {
         })
       })
 
-      it('adds \'active\' class on click', () => {
+      it.only('adds \'active\' class on click', () => {
         cy.get('@firstSpec').parent()
         .should('not.have.class', 'active')
 
