@@ -500,12 +500,12 @@ describe('Specs List', function () {
           })
 
           // the button has its its label reflect the running specs
-          cy.contains('.all-tests', 'Running 1 integration spec')
+          cy.contains('.all-tests', 'Running integration tests')
           .should('have.class', 'active')
 
           // the button has its label unchanged while the specs are running
           cy.get('.filter').clear()
-          cy.contains('.all-tests', 'Running 1 integration spec')
+          cy.contains('.all-tests', 'Running integration tests')
           .should('have.class', 'active')
 
           // but once the project stops running tests, the button gets updated
