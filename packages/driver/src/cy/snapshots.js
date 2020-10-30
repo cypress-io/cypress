@@ -9,6 +9,7 @@ const HIGHLIGHT_ATTR = 'data-cypress-el'
 const create = ($$, state) => {
   const snapshotsCss = $SnapshotsCss.create($$, state)
   const snapshotsMap = new WeakMap()
+  const snapshotDocument = new Document()
 
   const getHtmlAttrs = function (htmlEl) {
     const tmpHtmlEl = document.createElement('html')
@@ -121,7 +122,9 @@ const create = ($$, state) => {
     const snapshot = {
       name: 'final state',
       htmlAttrs,
-      body: $body.detach(),
+      body: {
+        get: () => $body.detach(),
+      },
     }
 
     snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
@@ -149,10 +152,13 @@ const create = ($$, state) => {
 
       // cloneNode can actually trigger functions attached to custom elements
       // so we have to use importNode to clone the element
-      // to the outer doc and then reassign ownership to the original doc
       // https://github.com/cypress-io/cypress/issues/7187
       // https://github.com/cypress-io/cypress/issues/1068
-      const $body = $$(state('document').adoptNode(document.importNode($$('body')[0], true)))
+      // we import it to a transient document (snapshotDocument) so that there
+      // are no side effects from cloning it. see below for how we re-attach
+      // it to the AUT document
+      // https://github.com/cypress-io/cypress/issues/8679
+      const $body = $$(snapshotDocument.importNode($$('body')[0], true))
 
       // for the head and body, get an array of all CSS,
       // whether it's links or style tags
@@ -186,11 +192,25 @@ const create = ($$, state) => {
 
       // preserve attributes on the <html> tag
       const htmlAttrs = getHtmlAttrs($$('html')[0])
+      // the body we clone via importNode above is attached to a transient document
+      // so that there are no side effects from cloning it. we only attach it back
+      // to the AUT document at the last moment (when restoring the snapshot)
+      // https://github.com/cypress-io/cypress/issues/8679
+      let attachedBody
+      const body = {
+        get: () => {
+          if (!attachedBody) {
+            attachedBody = $$(state('document').adoptNode($body[0]))
+          }
+
+          return attachedBody
+        },
+      }
 
       const snapshot = {
         name,
         htmlAttrs,
-        body: $body,
+        body,
       }
 
       snapshotsMap.set(snapshot, { headStyleIds, bodyStyleIds })
