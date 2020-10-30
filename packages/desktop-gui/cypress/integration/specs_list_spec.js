@@ -11,7 +11,9 @@ describe('Specs List', function () {
       this.win = win
       this.ipc = win.App.ipc
 
-      this.numSpecs = this.specs.integration.length + this.specs.unit.length
+      expect(this.specs.integration.length, 'has integration tests').to.be.gt(0)
+      expect(this.specs.component.length, 'has component tests').to.be.gt(0)
+      this.numSpecs = this.specs.integration.length + this.specs.component.length
 
       cy.stub(this.ipc, 'getOptions').resolves({ projectRoot: '/foo/bar' })
       cy.stub(this.ipc, 'getCurrentUser').resolves(this.user)
@@ -235,8 +237,9 @@ describe('Specs List', function () {
 
       context('displays list of specs', function () {
         it('lists main folders of specs', function () {
+          cy.get('.folder.level-0').should('have.length', 2)
           cy.contains('.folder.level-0', 'integration')
-          cy.contains('.folder.level-0', 'unit')
+          cy.contains('.folder.level-0', 'component')
         })
 
         it('lists nested folders', () => {
@@ -670,6 +673,22 @@ describe('Specs List', function () {
       it('updates active spec', function () {
         cy.get('@firstSpec').parent().should('not.have.class', 'active')
         cy.get('@secondSpec').parent().should('have.class', 'active')
+      })
+    })
+
+    context('with component tests', function () {
+      beforeEach(function () {
+        this.ipc.getSpecs.yields(null, this.specs)
+        this.openProject.resolve(this.config)
+      })
+
+      it('shows separate run specs buttons', function () {
+        cy.get('.all-tests').should('have.length', 2)
+        cy.contains('.folder-name', 'integration tests')
+        .contains('.all-tests', 'Run 5 integration specs')
+
+        cy.contains('.folder-name', 'component tests')
+        .contains('.all-tests', 'Run 8 component specs')
       })
     })
   })

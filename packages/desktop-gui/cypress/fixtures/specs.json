@@ -26,7 +26,7 @@
       "relative": "cypress/integration/admin_users/admin.user/foo_list_spec.coffee"
     }
   ],
-  "unit": [
+  "component": [
     {
       "name": "admin_users/admin/users/bar_list_spec.coffee",
       "absolute": "/user/project/cypress/unit/admin_users/admin/users/bar_list_spec.coffee",
