@@ -148,7 +148,7 @@ const waitOnTests = async (names, packageInfo) => {
   console.log(`\nWaiting on the following CI jobs: ${jobs.join(', ')}`)
 
   return Promise.all(jobs.map((job) => {
-    waitForJobToPass(job)
+    return waitForJobToPass(job)
     .timeout(minutes(60))
     .then(() => {
       console.log(`${job} passed`)
