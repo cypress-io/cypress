@@ -174,7 +174,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger constructor', () => {
-      const constructor = cy.stub(cy.state('window'), 'shadowScreenshotConstructor')
+      const constructor = cy.stub(cy.state('window'), 'customElementConstructor')
 
       cy.createSnapshot()
 
@@ -183,7 +183,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger attributeChangedCallback', () => {
-      const attributeChanged = cy.stub(cy.state('window'), 'shadowScreenshotAttributeChanged')
+      const attributeChanged = cy.stub(cy.state('window'), 'customElementAttributeChanged')
 
       cy.createSnapshot()
 
