@@ -1,3 +1,5 @@
+import dayjs from 'dayjs'
+
 const utils = require('../../src/lib/utils')
 
 describe('durationFormatted', function () {
@@ -23,6 +25,15 @@ describe('durationFormatted', function () {
 
   it('formats hours with mins', function () {
     expect(utils.durationFormatted(33300000)).to.eq('9:15:00')
+  })
+})
+
+describe('getFormattedTimeFromNow', function () {
+  it('displays time a minute ago', () => {
+    const now = dayjs()
+    const dateInPast = now.subtract(1, 'minute').toISOString()
+
+    expect(utils.getFormattedTimeFromNow(dateInPast)).to.eq('a min ago')
   })
 })
 

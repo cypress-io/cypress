@@ -290,7 +290,11 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       // resolve with the outputPath so Cypress knows where to serve
       // the file from
-      latestBundle.resolve(outputPath)
+      // Seems to be a race condition where changing file before next tick
+      // does not cause build to rerun
+      Promise.delay(0).then(() => {
+        latestBundle.resolve(outputPath)
+      })
     }
 
     // this event is triggered when watching and a file is saved

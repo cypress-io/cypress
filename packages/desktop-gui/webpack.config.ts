@@ -6,7 +6,7 @@ import webpack from 'webpack'
 const config: webpack.Configuration = {
   ...getCommonConfig(),
   entry: {
-    app: [require.resolve('@babel/polyfill'), path.resolve(__dirname, 'src/main')],
+    app: path.resolve(__dirname, 'src/main'),
   },
   output: {
     path: path.resolve(__dirname, 'dist'),

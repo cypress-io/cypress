@@ -15,7 +15,7 @@
     "vue-property-decorator": "^8.4.2"
   },
   "devDependencies": {
-    "@cypress/vue": "file:../..",
+    "@cypress/vue": "file:../../dist",
     "@vue/cli-plugin-babel": "~4.4.0",
     "@vue/cli-plugin-typescript": "~4.4.0",
     "@vue/cli-service": "~4.4.0",

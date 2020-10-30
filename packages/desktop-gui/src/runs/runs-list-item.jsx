@@ -1,11 +1,20 @@
 import _ from 'lodash'
-import moment from 'moment'
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { BrowserIcon } from '@packages/ui-components'
-
 import TimerDisplay from '../duration-timer/TimerDisplay'
-import { osIcon, gravatarUrl, getStatusIcon, durationFormatted, browserNameFormatted, browserVersionFormatted, stripLeadingCyDirs, stripSharedDirsFromDir2 } from '../lib/utils'
+
+import {
+  browserNameFormatted,
+  browserVersionFormatted,
+  durationFormatted,
+  getFormattedTimeFromNow,
+  getStatusIcon,
+  gravatarUrl,
+  osIcon,
+  stripLeadingCyDirs,
+  stripSharedDirsFromDir2,
+} from '../lib/utils'
 
 const RunDuration = ({ run }) => {
   // Run was blocked due to exceeding limit
@@ -37,7 +46,7 @@ const RunDuration = ({ run }) => {
   // Run is still going
   if (run.createdAt) {
     return (
-      <TimerDisplay startTime={run.createdAt} />
+      <TimerDisplay startTime={run.createdAt}/>
     )
   }
 
@@ -66,7 +75,7 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div className='td-top-padding'>
             <div>
-              { run.commit && run.commit.branch ?
+              {run.commit && run.commit.branch ?
                 <span>
                   {run.commit.branch}
                   {this._displaySpec() ? ' / ' : null}
@@ -108,12 +117,12 @@ export default class RunsListItem extends Component {
         <div className='row-column-wrapper'>
           <div>
             <i className='far fa-clock'></i>{' '}
-            {moment(run.createdAt).fromNow() === '1 secs ago' ? '1 sec ago' : moment(run.createdAt).fromNow()}
+            {getFormattedTimeFromNow(run.createdAt)}
           </div>
         </div>
         <div className='row-column-wrapper'>
           <div className='td-padding'>
-            <RunDuration run={run} />
+            <RunDuration run={run}/>
           </div>
         </div>
         <div className='row-column-wrapper env-data'>
@@ -253,7 +262,7 @@ export default class RunsListItem extends Component {
   _browserIcon = () => {
     const browserName = _.get(this.props.run, 'instances[0].platform.browserName', '')
 
-    return browserName ? <BrowserIcon browserName={browserName} /> : null
+    return browserName ? <BrowserIcon browserName={browserName}/> : null
   }
 
   _browserDisplay = () => {

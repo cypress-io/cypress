@@ -20,6 +20,9 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# npm packages
+npm/**/cypress/screenshots
+
 # from example
 packages/example/app
 packages/example/build
@@ -31,6 +34,10 @@ packages/server/.projects
 packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
+
+# from npm/react
+/npm/react/bin/*
+/npm/react/cypress/videos
 
 # Building app binary
 scripts/support
@@ -54,6 +61,7 @@ cli/visual-snapshots
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
+.idea
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
@@ -312,4 +320,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
