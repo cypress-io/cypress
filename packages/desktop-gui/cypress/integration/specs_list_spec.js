@@ -714,6 +714,17 @@ describe('Specs List', function () {
         // the button does not get the class active, it stays with the file
         .and('not.have.class', 'active')
       })
+
+      it('filters all spec types using filter', function () {
+        cy.get('.filter').type('fo')
+        cy.contains('.all-tests', 'Run 1 integration spec')
+        cy.contains('.all-tests', 'Run 1 component spec')
+
+        cy.log('**clearing the search**')
+        cy.get('.filter').clear()
+        cy.contains('.all-tests', 'Run 5 integration specs')
+        cy.contains('.all-tests', 'Run 8 component specs')
+      })
     })
   })
 
