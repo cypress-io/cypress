@@ -73,6 +73,8 @@ describe('Release Notes', () => {
       .shadow()
       .find('h1')
       .should('have.text', 'This is a great release')
+
+      cy.percySnapshot()
     })
 
     it('content handles emoji', () => {
