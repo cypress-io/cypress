@@ -690,6 +690,30 @@ describe('Specs List', function () {
         cy.contains('.folder-name', 'component tests')
         .contains('.all-tests', 'Run 8 component specs')
       })
+
+      it('runs all component tests together', function () {
+        cy.contains('.all-tests', 'Run 8 component specs').click()
+        // all other "Run .." buttons should disappear
+        cy.get('.all-tests').should('have.length', 1)
+        // and the label changes
+        cy.contains('.folder-name', 'component tests')
+        .contains('.all-tests', 'Running component tests').should('be.visible')
+        .and('have.class', 'active')
+      })
+
+      it('runs single component spec', function () {
+        cy.contains('bar_list_spec.coffee').click()
+        .parent()
+        .should('have.class', 'active')
+
+        // all other "Run .." buttons should disappear
+        cy.get('.all-tests').should('have.length', 1)
+        // and the label changes
+        cy.contains('.folder-name', 'component tests')
+        .contains('.all-tests', 'Running 1 spec').should('be.visible')
+        // the button does not get the class active, it stays with the file
+        .and('not.have.class', 'active')
+      })
     })
   })
 
