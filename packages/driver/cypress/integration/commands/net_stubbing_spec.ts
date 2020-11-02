@@ -1804,6 +1804,13 @@ describe('network stubbing', { retries: 2 }, function () {
           $.post('/post-only', 'some body')
         }).wait('@foo').its('request.body').should('eq', 'changed')
       })
+
+      it('when static response body is provided', function () {
+        cy.route2('/post-only', { static: 'response' }).as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'some body')
+      })
     })
 
     // @see https://github.com/cypress-io/cypress/issues/8536
