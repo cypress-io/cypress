@@ -32,7 +32,7 @@
     "chalk": "^4.1.0",
     "check-more-types": "^2.24.0",
     "cli-table3": "~0.6.0",
-    "commander": "^4.1.1",
+    "commander": "^5.1.0",
     "common-tags": "^1.8.0",
     "debug": "^4.1.1",
     "eventemitter2": "^6.4.2",
