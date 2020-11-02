@@ -559,6 +559,11 @@ namespace CypressTestConfigOverridesTests {
     }
   }, () => { })
   it('test', {
+    retries: {
+      runMode: 3,
+    }
+  }, () => { })
+  it('test', {
     retries: { run: 3 } // $ExpectError
   }, () => { })
 
@@ -602,4 +607,16 @@ namespace CypressShadowTests {
   cy
   .get('.foo')
   .find('.bar', {includeShadowDom: true})
+}
+
+namespace CypressTaskTests {
+  cy.task<number>('foo') // $ExpectType Chainable<number>
+  cy.task<number>('foo').then((val) => {
+    val // $ExpectType number
+  })
+
+  cy.task('foo') // $ExpectType Chainable<unknown>
+  cy.task('foo').then((val) => {
+    val // $ExpectType unknown
+  })
 }

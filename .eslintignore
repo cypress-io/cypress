@@ -2,6 +2,7 @@
 !.*
 
 **/__snapshots__
+**/_test-output
 **/build
 **/cypress/fixtures
 **/dist

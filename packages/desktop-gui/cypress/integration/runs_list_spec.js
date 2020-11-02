@@ -1,5 +1,3 @@
-const moment = require('moment')
-
 describe('Runs List', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
@@ -72,7 +70,7 @@ describe('Runs List', function () {
 
   context('api server connection', function () {
     beforeEach(function () {
-      const timestamp = moment('2016-12-19T10:00:00').valueOf()
+      const timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
       cy.clock(timestamp)
       this.getCurrentUser.resolve(this.user)
@@ -100,11 +98,12 @@ describe('Runs List', function () {
       context('displays each run\'s data', function () {
         beforeEach(function () {
           cy.get('.runs-container li').first().as('firstRunRow')
-          cy.get('.runs-container li').eq(1).as('runRow')
+          cy.get('.runs-container li').eq(1).as('secondRunRow')
+          cy.get('.runs-container li').eq(3).as('fourthRunRow')
         })
 
         it('displays build num', function () {
-          cy.get('@runRow').contains(`#${this.runs[1].buildNumber}`)
+          cy.get('@secondRunRow').contains(`#${this.runs[1].buildNumber}`)
         })
 
         it('displays commit info', function () {
@@ -113,14 +112,14 @@ describe('Runs List', function () {
         })
 
         it('display no info msg & does not display avatar', () => {
-          cy.get('@runRow').within(function () {
+          cy.get('@secondRunRow').within(function () {
             cy.get('.user-avatar').should('not.exist')
             cy.contains('No commit info found')
           })
         })
 
         it('displays platform info', () => {
-          cy.get('@runRow').within(function () {
+          cy.get('@secondRunRow').within(function () {
             cy.contains(this.runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(this.runs[1].instances[0].platform.browserName)
             cy.get('.fa-apple')
@@ -138,24 +137,24 @@ describe('Runs List', function () {
         })
 
         it('displays totals', function () {
-          cy.get('@runRow').contains(this.runs[1].totalFailed)
-          cy.get('@runRow').contains(this.runs[1].totalPassed)
+          cy.get('@secondRunRow').contains(this.runs[1].totalFailed)
+          cy.get('@secondRunRow').contains(this.runs[1].totalPassed)
         })
 
         it('displays times', function () {
-          cy.get('@runRow').contains('a few secs ago')
-          cy.get('@runRow').contains('00:16')
+          cy.get('@secondRunRow').contains('a few secs ago')
+          cy.get('@secondRunRow').contains('00:16')
         })
 
         it('displays separate timers for incomplete runs', function () {
-          cy.get('@firstRunRow').contains('24:47')
-          cy.get('.runs-container li').eq(3).contains('45:47')
+          cy.get('@firstRunRow').contains('12:24:47')
+          cy.get('@fourthRunRow').contains('12:45:47')
           .then(() => {
             cy.tick(1000)
           })
 
-          cy.get('@firstRunRow').contains('24:48')
-          cy.get('.runs-container li').eq(3).contains('45:48')
+          cy.get('@firstRunRow').contains('12:24:48')
+          cy.get('@fourthRunRow').contains('12:45:48')
         })
 
         context('spec display', function () {

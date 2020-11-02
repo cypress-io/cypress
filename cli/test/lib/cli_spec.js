@@ -7,6 +7,7 @@ const logger = require(`${lib}/logger`)
 const info = require(`${lib}/exec/info`)
 const run = require(`${lib}/exec/run`)
 const open = require(`${lib}/exec/open`)
+const cache = require(`${lib}/tasks/cache`)
 const state = require(`${lib}/tasks/state`)
 const verify = require(`${lib}/tasks/verify`)
 const install = require(`${lib}/tasks/install`)
@@ -450,27 +451,29 @@ describe('cli', () => {
     })
   })
 
-  it('install calls install.start without forcing', () => {
-    sinon.stub(install, 'start').resolves()
-    this.exec('install')
-    expect(install.start).not.to.be.calledWith({ force: true })
-  })
+  context('cypress install', () => {
+    it('calls install.start without forcing', () => {
+      sinon.stub(install, 'start').resolves()
+      this.exec('install')
+      expect(install.start).not.to.be.calledWith({ force: true })
+    })
 
-  it('install calls install.start with force: true when passed', () => {
-    sinon.stub(install, 'start').resolves()
-    this.exec('install --force')
-    expect(install.start).to.be.calledWith({ force: true })
-  })
+    it('calls install.start with force: true when passed', () => {
+      sinon.stub(install, 'start').resolves()
+      this.exec('install --force')
+      expect(install.start).to.be.calledWith({ force: true })
+    })
 
-  it('install calls install.start + catches errors', (done) => {
-    const err = new Error('foo')
+    it('install calls install.start + catches errors', (done) => {
+      const err = new Error('foo')
 
-    sinon.stub(install, 'start').rejects(err)
-    this.exec('install')
+      sinon.stub(install, 'start').rejects(err)
+      this.exec('install')
 
-    util.logErrorExit1.callsFake((e) => {
-      expect(e).to.eq(err)
-      done()
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
 
@@ -506,6 +509,34 @@ describe('cli', () => {
     it('calls info start', () => {
       this.exec('info')
       expect(info.start).to.have.been.calledWith()
+    })
+  })
+
+  context('cypress cache list', () => {
+    it('prints explanation when no cache', (done) => {
+      const err = new Error()
+
+      err.code = 'ENOENT'
+
+      sinon.stub(cache, 'list').rejects(err)
+      this.exec('cache list')
+
+      process.exit.callsFake(() => {
+        snapshot('prints explanation when no cache', logger.print())
+        done()
+      })
+    })
+
+    it('catches rejection and exits', (done) => {
+      const err = new Error('cache list failed badly')
+
+      sinon.stub(cache, 'list').rejects(err)
+      this.exec('cache list')
+
+      util.logErrorExit1.callsFake((e) => {
+        expect(e).to.eq(err)
+        done()
+      })
     })
   })
 })

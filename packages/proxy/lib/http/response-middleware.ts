@@ -299,6 +299,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'set-cookie',
     'x-frame-options',
     'content-length',
+    'transfer-encoding',
     'content-security-policy',
     'content-security-policy-report-only',
     'connection',

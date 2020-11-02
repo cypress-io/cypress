@@ -20,6 +20,9 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# npm packages
+npm/**/cypress/screenshots
+
 # from example
 packages/example/app
 packages/example/build
@@ -58,6 +61,7 @@ cli/visual-snapshots
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
+.idea
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml

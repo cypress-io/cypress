@@ -8,6 +8,7 @@ import C from '../lib/constants'
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
 import authApi from '../auth/auth-api'
+import updateStore from '../update/update-store'
 import viewStore from '../lib/view-store'
 
 import Intro from './intro'
@@ -20,7 +21,8 @@ class App extends Component {
     appApi.listenForMenuClicks()
 
     ipc.getOptions().then((options = {}) => {
-      appStore.set(_.pick(options, 'cypressEnv', 'os', 'projectRoot', 'version', 'proxySource', 'proxyServer', 'proxyBypassList'))
+      updateStore.setVersion(options.version)
+      appStore.set(_.pick(options, 'cypressEnv', 'os', 'projectRoot', 'proxySource', 'proxyServer', 'proxyBypassList'))
       viewStore.showApp()
     })
 

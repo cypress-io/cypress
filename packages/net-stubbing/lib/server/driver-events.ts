@@ -12,7 +12,7 @@ import {
 } from '../types'
 import {
   getAllStringMatcherFields,
-  setBodyFromFixture,
+  setResponseFromFixture,
 } from './util'
 import { onRequestContinue } from './intercept-request'
 import { onResponseContinue } from './intercept-response'
@@ -25,7 +25,7 @@ async function _onRouteAdded (state: NetStubbingState, getFixture: GetFixtureFn,
   const { staticResponse } = options
 
   if (staticResponse) {
-    await setBodyFromFixture(getFixture, staticResponse)
+    await setResponseFromFixture(getFixture, staticResponse)
   }
 
   const route: BackendRoute = {
