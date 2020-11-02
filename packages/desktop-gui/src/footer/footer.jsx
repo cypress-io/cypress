@@ -5,7 +5,8 @@ import React from 'react'
 
 import ipc from '../lib/ipc'
 import appStore from '../lib/app-store'
-import { useUpdateChecker } from '../update/use-update-checker'
+import updateStore from '../update/update-store'
+import { getReleaseNotes, useUpdateChecker } from '../update/updates'
 
 import UpdateModal from '../update/update-modal'
 import UpdateNotice from '../update/update-notice'
@@ -32,20 +33,26 @@ const Footer = observer(() => {
   const showModal = (e) => {
     e.target.blur()
 
-    if (!appStore.updateAvailable) return
+    if (!updateStore.updateAvailable) return
 
+    updateStore.setState(updateStore.SHOW_INSTRUCTIONS)
+    state.showModal()
+  }
+
+  const showModalWithReleaseNotes = () => {
+    getReleaseNotes(updateStore.newVersion)
     state.showModal()
   }
 
   return (
-    <footer className={cs('footer', { 'update-available': appStore.updateAvailable })}>
-      <button className='version' onClick={showModal} disabled={!appStore.updateAvailable}>
+    <footer className={cs('footer', { 'update-available': updateStore.updateAvailable })}>
+      <button className='version' onClick={showModal} disabled={!updateStore.updateAvailable}>
         <i className='update-indicator fas fa-arrow-alt-circle-up' />
         Version {appStore.displayVersion}
       </button>
       <button className='open-changelog' onClick={openChangelog}>Changelog</button>
       <UpdateModal show={state.showingModal} onClose={state.hideModal} />
-      <UpdateNotice onOpenUpdatesModal={state.showModal} />
+      <UpdateNotice onOpenUpdatesModal={showModalWithReleaseNotes} />
     </footer>
   )
 })

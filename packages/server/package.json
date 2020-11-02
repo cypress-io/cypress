@@ -89,7 +89,6 @@
     "moment": "2.27.0",
     "morgan": "1.9.1",
     "node-machine-id": "1.1.12",
-    "node-webkit-updater": "cypress-io/node-webkit-updater#e74623726f381487f543e373e71515177a32daeb",
     "opn": "cypress-io/opn#2f4e9a216ca7bdb95dfae9d46d99ddf004b3cbb5",
     "ospath": "1.2.2",
     "p-queue": "6.1.0",

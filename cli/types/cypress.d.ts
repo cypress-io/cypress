@@ -5237,7 +5237,7 @@ declare namespace Cypress {
     snapshot(name?: string, options?: { at?: number, next: string }): Log
   }
 
-  interface LogConfig {
+  interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** Allows the name of the command to be overwritten */

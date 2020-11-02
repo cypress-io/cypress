@@ -8,7 +8,7 @@ const humanInterval = require('human-interval')
 const { agent } = require('@packages/network')
 const pkg = require('@packages/root')
 const machineId = require('./util/machine_id')
-const routes = require('./util/routes')
+const { apiRoutes, onRoutes } = require('./util/routes')
 
 const THIRTY_SECONDS = humanInterval('30 seconds')
 const SIXTY_SECONDS = humanInterval('60 seconds')
@@ -116,13 +116,13 @@ module.exports = {
   rp,
 
   ping () {
-    return rp.get(routes.ping())
+    return rp.get(apiRoutes.ping())
     .catch(tagError)
   },
 
   getMe (authToken) {
     return rp.get({
-      url: routes.me(),
+      url: apiRoutes.me(),
       json: true,
       auth: {
         bearer: authToken,
@@ -132,7 +132,7 @@ module.exports = {
 
   getAuthUrls () {
     return rp.get({
-      url: routes.auth(),
+      url: apiRoutes.auth(),
       json: true,
       cacheable: true,
       headers: {
@@ -144,7 +144,7 @@ module.exports = {
 
   getOrgs (authToken) {
     return rp.get({
-      url: routes.orgs(),
+      url: apiRoutes.orgs(),
       json: true,
       auth: {
         bearer: authToken,
@@ -155,7 +155,7 @@ module.exports = {
 
   getProjects (authToken) {
     return rp.get({
-      url: routes.projects(),
+      url: apiRoutes.projects(),
       json: true,
       auth: {
         bearer: authToken,
@@ -166,7 +166,7 @@ module.exports = {
 
   getProject (projectId, authToken) {
     return rp.get({
-      url: routes.project(projectId),
+      url: apiRoutes.project(projectId),
       json: true,
       auth: {
         bearer: authToken,
@@ -184,7 +184,7 @@ module.exports = {
     }
 
     return rp.get({
-      url: routes.projectRuns(projectId),
+      url: apiRoutes.projectRuns(projectId),
       json: true,
       timeout: options.timeout != null ? options.timeout : 10000,
       auth: {
@@ -215,7 +215,7 @@ module.exports = {
 
     return rp.post({
       body,
-      url: routes.runs(),
+      url: apiRoutes.runs(),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
@@ -238,7 +238,7 @@ module.exports = {
 
     return rp.post({
       body,
-      url: routes.instances(runId),
+      url: apiRoutes.instances(runId),
       json: true,
       timeout: timeout != null ? timeout : SIXTY_SECONDS,
       headers: {
@@ -251,7 +251,7 @@ module.exports = {
 
   updateInstanceStdout (options = {}) {
     return rp.put({
-      url: routes.instanceStdout(options.instanceId),
+      url: apiRoutes.instanceStdout(options.instanceId),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       body: {
@@ -264,7 +264,7 @@ module.exports = {
 
   updateInstance (options = {}) {
     return rp.put({
-      url: routes.instance(options.instanceId),
+      url: apiRoutes.instance(options.instanceId),
       json: true,
       timeout: options.timeout != null ? options.timeout : SIXTY_SECONDS,
       headers: {
@@ -288,7 +288,7 @@ module.exports = {
 
   createCrashReport (body, authToken, timeout = 3000) {
     return rp.post({
-      url: routes.exceptions(),
+      url: apiRoutes.exceptions(),
       json: true,
       body,
       auth: {
@@ -328,7 +328,7 @@ module.exports = {
     })
 
     return rp.post({
-      url: routes.projects(),
+      url: apiRoutes.projects(),
       json: true,
       auth: {
         bearer: authToken,
@@ -349,7 +349,7 @@ module.exports = {
 
   getProjectRecordKeys (projectId, authToken) {
     return rp.get({
-      url: routes.projectRecordKeys(projectId),
+      url: apiRoutes.projectRecordKeys(projectId),
       json: true,
       auth: {
         bearer: authToken,
@@ -360,7 +360,7 @@ module.exports = {
 
   requestAccess (projectId, authToken) {
     return rp.post({
-      url: routes.membershipRequests(projectId),
+      url: apiRoutes.membershipRequests(projectId),
       json: true,
       auth: {
         bearer: authToken,
@@ -373,7 +373,7 @@ module.exports = {
   _projectToken (method, projectId, authToken) {
     return rp({
       method,
-      url: routes.projectToken(projectId),
+      url: apiRoutes.projectToken(projectId),
       json: true,
       auth: {
         bearer: authToken,
@@ -392,6 +392,19 @@ module.exports = {
 
   updateProjectToken (projectId, authToken) {
     return this._projectToken('put', projectId, authToken)
+  },
+
+  getReleaseNotes (version) {
+    return rp.get({
+      url: onRoutes.releaseNotes(version),
+      json: true,
+    })
+    .catch((err) => {
+      // log and ignore by sending an empty response if there's an error
+      debug('error getting release notes for version %s: %s', version, err.stack || err.message || err)
+
+      return {}
+    })
   },
 
   retryWithBackoff (fn, options = {}) {
