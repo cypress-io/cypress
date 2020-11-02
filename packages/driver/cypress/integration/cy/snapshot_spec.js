@@ -59,7 +59,7 @@ describe('driver/src/cy/snapshots', () => {
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      expect(body.find('script')).not.to.exist
+      expect(body.get().find('script')).not.to.exist
     })
 
     it('does not clone css stylesheets', function () {
@@ -67,7 +67,7 @@ describe('driver/src/cy/snapshots', () => {
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      expect(body.find('link')).not.to.exist
+      expect(body.get().find('link')).not.to.exist
     })
 
     it('does not clone style tags', function () {
@@ -75,7 +75,7 @@ describe('driver/src/cy/snapshots', () => {
 
       const { body } = cy.createSnapshot(null, this.$el)
 
-      expect(body.find('style')).not.to.exist
+      expect(body.get().find('style')).not.to.exist
     })
 
     it('preserves classes on the <html> tag', function () {
@@ -108,6 +108,25 @@ describe('driver/src/cy/snapshots', () => {
       expect(this.$el.attr('data-cypress-el')).to.be.undefined
     })
 
+    // https://github.com/cypress-io/cypress/issues/8679
+    it('does not cause images to be requested multiple times', function () {
+      let timesRequested = 0
+
+      cy.route2('media/cypress.png', () => {
+        timesRequested++
+      })
+      .then(() => {
+        $('<img src="/fixtures/media/cypress.png">').appendTo(cy.$$('body'))
+      })
+      .then(() => {
+        cy.createSnapshot(null, this.$el)
+      })
+      .wait(500)
+      .then(() => {
+        expect(timesRequested).to.equal(1)
+      })
+    })
+
     context('iframes', () => {
       it('replaces with placeholders that have src in content', function () {
         $('<iframe src=\'generic.html\' />').appendTo(cy.$$('body'))
@@ -120,9 +139,9 @@ describe('driver/src/cy/snapshots', () => {
         // For now we parse the src attr and assert on base64 encoded content
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe').length).to.equal(1)
-        expect(body.find('iframe')[0].src).to.include(';base64')
-        expect(atob(body.find('iframe')[0].src.split(',')[1])).to.include('generic.html')
+        expect(body.get().find('iframe').length).to.equal(1)
+        expect(body.get().find('iframe')[0].src).to.include(';base64')
+        expect(atob(body.get().find('iframe')[0].src.split(',')[1])).to.include('generic.html')
       })
 
       it('placeholders have same id', function () {
@@ -130,7 +149,7 @@ describe('driver/src/cy/snapshots', () => {
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe')[0].id).to.equal('foo-bar')
+        expect(body.get().find('iframe')[0].id).to.equal('foo-bar')
       })
 
       it('placeholders have same classes', function () {
@@ -138,7 +157,7 @@ describe('driver/src/cy/snapshots', () => {
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe')[0].className).to.equal('foo bar')
+        expect(body.get().find('iframe')[0].className).to.equal('foo bar')
       })
 
       it('placeholders have inline styles', function () {
@@ -146,7 +165,7 @@ describe('driver/src/cy/snapshots', () => {
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe').css('margin')).to.equal('40px')
+        expect(body.get().find('iframe').css('margin')).to.equal('40px')
       })
 
       it('placeholders have width set to outer width', function () {
@@ -154,7 +173,7 @@ describe('driver/src/cy/snapshots', () => {
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe').css('width')).to.equal('90px')
+        expect(body.get().find('iframe').css('width')).to.equal('90px')
       })
 
       it('placeholders have height set to outer height', function () {
@@ -162,7 +181,7 @@ describe('driver/src/cy/snapshots', () => {
 
         const { body } = cy.createSnapshot(null, this.$el)
 
-        expect(body.find('iframe').css('height')).to.equal('70px')
+        expect(body.get().find('iframe').css('height')).to.equal('70px')
       })
     })
   })
@@ -174,7 +193,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger constructor', () => {
-      const constructor = cy.stub(cy.state('window'), 'shadowScreenshotConstructor')
+      const constructor = cy.stub(cy.state('window'), 'customElementConstructor')
 
       cy.createSnapshot()
 
@@ -183,7 +202,7 @@ describe('driver/src/cy/snapshots', () => {
 
     // https://github.com/cypress-io/cypress/issues/7187
     it('does not trigger attributeChangedCallback', () => {
-      const attributeChanged = cy.stub(cy.state('window'), 'shadowScreenshotAttributeChanged')
+      const attributeChanged = cy.stub(cy.state('window'), 'customElementAttributeChanged')
 
       cy.createSnapshot()
 
