@@ -2,16 +2,15 @@ import human from 'human-interval'
 import { deferred } from '../support/util'
 
 describe('Update Notice', () => {
-  let user
   let ipc
   let start
   let updaterCheck
 
   beforeEach(() => {
+    let user
+
     cy.viewport(800, 500)
     cy.fixture('user').then((theUser) => user = theUser)
-    cy.fixture('projects').as('projects')
-    cy.fixture('config').as('config')
 
     cy.visitIndex().then((win) => {
       ipc = win.App.ipc

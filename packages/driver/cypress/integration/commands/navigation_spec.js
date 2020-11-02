@@ -1726,6 +1726,11 @@ describe('src/cy/commands/navigation', () => {
         })
 
         cy.visit('https://google.com/foo')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/8506
+      it('accepts text/html; + parameter as content-type', () => {
+        cy.visit('http://localhost:3500/html-content-type-with-charset-param')
       });
 
       // https://github.com/cypress-io/cypress/issues/3101
@@ -1733,7 +1738,7 @@ describe('src/cy/commands/navigation', () => {
         contentType: 'application/json',
         pathName: 'json-content-type',
       }, {
-        contentType: 'text/html; charset=utf-8,text/html',
+        contentType: 'text/image',
         pathName: 'invalid-content-type',
       }]
       .forEach(({ contentType, pathName }) => {

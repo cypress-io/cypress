@@ -513,6 +513,20 @@ describe('cli', () => {
   })
 
   context('cypress cache list', () => {
+    it('prints explanation when no cache', (done) => {
+      const err = new Error()
+
+      err.code = 'ENOENT'
+
+      sinon.stub(cache, 'list').rejects(err)
+      this.exec('cache list')
+
+      process.exit.callsFake(() => {
+        snapshot('prints explanation when no cache', logger.print())
+        done()
+      })
+    })
+
     it('catches rejection and exits', (done) => {
       const err = new Error('cache list failed badly')
 
