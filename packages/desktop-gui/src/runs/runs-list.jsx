@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import { configFileFormatted } from '../lib/config-file-formatted'
@@ -341,7 +342,13 @@ class RunsList extends Component {
           </h5>
           <pre id="code-project-id-config" className='line-nums copy-to-clipboard'>
             <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
-              <i className='fas fa-clipboard'></i>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
             </a>
             <span>{'{'}</span>
             <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
@@ -358,7 +365,13 @@ class RunsList extends Component {
           </h5>
           <pre id="code-record-command" className="copy-to-clipboard">
             <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
-              <i className='fas fa-clipboard'></i>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
             </a>
             <code>{recordCommand}</code>
           </pre>

@@ -1,6 +1,7 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import authStore from '../auth/auth-store'
@@ -131,7 +132,13 @@ class RecordKey extends Component {
           <pre className="copy-to-clipboard">
             <code>{recordCommand}</code>
             <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
-              <i className='fas fa-clipboard'></i>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
             </a>
           </pre>
         </p>

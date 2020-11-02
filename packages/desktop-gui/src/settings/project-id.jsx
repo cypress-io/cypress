@@ -1,5 +1,6 @@
 import { observer } from 'mobx-react'
 import React from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import { configFileFormatted } from '../lib/config-file-formatted'
@@ -27,7 +28,13 @@ const ProjectId = observer(({ project }) => {
       </p>
       <pre className='line-nums copy-to-clipboard'>
         <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
-          <i className='fas fa-clipboard'></i>
+          <Tooltip
+            title='Copy to clipboard'
+            placement='top'
+            className='cy-tooltip'
+          >
+            <i className='fas fa-clipboard'></i>
+          </Tooltip>
         </a>
         <span>{'{'}</span>
         <span>{`  "projectId": "${project.id}"`}</span>

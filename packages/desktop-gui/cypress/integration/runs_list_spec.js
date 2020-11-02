@@ -866,14 +866,14 @@ describe('Runs List', function () {
 
       it('copies record key command to clipboard', () => {
         cy.get('#code-record-command').find('.action-copy').click()
-        .then(() => {
-          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key ${this.keys[0].id}`)
+        .then(function () {
+          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
         })
       })
 
       it('copies project id config to clipboard', () => {
         cy.get('#code-project-id-config').find('.action-copy').click()
-        .then(() => {
+        .then(function () {
           const expectedJsonConfig = {
             projectId: this.config.projectId,
           }
