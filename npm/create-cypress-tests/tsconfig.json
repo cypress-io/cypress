@@ -3,6 +3,7 @@
     "outDir": "./dist",
     "rootDir": ".",
     "esModuleInterop": true,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "moduleResolution": "node",
@@ -24,6 +25,7 @@
   ],
   "include": [
     "./src/**/*.ts",
+    "src/component-testing/babel/examples/*",
     "src/initial-template/*"
   ]
 }

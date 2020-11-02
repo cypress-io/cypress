@@ -1,5 +1,7 @@
 import chalk from 'chalk'
 import findUp from 'find-up'
+import * as babel from '@babel/core'
+
 import { Template } from '../Template'
 import { createFindPackageJsonIterator } from '../../../findPackageJson'
 
@@ -22,6 +24,16 @@ export const BabelTemplate: Template = {
       '  return config',
       '}',
     ].join('\n')
+  },
+  getPluginsCodeAst: () => {
+    return {
+      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/babel\')'),
+      ModuleExportsBody: babel.template([
+        '  preprocessor(on, config)',
+        '  // IMPORTANT to return the config object',
+        '  return config',
+      ].join('\n')),
+    }
   },
   test: (cwd) => {
     const babelConfig = findUp.sync(

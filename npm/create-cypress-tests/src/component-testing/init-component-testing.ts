@@ -6,6 +6,7 @@ import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
 import { installAdapter } from './installAdapter'
+import { autoInjectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
 
 function printCypressJsonHelp (
   cypressJsonPath: string,
@@ -31,7 +32,7 @@ function printCypressJsonHelp (
   console.log(`\n${highlightedCode}\n`)
 }
 
-function printSupportHelper (supportFilePath: string, framework: string) {
+function injectAndShowSupportConfig (supportFilePath: string, framework: string) {
   const stepNumber = chalk.bold('2.')
   const importCode = `import \'@cypress/${framework}/support\'`
   const requireCode = `require(\'@cypress/${framework}/support\')`
@@ -60,15 +61,30 @@ function printSupportHelper (supportFilePath: string, framework: string) {
   }
 }
 
-function printPluginHelper (pluginCode: string, pluginsFilePath: string) {
-  const highlightedPluginCode = highlight(pluginCode, { language: 'js' })
-  const relativePluginsFilePath = path.relative(process.cwd(), pluginsFilePath)
+async function injectAndShowPluginConfig<T> (template: Template<T>, pluginsFilePath: string, emptyProject: boolean) {
+  const ast = template.getPluginsCodeAst?.()
 
-  const stepTitle = fs.existsSync(pluginsFilePath)
-    ? `And this to the ${chalk.green(relativePluginsFilePath)}`
-    : `And this to your plugins file (https://docs.cypress.io/guides/tooling/plugins-guide.html)`
+  if (!ast) {
+    return
+  }
 
-  console.log(`${chalk.bold('3.')} ${stepTitle}:`)
+  const injected = await autoInjectPluginsCode(pluginsFilePath, ast)
+
+  if (injected && emptyProject) {
+    return
+  }
+
+  const pluginsCode = await getPluginsSourceExample(ast)
+  const highlightedPluginCode = highlight(pluginsCode, { language: 'js' })
+  const relativePluginsFilePath = fs.existsSync(pluginsFilePath)
+    ? path.relative(process.cwd(), pluginsFilePath)
+    : 'plugins file (https://docs.cypress.io/guides/tooling/plugins-guide.html)`'
+
+  const stepTitle = injected
+    ? `✅ Injected into ${chalk.green(relativePluginsFilePath)}`
+    : `❌ ${chalk.red(`We were not able to modify your ${relativePluginsFilePath}`)}. Add this manually:`
+
+  console.log(stepTitle)
   console.log(`\n${highlightedPluginCode}\n`)
 }
 
@@ -142,13 +158,9 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   console.log(`Here are instructions of how to get started with component testing for ${chalk.cyan(chosenTemplateName)}:`)
 
   printCypressJsonHelp(cypressConfigPath, componentFolder)
-  printSupportHelper(supportFilePath, framework)
-  printPluginHelper(
-    chosenTemplate.getPluginsCode(templatePayload, {
-      cypressProjectRoot,
-    }),
-    pluginsFilePath,
-  )
+  injectAndShowSupportConfig(supportFilePath, framework)
+
+  await injectAndShowPluginConfig(chosenTemplate, pluginsFilePath, false)
 
   if (chosenTemplate.printHelper) {
     chosenTemplate.printHelper()
