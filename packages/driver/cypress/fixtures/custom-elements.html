@@ -4,23 +4,23 @@
     <title>Custom Elements</title>
   </head>
   <body>
-    <cy-snapshot-element id="snapshot-element"></cy-snapshot-element>
+    <cy-custom-element></cy-custom-element>
 
     <script type="text/javascript">
       // define empty functions to stub in tests
-      window.shadowScreenshotConstructor = function () {}
-      window.shadowScreenshotAttributeChanged = function () {}
+      window.customElementConstructor = function () {}
+      window.customElementAttributeChanged = function () {}
 
       if (window.customElements) {
-        window.customElements.define('cy-snapshot-element', class extends HTMLElement {
+        window.customElements.define('cy-custom-element', class extends HTMLElement {
           constructor () {
             super()
 
-            window.shadowScreenshotConstructor()
+            window.customElementConstructor()
           }
 
           attributeChangedCallback () {
-            window.shadowScreenshotAttributeChanged()
+            window.customElementAttributeChanged()
           }
         })
       }
