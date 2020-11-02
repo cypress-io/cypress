@@ -134,6 +134,10 @@ module.exports = (Commands, Cypress, cy, state) => {
         aliasObj = { alias: str.slice(1) }
       }
 
+      if (!aliasObj) {
+        cy.aliasNotFoundFor(str, 'wait', log)
+      }
+
       // if this alias is for a route then poll
       // until we find the response xhr object
       // by its alias
