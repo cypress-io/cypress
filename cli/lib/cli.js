@@ -403,9 +403,21 @@ module.exports = {
       }
 
       if (command === 'list') {
-        cache.list(opts.size)
+        debug('cache command %o', {
+          command,
+          size: opts.size,
+        })
 
-        return
+        return cache.list(opts.size)
+        .catch({ code: 'ENOENT' }, () => {
+          logger.always('No cached binary versions were found.')
+          process.exit(0)
+        })
+        .catch((e) => {
+          debug('cache list command failed with "%s"', e.message)
+
+          util.logErrorExit1(e)
+        })
       }
 
       cache[command]()

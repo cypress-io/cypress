@@ -12,6 +12,7 @@ const machineId = require(`${root}lib/util/machine_id`)
 const Promise = require('bluebird')
 
 const API_BASEURL = 'http://localhost:1234'
+const ON_BASEURL = 'http://localhost:8080'
 const DASHBOARD_BASEURL = 'http://localhost:3000'
 const AUTH_URLS = {
   'dashboardAuthUrl': 'http://localhost:3000/test-runner.html',
@@ -1138,6 +1139,32 @@ describe('lib/api', () => {
         throw new Error('should have thrown here')
       }).catch((err) => {
         expect(err.isApiError).to.be.true
+      })
+    })
+  })
+
+  context('.getReleaseNotes', () => {
+    it('GET /release-notes/:version + returns result', () => {
+      const releaseNotes = { title: 'New in 1.2.3!' }
+
+      nock(ON_BASEURL)
+      .get('/release-notes/1.2.3')
+      .reply(200, releaseNotes)
+
+      return api.getReleaseNotes('1.2.3')
+      .then((ret) => {
+        expect(ret).to.deep.eq(releaseNotes)
+      })
+    })
+
+    it('ignores errors + returns empty object', () => {
+      nock(ON_BASEURL)
+      .get('/release-notes/1.2.3')
+      .reply(500, {})
+
+      return api.getReleaseNotes('1.2.3')
+      .then((result) => {
+        expect(result).to.deep.eq({})
       })
     })
   })

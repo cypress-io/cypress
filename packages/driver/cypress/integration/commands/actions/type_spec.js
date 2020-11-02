@@ -24,6 +24,8 @@ const expectTextEndsWith = (expected) => {
   }
 }
 
+const isChromium = Cypress.isBrowser({ family: 'chromium' })
+
 describe('src/cy/commands/actions/type - #type', () => {
   beforeEach(() => {
     cy.visit('/fixtures/dom.html')
@@ -643,6 +645,7 @@ describe('src/cy/commands/actions/type - #type', () => {
           view: cy.state('window'),
           which: 65, // deprecated but fired by chrome
         })
+        .not.have.property('inputType')
 
         done()
       })
@@ -1806,6 +1809,219 @@ describe('src/cy/commands/actions/type - #type', () => {
           const iframeText = $iframe[0].contentDocument.body.innerText
 
           expect(iframeText).to.include('foo bar baz\nabc')
+        })
+      })
+    })
+
+    // https://github.com/cypress-io/cypress/issues/7088
+    describe('beforeInput event', () => {
+      it('sends beforeinput in text input', () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(' ')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq('f')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call3)
+        }
+        const call3 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('insertLineBreak')
+          stub.callsFake(call4)
+        }
+        const call4 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentBackward')
+          stub.callsFake(call5)
+        }
+        const call5 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentForward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('input:first')
+        .then(($el) => {
+          $el.val('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        .type(' f\n{backspace}')
+        .type('{moveToStart}{del}')
+        .then(($el) => {
+          if (isChromium) {
+            expect(stub).callCount(5)
+            expect($el[0].value).eq('oo bar baz ')
+          } else {
+            expect(stub, 'should NOT send beforeinput unless in chromium based browser').not.called
+          }
+        })
+      })
+
+      it('sends beforeinput in textarea', () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(' ')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq('f')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call3)
+        }
+        const call3 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('insertLineBreak')
+          stub.callsFake(call4)
+        }
+        const call4 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentBackward')
+          stub.callsFake(call5)
+        }
+        const call5 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentForward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('textarea:first')
+        .then(($el) => {
+          $el.val('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        .type(' f\n{backspace}')
+        .type('{moveToStart}{del}')
+        .then(($el) => {
+          if (isChromium) {
+            expect(stub).callCount(5)
+            expect($el[0].value).eq('oo bar baz f')
+          } else {
+            expect(stub, 'should NOT send beforeinput unless in chromium based browser').not.called
+          }
+        })
+      })
+
+      it('sends beforeinput in [contenteditable]', () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(' ')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq('f')
+          expect(e.inputType).eq('insertText')
+          stub.callsFake(call3)
+        }
+        const call3 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('insertParagraph')
+          stub.callsFake(call4)
+        }
+        const call4 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentBackward')
+          stub.callsFake(call5)
+        }
+        const call5 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteContentForward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('#input-types [contenteditable]')
+        .then(($el) => {
+          $el.text('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        .type(' f\n{backspace}')
+        .type('{moveToStart}{del}')
+        .then(($el) => {
+          if (isChromium) {
+            expect(stub).callCount(5)
+            expect($el[0].textContent).eq('oo bar baz f')
+          } else {
+            expect(stub, 'should NOT send beforeinput unless in chromium based browser').not.called
+          }
+        })
+      })
+
+      it('beforeinput special inputTypes', () => {
+        const call1 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteWordForward')
+          stub.callsFake(call2)
+        }
+        const call2 = (e) => {
+          expect(e.code).not.exist
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteHardLineForward')
+          stub.callsFake(call3)
+        }
+        const call3 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteWordBackward')
+          stub.callsFake(call4)
+        }
+        const call4 = (e) => {
+          expect(e.data).eq(null)
+          expect(e.inputType).eq('deleteHardLineBackward')
+        }
+
+        const stub = cy.stub()
+        .callsFake(call1)
+
+        cy.get('#input-types [contenteditable]')
+        .then(($el) => {
+          $el.text('foo bar baz')
+          $el[0].addEventListener('beforeinput', stub)
+        })
+        .type('{ctrl}{del}')
+        .type('{ctrl}{shift}{del}')
+        .type('{ctrl}{backspace}')
+        .type('{ctrl}{shift}{backspace}')
+        .then(($el) => {
+          if (isChromium) {
+            expect(stub).callCount(4)
+          } else {
+            expect(stub, 'should NOT send beforeinput unless in chromium based browser').not.called
+          }
+        })
+      })
+
+      it('can cancel beforeinput', () => {
+        let callCount = 0
+
+        cy.get('input:first')
+        .then(($el) => {
+          $el.val('foo bar baz')
+          $el[0].addEventListener('beforeinput', (e) => {
+            callCount++
+            e.preventDefault()
+          })
+        })
+        .type('foo')
+        .then(($el) => {
+          if (isChromium) {
+            expect(callCount).eq(3)
+            expect($el[0].value).eq('foo bar baz')
+          } else {
+            expect(callCount, 'should NOT send beforeinput unless in chromium based browser').eq(0)
+          }
         })
       })
     })
@@ -3013,18 +3229,20 @@ describe('src/cy/commands/actions/type - #type', () => {
           // eslint-disable-next-line
             console.table(table.data, table.columns)
 
+          const beforeInput = isChromium ? 'beforeinput, ' : ''
+
           expect(table.name).to.eq('Keyboard Events')
           const expectedTable = {
             1: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keydown', 'Active Modifiers': 'meta', 'Prevented Default': null, 'Target Element': $input[0] },
             2: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keypress, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            3: { 'Details': '{ code: KeyF, which: 70 }', Typed: 'f', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            4: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            5: { 'Details': '{ code: KeyO, which: 79 }', Typed: 'o', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            6: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, ${beforeInput}keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            7: { 'Details': '{ code: KeyB, which: 66 }', Typed: 'b', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
             8: { 'Details': '{ code: ArrowLeft, which: 37 }', Typed: '{leftarrow}', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': 'keydown, input, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
-            10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': 'keydown, keypress, keyup', 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            9: { 'Details': '{ code: Delete, which: 46 }', Typed: '{del}', 'Events Fired': `keydown, ${beforeInput}input, keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
+            10: { 'Details': '{ code: Enter, which: 13 }', Typed: '{enter}', 'Events Fired': `keydown, keypress, ${beforeInput}keyup`, 'Active Modifiers': 'alt, meta', 'Prevented Default': null, 'Target Element': $input[0] },
             11: { 'Details': '{ code: MetaLeft, which: 91 }', Typed: '{cmd}', 'Events Fired': 'keyup', 'Active Modifiers': 'alt', 'Prevented Default': null, 'Target Element': $input[0] },
             12: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{option}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
           }
@@ -3040,8 +3258,10 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.get(':text:first').type('f').then(function ($el) {
           const table = this.lastLog.invoke('consoleProps').table[2]()
 
+          const beforeInput = isChromium ? 'beforeinput, ' : ''
+
           expect(table.data).to.deep.eq({
-            1: { Typed: 'f', 'Events Fired': 'keydown, keypress, textInput, input, keyup', 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
+            1: { Typed: 'f', 'Events Fired': `keydown, keypress, ${beforeInput}textInput, input, keyup`, 'Active Modifiers': null, Details: '{ code: KeyF, which: 70 }', 'Prevented Default': null, 'Target Element': $el[0] },
           })
         })
       })

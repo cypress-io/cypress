@@ -1,6 +1,5 @@
-require('../spec_helper')
-
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+require('../spec_helper')
 
 const ws = require('ws')
 const httpsProxyAgent = require('https-proxy-agent')
@@ -57,18 +56,6 @@ describe('Web Sockets', () => {
   })
 
   context('proxying external websocket requests', () => {
-    it('ends the socket connection without remoteHost', function (done) {
-      this.server._onDomainSet()
-
-      const client = new ws(`ws://localhost:${cyPort}`)
-
-      return client.on('error', (err) => {
-        expect(err.code).to.eq('ECONNRESET')
-
-        return done()
-      })
-    })
-
     it('sends back ECONNRESET when error upgrading', function (done) {
       const agent = new httpsProxyAgent(`http://localhost:${cyPort}`)
 
@@ -87,7 +74,8 @@ describe('Web Sockets', () => {
     })
 
     it('proxies https messages', function (done) {
-      this.server._onDomainSet(`https://localhost:${wssPort}`)
+      const agent = new httpsProxyAgent(`http://localhost:${cyPort}`, {
+      })
 
       this.wss.on('connection', (c) => {
         return c.on('message', (msg) => {
@@ -95,7 +83,10 @@ describe('Web Sockets', () => {
         })
       })
 
-      const client = new ws(`ws://localhost:${cyPort}`)
+      const client = new ws(`wss://localhost:${wssPort}`, {
+        rejectUnauthorized: false,
+        agent,
+      })
 
       client.on('message', (data) => {
         expect(data).to.eq('response:foo')
