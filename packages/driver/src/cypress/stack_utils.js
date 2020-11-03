@@ -199,6 +199,10 @@ const parseLine = (line) => {
 }
 
 const stripCustomProtocol = (filePath) => {
+  if (!filePath) {
+    return
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 
@@ -216,6 +220,15 @@ const getSourceDetailsForLine = (projectRoot, line) => {
 
   const sourceDetails = getSourceDetails(generatedDetails)
   const originalFile = sourceDetails.file
+
+  if (!originalFile) {
+    // this is an edge case: could not parse the stack trace
+    // let's not warn about it, but at least allow the user
+    // to see the original error by being defensive about it
+    /* eslint-disable-next-line no-console */
+    console.warn('Could not get the original source file from line "%s"', line)
+  }
+
   const relativeFile = stripCustomProtocol(originalFile)
 
   return {
@@ -223,7 +236,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
     fileUrl: generatedDetails.file,
     originalFile,
     relativeFile,
-    absoluteFile: path.join(projectRoot, relativeFile),
+    absoluteFile: relativeFile ? path.join(projectRoot, relativeFile) : undefined,
     line: sourceDetails.line,
     // adding 1 to column makes more sense for code frame and opening in editor
     column: sourceDetails.column + 1,
