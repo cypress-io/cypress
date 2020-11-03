@@ -595,7 +595,7 @@ describe('Settings', () => {
         })
 
         it('displays empty message', () => {
-          cy.get('.settings-record-key .empty-well').should(
+          cy.get('.settings-record-key .empty-card').should(
             'contain',
             'This project has no record keys',
           )
@@ -622,7 +622,7 @@ describe('Settings', () => {
         })
 
         it('shows message that user must be logged in to view record keys', () => {
-          cy.get('.empty-well').should('contain', 'must be logged in')
+          cy.get('.empty-card').should('contain', 'must be logged in')
           cy.percySnapshot()
         })
 

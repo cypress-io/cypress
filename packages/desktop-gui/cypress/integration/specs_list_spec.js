@@ -480,7 +480,7 @@ describe('Specs List', function () {
           cy.get('.filter').clear().type('foobarbaz')
           cy.get('.specs-list').should('not.exist')
 
-          cy.get('.empty-well').should('contain', 'No specs match your search: "foobarbaz"')
+          cy.get('.empty-card').should('contain', 'No specs match your search: "foobarbaz"')
         })
 
         it('removes run all tests buttons if no results', function () {
