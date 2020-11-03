@@ -53,6 +53,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     id: requestId,
     request: req,
     state: 'Received',
+    requestWaited: false,
+    responseWaited: false,
   }
 
   const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
@@ -111,7 +113,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     destroy () {
       userReq.reply({
         forceNetworkError: true,
-      })
+      }) // TODO: this misnomer is a holdover from XHR, should be numRequests
     },
   }
 
@@ -200,6 +202,15 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     resolved = true
   })
   .then(() => {
+    if (userReq.alias) {
+      Cypress.state('aliasedRequests').push({
+        alias: userReq.alias,
+        request: request as Request,
+      })
+
+      delete userReq.alias
+    }
+
     if (!replyCalled) {
       // handler function resolved without resolving request, pass on
       continueFrame.tryNextRoute = true
