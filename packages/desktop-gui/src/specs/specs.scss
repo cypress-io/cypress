@@ -161,8 +161,14 @@ $max-nesting-level: 14;
         flex-direction: row;
 
         i {
-          font-size: 8px;
-          margin-right: 0px;
+          font-size: 14px;
+          margin-right: 0;
+        }
+
+        .all-tests {
+          i {
+            font-size: 8px;
+          }
         }
 
         span {
