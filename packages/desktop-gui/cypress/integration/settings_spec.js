@@ -35,6 +35,7 @@ describe('Settings', () => {
       cy.stub(this.ipc, 'onConfigChanged')
       cy.stub(this.ipc, 'onFocusTests')
       cy.stub(this.ipc, 'externalOpen')
+      cy.stub(this.ipc, 'setClipboardText')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -375,6 +376,23 @@ describe('Settings', () => {
     it('displays project id section', function () {
       cy.contains(this.config.projectId)
     })
+
+    it('shows tooltip on hover of copy to clipboard', () => {
+      cy.get('.action-copy').trigger('mouseover')
+      cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+    })
+
+    it('copies project id config to clipboard', function () {
+      cy.get('.action-copy').click()
+      .then(() => {
+        const expectedJsonConfig = {
+          projectId: this.config.projectId,
+        }
+        const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+
+        expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
+      })
+    })
   })
 
   describe('record key panel', () => {
@@ -415,6 +433,18 @@ describe('Settings', () => {
           cy.get('.loading-record-keys').should('not.exist')
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+        })
+
+        it('shows tooltip on hover of copy to clipboard', () => {
+          cy.get('.settings-record-key').find('.action-copy').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        })
+
+        it('copies record key command to clipboard', function () {
+          cy.get('.settings-record-key').find('.action-copy').click()
+          .then(() => {
+            expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key ${this.keys[0].id}`)
+          })
         })
 
         it('opens admin project settings when record key link is clicked', () => {

@@ -1,4 +1,4 @@
-describe('network stubbing', function () {
+describe('network stubbing', { retries: 2 }, function () {
   const { $, _, sinon, state, Promise } = Cypress
 
   beforeEach(function () {
@@ -118,11 +118,11 @@ describe('network stubbing', function () {
             },
           },
           headers: {
-            'Accept-Language': {
+            'accept-language': {
               type: 'regex',
               value: '/hylian/i',
             },
-            'Content-Encoding': {
+            'content-encoding': {
               type: 'glob',
               value: options.headers['Content-Encoding'],
             },
@@ -310,6 +310,7 @@ describe('network stubbing', function () {
 
         // @ts-ignore: should fail
         cy.route2({
+          // @ts-ignore
           url: {},
         })
       })
@@ -344,6 +345,41 @@ describe('network stubbing', function () {
 
         // @ts-ignore - should fail
         cy.route2()
+      })
+
+      context('with invalid RouteMatcher', function () {
+        it('requires unique header names', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`FOO` was specified more than once in `headers`. Header fields can only be matched once (HTTP header field names are case-insensitive).')
+
+            done()
+          })
+
+          cy.route2({
+            headers: {
+              foo: 'bar',
+              FOO: 'bar',
+            },
+          })
+        })
+
+        it('requires StringMatcher header values', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`headers.wrong` must be a string or a regular expression.')
+
+            done()
+          })
+
+          // @ts-ignore this is invalid on purpose
+          cy.route2({
+            headers: {
+              good: 'string',
+              fine: /regexp/,
+              // @ts-ignore
+              wrong: 3,
+            },
+          })
+        })
       })
 
       context('with invalid handler', function () {
@@ -860,6 +896,25 @@ describe('network stubbing', function () {
         .wait('@third')
         .wait('@final')
       })
+
+      // @see https://github.com/cypress-io/cypress/issues/8921
+      it('with case-insensitive header matching', function () {
+        cy.route2({
+          headers: {
+            'X-some-Thing': 'foo',
+          },
+        })
+        .as('foo')
+        .then(() => {
+          $.get({
+            url: '/foo',
+            headers: {
+              'X-SOME-THING': 'foo',
+            },
+          })
+        })
+        .wait('@foo')
+      })
     })
 
     context('with StaticResponse shorthand', function () {
@@ -1048,7 +1103,6 @@ describe('network stubbing', function () {
 
       it('can timeout in request handler', {
         defaultCommandTimeout: 50,
-        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
@@ -1553,7 +1607,6 @@ describe('network stubbing', function () {
 
       it('can timeout in req.reply handler', {
         defaultCommandTimeout: 50,
-        retries: 1,
       }, function (done) {
         cy.on('fail', (err) => {
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)

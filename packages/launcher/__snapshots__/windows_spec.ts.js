@@ -114,7 +114,10 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "stable",
     "displayName": "Edge",
     "versionRegex": {},
-    "binary": "edge",
+    "binary": [
+      "edge",
+      "microsoft-edge"
+    ],
     "path": "C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe",
     "version": "11",
     "findAppParams": {
@@ -162,7 +165,10 @@ exports['windows browser detection detects browsers as expected 1'] = [
     "channel": "dev",
     "displayName": "Edge Dev",
     "versionRegex": {},
-    "binary": "edge-dev",
+    "binary": [
+      "edge-dev",
+      "microsoft-edge-dev"
+    ],
     "path": "C:/Program Files (x86)/Microsoft/Edge Dev/Application/msedge.exe",
     "version": "13",
     "findAppParams": {
