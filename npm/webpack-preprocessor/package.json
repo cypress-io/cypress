@@ -83,7 +83,7 @@
   },
   "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-preprocessor#readme",
   "author": "Chris Breiding <chris@cypress.io>",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A %40cypress%2Fwebpack-preprocessor&template=bug-report.md",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fwebpack-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
     "cypress-plugin",

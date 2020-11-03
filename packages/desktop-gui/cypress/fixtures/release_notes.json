@@ -1,0 +1,8 @@
+{
+  "title": "Check Out This Release 😀",
+  "version": "1.2.3",
+  "bannerImage": "cypress-banner.jpg",
+  "content": "<h1>This is a great release</h1><h2>dolor sit amet 😀 4️⃣ 👽 👍 🌎</h2><h3>consectetur adipiscing elit</h3><h4>sed do eiusmod </h4><h5>tempor incididunt</h5><h6>ut labore et</h6><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \ntempor incididunt ut labore et dolore magna aliqua. </p><ul><li><p><b>bold</b> text</p></li><li><p><i>italic</i> text</p><ul><li><p><a href=\"https://example.com/link-one\">link</a><u></u></p></li><li><p><u>underlined</u> text</p></li></ul></li></ul><ul><li><p>some <code>code</code> here</p></li></ul><ol><li><p>one</p></li><li><p>two</p><ol><li><p>aaay</p></li><li><p>beee</p></li></ol></li><li><p>three</p></li></ol><blockquote><p>Here&#39;s a blockquote</p></blockquote><hr/><p>Duis aute irure dolor in <a href=\"https://example.com/link-two\">reprehenderit</a> in voluptate \nvelit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint \noccaecat cupidatat non proident, sunt in culpa qui officia deserunt \nmollit anim id est laborum.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod \ntempor incididunt ut labore et dolore magna aliqua. </p><p></p>",
+  "externalLink": "https://example.com",
+  "externalLinkText": "Check out this blog post for more information 👍"
+}

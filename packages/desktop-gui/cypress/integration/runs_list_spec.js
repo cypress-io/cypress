@@ -33,6 +33,7 @@ describe('Runs List', function () {
       cy.stub(this.ipc, 'setupDashboardProject')
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'beginAuth').resolves()
+      cy.stub(this.ipc, 'setClipboardText')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -860,6 +861,35 @@ describe('Runs List', function () {
         cy.contains('Cypress Dashboard').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
+        })
+      })
+
+      it('shows tooltip on hover of copy to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseout')
+      })
+
+      it('copies record key command to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').click()
+        .then(function () {
+          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+        })
+      })
+
+      it('copies project id config to clipboard', () => {
+        cy.get('#code-project-id-config').find('.action-copy').click()
+        .then(function () {
+          const expectedJsonConfig = {
+            projectId: this.config.projectId,
+          }
+          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+
+          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
         })
       })
     })

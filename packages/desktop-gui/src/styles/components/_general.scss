@@ -122,7 +122,7 @@ pre.line-nums {
   padding-left: 15px;
   counter-reset: line;
 
-  span {
+  & > span {
     display: block;
 
     &:before {
@@ -133,6 +133,21 @@ pre.line-nums {
       padding: 0 .5em 0 0;
       margin-right: .5em;
       color: #696c6d;
+    }
+  }
+}
+
+pre.copy-to-clipboard {
+  & > span, & > code {
+    padding-right: 15px;
+  }
+  
+  .action-copy {
+    float: right;
+    color: white;
+
+    &:hover {
+      color: #E2E8F0;
     }
   }
 }

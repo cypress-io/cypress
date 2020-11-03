@@ -461,6 +461,28 @@ describe('Server', () => {
         })
       })
 
+      // @see https://github.com/cypress-io/cypress/issues/8506
+      it('yields isHtml true for unconventional HTML content-types', async function () {
+        const scope = nock('http://example.com')
+        .get('/a').reply(200, 'notHtml')
+        .get('/b').reply(200, 'notHtml', { 'content-type': 'Text/Html' })
+        .get('/c').reply(200, 'notHtml', { 'content-type': 'text/html;charset=utf-8' })
+        // invalid, but let's be tolerant
+        .get('/d').reply(200, 'notHtml', { 'content-type': 'text/html;' })
+
+        const bad = await this.server._onResolveUrl('http://example.com/a', {}, this.automationRequest)
+
+        expect(bad.isHtml).to.be.false
+
+        for (const path of ['/b', '/c', '/d']) {
+          const details = await this.server._onResolveUrl(`http://example.com${path}`, {}, this.automationRequest)
+
+          expect(details.isHtml).to.be.true
+        }
+
+        scope.done()
+      })
+
       it('yields isHtml true for HTML-shaped responses', function () {
         nock('http://example.com')
         .get('/')

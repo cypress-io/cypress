@@ -38,6 +38,7 @@ const templateEngine = require('./template_engine')
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
+const textHtmlContentTypeRe = /^text\/html/i
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -71,7 +72,10 @@ const isResponseHtml = function (contentType, responseBuffer) {
   let body
 
   if (contentType) {
-    return contentType === 'text/html'
+    // want to match anything starting with 'text/html'
+    // including 'text/html;charset=utf-8' and 'Text/HTML'
+    // https://github.com/cypress-io/cypress/issues/8506
+    return textHtmlContentTypeRe.test(contentType)
   }
 
   body = _.invoke(responseBuffer, 'toString')
