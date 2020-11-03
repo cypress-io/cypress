@@ -377,6 +377,11 @@ describe('Settings', () => {
       cy.contains(this.config.projectId)
     })
 
+    it('shows tooltip on hover of copy to clipboard', () => {
+      cy.get('.action-copy').trigger('mouseover')
+      cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+    })
+
     it('copies project id config to clipboard', function () {
       cy.get('.action-copy').click()
       .then(() => {
@@ -428,6 +433,11 @@ describe('Settings', () => {
           cy.get('.loading-record-keys').should('not.exist')
           cy.get('.settings-record-key')
           .contains(`cypress run --record --key ${this.keys[0].id}`)
+        })
+
+        it('shows tooltip on hover of copy to clipboard', () => {
+          cy.get('.settings-record-key').find('.action-copy').trigger('mouseover')
+          cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
         })
 
         it('copies record key command to clipboard', function () {

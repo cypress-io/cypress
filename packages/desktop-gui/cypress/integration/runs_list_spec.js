@@ -864,6 +864,16 @@ describe('Runs List', function () {
         })
       })
 
+      it('shows tooltip on hover of copy to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseout')
+      })
+
       it('copies record key command to clipboard', () => {
         cy.get('#code-record-command').find('.action-copy').click()
         .then(function () {
