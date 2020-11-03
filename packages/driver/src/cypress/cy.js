@@ -176,11 +176,11 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
 
   const contentWindowListeners = function (contentWindow) {
     return $Listeners.bindTo(contentWindow, {
-      onError () {
+      onError (e) {
         // use a function callback here instead of direct
         // reference so our users can override this function
         // if need be
-        return cy.onUncaughtException.apply(cy, arguments)
+        return cy.onUncaughtException.call(cy, e.message, e.filename, e.lineno, e.colno, e.error)
       },
       onSubmit (e) {
         return Cypress.action('app:form:submitted', e)
