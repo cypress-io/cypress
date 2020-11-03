@@ -73,11 +73,9 @@ $max-nesting-level: 14;
   }
 
   .all-tests {
-    position: relative;
-    display: inline;
+    margin-left: auto;
     font-size: 13px;
     color: #637eb9;
-    padding: 5px 10px;
 
     &:hover, &:focus {
       color: #38589c;
@@ -163,8 +161,14 @@ $max-nesting-level: 14;
         flex-direction: row;
 
         i {
-          display: block;
-          margin-right: 5px;
+          font-size: 14px;
+          margin-right: 0;
+        }
+
+        .all-tests {
+          i {
+            font-size: 8px;
+          }
         }
 
         span {
