@@ -4,7 +4,7 @@ const fs = require('../fs')
 const util = require('../util')
 const { join } = require('path')
 const Table = require('cli-table3')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const chalk = require('chalk')
 const _ = require('lodash')
 const getFolderSize = require('./get-folder-size')
@@ -124,7 +124,7 @@ const getCachedVersions = (showSize) => {
         return binary
       }
 
-      const accessed = moment(lastAccessedTime).fromNow()
+      const accessed = dayjs(lastAccessedTime).fromNow()
 
       binary.accessed = accessed
 
