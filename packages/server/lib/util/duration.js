@@ -1,8 +1,8 @@
 const _ = require('lodash')
 const dayjs = require('dayjs')
-import relativeTime from 'dayjs/plugin/relativeTime'
-import updateLocale from 'dayjs/plugin/updateLocale'
-import duration from 'dayjs/plugin/duration'
+const duration = require('dayjs/plugin/duration')
+const relativeTime = require('dayjs/plugin/relativeTime')
+const updateLocale = require('dayjs/plugin/updateLocale')
 
 dayjs.extend(duration)
 dayjs.extend(relativeTime)

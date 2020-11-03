@@ -1,5 +1,5 @@
 const dayjs = require('dayjs')
-import duration from 'dayjs/plugin/duration'
+const duration = require('dayjs/plugin/duration')
 
 dayjs.extend(duration)
 
