@@ -226,7 +226,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
     // let's not warn about it, but at least allow the user
     // to see the original error by being defensive about it
     /* eslint-disable-next-line no-console */
-    console.warn('Could not get the original source file from line "%s"', line)
+    console.warn(`Could not get the original source file from line "${line}"`)
   }
 
   const relativeFile = stripCustomProtocol(originalFile)
