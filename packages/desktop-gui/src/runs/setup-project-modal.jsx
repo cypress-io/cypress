@@ -16,7 +16,7 @@ class SetupProject extends Component {
   static propTypes = {
     project: PropTypes.object,
     onSetup: PropTypes.func.isRequired,
-    dismissModal: PropTypes.func.isRequired,
+    onClose: PropTypes.func.isRequired,
   }
 
   constructor (...args) {
@@ -85,7 +85,7 @@ class SetupProject extends Component {
 
     return (
       <div className='setup-project-modal modal-body os-dialog'>
-        <button onClick={this.props.dismissModal} className='btn btn-link close'>x</button>
+        <button onClick={this.props.onClose} className='btn btn-link close'>x</button>
         <h4>Set up project</h4>
         <form
           onSubmit={this._submit}>

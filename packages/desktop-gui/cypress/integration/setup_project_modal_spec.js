@@ -512,7 +512,7 @@ describe('Connect to Dashboard', function () {
 
     it('closes login modal', () => {
       cy.get('.modal').contains('Log In to Dashboard')
-      cy.get('.close').click()
+      cy.get('.login').find('.close').click()
       cy.get('.btn').contains('Connect to Dashboard').click()
     })
 
