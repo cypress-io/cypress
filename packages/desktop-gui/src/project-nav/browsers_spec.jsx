@@ -59,7 +59,9 @@ describe('Browsers', () => {
     browserListOpened()
 
     cy.log('**closing**')
-    cy.get('.spacer').click()
+    // Click anywhere next to the dropdown to make sure it closes
+    cy.get('.spacer').click({ force: true })
+    browserListClosed()
   })
 
   it('picks the browser', () => {

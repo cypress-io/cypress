@@ -82,7 +82,7 @@ describe('Footer', () => {
     it('closes modal after clicking close', () => {
       cy.get('.version').click()
       cy.get('.update-modal .close').click()
-      cy.get('.update-modal').should('not.exist')
+      cy.get('.update-modal').should('not.be.visible')
     })
 
     it('blurs version button after clicking', () => {

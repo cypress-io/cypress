@@ -50,7 +50,7 @@ class OrgSelector extends Component {
     const selectedOption = _.find(options, { value: this.props.selectedOrgId })
 
     return (
-      <div className={cs({ hidden: !orgs.length })}>
+      <div className={cs({ 'd-none': !orgs.length })}>
         <Select
           className='organizations-select'
           classNamePrefix='organizations-select'

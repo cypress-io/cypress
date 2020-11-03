@@ -179,7 +179,7 @@ class SetupProject extends Component {
 
   _accessSelector () {
     return (
-      <div className={cs({ 'hidden': !this._hasOrgs() })}>
+      <div className={cs({ 'd-none': !this._hasOrgs() })}>
         <hr />
         <label htmlFor='projectName' className='control-label'>
           Who should see the runs and recordings?
