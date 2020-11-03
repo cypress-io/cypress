@@ -111,6 +111,11 @@ export namespace CyHttpMessages {
      * not follow redirects before yielding the response (the 3xx redirect is yielded)
      */
     followRedirect?: boolean
+    /**
+     * If set, `cy.wait` can be used to await the request/response cycle to complete for this
+     * request via `cy.wait('@alias')`.
+     */
+    alias?: string
   }
 
   export interface IncomingHttpRequest extends IncomingRequest {

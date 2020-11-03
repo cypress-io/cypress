@@ -1,6 +1,7 @@
 import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import authStore from '../auth/auth-store'
@@ -120,13 +121,26 @@ class RecordKey extends Component {
       )
     }
 
+    const recordCommand = `cypress run --record --key ${this.key.id}`
+
     return (
       <div>
         <p className='text-muted'>
           To record, run this command:
         </p>
         <p>
-          <pre><code>cypress run --record --key {this.key.id}</code></pre>
+          <pre className="copy-to-clipboard">
+            <code>{recordCommand}</code>
+            <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
+            </a>
+          </pre>
         </p>
         <p className='text-muted manage-btn'>
           <a href='#' onClick={openDashboardProjectSettings(this.props.project)}>

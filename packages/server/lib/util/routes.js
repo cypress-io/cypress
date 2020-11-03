@@ -2,26 +2,8 @@ const _ = require('lodash')
 const UrlParse = require('url-parse')
 const konfig = require('../konfig')
 
-const api_url = konfig('api_url')
-
-let routes = {
-  api: '',
-  auth: 'auth',
-  me: 'me',
-  ping: 'ping',
-  runs: 'runs',
-  instances: 'runs/:id/instances',
-  instance: 'instances/:id',
-  instanceStdout: 'instances/:id/stdout',
-  orgs: 'organizations',
-  projects: 'projects',
-  project: 'projects/:id',
-  projectToken: 'projects/:id/token',
-  projectRuns: 'projects/:id/runs',
-  projectRecordKeys: 'projects/:id/keys',
-  exceptions: 'exceptions',
-  membershipRequests: 'projects/:id/membership_requests',
-}
+const apiUrl = konfig('api_url')
+const onUrl = konfig('on_url')
 
 const parseArgs = function (url, args = []) {
   _.each(args, (value) => {
@@ -41,22 +23,50 @@ const parseArgs = function (url, args = []) {
   return url
 }
 
-routes = _.reduce(routes, (memo, value, key) => {
-  memo[key] = function (...args) {
-    let url = new UrlParse(api_url, true)
+const makeRoutes = (baseUrl, routes) => {
+  return _.reduce(routes, (memo, value, key) => {
+    memo[key] = function (...args) {
+      let url = new UrlParse(baseUrl, true)
 
-    if (value) {
-      url.set('pathname', value)
+      if (value) {
+        url.set('pathname', value)
+      }
+
+      if (args.length) {
+        url = parseArgs(url, args)
+      }
+
+      return url.toString()
     }
 
-    if (args.length) {
-      url = parseArgs(url, args)
-    }
+    return memo
+  }, {})
+}
 
-    return url.toString()
-  }
+const apiRoutes = makeRoutes(apiUrl, {
+  api: '',
+  auth: 'auth',
+  me: 'me',
+  ping: 'ping',
+  runs: 'runs',
+  instances: 'runs/:id/instances',
+  instance: 'instances/:id',
+  instanceStdout: 'instances/:id/stdout',
+  orgs: 'organizations',
+  projects: 'projects',
+  project: 'projects/:id',
+  projectToken: 'projects/:id/token',
+  projectRuns: 'projects/:id/runs',
+  projectRecordKeys: 'projects/:id/keys',
+  exceptions: 'exceptions',
+  membershipRequests: 'projects/:id/membership_requests',
+})
 
-  return memo
-}, {})
+const onRoutes = makeRoutes(onUrl, {
+  releaseNotes: 'release-notes/:id', // :id is the version (e.g. 1.2.3)
+})
 
-module.exports = routes
+module.exports = {
+  apiRoutes,
+  onRoutes,
+}
