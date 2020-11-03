@@ -5,10 +5,13 @@ const util = require('../util')
 const { join } = require('path')
 const Table = require('cli-table3')
 const dayjs = require('dayjs')
+const relativeTime = require('dayjs/plugin/relativeTime')
 const chalk = require('chalk')
 const _ = require('lodash')
 const getFolderSize = require('./get-folder-size')
 const Bluebird = require('bluebird')
+
+dayjs.extend(relativeTime)
 
 // output colors for the table
 const colors = {
