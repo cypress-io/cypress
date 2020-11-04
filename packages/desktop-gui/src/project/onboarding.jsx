@@ -33,6 +33,7 @@ class OnBoarding extends Component {
 
     return (
       <Modal
+        id="modal-onboarding"
         visible={project.onBoardingModalOpen}
         onClickBackdrop={closeModal}
       >

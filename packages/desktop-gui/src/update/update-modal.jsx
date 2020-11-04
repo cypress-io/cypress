@@ -21,6 +21,10 @@ const Contents = observer(({ onShowInstructions }) => {
 })
 
 const UpdateModal = observer(({ show, onClose }) => {
+  if (!show) {
+    return null
+  }
+
   const showInstructions = () => {
     updateStore.setState(updateStore.SHOW_INSTRUCTIONS)
   }
