@@ -254,7 +254,7 @@ class SpecsList extends Component {
       const isActive = specType === 'integration'
         ? specsStore.isChosen(allIntegrationSpecsSpec)
         : specsStore.isChosen(allComponentSpecsSpec)
-      const className = cs('btn-link all-tests', { active: isActive })
+      const className = cs('btn btn-link all-tests', { active: isActive })
 
       return (<button
         className={className}
