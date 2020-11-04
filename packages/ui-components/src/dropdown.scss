@@ -2,6 +2,10 @@
   display: inline-block;
   position: relative;
   vertical-align: middle;
+
+  .dropdown-toggle::after {
+    display: none;
+  }
 }
 
 .dropdown-chosen {

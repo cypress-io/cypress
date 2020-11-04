@@ -34,7 +34,7 @@ export default class Browsers extends Component {
     if (this.props.project.browserState === 'opened') {
       return (
         <li className='close-browser'>
-          <button className='btn btn-xs btn-danger' onClick={this._closeBrowser.bind(this)}>
+          <button className='btn btn-sm btn-danger' onClick={this._closeBrowser.bind(this)}>
             <i className='fas fa-fw fa-times'></i>
             Stop
           </button>

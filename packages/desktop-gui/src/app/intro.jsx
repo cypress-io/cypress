@@ -50,13 +50,13 @@ class Default extends Component {
 
     return (
       <div className='local-install-notice alert alert-info alert-dismissible'>
-        <p className='text-center'>
+        <div className='text-center'>
           <i className='fas fa-info-circle'></i>{' '}
           We recommend versioning Cypress per project and{' '}
           <a onClick={this._openHelp} className='helper-docs-link'>
             installing it via <span className='mono'>npm</span>
           </a>.
-        </p>
+        </div>
         <button className="close" onClick={this._removeGlobalIntro}><span>&times;</span></button>
       </div>
     )

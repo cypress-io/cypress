@@ -106,7 +106,7 @@ class LoginContent extends Component {
         <p>Logging in requires connecting to an external API server. We tried but failed to connect to the API server at <em>{this.state.apiUrl}</em></p>
         <p>
           <button
-            className='btn btn-default btn-sm'
+            className='btn btn-secondary btn-sm'
             onClick={this._pingApiServer}
           >
             <i className='fas fa-sync-alt'></i>{' '}

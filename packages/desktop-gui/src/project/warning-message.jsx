@@ -19,7 +19,7 @@ class WarningMessage extends Component {
           <MarkdownRenderer markdown={warningText}/>
           {warning.isRetryable &&
             <button
-              className='retry-button btn btn-default btn-sm'
+              className='retry-button btn btn-secondary btn-sm'
               disabled={warning.isRetrying}
               onClick={this.props.onRetry}
             >

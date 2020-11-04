@@ -104,7 +104,7 @@ class ErrorMessage extends Component {
             )}
           </span>
           <button
-            className='btn btn-default btn-sm'
+            className='btn btn-secondary btn-sm'
             onClick={() => {
               _copyErrorDetails(err)
             }}
@@ -113,7 +113,7 @@ class ErrorMessage extends Component {
             Copy to Clipboard
           </button>
           <button
-            className='btn btn-default btn-sm'
+            className='btn btn-secondary btn-sm'
             onClick={this.props.onTryAgain}
           >
             <i className='fas fa-sync-alt'></i>{' '}
