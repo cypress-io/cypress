@@ -10,6 +10,8 @@ import LiveReloadPlugin from 'webpack-livereload-plugin'
 import sassGlobImporter = require('node-sass-globbing')
 import HtmlWebpackPlugin = require('html-webpack-plugin')
 import MiniCSSExtractWebpackPlugin = require('mini-css-extract-plugin')
+import CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
+import TerserPlugin = require('terser-webpack-plugin')
 
 // Ensures node-sass/vendor has built node-sass binary.
 execa.sync('rebuild-node-sass', { cwd: path.join(require.resolve('node-sass'), '../../../', '.bin'), stdio: 'inherit' })
@@ -18,6 +20,7 @@ const env = process.env.NODE_ENV === 'production' ? 'production' : 'development'
 const args = process.argv.slice(2)
 const liveReloadEnabled = !(args.includes('--no-livereload') || process.env.NO_LIVERELOAD)
 const watchModeEnabled = args.includes('--watch') || args.includes('-w')
+const isProductionEnv = env === 'production'
 
 // opt out of livereload with arg --no-livereload
 // eslint-disable-next-line no-console
@@ -35,7 +38,7 @@ evalDevToolPlugin.evalDevToolPlugin = true
 
 const getCommonConfig = () => {
   const commonConfig: webpack.Configuration = {
-    mode: 'none',
+    mode: env,
     node: {
       fs: 'empty',
       child_process: 'empty',
@@ -170,6 +173,11 @@ const getCommonConfig = () => {
       mergeDuplicateChunks: true,
       flagIncludedChunks: true,
       removeEmptyChunks: true,
+      minimize: isProductionEnv,
+      minimizer: [
+        new TerserPlugin(),
+        new CssMinimizerPlugin(),
+      ],
     },
 
     plugins: [
