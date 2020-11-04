@@ -1339,6 +1339,18 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
     })
 
+    it('intercepts responses with no content', function () {
+      const url = '/status-204'
+
+      cy.route2(url)
+      .as('foo')
+      .then(() => fetch(url))
+      .wait('@foo')
+      .then((request) => {
+        expect(request.response.body).to.eq('')
+      })
+    })
+
     context('with StaticResponse', function () {
       it('res.send(body)', function () {
         cy.route2('/custom-headers', function (req) {

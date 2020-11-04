@@ -5,7 +5,7 @@ import {
   RequestState,
 } from './types'
 
-const RESPONSE_WAITED_STATES: RequestState[] = ['ResponseIntercepted', 'Complete']
+const RESPONSE_WAITED_STATES: RequestState[] = ['ResponseIntercepted', 'ResponseReceived', 'Complete']
 
 function getPredicateForSpecifier (specifier: string): Partial<Request> {
   if (specifier === 'request') {

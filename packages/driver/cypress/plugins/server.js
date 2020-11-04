@@ -129,6 +129,12 @@ const createApp = (port) => {
     return res.send(`<html><body>request headers:<br>${JSON.stringify(req.headers)}</body></html>`)
   })
 
+  app.get('/status-204', (req, res) => {
+    return res
+    .status(204)
+    .send('')
+  })
+
   app.get('/status-404', (req, res) => {
     return res
     .status(404)
