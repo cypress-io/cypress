@@ -230,6 +230,36 @@ describe('lib/cypress', () => {
     })
   })
 
+  context('invalid config', function () {
+    beforeEach(function () {
+      this.win = {
+        on: sinon.stub(),
+        webContents: {
+          on: sinon.stub(),
+        },
+      }
+
+      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon.stub(Windows, 'open').resolves(this.win)
+    })
+
+    it('shows warning if config is not valid', function () {
+      return cypress.start(['--config=test=false', '--cwd=/foo/bar'])
+      .then(() => {
+        expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
+        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
+      })
+    })
+
+    it('does not show warning if config is valid', function () {
+      return cypress.start(['--config=trashAssetsBeforeRuns=false'])
+      .then(() => {
+        expect(errors.warning).to.not.be.calledWith('INVALID_CONFIG_OPTION')
+      })
+    })
+  })
+
   context('--get-key', () => {
     it('writes out key and exits on success', function () {
       return Promise.all([
