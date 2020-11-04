@@ -50,6 +50,8 @@ describe('Projects List', function () {
       cy.get('.projects-list .loader').then(() => {
         expect(this.ipc.getProjects).to.be.called
       })
+
+      cy.percySnapshot()
     })
 
     describe('when loaded', function () {
@@ -59,6 +61,7 @@ describe('Projects List', function () {
 
       it('displays projects', function () {
         cy.get('.projects-list li').should('have.length', this.projects.length)
+        cy.percySnapshot()
       })
 
       it('displays project name and path', function () {
@@ -237,6 +240,7 @@ describe('Projects List', function () {
         cy.get('.alert').should('contain', 'Failed to get project statuses')
 
         cy.get('.projects-list li').should('have.length', this.projects.length)
+        cy.percySnapshot()
       })
 
       it('does not display api errors', function () {

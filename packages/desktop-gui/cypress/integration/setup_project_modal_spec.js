@@ -64,6 +64,7 @@ describe('Connect to Dashboard', function () {
 
       it('clicking link opens setup project window', () => {
         cy.get('.modal').should('be.visible')
+        cy.percySnapshot()
       })
 
       it('submit button is disabled', () => {
@@ -146,6 +147,8 @@ describe('Connect to Dashboard', function () {
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
           .should('have.length', this.orgs.length)
+
+          cy.percySnapshot()
         })
 
         it('selects personal org by default', function () {
@@ -170,6 +173,8 @@ describe('Connect to Dashboard', function () {
 
           cy.get('.privacy-radio').should('be.visible')
           .find('input').should('not.be.checked')
+
+          cy.percySnapshot()
         })
       })
 
@@ -219,6 +224,7 @@ describe('Connect to Dashboard', function () {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('.organizations-select').should('not.be.visible')
           cy.get('.privacy-radio').should('not.be.visible')
+          cy.percySnapshot()
         })
 
         it('opens dashboard organizations when \'create org\' is clicked', () => {
@@ -475,6 +481,7 @@ describe('Connect to Dashboard', function () {
         })
 
         cy.contains('"system": "down"')
+        cy.percySnapshot()
       })
     })
 
