@@ -103,7 +103,7 @@ describe('Specs List', function () {
     })
 
     it('displays modal', () => {
-      cy.contains('.modal', 'To help you get started').should('be.visible')
+      cy.contains('#modal-onboarding', 'To help you get started').should('be.visible')
       cy.percySnapshot()
     })
 
@@ -147,20 +147,20 @@ describe('Specs List', function () {
     it('can dismiss the modal', function () {
       cy.contains('OK, got it!').click()
 
-      cy.get('.modal').should('not.be.visible')
+      cy.get('#modal-onboarding').should('not.be.visible')
       .then(function () {
         expect(this.ipc.onboardingClosed).to.be.called
       })
     })
 
     it('triggers open:finder on click of example folder', function () {
-      cy.get('.modal').contains('examples').click().then(() => {
+      cy.get('#modal-onboarding').contains('examples').click().then(() => {
         expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationExamplePath)
       })
     })
 
     it('triggers open:finder on click of text folder', function () {
-      cy.get('.modal').contains('cypress/integration').click().then(() => {
+      cy.get('#modal-onboarding').contains('cypress/integration').click().then(() => {
         expect(this.ipc.openFinder).to.be.calledWith(this.config.integrationFolder)
       })
     })
