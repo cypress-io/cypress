@@ -14845,6 +14845,14 @@ file-loader@4.3.0, file-loader@~4.3.0:
     loader-utils "^1.2.3"
     schema-utils "^2.5.0"
 
+file-loader@5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/file-loader/-/file-loader-5.1.0.tgz#cb56c070efc0e40666424309bd0d9e45ac6f2bb8"
+  integrity sha512-u/VkLGskw3Ue59nyOwUwXI/6nuBCo7KBkniB/l7ICwr/7cPNGsL1WCXUp3GB0qgOOKU1TiP49bv4DZF/LJqprg==
+  dependencies:
+    loader-utils "^1.4.0"
+    schema-utils "^2.5.0"
+
 file-type@^9.0.0:
   version "9.0.0"
   resolved "https://registry.yarnpkg.com/file-type/-/file-type-9.0.0.tgz#a68d5ad07f486414dfb2c8866f73161946714a18"

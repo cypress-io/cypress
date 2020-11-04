@@ -28,7 +28,7 @@
     "chai-subset": "1.6.0",
     "classnames": "2.2.6",
     "cypress-multi-reporters": "1.4.0",
-    "file-loader": "4.3.0",
+    "file-loader": "5.1.0",
     "lodash": "4.17.19",
     "mobx": "5.15.4",
     "mobx-react": "6.1.7",
