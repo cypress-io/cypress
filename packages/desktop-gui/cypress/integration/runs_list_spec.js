@@ -105,6 +105,7 @@ describe('Runs List', function () {
 
         it('displays build num', function () {
           cy.get('@secondRunRow').contains(`#${this.runs[1].buildNumber}`)
+          cy.percySnapshot()
         })
 
         it('displays commit info', function () {
@@ -179,6 +180,7 @@ describe('Runs List', function () {
             .trigger('mouseover')
 
             cy.get('.cy-tooltip').contains('Parallelization was disabled for this run')
+            cy.percySnapshot()
           })
         })
       })
@@ -199,6 +201,7 @@ describe('Runs List', function () {
         cy.contains('Cannot connect to API server')
         cy.contains('http://api.server')
         cy.contains('ECONNREFUSED')
+        cy.percySnapshot()
       })
 
       describe('trying again', function () {
@@ -308,6 +311,8 @@ describe('Runs List', function () {
       cy.contains('button', 'Log In to Dashboard').click().then(function () {
         expect(this.ipc.beginAuth).to.be.calledOnce
       })
+
+      cy.percySnapshot()
     })
 
     it('clicking Log In to Dashboard passes utm code', () => {
@@ -437,6 +442,7 @@ describe('Runs List', function () {
         this.ipcError({ statusCode: 403 })
 
         cy.contains('Request access')
+        cy.percySnapshot()
       })
 
       it('displays "need to set up" message', function () {
@@ -556,6 +562,7 @@ describe('Runs List', function () {
 
             it('shows success message', () => {
               cy.contains('Request sent')
+              cy.percySnapshot()
             })
 
             it('persists request state (until app is reloaded at least)', function () {
@@ -611,6 +618,7 @@ describe('Runs List', function () {
 
               it('enables button', () => {
                 cy.get('@requestAccessBtn').should('not.be.disabled')
+                cy.percySnapshot()
               })
 
               it('shows "Request access" text', () => {
@@ -678,6 +686,7 @@ describe('Runs List', function () {
 
       it('displays timed out message', () => {
         cy.contains('timed out')
+        cy.percySnapshot()
       })
     })
 
@@ -692,6 +701,7 @@ describe('Runs List', function () {
 
       it('displays empty message', () => {
         cy.contains('Runs cannot be displayed')
+        cy.percySnapshot()
       })
     })
 
@@ -741,6 +751,7 @@ describe('Runs List', function () {
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
+        cy.percySnapshot()
       })
     })
 
@@ -755,8 +766,8 @@ describe('Runs List', function () {
 
       it('displays unexpected error message', function () {
         cy.contains('unexpected error')
-
         cy.contains('"no runs": "for you"')
+        cy.percySnapshot()
       })
     })
 

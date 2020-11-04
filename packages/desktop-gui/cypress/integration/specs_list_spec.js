@@ -44,6 +44,7 @@ describe('Specs List', function () {
 
     it('displays empty message', () => {
       cy.contains('No files found')
+      cy.percySnapshot()
     })
 
     it('displays integration test folder path', function () {
@@ -103,6 +104,7 @@ describe('Specs List', function () {
 
     it('displays modal', () => {
       cy.contains('.modal', 'To help you get started').should('be.visible')
+      cy.percySnapshot()
     })
 
     it('displays the scaffolded files', () => {
@@ -227,6 +229,7 @@ describe('Specs List', function () {
             cy.get('@allSpecs').find('i').should('have.class', 'fa-dot-circle')
 
             cy.get('@allSpecs').find('i').should('not.have.class', 'fa-play')
+            cy.percySnapshot()
           })
 
           it('sets spec as active', () => {
@@ -771,6 +774,7 @@ describe('Specs List', function () {
 
     it('displays when spec is hovered over', function () {
       cy.get('@button').invoke('show').should('be.visible')
+      cy.percySnapshot()
     })
 
     describe('opens files', function () {
