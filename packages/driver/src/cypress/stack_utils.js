@@ -203,6 +203,16 @@ const stripCustomProtocol = (filePath) => {
     return
   }
 
+  // if the file path (after all said and done)
+  // still starts with "http://" or "https://" then
+  // it is an URL and we have no idea how it maps
+  // to a physical file location on disk. Let it be.
+  const httpProtocolRegex = /^https?:\/\//
+
+  if (httpProtocolRegex.test(filePath)) {
+    return
+  }
+
   return filePath.replace(customProtocolRegex, '')
 }
 
@@ -318,7 +328,7 @@ const normalizedUserInvocationStack = (userInvocationStack) => {
   const stackLines = getStackLines(userInvocationStack)
   const winnowedStackLines = _.reject(stackLines, (line) => {
     // WARNING: STACK TRACE WILL BE DIFFERENT IN DEVELOPMENT vs PRODUCTOIN
-    // stacks in developemnt builds look like:
+    // stacks in development builds look like:
     //     at cypressErr (cypress:///../driver/src/cypress/error_utils.js:259:17)
     // stacks in prod builds look like:
     //     at cypressErr (http://localhost:3500/isolated-runner/cypress_runner.js:173123:17)
