@@ -301,7 +301,6 @@ Error: spec iframe stack
             at timeslice (cypress:///../driver/node_modules/mocha/browser-entry.js:80:27)
       `
 
-      cy.stub(console, 'warn')
       const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
       const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
 
@@ -315,9 +314,6 @@ Error: spec iframe stack
         relativeFile: undefined,
         whitespace: '    ',
       })
-
-      /* eslint-disable-next-line no-console */
-      expect(console.warn).to.have.been.calledWith('Could not get the original source file from line "    at <anonymous>:1:1"')
     })
   })
 

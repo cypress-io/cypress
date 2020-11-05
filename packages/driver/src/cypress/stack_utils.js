@@ -223,10 +223,7 @@ const getSourceDetailsForLine = (projectRoot, line) => {
 
   if (!originalFile) {
     // this is an edge case: could not parse the stack trace
-    // let's not warn about it, but at least allow the user
-    // to see the original error by being defensive about it
-    /* eslint-disable-next-line no-console */
-    console.warn(`Could not get the original source file from line "${line}"`)
+    // maybe there was some code that was evaluated in the browser?
   }
 
   const relativeFile = stripCustomProtocol(originalFile)
