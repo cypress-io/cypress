@@ -345,3 +345,52 @@ describe('test errors', function () {
     })
   })
 })
+
+describe('test error without file info', function () {
+  // the app was transpiled in the browser
+  // thus the stack has anonymous lines that cannot be mapped to file locations
+  // https://github.com/cypress-io/cypress/pull/9081
+  beforeEach(function () {
+    cy.fixture('runnables_error').as('runnablesErr')
+    cy.fixture('no_location_app_error').as('commandErr')
+
+    this.setError = function (err) {
+      this.runnablesErr.suites[0].tests[0].err = err
+
+      cy.get('.reporter').then(() => {
+        this.runner.emit('runnables:ready', this.runnablesErr)
+
+        this.runner.emit('reporter:start', {})
+      })
+    }
+
+    this.runner = new EventEmitter()
+
+    cy.visit('cypress/support/index.html').then((win) => {
+      win.render({
+        runner: this.runner,
+        spec: {
+          name: 'foo.js',
+          relative: 'relative/path/to/foo.js',
+          absolute: '/absolute/path/to/foo.js',
+        },
+        config: {
+          projectRoot: '/root',
+        },
+      })
+    })
+  })
+
+  it('does not have open IDE links', function () {
+    this.setError(this.commandErr)
+    cy.contains('View stack trace').click()
+    cy.get('.runnable-err-stack-trace').should('be.visible')
+    // there should be not clickable links in the stack
+    // since all error lines are still HTTP:// links
+    cy.get('.runnable-err-stack-trace .runnable-err-file-path').should('have.length', 0)
+
+    // but the relevant stack lines are still shown
+    cy.contains('.err-stack-line', 'http://localhost:8888/js/utils.js:9:4')
+    cy.contains('.err-stack-line', 'http://localhost:8888/js/utils.js:60:4')
+  })
+})
