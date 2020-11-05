@@ -42,7 +42,7 @@ const ErrorStack = observer(({ err }: Props) => {
 
   let stopLinking = false
   const lines = _.map(stackLines, (stackLine, index) => {
-    const { originalFile, function: fn, line, column } = stackLine
+    const { originalFile, function: fn, line, column, absoluteFile } = stackLine
     const key = `${originalFile}${index}`
 
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
@@ -57,7 +57,21 @@ const ErrorStack = observer(({ err }: Props) => {
       return makeLine(key, [whitespace, stackLine.message])
     }
 
-    if (cypressLineRegex.test(originalFile || '') || stopLinking) {
+    if (stopLinking) {
+      // we have already shown a good link, so no need to make
+      // clickable links deep in the woods of the stack trace
+      return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])
+    }
+
+    // decide if can show "open file in IDE" link or not
+    // sometimes we can determine the file on disk, but if
+    // there are no source maps, or the file was transpiled in the browser
+    // then all we can do is show the link as is without making it clickable
+    if (!absoluteFile) {
+      return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])
+    }
+
+    if (cypressLineRegex.test(originalFile || '')) {
       return makeLine(key, [whitespace, `at ${fn} (${originalFile}:${line}:${column})`])
     }
 

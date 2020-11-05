@@ -1,0 +1,224 @@
+{
+  "name": "ReferenceError",
+  "message": "The following error originated from your application code, not from Cypress.\n\n  > b is not defined\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.",
+  "stack": "ReferenceError: The following error originated from your application code, not from Cypress.\n\n  > b is not defined\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n    at http://localhost:8888/js/utils.js:9:3\n    at http://localhost:8888/js/utils.js:60:3\nFrom previous event:\n    at run (cypress:///../driver/src/cypress/cy.js:561:21)\n    at $Cy.cy.<computed> [as visit] (cypress:///../driver/src/cypress/cy.js:1018:11)\n    at Context.runnable.fn (cypress:///../driver/src/cypress/cy.js:1242:21)\n    at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:395:21)\n    at Test.Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:382:7)\n    at eval (cypress:///../driver/src/cypress/runner.js:1249:28)\nFrom previous event:\n    at Object.onRunnableRun (cypress:///../driver/src/cypress/runner.js:1237:17)\n    at $Cypress.action (cypress:///../driver/src/cypress.js:397:28)\n    at Test.Runnable.run (cypress:///../driver/src/cypress/mocha.js:347:13)\n    at Runner.runTest (cypress:///../driver/node_modules/mocha/lib/runner.js:541:10)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:667:12)\n    at next (cypress:///../driver/node_modules/mocha/lib/runner.js:450:14)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:460:7)\n    at next (cypress:///../driver/node_modules/mocha/lib/runner.js:362:14)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:428:5)\n    at timeslice (cypress:///../driver/node_modules/mocha/browser-entry.js:80:27)",
+  "sourceMappedStack": "ReferenceError: The following error originated from your application code, not from Cypress.\n\n    > b is not defined\n\nWhen Cypress detects uncaught errors originating from your application it will automatically fail the current test.\n\nThis behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.\n    at <unknown> (http://localhost:8888/js/utils.js:9:4)\n    at <unknown> (http://localhost:8888/js/utils.js:60:4)\nFrom previous event:\n    at run (cypress:///../driver/src/cypress/cy.js:561:22)\n    at $Cy.cy.<computed> [as visit] (cypress:///../driver/src/cypress/cy.js:1018:12)\n    at Context.runnable.fn (cypress:///../driver/src/cypress/cy.js:1242:22)\n    at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:395:22)\n    at Test.Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:382:8)\n    at eval (cypress:///../driver/src/cypress/runner.js:1249:29)\nFrom previous event:\n    at Object.onRunnableRun (cypress:///../driver/src/cypress/runner.js:1237:18)\n    at $Cypress.action (cypress:///../driver/src/cypress.js:397:29)\n    at Test.Runnable.run (cypress:///../driver/src/cypress/mocha.js:347:14)\n    at Runner.runTest (cypress:///../driver/node_modules/mocha/lib/runner.js:541:11)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:667:13)\n    at next (cypress:///../driver/node_modules/mocha/lib/runner.js:450:15)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:460:8)\n    at next (cypress:///../driver/node_modules/mocha/lib/runner.js:362:15)\n    at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:428:6)\n    at timeslice (cypress:///../driver/node_modules/mocha/browser-entry.js:80:28)",
+  "parsedStack": [
+    {
+      "message": "ReferenceError: The following error originated from your application code, not from Cypress.",
+      "whitespace": ""
+    },
+    {
+      "message": "",
+      "whitespace": ""
+    },
+    {
+      "message": "  > b is not defined",
+      "whitespace": "  "
+    },
+    {
+      "message": "",
+      "whitespace": ""
+    },
+    {
+      "message": "When Cypress detects uncaught errors originating from your application it will automatically fail the current test.",
+      "whitespace": ""
+    },
+    {
+      "message": "",
+      "whitespace": ""
+    },
+    {
+      "message": "This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.",
+      "whitespace": ""
+    },
+    {
+      "function": "<unknown>",
+      "fileUrl": "http://localhost:8888/js/utils.js",
+      "originalFile": "http://localhost:8888/js/utils.js",
+      "line": 9,
+      "column": 4,
+      "whitespace": "    "
+    },
+    {
+      "function": "<unknown>",
+      "fileUrl": "http://localhost:8888/js/utils.js",
+      "originalFile": "http://localhost:8888/js/utils.js",
+      "line": 60,
+      "column": 4,
+      "whitespace": "    "
+    },
+    {
+      "message": "From previous event:",
+      "whitespace": ""
+    },
+    {
+      "function": "run",
+      "fileUrl": "cypress:///../driver/src/cypress/cy.js",
+      "originalFile": "cypress:///../driver/src/cypress/cy.js",
+      "relativeFile": "../driver/src/cypress/cy.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/cy.js",
+      "line": 561,
+      "column": 22,
+      "whitespace": "    "
+    },
+    {
+      "function": "$Cy.cy.<computed> [as visit]",
+      "fileUrl": "cypress:///../driver/src/cypress/cy.js",
+      "originalFile": "cypress:///../driver/src/cypress/cy.js",
+      "relativeFile": "../driver/src/cypress/cy.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/cy.js",
+      "line": 1018,
+      "column": 12,
+      "whitespace": "    "
+    },
+    {
+      "function": "Context.runnable.fn",
+      "fileUrl": "cypress:///../driver/src/cypress/cy.js",
+      "originalFile": "cypress:///../driver/src/cypress/cy.js",
+      "relativeFile": "../driver/src/cypress/cy.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/cy.js",
+      "line": 1242,
+      "column": 22,
+      "whitespace": "    "
+    },
+    {
+      "function": "callFn",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runnable.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runnable.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runnable.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runnable.js",
+      "line": 395,
+      "column": 22,
+      "whitespace": "    "
+    },
+    {
+      "function": "Test.Runnable.run",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runnable.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runnable.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runnable.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runnable.js",
+      "line": 382,
+      "column": 8,
+      "whitespace": "    "
+    },
+    {
+      "function": "eval",
+      "fileUrl": "cypress:///../driver/src/cypress/runner.js",
+      "originalFile": "cypress:///../driver/src/cypress/runner.js",
+      "relativeFile": "../driver/src/cypress/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/runner.js",
+      "line": 1249,
+      "column": 29,
+      "whitespace": "    "
+    },
+    {
+      "message": "From previous event:",
+      "whitespace": ""
+    },
+    {
+      "function": "Object.onRunnableRun",
+      "fileUrl": "cypress:///../driver/src/cypress/runner.js",
+      "originalFile": "cypress:///../driver/src/cypress/runner.js",
+      "relativeFile": "../driver/src/cypress/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/runner.js",
+      "line": 1237,
+      "column": 18,
+      "whitespace": "    "
+    },
+    {
+      "function": "$Cypress.action",
+      "fileUrl": "cypress:///../driver/src/cypress.js",
+      "originalFile": "cypress:///../driver/src/cypress.js",
+      "relativeFile": "../driver/src/cypress.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress.js",
+      "line": 397,
+      "column": 29,
+      "whitespace": "    "
+    },
+    {
+      "function": "Test.Runnable.run",
+      "fileUrl": "cypress:///../driver/src/cypress/mocha.js",
+      "originalFile": "cypress:///../driver/src/cypress/mocha.js",
+      "relativeFile": "../driver/src/cypress/mocha.js",
+      "absoluteFile": "/Users/gleb/git/driver/src/cypress/mocha.js",
+      "line": 347,
+      "column": 14,
+      "whitespace": "    "
+    },
+    {
+      "function": "Runner.runTest",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 541,
+      "column": 11,
+      "whitespace": "    "
+    },
+    {
+      "function": "eval",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 667,
+      "column": 13,
+      "whitespace": "    "
+    },
+    {
+      "function": "next",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 450,
+      "column": 15,
+      "whitespace": "    "
+    },
+    {
+      "function": "eval",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 460,
+      "column": 8,
+      "whitespace": "    "
+    },
+    {
+      "function": "next",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 362,
+      "column": 15,
+      "whitespace": "    "
+    },
+    {
+      "function": "eval",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/lib/runner.js",
+      "relativeFile": "../driver/node_modules/mocha/lib/runner.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/lib/runner.js",
+      "line": 428,
+      "column": 6,
+      "whitespace": "    "
+    },
+    {
+      "function": "timeslice",
+      "fileUrl": "cypress:///../driver/node_modules/mocha/browser-entry.js",
+      "originalFile": "cypress:///../driver/node_modules/mocha/browser-entry.js",
+      "relativeFile": "../driver/node_modules/mocha/browser-entry.js",
+      "absoluteFile": "/Users/gleb/git/driver/node_modules/mocha/browser-entry.js",
+      "line": 80,
+      "column": 28,
+      "whitespace": "    "
+    }
+  ],
+  "docsUrl": [
+    "https://on.cypress.io/uncaught-exception-from-application"
+  ],
+  "templateType": ""
+}
