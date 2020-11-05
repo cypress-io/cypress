@@ -1,7 +1,7 @@
 /* eslint-disable prefer-rest-params */
 /* globals Cypress */
 const _ = require('lodash')
-const moment = require('moment')
+const dayjs = require('dayjs')
 const Promise = require('bluebird')
 const Pending = require('mocha/lib/pending')
 
@@ -1119,7 +1119,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     run (fn) {
       if (_startTime == null) {
-        _startTime = moment().toJSON()
+        _startTime = dayjs().toJSON()
       }
 
       _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)

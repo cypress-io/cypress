@@ -1,6 +1,6 @@
-const moment = require('moment')
+const dayjs = require('dayjs')
 
-moment.updateLocale('en', {
+dayjs.updateLocale('en', {
   relativeTime: {
     future: 'in %s',
     past: '%s ago',

@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const capitalize = require('underscore.string/capitalize')
 const methods = require('methods')
-const moment = require('moment')
+const dayjs = require('dayjs')
 
 const $jquery = require('../dom/jquery')
 const $Location = require('./location')
@@ -279,7 +279,7 @@ module.exports = {
   },
 
   addTwentyYears () {
-    return moment().add(20, 'years').unix()
+    return dayjs().add(20, 'years').unix()
   },
 
   locReload (forceReload, win) {
