@@ -44,9 +44,10 @@ describe('browser detection', () => {
       version: '11.22.33',
     }
 
-    setMajorVersion(foundBrowser)
+    const res = setMajorVersion(foundBrowser)
+
     // @ts-ignore
-    expect(foundBrowser.majorVersion, 'major version was converted to number').to.equal(11)
+    expect(res.majorVersion, 'major version was converted to number').to.equal(11)
   })
 
   context('#detectByPath', () => {

@@ -36,6 +36,10 @@ describe('RedBox 2', () => {
         'red-box': RedBox,
       },
     },
+    stylesheets: [
+      // you can use external links
+      'https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css',
+    ],
   }
 
   beforeEach(mountCallback({ template }, options))

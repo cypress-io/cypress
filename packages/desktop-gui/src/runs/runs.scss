@@ -539,6 +539,7 @@
   height: 185px;
   position: relative;
   overflow: hidden;
+  z-index: 0;
 
   .left-vector {
     z-index: 900;

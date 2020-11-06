@@ -1,0 +1,18 @@
+{
+  "viewportWidth": 400,
+  "viewportHeight": 400,
+  "video": false,
+  "projectId": "z9dxah",
+  "testFiles": "**/*spec.{js,jsx,ts,tsx}",
+  "env": {
+    "cypress-react-selector": {
+      "root": "#cypress-root"
+    }
+  },
+  "ignoreTestFiles": [
+    "**/__snapshots__/*",
+    "**/__image_snapshots__/*"
+  ],
+  "experimentalComponentTesting": true,
+  "experimentalFetchPolyfill": true
+}

@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const $errUtils = require('../../cypress/error_utils')
 
 const viewports = {
+  'macbook-16': '1536x960',
   'macbook-15': '1440x900',
   'macbook-13': '1280x800',
   'macbook-11': '1366x768',
@@ -12,6 +13,9 @@ const viewports = {
   'iphone-xr': '414x896',
   'iphone-x': '375x812',
   'iphone-6+': '414x736',
+  'iphone-se2': '375x667',
+  'iphone-8': '375x667',
+  'iphone-7': '375x667',
   'iphone-6': '375x667',
   'iphone-5': '320x568',
   'iphone-4': '320x480',

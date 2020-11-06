@@ -1,6 +1,31 @@
 import _ from 'lodash'
 import gravatar from 'gravatar'
-import duration from '../../../server/lib/util/duration'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import updateLocale from 'dayjs/plugin/updateLocale'
+import duration from 'dayjs/plugin/duration'
+
+dayjs.extend(duration)
+dayjs.extend(relativeTime)
+dayjs.extend(updateLocale)
+dayjs.updateLocale('en', {
+  relativeTime: {
+    future: 'in %s',
+    past: '%s ago',
+    s: 'a few secs',
+    ss: '%d secs',
+    m: 'a min',
+    mm: '%d mins',
+    h: 'an hour',
+    hh: '%d hours',
+    d: 'a day',
+    dd: '%d days',
+    M: 'a month',
+    MM: '%d months',
+    y: 'a year',
+    yy: '%d years',
+  },
+})
 
 const cyDirRegex = /^cypress\/integration\//g
 
@@ -10,7 +35,29 @@ const osIconLookup = {
   linux: 'linux',
 }
 
-export const durationFormatted = duration.format
+export const getFormattedTimeFromNow = (timeAsIsoString) => {
+  return dayjs(timeAsIsoString).fromNow()
+}
+
+export const durationFormatted = (durationInMs) => {
+  if (durationInMs < 1000) {
+    return `${durationInMs}ms`
+  }
+
+  const dayDuration = dayjs.duration(durationInMs)
+
+  const durationSecs = dayDuration.seconds() ? `${dayDuration.seconds()}` : ''
+  const durationMins = dayDuration.minutes() ? `${dayDuration.minutes()}` : ''
+  const durationHrs = dayDuration.hours() ? `${dayDuration.hours()}` : ''
+
+  const total = _.compact([
+    durationHrs,
+    _.padStart(durationMins, 2, '0'),
+    _.padStart(durationSecs, 2, '0'),
+  ])
+
+  return total.join(':')
+}
 
 export const osIcon = (osName) => {
   if (!osName) return ''

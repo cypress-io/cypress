@@ -1,0 +1,15 @@
+{
+  "name": "example-happo",
+  "description": "Visual component testing using Happo.io",
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run",
+    "test:happo": "../../node_modules/.bin/happo-cypress -- npm test"
+  },
+  "devDependencies": {
+    "@cypress/react": "file:../../dist",
+    "happo-cypress": "1.9.1",
+    "happo.io": "5.6.1"
+  }
+}

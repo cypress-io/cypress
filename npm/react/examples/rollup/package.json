@@ -1,0 +1,21 @@
+{
+  "name": "example-rollup",
+  "description": "Component testing using Rollup bundler",
+  "private": true,
+  "scripts": {
+    "build": "rollup -c",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-react": "7.0.0",
+    "@babel/preset-typescript": "7.10.4",
+    "@cypress/react": "file:../../dist",
+    "@rollup/plugin-babel": "5.2.1",
+    "@rollup/plugin-commonjs": "15.1.0",
+    "@rollup/plugin-node-resolve": "9.0.0",
+    "@rollup/plugin-replace": "2.3.3"
+  }
+}

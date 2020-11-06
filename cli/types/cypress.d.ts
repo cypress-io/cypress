@@ -1107,7 +1107,7 @@ declare namespace Cypress {
       ...args: any[]
     ): Chainable<R>
     invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
-      options: Loggable,
+      options: Partial<Loggable & Timeoutable>,
       functionName: K,
       ...args: any[]
     ): Chainable<R>
@@ -1117,7 +1117,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
-    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Partial<Loggable & Timeoutable>, index: number): Chainable<ReturnType<T>>
 
     /**
    * Invoke a function on the previously yielded subject by a property path.
@@ -1138,8 +1138,8 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
-    its(propertyPath: string, options?: Loggable): Chainable
+    its<K extends keyof Subject>(propertyName: K, options?: Partial<Loggable & Timeoutable>): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Partial<Loggable & Timeoutable>): Chainable
 
     /**
      * Get a value by index from an array yielded from the previous command.
@@ -1147,7 +1147,7 @@ declare namespace Cypress {
      * @example
      *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
      */
-    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
+    its<T, Subject extends T[]>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -1766,7 +1766,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/task
      */
-    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+    task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -2587,7 +2587,7 @@ declare namespace Cypress {
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
+    retries: Nullable<number | {runMode?: Nullable<number>, openMode?: Nullable<number>}>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
@@ -5237,7 +5237,7 @@ declare namespace Cypress {
     snapshot(name?: string, options?: { at?: number, next: string }): Log
   }
 
-  interface LogConfig {
+  interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** Allows the name of the command to be overwritten */
@@ -5295,7 +5295,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
+  type ViewportPreset = 'macbook-16' | 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-se2' | 'iphone-8' | 'iphone-7' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number
     left: number

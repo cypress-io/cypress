@@ -20,6 +20,9 @@ packages/desktop-gui/src/jsconfig.json
 packages/driver/cypress/videos
 packages/driver/cypress/screenshots
 
+# npm packages
+npm/**/cypress/screenshots
+
 # from example
 packages/example/app
 packages/example/build
@@ -32,6 +35,10 @@ packages/server/support
 packages/server/test/support/fixtures/server/imgs
 packages/server/test/support/fixtures/server/libs
 
+# from npm/react
+/npm/react/bin/*
+/npm/react/cypress/videos
+
 # Building app binary
 scripts/support
 package-lock.json
@@ -41,7 +48,6 @@ binary-url.json
 .eslintrc.js
 cli/visual-snapshots
 
-
 # Created by https://www.gitignore.io/api/osx,git,node,windows,intellij,linux
 # Edit at https://www.gitignore.io/?templates=osx,git,node,windows,intellij,linux
 
@@ -50,21 +56,12 @@ cli/visual-snapshots
 # $ git config --global mergetool.keepBackup false
 *.orig
 
-# Created by git when using merge tools for conflicts
-*.BACKUP.*
-*.BASE.*
-*.LOCAL.*
-*.REMOTE.*
-*_BACKUP_*.txt
-*_BASE_*.txt
-*_LOCAL_*.txt
-*_REMOTE_*.txt
-
 ### Intellij ###
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and WebStorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
+.idea
 .idea/**/workspace.xml
 .idea/**/tasks.xml
 .idea/**/usage.statistics.xml
@@ -323,4 +320,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+/npm/react/bin/*
 # End of https://www.gitignore.io/api/osx,git,node,windows,intellij,linux

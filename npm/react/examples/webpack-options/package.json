@@ -1,0 +1,14 @@
+{
+  "name": "example-webpack-options",
+  "description": "Using default Webpack options to transpile simple tests",
+  "private": true,
+  "scripts": {
+    "check-coverage": "check-coverage Test.js calc.js ParentComponent.js ChildComponent.js",
+    "cy:open": "node ../../../../scripts/cypress open",
+    "only-covered": "only-covered Test.js calc.js ParentComponent.js ChildComponent.js",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "devDependencies": {
+    "@cypress/react": "file:../../dist"
+  }
+}

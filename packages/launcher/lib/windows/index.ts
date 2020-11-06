@@ -5,7 +5,7 @@ import { tap, trim, prop } from 'ramda'
 import { get } from 'lodash'
 import { notInstalledErr } from '../errors'
 import { log } from '../log'
-import { Browser, FoundBrowser } from '../types'
+import { Browser, FoundBrowser, PathData } from '../types'
 import { utils } from '../utils'
 
 function formFullAppPath (name: string) {
@@ -183,6 +183,40 @@ export function getVersionString (path: string) {
   return utils.execa('wmic', args)
   .then(prop('stdout'))
   .then(trim)
+}
+
+export function getVersionNumber (version: string) {
+  if (version.indexOf('Version=') > -1) {
+    return version.split('=')[1]
+  }
+
+  return version
+}
+
+export function getPathData (pathStr: string): PathData {
+  const test = new RegExp(/^.+\.exe:(.+)$/)
+  const res = test.exec(pathStr)
+  let browserKey = ''
+  let path = pathStr
+
+  if (res) {
+    const pathParts = path.split(':')
+
+    browserKey = pathParts.pop() || ''
+    path = pathParts.join(':')
+
+    return { path, browserKey }
+  }
+
+  if (pathStr.indexOf('chrome.exe') > -1) {
+    return { path, browserKey: 'chrome' }
+  }
+
+  if (pathStr.indexOf('firefox.exe') > -1) {
+    return { path, browserKey: 'firefox' }
+  }
+
+  return { path }
 }
 
 export function detect (browser: Browser) {

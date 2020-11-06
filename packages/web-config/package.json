@@ -30,7 +30,7 @@
     "jsdom": "13.2.0",
     "mini-css-extract-plugin": "0.5.0",
     "mock-require": "3.0.3",
-    "node-sass": "4.12.0",
+    "node-sass": "4.13.1",
     "node-sass-globbing": "0.0.23",
     "postcss-loader": "3.0.0",
     "rebuild-node-sass": "1.1.0",

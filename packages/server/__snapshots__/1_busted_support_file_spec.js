@@ -17,7 +17,7 @@ exports['e2e busted support file passes 1'] = `
 
 Oops...we found an error preparing this test file:
 
-  /foo/bar/.projects/busted-support-file/cypress/support/index.js
+  cypress/support/index.js
 
 The error was:
 

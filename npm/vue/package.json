@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
+    "build-prod": "yarn build",
     "build:watch": "tsc --watch",
     "cy:open": "node ../../scripts/cypress open",
     "cy:run": "node ../../scripts/cypress run",
@@ -29,7 +30,7 @@
     "babel-loader": "8.1.0",
     "ban-sensitive-files": "1.9.7",
     "css-loader": "3.4.2",
-    "cypress": "5.2.0",
+    "cypress": "*",
     "dependency-check": "3.4.1",
     "deps-ok": "1.4.1",
     "eslint-plugin-vue": "^6.2.2",
@@ -66,12 +67,15 @@
   },
   "homepage": "https://on.cypress.io/component-testing",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=JessicaSachs&labels=experiment%3A+component+testing,npm%3A%20%40cypress%2Fvue&template=component-testing.md&title=",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Fvue&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
     "vue"
   ],
   "publishConfig": {
     "registry": "http://registry.npmjs.org/"
-  }
+  },
+  "ciJobs": [
+    "npm-vue"
+  ]
 }

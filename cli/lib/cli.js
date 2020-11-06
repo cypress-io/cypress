@@ -100,6 +100,7 @@ const descriptions = {
   browserOpenMode: 'path to a custom browser to be added to the list of available browsers in Cypress',
   browserRunMode: 'runs Cypress in the browser with the given name. if a filesystem path is supplied, Cypress will attempt to use the browser at that path.',
   cacheClear: 'delete all cached binaries',
+  cachePrune: 'deletes all cached binaries except for the version currently in use',
   cacheList: 'list cached binary versions',
   cachePath: 'print the path to the binary cache',
   cacheSize: 'Used with the list command to show the sizes of the cached folders',
@@ -387,6 +388,7 @@ module.exports = {
     .option('list', text('cacheList'))
     .option('path', text('cachePath'))
     .option('clear', text('cacheClear'))
+    .option('prune', text('cachePrune'))
     .option('--size', text('cacheSize'))
     .action(function (opts, args) {
       if (!args || !args.length) {
@@ -396,14 +398,26 @@ module.exports = {
 
       const [command] = args
 
-      if (!_.includes(['list', 'path', 'clear'], command)) {
+      if (!_.includes(['list', 'path', 'clear', 'prune'], command)) {
         unknownOption.call(this, `cache ${command}`, 'command')
       }
 
       if (command === 'list') {
-        cache.list(opts.size)
+        debug('cache command %o', {
+          command,
+          size: opts.size,
+        })
 
-        return
+        return cache.list(opts.size)
+        .catch({ code: 'ENOENT' }, () => {
+          logger.always('No cached binary versions were found.')
+          process.exit(0)
+        })
+        .catch((e) => {
+          debug('cache list command failed with "%s"', e.message)
+
+          util.logErrorExit1(e)
+        })
       }
 
       cache[command]()

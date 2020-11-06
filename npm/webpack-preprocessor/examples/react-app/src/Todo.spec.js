@@ -1,6 +1,6 @@
 import React from 'react'
 import { Todo } from './App'
-import { mount } from 'cypress-react-unit-test'
+import { mount } from '@cypress/react'
 
 describe('Todo', () => {
   it('renders new item', () => {

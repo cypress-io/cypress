@@ -13,6 +13,7 @@ import CyServer from '@packages/server'
 import { Socket } from 'net'
 import { GetFixtureFn } from './types'
 import ThrottleStream from 'throttle'
+import MimeTypes from 'mime-types'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
@@ -82,25 +83,28 @@ const caseInsensitiveGet = function (obj, lowercaseProperty) {
   }
 }
 
-export async function setBodyFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
+export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {
   const { fixture } = staticResponse
 
   if (!fixture) {
     return
   }
 
-  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding })
+  const data = await getFixtureFn(fixture.filePath, { encoding: fixture.encoding || null })
 
   const { headers } = staticResponse
 
   if (!headers || !caseInsensitiveGet(headers, 'content-type')) {
-    _.set(staticResponse, 'headers.content-type', parseContentType(data))
+    // attempt to detect mimeType based on extension, fall back to regular cy.fixture inspection otherwise
+    const mimeType = MimeTypes.lookup(fixture.filePath) || parseContentType(data)
+
+    _.set(staticResponse, 'headers.content-type', mimeType)
   }
 
   function getBody (): string {
     // NOTE: for backwards compatibility with cy.route
     if (data === null) {
-      return ''
+      return JSON.stringify('')
     }
 
     if (!_.isBuffer(data) && !_.isString(data)) {

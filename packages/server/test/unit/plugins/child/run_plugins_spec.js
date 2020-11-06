@@ -3,6 +3,7 @@ require('../../../spec_helper')
 const _ = require('lodash')
 const snapshot = require('snap-shot-it')
 const tsnode = require('ts-node')
+const Promise = require('bluebird')
 
 const preprocessor = require(`${root}../../lib/plugins/child/preprocessor`)
 const task = require(`${root}../../lib/plugins/child/task`)
@@ -15,6 +16,17 @@ const Fixtures = require(`${root}../../test/support/helpers/fixtures`)
 const colorCodeRe = /\[[0-9;]+m/gm
 const pathRe = /\/?([a-z0-9_-]+\/)*[a-z0-9_-]+\/([a-z_]+\.\w+)[:0-9]+/gmi
 
+const deferred = () => {
+  let reject
+  let resolve
+  const promise = new Promise((_resolve, _reject) => {
+    resolve = _resolve
+    reject = _reject
+  })
+
+  return { promise, resolve, reject }
+}
+
 const withoutColorCodes = (str) => {
   return str.replace(colorCodeRe, '<color-code>')
 }
@@ -24,6 +36,8 @@ const withoutPath = (str) => {
 
 describe('lib/plugins/child/run_plugins', () => {
   beforeEach(function () {
+    runPlugins.__reset()
+
     this.ipc = {
       send: sinon.spy(),
       on: sinon.stub(),
@@ -34,6 +48,7 @@ describe('lib/plugins/child/run_plugins', () => {
   afterEach(() => {
     mockery.deregisterMock('plugins-file')
     mockery.deregisterSubstitute('plugins-file')
+    mockery.deregisterMock('@cypress/webpack-batteries-included-preprocessor')
   })
 
   it('sends error message if pluginsFile is missing', function () {
@@ -80,8 +95,6 @@ describe('lib/plugins/child/run_plugins', () => {
 
   describe('typescript registration', () => {
     beforeEach(function () {
-      runPlugins.__reset()
-
       this.register = sinon.stub(tsnode, 'register')
       sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
     })
@@ -116,6 +129,122 @@ describe('lib/plugins/child/run_plugins', () => {
   })
 
   describe('on \'load\' message', () => {
+    it('sends loaded event with registrations', function () {
+      const pluginsDeferred = deferred()
+      const config = { projectRoot: '/project/root' }
+
+      mockery.registerMock('plugins-file', (on) => {
+        on('after:screenshot', () => {})
+        on('task', {})
+
+        return config
+      })
+
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+
+      this.ipc.on.withArgs('load').yield(config)
+
+      pluginsDeferred.resolve(config)
+
+      return Promise
+      .delay(10)
+      .then(() => {
+        expect(this.ipc.send).to.be.calledWith('loaded', config)
+        const registrations = this.ipc.send.lastCall.args[2]
+
+        expect(registrations).to.have.length(5)
+
+        expect(_.map(registrations, 'event')).to.eql([
+          '_get:task:body',
+          '_get:task:keys',
+          'after:screenshot',
+          'task',
+          'file:preprocessor',
+        ])
+      })
+    })
+
+    it('registers default preprocessor if none registered by user', function () {
+      const pluginsDeferred = deferred()
+      const config = { projectRoot: '/project/root' }
+      const webpackPreprocessorFn = sinon.spy()
+      const webpackPreprocessor = sinon.stub().returns(webpackPreprocessorFn)
+
+      sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+
+      mockery.registerMock('plugins-file', (on) => {
+        on('after:screenshot', () => {})
+        on('task', {})
+
+        return config
+      })
+
+      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+
+      this.ipc.on.withArgs('load').yield(config)
+
+      pluginsDeferred.resolve(config)
+
+      return Promise
+      .delay(10)
+      .then(() => {
+        const registrations = this.ipc.send.lastCall.args[2]
+
+        expect(webpackPreprocessor).to.be.calledWith({
+          typescript: '/path/to/typescript.js',
+        })
+
+        expect(registrations[4]).to.eql({
+          event: 'file:preprocessor',
+          eventId: 4,
+        })
+
+        this.ipc.on.withArgs('execute').yield('file:preprocessor', { eventId: 4, invocationId: '00' }, ['arg1', 'arg2'])
+        expect(webpackPreprocessorFn, 'webpackPreprocessor').to.be.called
+      })
+    })
+
+    it('does not register default preprocessor if registered by user', function () {
+      const pluginsDeferred = deferred()
+      const config = { projectRoot: '/project/root' }
+      const userPreprocessorFn = sinon.spy()
+      const webpackPreprocessor = sinon.spy()
+
+      sinon.stub(resolve, 'typescript').returns('/path/to/typescript.js')
+
+      mockery.registerMock('plugins-file', (on) => {
+        on('after:screenshot', () => {})
+        on('file:preprocessor', userPreprocessorFn)
+        on('task', {})
+
+        return config
+      })
+
+      mockery.registerMock('@cypress/webpack-batteries-included-preprocessor', webpackPreprocessor)
+      runPlugins(this.ipc, 'plugins-file', 'proj-root')
+
+      this.ipc.on.withArgs('load').yield(config)
+
+      pluginsDeferred.resolve(config)
+
+      return Promise
+      .delay(10)
+      .then(() => {
+        const registrations = this.ipc.send.lastCall.args[2]
+
+        expect(webpackPreprocessor).not.to.be.called
+
+        expect(registrations[3]).to.eql({
+          event: 'file:preprocessor',
+          eventId: 3,
+        })
+
+        this.ipc.on.withArgs('execute').yield('file:preprocessor', { eventId: 3, invocationId: '00' }, ['arg1', 'arg2'])
+        expect(userPreprocessorFn).to.be.called
+      })
+    })
+
     it('sends error if pluginsFile function rejects the promise', function (done) {
       const err = new Error('foo')
       const pluginsFn = sinon.stub().rejects(err)

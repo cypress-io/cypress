@@ -8,6 +8,7 @@ const moment = require('moment')
 const chalk = require('chalk')
 const _ = require('lodash')
 const getFolderSize = require('./get-folder-size')
+const Bluebird = require('bluebird')
 
 // output colors for the table
 const colors = {
@@ -25,6 +26,36 @@ const logCachePath = () => {
 
 const clear = () => {
   return fs.removeAsync(state.getCacheDir())
+}
+
+const prune = () => {
+  const cacheDir = state.getCacheDir()
+  const currentVersion = util.pkgVersion()
+
+  let deletedBinary = false
+
+  return fs.readdirAsync(cacheDir)
+  .then((versions) => {
+    return Bluebird.all(versions.map((version) => {
+      if (version !== currentVersion) {
+        deletedBinary = true
+
+        const versionDir = join(cacheDir, version)
+
+        return fs.removeAsync(versionDir)
+      }
+    }))
+  })
+  .then(() => {
+    if (deletedBinary) {
+      logger.always(`Deleted all binary caches except for the ${currentVersion} binary cache.`)
+    } else {
+      logger.always(`No binary caches found to prune.`)
+    }
+  })
+  .catch({ code: 'ENOENT' }, () => {
+    logger.always(`No Cypress cache was found at ${cacheDir}. Nothing to prune.`)
+  })
 }
 
 const fileSizeInMB = (size) => {
@@ -122,6 +153,7 @@ const getCachedVersions = (showSize) => {
 module.exports = {
   path: logCachePath,
   clear,
+  prune,
   list,
   getCachedVersions,
 }

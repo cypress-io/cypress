@@ -293,19 +293,11 @@ describe('src/cypress/runner', () => {
       // HACK to assert on the dom DURING the runIsolatedCypress run
       // we expect the last command item to be scrolled into view before
       // the test ends
-      cy.now('get', '.command-number:contains(25)')
-      .then(($el) => {
-        return new Promise((resolve) => {
-          requestAnimationFrame(() => {
-            expect($el).visible
-            resolve()
-          })
-        })
-      })
-      .catch((e) => cy.state('reject')(e))
+      const result = cy.now('get', '.command-number:contains(25):visible').catch((e) => cy.state('reject')(e))
 
       runIsolatedCypress(() => {
         describe('s1', () => {
+          // Passing in done forces the spec to timeout
           // eslint-disable-next-line
           it('t1', (done) => {
             cy.timeout(10)
@@ -313,6 +305,8 @@ describe('src/cypress/runner', () => {
           })
         })
       })
+
+      cy.wrap(result)
     })
   })
 

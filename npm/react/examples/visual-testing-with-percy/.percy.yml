@@ -1,0 +1,5 @@
+# https://docs.percy.io/docs/sdk-configuration
+version: 1
+snapshot:
+  # use same width as cypress.json
+  widths: [500]

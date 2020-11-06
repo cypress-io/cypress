@@ -4,6 +4,7 @@ const mockfs = require('mock-fs')
 
 const fs = require(`${lib}/fs`)
 const state = require(`${lib}/tasks/state`)
+const util = require(`${lib}/util`)
 const cache = require(`${lib}/tasks/cache`)
 const stdout = require('../../support/stdout')
 const snapshot = require('../../support/snapshot')
@@ -35,6 +36,7 @@ describe('lib/tasks/cache', () => {
 
     sinon.stub(state, 'getCacheDir').returns('/.cache/Cypress')
     sinon.stub(state, 'getBinaryDir').returns('/.cache/Cypress')
+    sinon.stub(util, 'pkgVersion').returns('1.2.3')
     this.stdout = stdout.capture()
   })
 
@@ -127,6 +129,50 @@ describe('lib/tasks/cache', () => {
           defaultSnapshot()
         })
       })
+    })
+  })
+
+  describe('.prune', () => {
+    it('deletes cache binaries for all version but the current one', async () => {
+      await cache.prune()
+
+      const currentVersion = util.pkgVersion()
+
+      const files = await fs.readdir('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+
+      files.forEach((file) => {
+        expect(file).to.eq(currentVersion)
+      })
+
+      defaultSnapshot()
+    })
+
+    it('doesn\'t delete any cache binaries', async () => {
+      const dir = path.join(state.getCacheDir(), '2.3.4')
+
+      await fs.removeAsync(dir)
+      await cache.prune()
+
+      const currentVersion = util.pkgVersion()
+
+      const files = await fs.readdirAsync('/.cache/Cypress')
+
+      expect(files.length).to.eq(1)
+
+      files.forEach((file) => {
+        expect(file).to.eq(currentVersion)
+      })
+
+      defaultSnapshot()
+    })
+
+    it('exits cleanly if cache dir DNE', async () => {
+      await fs.removeAsync(state.getCacheDir())
+      await cache.prune()
+
+      defaultSnapshot()
     })
   })
 

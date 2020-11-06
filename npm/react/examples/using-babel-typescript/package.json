@@ -1,0 +1,17 @@
+{
+  "name": "example-using-babel-typescript",
+  "description": "Component testing for TypeScript projects using Babel config",
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "devDependencies": {
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-react": "7.0.0",
+    "@babel/preset-typescript": "7.10.4",
+    "@cypress/react": "file:../../dist"
+  }
+}

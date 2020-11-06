@@ -1,0 +1,16 @@
+{
+  "name": "example-using-babel",
+  "description": "Component testing for projects using Babel config",
+  "private": true,
+  "scripts": {
+    "cy:open": "node ../../../../scripts/cypress open",
+    "test": "node ../../../../scripts/cypress run"
+  },
+  "devDependencies": {
+    "@babel/core": "7.4.5",
+    "@babel/plugin-proposal-class-properties": "7.4.4",
+    "@babel/preset-env": "7.4.5",
+    "@babel/preset-react": "7.0.0",
+    "@cypress/react": "file:../../dist"
+  }
+}

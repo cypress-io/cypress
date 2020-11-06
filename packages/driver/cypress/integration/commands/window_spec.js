@@ -729,6 +729,36 @@ describe('src/cy/commands/window', () => {
         cy.viewport('iphone-6+')
       })
 
+      it('iphone-se2', (done) => {
+        cy.on('viewport:changed', (viewport) => {
+          expect(viewport).to.deep.eq({ viewportWidth: 375, viewportHeight: 667 })
+
+          done()
+        })
+
+        cy.viewport('iphone-se2')
+      })
+
+      it('iphone-8', (done) => {
+        cy.on('viewport:changed', (viewport) => {
+          expect(viewport).to.deep.eq({ viewportWidth: 375, viewportHeight: 667 })
+
+          done()
+        })
+
+        cy.viewport('iphone-8')
+      })
+
+      it('iphone-7', (done) => {
+        cy.on('viewport:changed', (viewport) => {
+          expect(viewport).to.deep.eq({ viewportWidth: 375, viewportHeight: 667 })
+
+          done()
+        })
+
+        cy.viewport('iphone-7')
+      })
+
       it('iphone-6', (done) => {
         cy.on('viewport:changed', (viewport) => {
           expect(viewport).to.deep.eq({ viewportWidth: 375, viewportHeight: 667 })
@@ -787,6 +817,16 @@ describe('src/cy/commands/window', () => {
         })
 
         cy.viewport('samsung-note9')
+      })
+
+      it('macbook-16', (done) => {
+        cy.on('viewport:changed', (viewport) => {
+          expect(viewport).to.deep.eq({ viewportWidth: 1536, viewportHeight: 960 })
+
+          done()
+        })
+
+        cy.viewport('macbook-16')
       })
     })
 

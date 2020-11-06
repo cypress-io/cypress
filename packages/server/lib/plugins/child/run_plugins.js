@@ -1,12 +1,12 @@
 // this module is responsible for loading the plugins file
 // and running the exported function to register event handlers
 // and executing any tasks that the plugin registers
-const _ = require('lodash')
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 
 const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
+const resolve = require('../../util/resolve')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
@@ -14,12 +14,26 @@ const { registerTsNode } = require('../../util/ts-node')
 
 const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
-const registeredEvents = {}
+let registeredEventsById = {}
+let registeredEventsByName = {}
 
 const invoke = (eventId, args = []) => {
-  const event = registeredEvents[eventId]
+  const event = registeredEventsById[eventId]
 
   return event.handler(...args)
+}
+
+const getDefaultPreprocessor = function (config) {
+  const tsPath = resolve.typescript(config.projectRoot)
+  const options = {
+    typescript: tsPath,
+  }
+
+  debug('creating webpack preprocessor with options %o', options)
+
+  const webpackPreprocessor = require('@cypress/webpack-batteries-included-preprocessor')
+
+  return webpackPreprocessor(options)
 }
 
 let plugins
@@ -42,11 +56,11 @@ const load = (ipc, config, pluginsFile) => {
     }
 
     if (event === 'task') {
-      const existingEventId = _.findKey(registeredEvents, { event: 'task' })
+      const existingEventId = registeredEventsByName[event]
 
       if (existingEventId) {
-        handler = task.merge(registeredEvents[existingEventId].handler, handler)
-        registeredEvents[existingEventId] = { event, handler }
+        handler = task.merge(registeredEventsById[existingEventId].handler, handler)
+        registeredEventsById[existingEventId] = { event, handler }
         debug('extend task events with id', existingEventId)
 
         return
@@ -55,7 +69,8 @@ const load = (ipc, config, pluginsFile) => {
 
     const eventId = eventIdCount++
 
-    registeredEvents[eventId] = { event, handler }
+    registeredEventsById[eventId] = { event, handler }
+    registeredEventsByName[event] = eventId
 
     debug('register event', event, 'with id', eventId)
 
@@ -74,6 +89,12 @@ const load = (ipc, config, pluginsFile) => {
     debug('run plugins function')
 
     return plugins(register, config)
+  })
+  .tap(() => {
+    if (!registeredEventsByName['file:preprocessor']) {
+      debug('register default preprocessor')
+      register('file:preprocessor', getDefaultPreprocessor(config))
+    }
   })
   .then((modifiedCfg) => {
     debug('plugins file successfully loaded')
@@ -137,15 +158,15 @@ const execute = (ipc, event, ids, args = []) => {
     }
 
     case 'task':
-      task.wrap(ipc, registeredEvents, ids, args)
+      task.wrap(ipc, registeredEventsById, ids, args)
 
       return
     case '_get:task:keys':
-      task.getKeys(ipc, registeredEvents, ids)
+      task.getKeys(ipc, registeredEventsById, ids)
 
       return
     case '_get:task:body':
-      task.getBody(ipc, registeredEvents, ids, args)
+      task.getBody(ipc, registeredEventsById, ids, args)
 
       return
     default:
@@ -223,6 +244,8 @@ const runPlugins = (ipc, pluginsFile, projectRoot) => {
 // for testing purposes
 runPlugins.__reset = () => {
   tsRegistered = false
+  registeredEventsById = {}
+  registeredEventsByName = {}
 }
 
 module.exports = runPlugins

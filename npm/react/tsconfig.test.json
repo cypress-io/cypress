@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.bin.json",
+  "compilerOptions": {
+    "types": [
+      "mocha",
+      "node"
+    ]
+  }
+}

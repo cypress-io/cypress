@@ -1,0 +1,24 @@
+exports[`PositiveCounter > should render counts #0`] =
+{
+  "html": "<span>Value: 3<button class=\"decrement\">−</button><button class=\"increment\">+</button></span>"
+};
+
+exports[`PositiveCounter > should render counts #1`] =
+{
+  "html": "<span>Value: 6<button class=\"decrement\">−</button><button class=\"increment\">+</button></span>"
+};
+
+exports[`PositiveCounter > should not go negative #0`] =
+{
+  "html": "<span>Value: 0<button class=\"decrement\">−</button><button class=\"increment\">+</button></span>"
+};
+
+exports[`PositiveCounter > snapshots the component state #0`] =
+{
+  "count": 4
+};
+
+exports[`PositiveCounter > starts with zero #0`] =
+{
+  "html": "<span>Value: 0<button class=\"decrement\">−</button><button class=\"increment\">+</button></span>"
+};

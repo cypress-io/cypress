@@ -23,32 +23,41 @@ beforeEach(function () {
 })
 
 Cypress.Commands.add('visitIndex', (options = {}) => {
-  return cy.visit('/', options)
+  // disable livereload within the Cypress-loaded desktop GUI. it doesn't fully
+  // reload the app because the stubbed out ipc calls don't work after the first
+  // time, so it ends up a useless white page
+  cy.route2({ path: /livereload/ }, '')
+
+  cy.visit('/', options)
 })
 
 Cypress.Commands.add('shouldBeOnIntro', () => {
-  return cy.get('.main-nav .logo')
+  cy.get('.main-nav .logo')
 })
 
 Cypress.Commands.add('shouldBeOnProjectSpecs', () => {
   cy.contains('.folder', 'integration')
 
-  return cy.contains('.folder', 'unit')
+  cy.contains('.folder', 'unit')
 })
 
 Cypress.Commands.add('logOut', () => {
   cy.contains('Jane Lane').click()
 
-  return cy.contains('Log Out').click()
+  cy.contains('Log Out').click()
 })
 
 Cypress.Commands.add('shouldBeLoggedOut', () => {
-  return cy.contains('.main-nav a', 'Log In')
+  cy.contains('.main-nav a', 'Log In')
 })
 
 Cypress.Commands.add('setAppStore', (options = {}) => {
-  return cy.window()
+  cy.window()
   .then((win) => {
-    return win.AppStore.set(options)
+    if (options.version) {
+      win.UpdateStore.setVersion(options.version)
+    }
+
+    win.AppStore.set(options)
   })
 })

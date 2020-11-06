@@ -2,9 +2,10 @@ import _ from 'lodash'
 import { action } from 'mobx'
 import { EditorPicker } from '@packages/ui-components'
 import { observer, useLocalStore } from 'mobx-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import ipc from '../lib/ipc'
+import { useLifecycle } from '../lib/use-lifecycle'
 
 const openHelp = (e) => {
   e.preventDefault()
@@ -37,15 +38,17 @@ const FilePreference = observer(() => {
     }),
   }))
 
-  useEffect(() => {
-    ipc.getUserEditor().then(({ preferredOpener, availableEditors }) => {
-      if (preferredOpener) {
-        state.setChosenEditor(preferredOpener)
-      }
+  useLifecycle({
+    onMount () {
+      ipc.getUserEditor().then(({ preferredOpener, availableEditors }) => {
+        if (preferredOpener) {
+          state.setChosenEditor(preferredOpener)
+        }
 
-      state.setEditors(availableEditors)
-    })
-  }, [true])
+        state.setEditors(availableEditors)
+      })
+    },
+  })
 
   return (
     <div className='file-preference'>

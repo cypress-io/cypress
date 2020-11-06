@@ -27,6 +27,33 @@ const deferredPromise = function () {
 }
 
 module.exports = {
+  generateFfmpegChaptersConfig (tests) {
+    if (!tests) {
+      return null
+    }
+
+    const configString = tests.map((test) => {
+      return test.attempts.map((attempt, i) => {
+        const { videoTimestamp, wallClockDuration } = attempt
+        let title = test.title ? test.title.join(' ') : ''
+
+        if (i > 0) {
+          title += `attempt ${i}`
+        }
+
+        return [
+          '[CHAPTER]',
+          'TIMEBASE=1/1000',
+          `START=${videoTimestamp - wallClockDuration}`,
+          `END=${videoTimestamp}`,
+          `title=${title}`,
+        ].join('\n')
+      }).join('\n')
+    }).join('\n')
+
+    return `;FFMETADATA1\n${configString}`
+  },
+
   getMsFromDuration (duration) {
     return utils.timemarkToSeconds(duration) * 1000
   },
@@ -48,6 +75,18 @@ module.exports = {
       })
     }).tapCatch((err) => {
       return debug('getting codecData failed', { err })
+    })
+  },
+
+  getChapters (fileName) {
+    return new Promise((resolve, reject) => {
+      ffmpeg.ffprobe(fileName, ['-show_chapters'], (err, metadata) => {
+        if (err) {
+          return reject(err)
+        }
+
+        resolve(metadata)
+      })
     })
   },
 
@@ -217,30 +256,53 @@ module.exports = {
     })
   },
 
-  process (name, cname, videoCompression, onProgress = function () {}) {
+  async process (name, cname, videoCompression, ffmpegchaptersConfig, onProgress = function () {}) {
+    const metaFileName = `${name}.meta`
+
+    const maybeGenerateMetaFile = Promise.method(() => {
+      if (!ffmpegchaptersConfig) {
+        return false
+      }
+
+      // Writing the metadata to filesystem is necessary because fluent-ffmpeg is just a wrapper of ffmpeg command.
+      return fs.writeFile(metaFileName, ffmpegchaptersConfig).then(() => true)
+    })
+
+    const addChaptersMeta = await maybeGenerateMetaFile()
+
     let total = null
 
     return new Promise((resolve, reject) => {
       debug('processing video from %s to %s video compression %o',
         name, cname, videoCompression)
 
-      ffmpeg()
-      .input(name)
-      .videoCodec('libx264')
-      .outputOptions([
+      const command = ffmpeg()
+      const outputOptions = [
         '-preset fast',
         `-crf ${videoCompression}`,
-      ])
+      ]
+
+      if (addChaptersMeta) {
+        command.input(metaFileName)
+        outputOptions.push('-map_metadata 1')
+      }
+
+      command.input(name)
+      .videoCodec('libx264')
+      .outputOptions(outputOptions)
       // .videoFilters("crop='floor(in_w/2)*2:floor(in_h/2)*2'")
       .on('start', (command) => {
-        return debug('compression started %o', { command })
-      }).on('codecData', (data) => {
+        debug('compression started %o', { command })
+      })
+      .on('codecData', (data) => {
         debug('compression codec data: %o', data)
 
         total = utils.timemarkToSeconds(data.duration)
-      }).on('stderr', (stderr) => {
-        return debug('compression stderr log %o', { message: stderr })
-      }).on('progress', (progress) => {
+      })
+      .on('stderr', (stderr) => {
+        debug('compression stderr log %o', { message: stderr })
+      })
+      .on('progress', (progress) => {
         // bail if we dont have total yet
         if (!total) {
           return
@@ -255,11 +317,13 @@ module.exports = {
         if (percent < 1) {
           return onProgress(percent)
         }
-      }).on('error', (err, stdout, stderr) => {
+      })
+      .on('error', (err, stdout, stderr) => {
         debug('compression errored: %o', { error: err.message, stdout, stderr })
 
         return reject(err)
-      }).on('end', () => {
+      })
+      .on('end', () => {
         debug('compression ended')
 
         // we are done progressing
@@ -268,6 +332,11 @@ module.exports = {
         // rename and obliterate the original
         return fs.moveAsync(cname, name, {
           overwrite: true,
+        })
+        .then(() => {
+          if (addChaptersMeta) {
+            return fs.unlink(metaFileName)
+          }
         })
         .then(() => {
           return resolve()

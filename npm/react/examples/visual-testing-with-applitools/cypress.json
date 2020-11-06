@@ -1,0 +1,12 @@
+{
+  "fixturesFolder": false,
+  "testFiles": "**/*spec.js",
+  "viewportWidth": 1000,
+  "viewportHeight": 1000,
+  "experimentalComponentTesting": true,
+  "componentFolder": "src",
+  "video": false,
+  "env": {
+    "coverage": false
+  }
+}

@@ -1,0 +1,98 @@
+.App {
+  font-family: Arial, sans-serif;
+  max-width: 420px;
+  margin: 0 auto;
+  font-size: 1.5rem;
+  padding: 30px;
+  border-radius: 8px;
+  background: white;
+  line-height: 1;
+}
+
+body {
+  padding: 50px;
+}
+
+.add-todo {
+  display: flex;
+  width: 100%;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 4px solid #313d52;
+  margin-bottom: 2rem;
+}
+
+.todos {
+  margin-top: 20px;
+}
+
+.todo {
+  padding-right: 1em;
+  cursor: pointer;
+  background: #eef1f6;
+  border-radius: 0.5rem;
+  margin-bottom: 1em;
+  font-size: 1.2rem;
+  box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #313d52;
+}
+
+.todo_title {
+  flex-grow: 1;
+  padding: 1em;
+}
+
+.todo_remove {
+  background: #dde3ed;
+  width: 2em;
+  height: 2em;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #6d7e9b;
+}
+
+.completed {
+  color: #a0aec0;
+}
+
+.completed .todo_title {
+  text-decoration: line-through;
+}
+
+button,
+input {
+  display: block;
+  border: none;
+  overflow: hidden;
+  font-size: 1.2rem;
+}
+
+input {
+  flex-grow: 1;
+  padding: 1rem;
+  line-height: 1;
+  display: block;
+  color: #313d52;
+}
+
+button {
+  padding: 1rem;
+  flex-shrink: 0;
+  background: #313d52;
+  border: none;
+  color: white;
+}
+
+.no-todos {
+  color: #a0aec0;
+  font-size: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
