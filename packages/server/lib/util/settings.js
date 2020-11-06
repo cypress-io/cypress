@@ -124,6 +124,9 @@ module.exports = {
     }).catch({ code: 'EACCES' }, () => {
       // we cannot write due to folder permissions
       return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
+    }).catch({ code: 'EROFS' }, () => {
+      // we cannot write due to filesystem being read-only
+      return errors.warning('FOLDER_NOT_WRITABLE', projectRoot)
     }).catch((err) => {
       if (errors.isCypressErr(err)) {
         throw err
