@@ -18,7 +18,7 @@ export const VueWebpackTemplate: Template<{ webpackConfigPath: string }> = {
       Require: babel.template.ast([
         'const {',
         '  onFilePreprocessor',
-        '} = require(\'@cypress/vue/preprocessor/webpack\')',
+        '} = require(\'@cypress/vue/dist/preprocessor/webpack\')',
       ].join('\n')),
       ModuleExportsBody: babel.template.ast([
         includeWarnComment

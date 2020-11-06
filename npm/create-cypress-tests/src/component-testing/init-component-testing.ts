@@ -80,7 +80,9 @@ async function injectAndShowCypressJsonConfig (
 }
 
 async function injectAndShowSupportConfig (supportFilePath: string, framework: string) {
-  const importCode = `import \'@cypress/${framework}/support\'`
+  const importCode = framework === 'vue'
+    ? `import '@cypress/vue/dist/support'` // todo change vue bundle to output the right declaration
+    : `import \'@cypress/${framework}/support\'`
 
   await injectOrShowConfigCode(() => injectImportSupportCode(supportFilePath, importCode), {
     code: importCode,

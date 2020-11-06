@@ -1,4 +1,3 @@
-import * as babel from '@babel/core'
 import { PluginsConfigAst } from '../babel/babelTransform'
 
 export interface Template<T = unknown> {
