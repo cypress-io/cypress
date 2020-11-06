@@ -1,0 +1,43 @@
+{
+  "name": "AssertionError",
+  "message": "Timed out retrying: Expected to find element: `.new-todo`, but never found it.",
+  "stack": "AssertionError: Timed out retrying: Expected to find element: `.new-todo`, but never found it.\n    at getInputBox (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:130:13)\n    at Context.eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:105:32)",
+  "sourceMappedStack": "AssertionError: Timed out retrying: Expected to find element: `.new-todo`, but never found it.\n    at getInputBox (webpack:///cypress/integration/test-utils.js:2:13)\n    at Context.eval (webpack:///cypress/integration/spec.js:7:5)",
+  "parsedStack": [
+    {
+      "message": "AssertionError: Timed out retrying: Expected to find element: `.new-todo`, but never found it.",
+      "whitespace": ""
+    },
+    {
+      "function": "getInputBox",
+      "fileUrl": "http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js",
+      "originalFile": "webpack:///cypress/integration/test-utils.js",
+      "relativeFile": "cypress/integration/test-utils.js",
+      "absoluteFile": "/Users/gleb/git/cypress-example-todomvc/cypress/integration/test-utils.js",
+      "line": 2,
+      "column": 13,
+      "whitespace": "    "
+    },
+    {
+      "function": "Context.eval",
+      "fileUrl": "http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js",
+      "originalFile": "webpack:///cypress/integration/spec.js",
+      "relativeFile": "cypress/integration/spec.js",
+      "absoluteFile": "/Users/gleb/git/cypress-example-todomvc/cypress/integration/spec.js",
+      "line": 7,
+      "column": 5,
+      "whitespace": "    "
+    }
+  ],
+  "docsUrl": "",
+  "templateType": "",
+  "codeFrame": {
+    "line": 2,
+    "column": 13,
+    "originalFile": "cypress/integration/test-utils.js",
+    "relativeFile": "cypress/integration/test-utils.js",
+    "absoluteFile": "/Users/gleb/git/cypress-example-todomvc/cypress/integration/test-utils.js",
+    "frame": "  1 | export const getInputBox = () => {\n> 2 |   return cy.get('.new-todo')\n    |             ^\n  3 | }\n  4 | ",
+    "language": "js"
+  }
+}

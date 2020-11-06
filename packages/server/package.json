@@ -97,7 +97,7 @@
     "resolve": "1.17.0",
     "return-deep-diff": "0.4.0",
     "sanitize-filename": "1.6.3",
-    "semver": "6.3.0",
+    "semver": "7.3.2",
     "send": "0.17.1",
     "shell-env": "3.0.0",
     "signal-exit": "3.0.3",
