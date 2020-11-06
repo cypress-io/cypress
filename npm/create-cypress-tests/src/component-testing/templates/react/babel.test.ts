@@ -2,9 +2,9 @@ import { expect } from 'chai'
 import mockFs from 'mock-fs'
 import * as babel from '@babel/core'
 import { BabelTemplate } from './babel'
-import { createTransformPluginsFileBabelPlugin } from '../../bablTransform'
+import { createTransformPluginsFileBabelPlugin } from '../../babel/babelTransform'
 
-describe.only('babel installation template', () => {
+describe('babel installation template', () => {
   beforeEach(mockFs.restore)
 
   it('resolves babel.config.json', () => {
@@ -70,7 +70,7 @@ describe.only('babel installation template', () => {
     expect(success).to.equal(true)
   })
 
-  it.only('automatically injects config to the code', () => {
+  it('automatically injects config to the code', () => {
     const code = [
       'const something = require("something")',
       'module.exports = (on) => {',

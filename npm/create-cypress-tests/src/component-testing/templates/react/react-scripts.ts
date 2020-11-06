@@ -3,6 +3,7 @@ import { createFindPackageJsonIterator } from '../../../findPackageJson'
 import { Template } from '../Template'
 import { validateSemverVersion } from '../../../utils'
 import { MIN_SUPPORTED_VERSION } from '../../versions'
+import * as babel from '@babel/core'
 
 export const ReactScriptsTemplate: Template = {
   recommendedComponentFolder: 'src',
@@ -21,6 +22,16 @@ export const ReactScriptsTemplate: Template = {
       '  return config',
       '}',
     ].join('\n')
+  },
+  getPluginsCodeAst: () => {
+    return {
+      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/react-scripts\')'),
+      ModuleExportsBody: babel.template([
+        '  preprocessor(on, config)',
+        '  // IMPORTANT to return the config object',
+        '  return config',
+      ].join('\n'), { preserveComments: true }),
+    }
   },
   test: () => {
     // TODO also determine ejected create react app

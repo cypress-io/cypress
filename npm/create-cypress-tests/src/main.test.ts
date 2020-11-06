@@ -97,13 +97,11 @@ describe('init script', () => {
       fsCopyStub?.restore()
       sinon.stub(process, 'cwd').returns(e2eTestOutputPath)
 
-      // @ts-ignore
-      fsExtra.rmdirSync(e2eTestOutputPath, { recursive: true })
-
+      await fsExtra.remove(e2eTestOutputPath)
       await fsExtra.mkdir(e2eTestOutputPath)
     })
 
-    it('Really copies real plugins and support files', async () => {
+    it('Copies plugins and support files', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
         JSON.stringify({ name: 'test' }, null, 2),

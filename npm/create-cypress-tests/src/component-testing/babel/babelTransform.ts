@@ -1,9 +1,48 @@
-import path from 'path'
 import * as fs from 'fs-extra'
 import * as babel from '@babel/core'
 import * as babelTypes from '@babel/types'
 
-type PluginsAst = Record<'Require' | 'ModuleExportsBody', ReturnType<typeof babel.template>>
+export type PluginsAst = Record<'Require' | 'ModuleExportsBody', ReturnType<typeof babel.template>>
+
+function tryRequirePrettier () {
+  try {
+    return require('prettier')
+  } catch (e) {
+    return null
+  }
+}
+
+async function transformFileViaPlugin (filePath: string, babelPlugin: babel.PluginObj) {
+  try {
+    const initialCode = await fs.readFile(filePath, { encoding: 'utf-8' })
+
+    const updatedResult = await babel.transformAsync(initialCode, {
+      plugins: [babelPlugin],
+    })
+
+    if (!updatedResult) {
+      return false
+    }
+
+    let finalCode = updatedResult.code
+
+    if (finalCode === initialCode) {
+      return false
+    }
+
+    const maybePrettier = tryRequirePrettier()
+
+    if (maybePrettier && maybePrettier.format) {
+      finalCode = maybePrettier.format(finalCode, { parser: 'babel' })
+    }
+
+    await fs.writeFile(filePath, finalCode)
+
+    return true
+  } catch (e) {
+    return false
+  }
+}
 
 export function createTransformPluginsFileBabelPlugin (ast: PluginsAst): babel.PluginObj {
   return {
@@ -30,6 +69,7 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsAst): babel.P
 
           if (paramsLength === 0) {
             path.parent.right.params.push(babelTypes.identifier('on'))
+            path.parent.right.params.push(babelTypes.identifier('config'))
           }
 
           if (paramsLength === 1) {
@@ -43,42 +83,7 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsAst): babel.P
   }
 }
 
-function tryRequirePrettier () {
-  try {
-    return require('prettier')
-  } catch (e) {
-    return null
-  }
-}
-
-async function transformFileViaPlugin (filePath: string, babelPlugin: babel.PluginObj) {
-  try {
-    const pluginsFile = await fs.readFile(filePath, { encoding: 'utf-8' })
-
-    const updatedResult = await babel.transformAsync(pluginsFile, {
-      plugins: [babelPlugin],
-    })
-
-    if (!updatedResult) {
-      return false
-    }
-
-    let finalCode = updatedResult.code
-    const maybePrettier = tryRequirePrettier()
-
-    if (maybePrettier && maybePrettier.format) {
-      finalCode = maybePrettier.format(finalCode, { parser: 'babel' })
-    }
-
-    await fs.writeFile(filePath, finalCode)
-
-    return true
-  } catch (e) {
-    return false
-  }
-}
-
-export async function autoInjectPluginsCode (pluginsFilePath: string, ast: PluginsAst) {
+export async function injectPluginsCode (pluginsFilePath: string, ast: PluginsAst) {
   return transformFileViaPlugin(pluginsFilePath, createTransformPluginsFileBabelPlugin(ast))
 }
 
@@ -100,15 +105,33 @@ export async function getPluginsSourceExample (ast: PluginsAst) {
   return babelResult.code
 }
 
-export async function injectImportSupportCode (supportFilePath: string, importCode: string) {
+export function createSupportBabelPlugin (importCode: string): babel.PluginObj<any> {
   const template = babel.template(importCode)
-  const plugin: babel.PluginObj = {
+
+  const plugin: babel.PluginObj<{
+    root: babel.NodePath<babel.types.Program>
+    lastImport: babel.NodePath<babel.types.ImportDeclaration> |null
+  }> = {
     visitor: {
-      Program: (path) => {
-        path.unshiftContainer('body', template())
+      Program (path) {
+        this.root = path
       },
+      ImportDeclaration (path) {
+        this.lastImport = path
+      },
+    },
+    post () {
+      if (this.lastImport) {
+        this.lastImport.insertAfter(template())
+      } else if (this.root) {
+        this.root.unshiftContainer('body', template())
+      }
     },
   }
 
-  return transformFileViaPlugin(supportFilePath, plugin)
+  return plugin
+}
+
+export async function injectImportSupportCode (supportFilePath: string, importCode: string) {
+  return transformFileViaPlugin(supportFilePath, createSupportBabelPlugin(importCode))
 }

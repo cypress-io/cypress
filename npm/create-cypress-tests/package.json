@@ -5,14 +5,15 @@
   "private": false,
   "main": "index.js",
   "scripts": {
-    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js",
-    "prepare-example": "rimraf initial-template/* && cp -r ../../packages/example/* initial-template",
+    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js && node scripts/example copy-to ./dist/initial-template",
+    "prepare-example": "node scripts/example copy-to ./initial-template",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'",
     "test:watch": "yarn test -w"
   },
   "dependencies": {
     "@babel/core": "^7.5.4",
     "@babel/plugin-transform-typescript": "^7.2.0",
+    "@babel/template": "^7.5.4",
     "@babel/types": "^7.5.0",
     "chalk": "4.1.0",
     "cli-highlight": "2.1.4",

@@ -25,7 +25,6 @@
   ],
   "include": [
     "./src/**/*.ts",
-    "src/component-testing/babel/examples/*",
-    "src/initial-template/*"
+    "./initial-template/**/*.{js}"
   ]
 }

@@ -69,7 +69,7 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
     await initComponentTesting({ config, cypressConfigPath, useYarn })
   }
 
-  console.log(`\n✅ Success! Cypress is installed and ready to run tests.`)
+  console.log(`\n👍  Success! Cypress is installed and ready to run tests.`)
   printCypressCommandsHelper({ useYarn })
 
   console.log(`\nHappy testing with ${chalk.green('cypress.io')} 🌲\n`)

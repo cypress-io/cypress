@@ -1,3 +1,4 @@
+import * as babel from '@babel/core'
 import { createFindPackageJsonIterator } from '../../../findPackageJson'
 import { Template } from '../Template'
 import { validateSemverVersion } from '../../../utils'
@@ -19,10 +20,20 @@ export const NextTemplate: Template = {
       '}',
     ].join('\n')
   },
-  test: () => {
-    const packageJsonIterator = createFindPackageJsonIterator(process.cwd())
+  getPluginsCodeAst: () => {
+    return {
+      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/next\')'),
+      ModuleExportsBody: babel.template([
+        '  preprocessor(on, config)',
+        '  // IMPORTANT to return the config object',
+        '  return config',
+      ].join('\n')),
+    }
+  },
+  test: (cwd) => {
+    const packageJsonIterator = createFindPackageJsonIterator(cwd)
 
-    return packageJsonIterator.map(({ dependencies, devDependencies }) => {
+    return packageJsonIterator.map(({ dependencies, devDependencies }, path) => {
       if (!dependencies && !devDependencies) {
         return { success: false }
       }
