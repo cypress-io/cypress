@@ -4,13 +4,13 @@ const check = require('check-more-types')
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:routes')
 
+const socket = require('@package/socket')
 const AppData = require('./util/app_data')
 const CacheBuster = require('./util/cache_buster')
 const spec = require('./controllers/spec')
 const reporter = require('./controllers/reporter')
 const runner = require('./controllers/runner')
 const xhrs = require('./controllers/xhrs')
-const client = require('./controllers/client')
 const files = require('./controllers/files')
 const staticCtrl = require('./controllers/static')
 
@@ -25,7 +25,7 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   })
 
   app.get('/__cypress/socket.io.js', (req, res) => {
-    client.handle(req, res)
+    socket.handle(req, res)
   })
 
   app.get('/__cypress/reporter/*', (req, res) => {
