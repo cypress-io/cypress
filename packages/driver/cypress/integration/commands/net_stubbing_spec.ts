@@ -1605,20 +1605,22 @@ describe('network stubbing', { retries: 2 }, function () {
         .wait('@err', { timeout: 50 })
       })
 
-      it('can timeout in req.reply handler', {
-        defaultCommandTimeout: 50,
-      }, function (done) {
+      it('can timeout in req.reply handler', function (done) {
         cy.on('fail', (err) => {
+          Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
 
         cy.route2('/timeout', (req) => {
+          Cypress.config('defaultCommandTimeout', 50)
+
           req.reply(() => {
             return Promise.delay(200)
           })
-        }).visit('/timeout', { timeout: 500 })
+        })
+        .visit('/timeout')
       })
 
       it('can timeout when retrieving upstream response', {
