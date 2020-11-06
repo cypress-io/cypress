@@ -2,9 +2,7 @@
   "name": "@packages/runner-ct",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/test"
-  },
+  "scripts": {},
   "dependencies": {
     "@packages/driver": "*",
     "@vue/test-utils": "^1.1.0",
