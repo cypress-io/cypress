@@ -1495,8 +1495,8 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         }).then(() => {
           return $.get('/timeout').then((responseText) => {
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 475, 500)
             expect(responseText).to.eq(payload)
-            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
 
             done()
           })
