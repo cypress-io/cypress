@@ -1793,7 +1793,7 @@ describe('src/cy/commands/xhr', () => {
         .get('#trigger-xhr')
         .click()
 
-        cy.contains('#result', 12).should('be.visible')
+        cy.contains('#result', 14).should('be.visible')
       })
 
       it('works if the JSON file has boolean content', () => {
