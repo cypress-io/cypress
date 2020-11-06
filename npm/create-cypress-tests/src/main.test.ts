@@ -6,7 +6,6 @@ import fsExtra from 'fs-extra'
 import { main } from './main'
 import sinonChai from 'sinon-chai'
 import childProcess from 'child_process'
-import chalk from 'chalk'
 
 use(sinonChai)
 
@@ -33,7 +32,9 @@ describe('create-cypress-tests', () => {
     execStub = sinon.stub(childProcess, 'exec').callsFake((command, callback) => callback())
     // @ts-ignore
     fsCopyStub = sinon.stub(fsExtra, 'copy').returns(Promise.resolve())
-    processExitStub = sinon.stub(process, 'exit')
+    processExitStub = sinon.stub(process, 'exit').callsFake(() => {
+      throw new Error('process.exit should not be called')
+    })
   })
 
   afterEach(() => {
@@ -121,7 +122,7 @@ describe('create-cypress-tests', () => {
       await fsExtra.mkdir(e2eTestOutputPath)
     })
 
-    it.only('Copies plugins and support files', async () => {
+    it('Copies plugins and support files', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
         JSON.stringify({ name: 'test' }, null, 2),
