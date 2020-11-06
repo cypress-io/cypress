@@ -97,8 +97,14 @@ const createApp = (port) => {
     return res.send({})
   })
 
+  app.get('/html-content-type-with-charset-param', (req, res) => {
+    res.setHeader('Content-Type', 'text/html;charset=utf-8')
+
+    return res.end('<html><head><title>Test</title></head><body><center>Hello</center></body></html>')
+  })
+
   app.get('/invalid-content-type', (req, res) => {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8,text/html')
+    res.setHeader('Content-Type', 'text/image; charset=utf-8')
 
     return res.end('<html><head><title>Test</title></head><body><center>Hello</center></body></html>')
   })

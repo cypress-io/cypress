@@ -5,6 +5,7 @@
   "main": "dist",
   "scripts": {
     "build": "rimraf dist && yarn transpile && yarn build:dist-package",
+    "build-prod": "yarn build",
     "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
     "cy:open": "node ../../scripts/cypress open",
@@ -120,7 +121,7 @@
   },
   "homepage": "https://on.cypress.io/component-testing",
   "author": "Gleb Bahmutov <gleb.bahmutov@gmail.com>",
-  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=JessicaSachs&labels=experiment%3A+component+testing,npm%3A%20%40cypress%2Freact&template=component-testing.md&title=",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20%40cypress%2Freact&template=1-bug-report.md&title=",
   "keywords": [
     "react",
     "cypress",
@@ -148,6 +149,20 @@
       "optional": true
     }
   },
+  "ciJobs": [
+    "npm-react",
+    "npm-react-axe",
+    "npm-react-next",
+    "npm-react-cra",
+    "npm-react-cra-folder",
+    "npm-react-rollup",
+    "npm-react-sass-ts",
+    "npm-react-snapshots",
+    "npm-react-tailwind",
+    "npm-react-percy",
+    "npm-react-webpack-file",
+    "npm-react-webpack-options"
+  ],
   "standard": {
     "globals": [
       "Cypress",

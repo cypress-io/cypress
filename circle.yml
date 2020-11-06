@@ -120,6 +120,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -161,6 +162,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -184,6 +186,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -281,6 +284,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -381,6 +385,13 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
+  check-halt:
+    description: Halt CI if the package that this job corresponds to is unchanged
+    steps:
+      - run:
+          name: Check if job should run
+          command: yarn check-halt || circleci-agent step halt
+
 jobs:
   ## code checkout and yarn installs
   build:
@@ -459,6 +470,7 @@ jobs:
           root: ~/
           paths:
             - cypress
+            - .ssh
 
   lint:
     <<: *defaults
@@ -477,6 +489,15 @@ jobs:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
       - store-npm-logs
+
+  list-changed-packages:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: List changed packages
+          command: node scripts/changed-packages.js
 
   # a special job that keeps polling Circle and when all
   # individual jobs are finished, it closes the Percy build
@@ -515,6 +536,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -539,6 +561,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -584,6 +607,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - install-required-node
       - run:
           name: Mocha tests
@@ -603,6 +627,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -616,6 +641,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -628,6 +654,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -708,6 +735,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -733,6 +761,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -767,6 +796,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -800,6 +830,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -821,6 +852,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -842,6 +874,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -851,6 +884,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -884,23 +918,12 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
-  npm-webpack-preprocessor-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Build
-          command: yarn workspace @cypress/webpack-preprocessor build
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/webpack-preprocessor
-
   npm-vue:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
@@ -909,20 +932,12 @@ jobs:
           command: yarn workspace @cypress/vue test
       - store-npm-logs
 
-  npm-vue-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/vue
-
   npm-react:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -948,6 +963,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - restore_cache:
           name: Restore Cache
           keys:
@@ -965,16 +981,8 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
-
-  npm-react-release:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Release
-          command: yarn semantic-release @cypress/react
-
+  
+  
   npm-create-cypress-tests:
     <<: *defaults
     steps:
@@ -983,24 +991,25 @@ jobs:
       - run:
           name: Run unit test
           command: yarn workspace create-cypress-tests test 
-
+          
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
 
-  npm-eslint-plugin-dev-release:
+  npm-release:
     <<: *defaults
     steps:
       - attach_workspace:
           at: ~/
       - run:
-          name: Release
-          command: yarn semantic-release @cypress/eslint-plugin-dev
+          name: Release packages
+          command: yarn npm-release
 
   build-binary:
     <<: *defaults
@@ -1035,6 +1044,7 @@ jobs:
 
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: $(yarn bin)/print-arch
       - install-required-node
       - run:
@@ -1067,6 +1077,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: ls -l
       - run:
           name: upload unique binary
@@ -1084,6 +1095,7 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -1110,6 +1122,7 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - run:
@@ -1134,6 +1147,7 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
+      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-test-tiny
       - run:
@@ -1150,6 +1164,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - install-required-node
       - run:
           name: Check next dev version
@@ -1196,6 +1211,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: ls -l
       # NPM package file should have filename cypress-<version>.tgz
       - run:
@@ -1218,6 +1234,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1255,6 +1272,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: ls -la
       - post-install-comment
 
@@ -1263,6 +1281,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1298,6 +1317,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1339,6 +1359,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1382,6 +1403,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1425,6 +1447,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1457,6 +1480,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1592,6 +1616,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       # the user should be "node"
       - run: whoami
       - run: pwd
@@ -1640,6 +1665,9 @@ linux-workflow: &linux-workflow
     - build
     - lint:
         name: Linux lint
+        requires:
+          - build
+    - list-changed-packages:
         requires:
           - build
     - percy-finalize:
@@ -1718,69 +1746,50 @@ linux-workflow: &linux-workflow
     - npm-webpack-preprocessor:
         requires:
           - build
-    - npm-webpack-preprocessor-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - build
-          - npm-webpack-preprocessor
-
     - npm-vue:
         requires:
           - build
-    - npm-vue-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - build
-          - npm-vue
-
     - npm-react:
         requires:
           - build
-
     # Run tests for end-to-end react component tests examples
     - npm-react-e2e-example:
-        name: React + Axe component testing
+        name: npm-react-axe
         path: examples/a11y
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Next component testing
+        name: npm-react-next
         path: examples/nextjs
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + CRA component testing
+        name: npm-react-cra
         path: examples/react-scripts
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + CRA folder component testing
+        name: npm-react-cra-folder
         path: examples/react-scripts-folder
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Rollup component testing
+        name: npm-react-rollup
         path: examples/rollup
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Sass + TS component testing
+        name: npm-react-sass-ts
         path: examples/sass-and-ts
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Snapshots component testing
+        name: npm-react-snapshots
         path: examples/snapshots
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Tailwind component testing
+        name: npm-react-tailwind
         path: examples/tailwind
         requires:
           - npm-react
@@ -1791,7 +1800,7 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - npm-react
     - npm-react-e2e-example:
-        name: React + Percy component testing
+        name: npm-react-percy
         path: examples/visual-testing-with-percy
         requires:
           - npm-react
@@ -1802,38 +1811,27 @@ linux-workflow: &linux-workflow
     #     requires:
     #       - npm-react
     - npm-react-e2e-example:
-        name: React + Webpack file component testing
+        name: npm-react-webpack-file
         path: examples/webpack-file
         requires:
           - npm-react
     - npm-react-e2e-example:
-        name: React + Webpack options component testing
+        name: npm-react-webpack-options
         path: examples/webpack-options
         requires:
           - npm-react
-
-    - npm-react-release:
-        filters:
-          branches:
-            only:
-              - master
-        requires:
-          - build
-          - npm-vue
+    
     - npm-create-cypress-tests:
         requires:
           - build
+
     - npm-eslint-plugin-dev:
         requires:
           - build
-    - npm-eslint-plugin-dev-release:
-        filters:
-          branches:
-            only:
-              - master
+
+    - npm-release:
         requires:
           - build
-          - npm-eslint-plugin-dev
 
     # various testing scenarios, like building full binary
     # and testing it on a real project
