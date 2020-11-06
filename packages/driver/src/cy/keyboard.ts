@@ -200,22 +200,6 @@ const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
 
 const getTextLength = (str) => _.toArray(str).length
 
-const fillKeyDetailDefaults = (key) => {
-  const details = _.defaults({}, key, {
-    type: 'key',
-    key: '',
-    keyCode: 0,
-    code: '',
-    text: '',
-    location: 0,
-    events: {},
-  })
-
-  details.originalSequence = key.key
-
-  return details
-}
-
 const getKeyDetails = (onKeyNotFound) => {
   return (key: string): KeyDetails | ShortcutDetails => {
     let foundKey: KeyDetailsPartial
@@ -227,7 +211,15 @@ const getKeyDetails = (onKeyNotFound) => {
     }
 
     if (foundKey) {
-      const details = fillKeyDetailDefaults(foundKey)
+      const details = _.defaults({}, foundKey, {
+        type: 'key',
+        key: '',
+        keyCode: 0,
+        code: '',
+        text: '',
+        location: 0,
+        events: {},
+      })
 
       if (getTextLength(details.key) === 1) {
         details.text = details.key
@@ -245,16 +237,23 @@ const getKeyDetails = (onKeyNotFound) => {
       }
 
       const keys = key.split('+')
-      let lastKey = _.last(keys)!
+      let lastKey = _.last(keys)
 
       if (lastKey === 'plus') {
         keys[keys.length - 1] = '+'
         lastKey = '+'
       }
 
-      const modifiers = keys.filter((k, i) => i !== keys.length - 1)
+      if (!lastKey) {
+        return onKeyNotFound(key, _.keys(getKeymap()).join(', '))
+      }
 
-      modifiers.forEach((m) => {
+      const keyWithModifiers = getKeyDetails(onKeyNotFound)(lastKey) as KeyDetails
+
+      let hasModifierBesidesShift = false
+
+      const modifiers = keys.slice(0, -1)
+      .map((m) => {
         if (!Object.keys(modifierChars).includes(m)) {
           $errUtils.throwErrByPath('type.not_a_modifier', {
             args: {
@@ -262,19 +261,27 @@ const getKeyDetails = (onKeyNotFound) => {
             },
           })
         }
-      })
+
+        if (m !== 'shift') {
+          hasModifierBesidesShift = true
+        }
+
+        return getKeyDetails(onKeyNotFound)(m)
+      }) as KeyDetails[]
 
       const details: ShortcutDetails = {
         type: 'shortcut',
-        modifiers: keys
-        .filter((k, i) => i !== keys.length - 1)
-        .map((key) => findKeyDetailsOrLowercase(key))
-        .map((key) => fillKeyDetailDefaults(key)),
-        key: fillKeyDetailDefaults(USKeyboard[lastKey]),
+        modifiers,
+        key: keyWithModifiers,
         originalSequence: key,
       }
 
-      details.key.text = details.key.key
+      // if we are going to type {ctrl+b}, the 'b' shouldn't be input as text
+      // normally we don't bypass text input but for shortcuts it's definitely what the user wants
+      // since the modifiers only apply to this single key.
+      if (hasModifierBesidesShift) {
+        details.key.text = null
+      }
 
       return details
     }
@@ -751,72 +758,74 @@ export class Keyboard {
 
           if (key.type === 'shortcut') {
             this.simulateShortcut(activeEl, key, options)
-          } else {
-            debug('typing key:', key.key)
 
-            _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
+            return null
+          }
 
-            if (!_skipCheckUntilIndex) {
-              const { skipCheckUntilIndex, isClearChars } = validateTyping(
-                activeEl,
-                keyDetailsArr,
-                currentKeyIndex,
-                options.onFail,
-                _skipCheckUntilIndex,
-                options.force,
-              )
+          debug('typing key:', key.key)
 
-              _skipCheckUntilIndex = skipCheckUntilIndex
+          _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
 
-              if (
-                _skipCheckUntilIndex
+          if (!_skipCheckUntilIndex) {
+            const { skipCheckUntilIndex, isClearChars } = validateTyping(
+              activeEl,
+              keyDetailsArr,
+              currentKeyIndex,
+              options.onFail,
+              _skipCheckUntilIndex,
+              options.force,
+            )
+
+            _skipCheckUntilIndex = skipCheckUntilIndex
+
+            if (
+              _skipCheckUntilIndex
               && $elements.isNeedSingleValueChangeInputElement(activeEl)
-              ) {
-                const originalText = $elements.getNativeProp(activeEl, 'value')
+            ) {
+              const originalText = $elements.getNativeProp(activeEl, 'value')
 
-                debug('skip validate until:', _skipCheckUntilIndex)
-                const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
+              debug('skip validate until:', _skipCheckUntilIndex)
+              const keysToType = keyDetailsArr.slice(currentKeyIndex, currentKeyIndex + _skipCheckUntilIndex)
 
-                _.each(keysToType, (key) => {
-                  // singleValueChange inputs must have their value set once at the end
-                  // performing the simulatedDefault for a key would try to insert text on each character
-                  // we still send all the events as normal, however
-                  if (key.type === 'key') {
-                    key.simulatedDefault = _.noop
-                  }
-                })
+              _.each(keysToType, (key) => {
+                // singleValueChange inputs must have their value set once at the end
+                // performing the simulatedDefault for a key would try to insert text on each character
+                // we still send all the events as normal, however
+                if (key.type === 'key') {
+                  key.simulatedDefault = _.noop
+                }
+              })
 
-                const lastKeysToType = _.last(keysToType)!
+              const lastKeyToType = _.last(keysToType)!
 
-                if (lastKeysToType.type === 'key') {
-                  lastKeysToType.simulatedDefault = () => {
-                    options.onValueChange(originalText, activeEl)
+              if (lastKeyToType.type === 'key') {
+                lastKeyToType.simulatedDefault = () => {
+                  options.onValueChange(originalText, activeEl)
 
-                    const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
+                  const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
 
-                    debug('setting element value', valToSet, activeEl)
+                  debug('setting element value', valToSet, activeEl)
 
-                    return $elements.setNativeProp(
-                      activeEl as $elements.HTMLTextLikeInputElement,
-                      'value',
-                      valToSet,
-                    )
-                  }
+                  return $elements.setNativeProp(
+                    activeEl as $elements.HTMLTextLikeInputElement,
+                    'value',
+                    valToSet,
+                  )
                 }
               }
-            } else {
-              debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
             }
-
-            // simulatedDefaultOnly keys will not send any events, and cannot be canceled
-            if (key.simulatedDefaultOnly) {
-              key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
-
-              return null
-            }
-
-            this.typeSimulatedKey(activeEl, key, options)
+          } else {
+            debug('skipping validation due to *skipCheckUntilIndex*', _skipCheckUntilIndex)
           }
+
+          // simulatedDefaultOnly keys will not send any events, and cannot be canceled
+          if (key.simulatedDefaultOnly) {
+            key.simulatedDefault!(activeEl as HTMLTextLikeElement, key, options)
+
+            return null
+          }
+
+          this.typeSimulatedKey(activeEl, key, options)
 
           return null
         }
