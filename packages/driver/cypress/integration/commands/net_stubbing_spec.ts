@@ -1629,7 +1629,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }, function (done) {
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
-          .and.contain('ESOCKETTIMEDOUT')
+          .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()
         })
