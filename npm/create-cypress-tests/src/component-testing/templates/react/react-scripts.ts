@@ -13,23 +13,12 @@ export const ReactScriptsTemplate: Template = {
       ? 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts'
       : 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/react-scripts-folder'
   },
-  getPluginsCode: () => {
-    return [
-      'const preprocessor = require(\'@cypress/react/plugins/react-scripts\')',
-      'module.exports = (on, config) => {',
-      '   preprocessor(on, config)',
-      '  // IMPORTANT to return the config object',
-      '  return config',
-      '}',
-    ].join('\n')
-  },
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/react-scripts\')'),
-      ModuleExportsBody: babel.template([
-        '  preprocessor(on, config)',
-        '  // IMPORTANT to return the config object',
-        '  return config',
+      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/react-scripts\')'),
+      ModuleExportsBody: babel.template.ast([
+        'preprocessor(on, config)',
+        'return config // IMPORTANT to return the config object',
       ].join('\n'), { preserveComments: true }),
     }
   },

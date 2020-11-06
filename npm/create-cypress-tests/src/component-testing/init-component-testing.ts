@@ -90,12 +90,16 @@ async function injectAndShowSupportConfig (supportFilePath: string, framework: s
   })
 }
 
-async function injectAndShowPluginConfig<T> (template: Template<T>, pluginsFilePath: string, emptyProject: boolean) {
-  const ast = template.getPluginsCodeAst?.()
-
-  if (!ast) {
-    return
-  }
+async function injectAndShowPluginConfig<T> (template: Template<T>, {
+  templatePayload,
+  pluginsFilePath,
+  cypressProjectRoot,
+}: {
+  templatePayload: T | null
+  pluginsFilePath: string
+  cypressProjectRoot: string
+}) {
+  const ast = template.getPluginsCodeAst(templatePayload, { cypressProjectRoot })
 
   await injectOrShowConfigCode(() => injectPluginsCode(pluginsFilePath, ast), {
     code: await getPluginsSourceExample(ast),
@@ -177,7 +181,11 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
 
   await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
   await injectAndShowSupportConfig(supportFilePath, framework)
-  await injectAndShowPluginConfig(chosenTemplate, pluginsFilePath, false)
+  await injectAndShowPluginConfig(chosenTemplate, {
+    templatePayload,
+    pluginsFilePath,
+    cypressProjectRoot,
+  })
 
   if (chosenTemplate.printHelper) {
     chosenTemplate.printHelper()

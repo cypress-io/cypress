@@ -1,8 +1,7 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
-import * as babel from '@babel/core'
 import { BabelTemplate } from './babel'
-import { createTransformPluginsFileBabelPlugin } from '../../babel/babelTransform'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 
 describe('babel installation template', () => {
   beforeEach(mockFs.restore)
@@ -70,17 +69,5 @@ describe('babel installation template', () => {
     expect(success).to.equal(true)
   })
 
-  it('automatically injects config to the code', () => {
-    const code = [
-      'const something = require("something")',
-      'module.exports = (on) => {',
-      '};',
-    ].join('\n')
-
-    const output = babel.transformSync(code, {
-      plugins: [createTransformPluginsFileBabelPlugin(BabelTemplate.getPluginsCodeAst!())],
-    })
-
-    console.log('OUTPUT\n', output?.code)
-  })
+  it('correctly generates plugins config', () => snapshotPluginsAstCode(BabelTemplate))
 })

@@ -1,7 +1,6 @@
 import chalk from 'chalk'
 import findUp from 'find-up'
 import * as babel from '@babel/core'
-
 import { Template } from '../Template'
 import { createFindPackageJsonIterator } from '../../../findPackageJson'
 
@@ -11,28 +10,15 @@ export const BabelTemplate: Template = {
   )} This is not a replacement for bundling tool. We will use ${chalk.red(
     'webpack',
   )} to bundle the components for testing.`,
-  getExampleUrl: () => {
-    return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/babel'
-  },
   recommendedComponentFolder: 'cypress/component',
-  getPluginsCode: () => {
-    return [
-      'const preprocessor = require(\'@cypress/react/plugins/babel\')',
-      'module.exports = (on, config) => {',
-      '  preprocessor(on, config)',
-      '  // IMPORTANT to return the config object',
-      '  return config',
-      '}',
-    ].join('\n')
-  },
+  getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/babel',
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/babel\')'),
-      ModuleExportsBody: babel.template([
-        '  preprocessor(on, config)',
-        '  // IMPORTANT to return the config object',
-        '  return config',
-      ].join('\n')),
+      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/babel\')'),
+      ModuleExportsBody: babel.template.ast([
+        'preprocessor(on, config)',
+        'return config // IMPORTANT to return the config object',
+      ].join('\n'), { preserveComments: true }),
     }
   },
   test: (cwd) => {

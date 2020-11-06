@@ -1,8 +1,8 @@
 import * as babel from '@babel/core'
 import { expect } from 'chai'
-import { createSupportBabelPlugin, createTransformPluginsFileBabelPlugin, PluginsAst } from './babelTransform'
+import { createSupportBabelPlugin, createTransformPluginsFileBabelPlugin } from './babelTransform'
 
-describe('babel transform', () => {
+describe('babel transform utils', () => {
   context('support babel template', () => {
     it('injects import after the last import in the file', () => {
       const plugin = createSupportBabelPlugin('import "@cypress/react"')
@@ -60,8 +60,8 @@ describe('babel transform', () => {
   context('Plugins config babel plugin', () => {
     it('injects code into the plugins file based on ast', () => {
       const plugin = createTransformPluginsFileBabelPlugin({
-        Require: babel.template('require("something")'),
-        ModuleExportsBody: babel.template('yey()'),
+        Require: babel.template.ast('require("something")'),
+        ModuleExportsBody: babel.template.ast('yey()'),
       })
 
       const output = babel.transformSync([

@@ -4,6 +4,7 @@ import findUp from 'find-up'
 import highlight from 'cli-highlight'
 import { createFindPackageJsonIterator } from '../../../findPackageJson'
 import { Template } from '../Template'
+import * as babel from '@babel/core'
 
 export function extractRollupConfigPathFromScript (script: string) {
   if (script.includes('rollup ')) {
@@ -25,31 +26,29 @@ export const RollupTemplate: Template<{ rollupConfigPath: string }> = {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/rollup'
   },
   recommendedComponentFolder: 'src',
-  getPluginsCode: (payload, { cypressProjectRoot }) => {
+  getPluginsCodeAst: (payload, { cypressProjectRoot }) => {
     const includeWarnComment = !payload
     const rollupConfigPath = payload
       ? path.relative(cypressProjectRoot, payload.rollupConfigPath)
       : 'rollup.config.js'
 
-    return [
-      `// do not forget to install`,
-      `const rollupPreprocessor = require('@bahmutov/cy-rollup')`,
-      `module.exports = (on, config) => {`,
-      `  on(`,
-      `    'file:preprocessor',`,
-      `    rollupPreprocessor({`,
-      includeWarnComment
-        ? '      // TODO replace with valid rollup config path'
-        : '',
-      `      configFile: '${rollupConfigPath}',`,
-      `    }),`,
-      `  )`,
-      ``,
-      `  require('@cypress/code-coverage/task')(on, config)`,
-      `  // IMPORTANT to return the config object`,
-      `  return config`,
-      `}`,
-    ].join('\n')
+    return {
+      Require: babel.template.ast('const rollupPreprocessor = require("@bahmutov/cy-rollup")'),
+      ModuleExportsBody: babel.template.ast([
+        `on(`,
+        `  'file:preprocessor',`,
+        `  rollupPreprocessor({`,
+        includeWarnComment
+          ? '      // TODO replace with valid rollup config path'
+          : '',
+        `    configFile: '${rollupConfigPath}',`,
+        `  }),`,
+        `)`,
+        ``,
+        `require('@cypress/code-coverage/task')(on, config)`,
+        `return config // IMPORTANT to return the config object`,
+      ].join('\n'), { preserveComments: true }),
+    }
   },
   printHelper: () => {
     console.log(

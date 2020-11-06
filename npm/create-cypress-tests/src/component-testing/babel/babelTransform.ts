@@ -2,7 +2,7 @@ import * as fs from 'fs-extra'
 import * as babel from '@babel/core'
 import * as babelTypes from '@babel/types'
 
-export type PluginsAst = Record<'Require' | 'ModuleExportsBody', ReturnType<typeof babel.template>>
+export type PluginsConfigAst = Record<'Require' | 'ModuleExportsBody', ReturnType<typeof babel.template.ast>>
 
 function tryRequirePrettier () {
   try {
@@ -44,11 +44,11 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
   }
 }
 
-export function createTransformPluginsFileBabelPlugin (ast: PluginsAst): babel.PluginObj {
+export function createTransformPluginsFileBabelPlugin (ast: PluginsConfigAst): babel.PluginObj {
   return {
     visitor: {
       Program: (path) => {
-        path.unshiftContainer('body', ast.Require())
+        path.unshiftContainer('body', ast.Require)
       },
       Function: (path) => {
         if (!babelTypes.isAssignmentExpression(path.parent)) {
@@ -76,18 +76,18 @@ export function createTransformPluginsFileBabelPlugin (ast: PluginsAst): babel.P
             path.parent.right.params.push(babelTypes.identifier('config'))
           }
 
-          path.get('body').pushContainer('body' as never, ast.ModuleExportsBody())
+          path.get('body').pushContainer('body' as never, ast.ModuleExportsBody)
         }
       },
     },
   }
 }
 
-export async function injectPluginsCode (pluginsFilePath: string, ast: PluginsAst) {
+export async function injectPluginsCode (pluginsFilePath: string, ast: PluginsConfigAst) {
   return transformFileViaPlugin(pluginsFilePath, createTransformPluginsFileBabelPlugin(ast))
 }
 
-export async function getPluginsSourceExample (ast: PluginsAst) {
+export async function getPluginsSourceExample (ast: PluginsConfigAst) {
   const exampleCode = [
     'module.exports = (on, config) => {',
     '',
@@ -106,7 +106,7 @@ export async function getPluginsSourceExample (ast: PluginsAst) {
 }
 
 export function createSupportBabelPlugin (importCode: string): babel.PluginObj<any> {
-  const template = babel.template(importCode)
+  const template = babel.template.ast(importCode)
 
   const plugin: babel.PluginObj<{
     root: babel.NodePath<babel.types.Program>
@@ -122,9 +122,9 @@ export function createSupportBabelPlugin (importCode: string): babel.PluginObj<a
     },
     post () {
       if (this.lastImport) {
-        this.lastImport.insertAfter(template())
+        this.lastImport.insertAfter(template)
       } else if (this.root) {
-        this.root.unshiftContainer('body', template())
+        this.root.unshiftContainer('body', template)
       }
     },
   }

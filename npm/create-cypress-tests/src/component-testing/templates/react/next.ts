@@ -10,24 +10,13 @@ export const NextTemplate: Template = {
     return 'https://github.com/cypress-io/cypress/tree/develop/npm/react/examples/nextjs'
   },
   recommendedComponentFolder: 'cypress/component',
-  getPluginsCode: () => {
-    return [
-      'const preprocessor = require(\'@cypress/react/plugins/next\')',
-      'module.exports = (on, config) => {',
-      '  preprocessor(on, config)',
-      '  // IMPORTANT to return the config object',
-      '  return config',
-      '}',
-    ].join('\n')
-  },
   getPluginsCodeAst: () => {
     return {
-      Require: babel.template('const preprocessor = require(\'@cypress/react/plugins/next\')'),
-      ModuleExportsBody: babel.template([
-        '  preprocessor(on, config)',
-        '  // IMPORTANT to return the config object',
-        '  return config',
-      ].join('\n')),
+      Require: babel.template.ast('const preprocessor = require(\'@cypress/react/plugins/next\')'),
+      ModuleExportsBody: babel.template.ast([
+        'preprocessor(on, config)',
+        'return config // IMPORTANT to return the config object',
+      ].join('\n'), { preserveComments: true }),
     }
   },
   test: (cwd) => {

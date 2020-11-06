@@ -3,6 +3,7 @@ import { expect, use } from 'chai'
 import sinonChai from 'sinon-chai'
 import mockFs from 'mock-fs'
 import { ReactScriptsTemplate } from './react-scripts'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 
 use(sinonChai)
 
@@ -60,4 +61,6 @@ describe('create-react-app install template', () => {
     expect(success).to.equal(false)
     expect(global.console.warn).to.be.called
   })
+
+  it('correctly generates plugins config', () => snapshotPluginsAstCode(ReactScriptsTemplate))
 })
