@@ -15,11 +15,13 @@ type MainArgv = {
   setupComponentTesting: boolean
 }
 
-const execAsync = util.promisify(exec)
-
 async function getGitStatus () {
+  const execAsync = util.promisify(exec)
+
   try {
     let { stdout } = await execAsync(`git status --porcelain`)
+
+    console.log(stdout)
 
     return stdout.trim()
   } catch (e) {
@@ -28,6 +30,8 @@ async function getGitStatus () {
 }
 
 async function shouldUseYarn () {
+  const execAsync = util.promisify(exec)
+
   return execAsync('yarn --version')
   .then(() => true)
   .catch(() => false)

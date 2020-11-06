@@ -1,11 +1,12 @@
 import { expect, use } from 'chai'
 import path from 'path'
-import sinon, { SinonStub, SinonSpy, SinonSpyCallApi } from 'sinon'
+import sinon, { SinonStub, SinonSpy, SinonSpyCallApi, restore } from 'sinon'
 import mockFs from 'mock-fs'
 import fsExtra from 'fs-extra'
 import { main } from './main'
 import sinonChai from 'sinon-chai'
 import childProcess from 'child_process'
+import chalk from 'chalk'
 
 use(sinonChai)
 
@@ -17,18 +18,22 @@ function someOfSpyCallsIncludes (spy: any, logPart: string) {
   )
 }
 
-describe('init script', () => {
+describe('create-cypress-tests', () => {
   let promptSpy: SinonStub<any> | null = null
   let logSpy: SinonSpy | null = null
+  let errorSpy: SinonSpy | null = null
   let execStub: SinonStub | null = null
   let fsCopyStub: SinonStub | null = null
+  let processExitStub: SinonStub | null = null
 
   beforeEach(() => {
     logSpy = sinon.spy(global.console, 'log')
+    errorSpy = sinon.spy(global.console, 'error')
     // @ts-ignore
     execStub = sinon.stub(childProcess, 'exec').callsFake((command, callback) => callback())
     // @ts-ignore
     fsCopyStub = sinon.stub(fsExtra, 'copy').returns(Promise.resolve())
+    processExitStub = sinon.stub(process, 'exit')
   })
 
   afterEach(() => {
@@ -37,6 +42,9 @@ describe('init script', () => {
     promptSpy?.restore()
     execStub?.restore()
     fsCopyStub?.restore()
+    processExitStub?.restore()
+    execStub?.restore()
+    errorSpy?.restore()
   })
 
   it('Install cypress if no config found', async () => {
@@ -53,6 +61,7 @@ describe('init script', () => {
     execStub
     ?.onFirstCall().callsFake((command, callback) => callback('yarn is not available'))
     ?.onSecondCall().callsFake((command, callback) => callback())
+    ?.onThirdCall().callsFake((command, callback) => callback())
 
     mockFs({
       '/package.json': JSON.stringify({ }),
@@ -90,6 +99,17 @@ describe('init script', () => {
     expect(someOfSpyCallsIncludes(logSpy, 'yarn cypress open')).to.be.true
   })
 
+  it('Fails if git repository have untracked or uncommited files', async () => {
+    execStub?.callsFake((_, callback) => callback(null, { stdout: 'test' }))
+    await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
+
+    expect(
+      someOfSpyCallsIncludes(errorSpy, 'This repository has untracked files or uncommmited changes.'),
+    ).to.equal(true)
+
+    expect(processExitStub).to.be.called
+  })
+
   context('e2e fs tests', () => {
     const e2eTestOutputPath = path.resolve(__dirname, 'test-output')
 
@@ -101,7 +121,7 @@ describe('init script', () => {
       await fsExtra.mkdir(e2eTestOutputPath)
     })
 
-    it('Copies plugins and support files', async () => {
+    it.only('Copies plugins and support files', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
         JSON.stringify({ name: 'test' }, null, 2),

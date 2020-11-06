@@ -1,7 +1,7 @@
 exports['vue webpack-file install template correctly generates plugins config when webpack config path is missing 1'] = `
 const {
   onFilePreprocessor
-} = require('@cypress/vue/preprocessor/webpack');
+} = require('@cypress/vue/dist/preprocessor/webpack');
 
 const something = require("something");
 
@@ -14,7 +14,7 @@ module.exports = (on, config) => {
 exports['vue webpack-file install template correctly generates plugins config when webpack config path is provided 1'] = `
 const {
   onFilePreprocessor
-} = require('@cypress/vue/preprocessor/webpack');
+} = require('@cypress/vue/dist/preprocessor/webpack');
 
 const something = require("something");
 
