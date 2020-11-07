@@ -2,7 +2,15 @@
   "name": "@packages/runner-ct",
   "version": "0.0.0",
   "private": true,
-  "scripts": {},
+  "main": "index.js",
+  "browser": "src/index.js",
+  "scripts": {
+    "build": "webpack",
+    "build-prod": "cross-env NODE_ENV=production yarn build",
+    "clean-deps": "rm -rf node_modules",
+    "postinstall": "echo '@packages/runner needs: yarn build'",
+    "watch": "webpack --watch --progress"
+  },
   "dependencies": {
     "@packages/driver": "*",
     "@vue/test-utils": "^1.1.0",

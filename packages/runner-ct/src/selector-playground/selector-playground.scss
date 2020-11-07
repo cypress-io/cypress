@@ -1,0 +1,22 @@
+/**
+* This is a standalone file that gets included with the selector playground
+* highlight in the user's app html
+*/
+
+$cy-tooltip-background-color: #333;
+$cy-tooltip-color: #e3e3e3;
+$cy-tooltip-border-color: #333;
+
+@import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
+
+.highlight {
+  background: rgba(159, 196, 231, 0.6);
+  border: solid 2px #9FC4E7;
+  cursor: pointer;
+}
+
+.tooltip {
+  font-family: sans-serif;
+  font-size: 14px;
+  max-width: 400px !important;
+}
