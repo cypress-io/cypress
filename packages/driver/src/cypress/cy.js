@@ -175,7 +175,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   }
 
   const contentWindowListeners = function (contentWindow) {
-    return $Listeners.bindTo(contentWindow, {
+    return $Listeners.bindTo(contentWindow, config, {
       onError () {
         // use a function callback here instead of direct
         // reference so our users can override this function
