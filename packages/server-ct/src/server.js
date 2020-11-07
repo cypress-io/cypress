@@ -80,7 +80,7 @@ class Server {
 
   createServer (app, config, project, request, onWarning) {
     return new Bluebird((resolve, reject) => {
-      const { port, socketIoRoute } = config
+      const { port } = config
 
       this._server = http.createServer(app)
 
@@ -94,14 +94,6 @@ class Server {
           return reject(this.portInUseErr(port))
         }
       }
-
-      const onUpgrade = (req, socket, head) => {
-        debug('Got UPGRADE request from %s', req.url)
-
-        return this.proxyWebsockets(this._nodeProxy, socketIoRoute, req, socket, head)
-      }
-
-      this._server.on('upgrade', onUpgrade)
 
       this._server.once('error', onError)
 

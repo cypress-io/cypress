@@ -1,13 +1,15 @@
+const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 
 const runnerCt = require('@packages/runner-ct')
+const staticPkg = require('@packages/static')
 
 module.exports = ({ app, config, project, onError }) => {
-  app.get('/__cypress/runner-ct/*', (req, res) => {
-    runnerCt.handle(req, res)
-  })
+  app.get('/__cypress/runner/*', runnerCt.middleware(send))
 
-  app.get('/__cypress/iframes-ct/*', (req, res) => {
+  app.get('/__cypress/static/*', staticPkg.middleware(send))
+
+  app.get('/__cypress/iframes/*', (req, res) => {
     // const extraOptions = {
     //   specFilter: _.get(project, 'spec.specFilter'),
     // }
@@ -21,14 +23,10 @@ module.exports = ({ app, config, project, onError }) => {
     // files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
-  // app.get('/__cypress/source-maps/:id.map', (req, res) => {
-  //   networkProxy.handleSourceMapRequest(req, res)
-  // })
-
   app.get(config.clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runnerCt.handle(req, res, {
+    runnerCt.serve(req, res, {
       config,
       project,
     })

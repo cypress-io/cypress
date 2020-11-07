@@ -272,6 +272,15 @@ class Project {
     })
   }
 
+  setCurrentSpecAndBrowser (spec, browser) {
+    this.spec = spec
+    this.browser = browser
+  }
+
+  getCurrentSpecAndBrowser () {
+    return _.pick(this, 'spec', 'browser')
+  }
+
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.

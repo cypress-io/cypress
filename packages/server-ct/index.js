@@ -13,7 +13,7 @@ const start = (projectRoot, options) => {
     options.browsers = cfg.browsers
     options.proxyUrl = cfg.proxyUrl
     options.userAgent = cfg.userAgent
-    options.proxyServer = cfg.proxyUrl
+    options.proxyServer = null
     options.socketIoRoute = cfg.socketIoRoute
     options.chromeWebSecurity = cfg.chromeWebSecurity
 
@@ -25,6 +25,8 @@ const start = (projectRoot, options) => {
 
     return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME)
     .then((browser) => {
+      project.setCurrentSpecAndBrowser(null, browser)
+
       return browsers.open(browser, options, automation)
     })
   })

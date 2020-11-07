@@ -5,5 +5,8 @@
   "scripts": {
     "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/test",
     "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/test"
+  },
+  "dependencies": {
+    "send": "^0.17.1"
   }
 }
