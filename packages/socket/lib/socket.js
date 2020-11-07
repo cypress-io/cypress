@@ -1,7 +1,6 @@
 const _ = require('lodash')
 const fs = require('fs')
 const server = require('socket.io')
-const debug = require('debug')('cypress:socket')
 const { version: clientVersion } = require('socket.io-client/package.json')
 const { client, circularParser } = require('./browser')
 
@@ -25,20 +24,4 @@ module.exports = {
   getClientSource,
 
   getPathToClientSource,
-
-  handle (req, res) {
-    const etag = req.get('if-none-match')
-
-    debug('serving socket.io client %o', { etag, clientVersion })
-
-    if (etag && (etag === clientVersion)) {
-      return res.sendStatus(304)
-    }
-
-    return res
-    .type('application/javascript')
-    .set('ETag', clientVersion)
-    .status(200)
-    .send(clientSource)
-  },
 }

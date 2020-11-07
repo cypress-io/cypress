@@ -4,7 +4,6 @@ const check = require('check-more-types')
 const _ = require('lodash')
 const debug = require('debug')('cypress:server:routes')
 
-const socket = require('@package/socket')
 const AppData = require('./util/app_data')
 const CacheBuster = require('./util/cache_buster')
 const spec = require('./controllers/spec')
@@ -22,10 +21,6 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     const test = CacheBuster.strip(req.query.p)
 
     spec.handle(test, req, res, config, next, onError)
-  })
-
-  app.get('/__cypress/socket.io.js', (req, res) => {
-    socket.handle(req, res)
   })
 
   app.get('/__cypress/reporter/*', (req, res) => {

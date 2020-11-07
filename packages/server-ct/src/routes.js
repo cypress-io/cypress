@@ -1,13 +1,8 @@
 const debug = require('debug')('cypress:server:routes')
 
-const socket = require('@packages/socket')
 const runnerCt = require('@packages/runner-ct')
 
 module.exports = ({ app, config, project, onError }) => {
-  app.get('/__cypress/socket.io.js', (req, res) => {
-    socket.handle(req, res)
-  })
-
   app.get('/__cypress/runner-ct/*', (req, res) => {
     runnerCt.handle(req, res)
   })
