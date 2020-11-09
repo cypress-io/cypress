@@ -5,6 +5,7 @@ const Bluebird = require('bluebird')
 
 const cwd = require('@packages/server/lib/cwd')
 const config = require('@packages/server/lib/config')
+const savedState = require('@packages/server/lib/saved_state')
 const Server = require('./server')
 
 const localCwd = cwd()
@@ -296,6 +297,21 @@ class Project {
     }
 
     return config.get(this.projectRoot, options)
+    .then((cfg) => {
+      return this._setSavedState(cfg)
+    })
+  }
+
+  _setSavedState (cfg) {
+    debug('get saved state')
+
+    return savedState.create(this.projectRoot, cfg.isTextTerminal)
+    .then((state) => state.get())
+    .then((state) => {
+      cfg.state = state
+
+      return cfg
+    })
   }
 }
 
