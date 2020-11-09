@@ -371,7 +371,7 @@ By default, top level tasks will execute for all packages. However, most scripts
 
 | Task               | Purpose                                                          |
 | :----------------- | :--------------------------------------------------------------- |
-| `build`            | Compile non-node code (coffeescript/typescript)                  |
+| `build`            | Compile non-node code (typescript)                               |
 | `start`            | Open Cypress in dev and global mode                              |
 | `watch`            | Auto-rebuild on file changes                                     |
 | `clean`            | Remove build artifacts                                           |
