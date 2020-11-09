@@ -11,7 +11,7 @@ const main = async (ciJob) => {
   if (!ciJob) {
     console.log(`Could not get current CI job`)
 
-    return process.exit(1)
+    process.exit(1)
   }
 
   const currentBranch = await getCurrentBranch()
@@ -63,4 +63,6 @@ const main = async (ciJob) => {
   return skipTests()
 }
 
-main('npm-react')
+main(process.env.CIRCLE_JOB).catch(() => {
+  process.exit(1)
+})
