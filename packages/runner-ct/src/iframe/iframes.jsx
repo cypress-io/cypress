@@ -11,7 +11,6 @@ import SnapshotControls from './snapshot-controls'
 import IframeModel from './iframe-model'
 import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import util from '../lib/util'
 
 @observer
 export default class Iframes extends Component {
@@ -45,7 +44,9 @@ export default class Iframes extends Component {
   }
 
   componentDidMount () {
-    this.autIframe = new AutIframe(this.props.config)
+    const config = this.props.config
+
+    this.autIframe = new AutIframe(config)
 
     this.props.eventManager.on('visit:failed', this.autIframe.showVisitFailure)
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
@@ -55,7 +56,7 @@ export default class Iframes extends Component {
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
     this.props.eventManager.on('restart', () => {
-      this._run(this.props.config)
+      this._run(this.props.state.spec, config)
     })
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
@@ -88,53 +89,57 @@ export default class Iframes extends Component {
     })
 
     this.iframeModel.listen()
-    this._run(this.props.config)
+
+    this._disposers.push(autorun(() => {
+      const spec = this.props.state.spec
+
+      if (this.props.state.spec) {
+        this._run(spec, config)
+      }
+    }))
   }
 
   @action _setScriptError = (err) => {
     this.props.state.scriptError = err
   }
 
-  _run = (config) => {
-    const specPath = util.specPath()
+  _run = (spec, config) => {
+    config.spec = spec
 
-    this.props.eventManager.notifyRunningSpec(specPath)
+    // this.props.eventManager.notifyRunningSpec(specPath)
     logger.clearLog()
     this._setScriptError(null)
 
     this.props.eventManager.setup(config)
 
-    const $autIframe = this._loadIframes(specPath)
+    const $autIframe = this._loadIframes(spec)
 
     this.props.eventManager.initialize($autIframe, config)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
-  _loadIframes (specPath) {
-    const specSrc = `/${this.props.config.namespace}/iframes/${specPath}`
+  _loadIframes (spec) {
+    const specSrc = `/${this.props.config.namespace}/iframes/${spec.relative}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
     this.autIframe.showBlankContents()
 
-    // specs with type "component" can only arrive if the server has "componentTesting" experiment on
-    if (this.props.config.spec.specType === 'component') {
-      // In mount mode we need to render something right from spec file
-      // So load application tests to the aut frame
-      $autIframe.prop('src', specSrc)
-
-      return $autIframe
-    }
-
-    const $specIframe = $('<iframe />', {
-      id: `Your Spec: '${specSrc}'`,
-      class: 'spec-iframe',
-    }).appendTo($container)
-
-    $specIframe.prop('src', specSrc)
+    // In mount mode we need to render something right from spec file
+    // So load application tests to the aut frame
+    $autIframe.prop('src', specSrc)
 
     return $autIframe
+
+    // const $specIframe = $('<iframe />', {
+    //   id: `Your Spec: '${specSrc}'`,
+    //   class: 'spec-iframe',
+    // }).appendTo($container)
+
+    // $specIframe.prop('src', specSrc)
+
+    // return $autIframe
   }
 
   _toggleSnapshotHighlights = (snapshotProps) => {
