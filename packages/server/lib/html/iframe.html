@@ -6,7 +6,9 @@
   </head>
   <body>
     <script type="text/javascript">
+      {{if(options.domain)}}
       document.domain = '{{domain}}';
+      {{/if}}
 
       (function(parent) {
         var Cypress = window.Cypress = parent.Cypress;

@@ -1,6 +1,8 @@
+const _ = require('lodash')
 const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 
+const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
 const staticPkg = require('@packages/static')
 
@@ -10,17 +12,13 @@ module.exports = ({ app, config, project, onError }) => {
   app.get('/__cypress/static/*', staticPkg.middleware(send))
 
   app.get('/__cypress/iframes/*', (req, res) => {
-    // const extraOptions = {
-    //   specFilter: _.get(project, 'spec.specFilter'),
-    // }
+    const extraOptions = {
+      specFilter: _.get(project, 'spec.specFilter'),
+    }
 
-    // debug('project %o', project)
-    // debug('handling iframe for project spec %o', {
-    //   spec: project.spec,
-    //   extraOptions,
-    // })
+    const getRemoteState = _.constant({ domainName: null })
 
-    // files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
   app.get(config.clientRoute, (req, res) => {
