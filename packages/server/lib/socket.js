@@ -16,6 +16,7 @@ const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
 const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
+const session = require('./session')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -408,6 +409,12 @@ class Socket {
               return exec.run(config.projectRoot, args[0])
             case 'task':
               return task.run(config.pluginsFile, args[0])
+            case 'save:session':
+              return session.saveSession(args[0])
+            case 'get:session':
+              return session.getSession(args[0])
+            case 'get:fetchedHTMLOrigins':
+              return options.getRenderedHTMLOrigins()
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
