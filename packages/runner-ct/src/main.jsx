@@ -17,8 +17,13 @@ const Runner = {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
+      const configState = config.state || {}
 
-      const state = new State(NO_COMMAND_LOG ? 0 : (config.state || {}).reporterWidth)
+      if (NO_COMMAND_LOG) {
+        configState.reporterWidth = 0
+      }
+
+      const state = new State(configState)
 
       Runner.state = state
       Runner.configureMobx = configure

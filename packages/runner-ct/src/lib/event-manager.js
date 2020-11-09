@@ -9,6 +9,7 @@ import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
+import specsStore from '../specs/specs-store'
 
 const ws = client.connect({
   path: '/__socket.io',
@@ -18,6 +19,10 @@ const ws = client.connect({
 
 ws.on('connect', () => {
   ws.emit('runner:connected')
+
+  ws.emit('get:component:specs', (specs) => {
+    specsStore.setSpecs(specs)
+  })
 })
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
@@ -84,6 +89,10 @@ const eventManager = {
         default:
           break
       }
+    })
+
+    ws.on('component:specs:changed', (specs) => {
+      specsStore.setSpecs(specs)
     })
 
     _.each(socketRerunEvents, (event) => {

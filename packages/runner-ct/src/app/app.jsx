@@ -11,6 +11,7 @@ import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
 import State from '../lib/state'
 
+import SpecsList from '../specs/specs-list'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
@@ -24,9 +25,9 @@ class App extends Component {
     /**
      * @type {Cypress.Cypress['spec']}
      */
-    const spec = this.props.config.spec
+    const { spec } = this.props.state
 
-    const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
+    // debugger
 
     return (
       <div className={cs({
@@ -38,13 +39,7 @@ class App extends Component {
           className='reporter-wrap'
           style={{ width: this.props.state.reporterWidth }}
         >
-          {Boolean(NO_COMMAND_LOG) || <Reporter
-            runner={this.props.eventManager.reporterBus}
-            spec={spec}
-            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            firefoxGcInterval={this.props.config.firefoxGcInterval}
-          />}
+          {this._renderReporter(spec)}
         </div>
         <div
           ref='container'
@@ -73,7 +68,50 @@ class App extends Component {
 
   componentDidMount () {
     this._monitorWindowResize()
-    this._handleScreenshots()
+  }
+
+  _renderSpecs () {
+    return <SpecsList state={this.props.state} />
+  }
+
+  _renderReporter (spec) {
+    const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
+
+    if (NO_COMMAND_LOG) {
+      return null
+    }
+
+    // only render the inner reporter if we have a spec
+    return (
+      <>
+        <div
+          className="specs-wrapper"
+          style={{
+            position: 'absolute',
+            width: 200,
+            height: '100%',
+            borderRight: '1px solid #ddd',
+            boxSizing: 'border-box',
+          }}>
+          {this._renderSpecs()}
+        </div>
+        <div style={{
+          position: 'absolute',
+          left: 200,
+          right: 0,
+          top: 0,
+          bottom: 0,
+        }}>
+          {spec && (<Reporter
+            runner={this.props.eventManager.reporterBus}
+            spec={spec}
+            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
+            firefoxGcInterval={this.props.config.firefoxGcInterval}
+          />)}
+        </div>
+      </>
+    )
   }
 
   _monitorWindowResize () {
@@ -114,103 +152,6 @@ class App extends Component {
     this.isReporterResizing = false
     this.props.eventManager.saveState({
       reporterWidth: this.props.state.reporterWidth,
-    })
-  }
-
-  _handleScreenshots () {
-    const containerNode = findDOMNode(this.refs.container)
-    const reporterNode = this.refs.reporterWrap
-    const headerNode = findDOMNode(this.refs.header)
-    const iframesNode = findDOMNode(this.refs.iframes)
-    const iframesSizeNode = findDOMNode(this.refs.iframes.getSizeContainer())
-    const screenshotHelperPixels = this.refs.screenshotHelperPixels
-
-    let prevAttrs = {}
-    let screenshotting = false
-
-    const { eventManager } = this.props
-
-    eventManager.on('before:screenshot', (config) => {
-      if (!config.appOnly) return
-
-      screenshotting = true
-
-      prevAttrs = {
-        config,
-        top: iframesNode.style.top,
-        marginLeft: iframesSizeNode.style.marginLeft,
-        width: iframesSizeNode.style.width,
-        height: iframesSizeNode.style.height,
-        transform: iframesSizeNode.style.transform,
-        left: containerNode.style.left,
-      }
-
-      const messageNode = findDOMNode(this.refs.message)
-
-      if (messageNode) {
-        messageNode.style.display = 'none'
-      }
-
-      reporterNode.style.display = 'none'
-      headerNode.style.display = 'none'
-
-      iframesNode.style.top = 0
-      iframesNode.style.backgroundColor = 'black'
-      iframesSizeNode.style.marginLeft = 0
-
-      containerNode.style.left = 0
-      iframesNode.style.left = 0
-
-      containerNode.className += ' screenshotting'
-
-      if (!config.scale) {
-        iframesSizeNode.style.width = `${Math.min(window.innerWidth, iframesSizeNode.offsetWidth)}px`
-        iframesSizeNode.style.height = `${Math.min(window.innerHeight, iframesSizeNode.offsetHeight)}px`
-        iframesSizeNode.style.transform = null
-      }
-
-      screenshotHelperPixels.style.display = 'none'
-    })
-
-    const afterScreenshot = (config) => {
-      if (!config.appOnly) return
-
-      screenshotting = false
-
-      screenshotHelperPixels.style.display = 'block'
-
-      containerNode.className = containerNode.className.replace(' screenshotting', '')
-      containerNode.style.left = prevAttrs.left
-      iframesNode.style.left = prevAttrs.left
-
-      iframesNode.style.top = prevAttrs.top
-      iframesNode.style.backgroundColor = null
-      iframesSizeNode.style.marginLeft = prevAttrs.marginLeft
-
-      reporterNode.style.display = null
-      headerNode.style.display = null
-
-      const messageNode = findDOMNode(this.refs.message)
-
-      if (messageNode) {
-        messageNode.style.display = null
-      }
-
-      if (!config.scale) {
-        iframesSizeNode.style.transform = prevAttrs.transform
-        iframesSizeNode.style.width = prevAttrs.width
-        iframesSizeNode.style.height = prevAttrs.height
-      }
-
-      prevAttrs = {}
-    }
-
-    eventManager.on('after:screenshot', afterScreenshot)
-
-    eventManager.on('run:start', () => {
-      if (screenshotting) {
-        afterScreenshot(prevAttrs.config)
-      }
     })
   }
 

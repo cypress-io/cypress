@@ -15,6 +15,8 @@ const _defaults = {
   url: '',
   highlightUrl: false,
   isLoadingUrl: false,
+
+  spec: null,
 }
 
 export default class State {
@@ -54,8 +56,17 @@ export default class State {
 
   @observable.ref scriptError = null
 
-  constructor (reporterWidth = _defaults.reporterWidth) {
+  @observable spec = _defaults.spec
+  @observable specs = _defaults.specs
+
+  constructor ({
+    reporterWidth = _defaults.reporterWidth,
+    spec = _defaults.spec,
+  }) {
     this.reporterWidth = reporterWidth
+    this.spec = spec
+
+    // TODO: receive chosen spec from state and set it here
   }
 
   @computed get scale () {
@@ -136,5 +147,9 @@ export default class State {
     this.url = _defaults.url
     this.highlightUrl = _defaults.highlightUrl
     this.isLoadingUrl = _defaults.isLoadingUrl
+  }
+
+  @action setSpec (spec) {
+    this.spec = spec
   }
 }

@@ -7,6 +7,7 @@ const editors = require('@packages/server/lib/util/editors')
 const { openFile } = require('@packages/server/lib/util/file-opener')
 const open = require('@packages/server/lib/util/open')
 const errors = require('@packages/server/lib/errors')
+const specsUtil = require('@packages/server/lib/util/specs')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -163,9 +164,9 @@ class Socket {
 
     let automationClient = null
 
-    const { integrationFolder, socketIoRoute, socketIoCookie } = config
+    const { componentFolder, socketIoRoute, socketIoCookie } = config
 
-    this.testsDir = integrationFolder
+    this.testsDir = componentFolder
 
     this.io = this.createIo(server, socketIoRoute, socketIoCookie)
 
@@ -276,20 +277,34 @@ class Socket {
         return socket.join('runner')
       })
 
+      // TODO: this is just an example... the specs
+      // likely need to be cached in memory and served
+      // by the project controller, and the watchers
+      // need to update the specs in memory whenever
+      // they change to avoid querying the filesystem
+      // everytime the specs change
+      socket.on('get:component:specs', (cb) => {
+        return specsUtil.find(config)
+        .filter((spec) => {
+          return spec.specType === 'component'
+        })
+        .then(cb)
+      })
+
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
 
-      socket.on('watch:test:file', (specInfo, cb = function () { }) => {
-        debug('watch:test:file %o', specInfo)
+      // socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+      //   debug('watch:test:file %o', specInfo)
 
-        this.watchTestFileByPath(config, specInfo, options)
+      //   this.watchTestFileByPath(config, specInfo, options)
 
-        // callback is only for testing purposes
-        return cb()
-      })
+      //   // callback is only for testing purposes
+      //   return cb()
+      // })
 
       socket.on('app:connect', (socketId) => {
         return options.onConnect(socketId, socket)

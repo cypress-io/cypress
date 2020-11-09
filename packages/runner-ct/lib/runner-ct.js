@@ -29,6 +29,10 @@ module.exports = {
 
     const { browser } = project.getCurrentSpecAndBrowser()
 
+    // TODO: move the component file watchers in here
+    // and update them in memory when they change and serve
+    // them straight to the HTML on load
+
     config = _
     .chain(config)
     .clone()
