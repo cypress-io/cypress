@@ -2389,15 +2389,17 @@ describe('src/cy/commands/actions/type - #type', () => {
         // eslint-disable-next-line
           console.table(table.data, table.columns)
 
+        const beforeinput = Cypress.isBrowser('firefox') ? '' : ' beforeinput,'
+
         expect(table.name).to.eq('Keyboard Events')
         const expectedTable = {
-          1: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': 'keydown, keypress, beforeinput, textInput, input, keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          1: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
           2: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
           3: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
           4: { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
           5: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
           6: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
-          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': 'keydown, keypress, beforeinput, textInput, input, keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
         }
 
         // uncomment for debugging
