@@ -390,7 +390,7 @@ commands:
     steps:
       - run:
           name: Check if job should run
-          command: yarn check-halt || circleci-agent step halt
+          command: yarn check-halt
 
 jobs:
   ## code checkout and yarn installs

@@ -1,20 +1,17 @@
 /* eslint-disable no-console */
+const { execSync } = require('child_process')
 const { getCurrentBranch, readPackageJson } = require('./utils')
 const { getChangedPackagesAndDependents, getLernaPackages } = require('./changed-packages')
 
-const runTestsAndExit = () => {
-  process.exit(0)
-}
-
-const skipTestsAndExit = () => {
-  process.exit(1)
+const skipTests = () => {
+  execSync('circleci-agent step halt')
 }
 
 const main = async (ciJob) => {
   if (!ciJob) {
     console.log(`Could not get current CI job`)
 
-    return skipTestsAndExit()
+    return process.exit(1)
   }
 
   const currentBranch = await getCurrentBranch()
@@ -22,7 +19,7 @@ const main = async (ciJob) => {
   if (currentBranch === 'develop' || currentBranch === 'master') {
     console.log(`Currently on ${currentBranch} - all tests run`)
 
-    return runTestsAndExit()
+    return
   }
 
   const packages = await getLernaPackages()
@@ -44,7 +41,7 @@ const main = async (ciJob) => {
   if (Object.keys(changed).includes(pack)) {
     console.log(`${pack} was directly changed, so tests run.`)
 
-    return runTestsAndExit()
+    return
   }
 
   const dependenciesChanged = []
@@ -58,12 +55,12 @@ const main = async (ciJob) => {
   if (dependenciesChanged.length) {
     console.log(`${pack} is listed as a dependant of ${dependenciesChanged.join(', ')}, so tests run.`)
 
-    return runTestsAndExit()
+    return
   }
 
   console.log(`${pack} is unchanged and not dependent on any changed packages, so tests do not run.`)
 
-  return skipTestsAndExit()
+  return skipTests()
 }
 
-main(process.env.CIRCLE_JOB)
+main('npm-react')
