@@ -19,7 +19,7 @@ describe('init component tests script', () => {
   let processExitStub: SinonStub<any> | null = null
   let execStub: SinonStub | null = null
 
-  const e2eTestOutputPath = path.resolve(__dirname, '..', 'test-output', 'init-component-testing')
+  const e2eTestOutputPath = path.resolve(__dirname, '..', 'test-output')
   const cypressConfigPath = path.join(e2eTestOutputPath, 'cypress.json')
 
   beforeEach(async () => {
@@ -30,8 +30,8 @@ describe('init component tests script', () => {
       throw new Error(`${chalk.red('process.exit')} should not be called`)
     })
 
-    await fs.removeSync(e2eTestOutputPath)
-    await fs.mkdirSync(e2eTestOutputPath)
+    await fs.remove(e2eTestOutputPath)
+    await fs.mkdir(e2eTestOutputPath)
   })
 
   afterEach(() => {

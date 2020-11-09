@@ -102,6 +102,8 @@ describe('create-cypress-tests', () => {
 
   it('Fails if git repository have untracked or uncommited files', async () => {
     execStub?.callsFake((_, callback) => callback(null, { stdout: 'test' }))
+    processExitStub?.callsFake(() => {})
+
     await main({ useNpm: true, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
 
     expect(
@@ -116,13 +118,14 @@ describe('create-cypress-tests', () => {
 
     beforeEach(async () => {
       fsCopyStub?.restore()
+      mockFs.restore()
       sinon.stub(process, 'cwd').returns(e2eTestOutputPath)
 
       await fsExtra.remove(e2eTestOutputPath)
       await fsExtra.mkdir(e2eTestOutputPath)
     })
 
-    it('Copies plugins and support files', async () => {
+    it.only('Copies plugins and support files', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
         JSON.stringify({ name: 'test' }, null, 2),
@@ -147,6 +150,7 @@ describe('create-cypress-tests', () => {
 
       await main({ useNpm: false, ignoreTs: false, ignoreExamples: false, setupComponentTesting: false })
       await fsExtra.pathExists(path.resolve(e2eTestOutputPath, 'cypress', 'tsconfig.json'))
+      console.log(path.resolve(e2eTestOutputPath, 'cypress', 'tsconfig.json'))
     })
   })
 })
