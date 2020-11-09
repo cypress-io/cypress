@@ -5,8 +5,8 @@
   "private": false,
   "main": "index.js",
   "scripts": {
-    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js",
-    "prepare-example": "rimraf initial-template/* && cp -r ../../packages/example/* initial-template",
+    "build": "yarn prepare-example && tsc -p ./tsconfig.json && chmod +x dist/src/index.js && node scripts/example copy-to ./dist/initial-template",
+    "prepare-example": "node scripts/example copy-to ./initial-template",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json './src/**/*.test.ts'"
   },
   "dependencies": {
