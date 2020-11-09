@@ -9,6 +9,7 @@
     "test": "node ../../../../scripts/cypress run"
   },
   "devDependencies": {
-    "@cypress/react": "file:../../dist"
+    "@cypress/react": "file:../../dist",
+    "webpack": "5.1.3"
   }
 }
