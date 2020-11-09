@@ -988,6 +988,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
+      - run: yarn workspace create-cypress-tests build
       - run:
           name: Run unit test
           command: yarn workspace create-cypress-tests test 
