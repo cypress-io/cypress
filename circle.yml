@@ -61,7 +61,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "11.2.1"
+      xcode: "11.3.1"
     environment:
       PLATFORM: mac
 
@@ -440,7 +440,7 @@ jobs:
 
       - restore_cache:
           name: Restore yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
 
       # show what is already cached globally
       - run: ls $(yarn global bin)
@@ -461,7 +461,7 @@ jobs:
 
       - save_cache:
           name: Save yarn cache
-          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-{{ .Branch }}-deps-root-{{ checksum "yarn.lock" }}
+          key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache
 

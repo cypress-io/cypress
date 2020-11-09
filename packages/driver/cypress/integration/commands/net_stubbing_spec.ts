@@ -1787,6 +1787,63 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
+    context('with an intercepted request', function () {
+      it('can dynamically alias the request', function () {
+        cy.route2('/foo', (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@fromInterceptor')
+      })
+
+      it('can time out on a dynamic alias', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('for the 1st request to the route')
+          done()
+        })
+
+        cy.route2('/foo', (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .wait('@fromInterceptor', { timeout: 100 })
+      })
+
+      it('dynamic aliases are fulfilled before route aliases', function (done) {
+        cy.on('fail', (err) => {
+          expect(err.message).to.contain('for the 1st request to the route: `fromAs`')
+          done()
+        })
+
+        cy.route2('/foo', (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .as('fromAs')
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@fromInterceptor')
+        // this will fail - dynamic aliasing maintains the existing wait semantics, including that each request can only be waited once
+        .wait('@fromAs', { timeout: 100 })
+      })
+
+      it('fulfills both dynamic aliases when two are defined', function () {
+        cy.route2('/foo', (req) => {
+          req.alias = 'fromInterceptor'
+        })
+        .route2('/foo', (req) => {
+          expect(req.alias).to.be.undefined
+          req.alias = 'fromInterceptor2'
+        })
+        .then(() => {
+          $.get('/foo')
+        })
+        .wait('@fromInterceptor')
+        .wait('@fromInterceptor2')
+      })
+    })
+
     // @see https://github.com/cypress-io/cypress/issues/8695
     context('yields request', function () {
       it('when not intercepted', function () {
@@ -1803,6 +1860,13 @@ describe('network stubbing', { retries: 2 }, function () {
         .then(() => {
           $.post('/post-only', 'some body')
         }).wait('@foo').its('request.body').should('eq', 'changed')
+      })
+
+      it('when static response body is provided', function () {
+        cy.route2('/post-only', { static: 'response' }).as('foo')
+        .then(() => {
+          $.post('/post-only', 'some body')
+        }).wait('@foo').its('request.body').should('eq', 'some body')
       })
     })
 
@@ -1840,48 +1904,6 @@ describe('network stubbing', { retries: 2 }, function () {
         cy.route2('/xml', (req) => req.reply((res) => res.send('something different')))
         .as('foo')
         .then(testResponse('something different', done))
-      })
-    })
-
-    // NOTE: was undocumented in cy.route2, may not continue to support
-    // @see https://github.com/cypress-io/cypress/issues/7663
-    context.skip('indexed aliases', function () {
-      it('can wait for things that do not make sense but are technically true', function () {
-        cy.route2('/foo')
-        .as('foo.bar')
-        .then(() => {
-          $.get('/foo')
-        })
-        .wait('@foo.bar.1')
-        .wait('@foo.bar.1') // still only asserting on the 1st response
-        .wait('@foo.bar.request') // now waiting for the next request
-      })
-
-      it('can wait on the 3rd request using "alias.3"', function () {
-        cy.route2('/foo')
-        .as('foo.bar')
-        .then(() => {
-          _.times(3, () => {
-            $.get('/foo')
-          })
-        })
-        .wait('@foo.bar.3')
-      })
-
-      it('can timeout waiting on the 3rd request using "alias.3"', function (done) {
-        cy.on('fail', (err) => {
-          expect(err.message).to.contain('No response ever occurred.')
-          done()
-        })
-
-        cy.route2('/foo')
-        .as('foo.bar')
-        .then(() => {
-          _.times(2, () => {
-            $.get('/foo')
-          })
-        })
-        .wait('@foo.bar.3', { timeout: 100 })
       })
     })
   })
