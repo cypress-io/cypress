@@ -64,6 +64,7 @@ describe('Global Mode', function () {
 
   it('shows notice about using Cypress locally', () => {
     cy.contains('versioning Cypress per project')
+    cy.percySnapshot()
   })
 
   it('opens link to docs on click \'installing...\'', () => {

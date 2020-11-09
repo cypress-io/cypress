@@ -19,7 +19,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getAllStringMatcherFields, sendStaticResponse, emit, setBodyFromFixture } from './util'
+import { getAllStringMatcherFields, sendStaticResponse, emit, setResponseFromFixture } from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -194,12 +194,6 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     emit(socket, 'http:request:received', frame)
   }
 
-  if (route.staticResponse) {
-    emitReceived()
-
-    return sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
-  }
-
   const ensureBody = (cb: () => void) => {
     if (frame.req.body) {
       return cb()
@@ -209,6 +203,15 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
       request.req.body = frame.req.body = reqBody.toString()
       cb()
     }))
+  }
+
+  if (route.staticResponse) {
+    const { staticResponse } = route
+
+    return ensureBody(() => {
+      emitReceived()
+      sendStaticResponse(request.res, staticResponse, request.onResponse!)
+    })
   }
 
   if (notificationOnly) {
@@ -279,7 +282,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   }
 
   if (frame.staticResponse) {
-    await setBodyFromFixture(backendRequest.route.getFixture, frame.staticResponse)
+    await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
     return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
   }

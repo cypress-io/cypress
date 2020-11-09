@@ -42,7 +42,14 @@ const createApp = (port) => {
   })
 
   app.get('/redirect', (req, res) => {
-    res.redirect(301, req.query.href)
+    if (req.query.chunked) {
+      res.setHeader('transfer-encoding', 'chunked')
+      res.removeHeader('content-length')
+    }
+
+    res.statusCode = 301
+    res.setHeader('Location', req.query.href)
+    res.end()
   })
 
   // allows us to serve the testrunner into an iframe for testing
@@ -90,8 +97,14 @@ const createApp = (port) => {
     return res.send({})
   })
 
+  app.get('/html-content-type-with-charset-param', (req, res) => {
+    res.setHeader('Content-Type', 'text/html;charset=utf-8')
+
+    return res.end('<html><head><title>Test</title></head><body><center>Hello</center></body></html>')
+  })
+
   app.get('/invalid-content-type', (req, res) => {
-    res.setHeader('Content-Type', 'text/html; charset=utf-8,text/html')
+    res.setHeader('Content-Type', 'text/image; charset=utf-8')
 
     return res.end('<html><head><title>Test</title></head><body><center>Hello</center></body></html>')
   })

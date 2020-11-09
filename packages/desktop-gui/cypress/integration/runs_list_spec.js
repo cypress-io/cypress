@@ -1,5 +1,3 @@
-const moment = require('moment')
-
 describe('Runs List', function () {
   beforeEach(function () {
     cy.fixture('user').as('user')
@@ -35,6 +33,7 @@ describe('Runs List', function () {
       cy.stub(this.ipc, 'setupDashboardProject')
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'beginAuth').resolves()
+      cy.stub(this.ipc, 'setClipboardText')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -72,7 +71,7 @@ describe('Runs List', function () {
 
   context('api server connection', function () {
     beforeEach(function () {
-      const timestamp = moment('2016-12-19T10:00:00').valueOf()
+      const timestamp = new Date(2016, 11, 19, 10, 0, 0).valueOf()
 
       cy.clock(timestamp)
       this.getCurrentUser.resolve(this.user)
@@ -100,11 +99,13 @@ describe('Runs List', function () {
       context('displays each run\'s data', function () {
         beforeEach(function () {
           cy.get('.runs-container li').first().as('firstRunRow')
-          cy.get('.runs-container li').eq(1).as('runRow')
+          cy.get('.runs-container li').eq(1).as('secondRunRow')
+          cy.get('.runs-container li').eq(3).as('fourthRunRow')
         })
 
         it('displays build num', function () {
-          cy.get('@runRow').contains(`#${this.runs[1].buildNumber}`)
+          cy.get('@secondRunRow').contains(`#${this.runs[1].buildNumber}`)
+          cy.percySnapshot()
         })
 
         it('displays commit info', function () {
@@ -113,14 +114,14 @@ describe('Runs List', function () {
         })
 
         it('display no info msg & does not display avatar', () => {
-          cy.get('@runRow').within(function () {
+          cy.get('@secondRunRow').within(function () {
             cy.get('.user-avatar').should('not.exist')
             cy.contains('No commit info found')
           })
         })
 
         it('displays platform info', () => {
-          cy.get('@runRow').within(function () {
+          cy.get('@secondRunRow').within(function () {
             cy.contains(this.runs[1].instances[0].platform.osVersionFormatted)
             cy.contains(this.runs[1].instances[0].platform.browserName)
             cy.get('.fa-apple')
@@ -138,24 +139,24 @@ describe('Runs List', function () {
         })
 
         it('displays totals', function () {
-          cy.get('@runRow').contains(this.runs[1].totalFailed)
-          cy.get('@runRow').contains(this.runs[1].totalPassed)
+          cy.get('@secondRunRow').contains(this.runs[1].totalFailed)
+          cy.get('@secondRunRow').contains(this.runs[1].totalPassed)
         })
 
         it('displays times', function () {
-          cy.get('@runRow').contains('a few secs ago')
-          cy.get('@runRow').contains('00:16')
+          cy.get('@secondRunRow').contains('a few secs ago')
+          cy.get('@secondRunRow').contains('00:16')
         })
 
         it('displays separate timers for incomplete runs', function () {
-          cy.get('@firstRunRow').contains('24:47')
-          cy.get('.runs-container li').eq(3).contains('45:47')
+          cy.get('@firstRunRow').contains('12:24:47')
+          cy.get('@fourthRunRow').contains('12:45:47')
           .then(() => {
             cy.tick(1000)
           })
 
-          cy.get('@firstRunRow').contains('24:48')
-          cy.get('.runs-container li').eq(3).contains('45:48')
+          cy.get('@firstRunRow').contains('12:24:48')
+          cy.get('@fourthRunRow').contains('12:45:48')
         })
 
         context('spec display', function () {
@@ -179,6 +180,7 @@ describe('Runs List', function () {
             .trigger('mouseover')
 
             cy.get('.cy-tooltip').contains('Parallelization was disabled for this run')
+            cy.percySnapshot()
           })
         })
       })
@@ -199,6 +201,7 @@ describe('Runs List', function () {
         cy.contains('Cannot connect to API server')
         cy.contains('http://api.server')
         cy.contains('ECONNREFUSED')
+        cy.percySnapshot()
       })
 
       describe('trying again', function () {
@@ -308,6 +311,8 @@ describe('Runs List', function () {
       cy.contains('button', 'Log In to Dashboard').click().then(function () {
         expect(this.ipc.beginAuth).to.be.calledOnce
       })
+
+      cy.percySnapshot()
     })
 
     it('clicking Log In to Dashboard passes utm code', () => {
@@ -437,6 +442,7 @@ describe('Runs List', function () {
         this.ipcError({ statusCode: 403 })
 
         cy.contains('Request access')
+        cy.percySnapshot()
       })
 
       it('displays "need to set up" message', function () {
@@ -556,6 +562,7 @@ describe('Runs List', function () {
 
             it('shows success message', () => {
               cy.contains('Request sent')
+              cy.percySnapshot()
             })
 
             it('persists request state (until app is reloaded at least)', function () {
@@ -611,6 +618,7 @@ describe('Runs List', function () {
 
               it('enables button', () => {
                 cy.get('@requestAccessBtn').should('not.be.disabled')
+                cy.percySnapshot()
               })
 
               it('shows "Request access" text', () => {
@@ -678,6 +686,7 @@ describe('Runs List', function () {
 
       it('displays timed out message', () => {
         cy.contains('timed out')
+        cy.percySnapshot()
       })
     })
 
@@ -692,6 +701,7 @@ describe('Runs List', function () {
 
       it('displays empty message', () => {
         cy.contains('Runs cannot be displayed')
+        cy.percySnapshot()
       })
     })
 
@@ -741,6 +751,7 @@ describe('Runs List', function () {
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
+        cy.percySnapshot()
       })
     })
 
@@ -755,8 +766,8 @@ describe('Runs List', function () {
 
       it('displays unexpected error message', function () {
         cy.contains('unexpected error')
-
         cy.contains('"no runs": "for you"')
+        cy.percySnapshot()
       })
     })
 
@@ -861,6 +872,35 @@ describe('Runs List', function () {
         cy.contains('Cypress Dashboard').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
+        })
+      })
+
+      it('shows tooltip on hover of copy to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseout')
+      })
+
+      it('copies record key command to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').click()
+        .then(function () {
+          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+        })
+      })
+
+      it('copies project id config to clipboard', () => {
+        cy.get('#code-project-id-config').find('.action-copy').click()
+        .then(function () {
+          const expectedJsonConfig = {
+            projectId: this.config.projectId,
+          }
+          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+
+          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
         })
       })
     })
