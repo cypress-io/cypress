@@ -43,6 +43,15 @@ describe('Release Notes', () => {
     cy.contains('Update to Version 1.2.3').should('be.visible')
   })
 
+  it('shows update instructions if release notes does not include title or content', () => {
+    // if this hasn't been released on on.cypress.io yet, it will use the default redirect
+    // and not a 404 error, which returns an empty object
+    // also protects against the data not being correct in any case
+    getReleaseNotes.resolve({})
+    cy.get('.update-notice').contains('Learn more').click()
+    cy.contains('Update to Version 1.2.3').should('be.visible')
+  })
+
   it('shows update instructions if getting release notes errors', () => {
     getReleaseNotes.reject(new Error('something went wrong'))
     cy.get('.update-notice').contains('Learn more').click()
