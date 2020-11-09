@@ -1,0 +1,27 @@
+ReferenceError: The following error originated from your application code, not from Cypress.
+
+  > b is not defined
+
+When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+This behavior is configurable, and you can choose to turn this off by listening to the `uncaught:exception` event.
+    at http://localhost:8888/js/utils.js:9:3
+    at http://localhost:8888/js/utils.js:60:3
+From previous event:
+    at run (http://localhost:8888/__cypress/runner/cypress_runner.js:169474:21)
+    at $Cy.cy.<computed> [as visit] (http://localhost:8888/__cypress/runner/cypress_runner.js:169931:11)
+    at Context.runnable.fn (http://localhost:8888/__cypress/runner/cypress_runner.js:170155:21)
+    at callFn (http://localhost:8888/__cypress/runner/cypress_runner.js:104227:21)
+    at Test.../driver/node_modules/mocha/lib/runnable.js.Runnable.run (http://localhost:8888/__cypress/runner/cypress_runner.js:104214:7)
+    at http://localhost:8888/__cypress/runner/cypress_runner.js:175754:28
+From previous event:
+    at Object.onRunnableRun (http://localhost:8888/__cypress/runner/cypress_runner.js:175742:17)
+    at $Cypress.action (http://localhost:8888/__cypress/runner/cypress_runner.js:166291:28)
+    at Test.Runnable.run (http://localhost:8888/__cypress/runner/cypress_runner.js:174128:13)
+    at Runner.../driver/node_modules/mocha/lib/runner.js.Runner.runTest (http://localhost:8888/__cypress/runner/cypress_runner.js:104886:10)
+    at http://localhost:8888/__cypress/runner/cypress_runner.js:105012:12
+    at next (http://localhost:8888/__cypress/runner/cypress_runner.js:104795:14)
+    at http://localhost:8888/__cypress/runner/cypress_runner.js:104805:7
+    at next (http://localhost:8888/__cypress/runner/cypress_runner.js:104707:14)
+    at http://localhost:8888/__cypress/runner/cypress_runner.js:104773:5
+    at timeslice (http://localhost:8888/__cypress/runner/cypress_runner.js:98699:27)

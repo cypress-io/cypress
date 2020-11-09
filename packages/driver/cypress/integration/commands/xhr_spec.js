@@ -1780,6 +1780,36 @@ describe('src/cy/commands/xhr', () => {
 
         cy.contains('#result', '""').should('be.visible')
       })
+
+      it('works if the JSON file has number content', () => {
+        cy
+        .server()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:number.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
+
+        cy.contains('#result', 14).should('be.visible')
+      })
+
+      it('works if the JSON file has boolean content', () => {
+        cy
+        .server()
+        .route({
+          method: 'POST',
+          url: '/test-xhr',
+          response: 'fixture:boolean.json',
+        })
+        .visit('/fixtures/xhr-triggered.html')
+        .get('#trigger-xhr')
+        .click()
+
+        cy.contains('#result', /true/).should('be.visible')
+      })
     })
 
     describe('errors', {
