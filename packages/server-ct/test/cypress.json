@@ -1,6 +1,5 @@
 {
   "experimentalComponentTesting": true,
   "testFiles": "**/*.spec.*",
-  "componentSupportFile": "./component-helpers.js",
-  "componentDevServer": "./dev-server.js"
+  "componentSupportFile": "./component-helpers.js"
 }

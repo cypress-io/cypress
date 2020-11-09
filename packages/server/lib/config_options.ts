@@ -42,10 +42,6 @@ export const options = [
     validation: v.isStringOrFalse,
     isFolder: true,
   }, {
-    name: 'componentDevServer',
-    defaultValue: false,
-    validation: v.isStringOrFalse,
-  }, {
     name: 'configFile',
     defaultValue: 'cypress.json',
     validation: v.isStringOrFalse,
