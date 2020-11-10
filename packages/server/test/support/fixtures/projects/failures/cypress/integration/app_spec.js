@@ -1,14 +1,16 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("failures", function() {
-  it("failure1", function() {
-    throw new Error("foo");
-  });
+describe('failures', () => {
+  it('failure1', () => {
+    throw new Error('foo')
+  })
 
-  return it("failure2", function() {
-    throw new Error("bar");
-  });
-});
+  it('failure2', () => {
+    throw new Error('bar')
+  })
+})
