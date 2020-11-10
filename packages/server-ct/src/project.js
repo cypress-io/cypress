@@ -3,9 +3,12 @@ const path = require('path')
 const debug = require('debug')('cypress:server-ct:project')
 const Bluebird = require('bluebird')
 
+const fs = require('@packages/server/lib/util/fs')
 const cwd = require('@packages/server/lib/cwd')
 const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
+const plugins = require('@packages/server/lib/plugins')
+const settings = require('@packages/server/lib/util/settings')
 const Server = require('./server')
 
 const localCwd = cwd()
@@ -37,24 +40,24 @@ class Project {
     this.server = new Server()
 
     debug('project options %o', options)
-    // this.options = options
+    this.options = options
 
     return this.getConfig(options)
     .tap((cfg) => {
       process.chdir(this.projectRoot)
     })
-    // .then((cfg) => {
-    //   return this._initPlugins(cfg, options)
-    //   .then((modifiedCfg) => {
-    //     debug('plugin config yielded: %o', modifiedCfg)
+    .then((cfg) => {
+      return this._initPlugins(cfg, options)
+      .then((modifiedCfg) => {
+        debug('plugin config yielded: %o', modifiedCfg)
 
-    //     const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+        const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
-    //     debug('updated config: %o', updatedConfig)
+        debug('updated config: %o', updatedConfig)
 
-    //     return updatedConfig
-    //   })
-    // })
+        return updatedConfig
+      })
+    })
     .then((cfg) => {
       // return this.server.open(cfg, this, options.onError, options.onWarning)
       return this.server.open(cfg, this)
@@ -85,37 +88,45 @@ class Project {
           this.watchSettingsAndStartWebsockets(options, cfg),
           // this.scaffold(cfg),
         )
-        // .then(() => {
-        //   return Promise.join(
-        //     this.checkSupportFile(cfg),
-        //     this.watchPluginsFile(cfg, options),
-        //   )
-        // })
+        .then(() => {
+          return Bluebird.join(
+            // this.checkSupportFile(cfg),
+            // this.watchPluginsFile(cfg, options),
+          )
+        })
       })
     })
     .return(this)
   }
 
-  // _initPlugins (cfg, options) {
-  //   // only init plugins with the
-  //   // allowed config values to
-  //   // prevent tampering with the
-  //   // internals and breaking cypress
-  //   cfg = config.allowed(cfg)
+  _initPlugins (cfg, options) {
+    // only init plugins with the
+    // allowed config values to
+    // prevent tampering with the
+    // internals and breaking cypress
+    cfg = config.allowed(cfg)
 
-  //   return plugins.init(cfg, {
-  //     projectRoot: this.projectRoot,
-  //     configFile: settings.pathToConfigFile(this.projectRoot, options),
-  //     onError (err) {
-  //       debug('got plugins error', err.stack)
+    return plugins.init(cfg, {
+      projectRoot: this.projectRoot,
+      configFile: settings.pathToConfigFile(this.projectRoot, options),
+      // onError (err) {
+      //   debug('got plugins error', err.stack)
 
-  //       browsers.close()
+      //   browsers.close()
 
-  //       options.onError(err)
-  //     },
-  //     onWarning: options.onWarning,
-  //   })
-  // }
+      //   options.onError(err)
+      // },
+      // onWarning: options.onWarning,
+    })
+    .tap((cfg) => {
+      // now that plugins have been initialized, we want to execute
+      // the plugin event for 'devserver:config' and get back
+      return plugins.execute('devserver:config')
+      .then((obj) => {
+        // console.log('got object from child', obj)
+      })
+    })
+  }
 
   reset () {
     debug('resetting project instance %s', this.projectRoot)
@@ -155,36 +166,36 @@ class Project {
     })
   }
 
-  // watchPluginsFile (cfg, options) {
-  //   debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
-  //   if (!cfg.pluginsFile || options.isTextTerminal) {
-  //     return Promise.resolve()
-  //   }
+  watchPluginsFile (cfg, options) {
+    debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
+    if (!cfg.pluginsFile || options.isTextTerminal) {
+      return Bluebird.resolve()
+    }
 
-  //   return fs.pathExists(cfg.pluginsFile)
-  //   .then((found) => {
-  //     debug(`plugins file found? ${found}`)
-  //     // ignore if not found. plugins#init will throw the right error
-  //     if (!found) {
-  //       return
-  //     }
+    return fs.pathExists(cfg.pluginsFile)
+    .then((found) => {
+      debug(`plugins file found? ${found}`)
+      // ignore if not found. plugins#init will throw the right error
+      if (!found) {
+        return
+      }
 
-  //     debug('watch plugins file')
+      debug('watch plugins file')
 
-  //     return this.watchers.watchTree(cfg.pluginsFile, {
-  //       onChange: () => {
-  //         // TODO: completely re-open project instead?
-  //         debug('plugins file changed')
+      // return this.watchers.watchTree(cfg.pluginsFile, {
+      //   onChange: () => {
+      //     // TODO: completely re-open project instead?
+      //     debug('plugins file changed')
 
-  //         // re-init plugins after a change
-  //         this._initPlugins(cfg, options)
-  //         .catch((err) => {
-  //           options.onError(err)
-  //         })
-  //       },
-  //     })
-  //   })
-  // }
+      //     // re-init plugins after a change
+      //     this._initPlugins(cfg, options)
+      //     .catch((err) => {
+      //       options.onError(err)
+      //     })
+      //   },
+      // })
+    })
+  }
 
   // watchSettings (onSettingsChanged, options) {
   //   // bail if we havent been told to
