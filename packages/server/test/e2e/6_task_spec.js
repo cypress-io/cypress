@@ -23,7 +23,7 @@ describe('e2e task', () => {
   it('merges task events on subsequent registrations and logs warning for conflicts', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('multiple-task-registrations'),
-      spec: 'multiple_task_registrations_spec.coffee',
+      spec: 'multiple_task_registrations_spec.js',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
     })

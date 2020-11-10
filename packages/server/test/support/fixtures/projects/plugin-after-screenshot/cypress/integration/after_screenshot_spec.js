@@ -1,16 +1,5 @@
-/* eslint-disable
-    mocha/no-global-tests,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 it('cy.screenshot() - replacement', () => {
-  return cy.screenshot('replace-me', { capture: 'runner' }, {
+  cy.screenshot('replace-me', { capture: 'runner' }, {
     onAfterScreenshot (details) {
       expect(details.path).to.include('screenshot-replacement.png')
       expect(details.size).to.equal(1047)
@@ -21,7 +10,7 @@ it('cy.screenshot() - replacement', () => {
 })
 
 it('cy.screenshot() - ignored values', () => {
-  return cy.screenshot('ignored-values', { capture: 'runner' }, {
+  cy.screenshot('ignored-values', { capture: 'runner' }, {
     onAfterScreenshot (details) {
       expect(details.path).to.include('ignored-values.png')
       expect(details.multipart).to.be.false
@@ -32,7 +21,7 @@ it('cy.screenshot() - ignored values', () => {
 })
 
 it('cy.screenshot() - invalid return', () => {
-  return cy.screenshot('invalid-return', { capture: 'runner' }, {
+  cy.screenshot('invalid-return', { capture: 'runner' }, {
     onAfterScreenshot (details) {
       expect(details.path).to.include('invalid-return.png')
     },

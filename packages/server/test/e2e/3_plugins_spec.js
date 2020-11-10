@@ -27,7 +27,7 @@ describe('e2e plugins', function () {
 
   it('fails when there is an async error inside an event handler', function () {
     return e2e.exec(this, {
-      spec: 'app_spec.coffee',
+      spec: 'app_spec.js',
       project: Fixtures.projectPath('plugins-async-error'),
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -37,7 +37,7 @@ describe('e2e plugins', function () {
 
   it('can modify config from plugins', function () {
     return e2e.exec(this, {
-      spec: 'app_spec.coffee',
+      spec: 'app_spec.js',
       env: 'foo=foo,bar=bar',
       config: { pageLoadTimeout: 10000 },
       project: Fixtures.projectPath('plugin-config'),
@@ -95,7 +95,7 @@ describe('e2e plugins', function () {
 
   e2e.it('works with user extensions', {
     browser: 'chrome',
-    spec: 'app_spec.coffee',
+    spec: 'app_spec.js',
     headed: true,
     project: Fixtures.projectPath('plugin-extension'),
     sanitizeScreenshotDimensions: true,
@@ -106,7 +106,7 @@ describe('e2e plugins', function () {
     const pluginsAbsolutePath = Fixtures.projectPath('plugins-absolute-path')
 
     return e2e.exec(this, {
-      spec: 'absolute_spec.coffee',
+      spec: 'absolute_spec.js',
       config: {
         pluginsFile: path.join(
           pluginsAbsolutePath,
@@ -123,7 +123,7 @@ describe('e2e plugins', function () {
 
   it('calls after:screenshot for cy.screenshot() and failure screenshots', function () {
     return e2e.exec(this, {
-      spec: 'after_screenshot_spec.coffee',
+      spec: 'after_screenshot_spec.js',
       project: pluginAfterScreenshot,
       sanitizeScreenshotDimensions: true,
       snapshot: true,
@@ -134,7 +134,7 @@ describe('e2e plugins', function () {
   // https://github.com/cypress-io/cypress/issues/8079
   it('does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot', function () {
     return e2e.exec(this, {
-      spec: 'after_screenshot_overwrite_spec.coffee',
+      spec: 'after_screenshot_overwrite_spec.js',
       project: pluginAfterScreenshot,
       snapshot: true,
     })
@@ -163,7 +163,7 @@ describe('e2e plugins', function () {
   describe('preprocessor', function () {
     it('passes with working preprocessor', function () {
       return e2e.exec(this, {
-        spec: 'app_spec.coffee',
+        spec: 'app_spec.js',
         project: Fixtures.projectPath('working-preprocessor'),
         sanitizeScreenshotDimensions: true,
         snapshot: true,
