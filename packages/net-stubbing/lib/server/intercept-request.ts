@@ -194,12 +194,6 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     emit(socket, 'http:request:received', frame)
   }
 
-  if (route.staticResponse) {
-    emitReceived()
-
-    return sendStaticResponse(request.res, route.staticResponse, request.onResponse!)
-  }
-
   const ensureBody = (cb: () => void) => {
     if (frame.req.body) {
       return cb()
@@ -209,6 +203,15 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
       request.req.body = frame.req.body = reqBody.toString()
       cb()
     }))
+  }
+
+  if (route.staticResponse) {
+    const { staticResponse } = route
+
+    return ensureBody(() => {
+      emitReceived()
+      sendStaticResponse(request.res, staticResponse, request.onResponse!)
+    })
   }
 
   if (notificationOnly) {

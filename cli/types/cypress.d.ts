@@ -1107,7 +1107,7 @@ declare namespace Cypress {
       ...args: any[]
     ): Chainable<R>
     invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
-      options: Loggable,
+      options: Partial<Loggable & Timeoutable>,
       functionName: K,
       ...args: any[]
     ): Chainable<R>
@@ -1117,7 +1117,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
-    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Partial<Loggable & Timeoutable>, index: number): Chainable<ReturnType<T>>
 
     /**
    * Invoke a function on the previously yielded subject by a property path.
@@ -1138,8 +1138,8 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
-    its(propertyPath: string, options?: Loggable): Chainable
+    its<K extends keyof Subject>(propertyName: K, options?: Partial<Loggable & Timeoutable>): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Partial<Loggable & Timeoutable>): Chainable
 
     /**
      * Get a value by index from an array yielded from the previous command.
@@ -1147,7 +1147,7 @@ declare namespace Cypress {
      * @example
      *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
      */
-    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
+    its<T, Subject extends T[]>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -5237,7 +5237,7 @@ declare namespace Cypress {
     snapshot(name?: string, options?: { at?: number, next: string }): Log
   }
 
-  interface LogConfig {
+  interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** Allows the name of the command to be overwritten */
