@@ -743,10 +743,15 @@ describe('Specs List', function () {
           this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
         })
 
+        cy.contains('.all-tests', 'Running 1 spec')
+
         cy.contains('.project-nav a', 'Settings').click()
+        cy.get('.settings').should('be.visible')
         cy.contains('.project-nav a', 'Tests').click()
+
         // the specs list renders again
         cy.contains('.file-name', 'app_spec.coffee')
+        cy.contains('.all-tests', 'Running 1 spec')
       })
     })
   })
