@@ -729,6 +729,26 @@ describe('Specs List', function () {
         cy.contains('.all-tests', 'Run 8 component specs')
       })
     })
+
+    context('returning to specs tab', function () {
+      beforeEach(function () {
+        this.ipc.getSpecs.yields(null, this.specs)
+        this.openProject.resolve(this.config)
+      })
+
+      // https://github.com/cypress-io/cypress/issues/9151
+      it('does not crash when running', function () {
+        cy.contains('.file-name', 'app_spec.coffee').click()
+        .then(function () {
+          this.ipc.onSpecChanged.yield(null, 'integration/app_spec.coffee')
+        })
+
+        cy.contains('.project-nav a', 'Settings').click()
+        cy.contains('.project-nav a', 'Tests').click()
+        // the specs list renders again
+        cy.contains('.file-name', 'app_spec.coffee')
+      })
+    })
   })
 
   describe('spec list updates', function () {

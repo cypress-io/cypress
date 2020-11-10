@@ -211,14 +211,16 @@ class SpecsList extends Component {
 
       if (this._areTestsRunning()) {
         // selected spec must be set
-        // only show the button matching current running spec type
-        if (spec.specType !== this.selectedSpec.specType) {
-          return <></>
-        }
+        if (this.selectedSpec) {
+          // only show the button matching current running spec type
+          if (spec.specType !== this.selectedSpec.specType) {
+            return <></>
+          }
 
-        if (this.selectedSpec.relative !== '__all') {
-          // we are only running 1 spec
-          buttonText = `${word} 1 spec`
+          if (this.selectedSpec.relative !== '__all') {
+            // we are only running 1 spec
+            buttonText = `${word} 1 spec`
+          }
         }
       }
 
