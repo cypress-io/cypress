@@ -28,6 +28,8 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
   return label
 }
 
+// Note: this component can be mounted and unmounted
+// if you need to persist the data through mounts, "save" it in the specsStore
 @observer
 class SpecsList extends Component {
   constructor (props) {
@@ -167,7 +169,7 @@ class SpecsList extends Component {
 
     const { project } = this.props
 
-    this.selectedSpec = spec
+    specsStore.setSelectedSpec(spec)
 
     if (spec.relative === '__all') {
       if (specsStore.filter) {
@@ -211,13 +213,13 @@ class SpecsList extends Component {
 
       if (this._areTestsRunning()) {
         // selected spec must be set
-        if (this.selectedSpec) {
+        if (specsStore.selectedSpec) {
           // only show the button matching current running spec type
-          if (spec.specType !== this.selectedSpec.specType) {
+          if (spec.specType !== specsStore.selectedSpec.specType) {
             return <></>
           }
 
-          if (this.selectedSpec.relative !== '__all') {
+          if (specsStore.selectedSpec.relative !== '__all') {
             // we are only running 1 spec
             buttonText = `${word} 1 spec`
           }
