@@ -61,7 +61,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "11.2.1"
+      xcode: "11.3.1"
     environment:
       PLATFORM: mac
 
