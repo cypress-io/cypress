@@ -1,5 +1,5 @@
 const browsers = require('@packages/server/lib/browsers')
-const Project = require('./src/project')
+const Project = require('./src/project-ct')
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 

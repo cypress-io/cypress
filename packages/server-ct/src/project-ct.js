@@ -9,7 +9,7 @@ const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
 const plugins = require('@packages/server/lib/plugins')
 const settings = require('@packages/server/lib/util/settings')
-const Server = require('./server')
+const Server = require('./server-ct')
 
 const localCwd = cwd()
 
