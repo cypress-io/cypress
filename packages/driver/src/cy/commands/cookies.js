@@ -142,9 +142,11 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   // TODO: handle failure here somehow
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
-  Cypress.on('test:before:run:async', () => {
-    return getAndClear()
-  })
+  // TODO: make this conditional based on us being
+  // in CT or E2E mode
+  // Cypress.on('test:before:run:async', () => {
+  //   return getAndClear()
+  // })
 
   return Commands.addAll({
     getCookie (name, options = {}) {

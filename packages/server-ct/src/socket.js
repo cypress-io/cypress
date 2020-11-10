@@ -244,16 +244,16 @@ class Socket {
         // return socket.on('automation:response', automation.response)
       })
 
-      socket.on('automation:request', (message, data, cb) => {
-        debug('automation:request %s %o', message, data)
+      // socket.on('automation:request', (message, data, cb) => {
+      //   debug('automation:request %s %o', message, data)
 
-        return automationRequest(message, data)
-        .then((resp) => {
-          return cb({ response: resp })
-        }).catch((err) => {
-          return cb({ error: errors.clone(err) })
-        })
-      })
+      //   return automationRequest(message, data)
+      //   .then((resp) => {
+      //     return cb({ response: resp })
+      //   }).catch((err) => {
+      //     return cb({ error: errors.clone(err) })
+      //   })
+      // })
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
