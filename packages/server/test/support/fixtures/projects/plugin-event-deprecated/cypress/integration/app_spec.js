@@ -1,2 +1,2 @@
-it "noop test", ->
-  return
+it("noop test", function() {
+});

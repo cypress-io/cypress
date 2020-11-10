@@ -1,1 +1,1 @@
-it "is true", ->
+it("is true", function() {});
