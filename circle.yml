@@ -390,7 +390,7 @@ commands:
     steps:
       - run:
           name: Check if job should run
-          command: yarn check-halt
+          command: node scripts/check-halt.js
 
 jobs:
   ## code checkout and yarn installs
