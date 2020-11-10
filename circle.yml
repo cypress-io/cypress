@@ -237,6 +237,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-halt
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
