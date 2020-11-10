@@ -1,3 +1,10 @@
+# [@cypress/vue-v1.0.1-alpha.7](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.6...@cypress/vue-v1.0.1-alpha.7) (2020-11-10)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9045](https://github.com/cypress-io/cypress/issues/9045)) ([550c05c](https://github.com/cypress-io/cypress/commit/550c05cc3d7a2a179de21138ae5f8118277df6ef))
+
 # [@cypress/vue-v1.0.1-alpha.6](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.5...@cypress/vue-v1.0.1-alpha.6) (2020-10-30)
 
 
