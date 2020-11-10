@@ -3,12 +3,15 @@ const path = require('path')
 const debug = require('debug')('cypress:server-ct:project')
 const Bluebird = require('bluebird')
 
-const fs = require('@packages/server/lib/util/fs')
-const cwd = require('@packages/server/lib/cwd')
 const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
 const plugins = require('@packages/server/lib/plugins')
+const Watchers = require('@packages/server/lib/watchers')
+
+const fs = require('@packages/server/lib/util/fs')
+const cwd = require('@packages/server/lib/cwd')
 const settings = require('@packages/server/lib/util/settings')
+
 const Server = require('./server-ct')
 
 const localCwd = cwd()
@@ -24,7 +27,7 @@ class Project {
     }
 
     this.projectRoot = path.resolve(projectRoot)
-    // this.watchers = new Watchers()
+    this.watchers = new Watchers()
     this.cfg = null
     // this.spec = null
     // this.browser = null
@@ -91,7 +94,7 @@ class Project {
         .then(() => {
           return Bluebird.join(
             // this.checkSupportFile(cfg),
-            // this.watchPluginsFile(cfg, options),
+            this.watchPluginsFile(cfg, options),
           )
         })
       })
@@ -182,18 +185,18 @@ class Project {
 
       debug('watch plugins file')
 
-      // return this.watchers.watchTree(cfg.pluginsFile, {
-      //   onChange: () => {
-      //     // TODO: completely re-open project instead?
-      //     debug('plugins file changed')
+      return this.watchers.watchTree(cfg.pluginsFile, {
+        onChange: () => {
+          // TODO: completely re-open project instead?
+          debug('plugins file changed')
 
-      //     // re-init plugins after a change
-      //     this._initPlugins(cfg, options)
-      //     .catch((err) => {
-      //       options.onError(err)
-      //     })
-      //   },
-      // })
+          // re-init plugins after a change
+          this._initPlugins(cfg, options)
+          .catch((err) => {
+            options.onError(err)
+          })
+        },
+      })
     })
   }
 
