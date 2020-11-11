@@ -7,9 +7,7 @@ const start = (projectRoot, options) => {
   const project = new Project(projectRoot)
 
   return project.open(options)
-  .then((project) => {
-    const { cfg } = project
-
+  .then(({ cfg }) => {
     options.browsers = cfg.browsers
     options.proxyUrl = cfg.proxyUrl
     options.userAgent = cfg.userAgent
@@ -20,7 +18,8 @@ const start = (projectRoot, options) => {
     options.url = cfg.browserUrl
 
     const automation = {
-      use () {},
+      use () {
+      },
     }
 
     return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME)

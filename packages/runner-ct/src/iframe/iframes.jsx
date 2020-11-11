@@ -107,7 +107,7 @@ export default class Iframes extends Component {
     config.spec = spec
 
     // this.props.eventManager.notifyRunningSpec(specPath)
-    logger.clearLog()
+    // logger.clearLog()
     this._setScriptError(null)
 
     this.props.eventManager.setup(config)

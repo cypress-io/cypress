@@ -227,7 +227,7 @@ class Socket {
             errors.warning('AUTOMATION_SERVER_DISCONNECTED')
 
             // TODO: no longer emit this, just close the browser and display message in reporter
-            return this.io.emit('automation:disconnected')
+            return this.io.emit('`automation:disconnected`')
           })
         })
 

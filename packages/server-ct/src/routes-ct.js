@@ -12,13 +12,14 @@ module.exports = ({ app, config, project, onError }) => {
   app.get('/__cypress/static/*', staticPkg.middleware(send))
 
   app.get('/__cypress/iframes/*', (req, res) => {
-    const extraOptions = {
-      specFilter: _.get(project, 'spec.specFilter'),
-    }
-
-    const getRemoteState = _.constant({ domainName: null })
-
-    files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    res.render(require.resolve('../test.html'))
+    // const extraOptions = {
+    //   specFilter: _.get(project, 'spec.specFilter'),
+    // }
+    //
+    // const getRemoteState = _.constant({ domainName: null })
+    //
+    // files.handleIframe(req, res, config, getRemoteState, extraOptions)
   })
 
   app.get(config.clientRoute, (req, res) => {
