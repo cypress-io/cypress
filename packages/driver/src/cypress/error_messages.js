@@ -1689,6 +1689,10 @@ module.exports = {
       message: `${cmd('type')} can only be called on a single element. Your subject contained {{num}} elements.`,
       docsUrl: 'https://on.cypress.io/type',
     },
+    not_a_modifier: {
+      message: `\`{{key}}\` is not a modifier.`,
+      docsUrl: 'https://on.cypress.io/type',
+    },
     not_actionable_textlike: {
       message: stripIndent`\
         ${cmd('type')} failed because it targeted a disabled element.

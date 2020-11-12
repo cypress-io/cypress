@@ -33,6 +33,7 @@ describe('Runs List', function () {
       cy.stub(this.ipc, 'setupDashboardProject')
       cy.stub(this.ipc, 'externalOpen')
       cy.stub(this.ipc, 'beginAuth').resolves()
+      cy.stub(this.ipc, 'setClipboardText')
 
       this.openProject = this.util.deferred()
       cy.stub(this.ipc, 'openProject').returns(this.openProject.promise)
@@ -104,6 +105,7 @@ describe('Runs List', function () {
 
         it('displays build num', function () {
           cy.get('@secondRunRow').contains(`#${this.runs[1].buildNumber}`)
+          cy.percySnapshot()
         })
 
         it('displays commit info', function () {
@@ -178,6 +180,7 @@ describe('Runs List', function () {
             .trigger('mouseover')
 
             cy.get('.cy-tooltip').contains('Parallelization was disabled for this run')
+            cy.percySnapshot()
           })
         })
       })
@@ -198,6 +201,7 @@ describe('Runs List', function () {
         cy.contains('Cannot connect to API server')
         cy.contains('http://api.server')
         cy.contains('ECONNREFUSED')
+        cy.percySnapshot()
       })
 
       describe('trying again', function () {
@@ -307,6 +311,8 @@ describe('Runs List', function () {
       cy.contains('button', 'Log In to Dashboard').click().then(function () {
         expect(this.ipc.beginAuth).to.be.calledOnce
       })
+
+      cy.percySnapshot()
     })
 
     it('clicking Log In to Dashboard passes utm code', () => {
@@ -436,6 +442,7 @@ describe('Runs List', function () {
         this.ipcError({ statusCode: 403 })
 
         cy.contains('Request access')
+        cy.percySnapshot()
       })
 
       it('displays "need to set up" message', function () {
@@ -555,6 +562,7 @@ describe('Runs List', function () {
 
             it('shows success message', () => {
               cy.contains('Request sent')
+              cy.percySnapshot()
             })
 
             it('persists request state (until app is reloaded at least)', function () {
@@ -610,6 +618,7 @@ describe('Runs List', function () {
 
               it('enables button', () => {
                 cy.get('@requestAccessBtn').should('not.be.disabled')
+                cy.percySnapshot()
               })
 
               it('shows "Request access" text', () => {
@@ -677,6 +686,7 @@ describe('Runs List', function () {
 
       it('displays timed out message', () => {
         cy.contains('timed out')
+        cy.percySnapshot()
       })
     })
 
@@ -691,6 +701,7 @@ describe('Runs List', function () {
 
       it('displays empty message', () => {
         cy.contains('Runs cannot be displayed')
+        cy.percySnapshot()
       })
     })
 
@@ -740,6 +751,7 @@ describe('Runs List', function () {
         .contains('.btn', 'Set up project').click()
 
         cy.contains('To record your first')
+        cy.percySnapshot()
       })
     })
 
@@ -754,8 +766,8 @@ describe('Runs List', function () {
 
       it('displays unexpected error message', function () {
         cy.contains('unexpected error')
-
         cy.contains('"no runs": "for you"')
+        cy.percySnapshot()
       })
     })
 
@@ -860,6 +872,35 @@ describe('Runs List', function () {
         cy.contains('Cypress Dashboard').click()
         .then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith(`https://on.cypress.io/dashboard/projects/${this.config.projectId}/runs`)
+        })
+      })
+
+      it('shows tooltip on hover of copy to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-record-command').find('.action-copy').trigger('mouseout')
+
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseover')
+        cy.get('.cy-tooltip').should('contain', 'Copy to clipboard')
+        cy.get('#code-project-id-config').find('.action-copy').trigger('mouseout')
+      })
+
+      it('copies record key command to clipboard', () => {
+        cy.get('#code-record-command').find('.action-copy').click()
+        .then(function () {
+          expect(this.ipc.setClipboardText).to.be.calledWith(`cypress run --record --key <record-key>`)
+        })
+      })
+
+      it('copies project id config to clipboard', () => {
+        cy.get('#code-project-id-config').find('.action-copy').click()
+        .then(function () {
+          const expectedJsonConfig = {
+            projectId: this.config.projectId,
+          }
+          const expectedCopyCommand = JSON.stringify(expectedJsonConfig, null, 2)
+
+          expect(this.ipc.setClipboardText).to.be.calledWith(expectedCopyCommand)
         })
       })
     })

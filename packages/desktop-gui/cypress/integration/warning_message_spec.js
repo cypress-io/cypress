@@ -108,6 +108,8 @@ describe('Warning Message', function () {
     .then(function () {
       expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
     })
+
+    cy.percySnapshot()
   })
 
   it('does not try to open non-links', function () {
@@ -154,6 +156,7 @@ describe('Warning Message', function () {
 
     it('shows retry button', function () {
       cy.contains('Try Again')
+      cy.percySnapshot()
     })
 
     it('pings baseUrl and disables retry button when clicked', function () {
@@ -215,6 +218,8 @@ describe('Warning Message', function () {
 
       cy.get('.alert-warning').its('1')
       .should('contain', 'Other message')
+
+      cy.percySnapshot()
     })
 
     it('can dismiss the warnings', function () {
