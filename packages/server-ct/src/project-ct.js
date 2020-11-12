@@ -52,58 +52,47 @@ class Project {
     })
     .then((cfg) => {
       return this._initPlugins(cfg, options)
-      .then(({ port: webpackDevServerPort, modifiedCfg }) => {
-        debug('plugin config yielded: %o', modifiedCfg)
+      .then((cfg) => {
+        // return this.server.open(cfg, this, options.onError, options.onWarning)
+        return this.server.open(cfg, this)
+        .spread((port, warning) => {
+          // if we didnt have a cfg.port
+          // then get the port once we
+          // open the server
 
-        const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+          if (!cfg.port) {
+            cfg.port = port
 
-        updatedConfig.webpackDevServerUrl = `http://localhost:${webpackDevServerPort}`
+            // and set all the urls again
+            _.extend(cfg, config.setUrls(cfg))
+          }
 
+          // store the cfg from
+          // opening the server
+          this.cfg = cfg
 
-        debug('updated config: %o', updatedConfig)
+          debug('project config: %o', _.omit(cfg, 'resolved'))
 
-        return updatedConfig
-      })
-    })
-    .then((cfg) => {
-      // return this.server.open(cfg, this, options.onError, options.onWarning)
-      return this.server.open(cfg, this)
-      .spread((port, warning) => {
-        // if we didnt have a cfg.port
-        // then get the port once we
-        // open the server
-        if (!cfg.port) {
-          cfg.port = port
+          // if (warning) {
+          //   options.onWarning(warning)
+          // }
 
-          // and set all the urls again
-          _.extend(cfg, config.setUrls(cfg))
-        }
+          // options.onSavedStateChanged = (state) => this.saveState(state)
 
-        // store the cfg from
-        // opening the server
-        this.cfg = cfg
-
-        debug('project config: %o', _.omit(cfg, 'resolved'))
-
-        // if (warning) {
-        //   options.onWarning(warning)
-        // }
-
-        // options.onSavedStateChanged = (state) => this.saveState(state)
-
-        return Bluebird.join(
-          this.watchSettingsAndStartWebsockets(options, cfg),
-          // this.scaffold(cfg),
-        )
-        .then(() => {
           return Bluebird.join(
-            // this.checkSupportFile(cfg),
-            this.watchPluginsFile(cfg, options),
+            this.watchSettingsAndStartWebsockets(options, cfg),
+            // this.scaffold(cfg),
           )
+          .then(() => {
+            return Bluebird.join(
+              // this.checkSupportFile(cfg),
+              this.watchPluginsFile(cfg, options),
+            )
+          })
         })
       })
+      .return(this)
     })
-    .return(this)
   }
 
   _initPlugins (cfg, options) {
@@ -111,23 +100,33 @@ class Project {
     // allowed config values to
     // prevent tampering with the
     // internals and breaking cypress
-    cfg = config.allowed(cfg)
+    const allowedCfg = config.allowed(cfg)
 
-    return plugins.init(cfg, {
+    return plugins.init(allowedCfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
     })
     .then((modifiedCfg) => {
+      debug('plugin config yielded: %o', modifiedCfg)
+
+      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+
+      debug('updated config: %o', updatedConfig)
+
+      return updatedConfig
+    })
+    .then((modifiedCfg) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
-
       return specsUtil.find(modifiedCfg)
       .filter((spec) => {
         return spec.specType === 'component'
       }).then((specs) => {
         return plugins.execute('devserver:config', { specs, config: modifiedCfg })
         .then((port) => {
-          return { port, modifiedCfg }
+          modifiedCfg.webpackDevServerUrl = `http://localhost:${port}`
+          return modifiedCfg
         })
       })
     })

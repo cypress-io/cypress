@@ -96,7 +96,7 @@ const init = (config, options) => {
     if (inspector.url()) {
       childOptions.execArgv = _.chain(process.execArgv.slice(0))
       .remove('--inspect-brk')
-      .push(`--inspect-brk=${process.debugPort + 1}`)
+      .push(`--inspect=${process.debugPort + 1}`)
       .value()
     }
 

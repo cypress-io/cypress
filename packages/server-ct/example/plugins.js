@@ -5,5 +5,5 @@ module.exports = (on, config) => {
     return webpackConfig
   })
 
-  return config
+  // return config
 }

@@ -1,18 +1,24 @@
 const _ = require('lodash')
 const send = require('send')
 const debug = require('debug')('cypress:server:routes')
+const httpProxy = require('http-proxy')
 
 const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
 const staticPkg = require('@packages/static')
 
 module.exports = ({ app, config, project, onError }) => {
+  const proxy = httpProxy.createProxyServer()
+
   app.get('/__cypress/runner/*', runnerCt.middleware(send))
 
   app.get('/__cypress/static/*', staticPkg.middleware(send))
 
   app.get('/__cypress/iframes/*', (req, res) => {
-    res.render(require.resolve('../test.html'))
+    req.url = '/'
+    proxy.web(req, res, { target: config.webpackDevServerUrl })
+    // localhost:myPort/index.html
+    // res.send(config.webpackDevServerUrl)
     // const extraOptions = {
     //   specFilter: _.get(project, 'spec.specFilter'),
     // }
@@ -31,10 +37,16 @@ module.exports = ({ app, config, project, onError }) => {
     })
   })
 
-  // app.all('*', (req, res) => {
-    // config.webpackDevServerUrl
+  app.all('*', (req, res) => {
+    proxy.web(req, res, { target: config.webpackDevServerUrl })
+    // proxy.web(req, res, { target: webpack, function(e) { ... });
+
+    // const to = net.createConnection({
+    //   host: config.
+    //   port: config.webpackDevServerUrl
+    // }
     // res.sendStatus(200)
-  // })
+  })
 
   // when we experience uncaught errors
   // during routing just log them out to
