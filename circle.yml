@@ -309,6 +309,10 @@ commands:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
       - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
+      - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
           command: npm run types --if-present
