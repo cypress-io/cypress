@@ -32,17 +32,17 @@ module.exports = async function bundleSpecs ({ files, projectRoot, support }, lo
   files = [
     ...files,
     support,
-  ].map((p, idx) => {
+  ].filter((f) => f).map((p, idx) => {
     return {
       ...p,
-      relativeToProject: path.relative(projectRoot, p.path),
-      relativeToThisFile: path.relative(__dirname, p.path),
+      relativeToProject: path.relative(projectRoot, p.absolute),
+      relativeToThisFile: path.relative(__dirname, p.absolute),
       chunkName: `${idx}-spec`,
-      spec: support !== p,
+      spec: p.specType === 'component',
     }
   })
 
-  const supportImport = buildSupport(files.filter((f) => !f.spec)[0])
+  const supportImport = support ? buildSupport(files.filter((f) => !f.spec)[0]) : ''
 
   return {
     code: `

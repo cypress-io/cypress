@@ -111,22 +111,22 @@ class Project {
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
-
       debug('updated config: %o', updatedConfig)
 
       return updatedConfig
     })
-    .then((modifiedCfg) => {
+    .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
-      return specsUtil.find(modifiedCfg)
+      return specsUtil.find(modifiedConfig)
       .filter((spec) => {
         return spec.specType === 'component'
       }).then((specs) => {
-        return plugins.execute('devserver:config', { specs, config: modifiedCfg })
+        return plugins.execute('devserver:config', { specs, config: modifiedConfig })
         .then((port) => {
-          modifiedCfg.webpackDevServerUrl = `http://localhost:${port}`
-          return modifiedCfg
+          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
+
+          return modifiedConfig
         })
       })
     })
