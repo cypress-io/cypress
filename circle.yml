@@ -1287,6 +1287,10 @@ jobs:
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
       - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin)/cypress version
+      - run:
           name: Verify Cypress binary
           working_directory: test-binary
           command: $(yarn bin)/cypress verify
