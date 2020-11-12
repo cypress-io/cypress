@@ -25,7 +25,7 @@ const throwErr = (arg) => {
 
 module.exports = (Commands, Cypress, cy, state) => {
   const isDynamicAliasingPossible = () => {
-    // dynamic aliasing is possible if cy.route2 is enabled and a route with dynamic interception has been defined
+    // dynamic aliasing is possible if cy.http is enabled and a route with dynamic interception has been defined
     return Cypress.config('experimentalNetworkStubbing') && _.find(state('routes'), (route) => {
       return _.isFunction(route.handler)
     })
@@ -123,8 +123,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       try {
         aliasObj = cy.getAlias(str, 'wait', log)
       } catch (err) {
-        // before cy.route2, we could know when an alias did/did not exist, because they
-        // were declared synchronously. with cy.route2, req.alias can be used to dynamically
+        // before cy.http, we could know when an alias did/did not exist, because they
+        // were declared synchronously. with cy.http, req.alias can be used to dynamically
         // create aliases, so we cannot know at wait-time if an alias exists or not
         if (!isDynamicAliasingPossible()) {
           throw err
@@ -167,7 +167,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('referencesAlias', aliases)
       }
 
-      if (command && !['route', 'route2'].includes(command.get('name'))) {
+      if (command && !['route', 'route2', 'http'].includes(command.get('name'))) {
         $errUtils.throwErrByPath('wait.invalid_alias', {
           onFail: options._log,
           args: { alias },
