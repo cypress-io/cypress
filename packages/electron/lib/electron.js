@@ -34,7 +34,7 @@ module.exports = {
     debug('getting Electron Node version')
 
     // runs locally installed "electron" bin alias
-    const localScript = path.join(__dirname, '..', 'print-node-version.js')
+    const localScript = path.join(__dirname, 'print-node-version.js')
 
     debug('local script that prints Node version %s', localScript)
 
