@@ -19,6 +19,7 @@
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel",
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
+    "clean-untracked-files": "git clean -d -f",
     "precypress:open": "yarn ensure-deps",
     "cypress:open": "node $(yarn bin cypress) open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
