@@ -1,0 +1,6 @@
+{
+  "experimentalComponentTesting": true,
+  "testFiles": "**/*.spec.*",
+  "pluginsFile": "./plugins.js",
+  "componentSupportFile": "./component-helpers.js"
+}

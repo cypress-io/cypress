@@ -9,6 +9,7 @@ module.exports = {
   entry: {
     main: './src/client/runner.js',
   },
+  // devtool: 'inline-source-map',
   module: {
     rules: [
       {
@@ -73,7 +74,5 @@ module.exports = {
   output: {
     filename: '[name].bundle.js',
     path: path.resolve(__dirname, 'dist'),
-    library: 'evergreen',
-    libraryTarget: 'umd',
   }
 }

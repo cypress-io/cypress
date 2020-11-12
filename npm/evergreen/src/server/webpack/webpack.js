@@ -2,8 +2,8 @@ const debug = require('debug')('cypress:evergreen:webpack')
 const path = require('path')
 const webpack = require('webpack')
 const webpackDevServer = require('webpack-dev-server')
-import globby from 'globby'
-import merge from 'webpack-merge'
+const globby = require('globby')
+const { merge } = require('webpack-merge')
 
 async function getFiles (glob) {
   let files = await globby(
@@ -25,17 +25,18 @@ async function getFiles (glob) {
   return files
 }
 
-async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportFile, testFiles, projectRoot }) {
+async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportFile, testPattern, projectRoot, files, support }) {
+  componentSupportFile = '/Users/jess/projects/cypress/core/tr1/cypress/npm/evergreen/examples/webpack-vue-cli/component-helpers.js'
   debug(`User passed in webpack config with values`, userWebpackConfig)
 
   const evergreenWebpackConfig = require('./webpack.config')
 
   debug(`Merging Evergreen's webpack config with users'`)
 
-  debug(`Test files pattern`, testFiles)
+  debug(`Test files pattern`, testPattern)
   debug(`Support files`, componentSupportFile)
-  const files = await getFiles(testFiles)
-  const support = (await getFiles(path.resolve(componentSupportFile)))[0]
+  files = files ? files : await getFiles(testPattern)
+  support = support ? support : (await getFiles(path.resolve(componentSupportFile)))[0]
 
   debug(`New webpack entries`, files)
 
@@ -79,11 +80,12 @@ async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportF
   return mergedConfig
 }
 
+// files, support, projectRoot
 async function start (userWebpackConfig = {}, testConfig) {
   const webpackConfig = await resolveWebpackConfig(userWebpackConfig, testConfig)
   const compiler = webpack(webpackConfig)
 
-  new webpackDevServer(compiler, { hot: true }).listen(3000)
+  return new webpackDevServer(compiler, { hot: true })
 }
 
 if (require.main === module) {

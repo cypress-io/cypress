@@ -5,6 +5,7 @@
   "main": "dist/evergreen.js",
   "scripts": {
     "build": "tsc && webpack",
+    "client": "webpack",
     "build:watch": "watch 'yarn build' ./src ../../packages",
     "test": "echo success"
   },

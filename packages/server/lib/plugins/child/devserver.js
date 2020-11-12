@@ -1,42 +1,27 @@
 // const webpackDevServer
 const util = require('../util')
+const startWebpack = require('../../../../../npm/evergreen/src/server/webpack/webpack')
 
-const wrap = (ipc, invoke, ids, args) => {
-  // const file = _.pick(args[0], 'filePath', 'outputPath', 'shouldWatch')
-  // let childFile = fileObjects[file.filePath]
+const wrap = (ipc, invoke, ids, [ arg ]) => {
 
-  // // the emitter methods don't come through from the parent process
-  // // so we have to re-apply them here
-  // if (!childFile) {
-  //   childFile = fileObjects[file.filePath] = _.extend(new EE(), file)
-  //   childFile.on('rerun', () => {
-  //     ipc.send('preprocessor:rerun', file.filePath)
-  //   })
+  const { specs, config } = arg
+  const devserverConfig = {
+    support: '', // file path
+    files: specs, // { { path: f.path, absolute: path.resolve(f.path) }
+    projectRoot: config.projectRoot, // file path
+  }
 
-  //   ipc.on('preprocessor:close', (filePath) => {
-  //     // no filePath means close all
-  //     if (!filePath || filePath === file.filePath) {
-  //       delete fileObjects[file.filePath]
-  //       childFile.emit('close')
-  //     }
-  //   })
-  // }
+  util.wrapChildPromise(ipc, invoke, ids, [], async (webpackConfig) => {
+    const webpackDevServer = await startWebpack(webpackConfig, devserverConfig)
 
-  // util.wrapChildPromise(ipc, invoke, ids, [childFile])
-  // util.wrapChildPromise(ipc, invoke, ids)
-  // console.log(invoke(ids.eventId, args))
-
-  util.wrapChildPromise(ipc, invoke, ids)
+    return new Promise((resolve) => {
+      const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {
+        resolve(httpSvr.address().port)
+      })
+    })
+  })
 }
 
 module.exports = {
   wrap,
-
-  // // for testing purposes
-  // _clearFiles: () => {
-  //   for (let file in fileObjects) delete fileObjects[file]
-  // },
-  // _getFiles: () => {
-  //   return fileObjects
-  // },
 }

@@ -31,9 +31,10 @@ module.exports = ({ app, config, project, onError }) => {
     })
   })
 
-  app.all('*', (req, res) => {
-    res.sendStatus(200)
-  })
+  // app.all('*', (req, res) => {
+    // config.webpackDevServerUrl
+    // res.sendStatus(200)
+  // })
 
   // when we experience uncaught errors
   // during routing just log them out to

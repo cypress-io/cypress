@@ -3,6 +3,7 @@ const path = require('path')
 const debug = require('debug')('cypress:server-ct:project')
 const Bluebird = require('bluebird')
 
+const specsUtil = require('@packages/server/lib/util/specs')
 const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
 const plugins = require('@packages/server/lib/plugins')
@@ -46,15 +47,18 @@ class Project {
     this.options = options
 
     return this.getConfig(options)
-    .tap((cfg) => {
+    .tap(() => {
       process.chdir(this.projectRoot)
     })
     .then((cfg) => {
       return this._initPlugins(cfg, options)
-      .then((modifiedCfg) => {
+      .then(({ port: webpackDevServerPort, modifiedCfg }) => {
         debug('plugin config yielded: %o', modifiedCfg)
 
         const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+
+        updatedConfig.webpackDevServerUrl = `http://localhost:${webpackDevServerPort}`
+
 
         debug('updated config: %o', updatedConfig)
 
@@ -112,21 +116,19 @@ class Project {
     return plugins.init(cfg, {
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
-      // onError (err) {
-      //   debug('got plugins error', err.stack)
-
-      //   browsers.close()
-
-      //   options.onError(err)
-      // },
-      // onWarning: options.onWarning,
     })
-    .tap((cfg) => {
+    .then((modifiedCfg) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
-      return plugins.execute('devserver:config')
-      .then((obj) => {
-        // console.log('got object from child', obj)
+
+      return specsUtil.find(modifiedCfg)
+      .filter((spec) => {
+        return spec.specType === 'component'
+      }).then((specs) => {
+        return plugins.execute('devserver:config', { specs, config: modifiedCfg })
+        .then((port) => {
+          return { port, modifiedCfg }
+        })
       })
     })
   }
@@ -228,7 +230,7 @@ class Project {
   //     this.watchers.watch(settings.pathToConfigFile(this.projectRoot, options), obj)
   //   }
 
-  //   return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
+  //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
 
   watchSettingsAndStartWebsockets (options = {}, cfg = {}) {

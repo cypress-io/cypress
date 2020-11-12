@@ -1,5 +1,5 @@
-import { support, files } from '../server/webpack/bundle-specs'
-import init from '@cypress/evergreen/dist/main.bundle'
+const { support, files } = require('../server/webpack/bundle-specs')
+const init = require('@cypress/evergreen/dist/main.bundle')
 
 init(files, support)
 

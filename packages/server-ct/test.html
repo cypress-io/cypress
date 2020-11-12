@@ -4,7 +4,21 @@
   <meta charset="utf-8">
   <title>cypress/component/app.spec.js</title>
   <script>
-    window.location.href = 'http://localhost:8080'
+    (function(parent) {
+      var Cypress = window.Cypress = parent.Cypress;
+      if (!Cypress) {
+        throw new Error("Tests cannot run without a reference to Cypress!");
+      }
+      return Cypress.onSpecWindow(window, []);
+    })(window.opener || window.parent);
+  </script>
+
+  <script>
+    describe('it', () => {
+      it('works', () => {
+        expect(true).to.eq(true)
+      })
+    })
   </script>
 </head>
 <body>

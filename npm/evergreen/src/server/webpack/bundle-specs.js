@@ -1,6 +1,6 @@
 const path = require('path')
 
-export default async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
+module.exports = async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
   const makeImport = (file, fileKey, chunkName) => {
     // If we want to rename the chunks, we can use this
     const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''

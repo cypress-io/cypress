@@ -33783,7 +33783,7 @@ v8flags@^3.2.0:
   dependencies:
     homedir-polyfill "^1.0.1"
 
-val-loader@^2.1.2:
+val-loader@2.x, val-loader@^2.1.2:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/val-loader/-/val-loader-2.1.2.tgz#3f2efaed5791791727df62858ccaa07fc27579e7"
   integrity sha512-slp7F4QaEE3h2dCKb28ulCkgVYqpbTcx9u/8or+lpWGOn5v7+hrQXZ+dGbblrIf2LBkVZBCiinLh7DgYO4Ds5g==
@@ -34966,7 +34966,7 @@ webpack@4.44.1:
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 
-webpack@4.44.2, webpack@^4.18.1, webpack@^4.44.1:
+webpack@4.44.2, webpack@4.x, webpack@^4.18.1, webpack@^4.44.1:
   version "4.44.2"
   resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.44.2.tgz#6bfe2b0af055c8b2d1e90ed2cd9363f841266b72"
   integrity sha512-6KJVGlCxYdISyurpQ0IPTklv+DULv05rs2hseIXer6D7KrUicRDLFb4IUM1S6LUAKypPM/nSiVSuv8jHu1m3/Q==
