@@ -147,25 +147,45 @@ const buildCypressApp = function (platform, version, options = {}) {
     return packages.npmInstallAll(pathToPackages)
   }
 
+  /**
+   * Creates the package.json file that sits in the root of the output app
+   */
   const createRootPackage = function () {
     log(`#createRootPackage ${platform} ${version}`)
 
-    return fs.outputJsonAsync(distDir('package.json'), {
-      name: 'cypress',
-      productName: 'Cypress',
-      description: rootPackage.description,
-      version,
-      main: 'index.js',
-      scripts: {},
-      env: 'production',
-    })
-    .then(() => {
-      const str = `\
+    const electronVersion = electron.getElectronVersion()
+
+    la(electronVersion, 'missing Electron version', electronVersion)
+
+    return electron.getElectronNodeVersion()
+    .then((electronNodeVersion) => {
+      la(electronNodeVersion, 'missing Electron Node version', electronNodeVersion)
+
+      const json = {
+        name: 'cypress',
+        productName: 'Cypress',
+        description: rootPackage.description,
+        version, // Cypress version
+        electronVersion,
+        electronNodeVersion,
+        main: 'index.js',
+        scripts: {},
+        env: 'production',
+      }
+
+      const outputFilename = distDir('package.json')
+
+      debug('writing to %s json %o', outputFilename, json)
+
+      return fs.outputJsonAsync(outputFilename, json)
+      .then(() => {
+        const str = `\
 process.env.CYPRESS_INTERNAL_ENV = process.env.CYPRESS_INTERNAL_ENV || 'production'
 require('./packages/server')\
 `
 
-      return fs.outputFileAsync(distDir('index.js'), str)
+        return fs.outputFileAsync(distDir('index.js'), str)
+      })
     })
   }
 
@@ -417,26 +437,26 @@ require('./packages/server')\
   }
 
   return Promise.resolve()
-  .then(checkPlatform)
-  .then(cleanupPlatform)
-  .then(buildPackages)
-  .then(copyPackages)
-  .then(npmInstallPackages)
+  // .then(checkPlatform)
+  // .then(cleanupPlatform)
+  // .then(buildPackages)
+  // .then(copyPackages)
+  // .then(npmInstallPackages)
   .then(createRootPackage)
-  .then(removeTypeScript)
-  .then(cleanJs)
-  .then(transformSymlinkRequires)
-  .then(testVersion(distDir))
-  .then(testBuiltStaticAssets)
-  .then(removeBinFolders)
-  .then(removeCyFolders)
-  .then(removeDevElectronApp)
-  .then(electronPackAndSign)
-  .then(lsDistFolder)
-  .then(testVersion(buildAppDir))
-  .then(runSmokeTests)
-  .then(verifyAppCanOpen)
-  .then(printPackageSizes)
+  // .then(removeTypeScript)
+  // .then(cleanJs)
+  // .then(transformSymlinkRequires)
+  // .then(testVersion(distDir))
+  // .then(testBuiltStaticAssets)
+  // .then(removeBinFolders)
+  // .then(removeCyFolders)
+  // .then(removeDevElectronApp)
+  // .then(electronPackAndSign)
+  // .then(lsDistFolder)
+  // .then(testVersion(buildAppDir))
+  // .then(runSmokeTests)
+  // .then(verifyAppCanOpen)
+  // .then(printPackageSizes)
   .return({
     buildDir: buildDir(),
   })
