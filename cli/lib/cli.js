@@ -168,6 +168,8 @@ function showVersions () {
   .then((versions = {}) => {
     logger.always('Cypress package version:', versions.package)
     logger.always('Cypress binary version:', versions.binary)
+    logger.always('Using Electron version:', versions.electronVersion)
+    logger.always('Bundled Node version:', versions.electronNodeVersion)
     process.exit(0)
   })
   .catch(util.logErrorExit1)
