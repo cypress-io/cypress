@@ -334,9 +334,6 @@ declare global {
       /**
        * Use `cy.route2()` to stub and intercept HTTP requests and responses.
        *
-       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
-       * configuration option to `true`.
-       *
        * @see https://on.cypress.io/route2
        * @example
        *    cy.route2('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
@@ -354,9 +351,6 @@ declare global {
       route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
        * Use `cy.route2()` to stub and intercept HTTP requests and responses.
-       *
-       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
-       * configuration option to `true`.
        *
        * @see https://on.cypress.io/route2
        * @example

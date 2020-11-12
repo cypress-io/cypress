@@ -287,20 +287,6 @@ describe('network stubbing', { retries: 2 }, function () {
         })
       })
 
-      it('if experimentalNetworkStubbing is falsy', function (done) {
-        sinon.stub(Cypress, 'config').callThrough()
-        // @ts-ignore
-        .withArgs('experimentalNetworkStubbing').returns(false)
-
-        cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.route2()` requires experimental network mocking to be enabled.')
-          sinon.restore()
-          done()
-        })
-
-        cy.route2('', '')
-      })
-
       it('url must be a string or regexp', function (done) {
         cy.on('fail', function (err) {
           expect(err.message).to.include('`url` must be a string or a regular expression')

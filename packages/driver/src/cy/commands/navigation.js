@@ -877,8 +877,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
           url = url.replace(`${existingAuth}@`, '')
         }
 
-        // hack to make cy.visits interceptable by network stubbing
-        if (Cypress.config('experimentalNetworkStubbing')) {
+        // hack to make cy.visits interceptable by cy.http
+        if (state('routes').length) {
           options.selfProxy = true
         }
 

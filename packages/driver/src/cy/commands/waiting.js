@@ -25,8 +25,8 @@ const throwErr = (arg) => {
 
 module.exports = (Commands, Cypress, cy, state) => {
   const isDynamicAliasingPossible = () => {
-    // dynamic aliasing is possible if cy.route2 is enabled and a route with dynamic interception has been defined
-    return Cypress.config('experimentalNetworkStubbing') && _.find(state('routes'), (route) => {
+    // dynamic aliasing is possible if a route with dynamic interception has been defined
+    return _.find(state('routes'), (route) => {
       return _.isFunction(route.handler)
     })
   }
@@ -75,12 +75,11 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       options.type = type
 
-      if (Cypress.config('experimentalNetworkStubbing')) {
-        const req = waitForRoute(alias, state, type)
+      // check cy.http routes
+      const req = waitForRoute(alias, state, type)
 
-        if (req) {
-          return req
-        }
+      if (req) {
+        return req
       }
 
       // append .type to the alias

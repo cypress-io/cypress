@@ -75,11 +75,6 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalNetworkStubbing',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: v.isString,
