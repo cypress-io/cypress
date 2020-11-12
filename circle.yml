@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - remove-old-binary-file
+        - include-electron-node-version
 
 defaults: &defaults
   parallelism: 1
