@@ -4,6 +4,7 @@ const path = require('path')
 const debug = require('debug')('cypress:server:plugins')
 const resolve = require('resolve')
 const Promise = require('bluebird')
+const inspector = require('inspector')
 const errors = require('../errors')
 const util = require('./util')
 const pkg = require('@packages/root')
@@ -91,6 +92,14 @@ const init = (config, options) => {
     }
 
     debug('forking to run %s', childIndexFilename)
+
+    if (inspector.url()) {
+      childOptions.execArgv = _.chain(process.execArgv.slice(0))
+      .remove('--inspect-brk')
+      .push(`--inspect-brk=${process.debugPort + 1}`)
+      .value()
+    }
+
     pluginsProcess = cp.fork(childIndexFilename, childArguments, childOptions)
     const ipc = util.wrapIpc(pluginsProcess)
 
