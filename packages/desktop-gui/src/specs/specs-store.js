@@ -60,6 +60,7 @@ export class SpecsStore {
   @observable error
   @observable isLoading = false
   @observable filter
+  @observable selectedSpec
 
   @computed get specs () {
     return this._tree(this._files)
@@ -133,6 +134,10 @@ export class SpecsStore {
     localData.remove(this.getSpecsFilterId(project))
 
     this.filter = null
+  }
+
+  @action setSelectedSpec (spec) {
+    this.selectedSpec = spec
   }
 
   isChosen (spec) {
