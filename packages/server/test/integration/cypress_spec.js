@@ -252,6 +252,18 @@ describe('lib/cypress', () => {
       })
     })
 
+    it('shows warning when multiple config are not valid', function () {
+      return cypress.start(['--config=test=false,foo=bar', '--cwd=/foo/bar'])
+      .then(() => {
+        expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
+        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('`foo` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
+
+        snapshotConsoleLogs('INVALID_CONFIG_OPTION')
+      })
+    })
+
     it('does not show warning if config is valid', function () {
       return cypress.start(['--config=trashAssetsBeforeRuns=false'])
       .then(() => {
