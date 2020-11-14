@@ -237,7 +237,7 @@
     "experimentalNetworkStubbing": {
       "type": "boolean",
       "default": false,
-      "description": "Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
+      "description": "Enables `cy.http()`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)"
     },
     "experimentalFetchPolyfill": {
       "type": "boolean",

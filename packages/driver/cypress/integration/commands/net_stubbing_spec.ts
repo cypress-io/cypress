@@ -6,13 +6,35 @@ describe('network stubbing', { retries: 2 }, function () {
   })
 
   context('cy.route2()', function () {
+    it('emits a warning', function () {
+      cy.route2('*')
+      .then(() => expect(Cypress.utils.warning).to.be.calledWith('`cy.route2()` was renamed to `cy.http()` and will be removed in a future release. Please update usages of `cy.route2()` to use `cy.http()` instead.'))
+    })
+
+    it('calls through to cy.http()', function (done) {
+      cy.route2('*', 'hello world').then(() => {
+        $.get('/abc123').done((responseText, _, xhr) => {
+          expect(responseText).to.eq('hello world')
+
+          done()
+        })
+      })
+    })
+
+    it('can be used with cy.wait', function () {
+      cy.route2('*', 'hello world').as('foo')
+      .then(() => $.get('/abc123')).wait('@foo')
+    })
+  })
+
+  context('cy.http()', function () {
     beforeEach(function () {
       // we don't use cy.spy() because it causes an infinite loop with logging events
       this.sandbox = sinon.createSandbox()
       this.emit = this.sandbox.spy(Cypress, 'emit').withArgs('backend:request', 'net', 'route:added')
 
       this.testRoute = function (options, handler, expectedEvent, expectedRoute) {
-        cy.route2(options, handler).then(function () {
+        cy.http(options, handler).then(function () {
           const handlerId = _.findKey(state('routes'), { handler })
           const route = state('routes')[handlerId!]
 
@@ -174,7 +196,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
     // https://github.com/cypress-io/cypress/issues/8729
     it('resolve ambiguity between overloaded definitions', () => {
-      cy.route2('POST', 'http://dummy.restapiexample.com/api/v1/create').as('create')
+      cy.http('POST', 'http://dummy.restapiexample.com/api/v1/create').as('create')
 
       cy.window().then((win) => {
         win.eval(
@@ -187,17 +209,17 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.wait('@create')
     })
 
-    // TODO: implement warning in cy.route2 if appropriate
+    // TODO: implement warning in cy.http if appropriate
     // https://github.com/cypress-io/cypress/issues/2372
     it.skip('warns if a percent-encoded URL is used', function () {
-      cy.route2('GET', '/foo%25bar').then(function () {
-        expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.route2(), but cy.route2() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
+      cy.http('GET', '/foo%25bar').then(function () {
+        expect(Cypress.utils.warning).to.be.calledWith('A URL with percent-encoded characters was passed to cy.http(), but cy.http() expects a decoded URL.\n\nDid you mean to pass "/foo%bar"?')
       })
     })
 
     // NOTE: see todo on 'warns if a percent-encoded URL is used'
     it.skip('does not warn if an invalid percent-encoded URL is used', function () {
-      cy.route2('GET', 'http://example.com/%E0%A4%A').then(function () {
+      cy.http('GET', 'http://example.com/%E0%A4%A').then(function () {
         expect(Cypress.utils.warning).to.not.be.called
       })
     })
@@ -215,7 +237,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('has name of route', function () {
-        cy.route2('/foo', {}).then(function () {
+        cy.http('/foo', {}).then(function () {
           let lastLog
 
           lastLog = this.lastLog
@@ -225,7 +247,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('uses the wildcard URL', function () {
-        cy.route2('*', {}).then(function () {
+        cy.http('*', {}).then(function () {
           let lastLog
 
           lastLog = this.lastLog
@@ -236,7 +258,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       // TODO: implement log niceties
       it.skip('#consoleProps', function () {
-        cy.route2('*', {
+        cy.http('*', {
           foo: 'bar',
         }).as('foo').then(function () {
           expect(this.lastLog.invoke('consoleProps')).to.deep.eq({
@@ -254,7 +276,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       describe('numResponses', function () {
         it('is initially 0', function () {
-          cy.route2(/foo/, {}).then(() => {
+          cy.http(/foo/, {}).then(() => {
             let lastLog
 
             lastLog = this.lastLog
@@ -264,13 +286,13 @@ describe('network stubbing', { retries: 2 }, function () {
         })
 
         it('is incremented to 2', function () {
-          cy.route2(/foo/, {}).then(function () {
+          cy.http(/foo/, {}).then(function () {
             $.get('/foo')
           }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 1)
         })
 
         it('is incremented for each matching request', function () {
-          cy.route2(/foo/, {}).then(function () {
+          cy.http(/foo/, {}).then(function () {
             return Promise.all([$.get('/foo'), $.get('/foo'), $.get('/foo')])
           }).wrap(this).invoke('lastLog.get', 'numResponses').should('eq', 3)
         })
@@ -293,12 +315,12 @@ describe('network stubbing', { retries: 2 }, function () {
         .withArgs('experimentalNetworkStubbing').returns(false)
 
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('`cy.route2()` requires experimental network mocking to be enabled.')
+          expect(err.message).to.contain('`cy.http()` requires experimental network mocking to be enabled.')
           sinon.restore()
           done()
         })
 
-        cy.route2('', '')
+        cy.http('', '')
       })
 
       it('url must be a string or regexp', function (done) {
@@ -309,7 +331,7 @@ describe('network stubbing', { retries: 2 }, function () {
         })
 
         // @ts-ignore: should fail
-        cy.route2({
+        cy.http({
           // @ts-ignore
           url: {},
         })
@@ -318,12 +340,12 @@ describe('network stubbing', { retries: 2 }, function () {
       // TODO: not currently implemented
       it.skip('fails when method is invalid', function (done) {
         cy.on('fail', function (err) {
-          expect(err.message).to.include('cy.route2() was called with an invalid method: \'POSTS\'.')
+          expect(err.message).to.include('cy.http() was called with an invalid method: \'POSTS\'.')
 
           done()
         })
 
-        cy.route2('post', '/foo', {})
+        cy.http('post', '/foo', {})
       })
 
       it('requires a url when given a response', function (done) {
@@ -333,18 +355,18 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2({})
+        cy.http({})
       })
 
       it('requires arguments', function (done) {
         cy.on('fail', function (err) {
-          expect(err.message).to.include('An invalid RouteMatcher was supplied to `cy.route2()`. The RouteMatcher does not contain any keys. You must pass something to match on.')
+          expect(err.message).to.include('An invalid RouteMatcher was supplied to `cy.http()`. The RouteMatcher does not contain any keys. You must pass something to match on.')
 
           done()
         })
 
         // @ts-ignore - should fail
-        cy.route2()
+        cy.http()
       })
 
       context('with invalid RouteMatcher', function () {
@@ -355,7 +377,7 @@ describe('network stubbing', { retries: 2 }, function () {
             done()
           })
 
-          cy.route2({
+          cy.http({
             headers: {
               foo: 'bar',
               FOO: 'bar',
@@ -371,7 +393,7 @@ describe('network stubbing', { retries: 2 }, function () {
           })
 
           // @ts-ignore this is invalid on purpose
-          cy.route2({
+          cy.http({
             headers: {
               good: 'string',
               fine: /regexp/,
@@ -395,7 +417,7 @@ describe('network stubbing', { retries: 2 }, function () {
             })
 
             // @ts-ignore - this should error
-            cy.route2('/', handler)
+            cy.http('/', handler)
           })
         })
       })
@@ -439,7 +461,7 @@ describe('network stubbing', { retries: 2 }, function () {
             })
 
             // @ts-ignore - this should error
-            cy.route2('/', handler)
+            cy.http('/', handler)
           })
         })
       })
@@ -465,7 +487,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('different origin (HTTP)', function () {
-        cy.route2('/foo').as('foo')
+        cy.http('/foo').as('foo')
         .then(() => {
           $.get('http://baz.foobar.com:3501/foo')
         })
@@ -473,7 +495,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('different origin with response interception (HTTP)', function () {
-        cy.route2('/xhr.html', (req) => {
+        cy.http('/xhr.html', (req) => {
           req.reply((res) => {
             expect(res.body).to.include('xhr fixture')
             res.body = 'replaced the body'
@@ -490,7 +512,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       // @see https://github.com/cypress-io/cypress/issues/8487
       it('different origin (HTTPS)', function () {
-        cy.route2('/foo', 'somethin').as('foo')
+        cy.http('/foo', 'somethin').as('foo')
         .then(() => {
           $.get('https://bar.foobar.com.invalid:3502/foo')
         })
@@ -498,7 +520,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('different origin with response interception (HTTPS)', function () {
-        cy.route2('/xhr.html', (req) => {
+        cy.http('/xhr.html', (req) => {
           req.reply((res) => {
             expect(res.body).to.include('xhr fixture')
             res.body = 'replaced the body'
@@ -517,7 +539,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
   context('stubbing with static responses', function () {
     it('can stub a response with static body as string', function (done) {
-      cy.route2({
+      cy.http({
         url: '*',
       }, 'hello world').then(() => {
         $.get('/abc123').done((responseText, _, xhr) => {
@@ -530,11 +552,11 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can stub a cy.visit with static body', function () {
-      cy.route2('/foo', '<html>hello cruel world</html>').visit('/foo').document().should('contain.text', 'hello cruel world')
+      cy.http('/foo', '<html>hello cruel world</html>').visit('/foo').document().should('contain.text', 'hello cruel world')
     })
 
     it('can stub a response with an empty StaticResponse', function (done) {
-      cy.route2('/', {}).then(() => {
+      cy.http('/', {}).then(() => {
         $.get('/').done((responseText, _, xhr) => {
           expect(xhr.status).to.eq(200)
           expect(responseText).to.eq('')
@@ -545,7 +567,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can stub a response with a network error', function (done) {
-      cy.route2('/', {
+      cy.http('/', {
         forceNetworkError: true,
       }).then(() => {
         $.get('/').fail((xhr) => {
@@ -558,7 +580,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can use regular strings as response', function () {
-      cy.route2('/foo', 'foo bar baz').as('getFoo').then(function (win) {
+      cy.http('/foo', 'foo bar baz').as('getFoo').then(function (win) {
         $.get('/foo')
       }).wait('@getFoo').then(function (res) {
         expect(res.response.body).to.eq('foo bar baz')
@@ -566,7 +588,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can stub requests with uncommon HTTP methods', function () {
-      cy.route2('PROPFIND', '/foo', 'foo bar baz').as('getFoo').then(function (win) {
+      cy.http('PROPFIND', '/foo', 'foo bar baz').as('getFoo').then(function (win) {
         $.ajax({
           url: '/foo',
           method: 'PROPFIND',
@@ -579,7 +601,7 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can stub a response with an array', function (done) {
       const response = ['foo', 'bar', { foo: 'baz' }]
 
-      cy.route2({
+      cy.http({
         url: '*',
       }, response).then(() => {
         $.get('/abc123').done((responseJson, _, xhr) => {
@@ -594,7 +616,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
     // TODO: flaky - unable to reproduce outside of CI
     it('still works after a cy.visit', { retries: 2 }, function () {
-      cy.route2(/foo/, {
+      cy.http(/foo/, {
         body: JSON.stringify({ foo: 'bar' }),
         headers: {
           'content-type': 'application/json',
@@ -625,7 +647,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }
 
       it('with explicit StaticResponse', function (done) {
-        cy.route2({
+        cy.http({
           url: '*',
         }, {
           body: [],
@@ -633,25 +655,25 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('with body shorthand', function (done) {
-        cy.route2('*', []).then(assertEmptyArray(done))
+        cy.http('*', []).then(assertEmptyArray(done))
       })
 
       it('with method, url, res shorthand', function (done) {
-        cy.route2('GET', '*', []).then(assertEmptyArray(done))
+        cy.http('GET', '*', []).then(assertEmptyArray(done))
       })
 
       it('in req.reply', function (done) {
-        cy.route2('*', (req) => req.reply([])).then(assertEmptyArray(done))
+        cy.http('*', (req) => req.reply([])).then(assertEmptyArray(done))
       })
 
       it('in res.send', function (done) {
-        cy.route2('*', (req) => req.reply((res) => res.send(200, []))).then(assertEmptyArray(done))
+        cy.http('*', (req) => req.reply((res) => res.send(200, []))).then(assertEmptyArray(done))
       })
     })
 
     context('fixtures', function () {
       it('can stub a response with a JSON object', function () {
-        cy.route2({
+        cy.http({
           method: 'POST',
           url: '/test-xhr',
         }, {
@@ -662,7 +684,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('works with content-type override', function () {
-        cy.route2({
+        cy.http({
           method: 'POST',
           url: '/test-xhr',
         }, {
@@ -676,7 +698,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('works if the JSON file has null content', function () {
-        cy.route2({
+        cy.http({
           method: 'POST',
           url: '/test-xhr',
         }, {
@@ -690,7 +712,7 @@ describe('network stubbing', { retries: 2 }, function () {
       it('works with images', function () {
         cy.visit('/fixtures/img-embed.html')
         .contains('div', 'error loading image')
-        .route2('non-existing-image.png', { fixture: 'media/cypress.png' })
+        .http('non-existing-image.png', { fixture: 'media/cypress.png' })
         .reload()
         .contains('div', 'it loaded')
       })
@@ -699,7 +721,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
   context('intercepting request', function () {
     it('receives the original request in handler', function (done) {
-      cy.route2('/def456', function (req) {
+      cy.http('/def456', function (req) {
         req.reply({
           statusCode: 404,
         })
@@ -718,7 +740,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('receives the original request body in handler', function (done) {
-      cy.route2('/aaa', function (req) {
+      cy.http('/aaa', function (req) {
         expect(req.body).to.eq('foo-bar-baz')
 
         done()
@@ -728,16 +750,16 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can modify original request body and have it passed to next handler', function (done) {
-      cy.route2('/post-only', function (req) {
+      cy.http('/post-only', function (req) {
         expect(req.body).to.eq('foo-bar-baz')
         req.body = 'quuz'
       }).then(function () {
-        cy.route2('/post-only', function (req) {
+        cy.http('/post-only', function (req) {
           expect(req.body).to.eq('quuz')
           req.body = 'quux'
         })
       }).then(function () {
-        cy.route2('/post-only', function (req) {
+        cy.http('/post-only', function (req) {
           expect(req.body).to.eq('quux')
 
           done()
@@ -748,7 +770,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can modify a cy.visit before it goes out', function () {
-      cy.route2('/dump-headers', function (req) {
+      cy.http('/dump-headers', function (req) {
         expect(req.headers['foo']).to.eq('bar')
 
         req.headers['foo'] = 'quux'
@@ -765,7 +787,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can modify the request URL and headers', function (done) {
-      cy.route2('/does-not-exist', function (req) {
+      cy.http('/does-not-exist', function (req) {
         expect(req.headers['foo']).to.eq('bar')
         req.url = 'http://localhost:3500/dump-headers'
 
@@ -786,7 +808,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can modify the request method', function (done) {
-      cy.route2('/dump-method', function (req) {
+      cy.http('/dump-method', function (req) {
         expect(req.method).to.eq('POST')
 
         req.method = 'PATCH'
@@ -802,7 +824,7 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can modify the request body', function (done) {
       const body = '{"foo":"bar"}'
 
-      cy.route2('/post-only', function (req) {
+      cy.http('/post-only', function (req) {
         expect(req.body).to.eq('quuz')
         req.headers['content-type'] = 'application/json'
 
@@ -819,7 +841,7 @@ describe('network stubbing', { retries: 2 }, function () {
     it('can add a body to a request that does not have one', function (done) {
       const body = '{"foo":"bar"}'
 
-      cy.route2('/post-only', function (req) {
+      cy.http('/post-only', function (req) {
         expect(req.body).to.eq('')
         expect(req.method).to.eq('GET')
         req.method = 'POST'
@@ -836,7 +858,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can reply with a JSON fixture', function () {
-      cy.route2({
+      cy.http({
         method: 'POST',
         url: '/test-xhr',
       }, (req) => {
@@ -854,7 +876,7 @@ describe('network stubbing', { retries: 2 }, function () {
       const delayMs = 250
       const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
 
-      cy.route2('/timeout', (req) => {
+      cy.http('/timeout', (req) => {
         this.start = Date.now()
 
         req.reply({
@@ -875,19 +897,19 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
-        cy.route2({
+        cy.http({
           query: {
             foo: 'b*r',
             baz: /quu[x]/,
           },
         }).as('first')
-        .route2({
+        .http({
           path: '/abc?foo=bar&baz=qu*x*',
         }).as('second')
-        .route2({
+        .http({
           pathname: '/abc',
         }).as('third')
-        .route2('*', 'it worked').as('final')
+        .http('*', 'it worked').as('final')
         .then(() => {
           return $.get('/abc?foo=bar&baz=quux')
         })
@@ -899,7 +921,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       // @see https://github.com/cypress-io/cypress/issues/8921
       it('with case-insensitive header matching', function () {
-        cy.route2({
+        cy.http({
           headers: {
             'X-some-Thing': 'foo',
           },
@@ -919,7 +941,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('with StaticResponse shorthand', function () {
       it('req.reply(body)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply('baz')
         })
         .then(() => $.get('/foo'))
@@ -927,7 +949,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('req.reply(json)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply({ baz: 'quux' })
         })
         .then(() => $.getJSON('/foo'))
@@ -935,7 +957,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('req.reply(status)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply(777)
         })
         .then(() => {
@@ -947,7 +969,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('req.reply(status, body)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply(777, 'bar')
         })
         .then(() => {
@@ -961,7 +983,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('req.reply(status, json)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply(777, { bar: 'baz' })
         })
         .then(() => {
@@ -975,7 +997,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('req.reply(status, json, headers)', function () {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
         })
         .then(() => {
@@ -991,7 +1013,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('can forceNetworkError', function (done) {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply({ forceNetworkError: true })
         })
         .then(() => {
@@ -1010,13 +1032,13 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('request handler chaining', function () {
       it('passes request through in order', function () {
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           expect(req.method).to.eq('GET')
           req.method = 'POST'
-        }).route2('/dump-method', function (req) {
+        }).http('/dump-method', function (req) {
           expect(req.method).to.eq('POST')
           req.method = 'PATCH'
-        }).route2('/dump-method', function (req) {
+        }).http('/dump-method', function (req) {
           expect(req.method).to.eq('PATCH')
 
           req.reply()
@@ -1024,10 +1046,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('stops passing request through once req.reply called', function () {
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           expect(req.method).to.eq('GET')
           req.method = 'POST'
-        }).route2('/dump-method', function (req) {
+        }).http('/dump-method', function (req) {
           expect(req.method).to.eq('POST')
 
           req.reply()
@@ -1042,7 +1064,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           req.reply()
 
           req.reply()
@@ -1055,7 +1077,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           setTimeout(() => req.reply(), 50)
         }).visit('/dump-method')
       })
@@ -1066,7 +1088,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           setTimeout(() => req.reply(), 50)
 
           return Promise.resolve()
@@ -1075,7 +1097,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       it('fails test if an exception is thrown in req handler', function (done) {
         cy.on('fail', (err2) => {
-          expect(err2.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+          expect(err2.message).to.contain('A request callback passed to `cy.http()` threw an error while intercepting a request')
           .and.contain(err.message)
 
           done()
@@ -1083,20 +1105,20 @@ describe('network stubbing', { retries: 2 }, function () {
 
         const err = new Error('bar')
 
-        cy.route2('/foo', () => {
+        cy.http('/foo', () => {
           throw err
         }).visit('/foo')
       })
 
       it('fails test if req.reply is called with an invalid StaticResponse', function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.contain('A request callback passed to `cy.route2()` threw an error while intercepting a request')
+          expect(err.message).to.contain('A request callback passed to `cy.http()` threw an error while intercepting a request')
           .and.contain('must be a number between 100 and 999 (inclusive).')
 
           done()
         })
 
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.reply({ statusCode: 1 })
         }).visit('/foo')
       })
@@ -1105,12 +1127,12 @@ describe('network stubbing', { retries: 2 }, function () {
         defaultCommandTimeout: 50,
       }, function (done) {
         cy.on('fail', (err) => {
-          expect(err.message).to.match(/^A request callback passed to `cy.route2\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
+          expect(err.message).to.match(/^A request callback passed to `cy.http\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
 
-        cy.route2('/foo', () => {
+        cy.http('/foo', () => {
           return Promise.delay(200)
         }).visit('/foo')
       })
@@ -1119,7 +1141,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
   context('intercepting response', function () {
     it('receives the original response in handler', function (done) {
-      cy.route2('/json-content-type', function (req) {
+      cy.http('/json-content-type', function (req) {
         req.reply(function (res) {
           expect(res.body).to.eq('{}')
 
@@ -1136,7 +1158,7 @@ describe('network stubbing', { retries: 2 }, function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`
 
-      cy.route2('/redirect', (req) => {
+      cy.http('/redirect', (req) => {
         req.reply((res) => {
           expect(res.statusCode).to.eq(301)
           expect(res.headers.location).to.eq(href)
@@ -1144,7 +1166,7 @@ describe('network stubbing', { retries: 2 }, function () {
         })
       })
       .as('redirect')
-      .route2('/fixtures/generic.html').as('dest')
+      .http('/fixtures/generic.html').as('dest')
       .then(() => fetch(url))
       .wait('@redirect')
       .wait('@dest')
@@ -1155,7 +1177,7 @@ describe('network stubbing', { retries: 2 }, function () {
       const href = `/fixtures/generic.html?t=${Date.now()}`
       const url = `/redirect?href=${encodeURIComponent(href)}`
 
-      cy.route2('/redirect', (req) => {
+      cy.http('/redirect', (req) => {
         req.followRedirect = true
         req.reply((res) => {
           expect(res.body).to.include('Some generic content')
@@ -1173,7 +1195,7 @@ describe('network stubbing', { retries: 2 }, function () {
       const url = `/fixtures/generic.html?t=${Date.now()}`
       let hits = 0
 
-      cy.route2('/fixtures/generic.html', (req) => {
+      cy.http('/fixtures/generic.html', (req) => {
         req.reply((res) => {
           // the second time the request is sent, headers should have been passed
           // that result in Express serving a 304
@@ -1198,7 +1220,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can intercept a large proxy response', function (done) {
-      cy.route2('/1mb', (req) => {
+      cy.http('/1mb', (req) => {
         req.reply((res) => {
           res.send()
         })
@@ -1213,7 +1235,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can delay a proxy response using res.delay', function (done) {
-      cy.route2('/timeout', (req) => {
+      cy.http('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
@@ -1231,7 +1253,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can \'delay\' a proxy response using Promise.delay', function (done) {
-      cy.route2('/timeout', (req) => {
+      cy.http('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
@@ -1251,7 +1273,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can throttle a proxy response using res.throttle', function (done) {
-      cy.route2('/1mb', (req) => {
+      cy.http('/1mb', (req) => {
         // don't let gzip make response smaller and throw off the timing
         delete req.headers['accept-encoding']
 
@@ -1276,7 +1298,7 @@ describe('network stubbing', { retries: 2 }, function () {
       const kbps = 10
       const expectedSeconds = payload.length / (1024 * kbps)
 
-      cy.route2('/timeout', (req) => {
+      cy.http('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
@@ -1300,7 +1322,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
       expectedSeconds += delayMs / 1000
 
-      cy.route2('/timeout', (req) => {
+      cy.http('/timeout', (req) => {
         req.reply((res) => {
           this.start = Date.now()
 
@@ -1320,7 +1342,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can reply with a JSON fixture', function () {
-      cy.route2({
+      cy.http({
         method: 'POST',
         url: '/test-xhr',
       }, (req) => {
@@ -1341,7 +1363,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('with StaticResponse', function () {
       it('res.send(body)', function () {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send('baz')
           })
@@ -1358,7 +1380,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('res.send(json)', function () {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send({ baz: 'quux' })
           })
@@ -1377,7 +1399,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('res.send(status)', function (done) {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send(777)
           })
@@ -1397,7 +1419,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('res.send(status, body)', function (done) {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send(777, 'bar')
           })
@@ -1416,7 +1438,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('res.send(status, json)', function (done) {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send(777, { bar: 'baz' })
           })
@@ -1436,7 +1458,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('res.send(status, json, headers)', function (done) {
-        cy.route2('/custom-headers', function (req) {
+        cy.http('/custom-headers', function (req) {
           req.reply((res) => {
             res.send(777, { bar: 'baz' }, { 'x-quux': 'quuz' })
           })
@@ -1457,7 +1479,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('can forceNetworkError', function (done) {
-        cy.route2('/foo', function (req) {
+        cy.http('/foo', function (req) {
           req.reply((res) => {
             res.send({ forceNetworkError: true })
           })
@@ -1481,7 +1503,7 @@ describe('network stubbing', { retries: 2 }, function () {
         const delayMs = 50
         const expectedSeconds = payload.length / (1024 * throttleKbps) + delayMs / 1000
 
-        cy.route2('/timeout', (req) => {
+        cy.http('/timeout', (req) => {
           req.reply((res) => {
             this.start = Date.now()
 
@@ -1511,7 +1533,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/dump-method', function (req) {
+        cy.http('/dump-method', function (req) {
           req.reply(function (res) {
             res.send()
 
@@ -1530,7 +1552,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
         const err = new Error('bar')
 
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.reply(() => {
             throw err
           })
@@ -1549,7 +1571,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.reply((res) => {
             res.send({ statusCode: 1 })
           })
@@ -1568,7 +1590,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/should-err', function (req) {
+        cy.http('/should-err', function (req) {
           req.reply(() => {})
         }).then(function () {
           $.get('http://localhost:3333/should-err')
@@ -1585,7 +1607,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/should-err', function (req) {
+        cy.http('/should-err', function (req) {
           req.reply()
         })
         .as('err')
@@ -1614,7 +1636,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/timeout', (req) => {
+        cy.http('/timeout', (req) => {
           req.reply(() => {
             return Promise.delay(200)
           })
@@ -1631,7 +1653,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/timeout', (req) => {
+        cy.http('/timeout', (req) => {
           req.reply(_.noop)
         }).then(() => {
           $.get('/timeout?ms=50')
@@ -1642,7 +1664,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
   context('waiting and aliasing', function () {
     it('can wait on a single response using "alias"', function () {
-      cy.route2('/foo', 'bar')
+      cy.http('/foo', 'bar')
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1656,7 +1678,7 @@ describe('network stubbing', { retries: 2 }, function () {
         done()
       })
 
-      cy.route2('/foo', () => new Promise(_.noop))
+      cy.http('/foo', () => new Promise(_.noop))
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1665,7 +1687,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can wait on a single response using "alias.response"', function () {
-      cy.route2('/foo', 'bar')
+      cy.http('/foo', 'bar')
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1679,7 +1701,7 @@ describe('network stubbing', { retries: 2 }, function () {
         done()
       })
 
-      cy.route2('/foo', () => new Promise(_.noop))
+      cy.http('/foo', () => new Promise(_.noop))
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1688,7 +1710,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can wait on a single request using "alias.request"', function () {
-      cy.route2('/foo')
+      cy.http('/foo')
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1702,13 +1724,13 @@ describe('network stubbing', { retries: 2 }, function () {
         done()
       })
 
-      cy.route2('/foo')
+      cy.http('/foo')
       .as('foo.bar')
       .wait('@foo.bar.request', { timeout: 100 })
     })
 
     it('can incrementally wait on responses', function () {
-      cy.route2('/foo', 'bar')
+      cy.http('/foo', 'bar')
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1726,7 +1748,7 @@ describe('network stubbing', { retries: 2 }, function () {
         done()
       })
 
-      cy.route2('/foo', () => new Promise(_.noop))
+      cy.http('/foo', () => new Promise(_.noop))
       .as('foo.bar')
       .then(() => {
         $.get('/foo')
@@ -1737,7 +1759,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can incrementally wait on requests', function () {
-      cy.route2('/foo', (req) => {
+      cy.http('/foo', (req) => {
         req.reply(_.noop) // only request will be received, no response
       })
       .as('foo.bar')
@@ -1757,7 +1779,7 @@ describe('network stubbing', { retries: 2 }, function () {
         done()
       })
 
-      cy.route2('/foo', (req) => {
+      cy.http('/foo', (req) => {
         req.reply(_.noop) // only request will be received, no response
       })
       .as('foo.bar')
@@ -1769,7 +1791,7 @@ describe('network stubbing', { retries: 2 }, function () {
     })
 
     it('can alias a route without stubbing it', function () {
-      cy.route2(/fixtures\/app/).as('getFoo').then(function () {
+      cy.http(/fixtures\/app/).as('getFoo').then(function () {
         $.get('/fixtures/app.json')
       }).wait('@getFoo').then(function (res) {
         const log = cy.queue.logs({
@@ -1789,7 +1811,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('with an intercepted request', function () {
       it('can dynamically alias the request', function () {
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.alias = 'fromInterceptor'
         })
         .then(() => {
@@ -1804,7 +1826,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.alias = 'fromInterceptor'
         })
         .wait('@fromInterceptor', { timeout: 100 })
@@ -1816,7 +1838,7 @@ describe('network stubbing', { retries: 2 }, function () {
           done()
         })
 
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.alias = 'fromInterceptor'
         })
         .as('fromAs')
@@ -1829,10 +1851,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('fulfills both dynamic aliases when two are defined', function () {
-        cy.route2('/foo', (req) => {
+        cy.http('/foo', (req) => {
           req.alias = 'fromInterceptor'
         })
-        .route2('/foo', (req) => {
+        .http('/foo', (req) => {
           expect(req.alias).to.be.undefined
           req.alias = 'fromInterceptor2'
         })
@@ -1847,14 +1869,14 @@ describe('network stubbing', { retries: 2 }, function () {
     // @see https://github.com/cypress-io/cypress/issues/8695
     context('yields request', function () {
       it('when not intercepted', function () {
-        cy.route2('/post-only').as('foo')
+        cy.http('/post-only').as('foo')
         .then(() => {
           $.post('/post-only', 'some body')
         }).wait('@foo').its('request.body').should('eq', 'some body')
       })
 
       it('when intercepted', function () {
-        cy.route2('/post-only', (req) => {
+        cy.http('/post-only', (req) => {
           req.body = 'changed'
         }).as('foo')
         .then(() => {
@@ -1863,7 +1885,7 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('when static response body is provided', function () {
-        cy.route2('/post-only', { static: 'response' }).as('foo')
+        cy.http('/post-only', { static: 'response' }).as('foo')
         .then(() => {
           $.post('/post-only', 'some body')
         }).wait('@foo').its('request.body').should('eq', 'some body')
@@ -1884,24 +1906,24 @@ describe('network stubbing', { retries: 2 }, function () {
       }
 
       it('when not stubbed', function (done) {
-        cy.route2('/xml').as('foo')
+        cy.http('/xml').as('foo')
         .then(testResponse('<foo>bar</foo>', done))
       })
 
       it('when stubbed with StaticResponse', function (done) {
-        cy.route2('/xml', 'something different')
+        cy.http('/xml', 'something different')
         .as('foo')
         .then(testResponse('something different', done))
       })
 
       it('when stubbed with req.reply', function (done) {
-        cy.route2('/xml', (req) => req.reply('something different'))
+        cy.http('/xml', (req) => req.reply('something different'))
         .as('foo')
         .then(testResponse('something different', done))
       })
 
       it('when stubbed with res.send', function (done) {
-        cy.route2('/xml', (req) => req.reply((res) => res.send('something different')))
+        cy.http('/xml', (req) => req.reply((res) => res.send('something different')))
         .as('foo')
         .then(testResponse('something different', done))
       })
