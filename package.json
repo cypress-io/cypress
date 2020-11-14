@@ -14,7 +14,6 @@
     "build": "lerna run build --stream",
     "build-prod": "lerna run build-prod --stream",
     "bump": "node ./scripts/binary.js bump",
-    "check-halt": "node scripts/check-halt.js",
     "check-next-dev-version": "node scripts/check-next-dev-version.js",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
