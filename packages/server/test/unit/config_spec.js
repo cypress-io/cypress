@@ -1211,7 +1211,6 @@ describe('lib/config', () => {
         sinon.stub(config, 'getProcessEnvVars').returns({
           quux: 'quux',
           RECORD_KEY: 'foobarbazquux',
-          CI_KEY: 'justanothercikey',
           PROJECT_ID: 'projectId123',
         })
 
@@ -1267,10 +1266,6 @@ describe('lib/config', () => {
               },
               RECORD_KEY: {
                 value: 'fooba...zquux',
-                from: 'env',
-              },
-              CI_KEY: {
-                value: 'justa...cikey',
                 from: 'env',
               },
             },

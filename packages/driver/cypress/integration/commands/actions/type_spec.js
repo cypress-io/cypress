@@ -254,6 +254,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('can type when element has `opacity: 0`', () => {
+      cy.$$('input:text:first').css('opacity', 0)
+      cy.get('input:text:first').type('foo')
+      .should('have.value', 'foo')
+    })
+
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 

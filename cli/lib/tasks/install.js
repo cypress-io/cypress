@@ -217,15 +217,6 @@ const downloadAndUnzip = ({ version, installDir, downloadDir }) => {
 }
 
 const start = (options = {}) => {
-  // handle deprecated / removed
-  if (util.getEnv('CYPRESS_BINARY_VERSION')) {
-    return throwFormErrorText(errors.removed.CYPRESS_BINARY_VERSION)()
-  }
-
-  if (util.getEnv('CYPRESS_SKIP_BINARY_INSTALL')) {
-    return throwFormErrorText(errors.removed.CYPRESS_SKIP_BINARY_INSTALL)()
-  }
-
   debug('installing with options %j', options)
 
   _.defaults(options, {

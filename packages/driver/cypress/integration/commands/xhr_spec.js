@@ -1659,24 +1659,10 @@ describe('src/cy/commands/xhr', () => {
         this.warn = cy.spy(window.top.console, 'warn')
       })
 
-      it('logs on {force404: false}', () => {
-        cy.server({ force404: false })
-        .then(function () {
-          expect(this.warn).to.be.calledWith('Cypress Warning: Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.')
-        })
-      })
-
       it('does not log on {force404: true}', () => {
         cy.server({ force404: true })
         .then(function () {
           expect(this.warn).not.to.be.called
-        })
-      })
-
-      it('logs on {stub: false}', () => {
-        cy.server({ stub: false })
-        .then(function () {
-          expect(this.warn).to.be.calledWithMatch('Cypress Warning: Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.\n\nhttps://on.cypress.io/deprecated-stub-false-on-server')
         })
       })
     })

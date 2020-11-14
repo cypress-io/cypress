@@ -156,14 +156,11 @@ const create = (state, expect) => {
   }
 
   const ensureVisibility = (subject, onFail) => {
-    const cmd = state('current').get('name')
-
-    // We overwrite the filter(":visible") in jquery
-    // packages/driver/src/config/jquery.coffee#L51
-    // So that this effectively calls our logic
-    // for $dom.isVisible aka !$dom.isHidden
-    if (subject.length !== subject.filter(':visible').length) {
-      const reason = $dom.getReasonIsHidden(subject)
+    if (subject.length !== subject.filter(function () {
+      return !$dom.isHidden(this, 'isVisible()', { checkOpacity: false })
+    }).length) {
+      const cmd = state('current').get('name')
+      const reason = $dom.getReasonIsHidden(subject, { checkOpacity: false })
       const node = $dom.stringify(subject)
 
       return $errUtils.throwErrByPath('dom.not_visible', {

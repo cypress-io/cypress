@@ -31,10 +31,6 @@ module.exports = (Commands, Cypress, cy, state) => {
     })
   }
 
-  const waitFunction = () => {
-    $errUtils.throwErrByPath('wait.fn_deprecated')
-  }
-
   let userOptions = null
 
   const waitNumber = (subject, ms, options) => {
@@ -240,7 +236,7 @@ module.exports = (Commands, Cypress, cy, state) => {
   }
 
   Commands.addAll({ prevSubject: 'optional' }, {
-    wait (subject, msOrFnOrAlias, options = {}) {
+    wait (subject, msOrAlias, options = {}) {
       userOptions = options
 
       // check to ensure options is an object
@@ -252,42 +248,38 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       options = _.defaults({}, userOptions, { log: true })
-      const args = [subject, msOrFnOrAlias, options]
+      const args = [subject, msOrAlias, options]
 
       try {
-        if (_.isFinite(msOrFnOrAlias)) {
+        if (_.isFinite(msOrAlias)) {
           return waitNumber.apply(window, args)
         }
 
-        if (_.isFunction(msOrFnOrAlias)) {
-          return waitFunction()
-        }
-
-        if (_.isString(msOrFnOrAlias)) {
+        if (_.isString(msOrAlias)) {
           return waitString.apply(window, args)
         }
 
-        if (_.isArray(msOrFnOrAlias) && !_.isEmpty(msOrFnOrAlias)) {
+        if (_.isArray(msOrAlias) && !_.isEmpty(msOrAlias)) {
           return waitString.apply(window, args)
         }
 
         // figure out why this error failed
-        if (_.isNaN(msOrFnOrAlias)) {
+        if (_.isNaN(msOrAlias)) {
           throwErr('NaN')
         }
 
-        if (msOrFnOrAlias === Infinity) {
+        if (msOrAlias === Infinity) {
           throwErr('Infinity')
         }
 
-        if (_.isSymbol(msOrFnOrAlias)) {
-          throwErr(msOrFnOrAlias.toString())
+        if (_.isSymbol(msOrAlias)) {
+          throwErr(msOrAlias.toString())
         }
 
         let arg
 
         try {
-          arg = JSON.stringify(msOrFnOrAlias)
+          arg = JSON.stringify(msOrAlias)
         } catch (error) {
           arg = 'an invalid argument'
         }

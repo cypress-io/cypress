@@ -421,7 +421,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is hidden.
        */
-      isHidden(element: JQuery | HTMLElement): boolean
+      isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
        */
@@ -474,7 +474,7 @@ declare namespace Cypress {
       getContainsSelector(text: string, filter?: string): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
