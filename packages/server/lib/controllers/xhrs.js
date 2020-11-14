@@ -61,6 +61,10 @@ module.exports = {
           data = ''
         }
 
+        if (_.isNumber(data) || _.isBoolean(data)) {
+          data = String(data)
+        }
+
         const chunk = Buffer.from(data, encoding)
 
         headers['content-length'] = chunk.length

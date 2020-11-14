@@ -42,7 +42,10 @@ type SimulatedDefault = (
   options: typeOptions
 ) => void
 
+type KeyInfo = KeyDetails | ShortcutDetails
+
 interface KeyDetails {
+  type: 'key'
   key: string
   text: string | null
   code: string
@@ -57,6 +60,13 @@ interface KeyDetails {
   events: {
     [key in KeyEventType]?: boolean;
   }
+}
+
+interface ShortcutDetails {
+  type: 'shortcut'
+  modifiers: KeyDetails[]
+  key: KeyDetails
+  originalSequence: string
 }
 
 const dateRe = /^\d{4}-\d{2}-\d{2}/
@@ -138,11 +148,15 @@ const modifiersToString = (modifiers: KeyboardModifiers) => {
   })).join(', ')
 }
 
-const joinKeyArrayToString = (keyArr: KeyDetails[]) => {
-  return _.map(keyArr, (keyDetails) => {
-    if (keyDetails.text) return keyDetails.key
+const joinKeyArrayToString = (keyArr: KeyInfo[]) => {
+  return _.map(keyArr, (key) => {
+    if (key.type === 'key') {
+      if (key.text) return key.key
 
-    return `{${keyDetails.key}}`
+      return `{${key.key}}`
+    }
+
+    return `{${key.originalSequence}}`
   }).join('')
 }
 
@@ -150,8 +164,8 @@ type modifierKeyDetails = KeyDetails & {
   key: keyof typeof keyToModifierMap
 }
 
-const isModifier = (details: KeyDetails): details is modifierKeyDetails => {
-  return !!keyToModifierMap[details.key]
+const isModifier = (details: KeyInfo): details is modifierKeyDetails => {
+  return details.type === 'key' && !!keyToModifierMap[details.key]
 }
 
 const getFormattedKeyString = (details: KeyDetails) => {
@@ -170,7 +184,7 @@ const getFormattedKeyString = (details: KeyDetails) => {
   return details.originalSequence
 }
 
-const countNumIndividualKeyStrokes = (keys: KeyDetails[]) => {
+const countNumIndividualKeyStrokes = (keys: KeyInfo[]) => {
   return _.countBy(keys, isModifier)['false']
 }
 
@@ -188,7 +202,7 @@ const findKeyDetailsOrLowercase = (key: string): KeyDetailsPartial => {
 const getTextLength = (str) => _.toArray(str).length
 
 const getKeyDetails = (onKeyNotFound) => {
-  return (key: string): KeyDetails => {
+  return (key: string): KeyDetails | ShortcutDetails => {
     let foundKey: KeyDetailsPartial
 
     if (getTextLength(key) === 1) {
@@ -199,6 +213,7 @@ const getKeyDetails = (onKeyNotFound) => {
 
     if (foundKey) {
       const details = _.defaults({}, foundKey, {
+        type: 'key',
         key: '',
         keyCode: 0,
         code: '',
@@ -211,7 +226,63 @@ const getKeyDetails = (onKeyNotFound) => {
         details.text = details.key
       }
 
+      details.type = 'key'
       details.originalSequence = key
+
+      return details
+    }
+
+    if (key.includes('+')) {
+      if (key.endsWith('++')) {
+        key = key.replace('++', '+plus')
+      }
+
+      const keys = key.split('+')
+      let lastKey = _.last(keys)
+
+      if (lastKey === 'plus') {
+        keys[keys.length - 1] = '+'
+        lastKey = '+'
+      }
+
+      if (!lastKey) {
+        return onKeyNotFound(key, _.keys(getKeymap()).join(', '))
+      }
+
+      const keyWithModifiers = getKeyDetails(onKeyNotFound)(lastKey) as KeyDetails
+
+      let hasModifierBesidesShift = false
+
+      const modifiers = keys.slice(0, -1)
+      .map((m) => {
+        if (!Object.keys(modifierChars).includes(m)) {
+          $errUtils.throwErrByPath('type.not_a_modifier', {
+            args: {
+              key: m,
+            },
+          })
+        }
+
+        if (m !== 'shift') {
+          hasModifierBesidesShift = true
+        }
+
+        return getKeyDetails(onKeyNotFound)(m)
+      }) as KeyDetails[]
+
+      const details: ShortcutDetails = {
+        type: 'shortcut',
+        modifiers,
+        key: keyWithModifiers,
+        originalSequence: key,
+      }
+
+      // if we are going to type {ctrl+b}, the 'b' shouldn't be input as text
+      // normally we don't bypass text input but for shortcuts it's definitely what the user wants
+      // since the modifiers only apply to this single key.
+      if (hasModifierBesidesShift) {
+        details.key.text = null
+      }
 
       return details
     }
@@ -311,7 +382,7 @@ const getKeymap = () => {
 }
 const validateTyping = (
   el: HTMLElement,
-  keys: KeyDetails[],
+  keys: KeyInfo[],
   currentIndex: number,
   onFail: Function,
   skipCheckUntilIndex: number | undefined,
@@ -684,11 +755,17 @@ export class Keyboard {
 
     const typeKeyFns = _.map(
       keyDetailsArr,
-      (key: KeyDetails, currentKeyIndex: number) => {
+      (key: KeyInfo, currentKeyIndex: number) => {
         return () => {
-          debug('typing key:', key.key)
-
           const activeEl = getActiveEl(doc)
+
+          if (key.type === 'shortcut') {
+            this.simulateShortcut(activeEl, key, options)
+
+            return null
+          }
+
+          debug('typing key:', key.key)
 
           _skipCheckUntilIndex = _skipCheckUntilIndex && _skipCheckUntilIndex - 1
 
@@ -717,21 +794,27 @@ export class Keyboard {
                 // singleValueChange inputs must have their value set once at the end
                 // performing the simulatedDefault for a key would try to insert text on each character
                 // we still send all the events as normal, however
-                key.simulatedDefault = _.noop
+                if (key.type === 'key') {
+                  key.simulatedDefault = _.noop
+                }
               })
 
-              _.last(keysToType)!.simulatedDefault = () => {
-                options.onValueChange(originalText, activeEl)
+              const lastKeyToType = _.last(keysToType)!
 
-                const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
+              if (lastKeyToType.type === 'key') {
+                lastKeyToType.simulatedDefault = () => {
+                  options.onValueChange(originalText, activeEl)
 
-                debug('setting element value', valToSet, activeEl)
+                  const valToSet = isClearChars ? '' : joinKeyArrayToString(keysToType)
 
-                return $elements.setNativeProp(
-                  activeEl as $elements.HTMLTextLikeInputElement,
-                  'value',
-                  valToSet,
-                )
+                  debug('setting element value', valToSet, activeEl)
+
+                  return $elements.setNativeProp(
+                    activeEl as $elements.HTMLTextLikeInputElement,
+                    'value',
+                    valToSet,
+                  )
+                }
               }
             }
           } else {
@@ -1124,6 +1207,25 @@ export class Keyboard {
     const elToKeyup = this.getActiveEl(options)
 
     this.simulatedKeyup(elToKeyup, key, options)
+  }
+
+  simulateShortcut (el: HTMLElement, key: ShortcutDetails, options) {
+    key.modifiers.forEach((key) => {
+      this.simulatedKeydown(el, key, options)
+    })
+
+    this.simulatedKeydown(el, key.key, options)
+    this.simulatedKeyup(el, key.key, options)
+
+    options.id = _.uniqueId('char')
+
+    const elToKeyup = this.getActiveEl(options)
+
+    key.modifiers.reverse().forEach((key) => {
+      delete key.events.keyup
+      options.id = _.uniqueId('char')
+      this.simulatedKeyup(elToKeyup, key, options)
+    })
   }
 
   simulatedKeyup (el: HTMLElement, _key: KeyDetails, options: typeOptions) {
