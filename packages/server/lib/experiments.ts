@@ -52,7 +52,7 @@ interface StringValues {
 */
 const _summaries: StringValues = {
   experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
-  experimentalNetworkStubbing: 'Enables `cy.http`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)',
+  experimentalNetworkStubbing: 'Enables `cy.http()`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
   experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing',
 }

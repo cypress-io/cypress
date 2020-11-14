@@ -2577,7 +2577,7 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
-     * Enables `cy.http`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
+     * Enables `cy.http()`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
      * @default false
      */
     experimentalNetworkStubbing: boolean

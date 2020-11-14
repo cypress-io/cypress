@@ -8,7 +8,7 @@ describe('network stubbing', { retries: 2 }, function () {
   context('cy.route2()', function () {
     it('emits a warning', function () {
       cy.route2('*')
-      .then(() => expect(Cypress.utils.warning).to.be.calledWith('`cy.route2()` was renamed to `cy.http()`, and will be removed in a future release. Please update usages of `cy.route2()` to use `cy.http()` instead.'))
+      .then(() => expect(Cypress.utils.warning).to.be.calledWith('`cy.route2()` was renamed to `cy.http()` and will be removed in a future release. Please update usages of `cy.route2()` to use `cy.http()` instead.'))
     })
 
     it('calls through to cy.http()', function (done) {
