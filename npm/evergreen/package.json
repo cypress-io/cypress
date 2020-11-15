@@ -25,11 +25,8 @@
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.2.0",
     "@packages/driver": "*",
-    "vue-docgen-loader": "^1.5.0",
-    "vue-docgen-api": "^4.33.4",
     "vue": "2.6.12",
-    "@vue/test-utils": "^1.1.0",
-    "vue-live": "^1.15.1"
+    "@vue/test-utils": "^1.1.0"
   },
   "devDependencies": {
     "vue-loader": "^15.9.3",

@@ -58,17 +58,17 @@ async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportF
     ],
   }
 
-  const vueDocgenLoader = {
-    test: /\.vue$/,
-    use: 'vue-docgen-loader',
-    enforce: 'post'
-  }
+  // const vueDocgenLoader = {
+  //   test: /\.vue$/,
+  //   use: 'vue-docgen-loader',
+  //   enforce: 'post'
+  // }
 
   const dynamicWebpackConfig = {
     module: {
       rules: [
         entryValLoader,
-        vueDocgenLoader
+        // vueDocgenLoader
       ],
     },
   }

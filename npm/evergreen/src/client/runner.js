@@ -66,4 +66,11 @@ export function init (specMap, support) {
   // createApp(state.specNames, { runAllSpecs })
   renderTargets()
   setupEnvironment()
+
+
+  console.log(state.specNames)
+  Promise.all(
+    state.specNames.map((name) => load(state, name)),
+  ).then(executeSpecs)
+  // runAllSpecs()
 }

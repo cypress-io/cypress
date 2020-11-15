@@ -29,6 +29,8 @@ module.exports = async function bundleSpecs ({ files, projectRoot, support }, lo
     return makeImport(file, 'support', 'support')
   }
 
+  console.log('files before normalizing', files)
+
   files = [
     ...files,
     support,
@@ -42,13 +44,17 @@ module.exports = async function bundleSpecs ({ files, projectRoot, support }, lo
     }
   })
 
-  const supportImport = support ? buildSupport(files.filter((f) => !f.spec)[0]) : ''
+  console.log('files after normalizing', files)
+
+  const isComponent = f => f.specType === 'component'
+  const isSupport = f => !isComponent(f)
+  const supportImport = support ? buildSupport(files.filter(isSupport)[0]) : ''
 
   return {
     code: `
     ${require('./hmr-client.js')(files)}
     module.exports = {
-      files: ${buildSpecs(files.filter((f) => f.spec))},
+      files: ${buildSpecs(files.filter(isComponent))},
       ${supportImport}
     }
     `,
