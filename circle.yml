@@ -8,7 +8,7 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - remove-old-binary-file
+        - v6.0-release
 
 defaults: &defaults
   parallelism: 1
@@ -35,6 +35,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
+        - v6.0-release
   requires:
     - build-npm-package
     - build-binary
@@ -61,7 +62,7 @@ executors:
   mac:
     macos:
       # Executor should have Node >= required version
-      xcode: "11.2.1"
+      xcode: "11.3.1"
     environment:
       PLATFORM: mac
 
@@ -120,7 +121,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           environment:
             CYPRESS_KONFIG_ENV: production
@@ -162,7 +163,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: |
             cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
@@ -186,7 +187,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_*spec* --browser <<parameters.browser>>
       - verify-mocha-results
@@ -237,6 +238,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-conditional-ci
       - run:
           name: "Cloning test project: <<parameters.repo>>"
           command: |
@@ -284,7 +286,6 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -385,12 +386,12 @@ commands:
           name: "Waiting on Circle CI jobs: <<parameters.job-names>>"
           command: node ./scripts/wait-on-circle-jobs.js --job-names="<<parameters.job-names>>"
 
-  check-halt:
+  check-conditional-ci:
     description: Halt CI if the package that this job corresponds to is unchanged
     steps:
       - run:
           name: Check if job should run
-          command: yarn check-halt || circleci-agent step halt
+          command: node scripts/check-conditional-ci.js
 
 jobs:
   ## code checkout and yarn installs
@@ -536,7 +537,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: mkdir -p cli/visual-snapshots
       - run:
           command: node cli/bin/cypress info --dev | yarn --silent term-to-html | node scripts/sanitize --type cli-info > cli/visual-snapshots/cypress-info.html
@@ -561,7 +562,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure mocha runs
       - run: yarn test-mocha
       # test binary build code
@@ -607,7 +608,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - install-required-node
       - run:
           name: Mocha tests
@@ -627,7 +628,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: yarn test-unit --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -641,7 +642,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: yarn test-integration --scope @packages/server
       - verify-mocha-results:
           expectedResultCount: 1
@@ -654,7 +655,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn workspace @packages/server test-performance
       - verify-mocha-results:
@@ -735,7 +736,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -761,7 +762,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn build-prod
           working_directory: packages/desktop-gui
@@ -796,7 +797,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           # builds JS and CSS, and we need the app CSS
           # to correctly apply component styles
@@ -830,7 +831,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/reporter
@@ -852,7 +853,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: yarn build-for-tests
           working_directory: packages/ui-components
@@ -874,7 +875,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           command: node index.js
           working_directory: packages/launcher
@@ -884,7 +885,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/webpack-preprocessor build
@@ -923,7 +924,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/vue build
@@ -937,7 +938,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           name: Build
           command: yarn workspace @cypress/react build
@@ -966,7 +967,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - restore_cache:
           name: Restore Cache
           keys:
@@ -990,7 +991,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run:
           name: Run tests
           command: yarn workspace @cypress/eslint-plugin-dev test
@@ -1037,7 +1038,7 @@ jobs:
 
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: $(yarn bin)/print-arch
       - install-required-node
       - run:
@@ -1070,7 +1071,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: ls -l
       - run:
           name: upload unique binary
@@ -1088,7 +1089,6 @@ jobs:
   test-kitchensink:
     <<: *defaults
     steps:
-      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - install-required-node
@@ -1115,7 +1115,6 @@ jobs:
   "test-kitchensink-against-staging":
     <<: *defaults
     steps:
-      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-example-kitchensink
       - run:
@@ -1140,7 +1139,6 @@ jobs:
   "test-against-staging":
     <<: *defaults
     steps:
-      - check-halt
       - clone-repo-and-checkout-release-branch:
           repo: cypress-test-tiny
       - run:
@@ -1157,7 +1155,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - install-required-node
       - run:
           name: Check next dev version
@@ -1204,7 +1202,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: ls -l
       # NPM package file should have filename cypress-<version>.tgz
       - run:
@@ -1227,7 +1225,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: ls -la
       # make sure JSON files with uploaded urls are present
       - run: ls -la binary-url.json npm-package-url.json
@@ -1265,7 +1263,7 @@ jobs:
       # needs uploaded NPM and test binary
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: ls -la
       - post-install-comment
 
@@ -1274,7 +1272,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1310,7 +1308,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1352,7 +1350,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1396,7 +1394,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1440,7 +1438,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # make sure we have cypress.zip received
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -1473,7 +1471,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       - run: ls -l
       # make sure we have the binary and NPM package
       - run: ls -l cypress.zip cypress.tgz
@@ -1609,7 +1607,7 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/
-      - check-halt
+      - check-conditional-ci
       # the user should be "node"
       - run: whoami
       - run: pwd
@@ -1830,6 +1828,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - test-kitchensink:
@@ -1847,6 +1846,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - build-npm-package:
@@ -1858,7 +1858,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
     - build-binary:
@@ -1870,7 +1870,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1927,7 +1927,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1937,6 +1937,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1945,6 +1946,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1954,6 +1956,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1979,8 +1982,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - kevin-v5.0-release-rwa
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -2074,6 +2076,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package
           - Mac binary
@@ -2086,6 +2089,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2098,6 +2102,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload

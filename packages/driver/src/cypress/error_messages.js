@@ -909,22 +909,23 @@ module.exports = {
   },
 
   net_stubbing: {
+    route2_renamed: `${cmd('route2')} was renamed to ${cmd('http')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('http')} instead.`,
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
 
         You passed: ${format(staticResponse)}`, 8)
     },
-    route2: {
+    http: {
       invalid_handler: ({ handler }) => {
         return stripIndent`\
-          ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
+          ${cmd('http')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
           You passed: ${format(handler)}`
       },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
-          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${message}
+          An invalid RouteMatcher was supplied to ${cmd('http')}. ${message}
 
           You passed: ${format(matcher)}`
       },
@@ -932,7 +933,7 @@ module.exports = {
     request_handling: {
       cb_failed: ({ err, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
+          A request callback passed to ${cmd('http')} threw an error while intercepting a request:
 
           ${err.message}
 
@@ -942,7 +943,7 @@ module.exports = {
       },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A request callback passed to ${cmd('http')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
@@ -1635,6 +1636,10 @@ module.exports = {
     },
     multiple_elements: {
       message: `${cmd('type')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/type',
+    },
+    not_a_modifier: {
+      message: `\`{{key}}\` is not a modifier.`,
       docsUrl: 'https://on.cypress.io/type',
     },
     not_actionable_textlike: {

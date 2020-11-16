@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - develop
+    - v6.0-release
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

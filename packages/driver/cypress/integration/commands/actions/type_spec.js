@@ -2378,6 +2378,77 @@ describe('src/cy/commands/actions/type - #type', () => {
     })
   })
 
+  // https://github.com/cypress-io/cypress/issues/5694
+  describe('shortcuts', () => {
+    beforeEach(function () {
+      cy.visit('fixtures/dom.html')
+      cy.on('log:added', (attrs, log) => {
+        this.lastLog = log
+      })
+    })
+
+    it('releases modfier keys at the end of the shortcut sequence', () => {
+      cy.get(':text:first').type('h{ctrl+alt++}i')
+      .then(function ($input) {
+        const table = this.lastLog.invoke('consoleProps').table[2]()
+
+        // eslint-disable-next-line
+          console.table(table.data, table.columns)
+
+        const beforeinput = Cypress.isBrowser('firefox') ? '' : ' beforeinput,'
+
+        expect(table.name).to.eq('Keyboard Events')
+        const expectedTable = {
+          1: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          2: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          3: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          4: { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          5: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          6: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+        }
+
+        // uncomment for debugging
+        // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
+        expect(table.data).to.deep.eq(expectedTable)
+      })
+    })
+
+    it('can type a shortcut with special characters', () => {
+      // NOTE: the default actions we implement will NOT be taken into account with modifiers
+      // e.g. we do not the delete the entire word with ctrl+backspace
+      // this matches the same behavior as cy.type('{ctrl}{backspace}')
+      // TODO: maybe change this in the future, it's just more work
+      cy.get(':text:first').type('foo{ctrl+backspace}bar')
+      .should('have.value', 'fobar')
+    })
+
+    it('does not input text when non-shift modifier', () => {
+      // NOTE: in this case the modifier DOES change the default action (when modifier other than Shift is applied, do not insert text)
+      // since most users want to test a user issuing a shortcut, and it's simple for us to implement
+      cy.get(':text:first').type('{ctrl+b}hi')
+      .should('have.value', 'hi')
+    })
+
+    it('throws an error when a wrong modifier is given', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`asdf` is not a modifier.')
+      })
+
+      cy.get(':text:first').type('{asdf+x}hi')
+    })
+
+    it('throws an error when shortcut is missing key', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('{ctrl+}')
+        expect(err.message).to.contain('is not recognized')
+        expect(err.message).to.contain('alt, option, ctrl')
+      })
+
+      cy.get(':text:first').type('{ctrl+}hi')
+    })
+  })
+
   describe('case-insensitivity', () => {
     it('special chars are case-insensitive', () => {
       cy.get(':text:first').invoke('val', 'bar').type('{leftarrow}{DeL}').then(($input) => {

@@ -208,7 +208,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         hasInterceptor = true
         break
       case _.isUndefined(handler):
-        // user is doing something like cy.route2('foo').as('foo') to wait on a URL
+        // user is doing something like cy.http('foo').as('foo') to wait on a URL
         break
       case _.isString(handler):
         staticResponse = { body: <string>handler }
@@ -222,12 +222,12 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
           }
         }
 
-        validateStaticResponse('cy.route2', <StaticResponse>handler)
+        validateStaticResponse('cy.http', <StaticResponse>handler)
 
         staticResponse = handler as StaticResponse
         break
       default:
-        return $errUtils.throwErrByPath('net_stubbing.route2.invalid_handler', { args: { handler } })
+        return $errUtils.throwErrByPath('net_stubbing.http.invalid_handler', { args: { handler } })
     }
 
     const routeMatcher = annotateMatcherOptionsTypes(matcher)
@@ -263,7 +263,14 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function route2 (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
+  function route2 (...args) {
+    $errUtils.warnByPath('net_stubbing.route2_renamed')
+
+    // @ts-ignore
+    return http.apply(undefined, args)
+  }
+
+  function http (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
       if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
@@ -291,7 +298,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     const { isValid, message } = validateRouteMatcherOptions(routeMatcherOptions)
 
     if (!isValid) {
-      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
+      $errUtils.throwErrByPath('net_stubbing.http.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
     }
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)
@@ -299,6 +306,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   Commands.addAll({
+    http,
     route2,
   })
 }
