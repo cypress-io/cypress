@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
@@ -64,7 +63,7 @@ class Reporter extends Component<ReporterProps> {
     const { appState } = this.props
 
     return (
-      <div className={cs('reporter', { 'is-running': appState.isRunning })}>
+      <div className='reporter'>
         <Header appState={appState} statsStore={this.props.statsStore} />
         <Runnables
           appState={appState}

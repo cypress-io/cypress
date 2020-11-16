@@ -18,7 +18,7 @@ const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => {
     url: 'http://example.com',
   }
 
-  return runner.emit('reporter:log:add', _.extend(defaultLog, log))
+  runner.emit('reporter:log:add', _.extend(defaultLog, log))
 }
 
 describe('aliases', () => {
@@ -45,8 +45,7 @@ describe('aliases', () => {
 
     cy.get('.reporter').then(() => {
       runner.emit('runnables:ready', runnables)
-
-      return runner.emit('reporter:start', {})
+      runner.emit('reporter:start', {})
     })
   })
 
@@ -189,7 +188,7 @@ describe('aliases', () => {
 
         cy.get('.command-wrapper')
         .first()
-        .within(($commandWrapper) => {
+        .within(() => {
           cy.get('.num-duplicates').should('not.be.visible')
 
           cy.contains('.command-alias', 'getPosts')

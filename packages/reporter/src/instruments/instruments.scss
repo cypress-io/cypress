@@ -39,6 +39,10 @@
       }
     }
 
+    .call-count {
+      white-space: nowrap;
+    }
+
     .no-calls .call-count,
     .no-responses .response-count {
       color: $fail;
