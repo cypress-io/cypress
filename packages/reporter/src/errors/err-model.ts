@@ -15,11 +15,11 @@ interface ParsedStackFileLine extends FileDetails {
   whitespace: string
 }
 
-type ParsedStackLine = ParsedStackMessageLine & ParsedStackFileLine
+type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
 
 export interface CodeFrame extends FileDetails {
   frame: string
-  language: string
+  language?: string | null
 }
 
 export interface ErrProps {
@@ -38,7 +38,7 @@ export default class Err {
   @observable message = ''
   @observable stack = ''
   @observable sourceMappedStack = ''
-  @observable.ref parsedStack = [] as ParsedStackLine[]
+  @observable.ref parsedStack: ParsedStackLine[] = []
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
   // @ts-ignore

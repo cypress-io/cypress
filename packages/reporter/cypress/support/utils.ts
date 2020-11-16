@@ -1,16 +1,34 @@
-const _ = Cypress._
+import { Editor } from '@packages/ui-components'
 
-export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
-  beforeEach(function () {
-    cy.stub(this.runner, 'emit').callThrough()
+const { _ } = Cypress
+
+interface File {
+  file: string
+  line: number
+  column: number
+}
+
+interface HandlesFileOpeningProps {
+  getRunner: Function
+  selector: string
+  file: File
+  stackTrace?: boolean
+}
+
+export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = false }: HandlesFileOpeningProps) => {
+  beforeEach(() => {
+    cy.stub(getRunner(), 'emit').callThrough()
   })
 
   describe('when user has already set opener and opens file', function () {
-    beforeEach(function () {
-      this.editor = {}
+    let editor: Partial<Editor>
 
-      this.runner.emit.withArgs('get:user:editor').yields({
-        preferredOpener: this.editor,
+    beforeEach(function () {
+      editor = {}
+
+      // @ts-ignore
+      getRunner().emit.withArgs('get:user:editor').yields({
+        preferredOpener: editor,
       })
 
       if (stackTrace) {
@@ -20,8 +38,8 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
 
     it('opens in preferred opener', function () {
       cy.get(selector).first().click().then(() => {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
-          where: this.editor,
+        expect(getRunner().emit).to.be.calledWith('open:file', {
+          where: editor,
           ...file,
         })
       })
@@ -39,7 +57,8 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
     ]
 
     beforeEach(function () {
-      this.runner.emit.withArgs('get:user:editor').yields({ availableEditors })
+      // @ts-ignore
+      getRunner().emit.withArgs('get:user:editor').yields({ availableEditors })
       // usual viewport of only reporter is a bit cramped for the modal
       cy.viewport(600, 600)
 
@@ -73,8 +92,8 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
         .should('have.class', 'is-disabled')
         .click()
 
-        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
-        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+        cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'open:file')
       })
 
       it('shows validation message when hovering over submit button', function () {
@@ -93,8 +112,8 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
         .should('have.class', 'is-disabled')
         .click()
 
-        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'set:user:editor')
-        cy.wrap(this.runner.emit).should('not.to.be.calledWith', 'open:file')
+        cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'set:user:editor')
+        cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'open:file')
       })
 
       it('shows validation message when hovering over submit button', function () {
@@ -114,11 +133,11 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
       })
 
       it('emits set:user:editor', function () {
-        expect(this.runner.emit).to.be.calledWith('set:user:editor', availableEditors[4])
+        expect(getRunner().emit).to.be.calledWith('set:user:editor', availableEditors[4])
       })
 
       it('opens file in selected editor', function () {
-        expect(this.runner.emit).to.be.calledWith('open:file', {
+        expect(getRunner().emit).to.be.calledWith('open:file', {
           where: availableEditors[4],
           ...file,
         })

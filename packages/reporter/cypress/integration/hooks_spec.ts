@@ -2,10 +2,12 @@ import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 
 describe('hooks', function () {
+  let runner: EventEmitter
+
   beforeEach(function () {
     cy.fixture('runnables_hooks').as('runnables')
 
-    this.runner = new EventEmitter()
+    runner = this.runner = new EventEmitter()
 
     cy.visit('/dist').then((win) => {
       win.render({
@@ -103,10 +105,14 @@ describe('hooks', function () {
         cy.get('.hook-open-in-ide').first().invoke('show')
       })
 
-      itHandlesFileOpening('.hook-open-in-ide', {
-        file: '/absolute/path/to/foo_spec.js',
-        column: 4,
-        line: 10,
+      itHandlesFileOpening({
+        getRunner: () => runner,
+        selector: '.hook-open-in-ide',
+        file: {
+          file: '/absolute/path/to/foo_spec.js',
+          column: 4,
+          line: 10,
+        },
       })
     })
   })

@@ -1,7 +1,10 @@
-const { EventEmitter } = require('events')
+import { EventEmitter } from 'events'
+import CommandModel from './../../src/commands/command-model'
+import Runnable from '../../src/runnables/runnable-model'
+
 const { _ } = Cypress
 
-const addLog = function (runner, log) {
+const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => {
   const defaultLog = {
     event: false,
     hookId: 'r3',
@@ -19,33 +22,38 @@ const addLog = function (runner, log) {
 }
 
 describe('aliases', () => {
-  context('route aliases', () => {
-    beforeEach(function () {
-      cy.fixture('runnables_aliases').as('runnables')
+  let runner: EventEmitter
+  let runnables: Runnable[]
 
-      this.runner = new EventEmitter()
+  beforeEach(() => {
+    cy.fixture('runnables_aliases').then((_runnables) => {
+      runnables = _runnables
+    })
 
-      cy.visit('dist').then((win) => {
-        return win.render({
-          runner: this.runner,
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        })
-      })
+    runner = new EventEmitter()
 
-      cy.get('.reporter').then(() => {
-        this.runner.emit('runnables:ready', this.runnables)
-
-        return this.runner.emit('reporter:start', {})
+    cy.visit('dist').then((win) => {
+      return win.render({
+        runner,
+        spec: {
+          name: 'foo',
+          absolute: '/foo/bar',
+          relative: 'foo/bar',
+        },
       })
     })
 
+    cy.get('.reporter').then(() => {
+      runner.emit('runnables:ready', runnables)
+
+      return runner.emit('reporter:start', {})
+    })
+  })
+
+  context('route aliases', () => {
     describe('without duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           alias: 'getUsers',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -54,7 +62,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /users', indicator: 'passed' },
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'route',
           message: '@getUsers, function(){}',
           name: 'wait',
@@ -90,8 +98,8 @@ describe('aliases', () => {
     })
 
     describe('with consecutive duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -100,7 +108,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /posts', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -109,7 +117,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /posts', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -120,7 +128,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -190,8 +198,8 @@ describe('aliases', () => {
     })
 
     describe('with non-consecutive duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -200,7 +208,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /posts', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           alias: 'getUsers',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -209,7 +217,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /users', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           alias: 'getPosts',
           aliasType: 'route',
           displayName: 'xhr stub',
@@ -218,7 +226,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /posts', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -229,7 +237,7 @@ describe('aliases', () => {
           }],
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getUsers, function(){}',
           name: 'wait',
@@ -240,7 +248,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -283,32 +291,9 @@ describe('aliases', () => {
   })
 
   context('element aliases', () => {
-    beforeEach(function () {
-      cy.fixture('runnables_aliases').as('runnables')
-
-      this.runner = new EventEmitter()
-
-      cy.visit('cypress/support/index.html').then((win) => {
-        return win.render({
-          runner: this.runner,
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
-        })
-      })
-
-      cy.get('.reporter').then(() => {
-        this.runner.emit('runnables:ready', this.runnables)
-
-        return this.runner.emit('reporter:start', {})
-      })
-    })
-
     describe('without duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: 'body',
@@ -318,7 +303,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -354,8 +339,8 @@ describe('aliases', () => {
     })
 
     describe('with consecutive duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
@@ -365,7 +350,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: 'select',
@@ -375,7 +360,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -386,7 +371,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -438,8 +423,8 @@ describe('aliases', () => {
     })
 
     describe('with non-consecutive duplicates', () => {
-      beforeEach(function () {
-        addLog(this.runner, {
+      beforeEach(() => {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
@@ -449,7 +434,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: '[attr=\'modal\']',
@@ -459,7 +444,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           state: 'passed',
           name: 'get',
           message: '[attr=\'dropdown\']',
@@ -469,7 +454,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -480,7 +465,7 @@ describe('aliases', () => {
           }],
         })
 
-        addLog(this.runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -491,7 +476,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addLog(this.runner, {
+        return addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',

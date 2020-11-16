@@ -2,11 +2,13 @@ import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 
 describe('controls', function () {
+  let runner: EventEmitter
+
   context('all specs', function () {
     beforeEach(function () {
       cy.fixture('runnables').as('runnables')
 
-      this.runner = new EventEmitter()
+      runner = this.runner = new EventEmitter()
 
       cy.visit('/dist').then((win) => {
         win.render({
@@ -183,10 +185,14 @@ describe('controls', function () {
           cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
         })
 
-        itHandlesFileOpening('.runnable-header a', {
-          file: '/absolute/path/to/foo.js',
-          line: 0,
-          column: 0,
+        itHandlesFileOpening({
+          getRunner: () => runner,
+          selector: '.runnable-header a',
+          file: {
+            file: '/absolute/path/to/foo.js',
+            line: 0,
+            column: 0,
+          },
         })
       })
 
