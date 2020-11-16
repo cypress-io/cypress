@@ -102,7 +102,6 @@ class Test extends Component<Props> {
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
-
         <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
       </div>
     )

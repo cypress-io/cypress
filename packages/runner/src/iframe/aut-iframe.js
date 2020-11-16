@@ -7,6 +7,7 @@ import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import testCreator from '../lib/test-creator'
 
 export default class AutIframe {
   constructor (config) {
@@ -395,5 +396,13 @@ export default class AutIframe {
       console.error(err)
       /* eslint-disable no-console */
     }
+  }
+
+  startCreatingTest = () => {
+    testCreator.startCreating(this._body()[0])
+  }
+
+  stopCreatingTest = () => {
+    testCreator.stopCreating()
   }
 }

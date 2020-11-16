@@ -183,6 +183,14 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
+    reporterBus.on('start:creating:test', () => {
+      localBus.emit('start:creating:test')
+    })
+
+    localBus.on('update:creating:test:log', (log) => {
+      reporterBus.emit('update:creating:test:log', log)
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)
