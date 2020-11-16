@@ -1166,7 +1166,6 @@ describe('lib/config', () => {
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
-            experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalNetworkStubbing: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
@@ -1244,7 +1243,6 @@ describe('lib/config', () => {
             defaultCommandTimeout: { value: 4000, from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
-            experimentalFetchPolyfill: { value: false, from: 'default' },
             experimentalNetworkStubbing: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
