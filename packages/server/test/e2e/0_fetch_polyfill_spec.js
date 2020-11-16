@@ -141,6 +141,11 @@ describe('e2e fetch polyfill', () => {
     config: {
       experimentalFetchPolyfill: true,
     },
+    onRun: async (exec) => {
+      const { stdout } = await exec()
+
+      expect(stdout).to.include('The `experimentalFetchPolyfill` configuration option was deprecated in Cypress version `6.0.0`. It will be removed in a future release.')
+    },
   })
 })
 

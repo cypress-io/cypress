@@ -901,6 +901,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_FETCH_POLYFILL_DEPRECATED':
+      return stripIndent`\
+        The \`experimentalFetchPolyfill\` configuration option was deprecated in Cypress version \`6.0.0\`. It will be removed in a future release.
+
+        Consider using \`cy.http()\` to intercept fetch calls instead.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.

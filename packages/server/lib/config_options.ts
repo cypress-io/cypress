@@ -289,5 +289,9 @@ export const breakingOptions = [
     name: 'experimentalShadowDomSupport',
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
+  }, {
+    name: 'experimentalFetchPolyfill',
+    errorKey: 'EXPERIMENTAL_FETCH_POLYFILL_DEPRECATED',
+    isWarning: true,
   },
 ]
