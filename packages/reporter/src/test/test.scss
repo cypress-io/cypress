@@ -1,0 +1,33 @@
+.extending-test-modal {
+  max-width: 20em;
+
+  .content {
+    .icon {
+      color: #6a6b6c;
+    }
+
+    .beta {
+      color: #959595;
+    }
+
+    .center {
+      text-align: center;
+    }
+
+    .get-started {
+      background-color: $pending;
+      padding: 1em;
+      margin-top: 1em;
+      color: #fff;
+      border-radius: 0.5em;
+
+      &:hover {
+        background: darken($pending, 10%);
+      }
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}

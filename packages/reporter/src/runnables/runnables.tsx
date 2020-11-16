@@ -42,7 +42,7 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+function content (appState: AppState, { isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
   if (!isReady) {
     return <Loading />
   }
@@ -53,6 +53,10 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
     error = noTestsError(specPath)
   }
 
+  if (appState.extendingTest) {
+    return
+  }
+
   return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
 }
 
@@ -61,18 +65,18 @@ interface RunnablesProps {
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
-  appState?: AppState
+  appState: AppState
 }
 
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, spec } = this.props
+    const { appState, error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
-        {content(runnablesStore, spec.relative, error)}
+        {content(appState, runnablesStore, spec.relative, error)}
       </div>
     )
   }

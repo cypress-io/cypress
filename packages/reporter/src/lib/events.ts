@@ -213,9 +213,8 @@ const events: Events = {
       runner.emit('open:file', fileDetails)
     })
 
-    localBus.on('start:creating:test', (suiteId) => {
-      runner.emit('start:creating:test')
-      appState.startCreatingTest(suiteId)
+    localBus.on('start:extending:test', (test) => {
+      appState.startExtendingTest(test)
     })
   },
 

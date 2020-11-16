@@ -144,6 +144,10 @@ $font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif !default;
     position: absolute;
     right: 0.1em;
     top: 0.5em;
+
+    &:focus {
+      outline: none;
+    }
   }
 }
 
