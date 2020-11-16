@@ -3,6 +3,10 @@
 .reporter {
   min-height: 0; // needed for firefox or else scrolling gets funky
 
+  .ReactVirtualized__Grid.ReactVirtualized__List:focus {
+    outline: none;
+  }
+
   .container {
     box-shadow: 0 1px 2px #aaa;
     display: flex;
@@ -53,7 +57,7 @@
   .runnable {
     width: 100%;
     color: #6c6c6c;
-    overflow: auto;
+    // overflow: auto;
     line-height: 18px;
     padding: 5px 15px 5px 5px;
     border-left: 5px solid transparent;
@@ -95,7 +99,7 @@
       }
     }
 
-    &.runnable-active {
+    &.runnable-state-active {
       .runnable-state {
         @include runnable-state-active;
       }
@@ -117,90 +121,87 @@
       font-size: 14px;
       color: #bbbcbd;
     }
+  }
 
+  .attempt,
+  .runnable-agents-region,
+  .runnable-routes-region {
+    border-left: 5px solid transparent;
+  }
 
-    &.test.runnable-processing  {
-      .runnable-state {
-        @include runnable-state-processing;
-      }
-    }
-
-    &.runnable-failed > div > .runnable-wrapper,
-    &.runnable-failed > div > .runnable-instruments {
-      border-left: 5px solid $fail;
-
-      .fa-exclamation-triangle.has-command-failures {
-        visibility: visible;
-      }
-    }
-
-    &.runnable-pending > div > .runnable-wrapper,
-    &.runnable-pending > div > .runnable-instruments {
-      border-left: 5px solid lighten($pending, 25%);
-      padding-bottom: 0;
-    }
-
-    &.runnable-passed,
-    &.runnable-passed > div > .runnable-instruments {
-      border-left: 5px solid $pass;
-    }
-
-    .runnable-retried > div > .runnable-wrapper,
-    .runnable-retried > div > .runnable-instruments {
-      border-left: 5px solid $retried;
-    }
-
-    &.runnable-skipped > .runnable-wrapper {
-      .runnable-state {
-        @include runnable-state-skipped;
-      }
-
-      .runnable-title {
-        color: #aaa;
-      }
-    }
-
-    &.runnable-skipped > div > .runnable-wrapper,
-    &.runnable-skipped > div > .runnable-instruments {
-      border-left: 5px solid #9a9aaa;
-    }
-
-    &.test.runnable-failed {
-      .runnable-state {
-        @include runnable-state-failed;
-      }
-    }
-
-    &.suite > div > .runnable-wrapper {
-      .runnable-title {
-        color: #111;
-        font-weight: 800;
-        font-size: 13px;
-      }
-    }
-
-    &.test.runnable-passed {
-      .runnable-state {
-        @include runnable-state-passed;
-      }
-    }
-
-    &.test.runnable-pending {
-      .runnable-state {
-        @include runnable-state-pending;
-      }
-      .runnable-title {
-        color: lighten($pending, 25%);
-      }
-
-      .runnable-commands-region {
-        display: none;
-      }
+  .test.runnable-state-processing  {
+    .runnable-state {
+      @include runnable-state-processing;
     }
   }
 
-  .runnable-instruments {
-    border-left: 5px solid transparent;
+  .runnable-state-failed {
+    border-left: 5px solid $fail;
+
+    .fa-exclamation-triangle.has-command-failures {
+      visibility: visible;
+    }
+  }
+
+  .runnable-state-pending {
+    border-left: 5px solid lighten($pending, 25%);
+    padding-bottom: 0;
+  }
+
+  .runnable-state-passed {
+    border-left: 5px solid $pass;
+  }
+
+  .runnable-state-retried {
+    border-left: 5px solid $retried;
+  }
+
+  .runnable-state-skipped {
+    .runnable-state {
+      @include runnable-state-skipped;
+    }
+
+    .runnable-title {
+      color: #aaa;
+    }
+  }
+
+  .runnable-state-skipped {
+    border-left: 5px solid #9a9aaa;
+  }
+
+  .test.runnable-state-failed {
+    .runnable-state {
+      @include runnable-state-failed;
+    }
+  }
+
+  .suite {
+    .runnable-title {
+      color: #111;
+      font-weight: 800;
+      font-size: 13px;
+    }
+  }
+
+  .test.runnable-state-passed,
+  .test.runnable-state-retried {
+    .runnable-state {
+      @include runnable-state-passed;
+    }
+  }
+
+  .test.runnable-state-pending {
+    .runnable-state {
+      @include runnable-state-pending;
+    }
+    .runnable-title {
+      color: lighten($pending, 25%);
+    }
+
+    .runnable-commands-region {
+      display: none;
+    }
   }
 
   .collapsible > .runnable-instruments {
@@ -253,7 +254,7 @@
     }
   }
 
-  .test.runnable-failed .runnable-controls i {
+  .test.runnable-state-failed .runnable-controls i {
     visibility: visible;
   }
 

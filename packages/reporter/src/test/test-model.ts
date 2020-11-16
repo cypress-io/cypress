@@ -94,6 +94,8 @@ export class TestModel extends RunnableModel {
   }
 
   @computed get state () {
+    if (this.lastAttempt?.state === 'passed' && this.hasMultipleAttempts) return 'retried'
+
     return this.lastAttempt ? this.lastAttempt.state : 'active'
   }
 
@@ -110,7 +112,7 @@ export class TestModel extends RunnableModel {
   }
 
   @computed get hasRetried () {
-    return this.state === 'passed' && this.hasMultipleAttempts
+    return this.state === 'retried'
   }
 
   // TODO: make this an enum with states: 'QUEUED, ACTIVE, INACTIVE'

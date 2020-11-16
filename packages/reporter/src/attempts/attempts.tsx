@@ -1,11 +1,12 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { useEffect } from 'react'
-import { FlattenedNode } from 'react-virtualized-tree'
 
 import { AttemptModel } from './attempt-model'
-import { VirtualExpandable, ExpandableProps } from '../collapsible/expandable'
+import { Expandable, ExpandableProps } from '../collapsible/expandable'
+import { indentPadding } from '../lib/util'
 
 // TODO:
 // - handle scrollIntoView
@@ -28,31 +29,37 @@ interface AttemptProps {
 export const Attempt = observer(({ model, style, expandableProps }: AttemptProps) => {
   useEffect(() => {
     // scrollIntoView()
-    requestAnimationFrame(() => {
-      // FIXME: can't do this, it causes a render loop
-      expandableProps.measure()
+
+    const disposeAutorun = autorun(() => {
+      model.test.hasMultipleAttempts
+      model.hasCommands
+      model.state
+      model.index
+      model.commands.length
+
+      requestAnimationFrame(() => {
+        expandableProps.measure()
+      })
     })
+
+    return () => {
+      disposeAutorun()
+    }
   }, [true])
 
   // QUESTION: is this still necessary? can it be done without a hack?
   // HACK: causes component update when command log is added
   model.commands.length
 
-  if (!model.test.hasMultipleAttempts || model.hasCommands) {
-    return <div className='attempt'></div>
-  }
-
   return (
-    <VirtualExpandable {...expandableProps}>
-      <div
-        key={model.id}
-        className={cs('attempt', `attempt-state-${model.state}`, {
-          'attempt-failed': model.state === 'failed',
-          'show': model.test.hasMultipleAttempts,
-        })}
-        style={style}
-      >
-        <div className='attempt-header'>
+    <div
+      className={cs('attempt', `runnable-state-${model.test.state}`, `attempt-state-${model.state}`, {
+        'show': model.test.hasMultipleAttempts && model.hasCommands,
+      })}
+      style={indentPadding(style, model.test.level)}
+    >
+      <div className='attempt-header'>
+        <Expandable expandableProps={expandableProps}>
           <div className='attempt-tag'>
             <div className='open-close-indicator'>
               <i className='fa fa-fw fa-angle-up' />
@@ -61,9 +68,9 @@ export const Attempt = observer(({ model, style, expandableProps }: AttemptProps
             Attempt {model.index + 1}
             <i className="attempt-state fa fa-fw" />
           </div>
-        </div>
-        {!model.hasCommands && <NoCommands />}
+        </Expandable>
       </div>
-    </VirtualExpandable>
+      {!model.hasCommands && <NoCommands />}
+    </div>
   )
 })

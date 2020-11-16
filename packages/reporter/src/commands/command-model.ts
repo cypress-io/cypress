@@ -5,6 +5,7 @@ import { InstrumentModel, InstrumentProps } from '../instruments/instrument-mode
 import { TimeoutID } from '../lib/types'
 import { VirtualNodeModel } from '../tree/virtual-node-model'
 import { VirtualizableType } from '../tree/virtualizable'
+import { TestModel } from './../test/test-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -41,6 +42,7 @@ export class CommandModel extends InstrumentModel {
   @observable isDuplicate = false
   @observable hookId: string
   @observable virtualNode: VirtualNodeModel
+  @observable test: TestModel
 
   private _id: string
   private _prevState: string | null | undefined = null
@@ -59,7 +61,7 @@ export class CommandModel extends InstrumentModel {
     return this.numDuplicates > 1
   }
 
-  constructor (props: CommandProps) {
+  constructor (props: CommandProps, test: TestModel) {
     super(props)
 
     this._id = `command-${props.hookId}-${props.id}`
@@ -72,6 +74,7 @@ export class CommandModel extends InstrumentModel {
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
     this.virtualNode = new VirtualNodeModel(this._id, VirtualizableType.Command)
+    this.test = test
 
     if (props.err) {
       this.err = new ErrModel(props.err, this._id)

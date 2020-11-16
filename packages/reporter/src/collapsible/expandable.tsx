@@ -1,14 +1,14 @@
 import { action } from 'mobx'
 import React, { ReactNode } from 'react'
-import { renderers, FlattenedNode } from 'react-virtualized-tree'
+import { renderers, FlattenedNode, NodeAction } from 'react-virtualized-tree'
 
 export const VirtualExpandable = renderers.Expandable
 
 // TODO: move this to VirtualNodeProps
 export interface ExpandableProps {
   node: FlattenedNode
-  measure: () => {}
-  onChange: () => {}
+  measure: () => void
+  onChange: (udpateParams: NodeAction) => void
   index: number
 }
 

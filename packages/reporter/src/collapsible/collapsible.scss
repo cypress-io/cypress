@@ -8,13 +8,13 @@
   }
 
   .collapsible-indicator {
-    // @extend .#{$fa-css-prefix}-caret-right;
+    @extend .#{$fa-css-prefix}-caret-right;
     margin-right: 3px;
   }
 
-  // .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
-  //   @extend .#{$fa-css-prefix}-caret-down;
-  // }
+  .is-open > .collapsible-header-wrapper > .collapsible-header > .collapsible-header-inner > .collapsible-indicator {
+    @extend .#{$fa-css-prefix}-caret-down;
+  }
 
   .expandable {
     align-items: center;

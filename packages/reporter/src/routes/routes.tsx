@@ -1,7 +1,8 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -35,6 +36,21 @@ export interface RoutesProps {
 }
 
 export const Routes = observer(({ model, style, measure }: RoutesProps) => {
+  // TODO: abstract this or find a better pattern so this isn't necessary for every component
+  useEffect(() => {
+    const disposeAutorun = autorun(() => {
+      model.items.length
+
+      requestAnimationFrame(() => {
+        measure()
+      })
+    })
+
+    return () => {
+      disposeAutorun()
+    }
+  }, [true])
+
   const onToggle = () => {
     requestAnimationFrame(() => {
       measure()
@@ -43,41 +59,37 @@ export const Routes = observer(({ model, style, measure }: RoutesProps) => {
 
   return (
     <div
-      className={cs('runnable-routes-region', {
+      className={cs('runnable-routes-region', `runnable-state-${model.parent.state}`, {
         'no-routes': !model.items.length,
       })}
       style={indentPadding(style, model.level)}
     >
-      <div className='instruments-container'>
-        <ul className='hooks-container'>
-          <li className='hook-item'>
-            <Collapsible
-              header={`Routes (${model.items.length})`}
-              headerClass='hook-header'
-              contentClass='instrument-content'
-              onToggle={onToggle}
-            >
-              <table>
-                <thead>
-                  <tr>
-                    <th>Method</th>
-                    <th>Url</th>
-                    <th>Stubbed</th>
-                    <th>Alias</th>
-                    <th>
-                      <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
-                        <span>#</span>
-                      </Tooltip>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {_.map(model.items, (route: RouteModel) => <Route key={route.id} model={route} />)}
-                </tbody>
-              </table>
-            </Collapsible>
-          </li>
-        </ul>
+      <div className='instruments-container hooks-container'>
+        <Collapsible
+          header={`Routes (${model.items.length})`}
+          headerClass='hook-header'
+          contentClass='instrument-content'
+          onToggle={onToggle}
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Method</th>
+                <th>Url</th>
+                <th>Stubbed</th>
+                <th>Alias</th>
+                <th>
+                  <Tooltip placement='top' title='Number of responses which matched this route' className='cy-tooltip'>
+                    <span>#</span>
+                  </Tooltip>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {_.map(model.items, (route: RouteModel) => <Route key={route.id} model={route} />)}
+            </tbody>
+          </table>
+        </Collapsible>
       </div>
     </div>
   )

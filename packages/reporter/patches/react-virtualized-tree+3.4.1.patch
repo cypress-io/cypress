@@ -1,0 +1,26 @@
+diff --git a/node_modules/react-virtualized-tree/es/Tree.js b/node_modules/react-virtualized-tree/es/Tree.js
+index 7dceea3..402ed58 100644
+--- a/node_modules/react-virtualized-tree/es/Tree.js
++++ b/node_modules/react-virtualized-tree/es/Tree.js
+@@ -27,7 +27,7 @@ var Tree = function (_React$Component) {
+ 
+     return _ret = (_temp = (_this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this._cache = new CellMeasurerCache({
+       fixedWidth: true,
+-      minHeight: 20
++      minHeight: 0
+     }), _this.getRowCount = function () {
+       var nodes = _this.props.nodes;
+ 
+diff --git a/node_modules/react-virtualized-tree/lib/Tree.js b/node_modules/react-virtualized-tree/lib/Tree.js
+index 05ffc48..f7adfb4 100644
+--- a/node_modules/react-virtualized-tree/lib/Tree.js
++++ b/node_modules/react-virtualized-tree/lib/Tree.js
+@@ -43,7 +43,7 @@ var Tree = function (_React$Component) {
+ 
+     return _ret = (_temp = (_this = _possibleConstructorReturn(this, _React$Component.call.apply(_React$Component, [this].concat(args))), _this), _this._cache = new _reactVirtualized.CellMeasurerCache({
+       fixedWidth: true,
+-      minHeight: 20
++      minHeight: 0
+     }), _this.getRowCount = function () {
+       var nodes = _this.props.nodes;
+ 

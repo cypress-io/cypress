@@ -8,6 +8,8 @@ import { ErrModel } from '../errors/err-model'
 import { CommandModel } from '../commands/command-model'
 import { VirtualizableType } from '../tree/virtualizable'
 import { VirtualNodeModel } from '../tree/virtual-node-model'
+import { AttemptModel } from '../attempts/attempt-model'
+import { TestModel } from '../test/test-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
 
@@ -15,6 +17,12 @@ export interface HookProps {
   hookId: string
   hookName: HookName
   invocationDetails?: FileDetails
+}
+
+export interface HookExtraProps {
+  test: TestModel
+  attempt: AttemptModel
+  onCreateModel: Function
 }
 
 export class HookModel implements HookProps {
@@ -28,17 +36,22 @@ export class HookModel implements HookProps {
   @observable commands: Array<CommandModel> = []
   @observable failed = false
   @observable virtualNode: VirtualNodeModel
+  @observable test: TestModel
+  @observable attempt: AttemptModel
+
   onCreateModel: Function
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
   private _currentNumber = 1
 
-  constructor (props: HookProps, onCreateModel: Function) {
+  constructor (props: HookProps, extraProps: HookExtraProps) {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
-    this.virtualNode = new VirtualNodeModel(`${this.hookId}-${this.hookName}`, VirtualizableType.Hook)
-    this.onCreateModel = onCreateModel
+    this.virtualNode = new VirtualNodeModel(`${extraProps.attempt.id}-hook-${this.hookId}-${this.hookName}`, VirtualizableType.Hook)
+    this.test = extraProps.test
+    this.attempt = extraProps.attempt
+    this.onCreateModel = extraProps.onCreateModel
   }
 
   @computed get aliasesWithDuplicates () {

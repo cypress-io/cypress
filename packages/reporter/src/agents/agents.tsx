@@ -1,9 +1,9 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import Collapsible from '../collapsible/collapsible'
-import { FlattenedNode } from 'react-virtualized-tree'
 
 import { AgentModel } from './agent-model'
 import { Alias } from '../instruments/instrument-model'
@@ -30,6 +30,21 @@ export interface AgentsProps {
 }
 
 export const Agents = observer(({ model, style, measure }: AgentsProps) => {
+  // TODO: abstract this or find a better pattern so this isn't necessary for every component
+  useEffect(() => {
+    const disposeAutorun = autorun(() => {
+      model.items.length
+
+      requestAnimationFrame(() => {
+        measure()
+      })
+    })
+
+    return () => {
+      disposeAutorun()
+    }
+  }, [true])
+
   const onToggle = () => {
     requestAnimationFrame(() => {
       measure()
@@ -38,35 +53,33 @@ export const Agents = observer(({ model, style, measure }: AgentsProps) => {
 
   return (
     <div
-      className={cs('runnable-agents-region', {
+      className={cs('runnable-agents-region', `runnable-state-${model.parent.state}`, {
         'no-agents': !model.items.length,
       })}
       style={indentPadding(style, model.level)}
     >
-      <ul className='hooks-container'>
-        <li className='hook-item'>
-          <Collapsible
-            header={`Spies / Stubs (${model.items.length})`}
-            headerClass='hook-header'
-            contentClass='instrument-content'
-            onToggle={onToggle}
-          >
-            <table>
-              <thead>
-                <tr>
-                  <th>Type</th>
-                  <th>Function</th>
-                  <th>Alias(es)</th>
-                  <th># Calls</th>
-                </tr>
-              </thead>
-              <tbody>
-                {_.map(model.items, (agent: AgentModel) => <Agent key={agent.id} model={agent} />)}
-              </tbody>
-            </table>
-          </Collapsible>
-        </li>
-      </ul>
+      <div className='instruments-container hooks-container'>
+        <Collapsible
+          header={`Spies / Stubs (${model.items.length})`}
+          headerClass='hook-header'
+          contentClass='instrument-content'
+          onToggle={onToggle}
+        >
+          <table>
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Function</th>
+                <th>Alias(es)</th>
+                <th># Calls</th>
+              </tr>
+            </thead>
+            <tbody>
+              {_.map(model.items, (agent: AgentModel) => <Agent key={agent.id} model={agent} />)}
+            </tbody>
+          </table>
+        </Collapsible>
+      </div>
     </div>
   )
 })

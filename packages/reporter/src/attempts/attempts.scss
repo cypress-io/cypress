@@ -1,17 +1,21 @@
 .reporter {
   .attempt {
-    .attempt-header {
-      display: none;
-      margin-bottom: 7px;
+    display: none;
+    padding-bottom: 7px;
+    padding-right: 10px;
+
+    &.show {
+      display: block;
     }
 
-    &.show .attempt-header {
+    .attempt-header {
       display: flex;
     }
 
     > .collapsible {
       position: relative;
       margin-right: 20px;
+
       .collapsible-header-inner {
         outline: none;
       }
@@ -61,15 +65,13 @@
 
   .attempt-state-active {
     .attempt-state {
-
-    @include runnable-state-active;
+      @include runnable-state-active;
     }
   }
 
   .attempt-state-processing {
     .attempt-state {
-
-    @include runnable-state-processing;
+      @include runnable-state-processing;
     }
   }
 

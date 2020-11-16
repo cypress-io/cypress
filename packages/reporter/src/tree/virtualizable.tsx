@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import { Runnable } from '../runnables/runnable-and-suite'
 import { SuiteModel } from '../runnables/suite-model'
 import { TestModel } from '../test/test-model'
 import { Attempt } from '../attempts/attempts'
-import { AttemptModel, AttemptContent } from '../attempts/attempt-model'
+import { AttemptModel } from '../attempts/attempt-model'
 import { Agents } from '../agents/agents'
 import { AgentModel } from '../agents/agent-model'
 import { Routes } from '../routes/routes'
@@ -36,12 +36,21 @@ export interface Virtualizable {
   virtualNode: VirtualNodeModel
 }
 
-export interface VirtualizableProps extends ExpandableProps{
+export interface VirtualizableProps extends ExpandableProps {
   style: React.CSSProperties
   model: Virtualizable
 }
 
 export const Virtualizable = ({ style, model, node, measure, onChange, index }: VirtualizableProps) => {
+  // useEffect(() => {
+  //   console.log('-> mount', model.virtualType, node.id)
+
+  //   return () => {
+  //     console.log('<- unmount', model.virtualType, node.id)
+  //   }
+  // }, [true])
+
+  // TODO: rename expandableProps to something more generic, like virtualizableProps
   const expandableProps = { node, measure, onChange, index }
 
   switch (model?.virtualType) {
@@ -50,9 +59,7 @@ export const Virtualizable = ({ style, model, node, measure, onChange, index }: 
     case VirtualizableType.Test:
       return <Runnable model={model as TestModel} style={style} expandableProps={expandableProps} />
     case VirtualizableType.Attempt:
-      return null // this is a placeholder for the attempt 'container'
-    case VirtualizableType.AttemptContent:
-      return <Attempt model={(model as AttemptContent).attempt} style={style} expandableProps={expandableProps} />
+      return <Attempt model={model as AttemptModel} style={style} expandableProps={expandableProps} />
     case VirtualizableType.AgentCollection:
       return <Agents model={model as Collection<AgentModel>} style={style} measure={expandableProps.measure} />
     case VirtualizableType.RouteCollection:
@@ -60,12 +67,12 @@ export const Virtualizable = ({ style, model, node, measure, onChange, index }: 
     case VirtualizableType.HookCollection:
       return null
     case VirtualizableType.Hook:
-      return <Hook style={style} model={model as HookModel} />
+      return <Hook style={style} model={model as HookModel} expandableProps={expandableProps} />
     case VirtualizableType.Command:
       return <Command style={style} model={model as CommandModel} />
     case VirtualizableType.Error:
       return <TestError style={style} model={model as AttemptModel} />
     default:
-      return console.log('not virtualized:', node) || <div style={style}>Model (type: {model?.virtualType}) not yet virtualized</div>
+      return null
   }
 }

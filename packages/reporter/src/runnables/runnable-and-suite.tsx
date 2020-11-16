@@ -1,8 +1,6 @@
-import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
 import React from 'react'
-import { FlattenedNode } from 'react-virtualized-tree'
 
 import { indentPadding } from '../lib/util'
 import { SuiteModel } from './suite-model'
@@ -34,9 +32,7 @@ export interface RunnableProps {
 
 export const Runnable = observer(({ model, style = {}, expandableProps }: RunnableProps) => (
   <div
-    className={cs(`${model.type} runnable runnable-${model.state}`, {
-      'runnable-retried': model.hasRetried,
-    })}
+    className={`${model.type} runnable runnable-state-${model.state}`}
     style={indentPadding(style, model.level)}
   >
     <Expandable expandableProps={expandableProps}>

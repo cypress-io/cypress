@@ -1,69 +1,62 @@
 import cs from 'classnames'
 import _ from 'lodash'
+import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React from 'react'
-import { FileDetails } from '@packages/ui-components'
+import React, { useEffect } from 'react'
 
-// import { Command } from '../commands/command'
-import Collapsible from '../collapsible/collapsible'
-import { HookModel, HookName } from './hook-model'
+import { Expandable, ExpandableProps } from '../collapsible/expandable'
+import { HookModel } from './hook-model'
 import FileOpener from '../lib/file-opener'
-
-export interface HookHeaderProps {
-  name: string
-  number?: number
-}
-
-export const HookHeader = ({ name, number }: HookHeaderProps) => (
-  <span className='hook-name'>
-    {name} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
-  </span>
-)
-
-export interface HookOpenInIDEProps {
-  invocationDetails: FileDetails
-}
-
-const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
-  <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
-    <i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span>
-  </FileOpener>
-)
+import { indentPadding } from '../lib/util'
 
 export interface HookProps {
+  expandableProps: ExpandableProps
   model: HookModel
   showNumber: boolean
   style: React.CSSProperties
 }
 
-export const Hook = observer(({ model, showNumber, style }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed })} style={style}>
-    <Collapsible
-      header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
-      headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={true}
-    >
-      {/* <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-      </ul> */}
-    </Collapsible>
-  </li>
-))
+// TODO: get the showNumber part right
+// TODO: after hooks need to come after test body
 
-export interface HooksModel {
-  hooks: Array<HookModel>
-  hookCount: { [name in HookName]: number }
-}
+export const Hook = observer(({ expandableProps, model, style }: HookProps) => {
+  useEffect(() => {
+    const disposeAutorun = autorun(() => {
+      model.commands.length
+      model.hookName
+      model.hookNumber
 
-export interface HooksProps {
-  model: HooksModel
-}
+      requestAnimationFrame(() => {
+        expandableProps.measure()
+      })
+    })
 
-const Hooks = observer(({ model }: HooksProps) => (
-  <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => hook.commands.length ? <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} /> : undefined)}
-  </ul>
-))
+    return () => {
+      disposeAutorun()
+    }
+  }, [true])
 
-export default Hooks
+  if (!model.commands.length) return null
+
+  const showNumber = model.attempt.hookCount[model.hookName] > 1
+  const number = showNumber ? model.hookNumber : undefined
+
+  return (
+    <div className={cs(`hook runnable-state-${model.test.state}`, { 'hook-failed': model.failed })} style={indentPadding(style, model.test.level)}>
+      <div className='hooks-container'>
+        <div className='hook-item hook-header'>
+          <Expandable expandableProps={expandableProps}>
+            <div className='collapsible-header'>
+              {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+            </div>
+          </Expandable>
+          {model.invocationDetails && (
+            <FileOpener fileDetails={model.invocationDetails} className='hook-open-in-ide'>
+              <i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span>
+            </FileOpener>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+})

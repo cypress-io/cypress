@@ -98,7 +98,6 @@ class RunnablesStore {
 
     this._runnablesQueue.push(suite)
     this._addModel(suite)
-    this._models[suite.virtualNode.id] = suite
     suite.virtualNode.children = this._createRunnableChildren(props, ++level)
 
     return suite.virtualNode
@@ -115,7 +114,12 @@ class RunnablesStore {
   }
 
   _addModel = (model: Virtualizable) => {
-    console.log('add model:', model.virtualType, model.virtualNode.id)
+    // console.log('add model:', model.virtualType, model.virtualNode.id)
+
+    // if (this._models[model.virtualNode.id]) {
+    //   console.warn('duplicate model added:', model.virtualType, model.virtualNode.id)
+    // }
+
     this._models[model.virtualNode.id] = model
   }
 

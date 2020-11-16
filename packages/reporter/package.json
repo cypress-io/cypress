@@ -8,6 +8,7 @@
     "clean-deps": "rm -rf node_modules",
     "cypress:open": "node ../../scripts/cypress open --project .",
     "cypress:run": "node ../../scripts/cypress run --project .",
+    "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "mocha 'src/**/*.spec.*'",
@@ -49,5 +50,12 @@
   },
   "files": [
     "lib"
-  ]
+  ],
+  "workspaces": {
+    "nohoist": [
+      "@types/react-virtualized",
+      "react-virtualized",
+      "react-virtualized-tree"
+    ]
+  }
 }

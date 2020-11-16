@@ -11,32 +11,8 @@ import { HookModel, HookName, HookProps } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import { InstrumentModel } from '../instruments/instrument-model'
-import { Virtualizable, VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable'
 import { VirtualNodeModel } from './../tree/virtual-node-model'
-
-export class AttemptContent {
-  virtualType = VirtualizableType.AttemptContent
-  id: string
-  attempt: AttemptModel
-
-  constructor (id: string, attempt: AttemptModel) {
-    this.id = id
-    this.attempt = attempt
-  }
-
-  @computed get virtualNode () {
-    const attempt = this.attempt
-
-    return {
-      id: this.id,
-      name: this.id,
-      state: {
-        expanded: attempt.test.hasMultipleAttempts || !attempt.hasCommands,
-      },
-      children: [],
-    }
-  }
-}
 
 export class AttemptModel {
   virtualType = VirtualizableType.Attempt
@@ -47,7 +23,6 @@ export class AttemptModel {
   onCreateModel: Function
   test: TestModel
 
-  @observable content: Virtualizable
   @observable agents: Collection<AgentModel>
   @observable commands: CommandModel[] = []
   @observable err: ErrModel
@@ -65,7 +40,6 @@ export class AttemptModel {
     'after each': 0,
     'test body': 0,
   }
-  @observable _isOpen: boolean|null = null
 
   @observable isOpenWhenLast: boolean | null = null
   _callbackAfterUpdate: Function | null = null
@@ -84,19 +58,33 @@ export class AttemptModel {
     this.virtualNode = new VirtualNodeModel(this.id, this.virtualType)
     this.onCreateModel = onCreateModel
 
-    this.content = new AttemptContent(`${this.id}-content`, this)
+    this.agents = new Collection({
+      id: `${this.id}-agents`,
+      level: test.level,
+      parent: this.test,
+      type: VirtualizableType.AgentCollection,
+    })
 
-    onCreateModel(this.content)
-
-    this.agents = new Collection(`${this.id}-agents`, test.level, VirtualizableType.AgentCollection)
     onCreateModel(this.agents)
     _.each(props.agents, this._addAgent)
 
-    this.routes = new Collection(`${this.id}-routes`, test.level, VirtualizableType.RouteCollection)
+    this.routes = new Collection({
+      id: `${this.id}-routes`,
+      level: test.level,
+      parent: this.test,
+      type: VirtualizableType.RouteCollection,
+    })
+
     onCreateModel(this.routes)
     _.each(props.routes, this._addRoute)
 
-    this.hooks = new Collection(`${this.id}-hooks`, test.level, VirtualizableType.HookCollection)
+    this.hooks = new Collection({
+      id: `${this.id}-hooks`,
+      level: test.level,
+      parent: this.test,
+      type: VirtualizableType.HookCollection,
+    })
+
     onCreateModel(this.hooks)
     _.each(props.hooks, this._addHook)
 
@@ -106,7 +94,6 @@ export class AttemptModel {
     onCreateModel(this.err)
 
     this.virtualNode.children = [
-      this.content.virtualNode,
       this.agents.virtualNode,
       this.routes.virtualNode,
       this.hooks.virtualNode,
@@ -141,10 +128,6 @@ export class AttemptModel {
   }
 
   @computed get isOpen () {
-    if (this._isOpen !== null) {
-      return this._isOpen
-    }
-
     // prev attempts open by default while test is running, otherwise only the last is open
     return this.test.isActive || this.isLast
   }
@@ -231,7 +214,11 @@ export class AttemptModel {
   }
 
   _addHook = (props: HookProps) => {
-    const hook = new HookModel(props, this.onCreateModel)
+    const hook = new HookModel(props, {
+      test: this.test,
+      attempt: this,
+      onCreateModel: this.onCreateModel,
+    })
 
     this.hooks.items.push(hook)
     this.hooks.virtualNode.children.push(hook.virtualNode)
@@ -239,15 +226,15 @@ export class AttemptModel {
   }
 
   _addCommand = (props: CommandProps) => {
-    const command = new CommandModel(props)
+    const command = new CommandModel(props, this.test)
 
     this._logs[props.id] = command
 
     this.commands.push(command)
 
     const hookIndex = _.findIndex(this.hooks.items, { hookId: command.hookId })
-
     const hook = this.hooks.items[hookIndex]
+    const virtualNode = this.hooks.virtualNode.children[hookIndex]
 
     hook.addCommand(command)
 
@@ -258,6 +245,9 @@ export class AttemptModel {
       if (hook.invocationOrder !== hookIndex) {
         this.hooks.items[hookIndex] = this.hooks.items[hook.invocationOrder]
         this.hooks.items[hook.invocationOrder] = hook
+
+        this.hooks.virtualNode.children[hookIndex] = this.hooks.virtualNode.children[hook.invocationOrder]
+        this.hooks.virtualNode.children[hook.invocationOrder] = virtualNode
       }
     }
 

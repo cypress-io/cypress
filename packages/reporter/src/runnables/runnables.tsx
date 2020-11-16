@@ -34,13 +34,12 @@ const Loading = () => (
 const RunnablesList = observer(({ runnablesStore }: { runnablesStore: RunnablesStore }) => {
   const { runnables, modelById } = runnablesStore
 
-  console.log('render RunnablesList', toJS(runnables))
+  // console.log('render RunnablesList')
+  // console.log('render RunnablesList', toJS(runnables))
 
   return (
     <div className='runnables'>
-      <Tree nodes={runnables} nodeMarginLeft={0} onChange={(...args) => {
-        console.log('onChange:', ...args)
-      }}>
+      <Tree nodes={runnables} nodeMarginLeft={0} onChange={() => {}}>
         {({ node, index, measure, onChange, style }) => {
           return <Virtualizable key={node.id} model={modelById(node.id)} node={node} index={index} measure={measure} onChange={onChange} style={style} />
         }}

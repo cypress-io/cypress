@@ -1,7 +1,7 @@
 .reporter {
   .hooks-container {
-    margin: 5px 0 5px 5px;
-    padding-left: 10px;
+    margin-left: 5px;
+    padding: 5px 10px;
     border-left: 1px dotted #DDD;
 
     .hook-item {
@@ -12,13 +12,19 @@
       }
     }
 
-    i {
+    .expandable i,
+    .collapsible i {
       margin-right: 3px;
     }
 
     .hook-header {
       display: flex;
       width: 100%;
+
+      > span {
+        display: block;
+        flex-grow: 2;
+      }
 
       &:hover {
         .collapsible-header {

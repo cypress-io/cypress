@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import cs from 'classnames'
 import Markdown from 'markdown-it'
-import { action, observable } from 'mobx'
+import { action, autorun, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, MouseEvent } from 'react'
 // @ts-ignore
@@ -15,6 +15,7 @@ import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import { CommandModel } from './command-model'
+import { ExpandableProps } from '../collapsible/expandable'
 
 const md = new Markdown()
 
@@ -136,12 +137,14 @@ interface Props {
   appState?: AppState
   events?: Events
   runnablesStore?: RunnablesStore
+  expandableProps: ExpandableProps
 }
 
 @observer
 export class Command extends Component<Props> {
   @observable isOpen = false
   private _showTimeout?: TimeoutID
+  disposeAutorun: Function = () => {}
 
   static defaultProps = {
     appState,
@@ -149,16 +152,33 @@ export class Command extends Component<Props> {
     runnablesStore,
   }
 
+  componentDidMount () {
+    this.disposeAutorun = autorun(() => {
+      const { model, expandableProps } = this.props
+
+      model.displayMessage
+
+      requestAnimationFrame(() => {
+        expandableProps.measure()
+      })
+    })
+  }
+
+  componentWillUnmount () {
+    this.disposeAutorun()
+  }
+
   render () {
     const { model, aliasesWithDuplicates, style } = this.props
     const message = model.displayMessage
 
     return (
-      <li
+      <div
         className={cs(
           'command',
           `command-name-${model.name ? nameClassName(model.name) : ''}`,
           `command-state-${model.state}`,
+          `runnable-state-${model.test.state}`,
           `command-type-${model.type}`,
           {
             'command-is-event': !!model.event,
@@ -221,13 +241,11 @@ export class Command extends Component<Props> {
           </div>
         </FlashOnClick>
         {this._duplicates()}
-      </li>
+      </div>
     )
   }
 
   _duplicates () {
-    return null
-
     const { appState, events, model, runnablesStore } = this.props
 
     if (!this.isOpen || !model.hasDuplicates) return null

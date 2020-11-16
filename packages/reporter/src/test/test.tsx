@@ -6,6 +6,9 @@ import Tooltip from '@cypress/react-tooltip'
 import appState from '../lib/app-state'
 import { TestModel } from './test-model'
 import scroller from '../lib/scroller'
+import { ExpandableProps } from '../collapsible/expandable'
+// import { constants } from 'react-virtualized-tree'
+// import { autorun } from 'mobx'
 
 // TODO:
 // - handle scrollintoview from Attempts somehow
@@ -34,16 +37,28 @@ export const Test = observer(({ model }: TestProps) => {
 
   useEffect(() => {
     scrollIntoView()
+    // requestAnimationFrame(() => {
+    //   // expandableProps.measure()
+    //   // expandableProps.onChange({ node: expandableProps.node, type: constants.UPDATE_TYPE.UPDATE })
+    // })
+
+    // autorun(() => {
+    //   model.title
+    //   model.state
+    //   model.shouldRender
+    //   model.hasRetried
+    //   model.type
+    //   model.level
+
+    //   console.log('autorun measure')
+    //   expandableProps.measure()
+    // })
   }, [true])
 
   useEffect(() => {
     scrollIntoView()
     model.callbackAfterUpdate()
   })
-
-  if (model.err?.stack) {
-    console.error(model.err?.stack)
-  }
 
   return (
     <div className='runnable-title'>
