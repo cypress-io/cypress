@@ -14620,10 +14620,18 @@ file-loader@3.0.1:
     loader-utils "^1.0.2"
     schema-utils "^1.0.0"
 
-file-loader@4.3.0, file-loader@~4.3.0:
+file-loader@4.3.0:
   version "4.3.0"
   resolved "https://registry.yarnpkg.com/file-loader/-/file-loader-4.3.0.tgz#780f040f729b3d18019f20605f723e844b8a58af"
   integrity sha512-aKrYPYjF1yG3oX0kWRrqrSMfgftm7oJW5M+m4owoldH5C51C0RkIwB++JbRvEW3IU6/ZG5n8UvEcdgwOt2UOWA==
+  dependencies:
+    loader-utils "^1.2.3"
+    schema-utils "^2.5.0"
+
+file-loader@~5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/file-loader/-/file-loader-5.0.2.tgz#7f3d8b4ac85a5e8df61338cfec95d7405f971caa"
+  integrity sha512-QMiQ+WBkGLejKe81HU8SZ9PovsU/5uaLo0JdTCEXOYv7i7jfAjHZi1tcwp9tSASJPOmmHZtbdCervFmXMH/Dcg==
   dependencies:
     loader-utils "^1.2.3"
     schema-utils "^2.5.0"
@@ -29964,12 +29972,12 @@ svg-parser@^2.0.0:
   resolved "https://registry.yarnpkg.com/svg-parser/-/svg-parser-2.0.4.tgz#fdc2e29e13951736140b76cb122c8ee6630eb6b5"
   integrity sha512-e4hG1hRwoOdRb37cIMSgzNsxyzKfayW6VOflrwvR+/bzrkyxY/31WkbgnQpgtrNp1SdpJvpUAGTa/ZoiPNDuRQ==
 
-svg-url-loader@3.0.3:
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/svg-url-loader/-/svg-url-loader-3.0.3.tgz#95274eae80f4a46454a5b44e9582beb2f533465e"
-  integrity sha512-MKGiRNDs8fnHcZcPkhGcw9+130IXyFM9H8m6T7u3ScUuZYEeVzX0vNMru30D4MCF6vMYas5iw/Ru9lwFKBjaGw==
+svg-url-loader@4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/svg-url-loader/-/svg-url-loader-4.0.0.tgz#7cb2ed1b51ddfa5b7e20e93a54d2723af8d835c6"
+  integrity sha512-Mf/Pmn7/yvdivd1tMWpzMVeot4NfcNwYSfw1LAUjiGhImx7Gz04j36pytLUkJnM3LjIbB6By9BpKvGl6mGWq9A==
   dependencies:
-    file-loader "~4.3.0"
+    file-loader "~5.0.2"
     loader-utils "~1.2.3"
 
 svgo@^1.0.0, svgo@^1.2.2:
