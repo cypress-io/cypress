@@ -1142,6 +1142,17 @@ describe('lib/config', () => {
       expect(warning).to.be.calledWith('EXPERIMENTAL_SHADOW_DOM_REMOVED')
     })
 
+    // @see https://github.com/cypress-io/cypress/pull/9185
+    it('warns if experimentalNetworkStubbing is passed', async function () {
+      const warning = sinon.spy(errors, 'warning')
+
+      await this.defaults('experimentalNetworkStubbing', true, {
+        experimentalNetworkStubbing: true,
+      })
+
+      expect(warning).to.be.calledWith('EXPERIMENTAL_NETWORK_STUBBING_REMOVED')
+    })
+
     describe('.resolved', () => {
       it('sets reporter and port to cli', () => {
         const obj = {

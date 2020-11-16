@@ -901,6 +901,11 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalShadowDomSupport\` configuration option was removed in Cypress version \`5.2.0\`. It is no longer necessary when utilizing the \`includeShadowDom\` option.
 
         You can safely remove this option from your config.`
+    case 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED':
+      return stripIndent`\
+        The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`. It is no longer necessary for using \`cy.http()\` (formerly \`cy.route2()\`).
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
