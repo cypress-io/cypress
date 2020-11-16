@@ -20,10 +20,10 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
     cy.stub(getRunner(), 'emit').callThrough()
   })
 
-  describe('when user has already set opener and opens file', function () {
+  describe('when user has already set opener and opens file', () => {
     let editor: Partial<Editor>
 
-    beforeEach(function () {
+    beforeEach(() => {
       editor = {}
 
       // @ts-ignore
@@ -36,7 +36,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
       }
     })
 
-    it('opens in preferred opener', function () {
+    it('opens in preferred opener', () => {
       cy.get(selector).first().click().then(() => {
         expect(getRunner().emit).to.be.calledWith('open:file', {
           where: editor,
@@ -46,7 +46,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
     })
   })
 
-  describe('when user has not already set opener and opens file', function () {
+  describe('when user has not already set opener and opens file', () => {
     const availableEditors = [
       { id: 'computer', name: 'On Computer', isOther: false, openerId: 'computer' },
       { id: 'atom', name: 'Atom', isOther: false, openerId: 'atom' },
@@ -56,7 +56,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
       { id: 'other', name: 'Other', isOther: true, openerId: '' },
     ]
 
-    beforeEach(function () {
+    beforeEach(() => {
       // @ts-ignore
       getRunner().emit.withArgs('get:user:editor').yields({ availableEditors })
       // usual viewport of only reporter is a bit cramped for the modal
@@ -69,7 +69,7 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
       cy.get(selector).first().click()
     })
 
-    it('opens modal with available editors', function () {
+    it('opens modal with available editors', () => {
       _.each(availableEditors, ({ name }) => {
         cy.contains(name)
       })
@@ -81,13 +81,13 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
     // NOTE: this fails because mobx doesn't make the editors observable, so
     // the changes to the path don't bubble up correctly. this only happens
     // in the Cypress test and not when running the actual app
-    it.skip('updates "Other" path when typed into', function () {
+    it.skip('updates "Other" path when typed into', () => {
       cy.contains('Other').find('input[type="text"]').type('/absolute/path/to/foo.js')
       .should('have.value', '/absolute/path/to/foo.js')
     })
 
-    describe('when editor is not selected', function () {
-      it('disables submit button', function () {
+    describe('when editor is not selected', () => {
+      it('disables submit button', () => {
         cy.contains('Set preference and open file')
         .should('have.class', 'is-disabled')
         .click()
@@ -96,18 +96,18 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
         cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'open:file')
       })
 
-      it('shows validation message when hovering over submit button', function () {
+      it('shows validation message when hovering over submit button', () => {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
         cy.get('.cy-tooltip').last().should('have.text', 'Please select a preference')
       })
     })
 
-    describe('when Other is selected but path is not entered', function () {
-      beforeEach(function () {
+    describe('when Other is selected but path is not entered', () => {
+      beforeEach(() => {
         cy.contains('Other').click()
       })
 
-      it('disables submit button', function () {
+      it('disables submit button', () => {
         cy.contains('Set preference and open file')
         .should('have.class', 'is-disabled')
         .click()
@@ -116,27 +116,27 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
         cy.wrap(getRunner().emit).should('not.to.be.calledWith', 'open:file')
       })
 
-      it('shows validation message when hovering over submit button', function () {
+      it('shows validation message when hovering over submit button', () => {
         cy.get('.editor-picker-modal .submit').trigger('mouseover')
         cy.get('.cy-tooltip').last().should('have.text', 'Please enter the path for the "Other" editor')
       })
     })
 
-    describe('when editor is set', function () {
-      beforeEach(function () {
+    describe('when editor is set', () => {
+      beforeEach(() => {
         cy.contains('Visual Studio Code').click()
         cy.contains('Set preference and open file').click()
       })
 
-      it('closes modal', function () {
+      it('closes modal', () => {
         cy.contains('Set preference and open file').should('not.be.visible')
       })
 
-      it('emits set:user:editor', function () {
+      it('emits set:user:editor', () => {
         expect(getRunner().emit).to.be.calledWith('set:user:editor', availableEditors[4])
       })
 
-      it('opens file in selected editor', function () {
+      it('opens file in selected editor', () => {
         expect(getRunner().emit).to.be.calledWith('open:file', {
           where: availableEditors[4],
           ...file,

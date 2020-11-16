@@ -1,14 +1,12 @@
 import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 
-describe('controls', function () {
-  let runner: EventEmitter
-
+describe('tests', function () {
   context('all specs', function () {
     beforeEach(function () {
       cy.fixture('runnables').as('runnables')
 
-      runner = this.runner = new EventEmitter()
+      this.runner = new EventEmitter()
 
       cy.visit('/dist').then((win) => {
         win.render({
@@ -64,10 +62,12 @@ describe('controls', function () {
   })
 
   context('single spec', function () {
+    let runner: EventEmitter
+
     beforeEach(function () {
       cy.fixture('runnables').as('runnables')
 
-      this.runner = new EventEmitter()
+      runner = this.runner = new EventEmitter()
 
       cy.visit('/dist').then((win) => {
         win.render({
