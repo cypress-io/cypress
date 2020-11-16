@@ -4,18 +4,18 @@ import { computed, observable } from 'mobx'
 
 import { FileDetails } from '@packages/ui-components'
 
-interface ParsedStackMessageLine {
+export interface ParsedStackMessageLine {
   message: string
   whitespace: string
 }
 
-interface ParsedStackFileLine extends FileDetails {
+export interface ParsedStackFileLine extends FileDetails {
   fileUrl: string
   function: string
   whitespace: string
 }
 
-type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
+export type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
 
 export interface CodeFrame extends FileDetails {
   frame: string
