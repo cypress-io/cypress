@@ -1048,7 +1048,7 @@ jobs:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
-          no_output_timeout: "30m"
+          no_output_timeout: "45m"
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
