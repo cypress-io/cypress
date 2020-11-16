@@ -3,6 +3,7 @@ import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
+import { decodeFilePaths } from './decode-file-paths'
 import Err, { ParsedStackFileLine, ParsedStackMessageLine } from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
@@ -42,6 +43,10 @@ const ErrorStack = observer(({ err }: Props) => {
 
   let stopLinking = false
   const lines = _.map(stackLines, (stackLine, index) => {
+    if ((stackLine as ParsedStackFileLine).column) {
+      stackLine = decodeFilePaths(stackLine as ParsedStackFileLine) as ParsedStackFileLine
+    }
+
     const { originalFile, function: fn, line, column, absoluteFile } = stackLine as ParsedStackFileLine
     const key = `${originalFile}${index}`
 
