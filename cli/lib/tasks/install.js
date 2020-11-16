@@ -290,7 +290,7 @@ const start = (options = {}) => {
   })
   .then(() => {
     return Promise.all([
-      state.getBinaryPkgVersionAsync(binaryDir),
+      state.getBinaryPkgAsync(binaryDir).then(state.getBinaryPkgVersion),
       getVersionSpecifier(),
     ])
   })
