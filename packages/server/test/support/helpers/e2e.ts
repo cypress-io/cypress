@@ -437,7 +437,7 @@ const e2e = {
 
       this.timeout(human('2 minutes'))
 
-      // Fixtures.remove()
+      Fixtures.remove()
 
       const s = this.servers
 
