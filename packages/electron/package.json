@@ -25,6 +25,7 @@
   },
   "devDependencies": {
     "electron": "10.1.5",
+    "execa": "4.1.0",
     "mocha": "3.5.3"
   },
   "files": [
