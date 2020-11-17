@@ -271,10 +271,6 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   function http (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
-    if (!Cypress.config('experimentalNetworkStubbing')) {
-      return $errUtils.throwErrByPath('net_stubbing.http.needs_experimental')
-    }
-
     function getMatcherOptions (): RouteMatcherOptions {
       if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
