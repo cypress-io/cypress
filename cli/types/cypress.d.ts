@@ -2577,11 +2577,6 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
-     * Enables `cy.http()`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
-     * @default false
-     */
-    experimentalNetworkStubbing: boolean
-    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`

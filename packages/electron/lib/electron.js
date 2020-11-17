@@ -5,11 +5,19 @@ const debug = require('debug')('cypress:electron')
 const Promise = require('bluebird')
 const minimist = require('minimist')
 const inspector = require('inspector')
+const execa = require('execa')
 const paths = require('./paths')
 const install = require('./install')
 let fs = require('fs-extra')
 
 fs = Promise.promisifyAll(fs)
+
+/**
+ * If running as root on Linux, no-sandbox must be passed or Chrome will not start
+ */
+const isSandboxNeeded = () => {
+  return (os.platform() === 'linux') && (process.geteuid() === 0)
+}
 
 module.exports = {
   installIfNeeded () {
@@ -24,6 +32,36 @@ module.exports = {
 
   getElectronVersion () {
     return install.getElectronVersion()
+  },
+
+  /**
+   * Returns the Node version bundled inside Electron.
+   */
+  getElectronNodeVersion () {
+    debug('getting Electron Node version')
+
+    const args = []
+
+    if (isSandboxNeeded()) {
+      args.push('--no-sandbox')
+    }
+
+    // runs locally installed "electron" bin alias
+    const localScript = path.join(__dirname, 'print-node-version.js')
+
+    debug('local script that prints Node version %s', localScript)
+
+    args.push(localScript)
+
+    const options = {
+      preferLocal: true, // finds the "node_modules/.bin/electron"
+      timeout: 5000, // prevents hanging Electron if there is an error for some reason
+    }
+
+    debug('Running Electron with %o %o', args, options)
+
+    return execa('electron', args, options)
+    .then((result) => result.stdout)
   },
 
   icons () {
@@ -73,8 +111,7 @@ module.exports = {
     }).then(() => {
       const execPath = paths.getPathToExec()
 
-      // if running as root, no-sandbox must be passed or Chrome will not start
-      if ((os.platform() === 'linux') && (process.geteuid() === 0)) {
+      if (isSandboxNeeded()) {
         argv.unshift('--no-sandbox')
       }
 

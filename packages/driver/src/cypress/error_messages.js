@@ -917,12 +917,6 @@ module.exports = {
         You passed: ${format(staticResponse)}`, 8)
     },
     http: {
-      needs_experimental: stripIndent`\
-        ${cmd('http')} requires experimental network mocking to be enabled.
-
-        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
-
-        Read more: https://on.cypress.io/experiments`,
       invalid_handler: ({ handler }) => {
         return stripIndent`\
           ${cmd('http')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
@@ -1200,6 +1194,10 @@ module.exports = {
   },
 
   route: {
+    deprecated: {
+      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('http')} instead.`,
+      docsUrl: 'https://on.cypress.io/http',
+    },
     failed_prerequisites: {
       message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
       docsUrl: 'https://on.cypress.io/server',
@@ -1391,6 +1389,10 @@ module.exports = {
   },
 
   server: {
+    deprecated: {
+      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('http')} instead.`,
+      docsUrl: 'https://on.cypress.io/http',
+    },
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
       docsUrl: 'https://on.cypress.io/server',

@@ -12,7 +12,7 @@ After installing you'll be able to:
 
 ## Install
 
-Requires Node version >= 4.0.0
+Requires Node version >= 10.0.0
 
 ```sh
 npm install --save-dev cypress

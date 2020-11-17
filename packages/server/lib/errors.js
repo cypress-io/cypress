@@ -906,6 +906,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         The \`experimentalFetchPolyfill\` configuration option was deprecated in Cypress version \`6.0.0\`. It will be removed in a future release.
 
         Consider using \`cy.http()\` to intercept fetch calls instead.`
+    case 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED':
+      return stripIndent`\
+        The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`.
+        It is no longer necessary for using \`cy.http()\` (formerly \`cy.route2()\`).
+
+        You can safely remove this option from your config.`
     case 'INCOMPATIBLE_PLUGIN_RETRIES':
       return stripIndent`\
       We've detected that the incompatible plugin \`cypress-plugin-retries\` is installed at \`${arg1}\`.
@@ -916,6 +922,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
       https://on.cypress.io/test-retries
       `
+    case 'INVALID_CONFIG_OPTION':
+      return stripIndent`\
+        ${arg1.map((arg) => `\`${arg}\` is not a valid configuration option`)}
+
+        https://on.cypress.io/configuration
+        `
     default:
   }
 }

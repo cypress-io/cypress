@@ -74,11 +74,6 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalNetworkStubbing',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: v.isString,
@@ -302,6 +297,10 @@ export const breakingOptions: BreakingOption[] = [
   }, {
     name: 'experimentalFetchPolyfill',
     errorKey: 'EXPERIMENTAL_FETCH_POLYFILL_DEPRECATED',
+    isWarning: true,
+  }, {
+    name: 'experimentalNetworkStubbing',
+    errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
     isWarning: true,
   },
 ]
