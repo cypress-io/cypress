@@ -917,6 +917,12 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
       https://on.cypress.io/test-retries
       `
+    case 'INVALID_CONFIG_OPTION':
+      return stripIndent`\
+        ${arg1.map((arg) => `\`${arg}\` is not a valid configuration option`)}
+        
+        https://on.cypress.io/configuration
+        `
     default:
   }
 }
