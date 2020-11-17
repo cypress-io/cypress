@@ -9,6 +9,7 @@ import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
+import Studio from '../studio/studio'
 
 const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',
@@ -18,15 +19,11 @@ const noTestsError = (specPath: string) => ({
 })
 
 const Loading = () => (
-  <div className="runnable-loading">
-    <div className="runnable-loading-animation">
-      <div />
-      <div />
-      <div />
-      <div />
-      <div />
+  <div className='runnable-loading'>
+    <div className='runnable-loading-animation'>
+      <div /><div /><div /><div /><div />
     </div>
-    <div className="runnable-loading-title">Your tests are loading...</div>
+    <div className='runnable-loading-title'>Your tests are loading...</div>
   </div>
 )
 
@@ -42,22 +39,22 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-function content (appState: AppState, { isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
-  if (!isReady) {
+const content = (runnablesStore: RunnablesStore, specPath: string, appState?: AppState, error?: Error) => {
+  if (!runnablesStore.isReady) {
     return <Loading />
   }
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
-  if (!error && !runnables.length) {
+  if (!error && !runnablesStore.runnables.length) {
     error = noTestsError(specPath)
   }
 
-  if (appState.extendingTest) {
-    return
+  if (appState && appState.extendingTest) {
+    return <Studio model={runnablesStore.testById(appState.extendingTest)} />
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
+  return error ? <AnError error={error} /> : <RunnablesList runnables={runnablesStore.runnables} />
 }
 
 interface RunnablesProps {
@@ -65,7 +62,7 @@ interface RunnablesProps {
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
-  appState: AppState
+  appState?: AppState
 }
 
 @observer
@@ -76,7 +73,7 @@ class Runnables extends Component<RunnablesProps> {
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
-        {content(appState, runnablesStore, spec.relative, error)}
+        {content(runnablesStore, spec.relative, appState, error)}
       </div>
     )
   }

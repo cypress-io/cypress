@@ -1,7 +1,5 @@
 import _ from 'lodash'
-import { action, observable } from 'mobx'
-
-import Test from '../test/test-model'
+import { observable } from 'mobx'
 
 interface DefaultAppState {
   forcingGc: boolean
@@ -10,7 +8,7 @@ interface DefaultAppState {
   isRunning: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
-  extendingTest: Test | null
+  extendingTest: string | null
 }
 
 const defaults: DefaultAppState = {
@@ -88,6 +86,8 @@ class AppState {
 
   reset () {
     _.each(defaults, (value: any, key: string) => {
+      if (key === 'extendingTest') return
+
       this[key] = value
     })
 
@@ -98,9 +98,8 @@ class AppState {
     this.autoScrollingEnabled = this._resetAutoScrollingEnabledTo
   }
 
-  @action
-  startExtendingTest (test: Test) {
-    this.extendingTest = test
+  startExtendingTest (testId: string) {
+    this.extendingTest = testId
   }
 }
 

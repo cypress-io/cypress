@@ -183,8 +183,12 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
-    reporterBus.on('start:creating:test', () => {
-      localBus.emit('start:creating:test')
+    reporterBus.on('start:extending:test', (testId) => {
+      if (!Cypress) return
+
+      Cypress.runner.resumeAtTest(testId, state.emissions)
+
+      this._reRun(state)
     })
 
     localBus.on('update:creating:test:log', (log) => {
@@ -254,12 +258,6 @@ const eventManager = {
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
-          const run = () => {
-            performance.mark('initialize-end')
-            performance.measure('initialize', 'initialize-start', 'initialize-end')
-
-            this._runDriver(state)
-          }
 
           reporterBus.emit('runnables:ready', runnables)
 
@@ -279,13 +277,20 @@ const eventManager = {
           }
 
           if (config.isTextTerminal && !state.currentId) {
-            ws.emit('set:runnables', runnables, run)
+            ws.emit('set:runnables', runnables, () => this._run(state))
           } else {
-            run()
+            this._run(state)
           }
         })
       },
     })
+  },
+
+  _run (state) {
+    performance.mark('initialize-end')
+    performance.measure('initialize', 'initialize-start', 'initialize-end')
+
+    this._runDriver(state)
   },
 
   _addListeners () {

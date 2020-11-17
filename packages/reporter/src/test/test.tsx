@@ -74,7 +74,7 @@ class Test extends Component<Props, State> {
 
     if (!model.shouldRender) return null
 
-    return (
+    return (<>
       <Collapsible
         containerRef={this.containerRef}
         header={this._header()}
@@ -84,9 +84,9 @@ class Test extends Component<Props, State> {
         isOpen={model.isOpen}
       >
         {this._contents()}
-        {this._extendingModal()}
       </Collapsible>
-    )
+      {this._extendingModal()}
+    </>)
   }
 
   _header () {
@@ -117,7 +117,7 @@ class Test extends Component<Props, State> {
   _startExtendingTest = () => {
     const { model } = this.props
 
-    events.emit('start:extending:test', model)
+    events.emit('start:extending:test', model.id)
   }
 
   _closeExtendingModal = () => {
