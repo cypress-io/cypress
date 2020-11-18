@@ -265,7 +265,7 @@ chai.use((chai, u) => {
       return (function (text) {
         let obj = this._obj
 
-        if (!($dom.isJquery(obj) || $dom.isElement(obj))) {
+        if (!($dom.isElement(obj))) {
           return _super.apply(this, arguments)
         }
 
