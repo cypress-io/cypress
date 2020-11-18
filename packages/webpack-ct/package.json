@@ -1,10 +1,10 @@
 {
-  "name": "@packages/webpack-plugin-ct",
+  "name": "@packages/webpack-ct",
   "version": "0.0.0",
-  "description": "Plugin for users running component testing with webpack-dev-server",
+  "description": "Launches Webpack Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "build": "echo success"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/webpack": "^4.1.4",
