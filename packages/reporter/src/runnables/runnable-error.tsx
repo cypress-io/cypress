@@ -4,18 +4,18 @@ import React from 'react'
 
 const md = new Markdown({ html: true })
 
-export interface Error {
+export interface RunnablesErrorModel {
   title: string
   link?: string | null
   callout?: string | null
   message: string
 }
 
-export interface AnErrorProps {
-  error: Error
+interface RunnablesErrorProps {
+  error: RunnablesErrorModel
 }
 
-const AnError = observer(({ error }: AnErrorProps) => (
+export const RunnablesError = observer(({ error }: RunnablesErrorProps) => (
   <div className='error'>
     <h2>
       <i className='fas fa-exclamation-triangle' /> {error.title}
@@ -29,5 +29,3 @@ const AnError = observer(({ error }: AnErrorProps) => (
     <div className='error-message' dangerouslySetInnerHTML={{ __html: md.render(error.message) }} />
   </div>
 ))
-
-export default AnError
