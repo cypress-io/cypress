@@ -905,7 +905,9 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
       return stripIndent`\
         The \`experimentalFetchPolyfill\` configuration option was deprecated in Cypress version \`6.0.0\`. It will be removed in a future release.
 
-        Consider using \`cy.http()\` to intercept fetch calls instead.`
+        Consider using \`cy.http()\` to intercept fetch calls instead.
+
+        https://on.cypress.io/http`
     case 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED':
       return stripIndent`\
         The \`experimentalNetworkStubbing\` configuration option was removed in Cypress version \`6.0.0\`.
