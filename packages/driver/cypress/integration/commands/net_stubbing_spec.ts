@@ -1115,6 +1115,53 @@ describe('network stubbing', { retries: 2 }, function () {
         }).visit('/foo')
       })
     })
+
+    context('correctly determines the content-length of an intercepted request', function () {
+      it('when body is empty', function (done) {
+        cy.route2('/post-only', function (req) {
+          req.body = ''
+        }).then(function () {
+          cy.route2('/post-only', function (req) {
+            expect(req.headers['content-length']).to.eq('0')
+
+            done()
+          })
+        })
+        .then(() => {
+          $.post('/post-only', 'foo')
+        })
+      })
+
+      it('when body contains ascii', function (done) {
+        cy.route2('/post-only', function (req) {
+          req.body = 'this is only ascii'
+        }).then(function () {
+          cy.route2('/post-only', function (req) {
+            expect(req.headers['content-length']).to.eq('18')
+
+            done()
+          })
+        })
+        .then(() => {
+          $.post('/post-only', 'bar')
+        })
+      })
+
+      it('when body contains unicode', function (done) {
+        cy.route2('/post-only', function (req) {
+          req.body = '🙃🤔'
+        }).then(function () {
+          cy.route2('/post-only', function (req) {
+            expect(req.headers['content-length']).to.eq('8')
+
+            done()
+          })
+        })
+        .then(() => {
+          $.post('/post-only', 'baz')
+        })
+      })
+    })
   })
 
   context('intercepting response', function () {
