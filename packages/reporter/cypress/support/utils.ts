@@ -1,4 +1,6 @@
+import { EventEmitter } from 'events'
 import { Editor } from '@packages/ui-components'
+import CommandModel from './../../src/commands/command-model'
 
 const { _ } = Cypress
 
@@ -144,4 +146,21 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
       })
     })
   })
+}
+
+export const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => {
+  const defaultLog = {
+    event: false,
+    hookId: 'r3',
+    id: _.uniqueId('c'),
+    instrument: 'command',
+    renderProps: {},
+    state: 'passed',
+    testId: 'r3',
+    testCurrentRetry: 0,
+    type: 'parent',
+    url: 'http://example.com',
+  }
+
+  runner.emit('reporter:log:add', Object.assign(defaultLog, log))
 }

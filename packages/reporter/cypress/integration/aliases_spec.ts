@@ -1,25 +1,6 @@
 import { EventEmitter } from 'events'
-import CommandModel from './../../src/commands/command-model'
 import Runnable from '../../src/runnables/runnable-model'
-
-const { _ } = Cypress
-
-const addCommand = (runner: EventEmitter, log: Partial<CommandModel>) => {
-  const defaultLog = {
-    event: false,
-    hookId: 'r3',
-    id: _.uniqueId('l'),
-    instrument: 'command',
-    renderProps: {},
-    state: 'passed',
-    testId: 'r3',
-    testCurrentRetry: 0,
-    type: 'parent',
-    url: 'http://example.com',
-  }
-
-  runner.emit('reporter:log:add', _.extend(defaultLog, log))
-}
+import { addCommand } from '../support/utils'
 
 describe('aliases', () => {
   let runner: EventEmitter
@@ -61,7 +42,7 @@ describe('aliases', () => {
           renderProps: { message: 'GET --- /users', indicator: 'passed' },
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getUsers, function(){}',
           name: 'wait',
@@ -127,7 +108,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -247,7 +228,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'route',
           message: '@getPosts, function(){}',
           name: 'wait',
@@ -302,7 +283,7 @@ describe('aliases', () => {
           renderProps: { message: '', indicator: 'passed' },
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -370,7 +351,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
@@ -475,7 +456,7 @@ describe('aliases', () => {
           }],
         })
 
-        return addCommand(runner, {
+        addCommand(runner, {
           aliasType: 'dom',
           message: '',
           name: 'get',
