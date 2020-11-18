@@ -208,13 +208,13 @@ describe('commands', () => {
     it('emits runner:console:log', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 'c2')
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:console:log', 2)
     })
 
     it('shows the snapshot', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'c2')
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 2)
     })
 
     it('unpins after clicking again, does not emit runner:console:log again', () => {
@@ -247,7 +247,7 @@ describe('commands', () => {
     it('shows snapshot after 50ms passes', () => {
       cy.wrap(runner.emit).should('not.be.calledWith', 'runner:show:snapshot')
       cy.tick(50)
-      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 'c1')
+      cy.wrap(runner.emit).should('be.calledWith', 'runner:show:snapshot', 1)
     })
 
     describe('then mousing out', () => {
@@ -258,7 +258,7 @@ describe('commands', () => {
 
       it('hides the snapshot after 50ms pass without another mouse over', () => {
         cy.tick(50)
-        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 'c1')
+        cy.wrap(runner.emit).should('be.calledWith', 'runner:hide:snapshot', 1)
       })
 
       it('does not hide the snapshot if there is another mouseover before 50ms passes', () => {
