@@ -42,6 +42,11 @@ describe('commands', () => {
     cy.contains('http://localhost:3000') // ensure test content has loaded
   })
 
+  it('displays all the commands', () => {
+    cy.get('.command').should('have.length', 9)
+    cy.percySnapshot()
+  })
+
   it('includes the type class', () => {
     cy.contains('#exists').closest('.command')
     .should('have.class', 'command-type-parent')
