@@ -1,3 +1,6 @@
+// TODO: move this file into a "webpack" plugin
+// `packages/webpack-plugin-ct`
+
 const path = require('path')
 
 module.exports = async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
@@ -46,8 +49,8 @@ module.exports = async function bundleSpecs ({ files, projectRoot, support }, lo
 
   console.log('files after normalizing', files)
 
-  const isComponent = f => f.specType === 'component'
-  const isSupport = f => !isComponent(f)
+  const isComponent = (f) => f.specType === 'component'
+  const isSupport = (f) => !isComponent(f)
   const supportImport = support ? buildSupport(files.filter(isSupport)[0]) : ''
 
   return {

@@ -1,3 +1,6 @@
+// TODO: move this file into a "webpack" plugin
+// `packages/webpack-plugin-ct`
+
 const debug = require('debug')('cypress:evergreen:webpack')
 const path = require('path')
 const webpack = require('webpack')
@@ -5,6 +8,9 @@ const webpackDevServer = require('webpack-dev-server')
 const globby = require('globby')
 const { merge } = require('webpack-merge')
 
+/**
+ * FIXME: use cypresses files
+ */
 async function getFiles (glob) {
   let files = await globby(
     glob,

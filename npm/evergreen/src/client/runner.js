@@ -1,3 +1,5 @@
+// TODO: move this file into a "webpack" plugin
+// `packages/webpack-plugin-ct`
 const { Mocha } = require('mocha')
 const chai = require('chai')
 const driver = require('./driver')
@@ -8,14 +10,16 @@ const { renderTargets, renderMochaTarget } = require('./render-target')
 
 const state = {}
 
-function loadCypressStuff() {
-  (function(parent) {
-    var Cypress = window.Cypress = parent.Cypress;
+function loadCypressStuff () {
+  (function (parent) {
+    let Cypress = window.Cypress = parent.Cypress
+
     if (!Cypress) {
-      throw new Error("Tests cannot run without a reference to Cypress!");
+      throw new Error('Tests cannot run without a reference to Cypress!')
     }
-    return Cypress.onSpecWindow(window, []);
-  })(window.opener || window.parent);
+
+    return Cypress.onSpecWindow(window, [])
+  })(window.opener || window.parent)
 }
 
 function setupEnvironment () {
@@ -66,7 +70,6 @@ export function init (specMap, support) {
   // createApp(state.specNames, { runAllSpecs })
   renderTargets()
   setupEnvironment()
-
 
   console.log(state.specNames)
   Promise.all(

@@ -1,3 +1,4 @@
+// TODO: move this into `runner-ct`
 import $ from 'cash-dom'
 
 function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {
@@ -28,14 +29,15 @@ export function renderTargets () {
 export function renderMochaTarget () {
   const $mocha = $('#mocha')
   const $testRun = $('#test-run')
+
   if ($mocha.length) $mocha[0].innerHTML = ''
+
   if ($testRun.length) {
     return
   }
+
   $('#plugins').append(`<section id="test-run">
     <h2>Test Run</h2>
     <div id="mocha"></div>
     </section>`)
-
-
 }
