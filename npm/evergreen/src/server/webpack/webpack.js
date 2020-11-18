@@ -26,7 +26,7 @@ async function getFiles (glob) {
 }
 
 async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportFile, testPattern, projectRoot, files, support }) {
-  componentSupportFile = '/Users/jess/projects/cypress/core/tr1/cypress/npm/evergreen/examples/webpack-vue-cli/component-helpers.js'
+  componentSupportFile = './component-helpers.js'
   debug(`User passed in webpack config with values`, userWebpackConfig)
 
   const evergreenWebpackConfig = require('./webpack.config')
@@ -36,7 +36,7 @@ async function resolveWebpackConfig (userWebpackConfig = {}, { componentSupportF
   debug(`Test files pattern`, testPattern)
   debug(`Support files`, componentSupportFile)
   files = files ? files : await getFiles(testPattern)
-  support = support ? support : (await getFiles(path.resolve(componentSupportFile)))[0]
+  support = support ? support : (await getFiles(path.resolve(projectRoot, componentSupportFile)))[0]
 
   debug(`New webpack entries`, files)
 
