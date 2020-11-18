@@ -1081,6 +1081,15 @@ describe('src/cy/commands/xhr', () => {
   })
 
   context('#server', () => {
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      cy.server()
+      .then(function () {
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.server\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.http\(\)` instead\./)
+      })
+    })
+
     it('sets serverIsStubbed', () => {
       cy.server().then(() => {
         expect(cy.state('serverIsStubbed')).to.be.true
@@ -1258,6 +1267,15 @@ describe('src/cy/commands/xhr', () => {
 
       cy.server().then(function () {
         this.route = cy.spy(cy.state('server'), 'route')
+      })
+    })
+
+    it('logs deprecation warning', () => {
+      cy.stub(Cypress.utils, 'warning')
+
+      cy.route('*')
+      .then(function () {
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.route\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.http\(\)` instead\./)
       })
     })
 
@@ -1642,7 +1660,7 @@ describe('src/cy/commands/xhr', () => {
 
       cy.route('GET', 'http://example.com/%E0%A4%A')
       .then(() => {
-        expect(Cypress.utils.warning).to.not.be.called
+        expect(Cypress.utils.warning).to.not.be.calledWithMatch(/percent\-encoded characters/)
       })
     })
 
@@ -1651,33 +1669,6 @@ describe('src/cy/commands/xhr', () => {
       cy.route({
         url: /foo/,
         respond: false,
-      })
-    })
-
-    describe('deprecations', () => {
-      beforeEach(function () {
-        this.warn = cy.spy(window.top.console, 'warn')
-      })
-
-      it('logs on {force404: false}', () => {
-        cy.server({ force404: false })
-        .then(function () {
-          expect(this.warn).to.be.calledWith('Cypress Warning: Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.')
-        })
-      })
-
-      it('does not log on {force404: true}', () => {
-        cy.server({ force404: true })
-        .then(function () {
-          expect(this.warn).not.to.be.called
-        })
-      })
-
-      it('logs on {stub: false}', () => {
-        cy.server({ stub: false })
-        .then(function () {
-          expect(this.warn).to.be.calledWithMatch('Cypress Warning: Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.\n\nhttps://on.cypress.io/deprecated-stub-false-on-server')
-        })
       })
     })
 

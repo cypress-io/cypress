@@ -99,6 +99,12 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('can check checkboxes with `opacity: 0`', () => {
+      cy.get('[name=opacity]').check().then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
+    })
+
     it('does not require visibility with force: true', () => {
       const checkbox = ':checkbox[name=\'birds\']'
 

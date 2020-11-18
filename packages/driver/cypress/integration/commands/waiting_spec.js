@@ -51,22 +51,6 @@ describe('src/cy/commands/waiting', () => {
       })
     })
 
-    describe('function argument', () => {
-      describe('errors thrown', () => {
-        it('is deprecated', (done) => {
-          cy.on('fail', (err) => {
-            expect(err.message).to.eq('`cy.wait(fn)` has been deprecated. Change this command to be `cy.should(fn)`.')
-
-            done()
-          })
-
-          cy.get('body').wait(($body) => {
-            expect($body).to.match('body')
-          })
-        })
-      })
-    })
-
     describe('alias argument', () => {
       before(() => {
         cy.visit('/fixtures/jquery.html')
@@ -852,6 +836,7 @@ describe('src/cy/commands/waiting', () => {
           { type: 'Boolean', val: true },
           { type: 'Object', val: {} },
           { type: 'Symbol', val: Symbol.iterator, errVal: 'Symbol(Symbol.iterator)' },
+          { type: 'Function', val: () => {}, errVal: 'undefined' },
         ], (attrs) => {
           it(`throws when 1st arg is ${attrs.type}`, (done) => {
             cy.on('fail', (err) => {

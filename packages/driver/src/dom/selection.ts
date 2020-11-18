@@ -127,22 +127,16 @@ const insertSubstring = (curText, newText, [start, end]) => {
   return curText.substring(0, start) + newText + curText.substring(end)
 }
 
-const _hasContenteditableAttr = (el) => {
-  const attr = $elements.tryCallNativeMethod(el, 'getAttribute', 'contenteditable')
-
-  return attr !== undefined && attr !== null && attr !== 'false'
-}
-
 const getHostContenteditable = function (el: HTMLElement) {
   let curEl = el
 
-  while (curEl.parentElement && !_hasContenteditableAttr(curEl)) {
+  while (curEl.parentElement && !$elements.hasContenteditableAttr(curEl)) {
     curEl = curEl.parentElement
   }
 
   // if there's no host contenteditable, we must be in designMode
   // so act as if the documentElement (html element) is the host contenteditable
-  if (!_hasContenteditableAttr(curEl)) {
+  if (!$elements.hasContenteditableAttr(curEl)) {
     return $document.getDocumentFromElement(el).documentElement
   }
 
@@ -569,35 +563,51 @@ const _moveSelectionTo = function (toStart: boolean, el: HTMLElement, options = 
       return
     }
 
-    if (Cypress.isBrowser({ family: 'firefox' })) {
-      // FireFox doesn't treat a selectAll+arrow the same as clicking the start/end of a contenteditable
-      // so we need to select the specific nodes inside the contenteditable.
-      const root = getHostContenteditable(el)
+    // We need to check if element is the root contenteditable element or elements inside it
+    // because they should be handled differently.
+    if ($elements.hasContenteditableAttr(el)) {
+      if (Cypress.isBrowser({ family: 'firefox' })) {
+        // FireFox doesn't treat a selectAll+arrow the same as clicking the start/end of a contenteditable
+        // so we need to select the specific nodes inside the contenteditable.
+        let elToSelect = el.childNodes[toStart ? 0 : el.childNodes.length - 1]
 
-      let elToSelect = root.childNodes[toStart ? 0 : root.childNodes.length - 1]
-
-      // in firefox, when an empty contenteditable is a single <br> element or <div><br/></div>
-      // its innerText will be '\n' (maybe find a more efficient measure)
-      if (!elToSelect || root.innerText === '\n') {
-        // we must be in an empty contenteditable, so we're already at both the start and end
-        return
-      }
-
-      // if we're on a <br> but the text isn't empty, we need to
-      if ($elements.getTagName(elToSelect) === 'br') {
-        if (root.childNodes.length < 2) {
-          // no other node to target, shouldn't really happen but we should behave like the contenteditable is empty
+        // in firefox, when an empty contenteditable is a single <br> element or <div><br/></div>
+        // its innerText will be '\n' (maybe find a more efficient measure)
+        if (!elToSelect || el.innerText === '\n') {
+          // we must be in an empty contenteditable, so we're already at both the start and end
           return
         }
 
-        elToSelect = toStart ? root.childNodes[1] : root.childNodes[root.childNodes.length - 2]
+        // if we're on a <br> but the text isn't empty, we need to
+        if ($elements.getTagName(elToSelect) === 'br') {
+          if (el.childNodes.length < 2) {
+            // no other node to target, shouldn't really happen but we should behave like the contenteditable is empty
+            return
+          }
+
+          elToSelect = toStart ? el.childNodes[1] : el.childNodes[el.childNodes.length - 2]
+        }
+
+        const range = selection.getRangeAt(0)
+
+        range.selectNodeContents(elToSelect)
+      } else {
+        $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+      }
+    } else {
+      let range
+
+      // Sometimes, selection.rangeCount is 0 when there is no selection.
+      // In that case, it fails in Chrome.
+      // We're creating a new range and add it to the selection to avoid the case.
+      if (selection.rangeCount === 0) {
+        range = doc.createRange()
+        selection.addRange(range)
+      } else {
+        range = selection.getRangeAt(0)
       }
 
-      const range = selection.getRangeAt(0)
-
-      range.selectNodeContents(elToSelect)
-    } else {
-      $elements.callNativeMethod(doc, 'execCommand', 'selectAll', false, null)
+      range.selectNodeContents(el)
     }
 
     toStart ? selection.collapseToStart() : selection.collapseToEnd()

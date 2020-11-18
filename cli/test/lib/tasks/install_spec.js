@@ -429,25 +429,6 @@ describe('/lib/tasks/install', function () {
           })
         })
       })
-
-      describe('CYPRESS_BINARY_VERSION', function () {
-        it('throws when env var CYPRESS_BINARY_VERSION', function () {
-          process.env.CYPRESS_BINARY_VERSION = '/asf/asf'
-
-          return install.start()
-          .then(() => {
-            throw new Error('should have thrown')
-          })
-          .catch((err) => {
-            logger.error(err)
-
-            snapshot(
-              'error for removed CYPRESS_BINARY_VERSION 1',
-              normalize(this.stdout.toString()),
-            )
-          })
-        })
-      })
     })
 
     it('is silent when log level is silent', function () {

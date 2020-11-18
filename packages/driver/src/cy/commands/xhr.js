@@ -329,6 +329,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
 
   return Commands.addAll({
     server (options) {
+      $errUtils.warnByPath('server.deprecated')
+
       let userOptions = options
 
       if (arguments.length === 0) {
@@ -351,6 +353,8 @@ module.exports = (Commands, Cypress, cy, state, config) => {
     },
 
     route (...args) {
+      $errUtils.warnByPath('route.deprecated')
+
       // TODO:
       // if we return a function which returns a promise
       // then we should be handling potential timeout issues
