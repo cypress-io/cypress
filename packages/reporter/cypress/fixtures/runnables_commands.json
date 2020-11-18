@@ -11,7 +11,7 @@
       "commands": [
         {
           "hookId": "r3",
-          "id": "c1",
+          "id": 1,
           "instrument": "command",
           "message": "http://localhost:3000",
           "name": "visit",
@@ -22,7 +22,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c2",
+          "id": 2,
           "instrument": "command",
           "message": "#exists",
           "name": "get",
@@ -34,7 +34,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c3",
+          "id": 3,
           "instrument": "command",
           "message": "#doesnt-exist",
           "name": "find",
@@ -47,7 +47,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c4",
+          "id": 4,
           "instrument": "command",
           "name": "xhr",
           "displayName": "xhr stub",
@@ -63,7 +63,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c5",
+          "id": 5,
           "instrument": "command",
           "message": ".some-els",
           "name": "get",
@@ -75,7 +75,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c6",
+          "id": 6,
           "instrument": "command",
           "name": "xhr",
           "displayName": "xhr stub",
@@ -91,7 +91,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c7",
+          "id": 7,
           "instrument": "command",
           "message": ".invisible",
           "name": "get",
@@ -104,7 +104,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c8-1",
+          "id": 81,
           "instrument": "command",
           "name": "xhr",
           "message": "GET --- /dup",
@@ -117,7 +117,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c8-2",
+          "id": 82,
           "instrument": "command",
           "name": "xhr",
           "message": "GET --- /dup",
@@ -130,7 +130,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c8-3",
+          "id": 83,
           "instrument": "command",
           "name": "xhr",
           "message": "GET --- /dup",
@@ -143,7 +143,7 @@
         },
         {
           "hookId": "r3",
-          "id": "c8-4",
+          "id": 84,
           "instrument": "command",
           "name": "xhr",
           "message": "GET --- /dup",

@@ -1,11 +1,11 @@
 /// <reference types="../support" />
 
 import { EventEmitter } from 'events'
-import Runnable from '../../src/runnables/runnable-model'
+import { RootRunnable } from './../../src/runnables/runnables-store'
 
 describe('agents', () => {
   let runner: EventEmitter
-  let runnables: Runnable[]
+  let runnables: RootRunnable
   let start: Function
 
   beforeEach(() => {
@@ -16,7 +16,7 @@ describe('agents', () => {
     runner = new EventEmitter()
 
     cy.visit('dist').then((win) => {
-      return win.render({
+      win.render({
         runner,
         spec: {
           name: 'foo',
@@ -27,8 +27,6 @@ describe('agents', () => {
     })
 
     start = () => {
-      cy.spy(runner, 'emit')
-
       cy.get('.reporter').then(() => {
         runner.emit('runnables:ready', runnables)
         runner.emit('reporter:start', {})

@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events'
-import Runnable from '../../src/runnables/runnable-model'
+import { RootRunnable } from './../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
 describe('aliases', () => {
   let runner: EventEmitter
-  let runnables: Runnable[]
+  let runnables: RootRunnable
 
   beforeEach(() => {
     cy.fixture('runnables_aliases').then((_runnables) => {
@@ -14,7 +14,7 @@ describe('aliases', () => {
     runner = new EventEmitter()
 
     cy.visit('dist').then((win) => {
-      return win.render({
+      win.render({
         runner,
         spec: {
           name: 'foo',

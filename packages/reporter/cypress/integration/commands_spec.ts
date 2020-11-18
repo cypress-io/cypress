@@ -1,12 +1,12 @@
 /// <reference types="../support" />
 
 import { EventEmitter } from 'events'
-import Runnable from '../../src/runnables/runnable-model'
+import { RootRunnable } from './../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
 
 describe('commands', () => {
   let runner: EventEmitter
-  let runnables: Runnable[]
+  let runnables: RootRunnable
 
   beforeEach(() => {
     cy.fixture('runnables_commands').then((_runnables) => {
@@ -16,7 +16,7 @@ describe('commands', () => {
     runner = new EventEmitter()
 
     cy.visit('dist').then((win) => {
-      return win.render({
+      win.render({
         runner,
         spec: {
           name: 'foo',
@@ -30,7 +30,7 @@ describe('commands', () => {
       runner.emit('runnables:ready', runnables)
       runner.emit('reporter:start', {})
       addCommand(runner, {
-        id: '69',
+        id: 9,
         name: 'get',
         message: '#in-progress',
         state: 'pending',
