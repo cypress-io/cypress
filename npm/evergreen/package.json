@@ -4,7 +4,7 @@
   "description": "Browser-based Component Development Environment and Test Runner by Cypress.io 🌲",
   "main": "dist/evergreen.js",
   "scripts": {
-    "build": "tsc && webpack",
+    "build": "echo success",
     "build:watch": "watch 'yarn build' ./src ../../packages",
     "client": "webpack",
     "test": "echo success"

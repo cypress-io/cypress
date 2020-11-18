@@ -1,0 +1,14 @@
+{
+  "name": "@packages/webpack-plugin-ct",
+  "version": "0.0.0",
+  "description": "Plugin for users running component testing with webpack-dev-server",
+  "main": "dist/index.js",
+  "devDependencies": {
+    "@types/webpack": "^4.1.4",
+    "webpack": "^4.44.2"
+  },
+  "peerDependencies": {
+    "webpack": "> 4"
+  },
+  "license": "MIT"
+}
