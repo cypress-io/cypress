@@ -1,0 +1,168 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "hooks": [],
+  "tests": [
+    {
+      "id": "r3",
+      "title": "test 1",
+      "state": "passed",
+      "commands": [
+        {
+          "hookId": "r3",
+          "id": "c1",
+          "instrument": "command",
+          "message": "http://localhost:3000",
+          "name": "visit",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c2",
+          "instrument": "command",
+          "message": "#exists",
+          "name": "get",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "numElements": 1,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c3",
+          "instrument": "command",
+          "message": "#doesnt-exist",
+          "name": "find",
+          "state": "failed",
+          "testId": "r3",
+          "timeout": 4000,
+          "visible": false,
+          "numElements": 0,
+          "type": "child"
+        },
+        {
+          "hookId": "r3",
+          "id": "c4",
+          "instrument": "command",
+          "name": "xhr",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "renderProps": {
+            "message": "GET --- /posts",
+            "indicator": "successful"
+          },
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c5",
+          "instrument": "command",
+          "message": ".some-els",
+          "name": "get",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "numElements": 4,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c6",
+          "instrument": "command",
+          "name": "xhr",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "renderProps": {
+            "message": "Lorem ipsum **dolor** _sit_ amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat",
+            "indicator": "bad"
+          },
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c7",
+          "instrument": "command",
+          "message": ".invisible",
+          "name": "get",
+          "state": "passed",
+          "testId": "r3",
+          "timeout": 4000,
+          "visible": false,
+          "numElements": 4,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c8-1",
+          "instrument": "command",
+          "name": "xhr",
+          "message": "GET --- /dup",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c8-2",
+          "instrument": "command",
+          "name": "xhr",
+          "message": "GET --- /dup",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c8-3",
+          "instrument": "command",
+          "name": "xhr",
+          "message": "GET --- /dup",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        },
+        {
+          "hookId": "r3",
+          "id": "c8-4",
+          "instrument": "command",
+          "name": "xhr",
+          "message": "GET --- /dup",
+          "displayName": "xhr stub",
+          "state": "passed",
+          "event": true,
+          "testId": "r3",
+          "timeout": 4000,
+          "type": "parent"
+        }
+      ],
+      "invocationDetails": {
+        "absoluteFile": "/absolute/path/to/foo_spec.js",
+        "column": 8,
+        "line": 34,
+        "originalFile": "path/to/foo_spec.js",
+        "relativeFile": "path/to/foo_spec.js"
+      }
+    }
+  ],
+  "suites": []
+}
