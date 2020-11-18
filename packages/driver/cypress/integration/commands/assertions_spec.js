@@ -572,25 +572,6 @@ describe('src/cy/commands/assertions', () => {
         cy.get('button').should('have.length', 'foo')
       })
 
-      it('eventually.have.length is deprecated', function (done) {
-        cy.on('fail', (err) => {
-          const { lastLog } = this
-
-          expect(this.logs.length).to.eq(2)
-          expect(err.message).to.eq('The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.')
-          expect(lastLog.get('name')).to.eq('should')
-          expect(lastLog.get('error')).to.eq(err)
-          expect(lastLog.get('state')).to.eq('failed')
-          expect(lastLog.get('snapshots').length).to.eq(1)
-          expect(lastLog.get('snapshots')[0]).to.be.an('object')
-          expect(lastLog.get('message')).to.eq('eventually.have.length, 1')
-
-          done()
-        })
-
-        cy.get('div:first').should('eventually.have.length', 1)
-      })
-
       it('does not additionally log when .should is the current command', function (done) {
         cy.on('fail', (err) => {
           const { lastLog } = this
