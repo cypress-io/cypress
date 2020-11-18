@@ -421,7 +421,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is hidden.
        */
-      isHidden(element: JQuery | HTMLElement): boolean
+      isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
        */
@@ -474,7 +474,7 @@ declare namespace Cypress {
       getContainsSelector(text: string, filter?: string): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
@@ -2576,11 +2576,6 @@ declare namespace Cypress {
      * @default false
      */
     experimentalSourceRewriting: boolean
-    /**
-     * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
-     * @default false
-     */
-    experimentalNetworkStubbing: boolean
     /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
