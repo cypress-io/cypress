@@ -6,7 +6,7 @@ describe('controls', function () {
 
     this.runner = new EventEmitter()
 
-    cy.visit('/dist').then((win) => {
+    cy.visit('dist').then((win) => {
       win.render({
         runner: this.runner,
         spec: {

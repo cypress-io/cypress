@@ -9,7 +9,7 @@ describe('hooks', function () {
 
     runner = this.runner = new EventEmitter()
 
-    cy.visit('/dist').then((win) => {
+    cy.visit('dist').then((win) => {
       win.render({
         runner: this.runner,
         spec: {
