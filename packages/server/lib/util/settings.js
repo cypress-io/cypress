@@ -11,7 +11,7 @@ const fs = require('../util/fs')
 // settings at the same time something else
 // is potentially reading it
 
-const isJson = file => file.split('.').pop() === 'json'
+const isJson = (file) => file.split('.').pop() === 'json'
 
 const loadCypressConfig = (file) => {
   return isJson(file) ? fs.readJsonAsync(file) : Promise.resolve(require(file))
@@ -85,6 +85,7 @@ module.exports = {
 
   _write (file, obj = {}) {
     if (!isJson(file)) throw new Error('Unhandled file extension. Expected JSON', file)
+
     return fs.outputJsonAsync(file, obj, { spaces: 2 })
     .return(obj)
     .catch((err) => {
@@ -117,7 +118,6 @@ module.exports = {
   exists (projectRoot, options = {}) {
     const file = this.pathToConfigFile(projectRoot, options)
 
-    console.log('exists', file)
     // first check if cypress.json exists
     return maybeVerifyConfigFile(file)
     .then(() => {
@@ -147,6 +147,7 @@ module.exports = {
     }
 
     const file = this.pathToConfigFile(projectRoot, options)
+
     return loadCypressConfig(file)
     .catch({ code: 'ENOENT' }, () => {
       return this._write(file, {})
@@ -162,7 +163,6 @@ module.exports = {
       // else write the new reduced obj
       return this._write(file, changed)
     }).catch((err) => {
-      console.log('err is cypress err', err)
       if (errors.isCypressErr(err)) {
         throw err
       }
@@ -192,7 +192,6 @@ module.exports = {
       return Promise.resolve({})
     }
 
-
     return this.read(projectRoot)
     .then((settings) => {
       _.extend(settings, obj)
@@ -209,8 +208,6 @@ module.exports = {
 
   pathToConfigFile (projectRoot, options = {}) {
     const configFile = this.configFile(options)
-
-    console.log(configFile, 'path to config file')
 
     return configFile && this._pathToFile(projectRoot, configFile)
   },
