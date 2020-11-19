@@ -1,7 +1,7 @@
-import _ from 'lodash'
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
+import scroller from '../../src/lib/scroller'
 
-import scroller from './scroller'
+const { _ } = Cypress
 
 interface ContainerProps {
   clientHeight?: number
@@ -49,7 +49,11 @@ describe('scroller', () => {
   it('throws an error if attempting to scroll an element before setting a container', () => {
     expect(() => {
       return scroller.scrollIntoView({} as HTMLElement)
-    }).to.throw(/container must be set/)
+    }).to.throw().and.satisfy((err: Error) => {
+      expect(err.message).to.match(/container must be set/)
+
+      return true
+    })
   })
 
   it('does not scroll if near top and scrolling would result in negative scroll', () => {
