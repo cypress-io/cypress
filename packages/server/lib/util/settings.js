@@ -11,11 +11,11 @@ const fs = require('../util/fs')
 // settings at the same time something else
 // is potentially reading it
 
-const isJson = (file) => file.split('.').pop() === 'json'
+const isJson = (file) => path.extname(file) === '.json'
 
-const loadCypressConfig = (file) => {
-  return isJson(file) ? fs.readJsonAsync(file) : Promise.resolve(require(file))
-}
+const loadCypressConfig = Promise.method((file) => {
+  return isJson(file) ? fs.readJsonAsync(file) : require(file)
+})
 
 const flattenCypress = (obj) => {
   return obj.cypress ? obj.cypress : undefined
