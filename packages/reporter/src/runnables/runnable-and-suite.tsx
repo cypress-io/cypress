@@ -1,8 +1,7 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { action, observable } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { Component, MouseEvent } from 'react'
+import React from 'react'
 
 import { indent } from '../lib/util'
 
@@ -38,32 +37,15 @@ export interface RunnableProps {
   model: TestModel | SuiteModel
 }
 
-@observer
-class Runnable extends Component<RunnableProps> {
-  @observable isHovering = false
-
-  render () {
-    const { model } = this.props
-
-    return (
-      <li
-        className={cs(`${model.type} runnable runnable-${model.state}`, {
-          'runnable-retried': model.hasRetried,
-          hover: this.isHovering,
-        })}
-        onMouseOver={this._hover(true)}
-        onMouseOut={this._hover(false)}
-      >
-        {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
-      </li>
-    )
-  }
-
-  _hover = (shouldHover: boolean) => action('runnable:hover', (e: MouseEvent) => {
-    e.stopPropagation()
-    this.isHovering = shouldHover
-  })
-}
+const Runnable = observer(({ model }: RunnableProps) => (
+  <li
+    className={cs(`${model.type} runnable runnable-${model.state}`, {
+      'runnable-retried': model.hasRetried,
+    })}
+  >
+    {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+  </li>
+))
 
 export { Suite }
 
