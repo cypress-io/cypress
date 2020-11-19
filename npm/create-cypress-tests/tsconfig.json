@@ -3,6 +3,7 @@
     "outDir": "./dist",
     "rootDir": ".",
     "esModuleInterop": true,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "moduleResolution": "node",
@@ -24,6 +25,6 @@
   ],
   "include": [
     "./src/**/*.ts",
-    "src/initial-template/*"
+    "./initial-template/**/*.{js}"
   ]
 }

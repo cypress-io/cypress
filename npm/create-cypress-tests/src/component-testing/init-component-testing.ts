@@ -1,75 +1,114 @@
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
 import inqueier from 'inquirer'
 import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
-import { installAdapter } from './installAdapter'
+import { installFrameworkAdapter } from './installFrameworkAdapter'
+import { injectImportSupportCode, injectPluginsCode, getPluginsSourceExample } from './babel/babelTransform'
 
-function printCypressJsonHelp (
+async function injectOrShowConfigCode (injectFn: () => Promise<boolean>, {
+  code,
+  filePath,
+  fallbackFileMessage,
+  language,
+}: {
+  code: string
+  filePath: string
+  language: string
+  fallbackFileMessage: string
+}) {
+  const fileExists = fs.existsSync(filePath)
+  const readableFilePath = fileExists ? path.relative(process.cwd(), filePath) : fallbackFileMessage
+
+  const printCode = () => {
+    console.log()
+    console.log(highlight(code, { language }))
+    console.log()
+  }
+
+  const printSuccess = () => {
+    console.log(`✅  ${chalk.bold.green(readableFilePath)} was updated with the following config:`)
+    printCode()
+  }
+
+  const printFailure = () => {
+    console.log(`❌  ${chalk.bold.red(readableFilePath)} was not updated automatically. Please add the following config manually: `)
+    printCode()
+  }
+
+  if (!fileExists) {
+    printFailure()
+
+    return
+  }
+
+  // something get completely wrong when using babel or something. Print error message.
+  const injected = await injectFn().catch(() => false)
+
+  injected ? printSuccess() : printFailure()
+}
+
+async function injectAndShowCypressJsonConfig (
   cypressJsonPath: string,
   componentFolder: string,
 ) {
-  const resultObject = {
+  const configToInject = {
     experimentalComponentTesting: true,
     componentFolder,
     testFiles: '**/*.spec.{js,ts,jsx,tsx}',
   }
 
-  const relativeCypressJsonPath = path.relative(process.cwd(), cypressJsonPath)
-  const highlightedCode = highlight(JSON.stringify(resultObject, null, 2), {
-    language: 'json',
-  })
+  async function autoInjectCypressJson () {
+    const currentConfig = JSON.parse(await fs.readFile(cypressJsonPath, { encoding: 'utf-8' }))
 
-  console.log(
-    `\n${chalk.bold('1.')} Add this to the ${chalk.green(
-      relativeCypressJsonPath,
-    )}:`,
-  )
+    await fs.writeFile(cypressJsonPath, JSON.stringify({
+      ...currentConfig,
+      ...configToInject,
+    }, null, 2))
 
-  console.log(`\n${highlightedCode}\n`)
-}
-
-function printSupportHelper (supportFilePath: string, framework: string) {
-  const stepNumber = chalk.bold('2.')
-  const importCode = `import \'@cypress/${framework}/support\'`
-  const requireCode = `require(\'@cypress/${framework}/support\')`
-
-  if (fs.existsSync(supportFilePath)) {
-    const fileContent = fs.readFileSync(supportFilePath, { encoding: 'utf-8' })
-    const relativeSupportPath = path.relative(process.cwd(), supportFilePath)
-
-    const importCodeWithPreferredStyle = fileContent.includes('import ')
-      ? importCode
-      : requireCode
-
-    console.log(
-      `\n${stepNumber} This to the ${chalk.green(relativeSupportPath)}:`,
-    )
-
-    console.log(
-      `\n${highlight(importCodeWithPreferredStyle, { language: 'js' })}\n`,
-    )
-  } else {
-    console.log(
-      `\n${stepNumber} This to the support file https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Support-file`,
-    )
-
-    console.log(`\n${highlight(requireCode, { language: 'js' })}\n`)
+    return true
   }
+
+  await injectOrShowConfigCode(autoInjectCypressJson, {
+    code: JSON.stringify(configToInject, null, 2),
+    language: 'js',
+    filePath: cypressJsonPath,
+    fallbackFileMessage: 'cypress.json config file',
+  })
 }
 
-function printPluginHelper (pluginCode: string, pluginsFilePath: string) {
-  const highlightedPluginCode = highlight(pluginCode, { language: 'js' })
-  const relativePluginsFilePath = path.relative(process.cwd(), pluginsFilePath)
+async function injectAndShowSupportConfig (supportFilePath: string, framework: string) {
+  const importCode = framework === 'vue'
+    ? `import '@cypress/vue/dist/support'` // todo change vue bundle to output the right declaration
+    : `import \'@cypress/${framework}/support\'`
 
-  const stepTitle = fs.existsSync(pluginsFilePath)
-    ? `And this to the ${chalk.green(relativePluginsFilePath)}`
-    : `And this to your plugins file (https://docs.cypress.io/guides/tooling/plugins-guide.html)`
+  await injectOrShowConfigCode(() => injectImportSupportCode(supportFilePath, importCode), {
+    code: importCode,
+    language: 'js',
+    filePath: supportFilePath,
+    fallbackFileMessage: 'support file (https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Support-file)',
+  })
+}
 
-  console.log(`${chalk.bold('3.')} ${stepTitle}:`)
-  console.log(`\n${highlightedPluginCode}\n`)
+async function injectAndShowPluginConfig<T> (template: Template<T>, {
+  templatePayload,
+  pluginsFilePath,
+  cypressProjectRoot,
+}: {
+  templatePayload: T | null
+  pluginsFilePath: string
+  cypressProjectRoot: string
+}) {
+  const ast = template.getPluginsCodeAst(templatePayload, { cypressProjectRoot })
+
+  await injectOrShowConfigCode(() => injectPluginsCode(pluginsFilePath, ast), {
+    code: await getPluginsSourceExample(ast),
+    language: 'js',
+    filePath: pluginsFilePath,
+    fallbackFileMessage: 'plugins file (https://docs.cypress.io/guides/core-concepts/writing-and-organizing-tests.html#Plugin-files)',
+  })
 }
 
 type InitComponentTestingOptions = {
@@ -81,7 +120,7 @@ type InitComponentTestingOptions = {
 export async function initComponentTesting<T> ({ config, useYarn, cypressConfigPath }: InitComponentTestingOptions) {
   const cypressProjectRoot = path.resolve(cypressConfigPath, '..')
 
-  const framework = await installAdapter(cypressProjectRoot, { useYarn })
+  const framework = await installFrameworkAdapter(cypressProjectRoot, { useYarn })
   const {
     possibleTemplates,
     defaultTemplate,
@@ -140,15 +179,15 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
 
   console.log()
   console.log(`Here are instructions of how to get started with component testing for ${chalk.cyan(chosenTemplateName)}:`)
+  console.log()
 
-  printCypressJsonHelp(cypressConfigPath, componentFolder)
-  printSupportHelper(supportFilePath, framework)
-  printPluginHelper(
-    chosenTemplate.getPluginsCode(templatePayload, {
-      cypressProjectRoot,
-    }),
+  await injectAndShowCypressJsonConfig(cypressConfigPath, componentFolder)
+  await injectAndShowSupportConfig(supportFilePath, framework)
+  await injectAndShowPluginConfig(chosenTemplate, {
+    templatePayload,
     pluginsFilePath,
-  )
+    cypressProjectRoot,
+  })
 
   if (chosenTemplate.printHelper) {
     chosenTemplate.printHelper()
@@ -169,4 +208,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
       )}`,
     )
   }
+
+  // render delimiter
+  console.log(new Array(process.stdout.columns).fill('═').join(''))
 }

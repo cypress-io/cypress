@@ -1,7 +1,4 @@
-import chalk from 'chalk'
-import inquirer from 'inquirer'
 import { Template } from './Template'
-import { scanFSForAvailableDependency } from '../../findPackageJson'
 import { reactTemplates } from './react'
 import { vueTemplates } from './vue'
 

@@ -3,6 +3,7 @@ import { expect, use } from 'chai'
 import sinonChai from 'sinon-chai'
 import mockFs from 'mock-fs'
 import { NextTemplate } from './next'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 
 use(sinonChai)
 
@@ -71,4 +72,6 @@ describe('next.js install template', () => {
 
     expect(global.console.warn).to.be.called
   })
+
+  it('correctly generates plugins config', () => snapshotPluginsAstCode(NextTemplate))
 })

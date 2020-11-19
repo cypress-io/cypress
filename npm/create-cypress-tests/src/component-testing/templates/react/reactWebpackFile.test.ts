@@ -1,20 +1,10 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 import { WebpackTemplate } from './reactWebpackFile'
 
 describe('webpack-file install template', () => {
   afterEach(mockFs.restore)
-
-  it('suggests the right code', () => {
-    expect(
-      WebpackTemplate.getPluginsCode(
-        {
-          webpackConfigPath: '/somePath/webpack.config.js',
-        },
-        { cypressProjectRoot: '/' },
-      ),
-    ).to.contain('config.env.webpackFilename = \'somePath/webpack.config.js\'')
-  })
 
   it('resolves webpack.config.js', () => {
     mockFs({
@@ -72,5 +62,13 @@ describe('webpack-file install template', () => {
 
     expect(success).to.equal(false)
     expect(payload).to.equal(undefined)
+  })
+
+  it('correctly generates plugins config when webpack config path is missing', () => {
+    snapshotPluginsAstCode(WebpackTemplate)
+  })
+
+  it('correctly generates plugins config when webpack config path is provided', () => {
+    snapshotPluginsAstCode(WebpackTemplate, { webpackConfigPath: '/config/webpack.config.js' })
   })
 })

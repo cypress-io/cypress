@@ -47,7 +47,7 @@ type InstallAdapterOptions = {
   useYarn: boolean
 }
 
-export async function installAdapter (cwd: string, options: InstallAdapterOptions) {
+export async function installFrameworkAdapter (cwd: string, options: InstallAdapterOptions) {
   const framework = await guessOrAskForFramework(cwd)
 
   await installDependency(`@cypress/${framework}`, options)

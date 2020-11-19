@@ -1,20 +1,10 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 import { RollupTemplate } from './rollup'
 
 describe('rollup-file install template', () => {
   afterEach(mockFs.restore)
-
-  it('suggests the right code', () => {
-    expect(
-      RollupTemplate.getPluginsCode(
-        {
-          rollupConfigPath: '/configs/rollup.config.js',
-        },
-        { cypressProjectRoot: '/' },
-      ),
-    ).to.contain('configFile: \'configs/rollup.config.js\'')
-  })
 
   it('resolves rollup.config.js', () => {
     mockFs({
@@ -70,5 +60,13 @@ describe('rollup-file install template', () => {
 
     expect(success).to.equal(false)
     expect(payload).to.equal(undefined)
+  })
+
+  it('correctly generates plugins config when webpack config path is missing', () => {
+    snapshotPluginsAstCode(RollupTemplate)
+  })
+
+  it('correctly generates plugins config when webpack config path is provided', () => {
+    snapshotPluginsAstCode(RollupTemplate, { rollupConfigPath: '/config/rollup.config.js' })
   })
 })

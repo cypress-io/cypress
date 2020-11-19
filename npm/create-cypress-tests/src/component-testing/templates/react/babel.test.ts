@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
 import { BabelTemplate } from './babel'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 
 describe('babel installation template', () => {
   beforeEach(mockFs.restore)
@@ -67,4 +68,6 @@ describe('babel installation template', () => {
 
     expect(success).to.equal(true)
   })
+
+  it('correctly generates plugins config', () => snapshotPluginsAstCode(BabelTemplate))
 })

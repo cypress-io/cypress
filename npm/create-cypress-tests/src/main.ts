@@ -15,6 +15,20 @@ type MainArgv = {
   setupComponentTesting: boolean
 }
 
+async function getGitStatus () {
+  const execAsync = util.promisify(exec)
+
+  try {
+    let { stdout } = await execAsync(`git status --porcelain`)
+
+    console.log(stdout)
+
+    return stdout.trim()
+  } catch (e) {
+    return ''
+  }
+}
+
 async function shouldUseYarn () {
   const execAsync = util.promisify(exec)
 
@@ -62,6 +76,13 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
 
   console.log(`Running ${chalk.green('cypress 🌲')} installation wizard for ${chalk.cyan(`${name}@${version}`)}`)
 
+  const gitStatus = await getGitStatus()
+
+  if (gitStatus) {
+    console.error(`\n${chalk.bold.red('This repository has untracked files or uncommmited changes.')}\nThis command will ${chalk.cyan('make changes in the codebase')}, so please remove untracked files, stash or commit any changes, and try again.`)
+    process.exit(1)
+  }
+
   const { config, cypressConfigPath } = await findInstalledOrInstallCypress({ useYarn, useTypescript, ignoreExamples })
   const shouldSetupComponentTesting = setupComponentTesting ?? await askForComponentTesting()
 
@@ -69,7 +90,7 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
     await initComponentTesting({ config, cypressConfigPath, useYarn })
   }
 
-  console.log(`\n✅ Success! Cypress is installed and ready to run tests.`)
+  console.log(`\n👍  Success! Cypress is installed and ready to run tests.`)
   printCypressCommandsHelper({ useYarn })
 
   console.log(`\nHappy testing with ${chalk.green('cypress.io')} 🌲\n`)

@@ -1,20 +1,10 @@
 import { expect } from 'chai'
 import mockFs from 'mock-fs'
+import { snapshotPluginsAstCode } from '../../../test-utils'
 import { VueWebpackTemplate } from './vueWebpackFile'
 
 describe('vue webpack-file install template', () => {
-  afterEach(mockFs.restore)
-
-  it('suggests the right code', () => {
-    expect(
-      VueWebpackTemplate.getPluginsCode(
-        {
-          webpackConfigPath: '/somePath/webpack.config.js',
-        },
-        { cypressProjectRoot: '/' },
-      ),
-    ).to.contain(`on('file:preprocessor', onFilePreprocessor(\'somePath/webpack.config.js\'))`)
-  })
+  beforeEach(mockFs.restore)
 
   it('resolves webpack.config.js', () => {
     mockFs({
@@ -72,5 +62,13 @@ describe('vue webpack-file install template', () => {
 
     expect(success).to.equal(false)
     expect(payload).to.equal(undefined)
+  })
+
+  it('correctly generates plugins config when webpack config path is missing', () => {
+    snapshotPluginsAstCode(VueWebpackTemplate)
+  })
+
+  it('correctly generates plugins config when webpack config path is provided', () => {
+    snapshotPluginsAstCode(VueWebpackTemplate, { webpackConfigPath: '/build/webpack.config.js' })
   })
 })
