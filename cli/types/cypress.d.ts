@@ -1477,8 +1477,10 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     * 
      * Use `cy.route()` to manage the behavior of network requests.
-     *
      * @see https://on.cypress.io/route
      * @example
      *    cy.server()
@@ -1486,6 +1488,9 @@ declare namespace Cypress {
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     *
      * Spy or stub request with specific method and url.
      *
      * @see https://on.cypress.io/route
@@ -1496,6 +1501,9 @@ declare namespace Cypress {
      */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     *
      * Set a route by returning an object literal from a callback function.
      * Functions that return a Promise will automatically be awaited.
      *
@@ -1514,6 +1522,9 @@ declare namespace Cypress {
      */
     route(fn: () => RouteOptions): Chainable<null>
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     *
      * Spy or stub a given route.
      *
      * @see https://on.cypress.io/route
@@ -1530,6 +1541,9 @@ declare namespace Cypress {
     route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     *
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
@@ -1581,6 +1595,9 @@ declare namespace Cypress {
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * Deprecated - use `cy.http()` instead.
+     * @deprecated
+     *
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
      * @example
