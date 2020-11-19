@@ -151,9 +151,11 @@ describe('cli', () => {
     it('reports package version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
       sinon
-      .stub(state, 'getBinaryPkgVersionAsync')
+      .stub(state, 'getBinaryPkgAsync')
       .withArgs(binaryDir)
-      .resolves('X.Y.Z')
+      .resolves({
+        version: 'X.Y.Z',
+      })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -164,11 +166,26 @@ describe('cli', () => {
 
     it('reports package and binary message', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
 
       this.exec('version')
       process.exit.callsFake(() => {
         snapshot('cli version and binary version 2', logger.print())
+        done()
+      })
+    })
+
+    it('reports electron and node message', (done) => {
+      sinon.stub(util, 'pkgVersion').returns('1.2.3')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({
+        version: 'X.Y.Z',
+        electronVersion: '10.10.88',
+        electronNodeVersion: '11.10.3',
+      })
+
+      this.exec('version')
+      process.exit.callsFake(() => {
+        snapshot('cli version with electron and node 1', logger.print())
         done()
       })
     })
@@ -179,7 +196,7 @@ describe('cli', () => {
       })
 
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({ version: 'X.Y.Z' })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -195,7 +212,9 @@ describe('cli', () => {
       })
 
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves('X.Y.Z')
+      sinon.stub(state, 'getBinaryPkgAsync').resolves({
+        version: 'X.Y.Z',
+      })
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -207,7 +226,7 @@ describe('cli', () => {
 
     it('handles non-existent binary version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('version')
       process.exit.callsFake(() => {
@@ -218,7 +237,7 @@ describe('cli', () => {
 
     it('handles non-existent binary --version', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('--version')
       process.exit.callsFake(() => {
@@ -229,7 +248,7 @@ describe('cli', () => {
 
     it('handles non-existent binary -v', (done) => {
       sinon.stub(util, 'pkgVersion').returns('1.2.3')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves(null)
+      sinon.stub(state, 'getBinaryPkgAsync').resolves(null)
 
       this.exec('-v')
       process.exit.callsFake(() => {
