@@ -210,5 +210,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   }
 
   // render delimiter
+  console.log()
   console.log(new Array(process.stdout.columns).fill('═').join(''))
+  console.log()
 }
