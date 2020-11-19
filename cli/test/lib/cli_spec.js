@@ -15,6 +15,7 @@ const snapshot = require('../support/snapshot')
 const debug = require('debug')('test')
 const execa = require('execa-wrap')
 const mockedEnv = require('mocked-env')
+const { expect } = require('chai')
 
 describe('cli', () => {
   require('mocha-banner').register()
@@ -146,6 +147,67 @@ describe('cli', () => {
 
     beforeEach(() => {
       sinon.stub(state, 'getBinaryDir').returns(binaryDir)
+    })
+
+    describe('individual package versions', () => {
+      beforeEach(() => {
+        sinon.stub(util, 'pkgVersion').returns('1.2.3')
+        sinon
+        .stub(state, 'getBinaryPkgAsync')
+        .withArgs(binaryDir)
+        .resolves({
+          version: 'X.Y.Z',
+          electronVersion: '10.9.8',
+          electronNodeVersion: '7.7.7',
+        })
+      })
+
+      it('reports just the package version', (done) => {
+        this.exec('version --component package')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('1.2.3')
+          done()
+        })
+      })
+
+      it('reports just the binary version', (done) => {
+        this.exec('version --component binary')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('X.Y.Z')
+          done()
+        })
+      })
+
+      it('reports just the electron version', (done) => {
+        this.exec('version --component electron')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('10.9.8')
+          done()
+        })
+      })
+
+      it('reports just the bundled Node version', (done) => {
+        this.exec('version --component node')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('7.7.7')
+          done()
+        })
+      })
+
+      it('handles not found bundled Node version', (done) => {
+        state.getBinaryPkgAsync
+        .withArgs(binaryDir)
+        .resolves({
+          version: 'X.Y.Z',
+          electronVersion: '10.9.8',
+        })
+
+        this.exec('version --component node')
+        process.exit.callsFake(() => {
+          expect(logger.print()).to.equal('not found')
+          done()
+        })
+      })
     })
 
     it('reports package version', (done) => {
