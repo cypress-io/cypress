@@ -22,7 +22,6 @@ module.exports = {
     },
   },
 
-  entry: '@cypress/evergreen/dist/plugins/webpack-client.js',
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),

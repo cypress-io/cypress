@@ -140,6 +140,7 @@
     "@packages/socket": "*",
     "@packages/static": "*",
     "@packages/ts": "*",
+    "@packages/webpack-ct": "*",
     "@types/chai-as-promised": "7.1.2",
     "@types/chrome": "0.0.101",
     "awesome-typescript-loader": "5.2.1",

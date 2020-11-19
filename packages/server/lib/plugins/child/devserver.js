@@ -1,9 +1,8 @@
 // const webpackDevServer
 const util = require('../util')
-const { startEvergreen } = require('@cypress/evergreen')
+const { start: startWebpackDevServer } = require('@packages/webpack-ct')
 
-const wrap = (ipc, invoke, ids, [ arg ]) => {
-
+const wrap = (ipc, invoke, ids, [arg]) => {
   const { specs, config } = arg
   const devserverConfig = {
     support: '', // file path
@@ -12,7 +11,7 @@ const wrap = (ipc, invoke, ids, [ arg ]) => {
   }
 
   util.wrapChildPromise(ipc, invoke, ids, [], async (webpackConfig) => {
-    const webpackDevServer = await startEvergreen(webpackConfig, devserverConfig)
+    const webpackDevServer = await startWebpackDevServer(webpackConfig, devserverConfig)
 
     return new Promise((resolve) => {
       const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {
