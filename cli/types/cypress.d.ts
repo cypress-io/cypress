@@ -1477,8 +1477,7 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      * 
      * Use `cy.route()` to manage the behavior of network requests.
      * @see https://on.cypress.io/route
@@ -1488,8 +1487,7 @@ declare namespace Cypress {
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      *
      * Spy or stub request with specific method and url.
      *
@@ -1501,8 +1499,7 @@ declare namespace Cypress {
      */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      *
      * Set a route by returning an object literal from a callback function.
      * Functions that return a Promise will automatically be awaited.
@@ -1522,8 +1519,7 @@ declare namespace Cypress {
      */
     route(fn: () => RouteOptions): Chainable<null>
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      *
      * Spy or stub a given route.
      *
@@ -1541,8 +1537,7 @@ declare namespace Cypress {
     route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      *
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
