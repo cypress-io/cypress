@@ -4,7 +4,8 @@
   "description": "Launches Webpack Dev Server for Component Testing",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "build:watch": "tsc -w ./src/** ../webpack-plugin-ct/dist/**"
   },
   "devDependencies": {
     "@types/webpack": "^4.1.4",

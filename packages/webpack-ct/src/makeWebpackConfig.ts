@@ -1,5 +1,5 @@
 import { debug as debugFn } from 'debug'
-// import * as path from 'path'
+import * as path from 'path'
 import { merge } from 'webpack-merge'
 
 const debug = debugFn('cypress:evergreen:webpack')
@@ -37,12 +37,15 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
   //     ],
   //   }
 
+  const entry = path.resolve(__dirname, './browser.js')
+
   const dynamicWebpackConfig = {
-    module: {
-      rules: [
-        // entryValLoader,
-      ],
-    },
+    entry,
+    // module: {
+    //   rules: [
+    //     // entryValLoader,
+    //   ],
+    // },
   }
 
   const mergedConfig = merge(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)

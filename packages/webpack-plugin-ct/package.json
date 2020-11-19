@@ -4,7 +4,8 @@
   "description": "Plugin for users running component testing with webpack-dev-server",
   "main": "dist/index.js",
   "scripts": {
-    "build": "echo success"
+    "build": "tsc",
+    "build:watch": "tsc -w ./src/**"
   },
   "devDependencies": {
     "@types/webpack": "^4.1.4",
