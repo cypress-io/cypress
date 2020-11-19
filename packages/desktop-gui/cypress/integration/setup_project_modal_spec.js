@@ -223,7 +223,7 @@ describe('Connect to Dashboard', function () {
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
           cy.get('.organizations-select').should('not.exist')
-          cy.get('.privacy-radio').should('not.exist')
+          cy.get('.privacy-radio').should('not.be.visible')
           cy.percySnapshot()
         })
 

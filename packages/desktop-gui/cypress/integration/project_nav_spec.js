@@ -294,7 +294,7 @@ describe('Project Nav', function () {
           })
 
           it('hides close browser button', () => {
-            cy.get('.close-browser').should('not.be.visible')
+            cy.get('.close-browser').should('not.exist')
           })
 
           it('re-enables browser dropdown', () => {
