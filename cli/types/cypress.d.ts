@@ -1478,7 +1478,7 @@ declare namespace Cypress {
 
     /**
      * @deprecated Use `cy.http()` instead.
-     * 
+     *
      * Use `cy.route()` to manage the behavior of network requests.
      * @see https://on.cypress.io/route
      * @example
