@@ -1,3 +1,115 @@
+exports['e2e stdout / displays assertion errors'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:    1.2.3                                                                              │
+  │ Browser:    FooBrowser 88                                                                      │
+  │ Specs:      1 found (stdout_assertion_errors_spec.js)                                          │
+  │ Searched:   cypress/integration/stdout_assertion_errors_spec.js                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  stdout_assertion_errors_spec.js                                                 (1 of 1)
+
+
+  assertion errors
+    1) fails with assertion diff, no retries
+    2) fails with assertion diff, with retries
+    3) fails with dom assertion without diff, with retries
+    4) fails with dom assertion without diff, with retries
+
+
+  0 passing
+  4 failing
+
+  1) assertion errors
+       fails with assertion diff, no retries:
+
+      AssertionError: expected [] to deeply equal [ 1, 2, 3 ]
+      + expected - actual
+
+      -[]
+      +[ 1, 2, 3 ]
+      
+      [stack trace lines]
+
+  2) assertion errors
+       fails with assertion diff, with retries:
+
+      AssertionError: Timed out retrying after  XX:XX. expected [] to deeply equal [ 1, 2, 3 ]
+      + expected - actual
+
+      -[]
+      +[ 1, 2, 3 ]
+      
+      [stack trace lines]
+
+  3) assertion errors
+       fails with dom assertion without diff, with retries:
+     AssertionError: expected '<body>' to have class 'foo'
+      [stack trace lines]
+
+  4) assertion errors
+       fails with dom assertion without diff, with retries:
+     AssertionError: Timed out retrying after  XX:XX. expected '<body>' to have class 'foo'
+      [stack trace lines]
+
+
+
+
+  (Results)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        4                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      4                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  4                                                                                │
+  │ Video:        true                                                                             │
+  │ Duration:     X seconds                                                                        │
+  │ Spec Ran:     stdout_assertion_errors_spec.js                                                  │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+  (Screenshots)
+
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with assertion diff, no retries (failed).png                                        
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with assertion diff, with retries (failed).png                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with dom assertion without diff, with retries (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
+     s -- fails with dom assertion without diff, with retries (failed) (1).png                      
+
+
+  (Video)
+
+  -  Started processing:  Compressing to 32 CRF                                                     
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_assertion_errors_spec.js     (X second)
+                          .mp4                                                                      
+
+
+====================================================================================================
+
+  (Run Finished)
+
+
+       Spec                                              Tests  Passing  Failing  Pending  Skipped  
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✖  stdout_assertion_errors_spec.js          XX:XX        4        -        4        -        - │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
+
+
+`
+
 exports['e2e stdout displays errors from failures 1'] = `
 
 ====================================================================================================
@@ -193,78 +305,6 @@ Fix the error in your code and re-run your tests.
 
 `
 
-exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/stdout_passing_spec.coffee                                     │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  stdout_passing_spec.coffee                                                      (1 of 1)
-
-
-  stdout_passing_spec
-    file
-      ✓ visits file
-    google
-      ✓ visits google
-      ✓ google2
-    apple
-      ✓ apple1
-      ✓ visits apple
-    subdomains
-      ✓ cypress1
-      ✓ visits cypress
-      ✓ cypress3
-
-
-  8 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        8                                                                                │
-  │ Passing:      8                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     stdout_passing_spec.coffee                                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X second)
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  stdout_passing_spec.coffee               XX:XX        8        8        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        8        8        -        -        -  
-
-
-`
-
 exports['e2e stdout displays fullname of nested specfile 1'] = `
 
 ====================================================================================================
@@ -411,141 +451,6 @@ exports['e2e stdout displays fullname of nested specfile 1'] = `
   │    pecfile.js                                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        3        3        -        -        -  
-
-
-`
-
-exports['e2e stdout / displays assertion errors'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_assertion_errors_spec.js)                                          │
-  │ Searched:   cypress/integration/stdout_assertion_errors_spec.js                                │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  stdout_assertion_errors_spec.js                                                 (1 of 1)
-
-
-  assertion errors
-    1) fails with assertion diff, no retries
-    2) fails with assertion diff, with retries
-    3) fails with dom assertion without diff, with retries
-    4) fails with dom assertion without diff, with retries
-
-
-  0 passing
-  4 failing
-
-  1) assertion errors
-       fails with assertion diff, no retries:
-
-      AssertionError: expected [] to deeply equal [ 1, 2, 3 ]
-      + expected - actual
-
-      -[]
-      +[ 1, 2, 3 ]
-      
-      [stack trace lines]
-
-  2) assertion errors
-       fails with assertion diff, with retries:
-
-      Timed out retrying
-      + expected - actual
-
-      -[]
-      +[ 1, 2, 3 ]
-      
-      [stack trace lines]
-
-  3) assertion errors
-       fails with dom assertion without diff, with retries:
-     AssertionError: expected '<body>' to have class 'foo'
-      [stack trace lines]
-
-  4) assertion errors
-       fails with dom assertion without diff, with retries:
-     AssertionError: Timed out retrying: expected '<body>' to have class 'foo'
-      [stack trace lines]
-
-
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        4                                                                                │
-  │ Passing:      0                                                                                │
-  │ Failing:      4                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  4                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     stdout_assertion_errors_spec.js                                                  │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with assertion diff, no retries (failed).png                                        
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with assertion diff, with retries (failed).png                                      
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with dom assertion without diff, with retries (failed).png                          
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_assertion_errors_spec.js/assertion error     (1280x720)
-     s -- fails with dom assertion without diff, with retries (failed) (1).png                      
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_assertion_errors_spec.js     (X second)
-                          .mp4                                                                      
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  stdout_assertion_errors_spec.js          XX:XX        4        -        4        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✖  1 of 1 failed (100%)                     XX:XX        4        -        4        -        -  
-
-
-`
-
-exports['e2e stdout respects quiet mode 1'] = `
-
-
-  stdout_passing_spec
-    file
-      ✓ visits file
-    google
-      ✓ visits google
-      ✓ google2
-    apple
-      ✓ apple1
-      ✓ visits apple
-    subdomains
-      ✓ cypress1
-      ✓ visits cypress
-      ✓ cypress3
-
-
-  8 passing
 
 
 `

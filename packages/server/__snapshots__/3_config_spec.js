@@ -92,7 +92,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   1) short defaultCommandTimeout
        times out looking for a missing element:
-     AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+     AssertionError: Timed out retrying after  XX:XX. Expected to find element: \`#bar\`, but never found it.
       [stack trace lines]
 
 

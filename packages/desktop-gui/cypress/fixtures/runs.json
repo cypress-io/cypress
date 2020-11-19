@@ -26,7 +26,7 @@
     "failedTests": [
       {
         "body": "function () {}",
-        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "error": "Timed out retrying after 4000ms. cy.click() failed because this element is being covered by another element:",
         "id": "175e807c-ce85-5f94-938c-e2e30b090633",
         "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
         "stack": "Error: Uncaught ReferenceError:\n    at Object.$Cypress.Utils._.cypressErr (http://localhost:2020/__cypress/static/js/cypress.js:4678:15)\n    at Object.$Cypress.Utils._.throwErr (http://localhost:2020/__cypress/static/js/cypress.js:4642:22)\n    at Object.$Cypress.Utils._.throwErrByPath (http://localhost:2020/__cypress/static/js/cypress.js:4670:21)",
@@ -53,7 +53,7 @@
       },
       {
         "body": "function () {}",
-        "error": "Timed out retrying: cy.click() failed because this element is being covered by another element:",
+        "error": "Timed out retrying after 4000ms. cy.click() failed because this element is being covered by another element:",
         "failedFromHookId": "h1",
         "id": "ef0d934e-a247-5e60-b801-3c5be5aa8796",
         "instanceId": "d1609552-31b5-50c1-b307-c27c9553ccb8",
