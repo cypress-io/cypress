@@ -44,7 +44,7 @@ describe('Project Nav', function () {
     })
 
     it('displays projects nav', function () {
-      cy.get('.empty').should('not.be.visible')
+      cy.get('.empty').should('not.exist')
 
       cy.get('.navbar-default')
     })
@@ -380,7 +380,7 @@ describe('Project Nav', function () {
 
       it('displays no dropdown btn', () => {
         cy.get('.browsers-list')
-        .find('.dropdown-toggle').should('not.be.visible')
+        .find('.dropdown-toggle').should('not.exist')
 
         cy.percySnapshot()
       })

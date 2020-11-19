@@ -142,7 +142,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('lists organizations to assign to project', function () {
-          cy.get('.empty-select-orgs').should('not.be.visible')
+          cy.get('.empty-select-orgs').should('not.exist')
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
@@ -185,7 +185,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('lists organizations to assign to project', function () {
-          cy.get('.empty-select-orgs').should('not.be.visible')
+          cy.get('.empty-select-orgs').should('not.exist')
           cy.get('.organizations-select__dropdown-indicator').click()
           cy.get('.organizations-select__menu').should('be.visible')
           cy.get('.organizations-select__option')
@@ -222,8 +222,8 @@ describe('Connect to Dashboard', function () {
 
         it('displays empty message', () => {
           cy.get('.empty-select-orgs').should('be.visible')
-          cy.get('.organizations-select').should('not.be.visible')
-          cy.get('.privacy-radio').should('not.be.visible')
+          cy.get('.organizations-select').should('not.exist')
+          cy.get('.privacy-radio').should('not.exist')
           cy.percySnapshot()
         })
 
@@ -436,7 +436,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('closes modal', () => {
-          cy.get('.modal').should('not.be.visible')
+          cy.get('.modal').should('not.exist')
         })
 
         it('updates localStorage projects cache', () => {
