@@ -1,7 +1,7 @@
 import fs from 'fs-extra'
 import path from 'path'
 import chalk from 'chalk'
-import inqueier from 'inquirer'
+import inquirer from 'inquirer'
 import highlight from 'cli-highlight'
 import { Template } from './templates/Template'
 import { guessTemplate } from './templates/guessTemplate'
@@ -145,7 +145,7 @@ export async function initComponentTesting<T> ({ config, useYarn, cypressConfigP
   const {
     chosenTemplateName,
     componentFolder,
-  }: Record<string, string> = await inqueier.prompt([
+  }: Record<string, string> = await inquirer.prompt([
     {
       type: 'list',
       name: 'chosenTemplateName',
