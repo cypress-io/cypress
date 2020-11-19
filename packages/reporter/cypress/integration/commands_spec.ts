@@ -205,6 +205,13 @@ describe('commands', () => {
       cy.get('.cy-tooltip').should('have.text', 'Printed output to your console')
     })
 
+    it('tooltip disappears after 1500ms', () => {
+      cy.clock()
+      cy.contains('#exists').click()
+      cy.tick(1500)
+      cy.get('.cy-tooltip').should('not.exist')
+    })
+
     it('emits runner:console:log', () => {
       cy.spy(runner, 'emit')
       cy.contains('#exists').click()
