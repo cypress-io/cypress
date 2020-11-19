@@ -1,9 +1,9 @@
 import sinon from 'sinon'
 
-import Hook from './hook-model'
+import Hook from '../../src/hooks/hook-model'
 
-import CommandModel from '../commands/command-model'
-import ErrModel from '../errors/err-model'
+import CommandModel from '../../src/commands/command-model'
+import ErrModel from '../../src/errors/err-model'
 
 describe('Hook model', () => {
   let hook: Hook
