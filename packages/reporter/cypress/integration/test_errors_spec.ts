@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 import Err from '../../src/errors/err-model'
@@ -87,6 +89,7 @@ describe('test errors', () => {
     it('opens stack trace on click', () => {
       cy.contains('View stack trace').click()
       cy.get('.runnable-err-stack-trace').should('be.visible')
+      cy.percySnapshot()
     })
 
     it('pairs down stack line whitespace', () => {
@@ -212,6 +215,8 @@ describe('test errors', () => {
       .then((content) => {
         expect(content).not.to.contain('*fizz*')
       })
+
+      cy.percySnapshot()
     })
 
     // NOTE: still needs to be implemented
@@ -234,6 +239,8 @@ describe('test errors', () => {
       cy
       .get('.test-err-code-frame')
       .should('be.visible')
+
+      cy.percySnapshot()
     })
 
     it('does not show code frame when not included on error', () => {

@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
@@ -75,6 +77,7 @@ describe('header', () => {
       cy.get('.passed .num').should('have.text', '2')
       cy.get('.failed .num').should('have.text', '3')
       cy.get('.pending .num').should('have.text', '1')
+      cy.percySnapshot()
     })
 
     it('displays "--" if zero of the given state', () => {

@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 import { itHandlesFileOpening } from '../support/utils'
@@ -45,6 +47,7 @@ describe('hooks', () => {
 
       cy.contains('after each').closest('.collapsible').find('.command').should('have.length', 1)
       cy.contains('after each').closest('.collapsible').should('contain', '.cleanup')
+      cy.percySnapshot()
     })
 
     it('displays hooks in the correct order', () => {

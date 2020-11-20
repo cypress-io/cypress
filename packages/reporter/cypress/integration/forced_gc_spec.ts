@@ -107,6 +107,7 @@ describe('forced gc', () => {
       cy.get('.forced-gc-warning').should('be.visible')
       cy.contains('GC Duration: 0.00')
       cy.contains('Running GC...')
+      cy.percySnapshot()
     })
 
     it('displays the full message with (enabled)', () => {

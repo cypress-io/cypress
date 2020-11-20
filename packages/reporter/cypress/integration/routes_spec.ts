@@ -60,6 +60,8 @@ describe('routes', () => {
       cy.contains('Routes (3)').click()
       cy.contains('Routes (3)').closest('.runnable-routes-region').find('table')
       .should('be.visible')
+
+      cy.percySnapshot()
     })
   })
 

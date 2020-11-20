@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
@@ -33,6 +35,8 @@ describe('suites', () => {
     cy.contains('suite 1')
     .closest('.runnable')
     .should('have.class', 'suite')
+
+    cy.percySnapshot()
   })
 
   it('includes the state as a class', () => {

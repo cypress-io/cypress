@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { itHandlesFileOpening } from '../support/utils'
 
@@ -28,6 +30,7 @@ describe('spec title', () => {
     })
 
     cy.get('.runnable-header').should('have.text', 'All Specs')
+    cy.percySnapshot()
   })
 
   it('all specs displays "Specs matching ..."', () => {
@@ -39,6 +42,7 @@ describe('spec title', () => {
     })
 
     cy.contains('.runnable-header', 'Specs matching "cof"')
+    cy.percySnapshot()
   })
 
   describe('single spec', () => {
@@ -52,6 +56,7 @@ describe('spec title', () => {
 
     it('displays relative spec path', () => {
       cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
+      cy.percySnapshot()
     })
 
     it('displays tooltip on hover', () => {

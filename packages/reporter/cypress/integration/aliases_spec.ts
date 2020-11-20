@@ -1,3 +1,5 @@
+/// <reference types="../support" />
+
 import { EventEmitter } from 'events'
 import { RootRunnable } from './../../src/runnables/runnables-store'
 import { addCommand } from '../support/utils'
@@ -74,6 +76,8 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found an alias for: \'getUsers\'')
         })
+
+        cy.percySnapshot()
       })
     })
 
@@ -122,6 +126,7 @@ describe('aliases', () => {
 
       it('renders all aliases ', () => {
         cy.get('.command-alias').should('have.length', 3)
+        cy.percySnapshot()
       })
 
       it('render with counts in non-event commands', () => {
@@ -266,6 +271,8 @@ describe('aliases', () => {
         cy.get('.cy-tooltip span').should(($tooltip) => {
           expect($tooltip).to.contain('Found 2nd alias for: \'getPosts\'')
         })
+
+        cy.percySnapshot()
       })
     })
   })
