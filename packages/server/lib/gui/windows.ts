@@ -135,6 +135,8 @@ export function defaults (options = {}) {
       partition: null,
       webSecurity: true,
       nodeIntegration: false,
+      // in Electron 12, this is the new default and can be removed
+      contextIsolation: true,
       backgroundThrottling: false,
     },
   })
@@ -209,6 +211,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
+// open desktop-gui BrowserWindow
 export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
   // if we already have a window open based
   // on that type then just show + focus it!
@@ -230,6 +233,8 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
     show: true,
     webPreferences: {
       preload: cwd('lib', 'ipc', 'ipc.js'),
+      // explicitly disable context isolation so we can use IPC
+      contextIsolation: false,
     },
   })
 
