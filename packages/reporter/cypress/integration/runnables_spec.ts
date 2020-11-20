@@ -43,7 +43,7 @@ describe('runnables', () => {
     }
   })
 
-  it('renders loader when runnables have not yet loaded', () => {
+  it('displays loader when runnables have not yet loaded', () => {
     render()
     cy.contains('Your tests are loading...').should('be.visible')
     cy.percySnapshot()
@@ -51,7 +51,7 @@ describe('runnables', () => {
 
   it('displays runnables when they load', () => {
     start()
-    cy.get('.runnable').should('have.length', 6)
+    cy.get('.runnable').should('have.length', 9)
     cy.percySnapshot()
   })
 

@@ -7,6 +7,7 @@ import { addCommand } from '../support/utils'
 describe('commands', () => {
   let runner: EventEmitter
   let runnables: RootRunnable
+  const inProgressStartedAt = (new Date(2000, 0, 1)).toISOString()
 
   beforeEach(() => {
     cy.fixture('runnables_commands').then((_runnables) => {
@@ -35,7 +36,7 @@ describe('commands', () => {
         message: '#in-progress',
         state: 'pending',
         timeout: 4000,
-        wallClockStartedAt: (new Date()).toISOString(),
+        wallClockStartedAt: inProgressStartedAt,
       })
     })
 
@@ -123,9 +124,53 @@ describe('commands', () => {
     .should('have.class', 'bad')
   })
 
-  it('displays a progress indicator', () => {
-    cy.contains('#in-progress').closest('.command').find('.command-progress span').invoke('attr', 'style')
-    .should('match', /animation-duration: \d+ms; transform: scaleX\(0\.\d+\);/)
+  describe('progress bar', () => {
+    const getProgress = () => {
+      return cy.contains('#in-progress')
+      .closest('.command')
+      .find('.command-progress span')
+    }
+
+    it('calculates correct scale factor', () => {
+      // take the wallClockStartedAt of this command and add 2500 milliseconds to it
+      // in order to simulate the command having run for 2.5 seconds of the total 4000 timeout
+      const date = new Date(inProgressStartedAt).setMilliseconds(2500)
+
+      cy.clock(date, ['Date'])
+      // close and open tests so it freshly mounts
+      cy.contains('test 1').click().click()
+      getProgress().should(($span) => {
+        expect($span.attr('style')).to.contain('animation-duration: 1500ms')
+        expect($span.attr('style')).to.contain('transform: scaleX(0.375)')
+
+        // ensures that actual scale factor hits 0 within default timeout
+        // this matrix is equivalent to scaleX(0)
+        expect($span).to.have.css('transform', 'matrix(0, 0, 0, 1, 0, 0)')
+      })
+    })
+
+    it('recalculates correct scale factor after being closed', () => {
+      // take the wallClockStartedAt of this command and add 1000 milliseconds to it
+      // in order to simulate the command having run for 1 second of the total 4000 timeout
+      const date = new Date(inProgressStartedAt).setMilliseconds(1000)
+
+      cy.clock(date, ['Date'])
+      // close and open tests so it freshly mounts
+      cy.contains('test').click().click()
+      getProgress().should(($span) => {
+        expect($span.attr('style')).to.contain('animation-duration: 3000ms')
+        expect($span.attr('style')).to.contain('transform: scaleX(0.75)')
+      })
+
+      // set the clock ahead as if time has passed
+      cy.tick(2000)
+
+      cy.contains('test 1').click().click()
+      getProgress().should(($span) => {
+        expect($span.attr('style')).to.contain('animation-duration: 1000ms')
+        expect($span.attr('style')).to.contain('transform: scaleX(0.25)')
+      })
+    })
   })
 
   context('invisible indicator', () => {
