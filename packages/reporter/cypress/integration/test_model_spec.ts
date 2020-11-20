@@ -1,10 +1,10 @@
-import Err from '../errors/err-model'
+import Err from '../../src/errors/err-model'
 import _ from 'lodash'
-import TestModel, { TestProps, UpdatableTestProps } from './test-model'
-import CommandModel, { CommandProps } from '../commands/command-model'
-import { RouteProps } from '../routes/route-model'
-import { RunnablesStore } from '../runnables/runnables-store'
-import { AgentProps } from '../agents/agent-model'
+import TestModel, { TestProps, UpdatableTestProps } from '../../src/test/test-model'
+import CommandModel, { CommandProps } from '../../src/commands/command-model'
+import { RouteProps } from '../../src/routes/route-model'
+import { RunnablesStore } from '../../src/runnables/runnables-store'
+import { AgentProps } from '../../src/agents/agent-model'
 
 const createTest = (props: Partial<TestProps> = {}, store = {}) => {
   const defaults = {
@@ -252,7 +252,7 @@ describe('Test model', () => {
       const test = createTest({ hooks: [{ hookId: 'h1', hookName: 'before each' }] })
 
       test.addLog(createCommand({ instrument: 'command' }))
-      test.finish({ hookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps)
+      test.finish({ failedFromHookId: 'h1', err: { message: 'foo' } as Err } as UpdatableTestProps)
       expect(test.lastAttempt.hooks[1].failed).to.be.true
     })
 
