@@ -328,7 +328,7 @@ export interface GenericStaticResponse<Fixture, Body> {
  */
 export type StringMatcher = GlobPattern | RegExp
 
-type WaitOptions = {
+interface WaitOptions {
   /**
    * Displays the command in the Command Log
    *
