@@ -85,7 +85,7 @@ describe('hooks', () => {
       it('collapses on click', () => {
         cy.contains('before each').click()
         .closest('.collapsible').find('.commands-container')
-        .should('not.be.visible')
+        .should('not.exist')
       })
 
       it('expands on second click', () => {
