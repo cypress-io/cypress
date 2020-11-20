@@ -2013,50 +2013,6 @@ declare namespace Cypress {
      *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
-    /**
-     * Wait for a specific XHR to respond.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string} alias - Name of the alias to wait for.
-     *
-    ```
-    // Wait for the route aliased as 'getAccount' to respond
-    // without changing or stubbing its response
-    cy.server()
-    cy.route('/accounts/*').as('getAccount')
-    cy.visit('/accounts/123')
-    cy.wait('@getAccount').then((xhr) => {
-      // we can now access the low level xhr
-      // that contains the request body,
-      // response body, status, etc
-    })
-    ```
-     */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
-    /**
-     * Wait for list of XHR requests to complete.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
-     *
-    ```
-    // wait for 3 XHR requests to complete
-    cy.server()
-    cy.route('users/*').as('getUsers')
-    cy.route('activities/*').as('getActivities')
-    cy.route('comments/*').as('getComments')
-    cy.visit('/dashboard')
-
-    cy.wait(['@getUsers', '@getActivities', '@getComments'])
-      .then((xhrs) => {
-        // xhrs will now be an array of matching XHR's
-        // xhrs[0] <-- getUsers
-        // xhrs[1] <-- getActivities
-        // xhrs[2] <-- getComments
-      })
-    ```
-     */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.

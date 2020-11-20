@@ -569,7 +569,7 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.http('/foo', 'foo bar baz').as('getFoo').then(function (win) {
         $.get('/foo')
       }).wait('@getFoo').then(function (res) {
-        expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response!.body).to.eq('foo bar baz')
       })
     })
 
@@ -580,7 +580,7 @@ describe('network stubbing', { retries: 2 }, function () {
           method: 'PROPFIND',
         })
       }).wait('@getFoo').then(function (res) {
-        expect(res.response.body).to.eq('foo bar baz')
+        expect(res.response!.body).to.eq('foo bar baz')
       })
     })
 
@@ -1786,7 +1786,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
         expect(log.get('alias')).to.eq('getFoo')
 
-        expect(JSON.parse(res.response.body as string)).to.deep.eq({
+        expect(JSON.parse(res.response!.body as string)).to.deep.eq({
           some: 'json',
           foo: {
             bar: 'baz',
@@ -1885,7 +1885,7 @@ describe('network stubbing', { retries: 2 }, function () {
           $.get('/xml')
 
           cy.wait('@foo').then((request) => {
-            expect(request.response.body).to.eq(expectedBody)
+            expect(request.response!.body).to.eq(expectedBody)
             done()
           })
         }
