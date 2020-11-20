@@ -1,15 +1,14 @@
 import sinon, { SinonSpy } from 'sinon'
 
-import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../../src/runnables/runnables-store'
-import SuiteModel, { SuiteProps } from '../../src/runnables/suite-model'
-
-import { AppState } from '../../src/lib/app-state'
-import { Scroller } from '../../src/lib/scroller'
-import TestModel, { TestProps } from '../../src/test/test-model'
-import { AgentProps } from '../../src/agents/agent-model'
-import { CommandProps } from '../../src/commands/command-model'
-import { RouteProps } from '../../src/routes/route-model'
-import { HookProps } from '../../src/hooks/hook-model'
+import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../../../src/runnables/runnables-store'
+import SuiteModel, { SuiteProps } from '../../../src/runnables/suite-model'
+import { AppState } from '../../../src/lib/app-state'
+import { Scroller } from '../../../src/lib/scroller'
+import TestModel, { TestProps } from '../../../src/test/test-model'
+import { AgentProps } from '../../../src/agents/agent-model'
+import { CommandProps } from '../../../src/commands/command-model'
+import { RouteProps } from '../../../src/routes/route-model'
+import { HookProps } from '../../../src/hooks/hook-model'
 
 const appStateStub = () => {
   return {

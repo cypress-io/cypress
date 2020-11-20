@@ -1,5 +1,6 @@
 import sinon, { SinonSpy, SinonFakeTimers } from 'sinon'
-import scroller from '../../src/lib/scroller'
+
+import scroller from '../../../src/lib/scroller'
 
 const { _ } = Cypress
 

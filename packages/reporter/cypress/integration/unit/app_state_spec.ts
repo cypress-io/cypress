@@ -1,4 +1,4 @@
-import appState, { AppState } from '../../src/lib/app-state'
+import appState, { AppState } from '../../../src/lib/app-state'
 
 describe('app state', () => {
   it('exports singleton by default', () => {

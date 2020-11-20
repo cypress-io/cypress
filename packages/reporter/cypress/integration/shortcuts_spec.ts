@@ -15,7 +15,7 @@ const runnerStub = () => {
   } as EventEmitterStub
 }
 
-describe('controls', function () {
+describe('shortcuts', function () {
   let runner: EventEmitterStub
 
   beforeEach(function () {

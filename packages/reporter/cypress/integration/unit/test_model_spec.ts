@@ -1,10 +1,11 @@
-import Err from '../../src/errors/err-model'
-import _ from 'lodash'
-import TestModel, { TestProps, UpdatableTestProps } from '../../src/test/test-model'
-import CommandModel, { CommandProps } from '../../src/commands/command-model'
-import { RouteProps } from '../../src/routes/route-model'
-import { RunnablesStore } from '../../src/runnables/runnables-store'
-import { AgentProps } from '../../src/agents/agent-model'
+import Err from '../../../src/errors/err-model'
+import TestModel, { TestProps, UpdatableTestProps } from '../../../src/test/test-model'
+import CommandModel, { CommandProps } from '../../../src/commands/command-model'
+import { RouteProps } from '../../../src/routes/route-model'
+import { RunnablesStore } from '../../../src/runnables/runnables-store'
+import { AgentProps } from '../../../src/agents/agent-model'
+
+const { _ } = Cypress
 
 const createTest = (props: Partial<TestProps> = {}, store = {}) => {
   const defaults = {

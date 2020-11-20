@@ -1,6 +1,6 @@
 import sinon, { SinonFakeTimers } from 'sinon'
 
-import statsStore, { StatsStore } from '../../src/header/stats-store'
+import statsStore, { StatsStore } from '../../../src/header/stats-store'
 
 describe('stats store', () => {
   it('exports singleton by default', () => {

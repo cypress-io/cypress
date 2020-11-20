@@ -1,6 +1,6 @@
 import sinon, { SinonFakeTimers } from 'sinon'
 
-import CommandModel, { CommandProps } from '../../src/commands/command-model'
+import CommandModel, { CommandProps } from '../../../src/commands/command-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
 
@@ -54,7 +54,7 @@ describe('Command model', () => {
     beforeEach(() => {
       command = new CommandModel(commandProps({ state: null }))
       clock.tick(300)
-      command.update({ state: 'pending' } as CommandModelProps)
+      command.update({ state: 'pending' } as CommandProps)
     })
 
     it('sets isLongRunning to true if model is still pending', () => {
