@@ -121,6 +121,9 @@ module.exports = {
         y: 'browserY',
         devTools: 'isBrowserDevToolsOpen',
       },
+      webPreferences: {
+        sandbox: true,
+      },
       onFocus () {
         if (options.show) {
           return menu.set({ withDevTools: true })
