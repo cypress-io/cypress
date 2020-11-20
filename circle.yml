@@ -579,7 +579,7 @@ jobs:
       # run unit tests from each individual package
       - run: yarn test
       - verify-mocha-results:
-          expectedResultCount: 8
+          expectedResultCount: 9
       - store_test_results:
           path: /tmp/cypress
       # CLI tests generate HTML files with sample CLI command output
