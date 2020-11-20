@@ -1,1 +1,4 @@
-import '@packages/ui-components/cypress/support/customPercyCommand'
+// @ts-ignore
+import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
+
+installCustomPercyCommand()
