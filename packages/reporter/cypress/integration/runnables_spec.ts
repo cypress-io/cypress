@@ -1,5 +1,3 @@
-/// <reference types="../support" />
-
 import { EventEmitter } from 'events'
 import { RunnablesErrorModel } from '../../src/runnables/runnable-error'
 import { RootRunnable } from './../../src/runnables/runnables-store'

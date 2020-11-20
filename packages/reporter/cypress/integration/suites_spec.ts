@@ -1,5 +1,3 @@
-/// <reference types="../support" />
-
 import { EventEmitter } from 'events'
 import { RootRunnable } from '../../src/runnables/runnables-store'
 
