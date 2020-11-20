@@ -534,6 +534,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            reporter-integration-tests,
       - run: npx percy finalize --all
 
   cli-visual-tests:
