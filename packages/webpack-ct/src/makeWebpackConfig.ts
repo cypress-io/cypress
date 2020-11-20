@@ -1,6 +1,7 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import CypressCTOptionsPlugin from '@packages/webpack-plugin-ct/dist/plugin'
 
 const debug = debugFn('cypress:evergreen:webpack')
 
@@ -41,6 +42,13 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   const dynamicWebpackConfig = {
     entry,
+    plugins: [
+      new CypressCTOptionsPlugin({
+        files,
+        support,
+        projectRoot
+      })
+    ],
     // module: {
     //   rules: [
     //     // entryValLoader,

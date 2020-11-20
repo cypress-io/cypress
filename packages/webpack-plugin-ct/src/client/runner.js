@@ -64,16 +64,15 @@ function runAllSpecs () {
   ).then(executeSpecs)
 }
 
+function shouldLoad() {}
+
 export function init (specMap, support) {
   setState(specMap, support)
-  // renderMochaTarget()
-  // createApp(state.specNames, { runAllSpecs })
   renderTargets()
   setupEnvironment()
 
-  console.log(state.specNames)
   Promise.all(
-    state.specNames.map((name) => load(state, name)),
+    state.specNames.filter(shouldLoad).map((name) => load(state, name)),
   ).then(executeSpecs)
   // runAllSpecs()
 }
