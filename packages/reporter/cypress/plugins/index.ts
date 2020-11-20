@@ -1,5 +1,3 @@
-/// <reference types="cypress" />
-
 const percyHealthCheck = require('@percy/cypress/task')
 
 /**
