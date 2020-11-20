@@ -53,7 +53,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
     try {
       // reset obj to wrapped
       const orig = ctx._obj
-      const selector = ctx._obj.selector
+      const selector = orig ? orig.selector : undefined
 
       ctx._obj = wrap(ctx)
 
