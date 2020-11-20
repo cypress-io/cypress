@@ -28,6 +28,29 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
   return label
 }
 
+/**
+ * Returns array of spec sorted with Dir first, then Spec.
+ * @param {any[]} specs array of specs with random order of 'Spec'/'Dir'
+ */
+const separatedSpecList = (specs) => {
+  let retList = []
+  let dirs = []
+  let files = []
+
+  _.map(specs, (spec) => {
+    if (spec.hasChildren) {
+      dirs.push(spec)
+    } else {
+      files.push(spec)
+    }
+  })
+
+  retList = retList.concat(dirs)
+  retList = retList.concat(files)
+
+  return retList
+}
+
 // Note: this component can be mounted and unmounted
 // if you need to persist the data through mounts, "save" it in the specsStore
 @observer
@@ -265,7 +288,7 @@ class SpecsList extends Component {
             isExpanded ?
               <div>
                 <ul className='list-as-table'>
-                  {_.map(spec.children, (spec) => this._specItem(spec, nestingLevel + 1))}
+                  {_.map(separatedSpecList(spec.children), (spec) => this._specItem(spec, nestingLevel + 1))}
                 </ul>
               </div> :
               null
