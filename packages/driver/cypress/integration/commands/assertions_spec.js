@@ -1153,7 +1153,8 @@ describe('src/cy/commands/assertions', () => {
         cy.noop('foobar').should('contain', 'oob')
       })
 
-      it('fails not.contain for non-existent DOM', function (done) {
+      // https://github.com/cypress-io/cypress/issues/205
+      it('fails existence check on not.contain for non-existent DOM', function (done) {
         cy.timeout(100)
         cy.on('fail', ({ message }) => {
           expect(message)
@@ -1250,6 +1251,7 @@ describe('src/cy/commands/assertions', () => {
         cy.wrap(cy.$$('.non-existent')).should('not.exist')
       })
 
+      // https://github.com/cypress-io/cypress/issues/205
       describe('does not pass not.visible for non-dom', function () {
         beforeEach(function () {
           return Cypress.config('defaultCommandTimeout', 50)
