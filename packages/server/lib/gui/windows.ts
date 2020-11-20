@@ -135,8 +135,8 @@ export function defaults (options = {}) {
       partition: null,
       webSecurity: true,
       nodeIntegration: false,
-      // in Electron 12, this is the new default and can be removed
-      contextIsolation: true,
+      // TODO: disable contextIsolation for Cypress browser (default in Electron 12)
+      contextIsolation: false,
       backgroundThrottling: false,
     },
   })
@@ -233,8 +233,6 @@ export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow
     show: true,
     webPreferences: {
       preload: cwd('lib', 'ipc', 'ipc.js'),
-      // explicitly disable context isolation so we can use IPC
-      contextIsolation: false,
     },
   })
 
