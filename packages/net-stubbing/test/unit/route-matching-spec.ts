@@ -1,7 +1,7 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
-} from '../../lib/server/intercept-request'
+} from '../../lib/server/route-matching'
 import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
 

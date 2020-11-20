@@ -130,8 +130,8 @@ export const itHandlesFileOpening = ({ getRunner, selector, file, stackTrace = f
         cy.contains('Set preference and open file').click()
       })
 
-      it('closes modal', () => {
-        cy.contains('Set preference and open file').should('not.be.visible')
+      it('closes modal', function () {
+        cy.contains('Set preference and open file').should('not.exist')
       })
 
       it('emits set:user:editor', () => {

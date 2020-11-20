@@ -248,7 +248,7 @@ describe('test errors', () => {
 
       cy
       .get('.test-err-code-frame')
-      .should('not.be.visible')
+      .should('not.exist')
     })
 
     it('use correct language class', () => {
