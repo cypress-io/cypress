@@ -220,6 +220,7 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
+    debugger
     $scriptUtils.runScripts(specWindow, scripts)
     .catch((err) => {
       err = $errUtils.createUncaughtException('spec', err)
@@ -227,6 +228,7 @@ class $Cypress {
       this.runner.onScriptError(err)
     })
     .then(() => {
+      debugger
       this.cy.initialize(this.$autIframe)
 
       this.onSpecReady()

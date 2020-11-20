@@ -2,6 +2,7 @@ import * as webpack from 'webpack'
 
 interface CypressOptions {
   files: any[]
+  projectRoot: string
 }
 
 type CypressCTWebpackContext = {
@@ -10,9 +11,11 @@ type CypressCTWebpackContext = {
 
 export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInstance {
   private readonly files: any[] = []
+  private readonly projectRoot: string
 
-  public constructor(options) {
+  public constructor (options) {
     this.files = options.files
+    this.projectRoot = options.projectRoot
   }
 
   private pluginFunc = (context: CypressCTWebpackContext, module) => {
@@ -20,7 +23,10 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
       return
     }
 
-    context._cypress = { files: this.files }
+    context._cypress = {
+      files: this.files,
+      projectRoot: this.projectRoot,
+    }
   };
 
   /**
@@ -35,7 +41,7 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
       // @ts-ignore
       webpack.NormalModule.getCompilationHooks(compilation).loader.tap(
         'CypressCTOptionsPlugin',
-        this.pluginFunc as any
+        this.pluginFunc,
       )
 
       return
@@ -44,15 +50,11 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
     // Webpack 4
     (compilation as webpack.compilation.Compilation).hooks.normalModuleLoader.tap(
       'CypressCTOptionsPlugin',
-      this.pluginFunc as any
+      this.pluginFunc,
     )
   };
 
   apply (compiler: webpack.Compiler): void {
-    const files = this.files
-
-    console.log('i think the files are', files)
-
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', this.plugin)
   }
 }

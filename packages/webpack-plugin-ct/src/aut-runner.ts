@@ -1,7 +1,7 @@
-console.log('is this working?')
+/*eslint-env browser*/
 
-;(function (parent) {
-  let Cypress = window.Cypress = parent.Cypress
+(function (parent) {
+  let Cypress = (window as any).Cypress = parent.Cypress
 
   if (!Cypress) {
     throw new Error('Tests cannot run without a reference to Cypress!')

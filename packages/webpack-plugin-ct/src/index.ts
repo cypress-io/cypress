@@ -1,13 +1,30 @@
-// import * as path from 'path'
+import * as path from 'path'
 
-export default function loader (source) {
-  const config = this._cypress
+const makeImport = (file, fileKey, chunkName, projectRoot) => {
+  // If we want to rename the chunks, we can use this
+  const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
+  return `"${fileKey}": {
+    load: () => {
+      return import(${JSON.stringify(path.resolve(projectRoot, file.relative), null, 2)} ${magicComments})
+    },
+    chunkName: "${chunkName}",
+  }`
+}
 
+function buildSpecs (files, projectRoot) {
+  return `{${files.map((f, i) => {
+    return makeImport(f, f.name, `spec-${i}`, projectRoot)
+  }).join(',')}}`
+}
+
+// Runs the tests inside the iframe
+export default function loader () {
+  const { files, projectRoot } = this._cypress
 
   return `
-  
   require(${JSON.stringify(require.resolve('./aut-runner'))})  
-
-  export default {}`
+  
+  var allTheSpecs = ${buildSpecs(files, projectRoot)};
+  Object.keys(allTheSpecs).map(a => allTheSpecs[a].load())`
 }
