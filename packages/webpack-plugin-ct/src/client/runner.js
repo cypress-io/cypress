@@ -1,10 +1,8 @@
-// TODO: move this file into a "webpack" plugin
-// `packages/webpack-plugin-ct`
+/*eslint-env browser*/
+
 const { Mocha } = require('mocha')
 const chai = require('chai')
 const driver = require('./driver')
-
-const { createApp } = require('./app')
 const { load } = require('./load-specs')
 const { renderTargets, renderMochaTarget } = require('./render-target')
 
@@ -46,13 +44,13 @@ function setState (specMap, support) {
   window.specs = state.specs = specMap
 }
 
-function executeSpecs () {
-  // window.mocha.run()
-}
+// function executeSpecs () {
+//   // window.mocha.run()
+// }
 
-function clearCache () {
-  // state.specNames.forEach((s) => state.specs[s].reset())
-}
+// function clearCache () {
+//   // state.specNames.forEach((s) => state.specs[s].reset())
+// }
 
 function runAllSpecs () {
   // clearCache()
@@ -64,16 +62,18 @@ function runAllSpecs () {
   ).then(executeSpecs)
 }
 
+function shouldLoad () {
+  return true
+}
+
 export function init (specMap, support) {
   setState(specMap, support)
-  // renderMochaTarget()
-  // createApp(state.specNames, { runAllSpecs })
   renderTargets()
   setupEnvironment()
 
-  console.log(state.specNames)
   Promise.all(
-    state.specNames.map((name) => load(state, name)),
+    state.specNames.filter(shouldLoad).map((name) => load(state, name)),
   ).then(executeSpecs)
-  // runAllSpecs()
+
+  runAllSpecs()
 }

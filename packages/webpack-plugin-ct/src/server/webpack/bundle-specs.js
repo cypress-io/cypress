@@ -1,9 +1,6 @@
-// TODO: move this file into a "webpack" plugin
-// `packages/webpack-plugin-ct`
+import * as path from 'path'
 
-const path = require('path')
-
-module.exports = async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
+export async function bundleSpecs ({ files, projectRoot, support }, loaderContext) {
   const makeImport = (file, fileKey, chunkName) => {
     // If we want to rename the chunks, we can use this
     const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''

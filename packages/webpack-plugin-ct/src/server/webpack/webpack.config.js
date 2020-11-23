@@ -1,6 +1,3 @@
-// TODO: move this file into a "webpack" plugin
-// `packages/webpack-plugin-ct`
-
 const path = require('path')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 

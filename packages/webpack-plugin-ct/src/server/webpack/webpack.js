@@ -1,6 +1,3 @@
-// TODO: move this file into a "webpack" plugin
-// `packages/webpack-plugin-ct`
-
 const debug = require('debug')('cypress:evergreen:webpack')
 const path = require('path')
 const webpack = require('webpack')

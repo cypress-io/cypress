@@ -1,6 +1,7 @@
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
+import CypressCTOptionsPlugin from '@packages/webpack-plugin-ct/dist/plugin'
 
 const debug = debugFn('cypress:evergreen:webpack')
 
@@ -15,42 +16,21 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   debug(`New webpack entries`, files)
 
-  // TODO: Add plugin
-
-  // TODO: hook up to entry point? where will aut webpack entry live?
-  //   const entry = path.resolve(__dirname, '../../plugins/webpack-client.js')
-
-  //   debug({ entry })
-
-  // TODO: webpack-plugin-ct, loader? idk
-  //   const entryValLoader = {
-  //     test: /bundle-specs.js$/,
-  //     use: [
-  //       {
-  //         loader: 'val-loader',
-  //         options: {
-  //           support,
-  //           files,
-  //           projectRoot,
-  //         },
-  //       },
-  //     ],
-  //   }
-
   const entry = path.resolve(__dirname, './browser.js')
 
   const dynamicWebpackConfig = {
-    entry,
-    // module: {
-    //   rules: [
-    //     // entryValLoader,
-    //   ],
-    // },
+    plugins: [
+      new CypressCTOptionsPlugin({
+        files,
+        support,
+        projectRoot,
+      }),
+    ],
   }
 
   const mergedConfig = merge(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)
 
-  //   mergedConfig.entry = { entry }
+  mergedConfig.entry = entry
 
   return mergedConfig
 }
