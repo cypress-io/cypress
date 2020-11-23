@@ -406,9 +406,9 @@ declare global {
       ```
       // Wait for the route aliased as 'getAccount' to respond
       // without changing or stubbing its response
-      cy.http('https://api.example.com/accounts/*').as('getAccount')
+      cy.intercept('https://api.example.com/accounts/*').as('getAccount')
       cy.visit('/accounts/123')
-      cy.wait('@getAccount').then((xhr) => {
+      cy.wait('@getAccount').then((intercepted) => {
         // we can now access the low level request
         // that contains the request body,
         // response body, status, etc
@@ -424,18 +424,14 @@ declare global {
        *
       ```
       // wait for 3 XHR requests to complete
-      cy.server()
-      cy.http('users/*').as('getUsers')
-      cy.http('activities/*').as('getActivities')
-      cy.http('comments/*').as('getComments')
+      cy.intercept('users/*').as('getUsers')
+      cy.intercept('activities/*').as('getActivities')
+      cy.intercept('comments/*').as('getComments')
       cy.visit('/dashboard')
 
       cy.wait(['@getUsers', '@getActivities', '@getComments'])
-        .then((xhrs) => {
-          // xhrs will now be an array of matching XHR's
-          // xhrs[0] <-- getUsers
-          // xhrs[1] <-- getActivities
-          // xhrs[2] <-- getComments
+        .then((intercepts) => {
+          // intercepts will now be an array of matching HTTP requests
         })
       ```
       */
