@@ -428,7 +428,7 @@ declare global {
       cy.visit('/dashboard')
 
       cy.wait(['@getUsers', '@getActivities', '@getComments'])
-        .then((intercepts) => {
+        .then((interceptions) => {
           // intercepts will now be an array of matching HTTP requests
         })
       ```
