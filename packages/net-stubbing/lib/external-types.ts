@@ -406,7 +406,7 @@ declare global {
       // without changing or stubbing its response
       cy.intercept('https://api.example.com/accounts/*').as('getAccount')
       cy.visit('/accounts/123')
-      cy.wait('@getAccount').then((intercepted) => {
+      cy.wait('@getAccount').then((interception) => {
         // we can now access the low level request
         // that contains the request body,
         // response body, status, etc
