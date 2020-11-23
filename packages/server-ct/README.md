@@ -6,4 +6,8 @@ Server part of the component testing module
 
 Move to the `example` folder. In this folder run `yarn install`
 
-Then move back to the `server-ct` folder
+Then move back to the `server-ct` folder and run
+
+```sh
+yarn start
+```
