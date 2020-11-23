@@ -6,3 +6,5 @@ interface EventEmitter extends EventEmitter2 {
   emitMap: (eventName: string, args: any[]) => Array<(...args: any[]) => any>
   emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
 }
+
+type NodeEventEmitter = import('events').EventEmitter
