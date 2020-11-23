@@ -14,16 +14,21 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn } from './'
 import Bluebird from 'bluebird'
+import { parseJsonBody } from './utils'
 
 export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> = (Cypress, frame, { getRoute, getRequest, emitNetEvent }) => {
   const { res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
+
+  parseJsonBody(res)
 
   let sendCalled = false
   let resolved = false
 
   if (request) {
     request.state = 'ResponseReceived'
+
+    request.log.fireChangeEvent()
 
     if (!request.responseHandler) {
       // this is notification-only, update the request with the response attributes and end
@@ -42,12 +47,18 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     // copy changeable attributes of userRes to res in frame
     // if the user is setting a StaticResponse, use that instead
     // @ts-ignore
-    request.response = continueFrame.res = {
+    continueFrame.res = {
       ..._.pick(continueFrame.staticResponse || userRes, SERIALIZABLE_RES_PROPS),
     }
 
     if (request) {
+      request.response = _.clone(continueFrame.res)
       request.state = 'ResponseIntercepted'
+      request.log.fireChangeEvent()
+    }
+
+    if (_.isObject(continueFrame.res!.body)) {
+      continueFrame.res!.body = JSON.stringify(continueFrame.res!.body)
     }
 
     emitNetEvent('http:response:continue', continueFrame)

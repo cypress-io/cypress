@@ -110,7 +110,7 @@ export const itHandlesFileOpening = (selector, file, stackTrace = false) => {
       })
 
       it('closes modal', function () {
-        cy.contains('Set preference and open file').should('not.be.visible')
+        cy.contains('Set preference and open file').should('not.exist')
       })
 
       it('emits set:user:editor', function () {

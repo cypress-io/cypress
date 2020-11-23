@@ -1,5 +1,3 @@
-// prevents "regeneratorRuntime is not defined" error
-import 'regenerator-runtime/runtime'
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
 import Settings from './settings'

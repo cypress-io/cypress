@@ -111,8 +111,10 @@ function getInvocationDetails (specWindow, config) {
       stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, '__cypress/tests', true)
     }
 
+    const details = $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot'))
+
     return {
-      details: $stackUtils.getSourceDetailsForFirstLine(stack, config('projectRoot')),
+      details,
       stack,
     }
   }

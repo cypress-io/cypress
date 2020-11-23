@@ -1,4 +1,3 @@
-import 'regenerator-runtime/runtime'
 import FilePreference from './file-preference'
 import React from 'react'
 import { mount } from 'cypress-react-unit-test'
@@ -33,14 +32,14 @@ describe('FilePreference', () => {
       { alias: 'FilePreference', stylesheets: '/__root/dist/app.css' },
     )
 
-    cy.get('.file-preference').should('not.be.visible')
+    cy.get('.file-preference').should('not.exist')
     cy.log('**Opening file preferences**')
     cy.contains('File Opener Preference').click()
     cy.get('.file-preference').should('be.visible')
     cy.get('.loading-editors').should('be.visible')
 
     cy.log('**Editors loaded**')
-    cy.get('.loading-editors').should('not.be.visible')
+    cy.get('.loading-editors').should('not.exist')
     cy.contains('Visual Studio Code').closest('li').should('have.class', 'is-selected')
   })
 })

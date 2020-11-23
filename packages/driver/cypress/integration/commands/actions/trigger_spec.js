@@ -237,6 +237,14 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')
       })
 
+      it('can trigger on elements with `opacity: 0`', () => {
+        cy.get('#opacity-0').trigger('mousedown')
+      })
+
+      it('can trigger on elements with parents that have `opacity: 0`', () => {
+        cy.get('#opacity-0-parent').trigger('mousedown')
+      })
+
       it('can trigger on readonly inputs', () => {
         cy.get('#readonly-attr').trigger('mousedown')
       })
@@ -992,6 +1000,18 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('button:first').trigger('mouseover')
+      })
+
+      it('throws when the element has `opacity: 0` but is not visible', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).not.to.contain('CSS property: `opacity: 0`')
+          expect(err.message).to.contain('`cy.trigger()` failed because this element is not visible')
+
+          done()
+        })
+
+        cy.get('#opacity-0-hidden').trigger('mouseover')
       })
 
       it('throws when subject is disabled', function (done) {

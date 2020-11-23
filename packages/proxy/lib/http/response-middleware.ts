@@ -237,12 +237,13 @@ const PatchExpressSetHeader: ResponseMiddleware = function () {
 const SetInjectionLevel: ResponseMiddleware = function () {
   this.res.isInitial = this.req.cookies['__cypress.initial'] === 'true'
 
+  const isReqMatchOriginPolicy = reqMatchesOriginPolicy(this.req, this.getRemoteState())
   const getInjectionLevel = () => {
     if (this.incomingRes.headers['x-cypress-file-server-error'] && !this.res.isInitial) {
       return 'partial'
     }
 
-    if (!resContentTypeIs(this.incomingRes, 'text/html') || !reqMatchesOriginPolicy(this.req, this.getRemoteState())) {
+    if (!resContentTypeIs(this.incomingRes, 'text/html') || !isReqMatchOriginPolicy) {
       return false
     }
 
@@ -261,7 +262,7 @@ const SetInjectionLevel: ResponseMiddleware = function () {
     this.res.wantsInjection = getInjectionLevel()
   }
 
-  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && (
+  this.res.wantsSecurityRemoved = this.config.modifyObstructiveCode && isReqMatchOriginPolicy && (
     (this.res.wantsInjection === 'full')
     || resContentTypeIsJavaScript(this.incomingRes)
   )
@@ -299,6 +300,7 @@ const OmitProblematicHeaders: ResponseMiddleware = function () {
     'set-cookie',
     'x-frame-options',
     'content-length',
+    'transfer-encoding',
     'content-security-policy',
     'content-security-policy-report-only',
     'connection',

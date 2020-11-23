@@ -70,6 +70,7 @@ describe('Navigation', function () {
       cy.contains('Jane Lane').click()
 
       cy.contains('Log Out').should('be.visible')
+      cy.percySnapshot()
     })
 
     describe('logging out', function () {
@@ -95,6 +96,7 @@ describe('Navigation', function () {
 
       it('shows global error', () => {
         cy.get('.global-error').should('be.visible')
+        cy.percySnapshot()
       })
 
       it('displays error message', function () {

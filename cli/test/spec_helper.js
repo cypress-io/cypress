@@ -32,8 +32,6 @@ sinon.usingPromise(Promise)
 delete process.env.CYPRESS_RUN_BINARY
 delete process.env.CYPRESS_INSTALL_BINARY
 delete process.env.CYPRESS_CACHE_FOLDER
-delete process.env.CYPRESS_BINARY_VERSION
-delete process.env.CYPRESS_SKIP_BINARY_INSTALL
 delete process.env.CYPRESS_DOWNLOAD_MIRROR
 delete process.env.DISPLAY
 

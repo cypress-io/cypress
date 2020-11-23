@@ -1037,6 +1037,14 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('#overflow-link-width').click()
       })
 
+      it('can click on elements with `opacity: 0`', () => {
+        cy.get('#opacity-0').click()
+      })
+
+      it('can click on elements with parents that have `opacity: 0`', () => {
+        cy.get('#opacity-0-parent').click()
+      })
+
       // readonly should only limit typing, not clicking
       it('can click on readonly inputs', () => {
         cy.get('#readonly-attr').click()
@@ -1270,6 +1278,28 @@ describe('src/cy/commands/actions/click', () => {
           expect(scrolled).to.be.empty
           expect(retried).to.be.false
 
+          expect(clicked).to.be.true
+        })
+      })
+
+      it('can forcibly click when being covered by element with `opacity: 0`', () => {
+        const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+
+        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+
+        let retried = false
+        let clicked = false
+
+        cy.on('command:retry', () => {
+          retried = true
+        })
+
+        $btn.on('click', () => {
+          clicked = true
+        })
+
+        cy.get('#button-covered-in-span').click({ force: true }).then(() => {
+          expect(retried).to.be.false
           expect(clicked).to.be.true
         })
       })
@@ -2075,6 +2105,32 @@ describe('src/cy/commands/actions/click', () => {
         })
 
         cy.get('#three-buttons button').click({ multiple: true })
+      })
+
+      it('throws when the element has `opacity: 0` but is not visible', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).not.to.contain('CSS property: `opacity: 0`')
+          expect(err.message).to.contain('`cy.click()` failed because this element is not visible')
+
+          done()
+        })
+
+        cy.get('#opacity-0-hidden').click()
+      })
+
+      it('throws when element with `opacity: 0` is covering element', function (done) {
+        const $btn = $('<button>button covered</button>').attr('id', 'button-covered-in-span').prependTo(cy.$$('body'))
+
+        $('<span>span on button</span>').css({ opacity: 0, position: 'absolute', left: $btn.offset().left, top: $btn.offset().top, padding: 5, display: 'inline-block' }).prependTo(cy.$$('body'))
+
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).to.include('is being covered by another element')
+          done()
+        })
+
+        cy.get('#button-covered-in-span').click()
       })
 
       it('throws when subject is disabled', function (done) {

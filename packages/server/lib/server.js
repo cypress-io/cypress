@@ -20,7 +20,10 @@ const {
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
-const { netStubbingState } = require('@packages/net-stubbing')
+const {
+  netStubbingState,
+  getRouteForRequest,
+} = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')
@@ -38,6 +41,7 @@ const templateEngine = require('./template_engine')
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
+const textHtmlContentTypeRe = /^text\/html/i
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
@@ -71,7 +75,10 @@ const isResponseHtml = function (contentType, responseBuffer) {
   let body
 
   if (contentType) {
-    return contentType === 'text/html'
+    // want to match anything starting with 'text/html'
+    // including 'text/html;charset=utf-8' and 'Text/HTML'
+    // https://github.com/cypress-io/cypress/issues/8506
+    return textHtmlContentTypeRe.test(contentType)
   }
 
   body = _.invoke(responseBuffer, 'toString')
@@ -449,6 +456,16 @@ class Server {
       return currentPromisePhase = fn()
     }
 
+    const matchesNetStubbingRoute = (requestOptions) => {
+      const proxiedReq = {
+        proxiedUrl: requestOptions.url,
+        ..._.pick(requestOptions, ['headers', 'method']),
+        // TODO: add `body` here once bodies can be statically matched
+      }
+
+      return !!getRouteForRequest(this._netStubbingState.routes, proxiedReq)
+    }
+
     return this._urlResolver = (p = new Promise((resolve, reject, onCancel) => {
       let urlFile
 
@@ -638,7 +655,7 @@ class Server {
         },
       })
 
-      if (options.selfProxy) {
+      if (matchesNetStubbingRoute(options)) {
         // TODO: this is being used to force cy.visits to be interceptable by network stubbing
         // however, network errors will be obsfucated by the proxying so this is not an ideal solution
         _.assign(options, {

@@ -4,6 +4,7 @@ const Promise = require('bluebird')
 const debug = require('debug')('cypress:driver:actionability')
 
 const $dom = require('../dom')
+const $elements = require('../dom/elements')
 const $errUtils = require('../cypress/error_utils')
 
 const delay = 50
@@ -366,8 +367,16 @@ const verify = function (cy, $el, options, callbacks) {
       }
 
       // pass our final object into onReady
-      const finalEl = $elAtCoords != null ? $elAtCoords : $el
       const finalCoords = getCoordinatesForEl(cy, $el, options)
+      let finalEl
+
+      // When a contenteditable element is selected, we don't go deeper,
+      // because it is treated as a rich text field to users.
+      if ($elements.hasContenteditableAttr($el.get(0))) {
+        finalEl = $el
+      } else {
+        finalEl = $elAtCoords != null ? $elAtCoords : $el
+      }
 
       return onReady(finalEl, finalCoords)
     }

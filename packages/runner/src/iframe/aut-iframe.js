@@ -71,8 +71,8 @@ export default class AutIframe {
 
     // remove the old body and replace with restored one
     this._body().remove()
-    this._insertBodyStyles(body, bodyStyles)
-    $html.append(body)
+    this._insertBodyStyles(body.get(), bodyStyles)
+    $html.append(body.get())
 
     this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
   }
@@ -167,14 +167,14 @@ export default class AutIframe {
     this.removeHighlights()
 
     if (body) {
-      $el = body.find(`[${highlightAttr}]`)
+      $el = body.get().find(`[${highlightAttr}]`)
     } else {
-      body = this._body()
+      body = { get: () => this._body() }
     }
 
     // normalize
     const el = $el.get(0)
-    const $body = body
+    const $body = body.get()
 
     body = $body.get(0)
 

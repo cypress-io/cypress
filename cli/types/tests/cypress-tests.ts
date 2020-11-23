@@ -128,6 +128,9 @@ namespace CypressItsTests {
     s
   })
   cy.wrap({baz: { quux: '2' }}).its('baz.quux') // $ExpectType Chainable<any>
+  cy.wrap({foo: 'bar'}).its('foo', { log: true }) // $ExpectType Chainable<string>
+  cy.wrap({foo: 'bar'}).its('foo', { timeout: 100 }) // $ExpectType Chainable<string>
+  cy.wrap({foo: 'bar'}).its('foo', { log: true, timeout: 100 }) // $ExpectType Chainable<string>
 }
 
 namespace CypressInvokeTests {
@@ -137,6 +140,8 @@ namespace CypressInvokeTests {
   cy.wrap({ a: returnsString }).invoke('a') // $ExpectType Chainable<string>
   cy.wrap({ b: returnsNumber }).invoke('b') // $ExpectType Chainable<number>
   cy.wrap({ b: returnsNumber }).invoke({ log: true }, 'b') // $ExpectType Chainable<number>
+  cy.wrap({ b: returnsNumber }).invoke({ timeout: 100 }, 'b') // $ExpectType Chainable<number>
+  cy.wrap({ b: returnsNumber }).invoke({ log: true, timeout: 100 }, 'b') // $ExpectType Chainable<number>
 
   // challenging to define a more precise return type than string | number here
   cy.wrap([returnsString, returnsNumber]).invoke(1) // $ExpectType Chainable<string | number>
@@ -607,4 +612,16 @@ namespace CypressShadowTests {
   cy
   .get('.foo')
   .find('.bar', {includeShadowDom: true})
+}
+
+namespace CypressTaskTests {
+  cy.task<number>('foo') // $ExpectType Chainable<number>
+  cy.task<number>('foo').then((val) => {
+    val // $ExpectType number
+  })
+
+  cy.task('foo') // $ExpectType Chainable<unknown>
+  cy.task('foo').then((val) => {
+    val // $ExpectType unknown
+  })
 }

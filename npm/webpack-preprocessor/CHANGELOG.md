@@ -1,3 +1,25 @@
+# [@cypress/webpack-preprocessor-v5.4.11](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.10...@cypress/webpack-preprocessor-v5.4.11) (2020-11-10)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9045](https://github.com/cypress-io/cypress/issues/9045)) ([550c05c](https://github.com/cypress-io/cypress/commit/550c05cc3d7a2a179de21138ae5f8118277df6ef))
+
+# [@cypress/webpack-preprocessor-v5.4.10](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.9...@cypress/webpack-preprocessor-v5.4.10) (2020-10-30)
+
+
+### Bug Fixes
+
+* adding build-prod tasks to all of the npm dependencies that need artifacts ([#9046](https://github.com/cypress-io/cypress/issues/9046)) ([462829b](https://github.com/cypress-io/cypress/commit/462829bea1d903b0f1666d4ef2dd85e56636b725))
+
+# [@cypress/webpack-preprocessor-v5.4.9](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.8...@cypress/webpack-preprocessor-v5.4.9) (2020-10-29)
+
+
+### Bug Fixes
+
+* update bugs link in package.json ([#9015](https://github.com/cypress-io/cypress/issues/9015)) ([34186cb](https://github.com/cypress-io/cypress/commit/34186cb8b76c230a2506cabb0358d44c3205e0c4))
+* **webpack-preprocessor:** fix webpack preprocessor potential race condition ([#8976](https://github.com/cypress-io/cypress/issues/8976)) ([5e0e5d8](https://github.com/cypress-io/cypress/commit/5e0e5d8ece2909b2436eb563b39f22e2723ddf98))
+
 # [@cypress/webpack-preprocessor-v5.4.8](https://github.com/cypress-io/cypress/compare/@cypress/webpack-preprocessor-v5.4.7...@cypress/webpack-preprocessor-v5.4.8) (2020-10-15)
 
 

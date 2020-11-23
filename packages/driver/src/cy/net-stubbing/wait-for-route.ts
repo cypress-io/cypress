@@ -7,33 +7,31 @@ import {
 
 const RESPONSE_WAITED_STATES: RequestState[] = ['ResponseIntercepted', 'Complete']
 
-export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Request | null {
-  // if they didn't specify what to wait on, they want to wait on a response
-  if (!specifier) {
-    specifier = 'response'
+function getPredicateForSpecifier (specifier: string): Partial<Request> {
+  if (specifier === 'request') {
+    return { requestWaited: false }
   }
 
-  // 1. Get route with this alias.
+  // default to waiting on response
+  return { responseWaited: false }
+}
+
+export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Request | null {
+  // 1. Create an array of known requests that have this alias.
+  // Start with request-level (req.alias = '...') aliases that could be a match.
+  const candidateRequests = _.filter(state('aliasedRequests'), { alias })
+  .map(({ request }) => request)
+
+  // Now add route-level (cy.http(...).as()) aliased requests.
   const route: Route = _.find(state('routes'), { alias })
 
-  if (!route) {
-    // TODO: once XHR stubbing is removed, this should throw
-    return null
+  if (route) {
+    Array.prototype.push.apply(candidateRequests, _.values(route.requests))
   }
 
-  // 2. Find the first request without responseWaited/requestWaited/with the correct index
-  let i = 0
-  const request = _.find(route.requests, (request) => {
-    i++
-    switch (specifier) {
-      case 'request':
-        return !request.requestWaited
-      case 'response':
-        return !request.responseWaited
-      default:
-        return i === Number(specifier)
-    }
-  })
+  // 2. Find the first request without responseWaited/requestWaited
+  const predicate = getPredicateForSpecifier(specifier)
+  const request = _.find(candidateRequests, predicate) as Request | undefined
 
   if (!request) {
     return null

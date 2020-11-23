@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: 🤔 Questions and Help
-    url: https://www.cypress.io/support
-    about: This issue tracker is not for support questions. Please refer to the Cypress community's support.
+    url: https://github.com/cypress-io/cypress/discussions
+    about: This issue tracker is not for support questions. Please refer to our Discussions.
   - name: 📊 Cypress Dashboard Feature
     url: https://portal.productboard.com/cypress-io/1-cypress-dashboard
     about: This issue tracker is not for requesting Cypress Dashboard features. Please express interest here.
