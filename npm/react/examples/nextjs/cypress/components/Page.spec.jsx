@@ -15,10 +15,7 @@ describe('NextJS page', () => {
   it('It doesn\'t run the `.getInitialProps()`', () => {
     mount(<IndexPage />)
 
-    cy.get('[data-testid="server-result"').should(
-      'not.contain',
-      '`.getInitialProps()` was called and passed props to this component',
-    )
+    cy.get('[data-testid="server-result"').should('not.exist')
   })
 
   it('Allows to manually mock the server side props', () => {

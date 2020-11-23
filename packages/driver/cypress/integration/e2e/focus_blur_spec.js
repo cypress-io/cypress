@@ -722,10 +722,10 @@ describe('intercept blur methods correctly', () => {
 
       expect(stub).not.called
 
-      cy.get('no-focus-1').should('not.be.visible')
-      cy.get('no-focus-2').should('not.be.visible')
-      cy.get('no-focus-3').should('not.be.visible')
-      cy.get('no-focus-4').should('not.be.visible')
+      cy.get('#no-focus-1').should('not.be.visible')
+      cy.get('#no-focus-2').should('not.be.visible')
+      cy.get('#no-focus-3').should('not.be.visible')
+      cy.get('#no-focus-4').should('not.be.visible')
     })
   })
 

@@ -857,7 +857,7 @@ describe('Specs List', function () {
 
         it('closes modal when cancel is clicked', function () {
           cy.contains('Cancel').click()
-          cy.contains('Set preference and open file').should('not.be.visible')
+          cy.contains('Set preference and open file').should('not.exist')
         })
 
         describe('when editor is not selected', function () {
@@ -905,7 +905,7 @@ describe('Specs List', function () {
           })
 
           it('closes modal', function () {
-            cy.contains('Set preference and open file').should('not.be.visible')
+            cy.contains('Set preference and open file').should('not.exist')
           })
 
           it('sets user editor', function () {
