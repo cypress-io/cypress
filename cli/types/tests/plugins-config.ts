@@ -28,6 +28,7 @@ const pluginConfig2: Cypress.PluginConfig = (on, config) => {
     file.filePath // $ExpectType string
     file.outputPath // $ExpectType string
     file.shouldWatch // $ExpectType boolean
+    file.on // $ExpectType (type: string | number, listener: Listener) => FileObject
 
     return file.outputPath
   })
