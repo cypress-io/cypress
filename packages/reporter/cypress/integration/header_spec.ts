@@ -39,10 +39,9 @@ describe('header', () => {
 
     it('focuses tests on click', () => {
       cy.spy(runner, 'emit')
-      // don't know why, but 2 clicks are necessary for the event handler
-      // to trigger ¯\_(ツ)_/¯ only seems to be an issue with the test
-      // and not IRL
-      cy.get('.focus-tests button').click().click()
+      // { force: true } is necessary for click to work, apparently because
+      // of the tooltip popping up and getting in the way
+      cy.get('.focus-tests button').click({ force: true })
       cy.wrap(runner.emit).should('be.calledWith', 'focus:tests')
     })
 

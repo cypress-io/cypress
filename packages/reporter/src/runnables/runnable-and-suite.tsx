@@ -38,7 +38,7 @@ export interface RunnableProps {
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
-// in order to mess with its internal state. converting it to a funtional
+// in order to mess with its internal state. converting it to a functional
 // component breaks that, so it needs to stay a Class-based component or
 // else the driver tests need to be refactored to support it being functional
 @observer
