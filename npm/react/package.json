@@ -4,7 +4,7 @@
   "description": "Unit test React components using Cypress",
   "main": "dist",
   "scripts": {
-    "build": "rimraf dist && yarn transpile && yarn transpile:bin && yarn build:dist-package",
+    "build": "rimraf dist && yarn transpile && yarn build:dist-package",
     "build-prod": "yarn build",
     "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./support ./dist/support && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
@@ -15,7 +15,6 @@
     "test": "node ../../scripts/cypress run",
     "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json init/**/*.test.ts",
     "transpile": "tsc",
-    "transpile:bin": "tsc -p tsconfig.bin.json && chmod +x bin/init.js",
     "watch": "tsc -w"
   },
   "dependencies": {
@@ -121,9 +120,6 @@
     "support",
     "plugins"
   ],
-  "bin": {
-    "init": "./bin/init.js"
-  },
   "types": "lib",
   "license": "MIT",
   "repository": {
