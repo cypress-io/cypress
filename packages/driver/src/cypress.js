@@ -29,7 +29,7 @@ const $Screenshot = require('./cypress/screenshot')
 const $SelectorPlayground = require('./cypress/selector_playground')
 const $utils = require('./cypress/utils')
 const $errUtils = require('./cypress/error_utils')
-const $scriptUtils = require('./cypress/script_utils')
+// const $scriptUtils = require('./cypress/script_utils')
 const browserInfo = require('./cypress/browser')
 const resolvers = require('./cypress/resolvers')
 const debug = require('debug')('cypress:driver:cypress')
@@ -220,19 +220,27 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
-    debugger
-    $scriptUtils.runScripts(specWindow, scripts)
-    .catch((err) => {
-      err = $errUtils.createUncaughtException('spec', err)
-
-      this.runner.onScriptError(err)
-    })
+    specWindow.whenReady()
+    .promise()
     .then(() => {
-      debugger
       this.cy.initialize(this.$autIframe)
 
       this.onSpecReady()
     })
+
+    // debugger
+    // $scriptUtils.runScripts(specWindow, scripts)
+    // .catch((err) => {
+    //   err = $errUtils.createUncaughtException('spec', err)
+
+    //   this.runner.onScriptError(err)
+    // })
+    // .then(() => {
+    //   debugger
+    //   this.cy.initialize(this.$autIframe)
+
+    //   this.onSpecReady()
+    // })
   }
 
   action (eventName, ...args) {

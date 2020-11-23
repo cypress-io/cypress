@@ -2,11 +2,14 @@
 
 const { Mocha } = require('mocha')
 const chai = require('chai')
+const Bluebird = require('bluebird')
 const driver = require('./driver')
 const { load } = require('./load-specs')
 const { renderTargets, renderMochaTarget } = require('./render-target')
 
 const state = {}
+
+window.whenReady = Bluebird.defer()
 
 function loadCypressStuff () {
   (function (parent) {
