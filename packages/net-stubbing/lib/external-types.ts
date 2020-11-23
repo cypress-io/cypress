@@ -328,6 +328,36 @@ export interface GenericStaticResponse<Fixture, Body> {
  */
 export type StringMatcher = GlobPattern | RegExp
 
+interface WaitOptions {
+  /**
+   * Displays the command in the Command Log
+   *
+   * @default true
+   */
+  log: boolean
+  /**
+   * Time to wait for the request (ms)
+   *
+   * @default {@link Timeoutable#timeout}
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  requestTimeout: number
+  /**
+   * Time to wait for the response (ms)
+   *
+   * @default {@link Timeoutable#timeout}
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  responseTimeout: number
+  /**
+   * Time to wait (ms)
+   *
+   * @default defaultCommandTimeout
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  timeout: number
+}
+
 declare global {
   namespace Cypress {
     interface Chainable<Subject = any> {
@@ -367,6 +397,49 @@ declare global {
        * @deprecated
        */
       route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * Wait for a specific request to complete.
+       *
+       * @see https://on.cypress.io/wait
+       * @param {string} alias - Name of the alias to wait for.
+       *
+      ```
+      // Wait for the route aliased as 'getAccount' to respond
+      // without changing or stubbing its response
+      cy.http('https://api.example.com/accounts/*').as('getAccount')
+      cy.visit('/accounts/123')
+      cy.wait('@getAccount').then((xhr) => {
+        // we can now access the low level request
+        // that contains the request body,
+        // response body, status, etc
+      })
+      ```
+      */
+      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Request>
+      /**
+       * Wait for list of requests to complete.
+       *
+       * @see https://on.cypress.io/wait
+       * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
+       *
+      ```
+      // wait for 3 XHR requests to complete
+      cy.server()
+      cy.http('users/*').as('getUsers')
+      cy.http('activities/*').as('getActivities')
+      cy.http('comments/*').as('getComments')
+      cy.visit('/dashboard')
+
+      cy.wait(['@getUsers', '@getActivities', '@getComments'])
+        .then((xhrs) => {
+          // xhrs will now be an array of matching XHR's
+          // xhrs[0] <-- getUsers
+          // xhrs[1] <-- getActivities
+          // xhrs[2] <-- getComments
+        })
+      ```
+      */
+      wait(alias: string[], options?: Partial<WaitOptions>): Chainable<Request[]>
     }
   }
 }
