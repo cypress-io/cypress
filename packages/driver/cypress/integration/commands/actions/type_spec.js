@@ -2041,6 +2041,16 @@ describe('src/cy/commands/actions/type - #type', () => {
         })
       })
 
+      // https://github.com/cypress-io/cypress/issues/5480
+      it('does NOT follow focus if target is blurred without another receiving focus', () => {
+        cy.$$('input:first').keydown(_.after(4, function () {
+          this.blur()
+        }))
+
+        cy.get('input:first').type('foobar')
+        .should('have.value', 'foobar')
+      })
+
       it('follows focus into date input', () => {
         cy.$$('input:first').on('input', _.after(3, _.once((e) => {
           cy.$$('input[type=date]:first').focus()
