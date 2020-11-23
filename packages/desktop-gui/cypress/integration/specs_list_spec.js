@@ -290,10 +290,10 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 5)
