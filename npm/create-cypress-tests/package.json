@@ -1,6 +1,6 @@
 {
   "name": "create-cypress-tests-beta",
-  "version": "0.0.128",
+  "version": "0.0.130",
   "description": "Cypress smart installation wizard",
   "private": false,
   "main": "index.js",
