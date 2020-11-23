@@ -7,6 +7,7 @@ build
 .publish
 _test-output
 cypress.zip
+.idea
 
 # from extension
 Cached Theme.pak

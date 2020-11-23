@@ -23,8 +23,15 @@ export default function loader () {
   const { files, projectRoot } = this._cypress
 
   return `
-  require(${JSON.stringify(require.resolve('./aut-runner'))})  
-  
+  const Bluebird = require('bluebird')
+  window.whenReady = Bluebird.defer()
   var allTheSpecs = ${buildSpecs(files, projectRoot)};
-  Object.keys(allTheSpecs).map(a => allTheSpecs[a].load())`
+  Promise.all(
+    Object.keys(allTheSpecs).map(a => allTheSpecs[a].load())
+  ).then(() => { 
+    window.whenReady.resolve()
+  })
+
+  require(${JSON.stringify(require.resolve('./aut-runner'))})
+  `
 }

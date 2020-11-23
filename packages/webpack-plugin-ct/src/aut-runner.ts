@@ -1,6 +1,6 @@
 /*eslint-env browser*/
 
-(function (parent) {
+;(function (parent) {
   let Cypress = (window as any).Cypress = parent.Cypress
 
   if (!Cypress) {
