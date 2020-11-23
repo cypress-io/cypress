@@ -1906,7 +1906,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
         expect(log.get('alias')).to.eq('getFoo')
 
-        expect(res.response.body).to.deep.eq({
+        expect(res.response!.body).to.deep.eq({
           some: 'json',
           foo: {
             bar: 'baz',
