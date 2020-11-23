@@ -220,8 +220,8 @@ class $Cypress {
 
     $FirefoxForcedGc.install(this)
 
-    specWindow.whenReady()
-    .promise()
+    specWindow.whenReady
+    .promise
     .then(() => {
       this.cy.initialize(this.$autIframe)
 

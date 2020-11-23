@@ -47,13 +47,14 @@ function setState (specMap, support) {
   window.specs = state.specs = specMap
 }
 
-// function executeSpecs () {
-//   // window.mocha.run()
-// }
+function executeSpecs () {
+  window.whenResolve.resolve()
+  //   // window.mocha.run()
+  // }
 
 // function clearCache () {
 //   // state.specNames.forEach((s) => state.specs[s].reset())
-// }
+}
 
 function runAllSpecs () {
   // clearCache()
