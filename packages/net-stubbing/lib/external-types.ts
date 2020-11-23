@@ -388,13 +388,11 @@ declare global {
        */
       intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Deprecated - use `cy.intercept()` instead.
-       * @deprecated
+       * @deprecated Use `cy.intercept()` instead.
        */
       route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Deprecated - use `cy.intercept()` instead.
-       * @deprecated
+       * @deprecated Use `cy.intercept()` instead.
        */
       route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
