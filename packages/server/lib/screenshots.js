@@ -166,7 +166,7 @@ const crop = function (image, dimensions, pixelRatio = 1) {
   debug(`crop: from ${x}, ${y}`)
   debug(`        to ${width} x ${height}`)
 
-  return image.clone().crop(x, y, width, height)
+  return image.clone().crop(Math.max(0, x), Math.max(0, y), width, height)
 }
 
 const pixelConditionFn = function (data, image) {
