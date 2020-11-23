@@ -5,6 +5,7 @@ const makeImport = (file, fileKey, chunkName, projectRoot) => {
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
   return `"${fileKey}": {
+    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
     load: () => {
       return import(${JSON.stringify(path.resolve(projectRoot, file.relative), null, 2)} ${magicComments})
     },
@@ -26,6 +27,10 @@ export default function loader () {
   var allTheSpecs = ${buildSpecs(files, projectRoot)};
 
   const { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
-  init(Object.keys(allTheSpecs).map(a => allTheSpecs[a].load()))
+
+  init(Object.keys(allTheSpecs)
+    .filter(key => allTheSpecs[key].shouldLoad())
+    .map(a => allTheSpecs[a].load())
+  )
   `
 }
