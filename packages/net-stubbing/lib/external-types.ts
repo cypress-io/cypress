@@ -425,9 +425,9 @@ declare global {
       ```
       // wait for 3 XHR requests to complete
       cy.server()
-      cy.route('users/*').as('getUsers')
-      cy.route('activities/*').as('getActivities')
-      cy.route('comments/*').as('getComments')
+      cy.http('users/*').as('getUsers')
+      cy.http('activities/*').as('getActivities')
+      cy.http('comments/*').as('getComments')
       cy.visit('/dashboard')
 
       cy.wait(['@getUsers', '@getActivities', '@getComments'])
