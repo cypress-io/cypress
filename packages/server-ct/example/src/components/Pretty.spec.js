@@ -9,8 +9,8 @@ import Vue from 'vue'
 
 Vue.config.productionTip = false
 
-describe('hello', () => {
-  it('works', async () => {
+describe('Pretty', () => {
+  it('spec works', async () => {
     // window.Vue = Vue
     // new Vue(HelloWorld).$mount('#root')
     const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })
