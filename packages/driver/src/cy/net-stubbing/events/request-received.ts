@@ -8,6 +8,7 @@ import {
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
 } from '../types'
+import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
@@ -48,6 +49,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   const route = getRoute(frame.routeHandlerId)
   const { req, requestId, routeHandlerId } = frame
+
+  parseJsonBody(req)
 
   const request: Partial<Request> = {
     id: requestId,
@@ -138,6 +141,10 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       }
 
       _.merge(request.request, continueFrame.req)
+
+      if (_.isObject(continueFrame.req!.body)) {
+        continueFrame.req!.body = JSON.stringify(continueFrame.req!.body)
+      }
 
       emitNetEvent('http:request:continue', continueFrame)
     }

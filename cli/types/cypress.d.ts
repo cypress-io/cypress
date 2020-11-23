@@ -1477,8 +1477,9 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * Use `cy.route()` to manage the behavior of network requests.
+     * @deprecated Use `cy.http()` instead.
      *
+     * Use `cy.route()` to manage the behavior of network requests.
      * @see https://on.cypress.io/route
      * @example
      *    cy.server()
@@ -1486,6 +1487,8 @@ declare namespace Cypress {
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.http()` instead.
+     *
      * Spy or stub request with specific method and url.
      *
      * @see https://on.cypress.io/route
@@ -1496,6 +1499,8 @@ declare namespace Cypress {
      */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.http()` instead.
+     *
      * Set a route by returning an object literal from a callback function.
      * Functions that return a Promise will automatically be awaited.
      *
@@ -1514,6 +1519,8 @@ declare namespace Cypress {
      */
     route(fn: () => RouteOptions): Chainable<null>
     /**
+     * @deprecated Use `cy.http()` instead.
+     *
      * Spy or stub a given route.
      *
      * @see https://on.cypress.io/route
@@ -1530,6 +1537,8 @@ declare namespace Cypress {
     route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
+     * @deprecated Use `cy.http()` instead.
+     *
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
@@ -1581,6 +1590,8 @@ declare namespace Cypress {
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * @deprecated Use `cy.http()` instead.
+     *
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
      * @example
@@ -2013,50 +2024,6 @@ declare namespace Cypress {
      *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
-    /**
-     * Wait for a specific XHR to respond.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string} alias - Name of the alias to wait for.
-     *
-    ```
-    // Wait for the route aliased as 'getAccount' to respond
-    // without changing or stubbing its response
-    cy.server()
-    cy.route('/accounts/*').as('getAccount')
-    cy.visit('/accounts/123')
-    cy.wait('@getAccount').then((xhr) => {
-      // we can now access the low level xhr
-      // that contains the request body,
-      // response body, status, etc
-    })
-    ```
-     */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
-    /**
-     * Wait for list of XHR requests to complete.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
-     *
-    ```
-    // wait for 3 XHR requests to complete
-    cy.server()
-    cy.route('users/*').as('getUsers')
-    cy.route('activities/*').as('getActivities')
-    cy.route('comments/*').as('getComments')
-    cy.visit('/dashboard')
-
-    cy.wait(['@getUsers', '@getActivities', '@getComments'])
-      .then((xhrs) => {
-        // xhrs will now be an array of matching XHR's
-        // xhrs[0] <-- getUsers
-        // xhrs[1] <-- getActivities
-        // xhrs[2] <-- getComments
-      })
-    ```
-     */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
