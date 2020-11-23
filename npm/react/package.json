@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile && yarn transpile:bin && yarn build:dist-package",
     "build-prod": "yarn build",
-    "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./plugins ./dist/plugins",
+    "build:dist-package": "node scripts/prepareDistPackage.js && ncp ./support ./dist/support && ncp ./plugins ./dist/plugins",
     "check:links": "find . -type f -name 'README.md' ! -path './node_modules/*' | xargs -L1 npx markdown-link-check --quiet",
     "cy:open": "node ../../scripts/cypress open",
     "percy:test": "percy exec -- node ../../scripts/cypress run",
@@ -27,7 +27,7 @@
     "cli-highlight": "2.1.4",
     "debug": "4.1.1",
     "find-up": "5.0.0",
-    "find-webpack": "2.1.0",
+    "find-webpack": "2.2.0",
     "inquirer": "7.3.3",
     "mime-types": "2.1.26",
     "semver": "7.3.2",

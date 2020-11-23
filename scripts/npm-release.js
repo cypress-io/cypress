@@ -160,6 +160,10 @@ const waitOnTests = async (names, packageInfo) => {
   })
 }
 
+const RELEASE_DIST_PACKAGES = [
+  '@cypress/react',
+]
+
 const releasePackages = async (packages) => {
   console.log(`\nReleasing packages`)
 
@@ -168,7 +172,12 @@ const releasePackages = async (packages) => {
   // so we run them one by one to avoid this
   for (const name of packages) {
     console.log(`\nReleasing ${name}...`)
-    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', 'npx', '--no-install', 'semantic-release'])
+
+    const semanticReleaseCommand = RELEASE_DIST_PACKAGES.includes(name)
+      ? ['cd', 'dist', '&&', 'npx', '--no-install', 'semantic-release']
+      : ['npx', '--no-install', 'semantic-release']
+
+    const { stdout } = await execa('npx', ['lerna', 'exec', '--scope', name, '--', ...semanticReleaseCommand])
 
     console.log(`Released ${name} successfully:`)
     console.log(stdout)
