@@ -15,7 +15,7 @@ describe('test errors', () => {
 
     runner = new EventEmitter()
 
-    cy.visit('dist').then((win) => {
+    cy.visit('/').then((win) => {
       setError = (err: Error) => {
         // @ts-ignore
         runnablesWithErr.suites[0].tests[0].err = err

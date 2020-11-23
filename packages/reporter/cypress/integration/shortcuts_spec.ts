@@ -23,7 +23,7 @@ describe('shortcuts', function () {
 
     cy.fixture('runnables').as('runnables')
 
-    cy.visit('dist').then((win) => {
+    cy.visit('/').then((win) => {
       win.render({
         runner,
         spec: {

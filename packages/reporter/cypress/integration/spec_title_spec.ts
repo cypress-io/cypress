@@ -9,7 +9,7 @@ describe('spec title', () => {
     runner = new EventEmitter()
 
     start = (spec: Cypress.Cypress['spec']) => {
-      cy.visit('dist').then((win) => {
+      cy.visit('/').then((win) => {
         win.render({ runner, spec })
       })
 

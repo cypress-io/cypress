@@ -20,7 +20,7 @@ describe('runnables', () => {
     runner = new EventEmitter()
 
     render = (renderProps: RenderProps = {}) => {
-      cy.visit('dist').then((win) => {
+      cy.visit('/').then((win) => {
         win.render(Object.assign({
           runner,
           spec: {

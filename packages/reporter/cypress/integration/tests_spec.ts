@@ -12,7 +12,7 @@ describe('tests', () => {
 
     runner = new EventEmitter()
 
-    cy.visit('dist').then((win) => {
+    cy.visit('/').then((win) => {
       win.render({
         runner,
         spec: {
