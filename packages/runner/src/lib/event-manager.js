@@ -186,9 +186,12 @@ const eventManager = {
     reporterBus.on('start:extending:test', (testId) => {
       if (!Cypress) return
 
-      Cypress.runner.resumeAtTest(testId, state.emissions)
+      state.setIsLoading(true)
 
-      this._reRun(state)
+      Cypress.stop()
+      Cypress.removeAllListeners()
+
+      localBus.emit('restart', testId)
     })
 
     localBus.on('update:creating:test:log', (log) => {
@@ -243,10 +246,10 @@ const eventManager = {
     return this.Cypress.isBrowser(browserName)
   },
 
-  initialize ($autIframe, config) {
+  initialize ($autIframe, config, testId) {
     performance.mark('initialize-start')
 
-    return Cypress.initialize({
+    Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
         // get the current runnable in case we reran mid-test due to a visit
@@ -255,6 +258,10 @@ const eventManager = {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
+          }
+
+          if (testId) {
+            Cypress.runner.setOnlyTest(testId)
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)

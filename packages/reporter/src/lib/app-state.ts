@@ -86,8 +86,6 @@ class AppState {
 
   reset () {
     _.each(defaults, (value: any, key: string) => {
-      if (key === 'extendingTest') return
-
       this[key] = value
     })
 

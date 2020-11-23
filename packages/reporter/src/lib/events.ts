@@ -214,6 +214,9 @@ const events: Events = {
     })
 
     localBus.on('start:extending:test', action('start:extending:test', (testId) => {
+      appState.reset()
+      runnablesStore.reset()
+      statsStore.reset()
       appState.startExtendingTest(testId)
       runner.emit('start:extending:test', testId)
     }))

@@ -56,8 +56,8 @@ export default class Iframes extends Component {
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
-    this.props.eventManager.on('restart', () => {
-      this._run(this.props.config)
+    this.props.eventManager.on('restart', (testId) => {
+      this._run(this.props.config, testId)
     })
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
@@ -97,7 +97,7 @@ export default class Iframes extends Component {
     this.props.state.scriptError = err
   }
 
-  _run = (config) => {
+  _run = (config, testId) => {
     const specPath = util.specPath()
 
     this.props.eventManager.notifyRunningSpec(specPath)
@@ -108,7 +108,7 @@ export default class Iframes extends Component {
 
     const $autIframe = this._loadIframes(specPath)
 
-    this.props.eventManager.initialize($autIframe, config)
+    this.props.eventManager.initialize($autIframe, config, testId)
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get
