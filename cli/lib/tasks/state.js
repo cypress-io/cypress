@@ -2,6 +2,7 @@ const _ = require('lodash')
 const os = require('os')
 const path = require('path')
 const untildify = require('untildify')
+const R = require('ramda')
 const debug = require('debug')('cypress:cli')
 
 const fs = require('../fs')
@@ -159,7 +160,11 @@ const getPathToExecutable = (binaryDir) => {
   return path.join(binaryDir, getPlatformExecutable())
 }
 
-const getBinaryPkgVersionAsync = (binaryDir) => {
+/**
+ * Resolves with an object read from the binary app package.json file.
+ * If the file does not exist resolves with null
+ */
+const getBinaryPkgAsync = (binaryDir) => {
   const pathToPackageJson = getBinaryPkgPath(binaryDir)
 
   debug('Reading binary package.json from:', pathToPackageJson)
@@ -171,15 +176,22 @@ const getBinaryPkgVersionAsync = (binaryDir) => {
     }
 
     return fs.readJsonAsync(pathToPackageJson)
-    .get('version')
   })
 }
+
+const getBinaryPkgVersion = R.propOr(null, 'version')
+const getBinaryElectronVersion = R.propOr(null, 'electronVersion')
+const getBinaryElectronNodeVersion = R.propOr(null, 'electronNodeVersion')
 
 module.exports = {
   getPathToExecutable,
   getPlatformExecutable,
-  getBinaryPkgVersionAsync,
+  // those names start to sound like Java
+  getBinaryElectronNodeVersion,
+  getBinaryElectronVersion,
+  getBinaryPkgVersion,
   getBinaryVerifiedAsync,
+  getBinaryPkgAsync,
   getBinaryPkgPath,
   getBinaryDir,
   getCacheDir,

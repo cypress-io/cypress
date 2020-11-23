@@ -1309,6 +1309,12 @@ const findShadowRoots = (root: Node): Node[] => {
   return collectRoots(roots)
 }
 
+const hasContenteditableAttr = (el: HTMLElement) => {
+  const attr = tryCallNativeMethod(el, 'getAttribute', 'contenteditable')
+
+  return attr !== undefined && attr !== null && attr !== 'false'
+}
+
 export {
   elementFromPoint,
   isElement,
@@ -1372,4 +1378,5 @@ export {
   getParentNode,
   getAllParents,
   getShadowRoot,
+  hasContenteditableAttr,
 }

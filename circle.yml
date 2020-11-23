@@ -8,7 +8,8 @@ macBuildFilters: &macBuildFilters
     branches:
       only:
         - develop
-        - remove-old-binary-file
+        - v6.0-release
+        - include-electron-node-version
 
 defaults: &defaults
   parallelism: 1
@@ -35,6 +36,7 @@ testBinaryFirefox: &testBinaryFirefox
     branches:
       only:
         - develop
+        - v6.0-release
   requires:
     - build-npm-package
     - build-binary
@@ -43,14 +45,14 @@ executors:
   # the Docker image with Cypress dependencies and Chrome browser
   cy-doc:
     docker:
-      - image: cypress/browsers:node12.14.1-chrome83-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
     environment:
       PLATFORM: linux
 
   # Docker image with non-root "node" user
   non-root-docker-user:
     docker:
-      - image: cypress/browsers:node12.14.1-chrome83-ff77
+      - image: cypress/browsers:node12.18.3-chrome83-ff77
         user: node
     environment:
       PLATFORM: linux
@@ -308,6 +310,10 @@ commands:
           working_directory: /tmp/<<parameters.repo>>
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=~/cypress/cypress.zip npm i ~/cypress/cypress.tgz
+      - run:
+          name: Print Cypress version
+          working_directory: /tmp/<<parameters.repo>>
+          command: npx cypress version
       - run:
           name: Types check 🧩 (maybe)
           working_directory: /tmp/<<parameters.repo>>
@@ -1041,7 +1047,7 @@ jobs:
           environment:
             DEBUG: electron-builder,electron-osx-sign*
           # notarization on Mac can take a while
-          no_output_timeout: "30m"
+          no_output_timeout: "45m"
           # if this is a forked pull request, the NEXT_DEV_VERSION environment variable
           # won't be set and we will use default version, since we are not going to
           # upload the dev binary build anywhere
@@ -1283,6 +1289,10 @@ jobs:
           working_directory: test-binary
           # force installing the freshly built binary
           command: CYPRESS_INSTALL_BINARY=/root/cypress/cypress.zip npm i /root/cypress/cypress.tgz
+      - run:
+          name: Cypress version
+          working_directory: test-binary
+          command: $(yarn bin)/cypress version
       - run:
           name: Verify Cypress binary
           working_directory: test-binary
@@ -1824,6 +1834,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - test-kitchensink:
@@ -1841,6 +1852,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build
     - build-npm-package:
@@ -1852,7 +1864,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
     - build-binary:
@@ -1864,7 +1876,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-binary
     - test-npm-module-on-minimum-node-version:
@@ -1921,7 +1933,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - v5.0-release
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1931,6 +1943,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - upload-npm-package
           - upload-binary
@@ -1939,6 +1952,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1948,6 +1962,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -1973,8 +1988,7 @@ linux-workflow: &linux-workflow
           branches:
             only:
               - develop
-              - kevin-v5.0-release-rwa
-              - v5.0-release
+              - v6.0-release
         requires:
           - build-npm-package
           - build-binary
@@ -2068,6 +2082,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package
           - Mac binary
@@ -2080,6 +2095,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload
@@ -2092,6 +2108,7 @@ mac-workflow: &mac-workflow
           branches:
             only:
               - develop
+              - v6.0-release
         requires:
           - Mac NPM package upload
           - Mac binary upload

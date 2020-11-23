@@ -710,9 +710,6 @@ export class Keyboard {
 
     debug('type:', options.chars, options)
 
-    const el = options.$el.get(0)
-    const doc = $document.getDocumentFromElement(el)
-
     let keys: string[]
 
     if (!options.parseSpecialCharSequences) {
@@ -741,23 +738,13 @@ export class Keyboard {
 
     options.onBeforeType(numKeys)
 
-    const getActiveEl = (doc: Document) => {
-      if (options.force) {
-        return options.$el.get(0)
-      }
-
-      const activeEl = $elements.getActiveElByDocument(options.$el) || doc.body
-
-      return activeEl
-    }
-
     let _skipCheckUntilIndex: number | undefined = 0
 
     const typeKeyFns = _.map(
       keyDetailsArr,
       (key: KeyInfo, currentKeyIndex: number) => {
         return () => {
-          const activeEl = getActiveEl(doc)
+          const activeEl = this.getActiveEl(options)
 
           if (key.type === 'shortcut') {
             this.simulateShortcut(activeEl, key, options)
@@ -853,7 +840,7 @@ export class Keyboard {
         return Promise.map(modifierKeys, (key) => {
           options.id = _.uniqueId('char')
 
-          return this.simulatedKeyup(getActiveEl(doc), key, options)
+          return this.simulatedKeyup(this.getActiveEl(options), key, options)
         })
       }
 
@@ -1277,7 +1264,13 @@ export class Keyboard {
 
     const doc = $document.getDocumentFromElement(el)
 
-    return $elements.getActiveElByDocument(options.$el) || doc.body
+    // If focus has changed to a new element, use the new element
+    // however, if the new element is the body (aka the current element was blurred) continue with the same element.
+    // this is to prevent strange edge cases where an element loses focus due to framework rerender or page load.
+    // https://github.com/cypress-io/cypress/issues/5480
+    options.targetEl = $elements.getActiveElByDocument(options.$el) || options.targetEl || doc.body
+
+    return options.targetEl
   }
 
   performSimulatedDefault (el: HTMLElement, key: KeyDetails, options: any) {

@@ -230,6 +230,48 @@ describe('lib/cypress', () => {
     })
   })
 
+  context('invalid config', function () {
+    beforeEach(function () {
+      this.win = {
+        on: sinon.stub(),
+        webContents: {
+          on: sinon.stub(),
+        },
+      }
+
+      sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
+      sinon.stub(Windows, 'open').resolves(this.win)
+    })
+
+    it('shows warning if config is not valid', function () {
+      return cypress.start(['--config=test=false', '--cwd=/foo/bar'])
+      .then(() => {
+        expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
+        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
+      })
+    })
+
+    it('shows warning when multiple config are not valid', function () {
+      return cypress.start(['--config=test=false,foo=bar', '--cwd=/foo/bar'])
+      .then(() => {
+        expect(errors.warning).to.be.calledWith('INVALID_CONFIG_OPTION')
+        expect(console.log).to.be.calledWithMatch('`test` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('`foo` is not a valid configuration option')
+        expect(console.log).to.be.calledWithMatch('https://on.cypress.io/configuration')
+
+        snapshotConsoleLogs('INVALID_CONFIG_OPTION')
+      })
+    })
+
+    it('does not show warning if config is valid', function () {
+      return cypress.start(['--config=trashAssetsBeforeRuns=false'])
+      .then(() => {
+        expect(errors.warning).to.not.be.calledWith('INVALID_CONFIG_OPTION')
+      })
+    })
+  })
+
   context('--get-key', () => {
     it('writes out key and exits on success', function () {
       return Promise.all([
@@ -891,14 +933,6 @@ describe('lib/cypress', () => {
 
     const renamedConfigs = [
       {
-        old: 'trashAssetsBeforeHeadlessRuns',
-        new: 'trashAssetsBeforeRuns',
-      },
-      {
-        old: 'videoRecording',
-        new: 'video',
-      },
-      {
         old: 'blacklistHosts',
         new: 'blockHosts',
       },
@@ -914,17 +948,6 @@ describe('lib/cypress', () => {
           this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.old)
           this.expectExitWithErr('RENAMED_CONFIG_OPTION', config.new)
         })
-      })
-    })
-
-    it('logs error and exits when using screenshotOnHeadlessFailure', function () {
-      return cypress.start([
-        `--run-project=${this.todosPath}`,
-        '--config=screenshotOnHeadlessFailure=false',
-      ])
-      .then(() => {
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'screenshotOnHeadlessFailure')
-        this.expectExitWithErr('SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED', 'You now configure this behavior in your test code')
       })
     })
 
@@ -1297,7 +1320,7 @@ describe('lib/cypress', () => {
 
   // most record mode logic is covered in e2e tests.
   // we only need to cover the edge cases / warnings
-  context('--record or --ci', () => {
+  context('--record', () => {
     beforeEach(function () {
       sinon.stub(api, 'createRun').resolves()
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
@@ -1365,40 +1388,6 @@ describe('lib/cypress', () => {
         })
 
         expect(errors.warning).not.to.be.called
-        this.expectExitWith(3)
-      })
-    })
-
-    it('logs warning when using deprecated --ci arg and no env var', function () {
-      return cypress.start([
-        `--run-project=${this.recordPath}`,
-        '--key=token-123',
-        '--ci',
-      ])
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED')
-        expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        expect(console.log).to.be.calledWithMatch('cypress run --record --key <record_key>')
-        expect(errors.warning).not.to.be.calledWith('PROJECT_ID_AND_KEY_BUT_MISSING_RECORD_OPTION')
-        this.expectExitWith(3)
-      })
-    })
-
-    it('logs warning when using deprecated --ci arg and env var', function () {
-      sinon.stub(env, 'get')
-      .withArgs('CYPRESS_CI_KEY')
-      .returns('asdf123foobarbaz')
-
-      return cypress.start([
-        `--run-project=${this.recordPath}`,
-        '--key=token-123',
-        '--ci',
-      ])
-      .then(() => {
-        expect(errors.warning).to.be.calledWith('CYPRESS_CI_DEPRECATED_ENV_VAR')
-        expect(console.log).to.be.calledWithMatch('You are using the deprecated command:')
-        expect(console.log).to.be.calledWithMatch('cypress ci')
-        expect(console.log).to.be.calledWithMatch('cypress run --record')
         this.expectExitWith(3)
       })
     })

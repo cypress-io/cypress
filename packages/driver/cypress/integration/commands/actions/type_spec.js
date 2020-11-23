@@ -254,6 +254,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('can type when element has `opacity: 0`', () => {
+      cy.$$('input:text:first').css('opacity', 0)
+      cy.get('input:text:first').type('foo')
+      .should('have.value', 'foo')
+    })
+
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
@@ -1760,20 +1766,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.state('document').documentElement.focus()
         cy.get('div.item:first')
         .type('111')
-
-        cy.get('body').then(expectTextEndsWith('111'))
+        .then(expectTextEndsWith('111'))
       })
 
-      // TODO[breaking]: we should edit div.item:first text content instead of
-      // moving to the end of the host contenteditable. This will allow targeting
-      // specific elements to simplify testing rich editors
       it('can type in body[contenteditable]', () => {
         cy.state('document').body.setAttribute('contenteditable', true)
         cy.state('document').documentElement.focus()
         cy.get('div.item:first')
         .type('111')
-
-        cy.get('body')
         .then(expectTextEndsWith('111'))
       })
 
@@ -2039,6 +2039,16 @@ describe('src/cy/commands/actions/type - #type', () => {
 
           cy.get('input').eq(1).should('have.value', 'bar')
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/5480
+      it('does NOT follow focus if target is blurred without another receiving focus', () => {
+        cy.$$('input:first').keydown(_.after(4, function () {
+          this.blur()
+        }))
+
+        cy.get('input:first').type('foobar')
+        .should('have.value', 'foobar')
       })
 
       it('follows focus into date input', () => {
