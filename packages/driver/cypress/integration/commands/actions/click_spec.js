@@ -1186,6 +1186,18 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
+      it('can specify scrollToElement in options', () => {
+        cy.get('input:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('input:first').click({ scrollToElement: 'end' })
+
+        cy.get('input:first').then((el) => {
+          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+        })
+      })
+
       it('does not scroll when scrollToElement is false in options', () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
@@ -1218,7 +1230,7 @@ describe('src/cy/commands/actions/click', () => {
         cy.get('input:first').click()
 
         cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).to.be.called
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
         })
       })
 

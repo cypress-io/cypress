@@ -262,8 +262,8 @@ export const options = [
     validation: v.isBoolean,
   }, {
     name: 'scrollToElement',
-    defaultValue: true,
-    validation: v.isBoolean,
+    defaultValue: 'start',
+    validation: v.isOneOf('center', 'start', 'end', 'nearest', false),
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,

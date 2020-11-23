@@ -2322,6 +2322,8 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type scrollToElementOptions = false | 'center' | 'start' | 'end'
+
   /**
    * Options to affect Actionability checks
    * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
@@ -2339,11 +2341,11 @@ declare namespace Cypress {
      */
     animationDistanceThreshold: number
     /**
-     * Whether to call scrollIntoView before executing commands
+     * Viewport position to which the element should be scrolled prior to action commands. Scrolling can be disabled with `false`
      *
-     * @default true
+     * @default 'start'
      */
-    scrollToElement: boolean
+    scrollToElement: scrollToElementOptions
   }
 
   interface BlurOptions extends Loggable, Forceable { }
@@ -2588,10 +2590,10 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
-     * Whether to call scrollIntoView before executing commands
-     * @default true
+     * Viewport position to which the element should be scrolled prior to action commands. Scrolling can be disabled with `false`
+     * @default 'start'
      */
-    scrollToElement: boolean
+    scrollToElement: scrollToElementOptions
     /**
      * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.

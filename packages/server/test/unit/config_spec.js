@@ -656,10 +656,46 @@ describe('lib/config', () => {
           return this.expectValidationPasses()
         })
 
-        it('fails if not a boolean', function () {
+        it('passes if an enum (center)', function () {
+          this.setup({ scrollToElement: 'center' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (start)', function () {
+          this.setup({ scrollToElement: 'start' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (end)', function () {
+          this.setup({ scrollToElement: 'end' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (nearest)', function () {
+          this.setup({ scrollToElement: 'nearest' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not valid (number)', function () {
           this.setup({ scrollToElement: 42 })
 
-          return this.expectValidationFails('be a boolean')
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (null)', function () {
+          this.setup({ scrollToElement: null })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (true)', function () {
+          this.setup({ scrollToElement: true })
+
+          return this.expectValidationFails('be one of these values')
         })
       })
 
@@ -961,8 +997,8 @@ describe('lib/config', () => {
       return this.defaults('waitForAnimations', true)
     })
 
-    it('scrollToElement=true', function () {
-      return this.defaults('scrollToElement', true)
+    it('scrollToElement=start', function () {
+      return this.defaults('scrollToElement', 'start')
     })
 
     it('animationDistanceThreshold=5', function () {
@@ -1230,7 +1266,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
-            scrollToElement: { value: true, from: 'default' },
+            scrollToElement: { value: 'start', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })
@@ -1330,7 +1366,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
-            scrollToElement: { value: true, from: 'default' },
+            scrollToElement: { value: 'start', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })

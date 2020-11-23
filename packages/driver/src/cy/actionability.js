@@ -320,7 +320,7 @@ const verify = function (cy, $el, options, callbacks) {
 
         if (options.scrollToElement !== false) {
           // scroll the element into view
-          $el.get(0).scrollIntoView()
+          $el.get(0).scrollIntoView({ block: options.scrollToElement })
           debug('scrollIntoView:', $el[0])
 
           if (onScroll) {
