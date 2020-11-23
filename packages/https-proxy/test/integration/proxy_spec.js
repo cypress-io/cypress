@@ -103,7 +103,16 @@ describe('Proxy', () => {
       expect(res.socket.destroyed).to.be.true
       // ensure the outgoing socket created for this connection was destroyed
       expect(net.connect).calledOnce
-      expect(net.connect.getCalls()[0].returnValue.destroyed).to.be.true
+
+      const socket = net.connect.getCalls()[0].returnValue
+
+      return new Promise((resolve) => {
+        socket.on('close', () => {
+          expect(socket.destroyed).to.be.true
+
+          resolve()
+        })
+      })
     })
   })
 
