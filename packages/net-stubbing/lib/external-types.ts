@@ -332,38 +332,38 @@ declare global {
   namespace Cypress {
     interface Chainable<Subject = any> {
       /**
-       * Use `cy.http()` to stub and intercept HTTP requests and responses.
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
        * @see https://on.cypress.io/http
        * @example
-       *    cy.http('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
+       *    cy.intercept('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
        * @example
-       *    cy.http('https://localhost:7777/protected-endpoint', (req) => {
+       *    cy.intercept('https://localhost:7777/protected-endpoint', (req) => {
        *      req.headers['authorization'] = 'basic fooabc123'
        *    })
        * @example
-       *    cy.http('https://localhost:7777/some-response', (req) => {
+       *    cy.intercept('https://localhost:7777/some-response', (req) => {
        *      req.reply(res => {
        *        res.body = 'some new body'
        *      })
        *    })
        */
-      http(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      intercept(url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Use `cy.http()` to stub and intercept HTTP requests and responses.
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
        * @see https://on.cypress.io/http
        * @example
-       *    cy.http('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
+       *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
-      http(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Deprecated - use `cy.http()` instead.
+       * Deprecated - use `cy.intercept()` instead.
        * @deprecated
        */
       route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Deprecated - use `cy.http()` instead.
+       * Deprecated - use `cy.intercept()` instead.
        * @deprecated
        */
       route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>

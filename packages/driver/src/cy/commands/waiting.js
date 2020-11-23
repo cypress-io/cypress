@@ -75,7 +75,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
       options.type = type
 
-      // check cy.http routes
+      // check cy.intercept routes
       const req = waitForRoute(alias, state, type)
 
       if (req) {
@@ -118,8 +118,8 @@ module.exports = (Commands, Cypress, cy, state) => {
       try {
         aliasObj = cy.getAlias(str, 'wait', log)
       } catch (err) {
-        // before cy.http, we could know when an alias did/did not exist, because they
-        // were declared synchronously. with cy.http, req.alias can be used to dynamically
+        // before cy.intercept, we could know when an alias did/did not exist, because they
+        // were declared synchronously. with cy.intercept, req.alias can be used to dynamically
         // create aliases, so we cannot know at wait-time if an alias exists or not
         if (!isDynamicAliasingPossible()) {
           throw err

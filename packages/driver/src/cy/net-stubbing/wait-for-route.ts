@@ -22,7 +22,7 @@ export function waitForRoute (alias: string, state: Cypress.State, specifier: 'r
   const candidateRequests = _.filter(state('aliasedRequests'), { alias })
   .map(({ request }) => request)
 
-  // Now add route-level (cy.http(...).as()) aliased requests.
+  // Now add route-level (cy.intercept(...).as()) aliased requests.
   const route: Route = _.find(state('routes'), { alias })
 
   if (route) {
