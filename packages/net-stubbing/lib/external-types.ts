@@ -178,7 +178,7 @@ export type NumberMatcher = number | number[]
 /**
  * Request/response cycle.
  */
-export interface Request {
+export interface Interception {
   id: string
   /* @internal */
   log: any
@@ -197,10 +197,10 @@ export interface Request {
    */
   responseWaited: boolean
   /* @internal */
-  state: RequestState
+  state: InterceptionState
 }
 
-export type RequestState =
+export type InterceptionState =
   'Received' |
   'Intercepted' |
   'ResponseReceived' |
@@ -214,7 +214,7 @@ export interface Route {
   options: RouteMatcherOptions
   handler: RouteHandler
   hitCount: number
-  requests: { [key: string]: Request }
+  requests: { [key: string]: Interception }
 }
 
 export interface RouteMap { [key: string]: Route }
@@ -413,7 +413,7 @@ declare global {
       })
       ```
       */
-      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Request>
+      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Interception>
       /**
        * Wait for list of requests to complete.
        *
@@ -433,7 +433,7 @@ declare global {
         })
       ```
       */
-      wait(alias: string[], options?: Partial<WaitOptions>): Chainable<Request[]>
+      wait(alias: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
     }
   }
 }
