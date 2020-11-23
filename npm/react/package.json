@@ -9,7 +9,6 @@
     "cy:open": "node ../../scripts/cypress open",
     "pretest": "yarn transpile",
     "test": "node ../../scripts/cypress run",
-    "test:unit": "cross-env TS_NODE_PROJECT=./tsconfig.test.json mocha --config .mocharc.json init/**/*.test.ts",
     "transpile": "tsc",
     "watch": "tsc -w"
   },
