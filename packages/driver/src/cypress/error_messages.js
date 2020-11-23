@@ -1196,7 +1196,7 @@ module.exports = {
   route: {
     deprecated: {
       message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/http',
+      docsUrl: 'https://on.cypress.io/intercept',
     },
     failed_prerequisites: {
       message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
@@ -1391,7 +1391,7 @@ module.exports = {
   server: {
     deprecated: {
       message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
-      docsUrl: 'https://on.cypress.io/http',
+      docsUrl: 'https://on.cypress.io/intercept',
     },
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,

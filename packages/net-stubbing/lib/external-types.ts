@@ -364,7 +364,7 @@ declare global {
       /**
        * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
-       * @see https://on.cypress.io/http
+       * @see https://on.cypress.io/intercept
        * @example
        *    cy.intercept('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
        * @example
@@ -382,7 +382,7 @@ declare global {
       /**
        * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
-       * @see https://on.cypress.io/http
+       * @see https://on.cypress.io/intercept
        * @example
        *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
        */
