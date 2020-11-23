@@ -339,21 +339,21 @@ interface WaitOptions {
    * Time to wait for the request (ms)
    *
    * @default {@link Timeoutable#timeout}
-   * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+   * @see https://on.cypress.io/configuration#Timeouts
    */
   requestTimeout: number
   /**
    * Time to wait for the response (ms)
    *
    * @default {@link Timeoutable#timeout}
-   * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+   * @see https://on.cypress.io/configuration#Timeouts
    */
   responseTimeout: number
   /**
    * Time to wait (ms)
    *
    * @default defaultCommandTimeout
-   * @see https://docs.cypress.io/guides/references/configuration.html#Timeouts
+   * @see https://on.cypress.io/configuration#Timeouts
    */
   timeout: number
 }
