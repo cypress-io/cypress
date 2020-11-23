@@ -162,7 +162,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('referencesAlias', aliases)
       }
 
-      if (command && !['route', 'route2', 'http'].includes(command.get('name'))) {
+      if (command && !['route', 'route2', 'intercept'].includes(command.get('name'))) {
         $errUtils.throwErrByPath('wait.invalid_alias', {
           onFail: options._log,
           args: { alias },
