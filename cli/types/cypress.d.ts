@@ -5206,7 +5206,8 @@ declare namespace Cypress {
     duration: number
     headers: { [key: string]: string }
     isOkStatusCode: boolean
-    redirectedToUrl: string
+    redirects?: string[]
+    redirectedToUrl?: string
     requestHeaders: { [key: string]: string }
     status: number
     statusText: string

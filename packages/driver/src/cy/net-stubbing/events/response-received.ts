@@ -14,10 +14,13 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn } from './'
 import Bluebird from 'bluebird'
+import { parseJsonBody } from './utils'
 
 export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> = (Cypress, frame, { getRoute, getRequest, emitNetEvent }) => {
   const { res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
+
+  parseJsonBody(res)
 
   let sendCalled = false
   let resolved = false
@@ -49,9 +52,13 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     }
 
     if (request) {
-      request.response = continueFrame.res
+      request.response = _.clone(continueFrame.res)
       request.state = 'ResponseIntercepted'
       request.log.fireChangeEvent()
+    }
+
+    if (_.isObject(continueFrame.res!.body)) {
+      continueFrame.res!.body = JSON.stringify(continueFrame.res!.body)
     }
 
     emitNetEvent('http:response:continue', continueFrame)

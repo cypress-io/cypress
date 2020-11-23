@@ -70,7 +70,7 @@ type Method =
     | 'unsubscribe'
 
 export namespace CyHttpMessages {
-  interface BaseMessage {
+  export interface BaseMessage {
     body?: any
     headers: { [key: string]: string }
     url: string

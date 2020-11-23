@@ -881,6 +881,70 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
 
+    context('body parsing', function () {
+      it('automatically parses JSON request bodies', function () {
+        const p = Promise.defer()
+
+        cy.http('/post-only', (req) => {
+          expect(req.body).to.deep.eq({ foo: 'bar' })
+
+          p.resolve()
+        }).as('post')
+        .then(() => {
+          return $.ajax({
+            url: '/post-only',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ foo: 'bar' }),
+          })
+        }).then((responseText) => {
+          expect(responseText).to.include('request body:<br>{"foo":"bar"}')
+
+          return p
+        })
+        .wait('@post').its('request.body').should('deep.eq', { foo: 'bar' })
+      })
+
+      it('doesn\'t automatically parse JSON request bodies if content-type is wrong', function () {
+        const p = Promise.defer()
+
+        cy.http('/post-only', (req) => {
+          expect(req.body).to.deep.eq(JSON.stringify({ foo: 'bar' }))
+
+          p.resolve()
+        }).as('post')
+        .then(() => {
+          return $.ajax({
+            url: '/post-only',
+            method: 'POST',
+            contentType: 'text/html',
+            data: JSON.stringify({ foo: 'bar' }),
+          })
+        }).wrap(p)
+        .wait('@post').its('request.body').should('eq', JSON.stringify({ foo: 'bar' }))
+      })
+
+      it('sets body to string if JSON is malformed', function () {
+        const p = Promise.defer()
+
+        cy.http('/post-only', (req) => {
+          expect(req.body).to.deep.eq('{ foo::: }')
+
+          p.resolve()
+        }).as('post')
+        .then(() => {
+          return $.ajax({
+            url: '/post-only',
+            method: 'POST',
+            contentType: 'application/json',
+            // invalid JSON
+            data: '{ foo::: }',
+          }).catch(() => p)
+        })
+        .wait('@post').its('request.body').should('deep.eq', '{ foo::: }')
+      })
+    })
+
     context('matches requests as expected', function () {
       it('handles querystrings as expected', function () {
         cy.http({
@@ -1129,7 +1193,7 @@ describe('network stubbing', { retries: 2 }, function () {
     it('receives the original response in handler', function (done) {
       cy.http('/json-content-type', function (req) {
         req.reply(function (res) {
-          expect(res.body).to.eq('{}')
+          expect(res.body).to.deep.eq({})
 
           done()
         })
@@ -1345,6 +1409,62 @@ describe('network stubbing', { retries: 2 }, function () {
       }).visit('/fixtures/xhr-triggered.html').get('#trigger-xhr').click()
 
       cy.contains('{"foo":1,"bar":{"baz":"cypress"}}')
+    })
+
+    context('body parsing', function () {
+      it('automatically parses JSON response bodies', function () {
+        const p = Promise.defer()
+
+        cy.http('/foo.bar.baz.json', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.deep.eq({ quux: 'quuz' })
+            p.resolve()
+          })
+        }).as('get')
+        .then(() => {
+          return $.get('/fixtures/foo.bar.baz.json')
+        }).then((responseJson) => {
+          expect(responseJson).to.deep.eq({ quux: 'quuz' })
+
+          return p
+        })
+        .wait('@get').its('response.body').should('deep.eq', { quux: 'quuz' })
+      })
+
+      it('doesn\'t automatically parse JSON response bodies if content-type is wrong', function () {
+        const p = Promise.defer()
+
+        cy.http('/json.txt', (req) => {
+          req.reply((res) => {
+            expect(res.body).to.eq('{ "foo": "bar" }')
+            p.resolve()
+          })
+        }).as('get')
+        .then(() => {
+          return $.get('/fixtures/json.txt')
+        }).then((responseText) => {
+          expect(responseText).to.deep.eq('{ "foo": "bar" }')
+
+          return p
+        })
+        .wait('@get').its('response.body').should('deep.eq', '{ "foo": "bar" }')
+      })
+
+      it('sets body to string if JSON is malformed', function () {
+        const p = Promise.defer()
+
+        cy.http('/invalid.json', (req) => {
+          req.reply((res) => {
+            expect(res.headers['content-type']).to.match(/^application\/json/)
+            expect(res.body).to.eq('{ foo:::: }')
+            p.resolve()
+          })
+        }).as('get')
+        .then(() => {
+          return $.get('/fixtures/invalid.json').catch(() => p)
+        })
+        .wait('@get').its('response.body').should('deep.eq', '{ foo:::: }')
+      })
     })
 
     context('with StaticResponse', function () {
@@ -1786,7 +1906,7 @@ describe('network stubbing', { retries: 2 }, function () {
 
         expect(log.get('alias')).to.eq('getFoo')
 
-        expect(JSON.parse(res.response!.body as string)).to.deep.eq({
+        expect(res.response.body).to.deep.eq({
           some: 'json',
           foo: {
             bar: 'baz',
