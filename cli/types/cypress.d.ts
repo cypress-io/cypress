@@ -1590,8 +1590,7 @@ declare namespace Cypress {
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
-     * Deprecated - use `cy.http()` instead.
-     * @deprecated
+     * @deprecated Use `cy.http()` instead.
      *
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
