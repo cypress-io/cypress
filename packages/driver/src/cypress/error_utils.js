@@ -5,7 +5,7 @@ const chai = require('chai')
 
 const $dom = require('../dom')
 const $utils = require('./utils')
-// const $stackUtils = require('./stack_utils')
+const $stackUtils = require('./stack_utils')
 const $errorMessages = require('./error_messages')
 
 const ERROR_PROPS = 'message type name stack sourceMappedStack parsedStack fileName lineNumber columnNumber host uncaught actual expected showDiff isPending docsUrl codeFrame'.split(' ')
@@ -15,7 +15,7 @@ if (!Error.captureStackTrace) {
   Error.captureStackTrace = (err, fn) => {
     const stack = (new Error()).stack
 
-    // err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
+    err.stack = $stackUtils.stackWithLinesDroppedFromMarker(stack, fn.name)
   }
 }
 
@@ -110,7 +110,7 @@ const stackWithReplacedProps = (err, props) => {
 }
 
 const modifyErrMsg = (err, newErrMsg, cb) => {
-  // err.stack = $stackUtils.normalizedStack(err)
+  err.stack = $stackUtils.normalizedStack(err)
 
   const newMessage = cb(err.message, newErrMsg)
   const newStack = stackWithReplacedProps(err, { message: newMessage })
@@ -319,29 +319,29 @@ const stackAndCodeFrameIndex = (err, userInvocationStack) => {
   if (!userInvocationStack) return { stack: err.stack }
 
   if (isCypressErr(err) || isChaiValidationErr(err)) {
-    // return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
+    return $stackUtils.stackWithUserInvocationStackSpliced(err, userInvocationStack)
   }
 
-  // return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
+  return { stack: $stackUtils.replacedStack(err, userInvocationStack) }
 }
 
 const preferredStackAndCodeFrameIndex = (err, userInvocationStack) => {
   let { stack, index } = stackAndCodeFrameIndex(err, userInvocationStack)
 
-  // stack = $stackUtils.stackWithContentAppended(err, stack)
-  // stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
+  stack = $stackUtils.stackWithContentAppended(err, stack)
+  stack = $stackUtils.stackWithReplacementMarkerLineRemoved(stack)
 
   return { stack, index }
 }
 
 const enhanceStack = ({ err, userInvocationStack, projectRoot }) => {
   const { stack, index } = preferredStackAndCodeFrameIndex(err, userInvocationStack)
-  // const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
+  const { sourceMapped, parsed } = $stackUtils.getSourceStack(stack, projectRoot)
 
   err.stack = stack
   err.sourceMappedStack = sourceMapped
   err.parsedStack = parsed
-  // err.codeFrame = $stackUtils.getCodeFrame(err, index)
+  err.codeFrame = $stackUtils.getCodeFrame(err, index)
 
   return err
 }

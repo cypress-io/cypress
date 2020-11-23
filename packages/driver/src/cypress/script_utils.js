@@ -28,11 +28,22 @@ const evalScripts = (specWindow, scripts = []) => {
   return null
 }
 
-const runScripts = (specWindow, scripts) => {
+const runScriptsFromUrls = (specWindow, scripts) => {
   return Promise
   .map(scripts, (script) => fetchScript(specWindow, script))
   .map(extractSourceMap)
   .then((scripts) => evalScripts(specWindow, scripts))
+}
+
+// Supports either scripts as objects or as async import functions
+const runScripts = (specWindow, scripts) => {
+  // if scripts contains at least one promise
+  if (scripts.length && typeof scripts[0].then === 'function') {
+    // merge the awaiting of the promises
+    return Promise.all(scripts)
+  }
+
+  return runScriptsFromUrls(specWindow, scripts)
 }
 
 module.exports = {
