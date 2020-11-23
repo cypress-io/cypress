@@ -942,9 +942,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/react build
       - run:
-          name: Run unit test
-          command: yarn workspace @cypress/react test:unit
-      - run:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
