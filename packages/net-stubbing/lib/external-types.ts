@@ -70,7 +70,7 @@ type Method =
     | 'unsubscribe'
 
 export namespace CyHttpMessages {
-  interface BaseMessage {
+  export interface BaseMessage {
     body?: any
     headers: { [key: string]: string }
     url: string
@@ -178,7 +178,7 @@ export type NumberMatcher = number | number[]
 /**
  * Request/response cycle.
  */
-export interface Request {
+export interface Interception {
   id: string
   /* @internal */
   log: any
@@ -197,10 +197,10 @@ export interface Request {
    */
   responseWaited: boolean
   /* @internal */
-  state: RequestState
+  state: InterceptionState
 }
 
-export type RequestState =
+export type InterceptionState =
   'Received' |
   'Intercepted' |
   'ResponseReceived' |
@@ -214,7 +214,7 @@ export interface Route {
   options: RouteMatcherOptions
   handler: RouteHandler
   hitCount: number
-  requests: { [key: string]: Request }
+  requests: { [key: string]: Interception }
 }
 
 export interface RouteMap { [key: string]: Route }
@@ -328,41 +328,112 @@ export interface GenericStaticResponse<Fixture, Body> {
  */
 export type StringMatcher = GlobPattern | RegExp
 
+interface WaitOptions {
+  /**
+   * Displays the command in the Command Log
+   *
+   * @default true
+   */
+  log: boolean
+  /**
+   * Time to wait for the request (ms)
+   *
+   * @default {@link Timeoutable#timeout}
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  requestTimeout: number
+  /**
+   * Time to wait for the response (ms)
+   *
+   * @default {@link Timeoutable#timeout}
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  responseTimeout: number
+  /**
+   * Time to wait (ms)
+   *
+   * @default defaultCommandTimeout
+   * @see https://on.cypress.io/configuration#Timeouts
+   */
+  timeout: number
+}
+
 declare global {
   namespace Cypress {
     interface Chainable<Subject = any> {
       /**
-       * Use `cy.route2()` to stub and intercept HTTP requests and responses.
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
        *
-       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
-       * configuration option to `true`.
-       *
-       * @see https://on.cypress.io/route2
+       * @see https://on.cypress.io/intercept
        * @example
-       *    cy.route2('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
+       *    cy.intercept('https://localhost:7777/users', [{id: 1, name: 'Pat'}])
        * @example
-       *    cy.route2('https://localhost:7777/protected-endpoint', (req) => {
+       *    cy.intercept('https://localhost:7777/protected-endpoint', (req) => {
        *      req.headers['authorization'] = 'basic fooabc123'
        *    })
        * @example
-       *    cy.route2('https://localhost:7777/some-response', (req) => {
+       *    cy.intercept('https://localhost:7777/some-response', (req) => {
        *      req.reply(res => {
        *        res.body = 'some new body'
        *      })
        *    })
        */
+      intercept(url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * Use `cy.intercept()` to stub and intercept HTTP requests and responses.
+       *
+       * @see https://on.cypress.io/intercept
+       * @example
+       *    cy.intercept('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
+       */
+      intercept(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * @deprecated Use `cy.intercept()` instead.
+       */
       route2(url: RouteMatcher, response?: RouteHandler): Chainable<null>
       /**
-       * Use `cy.route2()` to stub and intercept HTTP requests and responses.
-       *
-       * Note: this command is only available if you have set the `experimentalNetworkStubbing`
-       * configuration option to `true`.
-       *
-       * @see https://on.cypress.io/route2
-       * @example
-       *    cy.route2('GET', 'http://foo.com/fruits', ['apple', 'banana', 'cherry'])
+       * @deprecated Use `cy.intercept()` instead.
        */
       route2(method: Method, url: RouteMatcher, response?: RouteHandler): Chainable<null>
+      /**
+       * Wait for a specific request to complete.
+       *
+       * @see https://on.cypress.io/wait
+       * @param {string} alias - Name of the alias to wait for.
+       *
+      ```
+      // Wait for the route aliased as 'getAccount' to respond
+      // without changing or stubbing its response
+      cy.intercept('https://api.example.com/accounts/*').as('getAccount')
+      cy.visit('/accounts/123')
+      cy.wait('@getAccount').then((interception) => {
+        // we can now access the low level request
+        // that contains the request body,
+        // response body, status, etc
+      })
+      ```
+      */
+      wait(alias: string, options?: Partial<WaitOptions>): Chainable<Interception>
+      /**
+       * Wait for list of requests to complete.
+       *
+       * @see https://on.cypress.io/wait
+       * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
+       *
+      ```
+      // wait for 3 XHR requests to complete
+      cy.intercept('users/*').as('getUsers')
+      cy.intercept('activities/*').as('getActivities')
+      cy.intercept('comments/*').as('getComments')
+      cy.visit('/dashboard')
+
+      cy.wait(['@getUsers', '@getActivities', '@getComments'])
+        .then((interceptions) => {
+          // intercepts will now be an array of matching HTTP requests
+        })
+      ```
+      */
+      wait(alias: string[], options?: Partial<WaitOptions>): Chainable<Interception[]>
     }
   }
 }

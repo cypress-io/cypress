@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "5.5.0",
+  "version": "6.0.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -14,12 +14,12 @@
     "build": "lerna run build --stream",
     "build-prod": "lerna run build-prod --stream",
     "bump": "node ./scripts/binary.js bump",
-    "check-halt": "node scripts/check-halt.js",
     "check-next-dev-version": "node scripts/check-next-dev-version.js",
     "check-node-version": "node scripts/check-node-version.js",
     "check-terminal": "node scripts/check-terminal.js",
     "clean": "lerna run clean --parallel",
     "clean-deps": "find . -depth -name node_modules -type d -exec rm -rf {} \\;",
+    "clean-untracked-files": "git clean -d -f",
     "precypress:open": "yarn ensure-deps",
     "cypress:open": "node $(yarn bin cypress) open --dev --global",
     "precypress:open:debug": "yarn ensure-deps",
@@ -196,7 +196,7 @@
     "typescript": "3.7.4"
   },
   "engines": {
-    "node": ">=12.14.1",
+    "node": ">=12.18.3",
     "yarn": ">=1.17.3"
   },
   "productName": "Cypress",
