@@ -909,23 +909,23 @@ module.exports = {
   },
 
   net_stubbing: {
-    route2_renamed: `${cmd('route2')} was renamed to ${cmd('http')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('http')} instead.`,
+    route2_renamed: `${cmd('route2')} was renamed to ${cmd('intercept')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('intercept')} instead.`,
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
 
         You passed: ${format(staticResponse)}`, 8)
     },
-    http: {
+    intercept: {
       invalid_handler: ({ handler }) => {
         return stripIndent`\
-          ${cmd('http')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
+          ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
           You passed: ${format(handler)}`
       },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
-          An invalid RouteMatcher was supplied to ${cmd('http')}. ${message}
+          An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
           You passed: ${format(matcher)}`
       },
@@ -933,7 +933,7 @@ module.exports = {
     request_handling: {
       cb_failed: ({ err, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('http')} threw an error while intercepting a request:
+          A request callback passed to ${cmd('intercept')} threw an error while intercepting a request:
 
           ${err.message}
 
@@ -943,7 +943,7 @@ module.exports = {
       },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('http')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
@@ -1195,8 +1195,8 @@ module.exports = {
 
   route: {
     deprecated: {
-      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('http')} instead.`,
-      docsUrl: 'https://on.cypress.io/http',
+      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
     },
     failed_prerequisites: {
       message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
@@ -1390,8 +1390,8 @@ module.exports = {
 
   server: {
     deprecated: {
-      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('http')} instead.`,
-      docsUrl: 'https://on.cypress.io/http',
+      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
     },
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
