@@ -256,6 +256,28 @@ describe('lib/browsers/chrome', () => {
 
       return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
+
+    it('respond ACK after receiving new screenshot frame', function () {
+      const frameMeta = { data: Buffer.from(''), sessionId: '1' }
+
+      this.criClient.on = (eventName, fn) => {
+        if (eventName === 'Page.screencastFrame') {
+          fn(frameMeta)
+        }
+      }
+
+      const write = sinon.stub()
+
+      return chrome.open('chrome', 'http://', { onScreencastFrame: write }, this.automation)
+      .then(() => {
+        expect(this.criClient.send).to.have.been.calledWith('Page.startScreencast')
+        expect(write).to.have.been.calledWith(frameMeta)
+        expect(this.criClient.send).to.have.been.calledWith('Page.screencastFrameAck', { sessionId: frameMeta.sessionId })
+      })
+      .then(() => {
+        this.criClient.on = undefined
+      })
+    })
   })
 
   context('#_getArgs', () => {
