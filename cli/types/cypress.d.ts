@@ -2322,7 +2322,7 @@ declare namespace Cypress {
     force: boolean
   }
 
-  type scrollToElementOptions = false | 'center' | 'start' | 'end'
+  type scrollToElementOptions = false | 'center' | 'start' | 'end' | 'nearest'
 
   /**
    * Options to affect Actionability checks

@@ -602,14 +602,14 @@ describe('src/cy/commands/actions/trigger', () => {
       })
 
       it('can specify scrollToElement in options', () => {
-        cy.get('input:first').then((el) => {
+        cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
         cy.get('button:first').trigger('mouseover', { scrollToElement: 'end' })
 
-        cy.get('input:first').then((el) => {
-          expect(el[0].scrollIntoView).calledWith({ block: 'end' })
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
       })
 
