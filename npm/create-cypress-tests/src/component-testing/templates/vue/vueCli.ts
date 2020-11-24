@@ -6,7 +6,7 @@ export const VueCliTemplate: Template = {
   message:
     'It looks like you are using vue-cli-service to run and build an application.',
   getExampleUrl: () => 'https://github.com/cypress-io/cypress/tree/develop/npm/vue/examples/cli',
-  recommendedComponentFolder: 'cypress/component',
+  recommendedComponentFolder: 'src',
   getPluginsCodeAst: () => {
     return {
       Require: babel.template.ast(
