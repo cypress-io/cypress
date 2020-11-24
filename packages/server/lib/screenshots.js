@@ -158,15 +158,15 @@ const crop = function (image, dimensions, pixelRatio = 1) {
 
   debug('dimensions for cropping are %o', dimensions)
 
-  const x = Math.min(dimensions.x, image.bitmap.width - 1)
-  const y = Math.min(dimensions.y, image.bitmap.height - 1)
+  const x = Math.max(0, Math.min(dimensions.x, image.bitmap.width - 1))
+  const y = Math.max(0, Math.min(dimensions.y, image.bitmap.height - 1))
   const width = Math.min(dimensions.width, image.bitmap.width - x)
   const height = Math.min(dimensions.height, image.bitmap.height - y)
 
   debug(`crop: from ${x}, ${y}`)
   debug(`        to ${width} x ${height}`)
 
-  return image.clone().crop(Math.max(0, x), Math.max(0, y), width, height)
+  return image.clone().crop(x, y, width, height)
 }
 
 const pixelConditionFn = function (data, image) {
