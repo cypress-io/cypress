@@ -200,6 +200,7 @@ class Command extends Component<Props> {
                 {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
               </span>
               <span className='command-controls'>
+                <span className='command-duration'>{model.duration}ms</span>
                 <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
                   <i className='command-invisible far fa-eye-slash' />
                 </Tooltip>

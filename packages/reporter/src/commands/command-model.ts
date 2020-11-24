@@ -36,6 +36,8 @@ export default class Command extends Instrument {
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
   @observable hookId: string
+  @observable start: number
+  @observable duration: number
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -65,6 +67,8 @@ export default class Command extends Instrument {
     this.visible = props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
+    this.start = Date.now()
+    this.duration = 0
 
     this._checkLongRunning()
   }
@@ -78,6 +82,7 @@ export default class Command extends Instrument {
     this.renderProps = props.renderProps || {}
     this.visible = props.visible
     this.timeout = props.timeout
+    this.duration = Date.now() - this.start
 
     this._checkLongRunning()
   }
