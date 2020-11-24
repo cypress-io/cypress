@@ -94,6 +94,7 @@ const quietErrorMessage = (err: Error) => {
 interface PreprocessorOptions {
   webpackOptions?: webpack.Configuration
   watchOptions?: Object
+  typescript?: string
   additionalEntries?: string[]
 }
 
@@ -201,9 +202,8 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
     })
     .tap((opts) => {
       if (opts.devtool === false) {
-        // disable any overrides if
-        // we've explictly turned off sourcemaps
-        overrideSourceMaps(false)
+        // disable any overrides if we've explictly turned off sourcemaps
+        overrideSourceMaps(false, options.typescript)
 
         return
       }
@@ -212,14 +212,15 @@ const preprocessor: WebpackPreprocessor = (options: PreprocessorOptions = {}): F
 
       opts.devtool = 'inline-source-map'
 
-      // override typescript to always generate
-      // proper source maps
-      overrideSourceMaps(true)
+      // override typescript to always generate proper source maps
+      overrideSourceMaps(true, options.typescript)
     })
     .value() as any
 
     debug('webpackOptions: %o', webpackOptions)
     debug('watchOptions: %o', watchOptions)
+    if (options.typescript) debug('typescript: %s', options.typescript)
+
     debug(`input: ${filePath}`)
     debug(`output: ${outputPath}`)
 
