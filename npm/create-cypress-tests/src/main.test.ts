@@ -101,6 +101,10 @@ describe('create-cypress-tests', () => {
   })
 
   it('Fails if git repository have untracked or uncommited files', async () => {
+    mockFs({
+      '/package.json': JSON.stringify({ }),
+    })
+
     execStub?.callsFake((_, callback) => callback(null, { stdout: 'test' }))
     processExitStub?.callsFake(() => {})
 
@@ -125,7 +129,7 @@ describe('create-cypress-tests', () => {
       await fsExtra.mkdir(e2eTestOutputPath)
     })
 
-    it.only('Copies plugins and support files', async () => {
+    it('Copies plugins and support files', async () => {
       await fsExtra.outputFile(
         path.join(e2eTestOutputPath, 'package.json'),
         JSON.stringify({ name: 'test' }, null, 2),

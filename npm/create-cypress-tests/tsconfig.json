@@ -9,6 +9,7 @@
     "moduleResolution": "node",
     "strict": true,
     "strictNullChecks": true,
+    "resolveJsonModule": true,
     "module": "CommonJS",
     "target": "ES2018",
     "types": [

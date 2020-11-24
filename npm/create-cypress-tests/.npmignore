@@ -1,4 +1,4 @@
-src/
-initial-template/
+./src/
+./initial-template/
 scripts/
 __snapshots__/

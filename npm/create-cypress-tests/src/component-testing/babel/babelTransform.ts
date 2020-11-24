@@ -1,3 +1,4 @@
+import path from 'path'
 import * as fs from 'fs-extra'
 import * as babel from '@babel/core'
 import * as babelTypes from '@babel/types'
@@ -17,7 +18,10 @@ async function transformFileViaPlugin (filePath: string, babelPlugin: babel.Plug
     const initialCode = await fs.readFile(filePath, { encoding: 'utf-8' })
 
     const updatedResult = await babel.transformAsync(initialCode, {
+      filename: path.basename(filePath),
+      filenameRelative: path.relative(process.cwd(), filePath),
       plugins: [babelPlugin],
+      presets: [],
     })
 
     if (!updatedResult) {
@@ -94,15 +98,21 @@ export async function getPluginsSourceExample (ast: PluginsConfigAst) {
     '}',
   ].join('\n')
 
-  const babelResult = await babel.transformAsync(exampleCode, {
-    plugins: [createTransformPluginsFileBabelPlugin(ast)],
-  })
+  try {
+    const babelResult = await babel.transformAsync(exampleCode, {
+      filename: 'nothing.js',
+      plugins: [createTransformPluginsFileBabelPlugin(ast)],
+      presets: [],
+    })
 
-  if (!babelResult?.code) {
-    throw new Error('Can not generate code example for plugins file')
+    if (!babelResult?.code) {
+      throw new Error()
+    }
+
+    return babelResult.code
+  } catch (e) {
+    throw new Error('Can not generate code example for plugins file because of unhandled error. Please update the plugins file manually.')
   }
-
-  return babelResult.code
 }
 
 export function createSupportBabelPlugin (importCode: string): babel.PluginObj<any> {

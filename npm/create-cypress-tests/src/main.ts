@@ -2,7 +2,7 @@ import fs from 'fs'
 import findUp from 'find-up'
 import chalk from 'chalk'
 import util from 'util'
-import inqueier from 'inquirer'
+import inquirer from 'inquirer'
 import { initComponentTesting } from './component-testing/init-component-testing'
 import { exec } from 'child_process'
 import { scanFSForAvailableDependency } from './findPackageJson'
@@ -42,7 +42,7 @@ function shouldUseTypescript () {
 }
 
 async function askForComponentTesting () {
-  const { shouldSetupComponentTesting } = await inqueier.prompt({
+  const { shouldSetupComponentTesting } = await inquirer.prompt({
     type: 'confirm',
     name: 'shouldSetupComponentTesting',
     message: `Do you want to setup ${chalk.cyan('component testing')}? ${chalk.grey('You can do this later by rerunning this command')}.`,
@@ -69,7 +69,8 @@ export async function main ({ useNpm, ignoreTs, setupComponentTesting, ignoreExa
   const useTypescript = ignoreTs ? false : shouldUseTypescript()
 
   if (!rootPackageJsonPath) {
-    throw new Error(`It looks like you are running this script outside of npm module. If you want to install cypress in this folder please run ${chalk.inverse('npm init')} first`)
+    console.log(`${chalk.bold.red(`It looks like you are running cypress installation wizard outside of npm module.`)}\nIf you would like to setup a new project for cypress tests please run the ${chalk.inverse(useNpm ? ' npm init ' : ' yarn init ')} first.`)
+    process.exit(1)
   }
 
   const { name = 'unknown', version = '0.0.0' } = JSON.parse(fs.readFileSync(rootPackageJsonPath).toString())
