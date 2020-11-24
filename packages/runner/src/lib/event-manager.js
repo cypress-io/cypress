@@ -187,6 +187,7 @@ const eventManager = {
       if (!Cypress) return
 
       state.setIsLoading(true)
+      state.setStudioTestId(testId)
 
       Cypress.stop()
       Cypress.removeAllListeners()
@@ -194,8 +195,8 @@ const eventManager = {
       localBus.emit('restart', testId)
     })
 
-    localBus.on('update:creating:test:log', (log) => {
-      reporterBus.emit('update:creating:test:log', log)
+    localBus.on('update:studio:log', (log) => {
+      reporterBus.emit('update:studio:log', log)
     })
 
     const $window = $(window)

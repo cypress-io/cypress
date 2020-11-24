@@ -5,6 +5,7 @@ import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runna
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
+import StudioCommand from '../studio/studio-command-model'
 
 const localBus = new EventEmitter()
 
@@ -137,6 +138,10 @@ const events: Events = {
     runner.on('after:firefox:force:gc', action('after:firefox:force:gc', ({ gcInterval }) => {
       appState.setForcingGc(false)
       appState.setFirefoxGcInterval(gcInterval)
+    }))
+
+    runner.on('update:studio:log', action('update:studio:log', (log: StudioCommand[]) => {
+      runnablesStore.updateStudioLog(appState.extendingTest, log)
     }))
 
     localBus.on('resume', action('resume', () => {

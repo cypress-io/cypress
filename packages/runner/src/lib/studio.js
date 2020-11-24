@@ -16,10 +16,11 @@ const eventsWithValue = [
   'select',
 ]
 
-class TestCreator {
+class Studio {
   startCreating = (body) => {
     this._body = body
     this._log = []
+    this._currentId = 1
 
     eventTypes.forEach((event) => {
       this._body.addEventListener(event, this._recordEvent, {
@@ -39,6 +40,10 @@ class TestCreator {
 
   resetLog = () => {
     this._log = []
+  }
+
+  _getId = () => {
+    return this._currentId++
   }
 
   _getCommand = (event, $el) => {
@@ -81,6 +86,7 @@ class TestCreator {
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
     const action = ({
+      id: this._getId(),
       selector,
       command: this._getCommand(event, $el),
       value: this._getValue(event, $el),
@@ -127,8 +133,8 @@ class TestCreator {
   }
 
   _emitUpdatedLog = () => {
-    eventManager.emit('update:creating:test:log', this._log)
+    eventManager.emit('update:studio:log', this._log)
   }
 }
 
-export default new TestCreator()
+export default new Studio()

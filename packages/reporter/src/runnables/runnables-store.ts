@@ -9,6 +9,7 @@ import scroller, { Scroller } from '../lib/scroller'
 import { HookProps } from '../hooks/hook-model'
 import SuiteModel, { SuiteProps } from './suite-model'
 import TestModel, { TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
+import StudioCommand from '../studio/studio-command-model'
 import RunnableModel from './runnable-model'
 
 const defaults = {
@@ -172,6 +173,12 @@ class RunnablesStore {
   addLog (log: LogProps) {
     this._withTest(log.testId, (test) => {
       test.addLog(log)
+    })
+  }
+
+  updateStudioLog (id: string, log: StudioCommand[]) {
+    this._withTest(id, (test) => {
+      test.setStudioCommands(log)
     })
   }
 

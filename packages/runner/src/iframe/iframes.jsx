@@ -52,7 +52,11 @@ export default class Iframes extends Component {
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
 
-    this.props.eventManager.on('start:creating:test', this.autIframe.startCreatingTest)
+    this.props.eventManager.on('run:end', () => {
+      if (this.props.state.studioTestId) {
+        this.autIframe.startStudio()
+      }
+    })
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests

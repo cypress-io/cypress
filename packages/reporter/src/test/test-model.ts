@@ -10,6 +10,7 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import StudioCommand from '../studio/studio-command-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
@@ -51,6 +52,7 @@ export default class Test extends Runnable {
   @observable _isOpen: boolean | null = null
   @observable isOpenWhenActive: Boolean | null = null
   @observable _isFinished = false
+  @observable studioCommands: StudioCommand[] = []
 
   constructor (props: TestProps, level: number, private store: RunnablesStore) {
     super(props, level)
@@ -128,6 +130,10 @@ export default class Test extends Runnable {
     this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
     })
+  }
+
+  setStudioCommands (commands: StudioCommand[]) {
+    this.studioCommands = commands
   }
 
   @action start (props: TestProps) {

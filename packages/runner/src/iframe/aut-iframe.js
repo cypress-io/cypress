@@ -7,7 +7,7 @@ import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import testCreator from '../lib/test-creator'
+import studio from '../lib/studio'
 
 export default class AutIframe {
   constructor (config) {
@@ -398,11 +398,11 @@ export default class AutIframe {
     }
   }
 
-  startCreatingTest = () => {
-    testCreator.startCreating(this._body()[0])
+  startStudio = () => {
+    studio.startCreating(this._body()[0])
   }
 
-  stopCreatingTest = () => {
-    testCreator.stopCreating()
+  stopStudio = () => {
+    studio.stopCreating()
   }
 }
