@@ -154,8 +154,8 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
 
   // update problematic headers
   // update content-length if available
-  if (backendRequest.req.headers['content-length'] && frame.req.body) {
-    backendRequest.req.headers['content-length'] = frame.req.body.length
+  if (backendRequest.req.headers['content-length'] && frame.req.body != null) {
+    backendRequest.req.headers['content-length'] = Buffer.from(frame.req.body).byteLength.toString()
   }
 
   if (frame.hasResponseHandler) {
