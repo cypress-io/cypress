@@ -10,7 +10,7 @@ describe('Release Notes', () => {
 
     cy.fixture('user').then((theUser) => user = theUser)
     cy.fixture('release_notes').then((theReleaseNotes) => releaseNotes = theReleaseNotes)
-    cy.route2('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
+    cy.intercept('cypress-banner.jpg', { fixture: 'cypress-banner.jpg' })
 
     cy.visitIndex().then((win) => {
       ipc = win.App.ipc
