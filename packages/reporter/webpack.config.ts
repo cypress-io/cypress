@@ -21,6 +21,7 @@ config.plugins = [
   ...config.plugins,
   new HtmlWebpackPlugin({
     template: path.resolve(__dirname, 'static/index.html'),
+    inject: false,
   }),
 ]
 

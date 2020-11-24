@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React, { ReactElement } from 'react'
 
 import FileNameOpener from '../lib/file-name-opener'
-import Err from './err-model'
+import Err, { ParsedStackFileLine, ParsedStackMessageLine } from './err-model'
 
 const cypressLineRegex = /(cypress:\/\/|cypress_runner\.js)/
 
@@ -19,10 +19,10 @@ const ErrorStack = observer(({ err }: Props) => {
   // only display stack lines beyond the original message, since it's already
   // displayed above this
   let foundFirstStackLine = false
-  const stackLines = _.filter(err.parsedStack, ({ message }) => {
+  const stackLines = _.filter(err.parsedStack, (line) => {
     if (foundFirstStackLine) return true
 
-    if (message != null) return false
+    if ((line as ParsedStackMessageLine).message != null) return false
 
     foundFirstStackLine = true
 
@@ -42,19 +42,19 @@ const ErrorStack = observer(({ err }: Props) => {
 
   let stopLinking = false
   const lines = _.map(stackLines, (stackLine, index) => {
-    const { originalFile, function: fn, line, column, absoluteFile } = stackLine
+    const { originalFile, function: fn, line, column, absoluteFile } = stackLine as ParsedStackFileLine
     const key = `${originalFile}${index}`
 
     const whitespace = stackLine.whitespace.slice(commonWhitespaceLength)
 
-    if (stackLine.message != null) {
+    if ((stackLine as ParsedStackMessageLine).message != null) {
       // we append some errors with 'node internals', which we don't want to link
       // so stop linking anything after 'From Node.js Internals'
-      if (stackLine.message.includes('From Node')) {
+      if ((stackLine as ParsedStackMessageLine).message.includes('From Node')) {
         stopLinking = true
       }
 
-      return makeLine(key, [whitespace, stackLine.message])
+      return makeLine(key, [whitespace, (stackLine as ParsedStackMessageLine).message])
     }
 
     if (stopLinking) {
@@ -76,7 +76,7 @@ const ErrorStack = observer(({ err }: Props) => {
     }
 
     const link = (
-      <FileNameOpener key={key} className="runnable-err-file-path" fileDetails={stackLine} />
+      <FileNameOpener key={key} className="runnable-err-file-path" fileDetails={stackLine as ParsedStackFileLine} />
     )
 
     return makeLine(key, [whitespace, `at ${fn} (`, link, ')'])

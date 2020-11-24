@@ -132,8 +132,8 @@ export default class Attempt {
 
     this.err.update(props.err)
 
-    if (props.hookId) {
-      const hook = _.find(this.hooks, { hookId: props.hookId })
+    if (props.failedFromHookId) {
+      const hook = _.find(this.hooks, { hookId: props.failedFromHookId })
 
       if (hook && props.err) {
         hook.failed = true
