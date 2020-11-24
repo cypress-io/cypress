@@ -1,5 +1,0 @@
-**/*
-dist/main.bundle.js
-dist/plugins/**
-dist/server/**
-dist/evergreen.js

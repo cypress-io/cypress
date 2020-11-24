@@ -1,5 +1,5 @@
 function render () {
-  require('!!@packages/webpack-plugin-ct!./browser.js')
+  require('!!./loader.js!./browser.js')
 }
 
 render()

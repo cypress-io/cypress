@@ -13,7 +13,7 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
   private readonly files: any[] = []
   private readonly projectRoot: string
 
-  public constructor (options) {
+  public constructor (options: CypressOptions) {
     this.files = options.files
     this.projectRoot = options.projectRoot
   }
