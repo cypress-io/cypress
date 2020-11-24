@@ -141,7 +141,9 @@ const events: Events = {
     }))
 
     runner.on('update:studio:log', action('update:studio:log', (log: StudioCommand[]) => {
-      runnablesStore.updateStudioLog(appState.extendingTest, log)
+      if (appState.extendingTest) {
+        runnablesStore.updateStudioLog(appState.extendingTest, log)
+      }
     }))
 
     localBus.on('resume', action('resume', () => {

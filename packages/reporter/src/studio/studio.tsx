@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React, { Component, createRef, RefObject } from 'react'
+import React, { Component } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
@@ -12,6 +12,7 @@ import TestModel from '../test/test-model'
 
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
+import StudioCommand from './studio-command'
 
 interface Props {
   events: Events
@@ -30,37 +31,6 @@ class Studio extends Component<Props> {
     scroller,
   }
 
-  containerRef: RefObject<HTMLDivElement>
-
-  constructor (props: Props) {
-    super(props)
-
-    this.containerRef = createRef<HTMLDivElement>()
-  }
-
-  componentDidMount () {
-    this._scrollIntoView()
-  }
-
-  componentDidUpdate () {
-    this._scrollIntoView()
-    this.props.model.callbackAfterUpdate()
-  }
-
-  _scrollIntoView () {
-    const { appState, model, scroller } = this.props
-    const { state, shouldRender } = model
-
-    if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
-      window.requestAnimationFrame(() => {
-        // since this executes async in a RAF the ref might be null
-        if (this.containerRef.current) {
-          scroller.scrollIntoView(this.containerRef.current as HTMLElement)
-        }
-      })
-    }
-  }
-
   render () {
     const { model } = this.props
 
@@ -69,14 +39,16 @@ class Studio extends Component<Props> {
         <div className='runnables'>
           <div className={`${model.type} runnable runnable-${model.state}`}>
             <Collapsible
-              containerRef={this.containerRef}
               header={this._header()}
               headerClass='runnable-wrapper'
               headerStyle={{ paddingLeft: indent(model.level) }}
               contentClass='runnable-instruments'
               isOpen={true}
             >
-              <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+              <Attempts test={model} scrollIntoView={() => {}} />
+              <ul className='commands-container'>
+                {model.studioCommands.map((command, index) => <StudioCommand key={command.id} index={index} model={command} />)}
+              </ul>
             </Collapsible>
           </div>
         </div>

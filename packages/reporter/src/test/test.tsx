@@ -135,7 +135,7 @@ class Test extends Component<Props, State> {
         onDismiss={this._closeExtendingModal}
       >
         <div className='content'>
-          <h1><i className='fas fa-magic icon' /> Extend Test <span className='beta'>BETA</span></h1>
+          <h1><i className='fas fa-magic icon' /> Cypress Studio <span className='beta'>BETA</span></h1>
           <div className='center'>
             Interact with your site (click, type) to generate commands.
             <button className='get-started' onClick={this._startExtendingTest}>
