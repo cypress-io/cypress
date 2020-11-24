@@ -13,16 +13,16 @@ export interface RouteProps {
 }
 
 const Route = observer(({ model }: RouteProps) => (
-  <tr className={cs({ 'no-responses': !model.numResponses })}>
-    <td>{model.method}</td>
-    <td>{model.url}</td>
-    <td>{model.isStubbed ? 'Yes' : 'No'}</td>
-    <td>
+  <tr className={cs('route-item', { 'no-responses': !model.numResponses })}>
+    <td className='route-method'>{model.method}</td>
+    <td className='route-url'>{model.url}</td>
+    <td className='route-is-stubbed'>{model.isStubbed ? 'Yes' : 'No'}</td>
+    <td className='route-alias'>
       <Tooltip placement='top' title={`Aliased this route as: '${model.alias}'`} className='cy-tooltip'>
-        <span className='route-alias'>{model.alias}</span>
+        <span className='route-alias-name'>{model.alias}</span>
       </Tooltip>
     </td>
-    <td className='response-count'>{model.numResponses || '-'}</td>
+    <td className='route-num-responses'>{model.numResponses || '-'}</td>
   </tr>
 ))
 

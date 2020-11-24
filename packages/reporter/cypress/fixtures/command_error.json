@@ -1,0 +1,105 @@
+{
+  "name": "CommandError",
+  "message": "`foo` \\`bar\\` **baz** *fizz* ** buzz **",
+  "stack": "Some Error\n        at foo.bar (my/app.js:2:7)\n          at baz.qux (cypress/integration/foo_spec.js:5:2)\n      From previous event:\n        at bar.baz (my/app.js:8:11)\n      ",
+  "parsedStack": [
+    {
+      "message": "Some Error",
+      "whitespace": ""
+    },
+    {
+      "message": "",
+      "whitespace": ""
+    },
+    {
+      "message": "Message line below blank line",
+      "whitespace": "  "
+    },
+    {
+      "originalFile": "my/app.js",
+      "relativeFile": "my/app.js",
+      "absoluteFile": "/me/dev/my/app.js",
+      "fileUrl": "http://localhost:1234/me/dev/my/app.js",
+      "function": "foo.bar",
+      "line": 2,
+      "column": 7,
+      "whitespace": "  "
+    },
+    {
+      "originalFile": "cypress/integration/foo_spec.js",
+      "relativeFile": "cypress/integration/foo_spec.js",
+      "absoluteFile": "/me/dev/cypress/integration/foo_spec.js",
+      "fileUrl": "http://localhost:1234/me/dev/cypress/integration/foo_spec.js",
+      "function": "baz.qux",
+      "line": 5,
+      "column": 2,
+      "whitespace": "    "
+    },
+    {
+      "message": "At previous event:",
+      "whitespace": "  "
+    },
+    {
+      "originalFile": "http://localhost:1234/me/dev/my/app.js",
+      "fileUrl": "http://localhost:1234/me/dev/my/app.js",
+      "function": "bar.baz",
+      "line": 8,
+      "column": 11,
+      "whitespace": "    "
+    },
+    {
+      "originalFile": "cypress://../driver/src/cypress/runner.js",
+      "relativeFile": "cypress://../driver/src/cypress/runner.js",
+      "absoluteFile": "cypress://../driver/src/cypress/runner.js",
+      "fileUrl": "http://localhost:1234cypress://../driver/src/cypress/runner.js",
+      "function": "callFn",
+      "line": 9,
+      "column": 12,
+      "whitespace": "    "
+    },
+    {
+      "originalFile": "http://localhost:12345/__cypress/runner/cypress_runner.js",
+      "relativeFile": "http://localhost:12345/__cypress/runner/cypress_runner.js",
+      "absoluteFile": "http://localhost:12345/__cypress/runner/cypress_runner.js",
+      "fileUrl": "http://localhost:1234http://localhost:12345/__cypress/runner/cypress_runner.js",
+      "function": "throwErr",
+      "line": 10,
+      "column": 13,
+      "whitespace": "    "
+    },
+    {
+      "message": "From Node.js Internals:",
+      "whitespace": "  "
+    },
+    {
+      "originalFile": "events.js",
+      "relativeFile": "events.js",
+      "absoluteFile": "events.js",
+      "fileUrl": "http://localhost:1234events.js",
+      "function": "emit",
+      "line": 11,
+      "column": 14,
+      "whitespace": "    "
+    },
+    {
+      "originalFile": "some/node/internals.js",
+      "relativeFile": "some/node/internals.js",
+      "absoluteFile": "/user/path/to/node/some/node/internals.js",
+      "fileUrl": "http://localhost:1234/user/path/to/node/some/node/internals.js",
+      "function": "writeFile",
+      "line": 12,
+      "column": 15,
+      "whitespace": "    "
+    }
+  ],
+  "docsUrl": "https://on.cypress.io/type",
+  "codeFrame": {
+    "originalFile": "my/app.js",
+    "relativeFile": "my/app.js",
+    "absoluteFile": "/me/dev/my/app.js",
+    "line": 2,
+    "column": 7,
+    "language": "javascript",
+    "frame": "cy.get('.as - table')\n.find('tbody>tr').eq(12)\n.find('td').first()\n.find('button').as('firstBtn')\n.then(() => { })"
+  }
+}

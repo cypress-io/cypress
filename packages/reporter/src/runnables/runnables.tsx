@@ -3,7 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 
-import AnError, { Error } from '../errors/an-error'
+import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import Runnable from './runnable-and-suite'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
@@ -42,7 +42,15 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-function content ({ isReady, runnables }: RunnablesStore, specPath: string, error?: Error) {
+interface RunnablesContentProps {
+  runnablesStore: RunnablesStore
+  specPath: string
+  error?: RunnablesErrorModel
+}
+
+const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
+  const { isReady, runnables } = runnablesStore
+
   if (!isReady) {
     return <Loading />
   }
@@ -53,11 +61,11 @@ function content ({ isReady, runnables }: RunnablesStore, specPath: string, erro
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnables={runnables} />
-}
+  return error ? <RunnablesError error={error} /> : <RunnablesList runnables={runnables} />
+})
 
 interface RunnablesProps {
-  error?: Error
+  error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller
@@ -72,7 +80,11 @@ class Runnables extends Component<RunnablesProps> {
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
-        {content(runnablesStore, spec.relative, error)}
+        <RunnablesContent
+          runnablesStore={runnablesStore}
+          specPath={spec.relative}
+          error={error}
+        />
       </div>
     )
   }
