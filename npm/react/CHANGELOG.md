@@ -1,3 +1,10 @@
+# [@cypress/react-v4.15.16](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.15...@cypress/react-v4.15.16) (2020-11-23)
+
+
+### Bug Fixes
+
+* cypress/react release process ([#9284](https://github.com/cypress-io/cypress/issues/9284)) ([88e332c](https://github.com/cypress-io/cypress/commit/88e332c5303613c182e92b77b25da9604039aaa8))
+
 # [@cypress/react-v4.15.15](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.14...@cypress/react-v4.15.15) (2020-11-10)
 
 

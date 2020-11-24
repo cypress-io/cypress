@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "5.6.0",
+  "version": "6.0.0",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -50,7 +50,7 @@
     "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.ts,cypress-tests.ts",
     "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
-    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,reporter,runner,socket}'\"",
+    "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
     "pretest-e2e": "yarn ensure-deps",
     "test-e2e": "lerna exec yarn test-e2e --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",

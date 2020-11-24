@@ -1,4 +1,3 @@
-import cs from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
@@ -7,7 +6,7 @@ import { render } from 'react-dom'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
-import { Error } from './errors/an-error'
+import { RunnablesErrorModel } from './runnables/runnable-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
 import ForcedGcWarning from './lib/forced-gc-warning'
@@ -27,7 +26,7 @@ export interface ReporterProps {
   scroller: Scroller
   statsStore: StatsStore
   events: Events
-  error?: Error
+  error?: RunnablesErrorModel
   spec: Cypress.Cypress['spec']
 }
 
@@ -64,7 +63,7 @@ class Reporter extends Component<ReporterProps> {
     const { appState } = this.props
 
     return (
-      <div className={cs('reporter', { 'is-running': appState.isRunning })}>
+      <div className='reporter'>
         <Header appState={appState} statsStore={this.props.statsStore} />
         <Runnables
           appState={appState}
