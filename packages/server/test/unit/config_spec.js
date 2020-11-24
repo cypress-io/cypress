@@ -649,51 +649,51 @@ describe('lib/config', () => {
         })
       })
 
-      context('scrollToElement', () => {
-        it('passes if a boolean', function () {
-          this.setup({ scrollToElement: false })
+      context('scrollBehavior', () => {
+        it('passes if false', function () {
+          this.setup({ scrollBehavior: false })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an enum (center)', function () {
-          this.setup({ scrollToElement: 'center' })
+          this.setup({ scrollBehavior: 'center' })
 
           return this.expectValidationPasses()
         })
 
-        it('passes if an enum (start)', function () {
-          this.setup({ scrollToElement: 'start' })
+        it('passes if an enum (top)', function () {
+          this.setup({ scrollBehavior: 'top' })
 
           return this.expectValidationPasses()
         })
 
-        it('passes if an enum (end)', function () {
-          this.setup({ scrollToElement: 'end' })
+        it('passes if an enum (bottom)', function () {
+          this.setup({ scrollBehavior: 'bottom' })
 
           return this.expectValidationPasses()
         })
 
         it('passes if an enum (nearest)', function () {
-          this.setup({ scrollToElement: 'nearest' })
+          this.setup({ scrollBehavior: 'nearest' })
 
           return this.expectValidationPasses()
         })
 
         it('fails if not valid (number)', function () {
-          this.setup({ scrollToElement: 42 })
+          this.setup({ scrollBehavior: 42 })
 
           return this.expectValidationFails('be one of these values')
         })
 
         it('fails if not a valid (null)', function () {
-          this.setup({ scrollToElement: null })
+          this.setup({ scrollBehavior: null })
 
           return this.expectValidationFails('be one of these values')
         })
 
         it('fails if not a valid (true)', function () {
-          this.setup({ scrollToElement: true })
+          this.setup({ scrollBehavior: true })
 
           return this.expectValidationFails('be one of these values')
         })
@@ -997,8 +997,8 @@ describe('lib/config', () => {
       return this.defaults('waitForAnimations', true)
     })
 
-    it('scrollToElement=start', function () {
-      return this.defaults('scrollToElement', 'start')
+    it('scrollBehavior=start', function () {
+      return this.defaults('scrollBehavior', 'top')
     })
 
     it('animationDistanceThreshold=5', function () {
@@ -1266,7 +1266,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
-            scrollToElement: { value: 'start', from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })
@@ -1366,7 +1366,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
-            scrollToElement: { value: 'start', from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })

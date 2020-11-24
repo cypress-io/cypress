@@ -386,31 +386,31 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('can specify scrollToElement in options', () => {
+    it('can specify scrollBehavior in options', () => {
       cy.get(':text:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
       })
 
-      cy.get(':text:first').type('foo', { scrollToElement: 'end' })
+      cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
 
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
       })
     })
 
-    it('does not scroll when scrollToElement is false in options', () => {
+    it('does not scroll when scrollBehavior is false in options', () => {
       cy.get(':text:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
       })
 
-      cy.get(':text:first').type('foo', { scrollToElement: false })
+      cy.get(':text:first').type('foo', { scrollBehavior: false })
 
       cy.get(':text:first').then((el) => {
         expect(el[0].scrollIntoView).not.to.be.called
       })
     })
 
-    it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
       cy.get(':text:first').then((el) => {
         cy.spy(el[0], 'scrollIntoView')
       })
@@ -434,7 +434,7 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
-    it('errors when scrollToElement is false and element is out of view and is clicked', (done) => {
+    it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
       cy.on('fail', (err) => {
         expect(err.message).to.include('`cy.type()` failed because the center of this element is hidden from view')
         expect(cy.state('window').scrollY).to.equal(0)
@@ -454,7 +454,7 @@ describe('src/cy/commands/actions/type - #type', () => {
         width: '100%',
       }).prependTo($body)
 
-      cy.get(':text:first').type('foo', { scrollToElement: false, timeout: 200 })
+      cy.get(':text:first').type('foo', { scrollBehavior: false, timeout: 200 })
     })
   })
 

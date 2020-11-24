@@ -23,6 +23,13 @@ const dispatchPrimedChangeEvents = function (state) {
   }
 }
 
+const scrollBehaviorOptionsMap = {
+  top: 'start',
+  bottom: 'end',
+  center: 'center',
+  nearest: 'nearest',
+}
+
 const getPositionFromArguments = function (positionOrX, y, options) {
   let position; let x
 
@@ -78,7 +85,7 @@ const ensureElIsNotCovered = function (cy, win, $el, fromElViewport, options, lo
       return ensureDescendents(fromElViewport)
     } catch (err) {
       // if scrolling to element is off we re-throw as there is nothing to do
-      if (options.scrollToElement === false) {
+      if (options.scrollBehavior === false) {
         throw err
       }
 
@@ -318,9 +325,11 @@ const verify = function (cy, $el, options, callbacks) {
           cy.ensureNotDisabled($el, _log)
         }
 
-        if (options.scrollToElement !== false) {
+        if (options.scrollBehavior !== false) {
           // scroll the element into view
-          $el.get(0).scrollIntoView({ block: options.scrollToElement })
+          const scrollBehavior = scrollBehaviorOptionsMap[options.scrollBehavior]
+
+          $el.get(0).scrollIntoView({ block: scrollBehavior })
           debug('scrollIntoView:', $el[0])
 
           if (onScroll) {

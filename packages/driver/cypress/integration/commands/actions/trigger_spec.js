@@ -601,32 +601,32 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
-      it('can specify scrollToElement in options', () => {
+      it('can specify scrollBehavior in options', () => {
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('button:first').trigger('mouseover', { scrollToElement: 'end' })
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: 'bottom' })
 
         cy.get('button:first').then((el) => {
           expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
         })
       })
 
-      it('does not scroll when scrollToElement is false in options', () => {
+      it('does not scroll when scrollBehavior is false in options', () => {
         cy.scrollTo('top')
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('button:first').trigger('mouseover', { scrollToElement: false })
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false })
 
         cy.get('button:first').then((el) => {
           expect(el[0].scrollIntoView).not.to.be.called
         })
       })
 
-      it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+      it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.scrollTo('top')
         cy.get('button:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
@@ -652,7 +652,7 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
-      it('errors when scrollToElement is false and element is out of view and is clicked', (done) => {
+      it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
         cy.scrollTo('top')
 
         cy.on('fail', (err) => {
@@ -674,7 +674,7 @@ describe('src/cy/commands/actions/trigger', () => {
           width: '100%',
         }).prependTo($body)
 
-        cy.get('button:first').trigger('mouseover', { scrollToElement: false, timeout: 200 })
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false, timeout: 200 })
       })
     })
 

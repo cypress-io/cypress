@@ -76,31 +76,31 @@ describe('src/cy/commands/actions/type - #clear', () => {
     })
   })
 
-  it('can specify scrollToElement in options', () => {
+  it('can specify scrollBehavior in options', () => {
     cy.get('input:first').then((el) => {
       cy.spy(el[0], 'scrollIntoView')
     })
 
-    cy.get('input:first').clear({ scrollToElement: 'end' })
+    cy.get('input:first').clear({ scrollBehavior: 'bottom' })
 
     cy.get('input:first').then((el) => {
       expect(el[0].scrollIntoView).calledWith({ block: 'end' })
     })
   })
 
-  it('does not scroll when scrollToElement is false in options', () => {
+  it('does not scroll when scrollBehavior is false in options', () => {
     cy.get('input:first').then((el) => {
       cy.spy(el[0], 'scrollIntoView')
     })
 
-    cy.get('input:first').clear({ scrollToElement: false })
+    cy.get('input:first').clear({ scrollBehavior: false })
 
     cy.get('input:first').then((el) => {
       expect(el[0].scrollIntoView).not.to.be.called
     })
   })
 
-  it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+  it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
     cy.get('input:first').then((el) => {
       cy.spy(el[0], 'scrollIntoView')
     })

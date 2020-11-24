@@ -129,7 +129,7 @@ const checkOrUncheck = (Cypress, cy, type, subject, values = [], userOptions = {
         interval: options.interval,
         waitForAnimations: options.waitForAnimations,
         animationDistanceThreshold: options.animationDistanceThreshold,
-        scrollToElement: options.scrollToElement,
+        scrollBehavior: options.scrollBehavior,
       }).then(() => {
         if (options._log) {
           options._log.snapshot().end()

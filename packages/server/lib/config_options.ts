@@ -261,9 +261,9 @@ export const options = [
     defaultValue: true,
     validation: v.isBoolean,
   }, {
-    name: 'scrollToElement',
-    defaultValue: 'start',
-    validation: v.isOneOf('center', 'start', 'end', 'nearest', false),
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
   }, {
     name: 'watchForFileChanges',
     defaultValue: true,

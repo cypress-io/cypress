@@ -79,10 +79,10 @@ Cypress.on('test:after:run', (attributes , test) => {
 })
 
 namespace CypressActionCommandOptionTests {
-  cy.get('el').clear({scrollToElement: 'start'})
-  cy.get('el').check({scrollToElement: 'end'})
-  cy.get('el').type('hello', {scrollToElement: 'center'})
-  cy.get('el').trigger('mousedown', {scrollToElement: 'nearest'})
-  cy.get('el').click({scrollToElement: false})
-  cy.get('el').click({scrollToElement: true}) // $ExpectError
+  cy.get('el').clear({scrollBehavior: 'top'})
+  cy.get('el').check({scrollBehavior: 'bottom'})
+  cy.get('el').type('hello', {scrollBehavior: 'center'})
+  cy.get('el').trigger('mousedown', {scrollBehavior: 'nearest'})
+  cy.get('el').click({scrollBehavior: false})
+  cy.get('el').click({scrollBehavior: true}) // $ExpectError
 }

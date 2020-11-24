@@ -1186,31 +1186,31 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('can specify scrollToElement in options', () => {
+      it('can specify scrollBehavior in options', () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('input:first').click({ scrollToElement: 'end' })
+        cy.get('input:first').click({ scrollBehavior: 'bottom' })
 
         cy.get('input:first').then((el) => {
           expect(el[0].scrollIntoView).calledWith({ block: 'end' })
         })
       })
 
-      it('does not scroll when scrollToElement is false in options', () => {
+      it('does not scroll when scrollBehavior is false in options', () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
 
-        cy.get('input:first').click({ scrollToElement: false })
+        cy.get('input:first').click({ scrollBehavior: false })
 
         cy.get('input:first').then((el) => {
           expect(el[0].scrollIntoView).not.to.be.called
         })
       })
 
-      it('does not scroll when scrollToElement is false in config', { scrollToElement: false }, () => {
+      it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
         cy.get('input:first').then((el) => {
           cy.spy(el[0], 'scrollIntoView')
         })
@@ -1234,7 +1234,7 @@ describe('src/cy/commands/actions/click', () => {
         })
       })
 
-      it('errors when scrollToElement is false and element is out of view and is clicked', (done) => {
+      it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
         cy.on('fail', (err) => {
           expect(err.message).to.include('`cy.click()` failed because the center of this element is hidden from view')
           expect(cy.state('window').scrollY).to.equal(0)
@@ -1254,7 +1254,7 @@ describe('src/cy/commands/actions/click', () => {
           width: '100%',
         }).prependTo($body)
 
-        cy.get('input:first').click({ scrollToElement: false, timeout: 200 })
+        cy.get('input:first').click({ scrollBehavior: false, timeout: 200 })
       })
 
       it('can force click on hidden elements', () => {
