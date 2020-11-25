@@ -116,7 +116,7 @@ describe('lib/cypress', () => {
     this.recordPath = Fixtures.projectPath('record')
     this.pluginConfig = Fixtures.projectPath('plugin-config')
     this.pluginBrowser = Fixtures.projectPath('plugin-browser')
-    this.idsPath = Fixtures.projectPath('ids')
+    this.samplePath = Fixtures.projectPath('sample')
 
     // force cypress to call directly into main without
     // spawning a separate process
@@ -498,7 +498,7 @@ describe('lib/cypress', () => {
     })
 
     it('runs project by specific spec with default configuration', function () {
-      return cypress.start([`--run-project=${this.idsPath}`, `--spec=${this.idsPath}/cypress/integration/bar.js`, '--config', 'port=2020'])
+      return cypress.start([`--run-project=${this.samplePath}`, `--spec=${this.samplePath}/cypress/integration/bar.js`, '--config', 'port=2020'])
       .then(() => {
         expect(browsers.open).to.be.calledWithMatch(ELECTRON_BROWSER, { url: 'http://localhost:2020/__/#/tests/integration/bar.js' })
         this.expectExitWith(0)
@@ -638,19 +638,19 @@ describe('lib/cypress', () => {
     })
 
     it('removes fixtures when they exist and fixturesFolder is false', function (done) {
-      config.get(this.idsPath)
+      config.get(this.samplePath)
       .then((cfg) => {
         this.cfg = cfg
 
         return fs.statAsync(this.cfg.fixturesFolder)
       }).then(() => {
-        return settings.read(this.idsPath)
+        return settings.read(this.samplePath)
       }).then((json) => {
         json.fixturesFolder = false
 
-        return settings.write(this.idsPath, json)
+        return settings.write(this.samplePath, json)
       }).then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
+        return cypress.start([`--run-project=${this.samplePath}`])
       }).then(() => {
         return fs.statAsync(this.cfg.fixturesFolder)
         .then(() => {
@@ -696,17 +696,17 @@ describe('lib/cypress', () => {
     it('can change the reporter with cypress.json', function () {
       sinon.spy(Reporter, 'create')
 
-      return config.get(this.idsPath)
+      return config.get(this.samplePath)
       .then((cfg) => {
         this.cfg = cfg
 
-        return settings.read(this.idsPath)
+        return settings.read(this.samplePath)
       }).then((json) => {
         json.reporter = 'dot'
 
-        return settings.write(this.idsPath, json)
+        return settings.write(this.samplePath, json)
       }).then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
+        return cypress.start([`--run-project=${this.samplePath}`])
       }).then(() => {
         expect(Reporter.create).to.be.calledWith('dot')
         this.expectExitWith(0)
@@ -762,9 +762,9 @@ describe('lib/cypress', () => {
     })
 
     it('logs error when supportFile doesn\'t exist', function () {
-      return settings.write(this.idsPath, { supportFile: '/does/not/exist' })
+      return settings.write(this.samplePath, { supportFile: '/does/not/exist' })
       .then(() => {
-        return cypress.start([`--run-project=${this.idsPath}`])
+        return cypress.start([`--run-project=${this.samplePath}`])
       }).then(() => {
         this.expectExitWithErr('SUPPORT_FILE_NOT_FOUND', 'Your `supportFile` is set to `/does/not/exist`,')
       })
@@ -773,7 +773,7 @@ describe('lib/cypress', () => {
     it('logs error when browser cannot be found', function () {
       browsers.open.restore()
 
-      return cypress.start([`--run-project=${this.idsPath}`, '--browser=foo'])
+      return cypress.start([`--run-project=${this.samplePath}`, '--browser=foo'])
       .then(() => {
         this.expectExitWithErr('BROWSER_NOT_FOUND_BY_NAME')
 

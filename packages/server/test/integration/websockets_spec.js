@@ -23,9 +23,9 @@ describe('Web Sockets', () => {
   beforeEach(function () {
     Fixtures.scaffold()
 
-    this.idsPath = Fixtures.projectPath('ids')
+    this.samplePath = Fixtures.samplePath('sample')
 
-    return config.get(this.idsPath, { port: cyPort })
+    return config.get(this.samplePath, { port: cyPort })
     .then((cfg) => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })

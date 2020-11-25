@@ -25,7 +25,7 @@ describe('lib/project', () => {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
-    this.idsPath = Fixtures.projectPath('ids')
+    this.samplePath = Fixtures.projectPath('sample')
     this.pristinePath = Fixtures.projectPath('pristine')
 
     return settings.read(this.todosPath).then((obj = {}) => {
@@ -726,9 +726,9 @@ This option will not have an effect in Some-other-name. Tests that rely on web s
 
   context('#getSpecUrl', () => {
     beforeEach(function () {
-      this.project2 = new Project(this.idsPath)
+      this.project2 = new Project(this.samplePath)
 
-      return settings.write(this.idsPath, { port: 2020 })
+      return settings.write(this.samplePath, { port: 2020 })
     })
 
     it('returns fully qualified url when spec exists', function () {
