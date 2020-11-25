@@ -18,8 +18,8 @@ interface NodeEventEmitter {
   removeAllListeners(event?: string | symbol): this
   setMaxListeners(n: number): this
   getMaxListeners(): number
-  listeners(event: string | symbol): ((...args: any[]) => void)[]
-  rawListeners(event: string | symbol): ((...args: any[]) => void)[]
+  listeners(event: string | symbol): Array<(...args: any[]) => void>
+  rawListeners(event: string | symbol): Array<(...args: any[]) => void>
   emit(event: string | symbol, ...args: any[]): boolean
   listenerCount(type: string | symbol): number
   // Added in Node 6...
