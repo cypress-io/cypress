@@ -56,6 +56,24 @@
           ]
         }
       ]
+    },
+    {
+      "id": "r8",
+      "title": "suite 2",
+      "root": false,
+      "hooks": [],
+      "tests": [
+        {
+          "id": "r9",
+          "title": "test 3",
+          "state": "passed"
+        },
+        {
+          "id": "r10",
+          "title": "test 4",
+          "state": "passed"
+        }
+      ]
     }
   ]
 }

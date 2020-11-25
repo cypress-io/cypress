@@ -34,7 +34,6 @@ Thanks for taking the time to contribute! :smile:
 - [Committing Code](#committing-code)
   - [Branches](#branches)
   - [Pull Requests](#pull-requests)
-  - [Testing](#testing)
   - [Dependencies](#dependencies)
 - [Reviewing Code](#reviewing-code)
   - [Some rules about Code Review](#Some-rules-about-Code-Review)

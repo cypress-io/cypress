@@ -1,3 +1,0 @@
---require @packages/web-config/node-register
---watch-extensions ts,jsx,tsx,js
---file test/helper

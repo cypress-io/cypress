@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { Component } from 'react'
 
 import { indentPadding } from '../lib/util'
 import { SuiteModel } from './suite-model'
@@ -30,13 +30,24 @@ export interface RunnableProps {
   expandableProps: ExpandableProps
 }
 
-export const Runnable = observer(({ model, style = {}, expandableProps }: RunnableProps) => (
-  <div
-    className={`${model.type} runnable runnable-state-${model.state}`}
-    style={indentPadding(style, model.level)}
-  >
-    <Expandable expandableProps={expandableProps}>
-      {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
-    </Expandable>
-  </div>
-))
+// NOTE: some of the driver tests dig into the React instance for this component
+// in order to mess with its internal state. converting it to a functional
+// component breaks that, so it needs to stay a Class-based component or
+// else the driver tests need to be refactored to support it being functional
+@observer
+export class Runnable extends Component<RunnableProps> {
+  render () {
+    const { model, style, expandableProps } = this.props
+
+    return (
+      <div
+        className={`${model.type} runnable runnable-state-${model.state}`}
+        style={indentPadding(style, model.level)}
+      >
+        <Expandable expandableProps={expandableProps}>
+          {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
+        </Expandable>
+      </div>
+    )
+  }
+}

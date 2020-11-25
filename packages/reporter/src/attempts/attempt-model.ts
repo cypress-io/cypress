@@ -177,8 +177,8 @@ export class AttemptModel {
 
     this.err.update(props.err)
 
-    if (props.hookId) {
-      const hook = _.find(this.hooks.items, { hookId: props.hookId })
+    if (props.failedFromHookId) {
+      const hook = _.find(this.hooks.items, { hookId: props.failedFromHookId })
 
       if (hook && props.err) {
         hook.failed = true

@@ -164,7 +164,7 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('.error')
-    cy.get('details.stacktrace > summary').should('not.be.visible')
+    cy.get('details.stacktrace > summary').should('not.exist')
   })
 
   it('shows abbreviated error details if only one line', function () {

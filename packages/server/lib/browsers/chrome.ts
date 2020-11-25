@@ -106,6 +106,10 @@ const DEFAULT_ARGS = [
   '--disable-breakpad',
   '--password-store=basic',
   '--use-mock-keychain',
+
+  // write shared memory files into '/tmp' instead of '/dev/shm'
+  // https://github.com/cypress-io/cypress/issues/5336
+  '--disable-dev-shm-usage',
 ]
 
 /**

@@ -69,7 +69,7 @@ describe('Update Modal', () => {
       cy.get('.footer .version').click()
       cy.get('.modal').find('.close').click()
 
-      cy.get('.modal').should('not.be.visible')
+      cy.get('.modal').should('not.exist')
     })
   })
 

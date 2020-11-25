@@ -6,7 +6,7 @@ export interface AliasObject {
   ordinal?: string
 }
 
-export type Alias = string | Array<string> | null | AliasObject
+export type Alias = string | Array<string> | null | AliasObject | Array<AliasObject>
 
 export interface InstrumentProps {
   id: number

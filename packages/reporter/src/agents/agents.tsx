@@ -15,7 +15,7 @@ export interface AgentProps {
 }
 
 export const Agent = observer(({ model }: AgentProps) => (
-  <tr className={cs({ 'no-calls': !model.callCount })}>
+  <tr className={cs('agent-item', { 'no-calls': !model.callCount })}>
     <td>{model.type}</td>
     <td>{model.functionName}</td>
     <td>{([] as Array<Alias>).concat(model.alias || []).join(', ')}</td>
@@ -71,7 +71,7 @@ export const Agents = observer(({ model, style, measure }: AgentsProps) => {
                 <th>Type</th>
                 <th>Function</th>
                 <th>Alias(es)</th>
-                <th># Calls</th>
+                <th className='call-count'># Calls</th>
               </tr>
             </thead>
             <tbody>

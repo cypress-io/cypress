@@ -240,7 +240,7 @@ describe('then', () => {
 
 cy.wait(['@foo', '@bar'])
   .then(([first, second]) => {
-    first // $ExpectType WaitXHR
+    first // $ExpectType Interception
   })
 
 cy.wait(1234) // $ExpectType Chainable<undefined>

@@ -1,15 +1,15 @@
 import _ from 'lodash'
-import { action, toJS } from 'mobx'
+import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import Tree from 'react-virtualized-tree'
 
-import AnError, { Error } from '../errors/an-error'
-import { Virtualizable } from '../tree/virtualizable'
+import { AppState } from '../lib/app-state'
+import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
-import { AppState } from '../lib/app-state'
+import { Virtualizable } from '../tree/virtualizable'
 
 const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',
@@ -48,7 +48,13 @@ const RunnablesList = observer(({ runnablesStore }: { runnablesStore: RunnablesS
   )
 })
 
-const RunnableContent = observer(({ runnablesStore, specPath, error }: { runnablesStore: RunnablesStore, specPath: string, error?: Error }) => {
+interface RunnablesContentProps {
+  runnablesStore: RunnablesStore
+  specPath: string
+  error?: RunnablesErrorModel
+}
+
+const RunnableContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
   const { isReady, runnables } = runnablesStore
 
   if (!isReady) {
@@ -61,11 +67,11 @@ const RunnableContent = observer(({ runnablesStore, specPath, error }: { runnabl
     error = noTestsError(specPath)
   }
 
-  return error ? <AnError error={error} /> : <RunnablesList runnablesStore={runnablesStore} />
+  return error ? <RunnablesError error={error} /> : <RunnablesList runnablesStore={runnablesStore} />
 })
 
 interface RunnablesProps {
-  error?: Error
+  error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']
   scroller: Scroller

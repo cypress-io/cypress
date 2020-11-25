@@ -6,22 +6,22 @@ import { FileDetails } from '@packages/ui-components'
 import { VirtualizableType } from '../tree/virtualizable'
 import { VirtualNodeModel } from './../tree/virtual-node-model'
 
-interface ParsedStackMessageLine {
+export interface ParsedStackMessageLine {
   message: string
   whitespace: string
 }
 
-interface ParsedStackFileLine extends FileDetails {
+export interface ParsedStackFileLine extends FileDetails {
   fileUrl: string
   function: string
   whitespace: string
 }
 
-type ParsedStackLine = ParsedStackMessageLine & ParsedStackFileLine
+export type ParsedStackLine = ParsedStackMessageLine | ParsedStackFileLine
 
 export interface CodeFrame extends FileDetails {
   frame: string
-  language: string
+  language?: string | null
 }
 
 export interface ErrProps {
@@ -42,7 +42,7 @@ export class ErrModel {
   @observable message = ''
   @observable stack = ''
   @observable sourceMappedStack = ''
-  @observable.ref parsedStack = [] as ParsedStackLine[]
+  @observable.ref parsedStack: ParsedStackLine[] = []
   @observable docsUrl = '' as string | string[]
   @observable templateType = ''
   @observable.ref codeFrame?: CodeFrame
