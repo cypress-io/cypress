@@ -145,6 +145,9 @@ fabric.properties
 .idea/**/markdown-navigator.xml
 .idea/**/markdown-navigator/
 
+### Vscode Patch ###
+.vscode
+
 ### Linux ###
 *~
 
