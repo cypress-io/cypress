@@ -8,6 +8,7 @@ import { $ } from '@packages/driver'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import { getSpecUrl } from '../iframe/iframes'
 
 @observer
 export default class Header extends Component {
@@ -15,6 +16,7 @@ export default class Header extends Component {
 
   render () {
     const { state, config } = this.props
+    const url = getSpecUrl(config, window.location.origin)
 
     return (
       <header
@@ -45,7 +47,7 @@ export default class Header extends Component {
               'highlighted': state.highlightUrl,
             })}
           >
-            <input className='url' value={state.url} readOnly onClick={this._openUrl} />
+            <input className='url' value={url} readOnly onClick={this._openUrl} />
             <span className='loading-container'>
               ...loading <i className='fas fa-spinner fa-pulse'></i>
             </span>
@@ -99,7 +101,7 @@ export default class Header extends Component {
   }
 
   _openUrl = () => {
-    window.open(this.props.state.url)
+    window.open(getSpecUrl(this.props.config, window.location.origin))
   }
 
   @action _toggleViewportMenu = () => {

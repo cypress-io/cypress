@@ -18,7 +18,6 @@
     "eslint-plugin-mocha": "^8.0.0",
     "express": "^4.17.1",
     "globby": "^11.0.1",
-    "hash-sum": "^2.0.0",
     "html-webpack-plugin": "^4.5.0",
     "koa": "^2.13.0",
     "lodash": "^4.17.20",
