@@ -1537,8 +1537,6 @@ declare namespace Cypress {
     route(options: Partial<RouteOptions>): Chainable<null>
 
     /**
-     * @deprecated Use `cy.intercept()` instead.
-     *
      * Take a screenshot of the application under test and the Cypress Command Log.
      *
      * @see https://on.cypress.io/screenshot
