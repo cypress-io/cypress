@@ -16,7 +16,7 @@ export default class Header extends Component {
 
   render () {
     const { state, config } = this.props
-    const url = getSpecUrl(config, window.location.origin)
+    const url = state.url.length ? state.url : getSpecUrl(config, window.location.origin)
 
     return (
       <header
