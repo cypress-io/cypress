@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "build:watch": "tsc -w ./src/** ../webpack-plugin-ct/dist/**"
+    "watch": "tsc -w"
   },
   "devDependencies": {
     "@types/webpack": "^4.1.4",
