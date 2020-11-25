@@ -8,6 +8,10 @@
     "build": "tsc",
     "watch": "tsc -w"
   },
+  "dependencies": {
+    "webpack-dev-server": "^3.11.0",
+    "webpack-merge": "^5.4.0"
+  },
   "devDependencies": {
     "@types/webpack": "^4.1.4",
     "webpack": "^4.44.2"
