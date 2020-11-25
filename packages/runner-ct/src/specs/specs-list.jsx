@@ -11,7 +11,7 @@ class SpecsList extends Component {
         <ul>
           {specsStore.specs.map((spec) => {
             return (<li key={spec.name} onClick={this.chooseSpec(spec)}>
-              <input type="checkbox" />{spec.name}
+              <input type="checkbox" readOnly checked={spec.name === this.props.state.spec?.name}/>{spec.name}
             </li>)
           })}
         </ul>
