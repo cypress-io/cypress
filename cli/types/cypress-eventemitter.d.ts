@@ -7,4 +7,23 @@ interface EventEmitter extends EventEmitter2 {
   emitThen: (eventName: string, args: any[]) => Bluebird.BluebirdStatic
 }
 
-type NodeEventEmitter = import('events').EventEmitter
+// Copied from https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/node/events.d.ts
+// to avoid type conflict.
+interface NodeEventEmitter {
+  addListener(event: string | symbol, listener: (...args: any[]) => void): this
+  on(event: string | symbol, listener: (...args: any[]) => void): this
+  once(event: string | symbol, listener: (...args: any[]) => void): this
+  removeListener(event: string | symbol, listener: (...args: any[]) => void): this
+  off(event: string | symbol, listener: (...args: any[]) => void): this
+  removeAllListeners(event?: string | symbol): this
+  setMaxListeners(n: number): this
+  getMaxListeners(): number
+  listeners(event: string | symbol): ((...args: any[]) => void)[]
+  rawListeners(event: string | symbol): ((...args: any[]) => void)[]
+  emit(event: string | symbol, ...args: any[]): boolean
+  listenerCount(type: string | symbol): number
+  // Added in Node 6...
+  prependListener(event: string | symbol, listener: (...args: any[]) => void): this
+  prependOnceListener(event: string | symbol, listener: (...args: any[]) => void): this
+  eventNames(): Array<string | symbol>
+}
