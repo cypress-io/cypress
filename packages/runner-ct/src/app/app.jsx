@@ -108,6 +108,7 @@ class App extends Component {
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
+            resetStatsOnSpecChange
           />)}
         </div>
       </>

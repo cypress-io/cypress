@@ -29,6 +29,7 @@ export interface ReporterProps {
   events: Events
   error?: Error
   spec: Cypress.Cypress['spec']
+  resetStatsOnSpecChange: boolean
 }
 
 @observer
@@ -50,6 +51,7 @@ class Reporter extends Component<ReporterProps> {
       relative: PropTypes.string.isRequired,
       absolute: PropTypes.string.isRequired,
     }),
+    resetStatsOnSpecChange: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -58,26 +60,35 @@ class Reporter extends Component<ReporterProps> {
     runnablesStore,
     scroller,
     statsStore,
+    resetStatsOnSpecChange: false,
   }
 
   render () {
-    const { appState } = this.props
+    const { appState, runnablesStore, spec, scroller, error, events, statsStore } = this.props
 
     return (
       <div className={cs('reporter', { 'is-running': appState.isRunning })}>
-        <Header appState={appState} statsStore={this.props.statsStore} />
+        <Header appState={appState} statsStore={statsStore} />
         <Runnables
           appState={appState}
-          error={this.props.error}
-          runnablesStore={this.props.runnablesStore}
-          scroller={this.props.scroller}
-          spec={this.props.spec}
+          error={error}
+          runnablesStore={runnablesStore}
+          scroller={scroller}
+          spec={spec}
         />
         <ForcedGcWarning
           appState={appState}
-          events={this.props.events}/>
+          events={events}/>
       </div>
     )
+  }
+
+  componentDidUpdate (newProps: ReporterProps) {
+    if (this.props.resetStatsOnSpecChange && this.props.spec.relative !== newProps.spec.relative) {
+      action('reporter:stats:reset', () => {
+        this.props.statsStore.reset()
+      })()
+    }
   }
 
   componentDidMount () {
