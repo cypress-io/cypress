@@ -2,6 +2,7 @@ import cs from 'classnames'
 import { action, autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import hashSum from 'hash-sum'
 import { $ } from '@packages/driver'
 
 import AutIframe from './aut-iframe'
@@ -9,7 +10,6 @@ import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
-import logger from '../lib/logger'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 @observer
@@ -120,7 +120,7 @@ export default class Iframes extends Component {
   // jQuery is a better fit for managing these iframes, since they need to get
   // wiped out and reset on re-runs and the snapshots are from dom we don't control
   _loadIframes (spec) {
-    const specSrc = `/${this.props.config.namespace}/iframes/${spec.relative}`
+    const specSrc = `/${this.props.config.namespace}/iframes/${hashSum(spec.relative)}`
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 

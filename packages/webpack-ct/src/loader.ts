@@ -1,11 +1,12 @@
 import * as path from 'path'
+import hashSum from 'hash-sum'
 
 const makeImport = (file, fileKey, chunkName, projectRoot) => {
   // If we want to rename the chunks, we can use this
   const magicComments = chunkName ? `/* webpackChunkName: "${chunkName}" */` : ''
 
   return `"${fileKey}": {
-    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(file.relative)}),
+    shouldLoad: () => document.location.pathname.includes(${JSON.stringify(hashSum(file.relative))}),
     load: () => {
       return import(${JSON.stringify(path.resolve(projectRoot, file.relative), null, 2)} ${magicComments})
     },

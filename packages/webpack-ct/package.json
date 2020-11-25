@@ -9,6 +9,7 @@
     "watch": "tsc -w"
   },
   "dependencies": {
+    "hash-sum": "^2.0.0",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.4.0"
   },
