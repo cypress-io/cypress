@@ -25,6 +25,10 @@
         {
           "hookId": "h2",
           "hookName": "after each"
+        },
+        {
+          "hookId": "h3",
+          "hookName": "before each"
         }
       ],
       "tests": [
@@ -85,6 +89,42 @@
             "originalFile": "path/to/foo_spec.js",
             "relativeFile": "path/to/foo_spec.js"
           }
+        },
+        {
+          "id": "r6",
+          "title": "test 2",
+          "state": "failed",
+          "commands": [
+            {
+              "hookId": "h3",
+              "id": "c5",
+              "instrument": "command",
+              "message": "http://localhost:3000",
+              "name": "visit",
+              "state": "passed",
+              "testId": "r6",
+              "timeout": 4000,
+              "type": "parent"
+            },
+            {
+              "hookId": "h3",
+              "id": "c6",
+              "instrument": "command",
+              "message": ".wrapper",
+              "name": "get",
+              "state": "failed",
+              "testId": "r6",
+              "timeout": 4000,
+              "type": "parent"
+            }
+          ],
+          "invocationDetails": {
+            "absoluteFile": "/absolute/path/to/foo_spec.js",
+            "column": 8,
+            "line": 34,
+            "originalFile": "path/to/foo_spec.js",
+            "relativeFile": "path/to/foo_spec.js"
+          }
         }
       ],
       "suites": [
@@ -109,7 +149,7 @@
           "tests": [
             {
               "id": "r5",
-              "title": "test 2",
+              "title": "test 3",
               "state": "passed",
               "commands": [
                 {

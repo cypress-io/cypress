@@ -99,7 +99,7 @@ describe('<FileOpener />', () => {
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
       cy.contains('Cancel').click()
-      cy.contains('Set preference and open file').should('not.be.visible')
+      cy.contains('Set preference and open file').should('not.exist')
     })
 
     it('initially has no editors chosen', () => {
@@ -173,7 +173,7 @@ describe('<FileOpener />', () => {
       cy.get('.file-opener').click()
       cy.contains('Sublime Text').click()
       cy.get('.submit').click()
-      cy.contains('Set preference and open file').should('not.be.visible')
+      cy.contains('Set preference and open file').should('not.exist')
     })
   })
 })

@@ -14,10 +14,13 @@ import {
 import $errUtils from '../../../cypress/error_utils'
 import { HandlerFn } from './'
 import Bluebird from 'bluebird'
+import { parseJsonBody } from './utils'
 
 export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> = (Cypress, frame, { getRoute, getRequest, emitNetEvent }) => {
   const { res, requestId, routeHandlerId } = frame
   const request = getRequest(frame.routeHandlerId, frame.requestId)
+
+  parseJsonBody(res)
 
   let sendCalled = false
   let resolved = false
@@ -49,9 +52,13 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
     }
 
     if (request) {
-      request.response = continueFrame.res
+      request.response = _.clone(continueFrame.res)
       request.state = 'ResponseIntercepted'
       request.log.fireChangeEvent()
+    }
+
+    if (_.isObject(continueFrame.res!.body)) {
+      continueFrame.res!.body = JSON.stringify(continueFrame.res!.body)
     }
 
     emitNetEvent('http:response:continue', continueFrame)
@@ -79,10 +86,12 @@ export const onResponseReceived: HandlerFn<NetEventFrames.HttpResponseReceived> 
       if (staticResponse) {
         validateStaticResponse('res.send', staticResponse)
 
-        continueFrame.staticResponse = getBackendStaticResponse(
-          // arguments to res.send() are merged with the existing response
-          _.defaultsDeep({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS)),
-        )
+        // arguments to res.send() are merged with the existing response
+        const _staticResponse = _.defaults({}, staticResponse, _.pick(res, STATIC_RESPONSE_KEYS))
+
+        _.defaults(_staticResponse.headers, res.headers)
+
+        continueFrame.staticResponse = getBackendStaticResponse(_staticResponse)
       }
 
       return sendContinueFrame()

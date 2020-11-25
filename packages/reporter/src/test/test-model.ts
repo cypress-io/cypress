@@ -35,6 +35,7 @@ export interface UpdatableTestProps {
   state?: TestProps['state']
   err?: TestProps['err']
   hookId?: string
+  failedFromHookId?: string
   isOpen?: TestProps['isOpen']
   currentRetry?: TestProps['currentRetry']
   retries?: TestProps['retries']

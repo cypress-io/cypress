@@ -105,14 +105,6 @@ describe('driver/src/cypress/index', () => {
   })
 
   context('.Log', () => {
-    it('throws when using Cypress.Log.command()', () => {
-      const fn = () => {
-        Cypress.Log.command({})
-      }
-
-      expect(fn).to.throw('has been renamed to `Cypress.log()`')
-    })
-
     it('throws when passing non-object to Cypress.log()', () => {
       const fn = () => {
         Cypress.log('My Log')
@@ -131,41 +123,6 @@ describe('driver/src/cypress/index', () => {
       }
 
       expect(fn).to.not.throw()
-    })
-  })
-
-  context('deprecated custom command methods', () => {
-    it('throws when using Cypress.addParentCommand', () => {
-      const addParentCommand = () => Cypress.addParentCommand()
-
-      expect(addParentCommand).to.throw().and.satisfy((err) => {
-        expect(err.message).to.include('Cypress.addParentCommand(...) has been removed and replaced')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
-
-        return true
-      })
-    })
-
-    it('throws when using Cypress.addChildCommand', () => {
-      const addChildCommand = () => Cypress.addChildCommand()
-
-      expect(addChildCommand).to.throw().and.satisfy((err) => {
-        expect(err.message).to.include('Cypress.addChildCommand(...) has been removed and replaced')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
-
-        return true
-      })
-    })
-
-    it('throws when using Cypress.addDualCommand', () => {
-      const addDualCommand = () => Cypress.addDualCommand()
-
-      expect(addDualCommand).to.throw().and.satisfy((err) => {
-        expect(err.message).to.include('Cypress.addDualCommand(...) has been removed and replaced')
-        expect(err.docsUrl).to.equal('https://on.cypress.io/custom-command-interface-changed')
-
-        return true
-      })
     })
   })
 

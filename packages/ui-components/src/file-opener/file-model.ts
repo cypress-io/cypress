@@ -1,5 +1,5 @@
 export interface FileDetails {
-  absoluteFile: string
+  absoluteFile?: string
   column: number
   line: number
   originalFile: string

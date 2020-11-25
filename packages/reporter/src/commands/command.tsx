@@ -163,7 +163,6 @@ class Command extends Component<Props> {
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
-            'command-other-pinned': this._isOtherCommandPinned(),
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
             'command-scaled': message && message.length > 100,
@@ -246,12 +245,6 @@ class Command extends Component<Props> {
 
   _isPinned () {
     return this.props.appState.pinnedSnapshotId === this.props.model.id
-  }
-
-  _isOtherCommandPinned () {
-    const pinnedId = this.props.appState.pinnedSnapshotId
-
-    return pinnedId != null && pinnedId !== this.props.model.id
   }
 
   _shouldShowClickMessage = () => {
