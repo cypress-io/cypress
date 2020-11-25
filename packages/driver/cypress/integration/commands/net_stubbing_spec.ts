@@ -209,6 +209,21 @@ describe('network stubbing', { retries: 2 }, function () {
       cy.wait('@create')
     })
 
+    // https://github.com/cypress-io/cypress/issues/9313
+    it('lower-cased method works', () => {
+      cy.intercept('post', 'http://dummy.restapiexample.com/api/v1/create').as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("http://dummy.restapiexample.com/api/v1/create", {
+            method: 'post', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create')
+    })
+
     // TODO: implement warning in cy.intercept if appropriate
     // https://github.com/cypress-io/cypress/issues/2372
     it.skip('warns if a percent-encoded URL is used', function () {
