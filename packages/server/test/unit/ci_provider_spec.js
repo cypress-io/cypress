@@ -175,6 +175,7 @@ describe('lib/util/ci_provider', () => {
       BITBUCKET_REPO_OWNER: 'bitbucketRepoOwner',
       BITBUCKET_REPO_SLUG: 'bitbucketRepoSlug',
       BITBUCKET_PARALLEL_STEP: 'bitbucketParallelStep',
+      BITBUCKET_STEP_RUN_NUMBER: 'bitbucketStepRunNumber',
 
       // git information
       BITBUCKET_COMMIT: 'bitbucketCommit',
@@ -187,6 +188,7 @@ describe('lib/util/ci_provider', () => {
       bitbucketRepoOwner: 'bitbucketRepoOwner',
       bitbucketRepoSlug: 'bitbucketRepoSlug',
       bitbucketParallelStep: 'bitbucketParallelStep',
+      bitbucketStepRunNumber: 'bitbucketStepRunNumber',
     })
 
     expectsCommitParams({

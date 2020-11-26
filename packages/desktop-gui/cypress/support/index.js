@@ -1,4 +1,9 @@
-require('@packages/ui-components/cypress/support/customPercyCommand')
+require('@packages/ui-components/cypress/support/customPercyCommand')({
+  elementOverrides: {
+    '.cy-tooltip': true,
+  },
+})
+
 require('cypress-react-unit-test/dist/hooks')
 
 const BluebirdPromise = require('bluebird')
