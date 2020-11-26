@@ -251,6 +251,28 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('can set options.waitForAnimations', () => {
+      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+
+      cy.get(':checkbox:first').check({ waitForAnimations: false }).then(() => {
+        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      })
+    })
+
+    it('can set options.animationDistanceThreshold', () => {
+      const $btn = cy.$$(':checkbox:first')
+
+      cy.spy(cy, 'ensureElementIsNotAnimating')
+      cy.get(':checkbox:first').check({ animationDistanceThreshold: 1000 }).then(() => {
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { args } = cy.ensureElementIsNotAnimating.firstCall
+
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+
+        expect(args[2]).to.eq(1000)
+      })
+    })
+
     it('delays 50ms before resolving', () => {
       cy.$$(':checkbox:first').on('change', (e) => {
         cy.spy(Promise, 'delay')
