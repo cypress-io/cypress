@@ -1,9 +1,11 @@
 import {
   _doesRouteMatch,
   _getMatchableForRequest,
+  getRouteForRequest,
 } from '../../lib/server/route-matching'
 import { expect } from 'chai'
 import { CypressIncomingRequest } from '@packages/proxy'
+import { BackendRoute } from '../../lib/server/types'
 
 describe('intercept-request', function () {
   context('._getMatchableForRequest', function () {
@@ -135,6 +137,88 @@ describe('intercept-request', function () {
       expect(_doesRouteMatch({
         url: '*',
       }, req)).to.be.true
+    })
+  })
+
+  context('.getRouteForRequest', function () {
+    it('returns the matching route for the request', function () {
+      const routes = [
+        {
+          routeMatcher: {
+            url: '**/abc*',
+          },
+          handlerId: '123',
+        },
+        {
+          routeMatcher: {
+            url: '**/def*',
+          },
+          handlerId: '456',
+        },
+      ] as unknown as BackendRoute[]
+
+      const req = {
+        headers: {},
+        method: 'GET',
+        proxiedUrl: '/abc?foo=bar&baz=quux',
+      } as unknown as CypressIncomingRequest
+
+      expect(getRouteForRequest(routes, req)).to.deep.eq({
+        routeMatcher: {
+          url: '**/abc*',
+        },
+        handlerId: '123',
+      })
+    })
+
+    it('returns undefined when no route was matched', function () {
+      const routes = [
+        {
+          routeMatcher: {
+            url: '**/quuz*',
+          },
+          handlerId: '123',
+        },
+      ] as unknown as BackendRoute[]
+
+      const req = {
+        headers: {},
+        method: 'GET',
+        proxiedUrl: '/abc?foo=bar&baz=quux',
+      } as unknown as CypressIncomingRequest
+
+      expect(getRouteForRequest(routes, req)).to.eq(undefined)
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9302
+    it('returns last found matched route for the request', function () {
+      const routes = [
+        {
+          routeMatcher: {
+            url: '**/abc*',
+          },
+          handlerId: '123',
+        },
+        {
+          routeMatcher: {
+            url: '**/abc*',
+          },
+          handlerId: '456',
+        },
+      ] as unknown as BackendRoute[]
+
+      const req = {
+        headers: {},
+        method: 'GET',
+        proxiedUrl: '/abc?foo=bar&baz=quux',
+      } as unknown as CypressIncomingRequest
+
+      expect(getRouteForRequest(routes, req)).to.deep.eq({
+        routeMatcher: {
+          url: '**/abc*',
+        },
+        handlerId: '456',
+      })
     })
   })
 })

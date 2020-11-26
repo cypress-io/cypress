@@ -2082,4 +2082,20 @@ describe('network stubbing', { retries: 2 }, function () {
       })
     })
   })
+
+  context('multiple matching routes', function () {
+    // https://github.com/cypress-io/cypress/issues/9302
+    it('uses the matching route defined last', function (done) {
+      const firstResponse = { foo: 'bar' }
+      const secondResponse = { hello: 'world' }
+
+      cy.intercept({ url: '*' }, firstResponse)
+      cy.intercept({ url: '*' }, secondResponse).then(() => {
+        $.get('/abc123').done((responseJson) => {
+          expect(responseJson).to.deep.eq(secondResponse)
+          done()
+        })
+      })
+    })
+  })
 })

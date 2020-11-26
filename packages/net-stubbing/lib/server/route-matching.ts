@@ -110,7 +110,13 @@ export function _getMatchableForRequest (req: CypressIncomingRequest) {
 export function getRouteForRequest (routes: BackendRoute[], req: CypressIncomingRequest, prevRoute?: BackendRoute) {
   const possibleRoutes = prevRoute ? routes.slice(_.findIndex(routes, prevRoute) + 1) : routes
 
-  return _.find(possibleRoutes, (route) => {
-    return _doesRouteMatch(route.routeMatcher, req)
-  })
+  for (let i = possibleRoutes.length - 1; i >= 0; i--) {
+    const route = possibleRoutes[i]
+
+    if (_doesRouteMatch(route.routeMatcher, req)) {
+      return route
+    }
+  }
+
+  return undefined
 }
