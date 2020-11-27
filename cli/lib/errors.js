@@ -191,9 +191,9 @@ const insufficientPermissionOnSmokeTest = {
 
       (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\<version>\Cypress)
 
-    then try
+    then try to set CYPRESS_CACHE_FOLDER environment values, e.g.
 
-      npm config set cache <Your Local Directory>
+      CYPRESS_CACHE_FOLDER=<Your own directory> cypress install
 
     and try again, 
     Or, consider create a folder with your own permission first.
