@@ -188,9 +188,13 @@ const insufficientPermissionOnSmokeTest = {
     'Cypress cannot use some directory due to file permissions',
   solution: stripIndent`
     If you are seeing this on some cache directory path
-      (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\4.8.0\Cypress)
+
+      (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\<version>\Cypress)
+
     then try
-      npm config set cache <Your Local Directory> --global
+
+      npm config set cache <Your Local Directory>
+
     and try again, 
     Or, consider create a folder with your own permission first.
     If you're working on Windows, See:
