@@ -65,6 +65,10 @@ const runSmokeTest = (binaryDir, options) => {
         return throwFormErrorText(errors.invalidSmokeTestDisplayError)(errMessage)
       }
 
+      if (err.code === 'EACCES' || err.code === 'EPERM') {
+        return throwFormErrorText(errors.insufficientPermissionOnSmokeTest)(errMessage)
+      }
+
       return throwFormErrorText(errors.missingDependency)(errMessage)
     }
   }

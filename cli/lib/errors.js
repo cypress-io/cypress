@@ -183,6 +183,21 @@ const invalidCacheDirectory = {
   `,
 }
 
+const insufficientPermissionOnSmokeTest = {
+  description:
+    'Cypress cannot use some directory due to file permissions',
+  solution: stripIndent`
+    If you are seeing this on some cache directory path
+      (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\4.8.0\Cypress)
+    then try
+      npm config set cache <Your Local Directory> --global
+    and try again, 
+    Or, consider create a folder with your own permission first.
+    If you're working on Windows, See:
+    https://answers.microsoft.com/en-us/windows/forum/windows_10-files-winpc/give-permissions-to-files-and-folders-in-windows/78ee562c-a21f-4a32-8691-73aac1415373
+  `,
+}
+
 const versionMismatch = {
   description: 'Installed version does not match package version.',
   solution: 'Install Cypress and verify app again',
@@ -402,6 +417,7 @@ module.exports = {
     failedUnzip,
     invalidCypressEnv,
     invalidCacheDirectory,
+    insufficientPermissionOnSmokeTest,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
     childProcessKilled,
