@@ -33,6 +33,7 @@ exports['errors individual has the following errors 1'] = [
   "failedDownload",
   "failedUnzip",
   "incompatibleHeadlessFlags",
+  "insufficientPermissionOnSmokeTest",
   "invalidCacheDirectory",
   "invalidCypressEnv",
   "invalidRunProjectPath",
