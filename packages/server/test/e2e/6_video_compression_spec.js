@@ -6,6 +6,8 @@ const ffmpeg = require('fluent-ffmpeg')
 
 ffmpeg.setFfprobePath(ffprobePath)
 
+const path = require('path')
+const fs = require('fs-extra')
 const humanInterval = require('human-interval')
 const e2e = require('../support/helpers/e2e').default
 const glob = require('../../lib/util/glob')
@@ -15,6 +17,18 @@ const Fixtures = require('../support/helpers/fixtures')
 const NUM_TESTS = 40
 const MS_PER_TEST = 500
 const EXPECTED_DURATION_MS = NUM_TESTS * MS_PER_TEST
+
+// ffmpeg command that extracts the final frame as a jpg
+function outputFinalFrameAsJpg (inputFile, outputFile) {
+  return new Promise((resolve, reject) => {
+    return ffmpeg(inputFile)
+    .inputOption('-sseof -3')
+    .outputOptions(['-vsync 2', '-update 1'])
+    .on('end', resolve)
+    .on('error', reject)
+    .save(outputFile)
+  })
+}
 
 describe('e2e video compression', () => {
   e2e.setup()
@@ -41,8 +55,16 @@ describe('e2e video compression', () => {
           const videosPath = Fixtures.projectPath('e2e/cypress/videos/*')
 
           return glob(videosPath)
-          .tap((files) => {
+          .tap(async (files) => {
             expect(files).to.have.length(1, `globbed for videos and found: ${files.length}. Expected to find 1 video. Search in videosPath: ${videosPath}.`)
+
+            const lastFrameFile = path.join(path.dirname(files[0]), 'lastFrame.jpg')
+
+            await outputFinalFrameAsJpg(files[0], lastFrameFile)
+            // if video is seekable and not just one frozen frame, this file should exist
+            await fs.stat(lastFrameFile).catch((err) => {
+              throw new Error(`Expected video to have seekable ending frame, but it did not. The video may be corrupted.`)
+            })
 
             return videoCapture.getCodecData(files[0])
             .then(({ duration }) => {
