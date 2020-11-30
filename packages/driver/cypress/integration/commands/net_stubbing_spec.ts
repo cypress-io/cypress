@@ -196,12 +196,30 @@ describe('network stubbing', { retries: 2 }, function () {
 
     // https://github.com/cypress-io/cypress/issues/8729
     it('resolve ambiguity between overloaded definitions', () => {
-      cy.intercept('POST', 'http://dummy.restapiexample.com/api/v1/create').as('create')
+      cy.intercept('POST', '/post-only').as('create')
 
       cy.window().then((win) => {
         win.eval(
-          `fetch("http://dummy.restapiexample.com/api/v1/create", {
+          `fetch("/post-only", {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9313
+    it('lower-cased method works', () => {
+      cy.intercept({
+        method: 'post',
+        url: '/post-only',
+      }).as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/post-only", {
+            method: 'post', // *GET, POST, PUT, DELETE, etc.
           });`,
         )
       })
