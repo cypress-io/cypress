@@ -257,6 +257,7 @@ describe('lib/browsers/chrome', () => {
       return expect(chrome.open('chrome', 'http://', {}, this.automation)).to.be.rejectedWith('Cypress requires at least Chrome 64.')
     })
 
+    // https://github.com/cypress-io/cypress/issues/9265
     it('respond ACK after receiving new screenshot frame', function () {
       const frameMeta = { data: Buffer.from(''), sessionId: '1' }
 
