@@ -2287,20 +2287,46 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
+
+  /**
+   * Options to affect Actionability checks
+   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   */
+  interface ActionableOptions extends Forceable {
+    /**
+     * Whether to wait for elements to finish animating before executing commands
+     *
+     * @default true
+     */
+    waitForAnimations: boolean
+    /**
+     * The distance in pixels an element must exceed over time to be considered animating
+     * @default 5
+     */
+    animationDistanceThreshold: number
+    /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     *
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+  }
+
   interface BlurOptions extends Loggable, Forceable { }
 
-  interface CheckOptions extends Loggable, Timeoutable, Forceable {
+  interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
-  interface ClearOptions extends Loggable, Timeoutable, Forceable {
+  interface ClearOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
   /**
    * Object to change the default behavior of .click().
    */
-  interface ClickOptions extends Loggable, Timeoutable, Forceable {
+  interface ClickOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Serially click multiple elements
      *
@@ -2529,6 +2555,11 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+    /**
      * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
@@ -2754,7 +2785,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/type
    */
-  interface TypeOptions extends Loggable, Timeoutable {
+  interface TypeOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Delay after each keypress (ms)
      *
@@ -2768,12 +2799,6 @@ declare namespace Cypress {
      * @default true
      */
     parseSpecialCharSequences: boolean
-    /**
-     * Forces the action, disables waiting for actionability
-     *
-     * @default false
-     */
-    force: boolean
     /**
      * Keep a modifier activated between commands
      *
@@ -2866,7 +2891,7 @@ declare namespace Cypress {
   /**
    * Options to change the default behavior of .trigger()
    */
-  interface TriggerOptions extends Loggable, Timeoutable, Forceable {
+  interface TriggerOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Whether the event bubbles
      *
