@@ -287,6 +287,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
