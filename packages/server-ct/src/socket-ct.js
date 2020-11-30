@@ -2,6 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server-ct:socket')
 const Bluebird = require('bluebird')
 const socketIo = require('@packages/socket')
+const devserver = require('@packages/server/lib/plugins/child/devserver')
 
 const editors = require('@packages/server/lib/util/editors')
 const { openFile } = require('@packages/server/lib/util/file-opener')
@@ -40,23 +41,23 @@ class Socket {
   constructor (config) {
     this.ended = false
 
-    // this.onTestFileChange = this.onTestFileChange.bind(this)
+    this.onTestFileChange = this.onTestFileChange.bind(this)
 
-    // if (config.watchForFileChanges) {
-    //   preprocessor.emitter.on('file:updated', this.onTestFileChange)
-    // }
+    if (config.watchForFileChanges) {
+      // devServer.emitter.on('file:updated', this.onTestFileChange)
+    }
   }
 
-  // onTestFileChange (filePath) {
-  //   debug('test file changed %o', filePath)
+  onTestFileChange (filePath) {
+    debug('test file changed %o', filePath)
 
-  //   return fs.statAsync(filePath)
-  //   .then(() => {
-  //     return this.io.emit('watched:file:changed')
-  //   }).catch(() => {
-  //     return debug('could not find test file that changed %o', filePath)
-  //   })
-  // }
+    // return fs.statAsync(filePath)
+    // .then(() => {
+    //   return this.io.emit('watched:file:changed')
+    // }).catch(() => {
+    //   return debug('could not find test file that changed %o', filePath)
+    // })
+  }
 
   // watchTestFileByPath (config, specConfig, options) {
   //   debug('watching spec with config %o', specConfig)

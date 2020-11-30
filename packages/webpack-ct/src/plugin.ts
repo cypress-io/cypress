@@ -1,3 +1,4 @@
+import debugFn from 'debug'
 import * as webpack from 'webpack'
 
 interface CypressOptions {

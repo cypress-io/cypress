@@ -21,7 +21,7 @@ const {
   uri,
 } = require('@packages/network')
 const { NetworkProxy } = require('@packages/proxy')
-const { netStubbingState, isHostInterceptable } = require('@packages/net-stubbing')
+const NetStubbing = require('@packages/net-stubbing')
 const { createInitialWorkers } = require('@packages/rewriter')
 const origin = require('./util/origin')
 const ensureUrl = require('./util/ensure-url')
@@ -39,6 +39,10 @@ const templateEngine = require('./template_engine')
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
+
+const { netStubbingState, isHostInterceptable } = NetStubbing
+
+debug('CONTENTS OF NET STUBBING', NetStubbing)
 
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',

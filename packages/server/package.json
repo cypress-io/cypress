@@ -134,6 +134,7 @@
     "@packages/extension": "*",
     "@packages/https-proxy": "*",
     "@packages/launcher": "*",
+    "@packages/net-stubbing": "*",
     "@packages/network": "*",
     "@packages/reporter": "*",
     "@packages/root": "*",

@@ -48,5 +48,5 @@
     "esModuleInterop": true
   },
   "include": ["src"],
-  "exclude": ["src/client", "node_modules"]
+  "exclude": ["node_modules"]
 }

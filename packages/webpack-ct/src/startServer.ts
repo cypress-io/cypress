@@ -3,7 +3,7 @@ import webpackDevServer from 'webpack-dev-server'
 
 import { makeWebpackConfig } from './makeWebpackConfig'
 
-export async function start (userWebpackConfig = {}, testConfig) {
+export async function start (userWebpackConfig = {}, testConfig, cypressWebsocket) {
   const webpackConfig = await makeWebpackConfig(userWebpackConfig, testConfig)
   const compiler = webpack(webpackConfig)
 
