@@ -279,7 +279,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         handler = arg2
 
         return {
-          method: matcher.toUpperCase(),
+          method: matcher,
           url,
         }
       }

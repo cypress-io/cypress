@@ -20,7 +20,7 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 
   for (let i = 0; i < stringMatcherFields.length; i++) {
     const field = stringMatcherFields[i]
-    const matcher = _.get(routeMatcher, field)
+    let matcher = _.get(routeMatcher, field)
     let value = _.get(matchable, field, '')
 
     if (typeof value !== 'string') {
@@ -33,6 +33,13 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
       }
 
       continue
+    }
+
+    if (field === 'method') {
+      // case-insensitively match on method
+      // @see https://github.com/cypress-io/cypress/issues/9313
+      value = value.toLowerCase()
+      matcher = matcher.toLowerCase()
     }
 
     if (field === 'url') {
