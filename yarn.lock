@@ -10871,7 +10871,7 @@ clean-webpack-plugin@2.0.2:
   dependencies:
     del "^4.0.0"
 
-clean-webpack-plugin@3.0.0, clean-webpack-plugin@^3.0.0:
+clean-webpack-plugin@^3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/clean-webpack-plugin/-/clean-webpack-plugin-3.0.0.tgz#a99d8ec34c1c628a4541567aa7b457446460c62b"
   integrity sha512-MciirUH5r+cYLGCOL5JX/ZLzOZbVr1ot3Fw+KcvbhUb6PM+yycqd9ZhIlcigQ5gl+XhppNmw3bEFuaaMNyLj3A==
