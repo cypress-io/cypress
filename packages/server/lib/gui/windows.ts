@@ -135,6 +135,8 @@ export function defaults (options = {}) {
       partition: null,
       webSecurity: true,
       nodeIntegration: false,
+      // TODO: enable contextIsolation for Cypress browser (default in Electron 12)
+      contextIsolation: false,
       backgroundThrottling: false,
     },
   })
@@ -209,6 +211,7 @@ export function create (projectRoot, _options: WindowOptions = {}, newBrowserWin
   return win
 }
 
+// open desktop-gui BrowserWindow
 export function open (projectRoot, options: WindowOptions = {}, newBrowserWindow = _newBrowserWindow) {
   // if we already have a window open based
   // on that type then just show + focus it!
