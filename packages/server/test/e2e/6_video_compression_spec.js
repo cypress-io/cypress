@@ -61,6 +61,7 @@ describe('e2e video compression', () => {
             const lastFrameFile = path.join(path.dirname(files[0]), 'lastFrame.jpg')
 
             await outputFinalFrameAsJpg(files[0], lastFrameFile)
+            // https://github.com/cypress-io/cypress/issues/9265
             // if video is seekable and not just one frozen frame, this file should exist
             await fs.stat(lastFrameFile).catch((err) => {
               throw new Error(`Expected video to have seekable ending frame, but it did not. The video may be corrupted.`)
