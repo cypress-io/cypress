@@ -992,8 +992,8 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
-  
-  
+
+
   npm-create-cypress-tests:
     <<: *defaults
     steps:
@@ -1002,8 +1002,8 @@ jobs:
       - run: yarn workspace create-cypress-tests build
       - run:
           name: Run unit test
-          command: yarn workspace create-cypress-tests test 
-          
+          command: yarn workspace create-cypress-tests test
+
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1833,7 +1833,7 @@ linux-workflow: &linux-workflow
         path: examples/webpack-options
         requires:
           - npm-react
-    
+
     - npm-create-cypress-tests:
         requires:
           - build
