@@ -158,6 +158,8 @@ const crop = function (image, dimensions, pixelRatio = 1) {
 
   debug('dimensions for cropping are %o', dimensions)
 
+  // Dimensions x/y can sometimes return negative numbers
+  // https://github.com/cypress-io/cypress/issues/2034
   const x = Math.max(0, Math.min(dimensions.x, image.bitmap.width - 1))
   const y = Math.max(0, Math.min(dimensions.y, image.bitmap.height - 1))
   const width = Math.min(dimensions.width, image.bitmap.width - x)
