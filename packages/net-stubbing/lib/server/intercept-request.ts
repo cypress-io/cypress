@@ -18,7 +18,12 @@ import {
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
 import { getRouteForRequest } from './route-matching'
-import { sendStaticResponse, emit, setResponseFromFixture } from './util'
+import {
+  sendStaticResponse,
+  emit,
+  setResponseFromFixture,
+  setDefaultHeaders,
+} from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -46,7 +51,10 @@ export const InterceptRequest: RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
-    onResponse: this.onResponse,
+    onResponse: (incomingRes, resStream) => {
+      setDefaultHeaders(this.req, incomingRes)
+      this.onResponse(incomingRes, resStream)
+    },
     req: this.req,
     res: this.res,
   }
