@@ -3,26 +3,27 @@ const _ = require('lodash')
 
 import { CompilerOptions, CreateProgramOptions } from 'typescript'
 
-let sourceMapOverride: null | boolean = null
+let patched = false
 
-export const getProgramOptions = (rootNamesOrOptions: CreateProgramOptions, options: CompilerOptions): CompilerOptions => {
+const getProgramOptions = (rootNamesOrOptions: CreateProgramOptions, options: CompilerOptions): CompilerOptions => {
   return _.isArray(rootNamesOrOptions) ? options : rootNamesOrOptions.options
 }
 
-export const tryRequireTypescript = () => {
+export const overrideSourceMaps = (sourceMap: boolean, typescriptPath?: string) => {
   try {
-    // reset each time this is called
-    sourceMapOverride = null
+    if (patched) {
+      debug('typescript.createProgram() already overridden')
 
-    const typescript = require('typescript') as typeof import('typescript')
+      return
+    }
+
+    const typescript = require(typescriptPath || 'typescript') as typeof import('typescript')
+    const { createProgram } = typescript
 
     debug('typescript found, overriding typescript.createProgram()')
 
-    const { createProgram } = typescript
-
     typescript.createProgram = (...args: any[]) => {
       const [rootNamesOrOptions, _options] = args
-
       const options = getProgramOptions(rootNamesOrOptions, _options)
 
       debug('typescript unmodified createProgram options %o', options)
@@ -30,34 +31,22 @@ export const tryRequireTypescript = () => {
       // if sourceMap has been set then apply
       // these overrides to force typescript
       // to generate the right sourcemaps
-      if (sourceMapOverride !== null) {
-        options.sourceMap = sourceMapOverride
+      options.sourceMap = sourceMap
 
-        delete options.inlineSources
-        delete options.inlineSourceMap
+      delete options.inlineSources
+      delete options.inlineSourceMap
 
-        debug('typescript modified createProgram options %o', options)
-      }
+      debug('typescript modified createProgram options %o', options)
 
       // @ts-ignore
       return createProgram.apply(typescript, args)
     }
 
-    return typescript
+    patched = true
   } catch (err) {
     debug('typescript not found')
 
-    // for testing
+    // for testing purposes
     return err
   }
 }
-
-export const overrideSourceMaps = (val: boolean) => {
-  sourceMapOverride = val
-}
-
-export const getSourceMapOverride = () => {
-  return sourceMapOverride
-}
-
-tryRequireTypescript()
