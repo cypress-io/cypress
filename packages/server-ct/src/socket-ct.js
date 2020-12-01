@@ -2,8 +2,6 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server-ct:socket')
 const Bluebird = require('bluebird')
 const socketIo = require('@packages/socket')
-// const devserver = require('@packages/server/lib/plugins/child/devserver')
-
 const editors = require('@packages/server/lib/util/editors')
 const { openFile } = require('@packages/server/lib/util/file-opener')
 const open = require('@packages/server/lib/util/open')
@@ -42,7 +40,6 @@ class Socket {
     this.ended = false
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
-
     if (config.watchForFileChanges) {
       // devServer.emitter.on('file:updated', this.onTestFileChange)
     }
@@ -171,16 +168,6 @@ class Socket {
 
     this.io = this.createIo(server, socketIoRoute, socketIoCookie)
 
-    // automation.use({
-    //   onPush: (message, data) => {
-    //     return this.io.emit('automation:push:message', message, data)
-    //   },
-    // })
-
-    // const onAutomationClientRequestCallback = (message, data, id) => {
-    //   return this.onAutomation(automationClient, message, data, id)
-    // }
-
     const automationRequest = (message, data) => {
       // return automation.request(message, data, onAutomationClientRequestCallback)
     }
@@ -233,28 +220,13 @@ class Socket {
         })
 
         socket.on('automation:push:request', (message, data, cb) => {
-          // automation.push(message, data)
-
           // just immediately callback because there
           // is not really an 'ack' here
           if (cb) {
             return cb()
           }
         })
-
-        // return socket.on('automation:response', automation.response)
       })
-
-      // socket.on('automation:request', (message, data, cb) => {
-      //   debug('automation:request %s %o', message, data)
-
-      //   return automationRequest(message, data)
-      //   .then((resp) => {
-      //     return cb({ response: resp })
-      //   }).catch((err) => {
-      //     return cb({ error: errors.clone(err) })
-      //   })
-      // })
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
@@ -297,15 +269,6 @@ class Socket {
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
-
-      // socket.on('watch:test:file', (specInfo, cb = function () { }) => {
-      //   debug('watch:test:file %o', specInfo)
-
-      //   this.watchTestFileByPath(config, specInfo, options)
-
-      //   // callback is only for testing purposes
-      //   return cb()
-      // })
 
       socket.on('app:connect', (socketId) => {
         return options.onConnect(socketId, socket)
@@ -466,8 +429,6 @@ class Socket {
   }
 
   close () {
-    // preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
-
     return (this.io != null ? this.io.close() : undefined)
   }
 }
