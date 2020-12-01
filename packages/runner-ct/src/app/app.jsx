@@ -88,7 +88,7 @@ class App extends Component {
           className="specs-wrapper"
           style={{
             position: 'absolute',
-            width: 200,
+            width: '50%',
             height: '100%',
             borderRight: '1px solid #ddd',
             boxSizing: 'border-box',
@@ -97,7 +97,7 @@ class App extends Component {
         </div>
         <div style={{
           position: 'absolute',
-          left: 200,
+          left: '50%',
           right: 0,
           top: 0,
           bottom: 0,
