@@ -52,8 +52,6 @@ export default class State {
 
   @observable automation = automation.CONNECTING
 
-  @observable studioTestId = null
-
   @observable.ref scriptError = null
 
   constructor (reporterWidth = _defaults.reporterWidth) {
@@ -124,10 +122,6 @@ export default class State {
     this.messageTitle = _defaults.messageTitle
     this.messageDescription = _defaults.messageDescription
     this.messageType = _defaults.messageType
-  }
-
-  @action setStudioTestId (testId) {
-    this.studioTestId = testId
   }
 
   setCallbackAfterUpdate (cb) {

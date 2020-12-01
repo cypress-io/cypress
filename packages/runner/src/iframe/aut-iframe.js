@@ -7,7 +7,7 @@ import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import studio from '../lib/studio'
+import studioRecorder from '../studio/studio-recorder'
 
 export default class AutIframe {
   constructor (config) {
@@ -399,10 +399,12 @@ export default class AutIframe {
   }
 
   startStudio = () => {
-    studio.startCreating(this._body()[0])
+    if (studioRecorder.isLoading) {
+      studioRecorder.start(this._body()[0])
+    }
   }
 
   stopStudio = () => {
-    studio.stopCreating()
+    studioRecorder.stop()
   }
 }

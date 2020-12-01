@@ -7,7 +7,6 @@
     flex-wrap: wrap;
     left: 0;
     line-height: 22px;
-    padding-left: 0.4em;
     position: absolute;
     right: 0;
     top: 0;
@@ -17,13 +16,14 @@
   .sel-url-wrap {
     display: flex;
     flex-grow: 2;
+    padding-left: 0.4em;
   }
 
   .selector-playground-toggle-tooltip-wrapper {
     display: flex;
   }
 
-  .selector-playground-toggle {
+  .header-button {
     background: none;
     border: none;
     color: #4f4f4f;
@@ -79,22 +79,26 @@
       background-color: #e9e9e9;
       box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
     }
+  }
 
-    .url-container,
-    .menu {
-      border-bottom: solid 1px #e3e3e3;
+  .showing-studio {
+    .studio {
+      display: flex;
     }
   }
 
-  .selector-playground {
+  .header-popup {
     align-items: center;
     background-color: #f8f8f8;
+    border-top: solid 1px #e3e3e3;
     display: none;
     padding: 8px;
     position: relative;
     width: 100%;
     color: #565554;
+  }
 
+  .selector-playground {
     &.invalid-selector, &.no-elements {
       .selector-input {
         input {
@@ -332,6 +336,40 @@
         color: #333;
         outline: 0;
         box-shadow: none;
+      }
+    }
+  }
+
+  .studio {
+    font-family: $open-sans;
+    font-size: 1em;
+    font-weight: 600;
+    padding: 0;
+
+    .studio-title {
+      border-right: solid 1px #e3e3e3;
+      padding: 10px;
+
+      .icon {
+        margin-right: 5px;
+        color: #9d9ea9;
+      }
+
+      .beta {
+        color: #b4b5bc;
+      }
+    }
+
+    .available-commands {
+      padding: 10px;
+    }
+
+    .studio-controls {
+      margin-left: auto;
+
+      .button-save {
+        border-left: solid 1px #e3e3e3;
+        font-size: 1.25em;
       }
     }
   }

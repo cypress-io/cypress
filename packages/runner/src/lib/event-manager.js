@@ -7,6 +7,7 @@ import { client, circularParser } from '@packages/socket/lib/browser'
 
 import automation from './automation'
 import logger from './logger'
+import studioRecorder from '../studio/studio-recorder'
 
 import $Cypress, { $ } from '@packages/driver'
 
@@ -187,7 +188,8 @@ const eventManager = {
       if (!Cypress) return
 
       state.setIsLoading(true)
-      state.setStudioTestId(testId)
+
+      studioRecorder.setTestId(testId)
 
       Cypress.stop()
       Cypress.removeAllListeners()

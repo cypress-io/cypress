@@ -1,4 +1,6 @@
+import { action, computed, observable } from 'mobx'
 import { $ } from '@packages/driver'
+
 import eventManager from '../lib/event-manager'
 
 const eventTypes = [
@@ -16,8 +18,24 @@ const eventsWithValue = [
   'select',
 ]
 
-class Studio {
-  startCreating = (body) => {
+class StudioRecorder {
+  @observable testId = null
+  @observable isActive = false
+
+  @action setTestId = (testId) => {
+    this.testId = testId
+  }
+
+  @computed get isLoading () {
+    return !!this.testId && !this.isActive
+  }
+
+  @computed get isOpen () {
+    return this.isLoading || this.isActive
+  }
+
+  @action start = (body) => {
+    this.isActive = true
     this._body = body
     this._log = []
     this._currentId = 1
@@ -30,12 +48,14 @@ class Studio {
     })
   }
 
-  stopCreating = () => {
+  @action stop = () => {
     eventTypes.forEach((event) => {
       this._body.removeEventListener(event, this._recordEvent, {
         capture: true,
       })
     })
+
+    this.isActive = false
   }
 
   resetLog = () => {
@@ -137,4 +157,4 @@ class Studio {
   }
 }
 
-export default new Studio()
+export default new StudioRecorder()

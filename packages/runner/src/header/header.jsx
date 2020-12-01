@@ -8,6 +8,8 @@ import { $ } from '@packages/driver'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import Studio from '../studio/studio'
+import studioRecorder from '../studio/studio-recorder'
 
 @observer
 export default class Header extends Component {
@@ -21,20 +23,21 @@ export default class Header extends Component {
         ref='header'
         className={cs({
           'showing-selector-playground': selectorPlaygroundModel.isOpen,
+          'showing-studio': studioRecorder.isOpen,
         })}
       >
         <div className='sel-url-wrap'>
           <Tooltip
             title='Open Selector Playground'
-            visible={selectorPlaygroundModel.isOpen ? false : null}
+            visible={selectorPlaygroundModel.isOpen || studioRecorder.isActive ? false : null}
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
             className='cy-tooltip'
           >
             <button
               aria-label='Open Selector Playground'
-              className='selector-playground-toggle'
+              className='header-button selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
-              disabled={state.isLoading || state.isRunning}
+              disabled={state.isLoading || state.isRunning || studioRecorder.isActive}
             >
               <i aria-hidden="true" className='fas fa-crosshairs' />
             </button>
@@ -47,7 +50,7 @@ export default class Header extends Component {
           >
             <input className='url' value={state.url} readOnly onClick={this._openUrl} />
             <span className='loading-container'>
-              ...loading <i className='fas fa-spinner fa-pulse'></i>
+              ...loading <i className='fas fa-spinner fa-pulse' />
             </span>
           </div>
         </div>
@@ -68,7 +71,7 @@ export default class Header extends Component {
               </pre>{/* eslint-enable indent */}
               <p>
                 <a href='https://on.cypress.io/viewport' target='_blank'>
-                  <i className='fas fa-info-circle'></i>
+                  <i className='fas fa-info-circle' />
                   Read more about viewport here.
                 </a>
               </p>
@@ -76,22 +79,32 @@ export default class Header extends Component {
           </li>
         </ul>
         <SelectorPlayground model={selectorPlaygroundModel} />
+        <Studio model={studioRecorder} />
       </header>
     )
   }
 
   componentDidMount () {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
+    this.previousRecorderIsOpen = studioRecorder.isOpen
   }
 
   componentDidUpdate () {
     if (selectorPlaygroundModel.isOpen !== this.previousSelectorPlaygroundOpen) {
-      this.props.state.updateWindowDimensions({
-        headerHeight: $(this.refs.header).outerHeight(),
-      })
-
+      this._updateWindowDimensions()
       this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     }
+
+    if (studioRecorder.isOpen !== this.previousRecorderIsOpen) {
+      this._updateWindowDimensions()
+      this.previousRecorderIsOpen = studioRecorder.isOpen
+    }
+  }
+
+  _updateWindowDimensions = () => {
+    this.props.state.updateWindowDimensions({
+      headerHeight: $(this.refs.header).outerHeight(),
+    })
   }
 
   _togglePlaygroundOpen = () => {
