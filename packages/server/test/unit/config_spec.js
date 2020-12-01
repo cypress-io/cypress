@@ -649,6 +649,56 @@ describe('lib/config', () => {
         })
       })
 
+      context('scrollBehavior', () => {
+        it('passes if false', function () {
+          this.setup({ scrollBehavior: false })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (center)', function () {
+          this.setup({ scrollBehavior: 'center' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (top)', function () {
+          this.setup({ scrollBehavior: 'top' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (bottom)', function () {
+          this.setup({ scrollBehavior: 'bottom' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('passes if an enum (nearest)', function () {
+          this.setup({ scrollBehavior: 'nearest' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not valid (number)', function () {
+          this.setup({ scrollBehavior: 42 })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (null)', function () {
+          this.setup({ scrollBehavior: null })
+
+          return this.expectValidationFails('be one of these values')
+        })
+
+        it('fails if not a valid (true)', function () {
+          this.setup({ scrollBehavior: true })
+
+          return this.expectValidationFails('be one of these values')
+        })
+      })
+
       context('watchForFileChanges', () => {
         it('passes if a boolean', function () {
           this.setup({ watchForFileChanges: false })
@@ -947,6 +997,10 @@ describe('lib/config', () => {
       return this.defaults('waitForAnimations', true)
     })
 
+    it('scrollBehavior=start', function () {
+      return this.defaults('scrollBehavior', 'top')
+    })
+
     it('animationDistanceThreshold=5', function () {
       return this.defaults('animationDistanceThreshold', 5)
     })
@@ -1212,6 +1266,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })
@@ -1311,6 +1366,7 @@ describe('lib/config', () => {
             viewportHeight: { value: 660, from: 'default' },
             viewportWidth: { value: 1000, from: 'default' },
             waitForAnimations: { value: true, from: 'default' },
+            scrollBehavior: { value: 'top', from: 'default' },
             watchForFileChanges: { value: true, from: 'default' },
           })
         })

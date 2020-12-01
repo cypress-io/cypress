@@ -266,7 +266,10 @@ const _maybeRecordVideo = async function (client, options) {
   }
 
   debug('starting screencast')
-  client.on('Page.screencastFrame', options.onScreencastFrame)
+  client.on('Page.screencastFrame', (meta) => {
+    options.onScreencastFrame(meta)
+    client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
+  })
 
   await client.send('Page.startScreencast', {
     format: 'jpeg',

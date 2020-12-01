@@ -196,12 +196,30 @@ describe('network stubbing', { retries: 2 }, function () {
 
     // https://github.com/cypress-io/cypress/issues/8729
     it('resolve ambiguity between overloaded definitions', () => {
-      cy.intercept('POST', 'http://dummy.restapiexample.com/api/v1/create').as('create')
+      cy.intercept('POST', '/post-only').as('create')
 
       cy.window().then((win) => {
         win.eval(
-          `fetch("http://dummy.restapiexample.com/api/v1/create", {
+          `fetch("/post-only", {
             method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          });`,
+        )
+      })
+
+      cy.wait('@create')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/9313
+    it('lower-cased method works', () => {
+      cy.intercept({
+        method: 'post',
+        url: '/post-only',
+      }).as('create')
+
+      cy.window().then((win) => {
+        win.eval(
+          `fetch("/post-only", {
+            method: 'post', // *GET, POST, PUT, DELETE, etc.
           });`,
         )
       })
@@ -1173,14 +1191,15 @@ describe('network stubbing', { retries: 2 }, function () {
         }).visit('/foo')
       })
 
-      it('can timeout in request handler', {
-        defaultCommandTimeout: 50,
-      }, function (done) {
+      it('can timeout in request handler', function (done) {
         cy.on('fail', (err) => {
+          Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A request callback passed to `cy.intercept\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
+
+        Cypress.config('defaultCommandTimeout', 50)
 
         cy.intercept('/foo', () => {
           return Promise.delay(200)
@@ -1670,8 +1689,8 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         }).then(() => {
           return $.get('/timeout').then((responseText) => {
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 475, 500)
             expect(responseText).to.eq(payload)
-            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
 
             done()
           })
@@ -1780,20 +1799,22 @@ describe('network stubbing', { retries: 2 }, function () {
         .wait('@err', { timeout: 50 })
       })
 
-      it('can timeout in req.reply handler', {
-        defaultCommandTimeout: 50,
-      }, function (done) {
+      it('can timeout in req.reply handler', function (done) {
         cy.on('fail', (err) => {
+          Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
 
         cy.intercept('/timeout', (req) => {
+          Cypress.config('defaultCommandTimeout', 50)
+
           req.reply(() => {
             return Promise.delay(200)
           })
-        }).visit('/timeout', { timeout: 500 })
+        })
+        .visit('/timeout')
       })
 
       it('can timeout when retrieving upstream response', {
@@ -1801,7 +1822,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }, function (done) {
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
-          .and.contain('ESOCKETTIMEDOUT')
+          .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()
         })
