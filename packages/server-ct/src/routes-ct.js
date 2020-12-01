@@ -2,7 +2,7 @@ const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 const httpProxy = require('http-proxy')
 
-const files = require('@packages/server/lib/controllers/files')
+// const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
 const staticPkg = require('@packages/static')
 

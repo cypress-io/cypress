@@ -2,7 +2,7 @@ const _ = require('lodash')
 const debug = require('debug')('cypress:server-ct:socket')
 const Bluebird = require('bluebird')
 const socketIo = require('@packages/socket')
-const devserver = require('@packages/server/lib/plugins/child/devserver')
+// const devserver = require('@packages/server/lib/plugins/child/devserver')
 
 const editors = require('@packages/server/lib/util/editors')
 const { openFile } = require('@packages/server/lib/util/file-opener')

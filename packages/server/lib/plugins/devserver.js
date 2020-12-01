@@ -5,7 +5,7 @@ const EE = require('events')
 const path = require('path')
 const debug = require('debug')('cypress:server:preprocessor')
 const Promise = require('bluebird')
-const appData = require('../util/app_data')
+// const appData = require('../util/app_data')
 const plugins = require('../plugins')
 
 // const errorMessage = function (err = {}) {

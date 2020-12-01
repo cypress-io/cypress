@@ -1,4 +1,4 @@
-// TODO: move this into `runner-ct`
+/* globals document */
 import $ from 'cash-dom'
 
 function appendTargetIfNotExists (id, tag = 'div', parent = document.body) {

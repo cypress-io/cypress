@@ -1,5 +1,4 @@
 /* eslint-env mocha,chai,jest */
-/* globals cy */
 
 // import '../main'
 import HelloWorld from './HelloWorld'
