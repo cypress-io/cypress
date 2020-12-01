@@ -1,4 +1,3 @@
-import debugFn from 'debug'
 import * as webpack from 'webpack'
 
 interface CypressOptions {
@@ -36,6 +35,7 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
    *   `Compilation`
    */
   private plugin = (compilation: any) => {
+    debugger;
     // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {

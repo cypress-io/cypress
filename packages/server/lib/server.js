@@ -42,8 +42,6 @@ const fullyQualifiedRe = /^https?:\/\//
 
 const { netStubbingState, isHostInterceptable } = NetStubbing
 
-debug('CONTENTS OF NET STUBBING', NetStubbing)
-
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',

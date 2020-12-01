@@ -3,32 +3,10 @@ require('../cwd')
 const _ = require('lodash')
 const EE = require('events')
 const path = require('path')
-const debug = require('debug')('cypress:server:preprocessor')
+const debug = require('debug')('cypress:ct:devserver')
 const Promise = require('bluebird')
 const appData = require('../util/app_data')
 const plugins = require('../plugins')
-
-// const errorMessage = function (err = {}) {
-//   return (err.stack || err.annotated || err.message || err.toString())
-//   .replace(/\n\s*at.*/g, '')
-//   .replace(/From previous event:\n?/g, '')
-// }
-
-// const clientSideError = function (err) {
-//   // eslint-disable-next-line no-console
-//   console.log(err.message)
-//
-//   err = errorMessage(err)
-//
-//   return `\
-// (function () {
-//   Cypress.action("spec:script:error", {
-//     type: "BUNDLE_ERROR",
-//     error: ${JSON.stringify(err)}
-//   })
-// }())\
-// `
-// }
 
 const baseEmitter = new EE()
 let fileObjects = {}
@@ -50,13 +28,10 @@ plugins.registerHandler((ipc) => {
 
 // for simpler stubbing from unit tests
 const API = {
-  // errorMessage,
-
-  // clientSideError,
-
   emitter: baseEmitter,
 
   getFile (filePath, config) {
+    debugger
     let fileObject; let fileProcessor
 
     debug(`getting file ${filePath}`)
@@ -71,14 +46,11 @@ const API = {
       // vs config.isInterativeMode
       const shouldWatch = !config.isTextTerminal || Boolean(process.env.CYPRESS_INTERNAL_FORCE_FILEWATCH)
 
-      // const baseFilePath = filePath
-      .replace(config.projectRoot, '')
-      .replace(config.integrationFolder, '')
+      debug('should watch', shouldWatch)
 
       fileObject = (fileObjects[filePath] = _.extend(new EE(), {
         filePath,
         shouldWatch,
-        // outputPath: appData.getBundledFilePath(config.projectRoot, baseFilePath),
       }))
 
       fileObject.on('rerun', () => {

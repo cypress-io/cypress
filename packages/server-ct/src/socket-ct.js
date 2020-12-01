@@ -1,9 +1,11 @@
+// copied from server/lib/socket.js
+
 const _ = require('lodash')
 const debug = require('debug')('cypress:server-ct:socket')
 const Bluebird = require('bluebird')
 const socketIo = require('@packages/socket')
-const devserver = require('@packages/server/lib/plugins/child/devserver')
-
+const devserver = require('@packages/server/lib/plugins/devserver')
+const fs = require('@packages/server/lib/util/fs')
 const editors = require('@packages/server/lib/util/editors')
 const { openFile } = require('@packages/server/lib/util/file-opener')
 const open = require('@packages/server/lib/util/open')
@@ -41,63 +43,31 @@ class Socket {
   constructor (config) {
     this.ended = false
 
-    this.onTestFileChange = this.onTestFileChange.bind(this)
+    debugger
 
+    this.onTestFileChange = this.onTestFileChange.bind(this)
     if (config.watchForFileChanges) {
-      // devServer.emitter.on('file:updated', this.onTestFileChange)
+      debugger
+      devserver.emitter.on('file:updated', this.onTestFileChange)
     }
   }
 
   onTestFileChange (filePath) {
-    debug('test file changed %o', filePath)
+    return fs.statAsync(filePath)
+    .then(() => {
+      debugger
 
-    // return fs.statAsync(filePath)
-    // .then(() => {
-    //   return this.io.emit('watched:file:changed')
-    // }).catch(() => {
-    //   return debug('could not find test file that changed %o', filePath)
-    // })
+      return this.io.emit('watched:file:changed')
+    }).catch(() => {
+      debugger
+
+      return debug('could not find test file that changed %o', filePath)
+    })
   }
 
-  // watchTestFileByPath (config, specConfig, options) {
-  //   debug('watching spec with config %o', specConfig)
-
-  //   const cleanIntegrationPrefix = (s) => {
-  //     const removedIntegrationPrefix = path.join(config.integrationFolder, s.replace(`integration${path.sep}`, ''))
-
-  //     return path.relative(config.projectRoot, removedIntegrationPrefix)
-  //   }
-
-  //   // previously we have assumed that we pass integration spec path with "integration/" prefix
-  //   // now we pass spec config object that tells what kind of spec it is, has relative path already
-  //   // so the only special handling remains for special paths like "integration/__all"
-  //   const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.relative
-
-  //   // bail if this is special path like "__all"
-  //   // maybe the client should not ask to watch non-spec files?
-  //   if (isSpecialSpec(filePath)) {
-  //     return
-  //   }
-
-  //   // bail if we're already watching this exact file
-  //   if (filePath === this.testFilePath) {
-  //     return
-  //   }
-
-  //   // remove the existing file by its path
-  //   if (this.testFilePath) {
-  //     preprocessor.removeFile(this.testFilePath, config)
-  //   }
-
-  //   // store this location
-  //   this.testFilePath = filePath
-  //   debug('will watch test file path %o', filePath)
-
-  //   return preprocessor.getFile(filePath, config)
-  //   // ignore errors b/c we're just setting up the watching. errors
-  //   // are handled by the spec controller
-  //   .catch(() => {})
-  // }
+  watchTestFileByPath (config, specConfig, options) {
+    debug('watching spec with config %o', specConfig)
+  }
 
   toReporter (event, data) {
     return this.io && this.io.to('reporter').emit(event, data)
@@ -171,16 +141,6 @@ class Socket {
 
     this.io = this.createIo(server, socketIoRoute, socketIoCookie)
 
-    // automation.use({
-    //   onPush: (message, data) => {
-    //     return this.io.emit('automation:push:message', message, data)
-    //   },
-    // })
-
-    // const onAutomationClientRequestCallback = (message, data, id) => {
-    //   return this.onAutomation(automationClient, message, data, id)
-    // }
-
     const automationRequest = (message, data) => {
       // return automation.request(message, data, onAutomationClientRequestCallback)
     }
@@ -233,28 +193,13 @@ class Socket {
         })
 
         socket.on('automation:push:request', (message, data, cb) => {
-          // automation.push(message, data)
-
           // just immediately callback because there
           // is not really an 'ack' here
           if (cb) {
             return cb()
           }
         })
-
-        // return socket.on('automation:response', automation.response)
       })
-
-      // socket.on('automation:request', (message, data, cb) => {
-      //   debug('automation:request %s %o', message, data)
-
-      //   return automationRequest(message, data)
-      //   .then((resp) => {
-      //     return cb({ response: resp })
-      //   }).catch((err) => {
-      //     return cb({ error: errors.clone(err) })
-      //   })
-      // })
 
       socket.on('reporter:connected', () => {
         if (socket.inReporterRoom) {
@@ -292,20 +237,20 @@ class Socket {
         .then(cb)
       })
 
+      socket.on('watch:test:file', (specInfo, cb = function () { }) => {
+        debug('watch:test:file %o', specInfo)
+
+        this.watchTestFileByPath(config, specInfo, options)
+
+        // callback is only for testing purposes
+        return cb()
+      })
+
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
         return options.onSpecChanged(spec)
       })
-
-      // socket.on('watch:test:file', (specInfo, cb = function () { }) => {
-      //   debug('watch:test:file %o', specInfo)
-
-      //   this.watchTestFileByPath(config, specInfo, options)
-
-      //   // callback is only for testing purposes
-      //   return cb()
-      // })
 
       socket.on('app:connect', (socketId) => {
         return options.onConnect(socketId, socket)
@@ -466,8 +411,6 @@ class Socket {
   }
 
   close () {
-    // preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
-
     return (this.io != null ? this.io.close() : undefined)
   }
 }
