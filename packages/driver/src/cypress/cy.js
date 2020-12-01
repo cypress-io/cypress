@@ -593,7 +593,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // highlight it in red or insert a new command
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
-      debugger
 
       return fail(err, state('runnable'))
     })
@@ -803,7 +802,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
       cyFailErr.isCyFailErr = true
-      debugger
 
       return fail(cyFailErr)
     }
@@ -1216,7 +1214,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (!runnable) return err
 
       try {
-        debugger
         fail(err)
       } catch (failErr) {
         const r = state('reject')
@@ -1403,8 +1400,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // if runnable.fn threw synchronously, then it didnt fail from
           // a cypress command, but we should still teardown and handle
           // the error
-          debugger
-
           return fail(err, runnable)
         }
       }

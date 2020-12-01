@@ -60,6 +60,21 @@ function compileTemplate (options = {}) {
 
 /**
  * Warning: modifies the input object
+ * @param {WebpackOptions} options
+ */
+
+function removeForkTsCheckerWebpackPlugin (options) {
+  if (!Array.isArray(options.plugins)) {
+    return
+  }
+
+  options.plugins = options.plugins.filter((plugin) => {
+    return plugin.typescript === undefined
+  })
+}
+
+/**
+ * Warning: modifies the input object
  * @param {Cypress.ConfigOptions} config
  * @param {WebpackOptions} options
  */
