@@ -1,4 +1,3 @@
-const _ = require('lodash')
 const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 const httpProxy = require('http-proxy')
@@ -12,7 +11,9 @@ module.exports = ({ app, config, project, onError }) => {
 
   app.get('/__cypress/runner/*', runnerCt.middleware(send))
 
-  app.get('/__cypress/static/*', staticPkg.middleware(send))
+  app.get('/__cypress/static/*', (req, res) => {
+    staticPkg.handle(req, res)
+  })
 
   app.get('/__cypress/iframes/*', (req, res) => {
     req.url = '/'

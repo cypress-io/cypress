@@ -10,4 +10,8 @@ module.exports = {
   getPathToDist (...args) {
     return dist(...args)
   },
+
+  getPathToIndex () {
+    return dist('index.html')
+  },
 }
