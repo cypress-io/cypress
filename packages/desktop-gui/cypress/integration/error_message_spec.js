@@ -52,6 +52,8 @@ describe('Error Message', function () {
 
     cy.get('.error')
     .should('contain', this.err.message)
+
+    cy.percySnapshot()
   })
 
   it('displays error message with html escaped', function () {
@@ -90,6 +92,8 @@ describe('Error Message', function () {
 
     cy.get('.error')
     .and('contain', this.longErrMessage)
+
+    cy.percySnapshot()
   })
 
   it('re-opens project on click of \'Try again\' button', function () {
@@ -149,6 +153,7 @@ describe('Error Message', function () {
     cy.get('details.stacktrace').should('not.have.attr', 'open')
     cy.get('details.stacktrace').click().should('have.attr', 'open')
     cy.get('details.stacktrace').should('contain', 'bar')
+    cy.percySnapshot()
   })
 
   it('doesn\'t show error stack trace if not provided', function () {
@@ -159,7 +164,7 @@ describe('Error Message', function () {
     this.start()
 
     cy.get('.error')
-    cy.get('details.stacktrace > summary').should('not.be.visible')
+    cy.get('details.stacktrace > summary').should('not.exist')
   })
 
   it('shows abbreviated error details if only one line', function () {

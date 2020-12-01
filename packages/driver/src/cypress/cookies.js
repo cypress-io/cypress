@@ -146,14 +146,6 @@ const $Cookies = (namespace, domain) => {
 
   }
 
-  _.each(['get', 'set', 'remove', 'getAllCookies', 'clearCookies'], (method) => {
-    return API[method] = () => {
-      return $errUtils.throwErrByPath('cookies.removed_method', {
-        args: { method },
-      })
-    }
-  })
-
   return API
 }
 

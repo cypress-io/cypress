@@ -75,11 +75,6 @@ export const options = [
     validation: v.isBoolean,
     isExperimental: true,
   }, {
-    name: 'experimentalNetworkStubbing',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'fileServerFolder',
     defaultValue: '',
     validation: v.isString,
@@ -266,6 +261,10 @@ export const options = [
     defaultValue: true,
     validation: v.isBoolean,
   }, {
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
+  }, {
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: v.isBoolean,
@@ -290,15 +289,8 @@ export const breakingOptions = [
     errorKey: 'EXPERIMENTAL_SHADOW_DOM_REMOVED',
     isWarning: true,
   }, {
-    name: 'screenshotOnHeadlessFailure',
-    errorKey: 'SCREENSHOT_ON_HEADLESS_FAILURE_REMOVED',
-  }, {
-    name: 'trashAssetsBeforeHeadlessRuns',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'trashAssetsBeforeRuns',
-  }, {
-    name: 'videoRecording',
-    errorKey: 'RENAMED_CONFIG_OPTION',
-    newName: 'video',
+    name: 'experimentalNetworkStubbing',
+    errorKey: 'EXPERIMENTAL_NETWORK_STUBBING_REMOVED',
+    isWarning: true,
   },
 ]

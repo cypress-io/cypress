@@ -1,5 +1,6 @@
 const $stackUtils = require('@packages/driver/src/cypress/stack_utils')
 const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
+const { stripIndent } = require('common-tags')
 
 describe('driver/src/cypress/stack_utils', () => {
   context('.replacedStack', () => {
@@ -92,6 +93,33 @@ describe('driver/src/cypress/stack_utils', () => {
       cy.stub($sourceMapUtils, 'getSourceContents').returns(null)
 
       expect($stackUtils.getCodeFrame(originalErr)).to.be.undefined
+    })
+  })
+
+  context('.getSourceStack when http links', () => {
+    it('does not have absolute files', () => {
+      const projectRoot = '/dev/app'
+
+      cy.fixture('error-stack-with-http-links.txt')
+      .then((stack) => {
+        return $stackUtils.getSourceStack(stack, projectRoot)
+      })
+      .its('parsed')
+      .then((parsed) => {
+        return Cypress._.find(parsed, { fileUrl: 'http://localhost:8888/js/utils.js' })
+      })
+      .then((errorLocation) => {
+        expect(errorLocation, 'does not have disk information').to.deep.equal({
+          absoluteFile: undefined,
+          column: 4,
+          fileUrl: 'http://localhost:8888/js/utils.js',
+          function: '<unknown>',
+          line: 9,
+          originalFile: 'http://localhost:8888/js/utils.js',
+          relativeFile: undefined,
+          whitespace: '    ',
+        })
+      })
     })
   })
 
@@ -236,6 +264,83 @@ Error: spec iframe stack
 
     it('returns empty object if there\'s no stack', () => {
       expect($stackUtils.getSourceStack()).to.eql({})
+    })
+  })
+
+  context('.getSourceDetailsForFirstLine', () => {
+    it('parses good stack trace', () => {
+      const stack = stripIndent`
+        Error
+          at Suite.eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:101:3)
+          at Object../cypress/integration/spec.js (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:100:1)
+          at __webpack_require__ (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:20:30)
+          at Object.0 (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:119:18)
+          at __webpack_require__ (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:20:30)
+          at eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:84:18)
+          at eval (http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js:87:10)
+          at eval (<anonymous>)
+      `
+      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+
+      expect(details.function, 'function name').to.equal('Suite.eval')
+      expect(details.fileUrl, 'file url').to.equal('http://localhost:8888/__cypress/tests?p=cypress/integration/spec.js')
+    })
+
+    it('parses anonymous eval line', () => {
+      const stack = stripIndent`
+        SyntaxError: The following error originated from your application code, not from Cypress.
+
+          > Identifier 'app' has already been declared
+
+        When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+        This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+        SyntaxError: The following error originated from your application code, not from Cypress.
+
+          > Identifier 'app' has already been declared
+
+        When Cypress detects uncaught errors originating from your application it will automatically fail the current test.
+
+        This behavior is configurable, and you can choose to turn this off by listening to the \`uncaught:exception\` event.
+            at <anonymous>:1:1
+            at run (http://localhost:8888/node_modules/react/dist/JSXTransformer.js:184:10)
+            at check (http://localhost:8888/node_modules/react/dist/JSXTransformer.js:238:9)
+            at result.<computed>.async (http://localhost:8888/node_modules/react/dist/JSXTransformer.js:273:9)
+            at XMLHttpRequest.xhr.onreadystatechange (http://localhost:8888/node_modules/react/dist/JSXTransformer.js:208:9)
+        From previous event:
+            at run (cypress:///../driver/src/cypress/cy.js:561:21)
+            at $Cy.cy.<computed> [as visit] (cypress:///../driver/src/cypress/cy.js:1018:11)
+            at Context.runnable.fn (cypress:///../driver/src/cypress/cy.js:1242:21)
+            at callFn (cypress:///../driver/node_modules/mocha/lib/runnable.js:395:21)
+            at Test.Runnable.run (cypress:///../driver/node_modules/mocha/lib/runnable.js:382:7)
+            at eval (cypress:///../driver/src/cypress/runner.js:1249:28)
+        From previous event:
+            at Object.onRunnableRun (cypress:///../driver/src/cypress/runner.js:1237:17)
+            at $Cypress.action (cypress:///../driver/src/cypress.js:397:28)
+            at Test.Runnable.run (cypress:///../driver/src/cypress/mocha.js:348:13)
+            at Runner.runTest (cypress:///../driver/node_modules/mocha/lib/runner.js:541:10)
+            at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:667:12)
+            at next (cypress:///../driver/node_modules/mocha/lib/runner.js:450:14)
+            at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:460:7)
+            at next (cypress:///../driver/node_modules/mocha/lib/runner.js:362:14)
+            at eval (cypress:///../driver/node_modules/mocha/lib/runner.js:428:5)
+            at timeslice (cypress:///../driver/node_modules/mocha/browser-entry.js:80:27)
+      `
+
+      const projectRoot = '/Users/gleb/git/cypress-example-todomvc'
+      const details = $stackUtils.getSourceDetailsForFirstLine(stack, projectRoot)
+
+      expect(details, 'minimal details').to.deep.equal({
+        absoluteFile: undefined,
+        column: 2,
+        fileUrl: undefined,
+        function: '<unknown>',
+        line: 1,
+        originalFile: undefined,
+        relativeFile: undefined,
+        whitespace: '    ',
+      })
     })
   })
 

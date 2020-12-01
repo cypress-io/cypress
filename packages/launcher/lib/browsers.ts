@@ -64,7 +64,7 @@ export const browsers: Browser[] = [
     channel: 'stable',
     displayName: 'Edge',
     versionRegex: /Microsoft Edge (\S+)/m,
-    binary: 'edge',
+    binary: ['edge', 'microsoft-edge'],
   },
   {
     name: 'edge',
@@ -88,7 +88,7 @@ export const browsers: Browser[] = [
     channel: 'dev',
     displayName: 'Edge Dev',
     versionRegex: /Microsoft Edge Dev (\S+)/m,
-    binary: 'edge-dev',
+    binary: ['edge-dev', 'microsoft-edge-dev'],
   },
 ]
 

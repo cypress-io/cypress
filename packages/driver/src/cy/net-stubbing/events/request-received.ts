@@ -2,12 +2,13 @@ import _ from 'lodash'
 
 import {
   Route,
-  Request,
+  Interception,
   CyHttpMessages,
   StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
 } from '../types'
+import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
@@ -18,7 +19,7 @@ import { HandlerFn } from './'
 import Bluebird from 'bluebird'
 
 export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = (Cypress, frame, { getRoute, emitNetEvent }) => {
-  function getRequestLog (route: Route, request: Omit<Request, 'log'>) {
+  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
       displayName: 'req',
@@ -26,6 +27,8 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       aliasType: 'route',
       type: 'parent',
       event: true,
+      method: request.request.method,
+      timeout: undefined,
       consoleProps: () => {
         return {
           Alias: route.alias,
@@ -47,49 +50,14 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   const route = getRoute(frame.routeHandlerId)
   const { req, requestId, routeHandlerId } = frame
 
-  const sendContinueFrame = () => {
-    if (continueSent) {
-      throw new Error('sendContinueFrame called twice in handler')
-    }
+  parseJsonBody(req)
 
-    continueSent = true
-
-    if (request) {
-      request.state = 'Intercepted'
-    }
-
-    if (continueFrame) {
-      // copy changeable attributes of userReq to req in frame
-      // @ts-ignore
-      continueFrame.req = {
-        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
-      }
-
-      _.merge(request.request, continueFrame.req)
-
-      emitNetEvent('http:request:continue', continueFrame)
-    }
-  }
-
-  if (!route) {
-    return sendContinueFrame()
-  }
-
-  const request: Partial<Request> = {
+  const request: Partial<Interception> = {
     id: requestId,
     request: req,
     state: 'Received',
-  }
-
-  request.log = getRequestLog(route, request as Omit<Request, 'log'>)
-  request.log.snapshot('request')
-
-  // TODO: this misnomer is a holdover from XHR, should be numRequests
-  route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
-  route.requests[requestId] = request as Request
-
-  if (frame.notificationOnly) {
-    return
+    requestWaited: false,
+    responseWaited: false,
   }
 
   const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
@@ -99,9 +67,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   let resolved = false
   let replyCalled = false
-  let continueSent = false
-
-  route.hitCount++
 
   const userReq: CyHttpMessages.IncomingHttpRequest = {
     ...req,
@@ -151,9 +116,57 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     destroy () {
       userReq.reply({
         forceNetworkError: true,
-      })
+      }) // TODO: this misnomer is a holdover from XHR, should be numRequests
     },
   }
+
+  let continueSent = false
+
+  const sendContinueFrame = () => {
+    if (continueSent) {
+      throw new Error('sendContinueFrame called twice in handler')
+    }
+
+    continueSent = true
+
+    if (request) {
+      request.state = 'Intercepted'
+    }
+
+    if (continueFrame) {
+      // copy changeable attributes of userReq to req in frame
+      // @ts-ignore
+      continueFrame.req = {
+        ..._.pick(userReq, SERIALIZABLE_REQ_PROPS),
+      }
+
+      _.merge(request.request, continueFrame.req)
+
+      if (_.isObject(continueFrame.req!.body)) {
+        continueFrame.req!.body = JSON.stringify(continueFrame.req!.body)
+      }
+
+      emitNetEvent('http:request:continue', continueFrame)
+    }
+
+    request.log.fireChangeEvent()
+  }
+
+  if (!route) {
+    return sendContinueFrame()
+  }
+
+  request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
+
+  // TODO: this misnomer is a holdover from XHR, should be numRequests
+  route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
+  route.requests[requestId] = request as Interception
+
+  if (frame.notificationOnly) {
+    return
+  }
+
+  route.hitCount++
 
   if (!_.isFunction(route.handler)) {
     return sendContinueFrame()
@@ -196,6 +209,15 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     resolved = true
   })
   .then(() => {
+    if (userReq.alias) {
+      Cypress.state('aliasedRequests').push({
+        alias: userReq.alias,
+        request: request as Interception,
+      })
+
+      delete userReq.alias
+    }
+
     if (!replyCalled) {
       // handler function resolved without resolving request, pass on
       continueFrame.tryNextRoute = true

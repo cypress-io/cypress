@@ -21,6 +21,9 @@ import {
 } from './static-response-utils'
 import { registerEvents } from './events'
 import $errUtils from '../../cypress/error_utils'
+import $utils from '../../cypress/utils'
+
+const lowercaseFieldNames = (headers: { [fieldName: string]: any }) => _.mapKeys(headers, (v, k) => _.toLower(k))
 
 /**
  * Get all STRING_MATCHER_FIELDS paths plus any extra fields the user has added within
@@ -118,6 +121,18 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     return err('`port` must be a number or a list of numbers.')
   }
 
+  if (_.has(routeMatcher, 'headers')) {
+    const knownFieldNames: string[] = []
+
+    for (const k in routeMatcher.headers) {
+      if (knownFieldNames.includes(k.toLowerCase())) {
+        return err(`\`${k}\` was specified more than once in \`headers\`. Header fields can only be matched once (HTTP header field names are case-insensitive).`)
+      }
+
+      knownFieldNames.push(k)
+    }
+  }
+
   return { isValid: true }
 }
 
@@ -193,7 +208,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         hasInterceptor = true
         break
       case _.isUndefined(handler):
-        // user is doing something like cy.route2('foo').as('foo') to wait on a URL
+        // user is doing something like cy.intercept('foo').as('foo') to wait on a URL
         break
       case _.isString(handler):
         staticResponse = { body: <string>handler }
@@ -207,18 +222,26 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
           }
         }
 
-        validateStaticResponse('cy.route2', <StaticResponse>handler)
+        validateStaticResponse('cy.intercept', <StaticResponse>handler)
 
         staticResponse = handler as StaticResponse
         break
       default:
-        return $errUtils.throwErrByPath('net_stubbing.route2.invalid_handler', { args: { handler } })
+        return $errUtils.throwErrByPath('net_stubbing.intercept.invalid_handler', { args: { handler } })
+    }
+
+    const routeMatcher = annotateMatcherOptionsTypes(matcher)
+
+    if (routeMatcher.headers) {
+      // HTTP header names are case-insensitive, lowercase the matcher so it works as expected
+      // @see https://github.com/cypress-io/cypress/issues/8921
+      routeMatcher.headers = lowercaseFieldNames(routeMatcher.headers)
     }
 
     const frame: NetEventFrames.AddRoute = {
       handlerId,
       hasInterceptor,
-      routeMatcher: annotateMatcherOptionsTypes(matcher),
+      routeMatcher,
     }
 
     if (staticResponse) {
@@ -240,13 +263,16 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     return emitNetEvent('route:added', frame)
   }
 
-  function route2 (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
-    if (!Cypress.config('experimentalNetworkStubbing')) {
-      return $errUtils.throwErrByPath('net_stubbing.route2.needs_experimental')
-    }
+  function route2 (...args) {
+    $errUtils.warnByPath('net_stubbing.route2_renamed')
 
+    // @ts-ignore
+    return intercept.apply(undefined, args)
+  }
+
+  function intercept (matcher: RouteMatcher, handler?: RouteHandler | StringMatcher, arg2?: RouteHandler) {
     function getMatcherOptions (): RouteMatcherOptions {
-      if (_.isString(matcher) && isStringMatcher(handler) && arg2) {
+      if (_.isString(matcher) && $utils.isValidHttpMethod(matcher) && isStringMatcher(handler)) {
         // method, url, handler
         const url = handler as StringMatcher
 
@@ -272,7 +298,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
     const { isValid, message } = validateRouteMatcherOptions(routeMatcherOptions)
 
     if (!isValid) {
-      $errUtils.throwErrByPath('net_stubbing.route2.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
+      $errUtils.throwErrByPath('net_stubbing.intercept.invalid_route_matcher', { args: { message, matcher: routeMatcherOptions } })
     }
 
     return addRoute(routeMatcherOptions, handler as RouteHandler)
@@ -280,6 +306,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
   }
 
   Commands.addAll({
+    intercept,
     route2,
   })
 }

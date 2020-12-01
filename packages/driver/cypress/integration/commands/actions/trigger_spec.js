@@ -237,6 +237,14 @@ describe('src/cy/commands/actions/trigger', () => {
         cy.get('#overflow-auto-container').contains('quux').trigger('mousedown')
       })
 
+      it('can trigger on elements with `opacity: 0`', () => {
+        cy.get('#opacity-0').trigger('mousedown')
+      })
+
+      it('can trigger on elements with parents that have `opacity: 0`', () => {
+        cy.get('#opacity-0-parent').trigger('mousedown')
+      })
+
       it('can trigger on readonly inputs', () => {
         cy.get('#readonly-attr').trigger('mousedown')
       })
@@ -592,6 +600,82 @@ describe('src/cy/commands/actions/trigger', () => {
           expect(args[2]).to.eq(animationDistanceThreshold)
         })
       })
+
+      it('can specify scrollBehavior in options', () => {
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: 'bottom' })
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+        })
+      })
+
+      it('does not scroll when scrollBehavior is false in options', () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false })
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).not.to.be.called
+        })
+      })
+
+      it('calls scrollIntoView by default', () => {
+        cy.scrollTo('top')
+        cy.get('button:first').then((el) => {
+          cy.spy(el[0], 'scrollIntoView')
+        })
+
+        cy.get('button:first').trigger('mouseover')
+
+        cy.get('button:first').then((el) => {
+          expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+        })
+      })
+
+      it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
+        cy.scrollTo('top')
+
+        cy.on('fail', (err) => {
+          expect(err.message).to.include('`cy.trigger()` failed because the center of this element is hidden from view')
+          expect(cy.state('window').scrollY).to.equal(0)
+          expect(cy.state('window').scrollX).to.equal(0)
+
+          done()
+        })
+
+        // make sure the input is out of view
+        const $body = cy.$$('body')
+
+        $('<div>Long block 5</div>')
+        .css({
+          height: '500px',
+          border: '1px solid red',
+          marginTop: '10px',
+          width: '100%',
+        }).prependTo($body)
+
+        cy.get('button:first').trigger('mouseover', { scrollBehavior: false, timeout: 200 })
+      })
     })
 
     describe('assertion verification', {
@@ -928,6 +1012,18 @@ describe('src/cy/commands/actions/trigger', () => {
         })
 
         cy.get('button:first').trigger('mouseover')
+      })
+
+      it('throws when the element has `opacity: 0` but is not visible', function (done) {
+        cy.on('fail', (err) => {
+          expect(this.logs.length).eq(2)
+          expect(err.message).not.to.contain('CSS property: `opacity: 0`')
+          expect(err.message).to.contain('`cy.trigger()` failed because this element is not visible')
+
+          done()
+        })
+
+        cy.get('#opacity-0-hidden').trigger('mouseover')
       })
 
       it('throws when subject is disabled', function (done) {

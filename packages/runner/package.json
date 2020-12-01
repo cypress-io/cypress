@@ -43,7 +43,6 @@
     "prop-types": "15.7.2",
     "react": "16.8.6",
     "react-dom": "16.8.6",
-    "regenerator-runtime": "0.13.7",
     "sinon": "7.5.0",
     "sinon-chai": "3.3.0",
     "snap-shot-core": "10.2.1",

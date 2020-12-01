@@ -52,6 +52,8 @@ module.exports = {
   },
 
   getSpecs (spec, config, extraOptions = {}) {
+    // when asking for all specs: spec = "__all"
+    // otherwise it is a relative spec filename like "integration/spec.js"
     debug('get specs %o', { spec, extraOptions })
 
     const convertSpecPath = (spec) => {
@@ -65,6 +67,7 @@ module.exports = {
     }
 
     const specFilter = _.get(extraOptions, 'specFilter')
+    const specTypeFilter = _.get(extraOptions, 'specType', 'integration')
 
     debug('specFilter %o', { specFilter })
     const specFilterContains = (spec) => {
@@ -87,9 +90,9 @@ module.exports = {
           return debug('found __all specs %o', specs)
         }))
         .filter(specFilterFn)
-        .filter((spec) => {
+        .filter((foundSpec) => {
           if (experimentalComponentTestingEnabled) {
-            return spec.specType === 'integration'
+            return foundSpec.specType === specTypeFilter
           }
 
           return true

@@ -40,6 +40,7 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   app.get('/__cypress/iframes/*', (req, res) => {
     const extraOptions = {
       specFilter: _.get(project, 'spec.specFilter'),
+      specType: _.get(project, 'spec.specType', 'integration'),
     }
 
     debug('project %o', project)

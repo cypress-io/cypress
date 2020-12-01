@@ -99,6 +99,12 @@ describe('src/cy/commands/actions/check', () => {
       })
     })
 
+    it('can check checkboxes with `opacity: 0`', () => {
+      cy.get('[name=opacity]').check().then(($checkbox) => {
+        expect($checkbox).to.be.checked
+      })
+    })
+
     it('does not require visibility with force: true', () => {
       const checkbox = ':checkbox[name=\'birds\']'
 
@@ -173,6 +179,57 @@ describe('src/cy/commands/actions/check', () => {
       cy.get('#checkbox-covered-in-span').check({ timeout: 1000, interval: 60 })
     })
 
+    it('can specify scrollBehavior in options', () => {
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check({ scrollBehavior: 'bottom' })
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in options', () => {
+      cy.get(':checkbox:first').scrollIntoView()
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check({ scrollBehavior: false })
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
+      cy.get(':checkbox:first').scrollIntoView()
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('calls scrollIntoView by default', () => {
+      cy.scrollTo('top')
+      cy.get(':checkbox:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':checkbox:first').check()
+
+      cy.get(':checkbox:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+      })
+    })
+
     it('waits until element is no longer disabled', () => {
       const chk = $(':checkbox:first').prop('disabled', true)
 
@@ -191,6 +248,28 @@ describe('src/cy/commands/actions/check', () => {
       cy.get(':checkbox:first').check().then(() => {
         expect(clicks).to.eq(1)
         expect(retried).to.be.true
+      })
+    })
+
+    it('can set options.waitForAnimations', () => {
+      cy.stub(cy, 'ensureElementIsNotAnimating').throws(new Error('animating!'))
+
+      cy.get(':checkbox:first').check({ waitForAnimations: false }).then(() => {
+        expect(cy.ensureElementIsNotAnimating).not.to.be.called
+      })
+    })
+
+    it('can set options.animationDistanceThreshold', () => {
+      const $btn = cy.$$(':checkbox:first')
+
+      cy.spy(cy, 'ensureElementIsNotAnimating')
+      cy.get(':checkbox:first').check({ animationDistanceThreshold: 1000 }).then(() => {
+        const { fromElWindow } = Cypress.dom.getElementCoordinatesByPosition($btn)
+        const { args } = cy.ensureElementIsNotAnimating.firstCall
+
+        expect(args[1]).to.deep.eq([fromElWindow, fromElWindow])
+
+        expect(args[2]).to.eq(1000)
       })
     })
 

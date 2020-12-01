@@ -211,7 +211,7 @@ http://localhost:3434/fail
 
 The response we received from your web server was:
 
-  > 500: Server Error
+  > 500: Internal Server Error
 
 This was considered a failure because the status code was not \`2xx\`.
 

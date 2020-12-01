@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🤔 Questions and Help
+    url: https://github.com/cypress-io/cypress/discussions
+    about: This issue tracker is not for support questions. Please refer to our Discussions.
+  - name: 📊 Cypress Dashboard Feature
+    url: https://portal.productboard.com/cypress-io/1-cypress-dashboard
+    about: This issue tracker is not for requesting Cypress Dashboard features. Please express interest here.
+  - name: 📃 Documentation Issue
+    url: https://github.com/cypress-io/cypress-documentation/issues/new
+    about: This issue tracker is not for documentation issues. Please open documentation issues here.
+
