@@ -199,16 +199,20 @@ class $Location {
   static qualifyWithBaseUrl (baseUrl, url) {
     // if we have a root url and our url isnt full qualified
     if (baseUrl && !this.isFullyQualifiedUrl(url)) {
+      const urlEndsWithSlash = (url) => {
+        return url[url.length - 1] === '/'
+      }
+
       // https://github.com/cypress-io/cypress/issues/9360
       // When user passed the URL that ends with '/', then we should preserve it.
-      const isOriginalUrlEndsWithSlash = url[url.length - 1] === '/'
+      const originalUrlEndsWithSlash = urlEndsWithSlash(url)
 
       // prepend the root url to it
       url = this.join(baseUrl, url)
 
       // https://github.com/cypress-io/cypress/issues/2101
       // Has query param and ends with /
-      if (!isOriginalUrlEndsWithSlash && reQueryParam.test(url) && url[url.length - 1] === '/') {
+      if (!originalUrlEndsWithSlash && reQueryParam.test(url) && urlEndsWithSlash(url)) {
         url = url.substring(0, url.length - 1)
       }
     }
