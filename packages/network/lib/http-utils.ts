@@ -7,5 +7,5 @@ import { IncomingMessage } from 'http'
 const NO_BODY_STATUS_CODES = [204, 304]
 
 export function responseMustHaveEmptyBody (req: IncomingMessage, res: IncomingMessage) {
-  return _.includes(NO_BODY_STATUS_CODES, res.statusCode) || req.method?.toLowerCase() === 'head'
+  return _.includes(NO_BODY_STATUS_CODES, res.statusCode) || (req.method && req.method.toLowerCase() === 'head')
 }
