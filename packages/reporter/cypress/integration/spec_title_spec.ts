@@ -28,6 +28,9 @@ describe('spec title', () => {
     })
 
     cy.get('.runnable-header').should('have.text', 'All Specs')
+
+    // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
     cy.percySnapshot()
   })
 
@@ -40,6 +43,9 @@ describe('spec title', () => {
     })
 
     cy.contains('.runnable-header', 'Specs matching "cof"')
+
+    // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
     cy.percySnapshot()
   })
 
@@ -54,6 +60,9 @@ describe('spec title', () => {
 
     it('displays relative spec path', () => {
       cy.get('.runnable-header').find('a').should('have.text', 'relative/path/to/foo.js')
+
+      // ensure the page is loaded before taking snapshot
+      cy.get('.focus-tests-text').should('be.visible')
       cy.percySnapshot()
     })
 
