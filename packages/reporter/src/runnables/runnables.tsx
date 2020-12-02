@@ -9,7 +9,7 @@ import { RunnablesError, RunnablesErrorModel } from './runnable-error'
 import RunnableHeader from './runnable-header'
 import { RunnablesStore } from './runnables-store'
 import { Scroller } from '../lib/scroller'
-import { Virtualizable } from '../tree/virtualizable'
+import { Virtualizable } from '../virtual-tree/virtualizable'
 
 const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React, { MouseEvent, useEffect } from 'react'
+import React, { MouseEvent } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 
@@ -11,8 +11,8 @@ import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { indentPadding, onEnterOrSpace } from '../lib/util'
 import { ErrModel } from './err-model'
-import { autorun } from 'mobx'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
+import { measureOnChange } from '../virtual-tree/virtualizable-util'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -39,20 +39,15 @@ interface TestErrorProps {
 }
 
 export const TestError = observer(({ model, virtualizableProps }: TestErrorProps) => {
-  useEffect(() => {
-    const disposeAutorun = autorun(() => {
-      model.name
-      model.message
-      model.stack
-      model.codeFrame
-
-      virtualizableProps.measure()
-    })
-
-    return () => {
-      disposeAutorun()
-    }
-  }, [true])
+  measureOnChange(virtualizableProps, () => {
+    // list any observable properties that may affect the height or width
+    // of the rendered DOM, in order to tell react-virtualized-tree
+    // to re-measure when they change
+    model.name
+    model.message
+    model.stack
+    model.codeFrame
+  })
 
   const md = new Markdown('zero')
 

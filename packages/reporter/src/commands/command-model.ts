@@ -3,8 +3,8 @@ import { action, computed, observable } from 'mobx'
 import { ErrModel } from '../errors/err-model'
 import { InstrumentModel, InstrumentProps } from '../instruments/instrument-model'
 import { TimeoutID } from '../lib/types'
-import { VirtualNodeModel } from '../tree/virtual-node-model'
-import { VirtualizableType } from '../tree/virtualizable-types'
+import { VirtualNodeModel } from '../virtual-tree/virtual-node-model'
+import { VirtualizableType } from '../virtual-tree/virtualizable-types'
 import { TestModel } from './../test/test-model'
 
 const LONG_RUNNING_THRESHOLD = 1000

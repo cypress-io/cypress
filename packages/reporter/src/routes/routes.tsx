@@ -1,16 +1,16 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
 import Collapsible from '../collapsible/collapsible'
 import { RouteModel } from './route-model'
 import { indentPadding } from '../lib/util'
-import { Collection } from '../tree/virtual-collection'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { Collection } from '../virtual-tree/virtual-collection'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
+import { measureOnChange } from '../virtual-tree/virtualizable-util'
 
 export interface RouteProps {
   model: RouteModel
@@ -36,17 +36,12 @@ export interface RoutesProps {
 }
 
 export const Routes = observer(({ model, virtualizableProps }: RoutesProps) => {
-  useEffect(() => {
-    const disposeAutorun = autorun(() => {
-      model.items.length
-
-      virtualizableProps.measure()
-    })
-
-    return () => {
-      disposeAutorun()
-    }
-  }, [true])
+  measureOnChange(virtualizableProps, () => {
+    // list any observable properties that may affect the height or width
+    // of the rendered DOM, in order to tell react-virtualized-tree
+    // to re-measure when they change
+    model.items.length
+  })
 
   return (
     <div

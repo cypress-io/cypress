@@ -16,7 +16,7 @@ import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import { CommandModel } from './command-model'
 import { indentPadding } from '../lib/util'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
 
 const md = new Markdown()
 
@@ -148,6 +148,9 @@ export class Command extends Component<Props> {
     const model = this.props.model
 
     this.disposeAutorun = autorun(() => {
+      // list any observable properties that may affect the height or width
+      // of the rendered DOM, in order to tell react-virtualized-tree
+      // to re-measure when they change
       model.alias
       model.displayMessage
       model.displayName

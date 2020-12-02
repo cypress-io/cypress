@@ -3,7 +3,7 @@ import { action, computed, observable } from 'mobx'
 
 import { AgentModel, AgentProps } from '../agents/agent-model'
 import { CommandModel, CommandProps } from '../commands/command-model'
-import { Collection } from '../tree/virtual-collection'
+import { Collection } from '../virtual-tree/virtual-collection'
 import { ErrModel } from '../errors/err-model'
 import { RouteModel, RouteProps } from '../routes/route-model'
 import { TestModel, TestProps, TestState, UpdatableTestProps } from '../test/test-model'
@@ -11,8 +11,8 @@ import { HookModel, HookName, HookProps } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import { InstrumentModel } from '../instruments/instrument-model'
-import { VirtualizableType } from '../tree/virtualizable-types'
-import { VirtualNodeModel } from './../tree/virtual-node-model'
+import { VirtualizableType } from '../virtual-tree/virtualizable-types'
+import { VirtualNodeModel } from './../virtual-tree/virtual-node-model'
 
 export class AttemptModel {
   virtualType = VirtualizableType.Attempt

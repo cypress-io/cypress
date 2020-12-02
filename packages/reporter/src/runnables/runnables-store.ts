@@ -11,7 +11,7 @@ import { HookProps } from '../hooks/hook-model'
 import { SuiteModel } from './suite-model'
 import { TestModel, TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
 import { RunnableModel } from './runnable-model'
-import { Virtualizable } from './../tree/virtualizable'
+import { Virtualizable } from './../virtual-tree/virtualizable'
 
 const defaults = {
   hasSingleTest: false,

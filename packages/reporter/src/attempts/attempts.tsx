@@ -1,13 +1,13 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { useEffect } from 'react'
 
 import { AttemptModel } from './attempt-model'
 import { Expandable } from '../collapsible/expandable'
 import { indentPadding } from '../lib/util'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
+import { measureOnChange } from '../virtual-tree/virtualizable-util'
 
 // TODO:
 // - handle scrollIntoView
@@ -27,22 +27,19 @@ interface AttemptProps {
 }
 
 export const Attempt = observer(({ model, virtualizableProps }: AttemptProps) => {
+  measureOnChange(virtualizableProps, () => {
+    // list any observable properties that may affect the height or width
+    // of the rendered DOM, in order to tell react-virtualized-tree
+    // to re-measure when they change
+    model.test.hasMultipleAttempts
+    model.hasCommands
+    model.state
+    model.index
+    model.commands.length
+  })
+
   useEffect(() => {
     // scrollIntoView()
-
-    const disposeAutorun = autorun(() => {
-      model.test.hasMultipleAttempts
-      model.hasCommands
-      model.state
-      model.index
-      model.commands.length
-
-      virtualizableProps.measure()
-    })
-
-    return () => {
-      disposeAutorun()
-    }
   }, [true])
 
   // QUESTION: is this still necessary? can it be done without a hack?

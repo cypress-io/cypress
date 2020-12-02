@@ -1,15 +1,15 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 import Collapsible from '../collapsible/collapsible'
 
 import { AgentModel } from './agent-model'
 import { Alias } from '../instruments/instrument-model'
 import { indentPadding } from '../lib/util'
-import { Collection } from '../tree/virtual-collection'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { Collection } from '../virtual-tree/virtual-collection'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
+import { measureOnChange } from '../virtual-tree/virtualizable-util'
 
 export interface AgentProps {
   model: AgentModel
@@ -30,18 +30,12 @@ export interface AgentsProps {
 }
 
 export const Agents = observer(({ model, virtualizableProps }: AgentsProps) => {
-  // TODO: abstract this or find a better pattern so this isn't necessary for every component
-  useEffect(() => {
-    const disposeAutorun = autorun(() => {
-      model.items.length
-
-      virtualizableProps.measure()
-    })
-
-    return () => {
-      disposeAutorun()
-    }
-  }, [true])
+  measureOnChange(virtualizableProps, () => {
+    // list any observable properties that may affect the height or width
+    // of the rendered DOM, in order to tell react-virtualized-tree
+    // to re-measure when they change
+    model.items.length
+  })
 
   return (
     <div

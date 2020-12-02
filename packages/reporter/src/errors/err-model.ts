@@ -4,8 +4,8 @@ import { computed, observable } from 'mobx'
 
 import { AttemptModel } from '../attempts/attempt-model'
 import { FileDetails } from '@packages/ui-components'
-import { VirtualizableType } from '../tree/virtualizable-types'
-import { VirtualNodeModel } from './../tree/virtual-node-model'
+import { VirtualizableType } from '../virtual-tree/virtualizable-types'
+import { VirtualNodeModel } from './../virtual-tree/virtual-node-model'
 
 export interface ParsedStackMessageLine {
   message: string

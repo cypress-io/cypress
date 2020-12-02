@@ -2,7 +2,7 @@ import { action } from 'mobx'
 import React, { ReactNode } from 'react'
 import { renderers } from 'react-virtualized-tree'
 
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
 
 export const VirtualExpandable = renderers.Expandable
 

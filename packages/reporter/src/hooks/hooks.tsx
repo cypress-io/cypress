@@ -1,14 +1,14 @@
 import cs from 'classnames'
 import _ from 'lodash'
-import { autorun } from 'mobx'
 import { observer } from 'mobx-react'
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { Expandable } from '../collapsible/expandable'
 import { HookModel } from './hook-model'
 import FileOpener from '../lib/file-opener'
 import { indentPadding } from '../lib/util'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
+import { measureOnChange } from '../virtual-tree/virtualizable-util'
 
 export interface HookProps {
   virtualizableProps: VirtualizableProps
@@ -17,19 +17,14 @@ export interface HookProps {
 }
 
 export const Hook = observer(({ model, virtualizableProps }: HookProps) => {
-  useEffect(() => {
-    const disposeAutorun = autorun(() => {
-      model.commands.length
-      model.hookName
-      model.hookNumber
-
-      virtualizableProps.measure()
-    })
-
-    return () => {
-      disposeAutorun()
-    }
-  }, [true])
+  measureOnChange(virtualizableProps, () => {
+    // list any observable properties that may affect the height or width
+    // of the rendered DOM, in order to tell react-virtualized-tree
+    // to re-measure when they change
+    model.commands.length
+    model.hookName
+    model.hookNumber
+  })
 
   if (!model.commands.length) return null
 

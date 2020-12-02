@@ -8,7 +8,7 @@ import { TestModel } from '../test/test-model'
 
 import { Expandable } from '../collapsible/expandable'
 import { Test } from '../test/test'
-import { VirtualizableProps } from '../tree/virtualizable-types'
+import { VirtualizableProps } from '../virtual-tree/virtualizable-types'
 
 interface SuiteProps {
   model: SuiteModel

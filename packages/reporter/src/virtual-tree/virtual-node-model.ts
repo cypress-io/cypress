@@ -13,8 +13,4 @@ export class VirtualNodeModel implements Node {
     this.id = id
     this.name = `${type}-${id}`
   }
-
-  // @action updateExpanded (expanded: boolean) {
-  //   this.state.expanded = expanded
-  // }
 }
