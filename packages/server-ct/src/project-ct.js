@@ -111,6 +111,8 @@ class Project {
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
+      updatedConfig.componentTesting = true
+
       debug('updated config: %o', updatedConfig)
 
       return updatedConfig
