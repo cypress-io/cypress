@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import concatStream from 'concat-stream'
+import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
 

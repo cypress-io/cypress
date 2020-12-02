@@ -475,6 +475,7 @@ describe('network stubbing', { retries: 2 }, function () {
   context('network handling', function () {
     // @see https://github.com/cypress-io/cypress/issues/8497
     it('can load transfer-encoding: chunked redirects', function () {
+      cy.intercept('*')
       const url4 = 'http://localhost:3501/fixtures/generic.html'
       const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
       const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
@@ -1209,10 +1210,10 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('correctly determines the content-length of an intercepted request', function () {
       it('when body is empty', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = ''
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('0')
 
             done()
@@ -1224,10 +1225,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('when body contains ascii', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = 'this is only ascii'
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('18')
 
             done()
@@ -1239,10 +1240,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('when body contains unicode', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = '🙃🤔'
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('8')
 
             done()
@@ -1281,6 +1282,18 @@ describe('network stubbing', { retries: 2 }, function () {
           res.send()
         })
       })
+      .as('redirect')
+      .intercept('/fixtures/generic.html').as('dest')
+      .then(() => fetch(url))
+      .wait('@redirect')
+      .wait('@dest')
+    })
+
+    it('can simply wait on redirects without intercepting', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.intercept('/redirect')
       .as('redirect')
       .intercept('/fixtures/generic.html').as('dest')
       .then(() => fetch(url))
@@ -1981,6 +1994,36 @@ describe('network stubbing', { retries: 2 }, function () {
           },
         })
       })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8999
+    it('can spy on a 204 no body response', function () {
+      cy.intercept('/status-code').as('status')
+      .then(() => {
+        $.get('/status-code?code=204')
+      })
+      .wait('@status').its('response.statusCode').should('eq', 204)
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8934
+    it('can spy on a 304 not modified image response', function () {
+      const url = `/fixtures/media/cypress.png?i=${Date.now()}`
+
+      cy.intercept(url).as('image')
+      .then(() => {
+        $.get({ url, cache: true })
+      })
+      .then(() => {
+        if (Cypress.isBrowser('firefox')) {
+          // strangely, Firefox requires some time to be waited before the first image response will be cached
+          cy.wait(1000)
+        }
+      })
+      .then(() => {
+        $.get({ url, cache: true })
+      })
+      .wait('@image').its('response.statusCode').should('eq', 200)
+      .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
     context('with an intercepted request', function () {
