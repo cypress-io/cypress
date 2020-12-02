@@ -55,7 +55,7 @@ describe('/lib/tasks/install', function () {
       sinon.stub(fs, 'removeAsync').resolves()
       sinon.stub(state, 'getVersionDir').returns('/cache/Cypress/1.2.3')
       sinon.stub(state, 'getBinaryDir').returns('/cache/Cypress/1.2.3/Cypress.app')
-      sinon.stub(state, 'getBinaryPkgVersionAsync').resolves()
+      sinon.stub(state, 'getBinaryPkgAsync').resolves()
       sinon.stub(fs, 'ensureDirAsync').resolves(undefined)
       os.platform.returns('darwin')
     })
@@ -181,14 +181,14 @@ describe('/lib/tasks/install', function () {
 
       describe('when version is already installed', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves(packageVersion)
+          state.getBinaryPkgAsync.resolves({ version: packageVersion })
         })
 
         it('doesn\'t attempt to download', function () {
           return install.start()
           .then(() => {
             expect(download.start).not.to.be.called
-            expect(state.getBinaryPkgVersionAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
+            expect(state.getBinaryPkgAsync).to.be.calledWith('/cache/Cypress/1.2.3/Cypress.app')
           })
         })
 
@@ -217,7 +217,7 @@ describe('/lib/tasks/install', function () {
 
       describe('when getting installed version fails', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves(null)
+          state.getBinaryPkgAsync.resolves(null)
 
           return install.start()
         })
@@ -240,7 +240,7 @@ describe('/lib/tasks/install', function () {
 
       describe('when there is no install version', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves(null)
+          state.getBinaryPkgAsync.resolves(null)
 
           return install.start()
         })
@@ -268,7 +268,7 @@ describe('/lib/tasks/install', function () {
 
       describe('when getting installed version does not match needed version', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves('x.x.x')
+          state.getBinaryPkgAsync.resolves({ version: 'x.x.x' })
 
           return install.start()
         })
@@ -291,7 +291,7 @@ describe('/lib/tasks/install', function () {
 
       describe('with force: true', function () {
         beforeEach(function () {
-          state.getBinaryPkgVersionAsync.resolves(packageVersion)
+          state.getBinaryPkgAsync.resolves({ version: packageVersion })
 
           return install.start({ force: true })
         })
@@ -316,7 +316,7 @@ describe('/lib/tasks/install', function () {
         beforeEach(function () {
           sinon.stub(util, 'isInstalledGlobally').returns(true)
 
-          state.getBinaryPkgVersionAsync.resolves('x.x.x')
+          state.getBinaryPkgAsync.resolves({ version: 'x.x.x' })
 
           return install.start()
         })
@@ -341,7 +341,7 @@ describe('/lib/tasks/install', function () {
         beforeEach(function () {
           util.isCi.returns(true)
 
-          state.getBinaryPkgVersionAsync.resolves('x.x.x')
+          state.getBinaryPkgAsync.resolves({ version: 'x.x.x' })
 
           return install.start()
         })
@@ -381,7 +381,7 @@ describe('/lib/tasks/install', function () {
 
       describe('CYPRESS_INSTALL_BINARY is URL or Zip', function () {
         it('uses cache when correct version installed given URL', function () {
-          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          state.getBinaryPkgAsync.resolves({ version: '1.2.3' })
           util.pkgVersion.returns('1.2.3')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
 
@@ -392,7 +392,7 @@ describe('/lib/tasks/install', function () {
         })
 
         it('uses cache when mismatch version given URL ', function () {
-          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          state.getBinaryPkgAsync.resolves({ version: '1.2.3' })
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = 'www.cypress.io/cannot-download/2.4.5'
 
@@ -405,7 +405,7 @@ describe('/lib/tasks/install', function () {
         it('uses cache when correct version installed given Zip', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
-          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          state.getBinaryPkgAsync.resolves({ version: '1.2.3' })
           util.pkgVersion.returns('1.2.3')
 
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
@@ -419,32 +419,13 @@ describe('/lib/tasks/install', function () {
         it('uses cache when mismatch version given Zip ', function () {
           sinon.stub(fs, 'pathExistsAsync').withArgs('/path/to/zip.zip').resolves(true)
 
-          state.getBinaryPkgVersionAsync.resolves('1.2.3')
+          state.getBinaryPkgAsync.resolves({ version: '1.2.3' })
           util.pkgVersion.returns('4.0.0')
           process.env.CYPRESS_INSTALL_BINARY = '/path/to/zip.zip'
 
           return install.start()
           .then(() => {
             expect(unzip.start).to.not.be.called
-          })
-        })
-      })
-
-      describe('CYPRESS_BINARY_VERSION', function () {
-        it('throws when env var CYPRESS_BINARY_VERSION', function () {
-          process.env.CYPRESS_BINARY_VERSION = '/asf/asf'
-
-          return install.start()
-          .then(() => {
-            throw new Error('should have thrown')
-          })
-          .catch((err) => {
-            logger.error(err)
-
-            snapshot(
-              'error for removed CYPRESS_BINARY_VERSION 1',
-              normalize(this.stdout.toString()),
-            )
           })
         })
       })

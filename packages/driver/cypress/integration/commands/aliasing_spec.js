@@ -497,19 +497,6 @@ describe('src/cy/commands/aliasing', () => {
         .get('input:first').as('firstInput')
         .get('@lastDiv')
       })
-
-      it('throws when alias is missing \'@\' but matches an available alias', (done) => {
-        cy.on('fail', (err) => {
-          expect(err.message).to.eq('Invalid alias: `getAny`.\nYou forgot the `@`. It should be written as: `@getAny`.')
-
-          done()
-        })
-
-        cy
-        .server()
-        .route('*', {}).as('getAny')
-        .wait('getAny').then(() => {})
-      })
     })
   })
 })

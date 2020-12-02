@@ -1,7 +1,7 @@
 const _ = require('lodash')
 const { stripIndent } = require('common-tags')
 const capitalize = require('underscore.string/capitalize')
-// const { normalizedStack } = require('./stack_utils')
+const { normalizedStack } = require('./stack_utils')
 
 const divider = (num, char) => {
   return Array(num).join(char)
@@ -104,10 +104,6 @@ const cyStripIndent = (str, indentSize) => {
 module.exports = {
   add: {
     type_missing: '`Cypress.add(key, fn, type)` must include a type!',
-  },
-
-  agents: {
-    deprecated_warning: `${cmd('agents')} is deprecated. Use ${cmd('stub')} and ${cmd('spy')} instead.`,
   },
 
   alias: {
@@ -288,19 +284,6 @@ module.exports = {
         message: `${cmd('{{cmd}}')} timed out waiting \`{{timeout}}ms\` to complete.`,
         docsUrl: `https://on.cypress.io/${_.toLower(obj.cmd)}`,
       }
-    },
-    removed_method: {
-      message: stripIndent`\
-        The \`Cypress.Cookies.{{method}}()\` method has been removed.
-
-        Setting, getting, and clearing cookies is now an asynchronous operation.
-
-        Replace this call with the appropriate command such as:
-          - \`cy.getCookie()\`
-          - \`cy.getCookies()\`
-          - \`cy.setCookie()\`
-          - \`cy.clearCookie()\`
-          - \`cy.clearCookies()\``,
     },
     whitelist_renamed (obj) {
       return {
@@ -694,23 +677,6 @@ module.exports = {
   },
 
   miscellaneous: {
-    custom_command_interface_changed (obj) {
-      return {
-        message: stripIndent`\
-          Cypress.${obj.method}(...) has been removed and replaced by:
-
-          \`Cypress.Commands.add(...)\`
-
-          Instead of indicating \`parent\`, \`child\`, or \`dual\` commands, you pass an \`options\` object
-          to describe the requirements around the previous subject. You can also enforce specific
-          subject types such as requiring the subject to be a DOM element.
-
-          To rewrite this custom command you'd likely write:
-
-          \`Cypress.Commands.add(${obj.signature})\``,
-        docsUrl: 'https://on.cypress.io/custom-command-interface-changed',
-      }
-    },
     returned_value_and_commands_from_custom_command (obj) {
       return {
         message: stripIndent`\
@@ -789,10 +755,6 @@ module.exports = {
         docsUrl: 'https://on.cypress.io/returning-promise-and-commands-in-test',
       }
     },
-    command_log_renamed: stripIndent`\
-      \`Cypress.Log.command()\` has been renamed to \`Cypress.log()\`
-
-      Please update your code. You should be able to safely do a find/replace.`,
     dangling_commands: {
       message: stripIndent`\
         Oops, Cypress detected something wrong with your test code.
@@ -858,12 +820,6 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/cannot-execute-commands-outside-test',
     },
     private_custom_command_interface: 'You cannot use the undocumented private command interface: `{{method}}`',
-    private_property: stripIndent`\
-      You are accessing a private property directly on \`cy\` which has been renamed.
-
-      This was never documented nor supported.
-
-      Please go through the public function: ${cmd('state', '...')}`,
     retry_timed_out: 'Timed out retrying: ',
   },
 
@@ -953,28 +909,23 @@ module.exports = {
   },
 
   net_stubbing: {
+    route2_renamed: `${cmd('route2')} was renamed to ${cmd('intercept')} and will be removed in a future release. Please update usages of ${cmd('route2')} to use ${cmd('intercept')} instead.`,
     invalid_static_response: ({ cmd, message, staticResponse }) => {
       return cyStripIndent(`\
         An invalid StaticResponse was supplied to \`${cmd}()\`. ${message}
 
         You passed: ${format(staticResponse)}`, 8)
     },
-    route2: {
-      needs_experimental: stripIndent`\
-        ${cmd('route2')} requires experimental network mocking to be enabled.
-
-        Set the \`experimentalNetworkStubbing\` config value to \`true\` to access this command.
-
-        Read more: https://on.cypress.io/experiments`,
+    intercept: {
       invalid_handler: ({ handler }) => {
         return stripIndent`\
-          ${cmd('route2')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
+          ${cmd('intercept')}'s \`handler\` argument must be a String, StaticResponse, or HttpController function.
 
           You passed: ${format(handler)}`
       },
       invalid_route_matcher: ({ message, matcher }) => {
         return stripIndent`\
-          An invalid RouteMatcher was supplied to ${cmd('route2')}. ${message}
+          An invalid RouteMatcher was supplied to ${cmd('intercept')}. ${message}
 
           You passed: ${format(matcher)}`
       },
@@ -982,7 +933,7 @@ module.exports = {
     request_handling: {
       cb_failed: ({ err, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} threw an error while intercepting a request:
+          A request callback passed to ${cmd('intercept')} threw an error while intercepting a request:
 
           ${err.message}
 
@@ -992,7 +943,7 @@ module.exports = {
       },
       cb_timeout: ({ timeout, req, route }) => {
         return cyStripIndent(`\
-          A request callback passed to ${cmd('route2')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
+          A request callback passed to ${cmd('intercept')} timed out after returning a Promise that took more than the \`defaultCommandTimeout\` of \`${timeout}ms\` to resolve.
 
           If the request callback is expected to take longer than \`${timeout}ms\`, increase the configured \`defaultCommandTimeout\` value.
 
@@ -1008,6 +959,8 @@ module.exports = {
         return cyStripIndent(`\
           \`req.reply()\` was provided a callback to intercept the upstream response, but a network error occurred while making the request:
 
+          ${normalizedStack(innerErr)}
+
           Route: ${format(route)}
 
           Intercepted request: ${format(req)}`, 10)
@@ -1015,6 +968,8 @@ module.exports = {
       timeout: ({ innerErr, req, route }) => {
         return cyStripIndent(`\
           \`req.reply()\` was provided a callback to intercept the upstream response, but the request timed out after the \`responseTimeout\` of \`${req.responseTimeout}ms\`.
+
+          ${normalizedStack(innerErr)}
 
           Route: ${format(route)}
 
@@ -1123,10 +1078,6 @@ module.exports = {
     },
     invalid_method: {
       message: `${cmd('request')} was called with an invalid method: \`{{method}}\`. Method can be: \`GET\`, \`POST\`, \`PUT\`, \`DELETE\`, \`PATCH\`, \`HEAD\`, \`OPTIONS\`, or any other method supported by Node's HTTP parser.`,
-      docsUrl: 'https://on.cypress.io/request',
-    },
-    failonstatus_deprecated_warning: {
-      message: `The ${cmd('request')} \`failOnStatus\` option has been renamed to \`failOnStatusCode\`. Please update your code. This option will be removed at a later time.`,
       docsUrl: 'https://on.cypress.io/request',
     },
     form_invalid: {
@@ -1243,6 +1194,10 @@ module.exports = {
   },
 
   route: {
+    deprecated: {
+      message: `${cmd('route')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
+    },
     failed_prerequisites: {
       message: `${cmd('route')} cannot be invoked before starting the ${cmd('server')}`,
       docsUrl: 'https://on.cypress.io/server',
@@ -1434,14 +1389,13 @@ module.exports = {
   },
 
   server: {
-    force404_deprecated: 'Passing `cy.server({force404: false})` is now the default behavior of `cy.server()`. You can safely remove this option.',
+    deprecated: {
+      message: `${cmd('server')} has been deprecated and will be moved to a plugin in a future release. Consider migrating to using ${cmd('intercept')} instead.`,
+      docsUrl: 'https://on.cypress.io/intercept',
+    },
     invalid_argument: {
       message: `${cmd('server')} accepts only an object literal as its argument.`,
       docsUrl: 'https://on.cypress.io/server',
-    },
-    stub_deprecated: {
-      message: 'Passing `cy.server({stub: false})` is now deprecated. You can safely remove: `{stub: false}`.',
-      docsUrl: 'https://on.cypress.io/deprecated-stub-false-on-{{type}}',
     },
     xhrurl_not_set: '`Server.options.xhrUrl` has not been set',
     unavailable: 'The XHR server is unavailable or missing. This should never happen and likely is a bug. Open an issue if you see this message.',
@@ -1499,7 +1453,6 @@ module.exports = {
       message: 'The chainer `{{originalChainers}}` is a language chainer provided to improve the readability of your assertions, not an actual assertion. Please provide a valid assertion.',
       docsUrl: 'https://on.cypress.io/assertions',
     },
-    eventually_deprecated: 'The `eventually` assertion chainer has been deprecated. This is now the default behavior so you can safely remove this word and everything should work as before.',
   },
 
   spread: {
@@ -1683,6 +1636,10 @@ module.exports = {
     },
     multiple_elements: {
       message: `${cmd('type')} can only be called on a single element. Your subject contained {{num}} elements.`,
+      docsUrl: 'https://on.cypress.io/type',
+    },
+    not_a_modifier: {
+      message: `\`{{key}}\` is not a modifier.`,
       docsUrl: 'https://on.cypress.io/type',
     },
     not_actionable_textlike: {
@@ -1951,10 +1908,6 @@ module.exports = {
       message: '`{{prop}}` is not a valid alias property. Are you trying to ask for the first request? If so write `@{{str}}.request`',
       docsUrl: 'https://on.cypress.io/wait',
     },
-    fn_deprecated: {
-      message: `${cmd('wait', 'fn')} has been deprecated. Change this command to be ${cmd('should', 'fn')}.`,
-      docsUrl: 'https://on.cypress.io/wait',
-    },
     invalid_1st_arg: {
       message: `${cmd('wait')} only accepts a number, an alias of a route, or an array of aliases of routes. You passed: \`{{arg}}\``,
       docsUrl: 'https://on.cypress.io/wait',
@@ -2002,7 +1955,5 @@ module.exports = {
     aborted: 'This XHR was aborted by your code -- check this stack trace below.',
     missing: '`XMLHttpRequest#xhr` is missing.',
     network_error: 'The network request for this XHR could not be made. Check your console for the reason.',
-    requestjson_deprecated: '`requestJSON` is now deprecated and will be removed in the next version. Update this to `requestBody` or `request.body`.',
-    responsejson_deprecated: '`responseJSON` is now deprecated and will be removed in the next version. Update this to `responseBody` or `response.body`.',
   },
 }

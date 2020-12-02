@@ -44,7 +44,7 @@ describe('Project Nav', function () {
     })
 
     it('displays projects nav', function () {
-      cy.get('.empty').should('not.be.visible')
+      cy.get('.empty').should('not.exist')
 
       cy.get('.navbar-default')
     })
@@ -152,6 +152,8 @@ describe('Project Nav', function () {
 
           cy.get('.cy-tooltip')
           .should('contain', browserWithInfo.info)
+
+          cy.percySnapshot()
         })
 
         it('does not display stop button', () => {
@@ -215,11 +217,15 @@ describe('Project Nav', function () {
         it('displays browser icon as spinner', () => {
           cy.get('.browsers-list .dropdown-chosen').find('i')
           .should('have.class', 'fas fa-sync-alt fa-spin')
+
+          cy.percySnapshot()
         })
 
         it('disables browser dropdown', () => {
           cy.get('.browsers-list .dropdown-chosen')
           .should('have.class', 'disabled')
+
+          cy.percySnapshot()
         })
       })
 
@@ -288,7 +294,7 @@ describe('Project Nav', function () {
           })
 
           it('hides close browser button', () => {
-            cy.get('.close-browser').should('not.be.visible')
+            cy.get('.close-browser').should('not.exist')
           })
 
           it('re-enables browser dropdown', () => {
@@ -374,7 +380,9 @@ describe('Project Nav', function () {
 
       it('displays no dropdown btn', () => {
         cy.get('.browsers-list')
-        .find('.dropdown-toggle').should('not.be.visible')
+        .find('.dropdown-toggle').should('not.exist')
+
+        cy.percySnapshot()
       })
     })
 
@@ -402,6 +410,8 @@ describe('Project Nav', function () {
         cy.get('.cy-tooltip a').click().then(function () {
           expect(this.ipc.externalOpen).to.be.calledWith('https://on.cypress.io/bad-browser-policy')
         })
+
+        cy.percySnapshot()
       })
     })
 
@@ -466,6 +476,7 @@ describe('Project Nav', function () {
     it('main nav does not block project nav when long project name pushes it to multiple lines', () => {
       cy.viewport(400, 400)
       cy.get('.project-nav').should('be.visible')
+      cy.percySnapshot()
     })
   })
 })

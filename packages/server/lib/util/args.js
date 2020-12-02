@@ -189,7 +189,11 @@ module.exports = {
     // to an object
     let options = minimist(argv, {
       alias,
+      // never cast the following CLI arguments
+      string: ['ci-build-id'],
     })
+
+    debug('parsed argv options %o', { options })
 
     const allowed = _.pick(argv, allowList)
 

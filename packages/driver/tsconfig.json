@@ -13,7 +13,7 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    /* "noEmit": false, */
+    "noEmit": true,
     "noImplicitReturns": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "dist",

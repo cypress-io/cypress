@@ -8,7 +8,7 @@ export { InterceptResponse } from './intercept-response'
 
 export { NetStubbingState } from './types'
 
-export { isHostInterceptable } from './is-host-interceptable'
+export { getRouteForRequest } from './route-matching'
 
 import { state } from './state'
 

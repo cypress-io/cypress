@@ -108,6 +108,8 @@ describe('Warning Message', function () {
     .then(function () {
       expect(this.ipc.externalOpen).to.be.calledWith('http://example.com/')
     })
+
+    cy.percySnapshot()
   })
 
   it('does not try to open non-links', function () {
@@ -154,6 +156,7 @@ describe('Warning Message', function () {
 
     it('shows retry button', function () {
       cy.contains('Try Again')
+      cy.percySnapshot()
     })
 
     it('pings baseUrl and disables retry button when clicked', function () {
@@ -180,7 +183,7 @@ describe('Warning Message', function () {
         this.pingBaseUrl.resolve()
       })
 
-      cy.get('.alert-warning').should('not.be.visible')
+      cy.get('.alert-warning').should('not.exist')
     })
 
     it('shows real error if one results from pinging baseUrl', function () {
@@ -215,6 +218,8 @@ describe('Warning Message', function () {
 
       cy.get('.alert-warning').its('1')
       .should('contain', 'Other message')
+
+      cy.percySnapshot()
     })
 
     it('can dismiss the warnings', function () {
@@ -234,8 +239,7 @@ describe('Warning Message', function () {
 
       cy.get('.alert-warning .close').click()
       cy.get('.alert-warning')
-      .should('not.contain', 'Some warning')
-      .should('not.contain', 'Other message')
+      .should('not.exist')
     })
   })
 })

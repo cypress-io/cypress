@@ -1,6 +1,8 @@
 # Deployment
 
-These deployment procedures mainly concern the Cypress binary and `cypress` npm module. Independent `@cypress/` packages that live inside the [`npm`](./npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into master.
+These deployment procedures mainly concern the Cypress binary and `cypress` npm module.
+
+Independent `@cypress/` packages that live inside the [`npm`](./npm) directory are automatically published to npm (with [`semantic-release`](https://semantic-release.gitbook.io/semantic-release/)) upon being merged into master. You can read more about this in [CONTRIBUTING.md](./CONTRIBUTING.md#committing-code)
 
 Anyone can build the binary and npm package, but you can only deploy the Cypress application and publish the npm module `cypress` if you are a member of the `cypress` npm organization.
 

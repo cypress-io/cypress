@@ -52,7 +52,6 @@ const create = (state = () => {},
   keyboard = fakeKeyboard,
   focused = fakeFocused,
   Cypress = fakeCypress) => {
-
   const isFirefox = Cypress.browser.family === 'firefox'
 
   const sendPointerEvent = (el, evtOptions, evtName, bubbles = false, cancelable = false) => {

@@ -1,19 +1,18 @@
-const _ = require('lodash')
-const la = require('lazy-ass')
-const send = require('send')
 const path = require('path')
+const la = require('lazy-ass')
 const check = require('check-more-types')
+const _ = require('lodash')
 const debug = require('debug')('cypress:server:routes')
-
-const reporter = require('@packages/reporter')
-const runner = require('@packages/runner')
-const staticPkg = require('@packages/static')
 
 const AppData = require('./util/app_data')
 const CacheBuster = require('./util/cache_buster')
 const spec = require('./controllers/spec')
+const reporter = require('./controllers/reporter')
+const runner = require('./controllers/runner')
 const xhrs = require('./controllers/xhrs')
+const client = require('./controllers/client')
 const files = require('./controllers/files')
+const staticCtrl = require('./controllers/static')
 
 module.exports = ({ app, config, getRemoteState, networkProxy, project, onError }) => {
   // routing for the actual specs which are processed automatically
@@ -25,11 +24,21 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
     spec.handle(test, req, res, config, next, onError)
   })
 
-  app.get('/__cypress/reporter/*', reporter.middleware(send))
+  app.get('/__cypress/socket.io.js', (req, res) => {
+    client.handle(req, res)
+  })
 
-  app.get('/__cypress/runner/*', runner.middleware(send))
+  app.get('/__cypress/reporter/*', (req, res) => {
+    reporter.handle(req, res)
+  })
 
-  app.get('/__cypress/static/*', staticPkg.middleware(send))
+  app.get('/__cypress/runner/*', (req, res) => {
+    runner.handle(req, res)
+  })
+
+  app.get('/__cypress/static/*', (req, res) => {
+    staticCtrl.handle(req, res)
+  })
 
   // routing for /files JSON endpoint
   app.get('/__cypress/files', (req, res) => {
@@ -40,6 +49,7 @@ module.exports = ({ app, config, getRemoteState, networkProxy, project, onError 
   app.get('/__cypress/iframes/*', (req, res) => {
     const extraOptions = {
       specFilter: _.get(project, 'spec.specFilter'),
+      specType: _.get(project, 'spec.specType', 'integration'),
     }
 
     debug('project %o', project)

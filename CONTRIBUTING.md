@@ -34,7 +34,6 @@ Thanks for taking the time to contribute! :smile:
 - [Committing Code](#committing-code)
   - [Branches](#branches)
   - [Pull Requests](#pull-requests)
-  - [Testing](#testing)
   - [Dependencies](#dependencies)
 - [Reviewing Code](#reviewing-code)
   - [Some rules about Code Review](#Some-rules-about-Code-Review)
@@ -294,6 +293,9 @@ Here is a list of the npm packages in this repository:
 
  | Folder Name                                            | Package Name                       | Purpose                                                                      |
  | :----------------------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------- |
+ | [eslint-plugin-dev](./npm/eslint-plugin-dev)           | `@cypress/eslint-plugin-dev`       | Eslint plugin for internal development.                                      |
+ | [react](./npm/react)                                   | `@cypress/react`                   | Cypress component testing for React.                                         |
+ | [vue](./npm/vue)                                       | `@cypress/vue`                     | Cypress component testing for Vue.                                           |
  | [webpack-preprocessor](./npm/webpack-preprocessor)     | `@cypress/webpack-preprocessor`    | Cypress preprocessor for bundling JavaScript via webpack.                    |
 
 We try to tag all issues with a `pkg/` or `npm/` tag describing the appropriate package the work is required in. For public packages, we use their qualified package name: For example, issues relating to the  webpack preprocessor are tagged under [`npm: @cypress/webpack-preprocessor`](https://github.com/cypress-io/cypress/labels/npm%3A%20%40cypress%2Fwebpack-preprocessor) label and issues related to the `driver` package are tagged with the [`pkg/driver`](https://github.com/cypress-io/cypress/labels/pkg%2Fdriver) label.
@@ -355,6 +357,8 @@ $ yarn add -W my-new-dep1
 $ yarn workspace @packages/server add my-new-dep1
 $ yarn workspace @packages/server add --dev my-new-dep1
 ```
+
+Alternatively, you can directly add the dependency to the corresponding `package.json`.
 
 #### Tasks
 
@@ -439,7 +443,7 @@ DEBUG=cypress:launcher
 ### Coding Style
 
 We use [eslint](https://eslint.org/) to lint all JavaScript code and follow rules specified in
-[@cypress/eslint-plugin-dev](https://github.com/cypress-io/eslint-plugin-cypress) plugin.
+[@cypress/eslint-plugin-dev](./npm/eslint-plugin-cypress) plugin.
 
 When you edit files, you can quickly fix all changed files before you commit using
 
@@ -464,13 +468,17 @@ This is to ensure that links do not go dead in older versions of Cypress when th
 
 ### Tests
 
-For most packages there are typically unit and some integration tests.
+For most packages there are typically unit and integration tests.
 
 Our true e2e tests are in [`packages/server`](packages/server), which test the full stack all together.
+
+Additionally, we test the code by running it against various other example projects in CI. See CI badges and links at the top of this document.
 
 Please refer to each packages' `README.md` which documents how to run tests. It is not feasible to try to run all of the tests together. We run our entire test fleet across over a dozen containers in CI.
 
 If you're curious how we manage all of these tests in CI check out our [`circle.yml`](circle.yml) file found in the root `cypress` directory.
+
+Each of the independent packages (in the [`/npm`](./npm) folder) have a `ciJobs` field in their `package.json`. This field corresponds to the CI jobs for that package and is used when determining what tests must pass before the package can be released.
 
 #### Docker
 
@@ -559,6 +567,52 @@ All updates to `master` are automatically merged into `develop`, so `develop` al
 <img src="./assets/branching-diagram.png" />
 <img src="./assets/sample-workflow.png" />
 
+### Independent Packages CI Workflow
+
+Independent packages are automatically released when code is merged into `master`. In order to make these automatic releases work smoothly, independent packages have a couple of special configuration options in their `package.json`.
+
+##### `ciJobs`
+
+List of Circle CI jobs that directly test the current package. These tests must pass before the package can be released.
+
+In addition, these tests will run when a PR is created that changes this package. All tests will run on `develop` and `master`, regardless of what packages were changed.
+
+Note: CI jobs should be unique to a package. Any jobs that are not listed within a `ciJobs` field are considered to be part of the binary and will only run when the binary is changed.
+
+This option takes an array of CI job names.
+
+Example
+```json
+{
+  "ciJobs": [
+    "npm-react",
+    "npm-react-axe",
+    "npm-react-next"
+  ]
+}
+```
+
+##### `ciDependents`
+
+List of local independent (npm) packages that are dependent on the current package. The tests specified in these packages' `ciJobs` must pass before the current package will be released.
+
+When the current package is changed in a PR, it will consider these packages to be changed as well and run CI accordingly.
+
+This option takes an array of package names.
+
+Example
+```json
+{
+  "ciDependents": [
+    "@cypress/react",
+    "@cypress/vue",
+    "@cypress/webpack-preprocessor"
+  ]
+}
+```
+
+You can read more about our CI design decisions in [#8730](https://github.com/cypress-io/cypress/pull/8730#issue-496593325)
+
 ### Pull Requests
 
 - When opening a PR for a specific issue already open, please name the branch you are working on using the convention `issue-[issue number]`. For example, if your PR fixes Issue #803, name your branch `issue-803`. If the PR is a larger issue, you can add more context like `issue-803-new-scrollable-area` If there is not an associated open issue, **create an issue using our [Issue Template](./.github/ISSUE_TEMPLATE.md)**.
@@ -567,12 +621,6 @@ All updates to `master` are automatically merged into `develop`, so `develop` al
 - Fill out the [Pull Request Template](./.github/PULL_REQUEST_TEMPLATE.md) completely within the body of the PR. If you feel some areas are not relevant add `N/A` as opposed to deleting those sections. PR's will not be reviewed if this template is not filled in.
 - Please check the "Allow edits from maintainers" checkbox when submitting your PR. This will make it easier for the maintainers to make minor adjustments, to help with tests or any other changes we may need.
 ![Allow edits from maintainers checkbox](https://user-images.githubusercontent.com/1271181/31393427-b3105d44-ada9-11e7-80f2-0dac51e3919e.png)
-
-### Testing
-
-This repository is exhaustively tested by [CircleCI](https://circleci.com/gh/cypress-io/cypress). Additionally we test the code by running it against various other example projects. See CI badges and links at the top of this document.
-
-To run local tests, consult the `README.md` of each package.
 
 ### Dependencies
 
@@ -651,7 +699,9 @@ Below are some guidelines Cypress uses when reviewing dependency updates.
 
 ## Deployment
 
-We will try to review and merge pull requests quickly. After merging we will try releasing a new version. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md)
+We will try to review and merge pull requests quickly. If you want to know our build process or build your own Cypress binary, read [DEPLOY.md](./DEPLOY.md).
+
+Independent packages are deployed immediately upon being merged into master. You can read more [above](#independent-packages-ci-workflow).
 
 ## Known problems
 

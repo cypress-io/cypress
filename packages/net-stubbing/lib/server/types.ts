@@ -9,7 +9,7 @@ import {
   BackendStaticResponse,
 } from '../types'
 
-export type GetFixtureFn = (path: string, opts?: { encoding?: string }) => Promise<any>
+export type GetFixtureFn = (path: string, opts?: { encoding?: string | null }) => Promise<any>
 
 export interface BackendRoute {
   routeMatcher: RouteMatcherOptions

@@ -1,9 +1,8 @@
-const _ = require('lodash')
 const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 const httpProxy = require('http-proxy')
 
-const files = require('@packages/server/lib/controllers/files')
+// const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
 const staticPkg = require('@packages/static')
 
@@ -12,7 +11,9 @@ module.exports = ({ app, config, project, onError }) => {
 
   app.get('/__cypress/runner/*', runnerCt.middleware(send))
 
-  app.get('/__cypress/static/*', staticPkg.middleware(send))
+  app.get('/__cypress/static/*', (req, res) => {
+    staticPkg.handle(req, res)
+  })
 
   app.get('/__cypress/iframes/*', (req, res) => {
     req.url = '/'

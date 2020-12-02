@@ -91,6 +91,7 @@ const _maybeRecordVideo = function (webContents, options) {
     webContents.debugger.on('message', (event, method, params) => {
       if (method === 'Page.screencastFrame') {
         onScreencastFrame(params)
+        webContents.debugger.sendCommand('Page.screencastFrameAck', { sessionId: params.sessionId })
       }
     })
 
@@ -120,6 +121,9 @@ module.exports = {
         x: 'browserX',
         y: 'browserY',
         devTools: 'isBrowserDevToolsOpen',
+      },
+      webPreferences: {
+        sandbox: true,
       },
       onFocus () {
         if (options.show) {

@@ -1251,6 +1251,7 @@ module.exports = {
       beforeSpecRun,
     })
     .then((runs = []) => {
+      results.status = 'finished'
       results.startedTestsAt = getRun(_.first(runs), 'stats.wallClockStartedAt')
       results.endedTestsAt = getRun(_.last(runs), 'stats.wallClockEndedAt')
       results.totalDuration = sumByProp(runs, 'stats.wallClockDuration')
@@ -1402,9 +1403,6 @@ module.exports = {
 
     // alias and coerce to null
     let specPattern = options.spec || null
-
-    // warn if we're using deprecated --ci flag
-    recordMode.warnIfCiFlag(options.ci)
 
     // ensure the project exists
     // and open up the project

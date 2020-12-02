@@ -421,7 +421,7 @@ declare namespace Cypress {
       /**
        * Returns a boolean indicating whether an element is hidden.
        */
-      isHidden(element: JQuery | HTMLElement): boolean
+      isHidden(element: JQuery | HTMLElement, methodName?: string, options?: object): boolean
       /**
        * Returns a boolean indicating whether an element can receive focus.
        */
@@ -474,7 +474,7 @@ declare namespace Cypress {
       getContainsSelector(text: string, filter?: string): JQuery.Selector
       getFirstDeepestElement(elements: HTMLElement[], index?: number): HTMLElement
       getWindowByElement(element: JQuery | HTMLElement): JQuery | HTMLElement
-      getReasonIsHidden(element: JQuery | HTMLElement): string
+      getReasonIsHidden(element: JQuery | HTMLElement, options?: object): string
       getFirstScrollableParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstFixedOrStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
       getFirstStickyPositionParent(element: JQuery | HTMLElement): JQuery | HTMLElement
@@ -1107,7 +1107,7 @@ declare namespace Cypress {
       ...args: any[]
     ): Chainable<R>
     invoke<K extends keyof Subject, F extends ((...args: any[]) => any) & Subject[K], R = ReturnType<F>>(
-      options: Loggable,
+      options: Partial<Loggable & Timeoutable>,
       functionName: K,
       ...args: any[]
     ): Chainable<R>
@@ -1117,7 +1117,7 @@ declare namespace Cypress {
      * @see https://on.cypress.io/invoke
      */
     invoke<T extends (...args: any[]) => any, Subject extends T[]>(index: number): Chainable<ReturnType<T>>
-    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Loggable, index: number): Chainable<ReturnType<T>>
+    invoke<T extends (...args: any[]) => any, Subject extends T[]>(options: Partial<Loggable & Timeoutable>, index: number): Chainable<ReturnType<T>>
 
     /**
    * Invoke a function on the previously yielded subject by a property path.
@@ -1138,8 +1138,8 @@ declare namespace Cypress {
      *    // Drill into nested properties by using dot notation
      *    cy.wrap({foo: {bar: {baz: 1}}}).its('foo.bar.baz')
      */
-    its<K extends keyof Subject>(propertyName: K, options?: Loggable): Chainable<Subject[K]>
-    its(propertyPath: string, options?: Loggable): Chainable
+    its<K extends keyof Subject>(propertyName: K, options?: Partial<Loggable & Timeoutable>): Chainable<Subject[K]>
+    its(propertyPath: string, options?: Partial<Loggable & Timeoutable>): Chainable
 
     /**
      * Get a value by index from an array yielded from the previous command.
@@ -1147,7 +1147,7 @@ declare namespace Cypress {
      * @example
      *    cy.wrap(['a', 'b']).its(1).should('equal', 'b')
      */
-    its<T, Subject extends T[]>(index: number, options?: Loggable): Chainable<T>
+    its<T, Subject extends T[]>(index: number, options?: Partial<Loggable & Timeoutable>): Chainable<T>
 
     /**
      * Get the last DOM element within a set of DOM elements.
@@ -1477,8 +1477,9 @@ declare namespace Cypress {
     root<E extends Node = HTMLHtmlElement>(options?: Partial<Loggable>): Chainable<JQuery<E>> // can't do better typing unless we ignore the `.within()` case
 
     /**
-     * Use `cy.route()` to manage the behavior of network requests.
+     * @deprecated Use `cy.intercept()` instead.
      *
+     * Use `cy.route()` to manage the behavior of network requests.
      * @see https://on.cypress.io/route
      * @example
      *    cy.server()
@@ -1486,6 +1487,8 @@ declare namespace Cypress {
      */
     route(url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Spy or stub request with specific method and url.
      *
      * @see https://on.cypress.io/route
@@ -1496,6 +1499,8 @@ declare namespace Cypress {
      */
     route(method: string, url: string | RegExp, response?: string | object): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Set a route by returning an object literal from a callback function.
      * Functions that return a Promise will automatically be awaited.
      *
@@ -1514,6 +1519,8 @@ declare namespace Cypress {
      */
     route(fn: () => RouteOptions): Chainable<null>
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Spy or stub a given route.
      *
      * @see https://on.cypress.io/route
@@ -1581,6 +1588,8 @@ declare namespace Cypress {
     select(value: string | string[], options?: Partial<SelectOptions>): Chainable<Subject>
 
     /**
+     * @deprecated Use `cy.intercept()` instead.
+     *
      * Start a server to begin routing responses to `cy.route()` and `cy.request()`.
      *
      * @example
@@ -1766,7 +1775,7 @@ declare namespace Cypress {
      *
      * @see https://on.cypress.io/task
      */
-    task(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
+    task<S = unknown>(event: string, arg?: any, options?: Partial<Loggable & Timeoutable>): Chainable<S>
 
     /**
      * Enables you to work with the subject yielded from the previous command.
@@ -2013,50 +2022,6 @@ declare namespace Cypress {
      *    cy.wait(1000) // wait for 1 second
      */
     wait(ms: number, options?: Partial<Loggable & Timeoutable>): Chainable<Subject>
-    /**
-     * Wait for a specific XHR to respond.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string} alias - Name of the alias to wait for.
-     *
-    ```
-    // Wait for the route aliased as 'getAccount' to respond
-    // without changing or stubbing its response
-    cy.server()
-    cy.route('/accounts/*').as('getAccount')
-    cy.visit('/accounts/123')
-    cy.wait('@getAccount').then((xhr) => {
-      // we can now access the low level xhr
-      // that contains the request body,
-      // response body, status, etc
-    })
-    ```
-     */
-    wait(alias: string, options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR>
-    /**
-     * Wait for list of XHR requests to complete.
-     *
-     * @see https://on.cypress.io/wait
-     * @param {string[]} aliases - An array of aliased routes as defined using the `.as()` command.
-     *
-    ```
-    // wait for 3 XHR requests to complete
-    cy.server()
-    cy.route('users/*').as('getUsers')
-    cy.route('activities/*').as('getActivities')
-    cy.route('comments/*').as('getComments')
-    cy.visit('/dashboard')
-
-    cy.wait(['@getUsers', '@getActivities', '@getComments'])
-      .then((xhrs) => {
-        // xhrs will now be an array of matching XHR's
-        // xhrs[0] <-- getUsers
-        // xhrs[1] <-- getActivities
-        // xhrs[2] <-- getComments
-      })
-    ```
-     */
-    wait(alias: string[], options?: Partial<Loggable & Timeoutable & TimeoutableXHR>): Chainable<WaitXHR[]>
 
     /**
      * Get the window object of the page that is currently active.
@@ -2322,20 +2287,46 @@ declare namespace Cypress {
     force: boolean
   }
 
+  type scrollBehaviorOptions = false | 'center' | 'top' | 'bottom' | 'nearest'
+
+  /**
+   * Options to affect Actionability checks
+   * @see https://docs.cypress.io/guides/core-concepts/interacting-with-elements.html#Actionability
+   */
+  interface ActionableOptions extends Forceable {
+    /**
+     * Whether to wait for elements to finish animating before executing commands
+     *
+     * @default true
+     */
+    waitForAnimations: boolean
+    /**
+     * The distance in pixels an element must exceed over time to be considered animating
+     * @default 5
+     */
+    animationDistanceThreshold: number
+    /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     *
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+  }
+
   interface BlurOptions extends Loggable, Forceable { }
 
-  interface CheckOptions extends Loggable, Timeoutable, Forceable {
+  interface CheckOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
-  interface ClearOptions extends Loggable, Timeoutable, Forceable {
+  interface ClearOptions extends Loggable, Timeoutable, ActionableOptions {
     interval: number
   }
 
   /**
    * Object to change the default behavior of .click().
    */
-  interface ClickOptions extends Loggable, Timeoutable, Forceable {
+  interface ClickOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Serially click multiple elements
      *
@@ -2564,6 +2555,11 @@ declare namespace Cypress {
      */
     waitForAnimations: boolean
     /**
+     * Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling.
+     * @default 'top'
+     */
+    scrollBehavior: scrollBehaviorOptions
+    /**
      * Firefox version 79 and below only: The number of tests that will run between forced garbage collections.
      * If a number is supplied, it will apply to `run` mode and `open` mode.
      * Set the interval to `null` or 0 to disable forced garbage collections.
@@ -2577,17 +2573,12 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
-     * Enables `cy.route2`, which can be used to dynamically intercept/stub/await any HTTP request or response (XHRs, fetch, beacons, etc.)
-     * @default false
-     */
-    experimentalNetworkStubbing: boolean
-    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`
      * @default null
      */
-    retries: Nullable<number | {runMode: Nullable<number>, openMode: Nullable<number>}>
+    retries: Nullable<number | {runMode?: Nullable<number>, openMode?: Nullable<number>}>
     /**
      * Enables including elements within the shadow DOM when using querying
      * commands (e.g. cy.get(), cy.find()). Can be set globally in cypress.json,
@@ -2794,7 +2785,7 @@ declare namespace Cypress {
    *
    * @see https://on.cypress.io/type
    */
-  interface TypeOptions extends Loggable, Timeoutable {
+  interface TypeOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Delay after each keypress (ms)
      *
@@ -2808,12 +2799,6 @@ declare namespace Cypress {
      * @default true
      */
     parseSpecialCharSequences: boolean
-    /**
-     * Forces the action, disables waiting for actionability
-     *
-     * @default false
-     */
-    force: boolean
     /**
      * Keep a modifier activated between commands
      *
@@ -2906,7 +2891,7 @@ declare namespace Cypress {
   /**
    * Options to change the default behavior of .trigger()
    */
-  interface TriggerOptions extends Loggable, Timeoutable, Forceable {
+  interface TriggerOptions extends Loggable, Timeoutable, ActionableOptions {
     /**
      * Whether the event bubbles
      *
@@ -5237,7 +5222,7 @@ declare namespace Cypress {
     snapshot(name?: string, options?: { at?: number, next: string }): Log
   }
 
-  interface LogConfig {
+  interface LogConfig extends Timeoutable {
     /** The JQuery element for the command. This will highlight the command in the main window when debugging */
     $el: JQuery
     /** Allows the name of the command to be overwritten */
@@ -5255,7 +5240,8 @@ declare namespace Cypress {
     duration: number
     headers: { [key: string]: string }
     isOkStatusCode: boolean
-    redirectedToUrl: string
+    redirects?: string[]
+    redirectedToUrl?: string
     requestHeaders: { [key: string]: string }
     status: number
     statusText: string
@@ -5295,7 +5281,7 @@ declare namespace Cypress {
 
   type Encodings = 'ascii' | 'base64' | 'binary' | 'hex' | 'latin1' | 'utf8' | 'utf-8' | 'ucs2' | 'ucs-2' | 'utf16le' | 'utf-16le'
   type PositionType = 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
-  type ViewportPreset = 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-se2' | 'iphone-8' | 'iphone-7' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
+  type ViewportPreset = 'macbook-16' | 'macbook-15' | 'macbook-13' | 'macbook-11' | 'ipad-2' | 'ipad-mini' | 'iphone-xr' | 'iphone-x' | 'iphone-6+' | 'iphone-se2' | 'iphone-8' | 'iphone-7' | 'iphone-6' | 'iphone-5' | 'iphone-4' | 'iphone-3' | 'samsung-s10' | 'samsung-note9'
   interface Offset {
     top: number
     left: number

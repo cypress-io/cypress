@@ -41,6 +41,7 @@ const cypressModuleApi = {
         .then((output) => {
           if (!output) {
             return {
+              status: 'failed',
               failures: failedTests,
               message: 'Could not find Cypress test run results',
             }

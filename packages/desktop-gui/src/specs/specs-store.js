@@ -8,15 +8,24 @@ import Folder from './folder-model'
 
 const pathSeparatorRe = /[\\\/]/g
 
-export const allSpecsSpec = new Spec({
-  name: 'All Specs',
+export const allIntegrationSpecsSpec = new Spec({
+  name: 'All Integration Specs',
   absolute: '__all',
   relative: '__all',
   displayName: 'Run all specs',
+  specType: 'integration',
+})
+
+export const allComponentSpecsSpec = new Spec({
+  name: 'All Component Specs',
+  absolute: '__all',
+  relative: '__all',
+  displayName: 'Run all component specs',
+  specType: 'component',
 })
 
 const formRelativePath = (spec) => {
-  return spec === allSpecsSpec ? spec.relative : path.join(spec.type, spec.name)
+  return spec.relative
 }
 
 const pathsEqual = (path1, path2) => {
@@ -51,6 +60,7 @@ export class SpecsStore {
   @observable error
   @observable isLoading = false
   @observable filter
+  @observable selectedSpec
 
   @computed get specs () {
     return this._tree(this._files)
@@ -63,7 +73,7 @@ export class SpecsStore {
   @action setSpecs (specsByType) {
     this._files = _.flatten(_.map(specsByType, (specs, type) => {
       return _.map(specs, (spec) => {
-        return _.extend({}, spec, { type })
+        return _.extend({}, spec, { specType: type })
       })
     }))
 
@@ -75,7 +85,23 @@ export class SpecsStore {
   }
 
   @action setChosenSpecByRelativePath (relativePath) {
-    this.chosenSpecPath = relativePath
+    // find an actual spec using relative path
+    if (relativePath === allIntegrationSpecsSpec.relative) {
+      this.chosenSpecPath = relativePath
+    } else if (relativePath === allComponentSpecsSpec.relative) {
+      this.chosenSpecPath = relativePath
+    } else {
+      const foundSpec = this._files.find((file) => {
+        return file.relative.endsWith(relativePath)
+      })
+
+      if (foundSpec) {
+        this.chosenSpecPath = foundSpec.relative
+      } else {
+        // a problem: could not find chosen spec
+        this.chosenSpecPath = null
+      }
+    }
   }
 
   @action setExpandSpecFolder (spec, isExpanded) {
@@ -110,6 +136,10 @@ export class SpecsStore {
     this.filter = null
   }
 
+  @action setSelectedSpec (spec) {
+    this.selectedSpec = spec
+  }
+
   isChosen (spec) {
     return pathsEqual(this.chosenSpecPath, formRelativePath(spec))
   }
@@ -141,7 +171,7 @@ export class SpecsStore {
     files = filterSpecs(this.filter, files)
 
     const tree = _.reduce(files, (root, file) => {
-      const segments = [file.type].concat(file.name.split(pathSeparatorRe))
+      const segments = [file.specType].concat(file.name.split(pathSeparatorRe))
       const segmentsPassed = []
 
       let placeholder = root
@@ -150,7 +180,12 @@ export class SpecsStore {
         segmentsPassed.push(segment)
         const currentPath = path.join(...segmentsPassed)
         const isCurrentAFile = i === segments.length - 1
-        const props = { path: currentPath, displayName: segment }
+
+        const props = {
+          path: currentPath,
+          displayName: segment,
+          specType: file.specType,
+        }
 
         let existing = _.find(placeholder, (file) => {
           return pathsEqual(file.path, currentPath)

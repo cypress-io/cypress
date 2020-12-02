@@ -3,8 +3,6 @@ describe('Footer', () => {
   let start
   let ipc
 
-  console.log('ok')
-
   beforeEach(() => {
     cy.fixture('user').as('user')
 

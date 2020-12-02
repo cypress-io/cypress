@@ -33,11 +33,6 @@ const $TestConfigOverrides = require('../cy/testConfigOverrides')
 
 const { registerFetch } = require('unfetch')
 
-const privateProps = {
-  props: { name: 'state', url: true },
-  privates: { name: 'state', url: false },
-}
-
 const noArgsAreAFunction = (args) => {
   return !_.some(args, _.isFunction)
 }
@@ -150,7 +145,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
   const jquery = $jQuery.create(state)
   const location = $Location.create(state)
   const focused = $Focused.create(state)
-  const keyboard = $Keyboard.create(state)
+  const keyboard = $Keyboard.create(Cypress, state)
   const mouse = $Mouse.create(state, keyboard, focused, Cypress)
   const timers = $Timers.create()
 
@@ -598,7 +593,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       // highlight it in red or insert a new command
       err.name = err.name || 'CypressError'
       errors.commandRunningFailed(err)
-      debugger
 
       return fail(err, state('runnable'))
     })
@@ -808,7 +802,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
     } catch (cyFailErr) {
       // and if any of these throw synchronously immediately error
       cyFailErr.isCyFailErr = true
-      debugger
 
       return fail(cyFailErr)
     }
@@ -1221,7 +1214,6 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
       if (!runnable) return err
 
       try {
-        debugger
         fail(err)
       } catch (failErr) {
         const r = state('reject')
@@ -1408,22 +1400,10 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           // if runnable.fn threw synchronously, then it didnt fail from
           // a cypress command, but we should still teardown and handle
           // the error
-          debugger
-
           return fail(err, runnable)
         }
       }
     },
-  })
-
-  _.each(privateProps, (obj, key) => {
-    return Object.defineProperty(cy, key, {
-      get () {
-        return $errUtils.throwErrByPath('miscellaneous.private_property', {
-          args: obj,
-        })
-      },
-    })
   })
 
   setTopOnError(cy)

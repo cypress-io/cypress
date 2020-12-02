@@ -2,6 +2,7 @@ import _ from 'lodash'
 import React, { Component } from 'react'
 import { observer } from 'mobx-react'
 import Loader from 'react-loader'
+import Tooltip from '@cypress/react-tooltip'
 
 import ipc from '../lib/ipc'
 import { configFileFormatted } from '../lib/config-file-formatted'
@@ -317,6 +318,12 @@ class RunsList extends Component {
   }
 
   _empty () {
+    const recordCommand = `cypress run --record --key ${this.state.recordKey || '<record-key>'}`
+
+    const projectIdJsonConfig = {
+      projectId: this.props.project.id || '<projectId>',
+    }
+
     return (
       <div>
         <div className='first-run-instructions'>
@@ -333,7 +340,16 @@ class RunsList extends Component {
               Why?
             </a>
           </h5>
-          <pre className='line-nums'>
+          <pre id="code-project-id-config" className='line-nums copy-to-clipboard'>
+            <a className="action-copy" onClick={() => ipc.setClipboardText(JSON.stringify(projectIdJsonConfig, null, 2))}>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
+            </a>
             <span>{'{'}</span>
             <span>{`  "projectId": "${this.props.project.id || '<projectId>'}"`}</span>
             <span>{'}'}</span>
@@ -347,8 +363,17 @@ class RunsList extends Component {
               Need help?
             </a>
           </h5>
-          <pre>
-            <code>cypress run --record --key {this.state.recordKey || '<record-key>'}</code>
+          <pre id="code-record-command" className="copy-to-clipboard">
+            <a className="action-copy" onClick={() => ipc.setClipboardText(recordCommand)}>
+              <Tooltip
+                title='Copy to clipboard'
+                placement='top'
+                className='cy-tooltip'
+              >
+                <i className='fas fa-clipboard'></i>
+              </Tooltip>
+            </a>
+            <code>{recordCommand}</code>
           </pre>
           <hr />
           <p className='alert alert-default'>
