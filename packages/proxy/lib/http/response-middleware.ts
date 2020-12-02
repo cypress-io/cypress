@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import charset from 'charset'
 import { CookieOptions } from 'express'
-import { cors, concatStream } from '@packages/network'
+import { cors, concatStream, httpUtils } from '@packages/network'
 import { CypressIncomingRequest, CypressOutgoingResponse } from '@packages/proxy'
 import debugModule from 'debug'
 import { HttpMiddleware } from '.'
@@ -90,15 +90,6 @@ function isHtml (res: IncomingMessage) {
 
 function resIsGzipped (res: IncomingMessage) {
   return (res.headers['content-encoding'] || '').includes('gzip')
-}
-
-// https://github.com/cypress-io/cypress/issues/4298
-// https://tools.ietf.org/html/rfc7230#section-3.3.3
-// HEAD, 1xx, 204, and 304 responses should never contain anything after headers
-const NO_BODY_STATUS_CODES = [204, 304]
-
-function responseMustHaveEmptyBody (req: CypressIncomingRequest, res: IncomingMessage) {
-  return _.some([_.includes(NO_BODY_STATUS_CODES, res.statusCode), _.invoke(req.method, 'toLowerCase') === 'head'])
 }
 
 function setCookie (res: CypressOutgoingResponse, k: string, v: string, domain: string) {
@@ -367,7 +358,7 @@ const ClearCyInitialCookie: ResponseMiddleware = function () {
 }
 
 const MaybeEndWithEmptyBody: ResponseMiddleware = function () {
-  if (responseMustHaveEmptyBody(this.req, this.incomingRes)) {
+  if (httpUtils.responseMustHaveEmptyBody(this.req, this.incomingRes)) {
     this.res.end()
 
     return this.end()
