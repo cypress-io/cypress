@@ -12,7 +12,12 @@
         color: #999999;
     }
     ul{
-        margin-left:10px;
+        margin-left: 10px;
+        transition: all .5s;
+        overflow: hidden;
+        &.group-hidden{
+            display: none;
+        }
         ul{
             padding: 2px 0;
             color: #555555;
