@@ -69,7 +69,7 @@ export const Virtualizable = ({ style, model, node, measure, onChange, index }: 
     case VirtualizableType.Hook:
       return <Hook style={style} model={model as HookModel} expandableProps={expandableProps} />
     case VirtualizableType.Command:
-      return <Command style={style} model={model as CommandModel} />
+      return <Command style={style} model={model as CommandModel} expandableProps={expandableProps} />
     case VirtualizableType.Error:
       return <TestError style={style} model={model as AttemptModel} />
     default:

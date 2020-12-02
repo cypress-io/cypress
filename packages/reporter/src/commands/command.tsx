@@ -7,15 +7,16 @@ import React, { Component, MouseEvent } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
 
-import appState, { AppState } from '../lib/app-state'
-import events, { Events } from '../lib/events'
+import appState from '../lib/app-state'
+import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
 import { TimeoutID } from '../lib/types'
-import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
+import runnablesStore from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import { CommandModel } from './command-model'
 import { ExpandableProps } from '../collapsible/expandable'
+import { indentPadding } from '../lib/util'
 
 const md = new Markdown()
 
@@ -131,13 +132,10 @@ const Progress = observer(({ model }: ProgressProps) => {
 })
 
 interface Props {
-  model: CommandModel
   aliasesWithDuplicates: Array<Alias> | null
-  style: React.CSSProperties
-  appState?: AppState
-  events?: Events
-  runnablesStore?: RunnablesStore
   expandableProps: ExpandableProps
+  model: CommandModel
+  style: React.CSSProperties
 }
 
 @observer
@@ -146,17 +144,26 @@ export class Command extends Component<Props> {
   private _showTimeout?: TimeoutID
   disposeAutorun: Function = () => {}
 
-  static defaultProps = {
-    appState,
-    events,
-    runnablesStore,
-  }
-
   componentDidMount () {
-    this.disposeAutorun = autorun(() => {
-      const { model, expandableProps } = this.props
+    const { expandableProps } = this.props
+    const model = this.props.model
 
+    this.disposeAutorun = autorun(() => {
+      model.alias
       model.displayMessage
+      model.displayName
+      model.name
+      // model.state
+      // model.test.level
+      // model.test.state
+      // model.type
+      // model.event
+      // model.visible
+      // model.state
+      // model.numElements
+      // model.renderProps
+      // model.numElements
+      // model.hasDuplicates
 
       requestAnimationFrame(() => {
         expandableProps.measure()
@@ -170,7 +177,7 @@ export class Command extends Component<Props> {
 
   render () {
     const { model, aliasesWithDuplicates, style } = this.props
-    const message = model.displayMessage
+    const { message: displayMessage, test } = model
 
     return (
       <div
@@ -178,15 +185,16 @@ export class Command extends Component<Props> {
           'command',
           `command-name-${model.name ? nameClassName(model.name) : ''}`,
           `command-state-${model.state}`,
-          `runnable-state-${model.test.state}`,
+          `runnable-state-${test.state}`,
           `command-type-${model.type}`,
+          `command-index-${model.index}`,
           {
             'command-is-event': !!model.event,
             'command-is-invisible': model.visible != null && !model.visible,
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
-            'command-scaled': message && message.length > 100,
+            'command-scaled': displayMessage && displayMessage.length > 100,
             'no-elements': !model.numElements,
             'multiple-elements': model.numElements > 1,
             'command-has-duplicates': model.hasDuplicates,
@@ -196,81 +204,83 @@ export class Command extends Component<Props> {
         )}
         onMouseOver={() => this._snapshot(true)}
         onMouseOut={() => this._snapshot(false)}
-        style={style}
+        style={indentPadding(style, test.level)}
       >
-        <FlashOnClick
-          message='Printed output to your console'
-          onClick={this._onClick}
-          shouldShowMessage={this._shouldShowClickMessage}
-        >
-          <div className='command-wrapper'>
-            <div className='command-wrapper-text'>
-              <span className='command-number'>
-                <i className='fas fa-spinner fa-spin' />
-                <span>{model.number || ''}</span>
-              </span>
-              <span className='command-pin'>
-                <i className='fas fa-thumbtack' />
-              </span>
-              <span className='command-expander' onClick={this._toggleOpen}>
-                <i className='fas' />
-              </span>
-              <span className='command-method'>
-                <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
-              </span>
-              <span className='command-message'>
-                {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
-              </span>
-              <span className='command-controls'>
-                <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
-                  <i className='command-invisible far fa-eye-slash' />
-                </Tooltip>
-                <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
-                  <span className='num-elements'>{model.numElements}</span>
-                </Tooltip>
-                <span className='alias-container'>
-                  <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
-                  <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
-                    <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
-                  </Tooltip>
+        <div className='hooks-container'>
+          <FlashOnClick
+            message='Printed output to your console'
+            onClick={this._onClick}
+            shouldShowMessage={this._shouldShowClickMessage}
+          >
+            <div className='command-wrapper'>
+              <div className='command-wrapper-text'>
+                <span className='command-number'>
+                  <i className='fas fa-spinner fa-spin' />
+                  <span>{model.number || ''}</span>
                 </span>
-              </span>
+                <span className='command-pin'>
+                  <i className='fas fa-thumbtack' />
+                </span>
+                <span className='command-expander' onClick={this._toggleOpen}>
+                  <i className='fas' />
+                </span>
+                <span className='command-method'>
+                  <span>{model.event ? `(${displayName(model)})` : displayName(model)}</span>
+                </span>
+                <span className='command-message'>
+                  {model.referencesAlias ? <AliasesReferences model={model} aliasesWithDuplicates={aliasesWithDuplicates} /> : <Message model={model} />}
+                </span>
+                <span className='command-controls'>
+                  <Tooltip placement='top' title={visibleMessage(model)} className='cy-tooltip'>
+                    <i className='command-invisible far fa-eye-slash' />
+                  </Tooltip>
+                  <Tooltip placement='top' title={`${model.numElements} matched elements`} className='cy-tooltip'>
+                    <span className='num-elements'>{model.numElements}</span>
+                  </Tooltip>
+                  <span className='alias-container'>
+                    <Aliases model={model} aliasesWithDuplicates={aliasesWithDuplicates} />
+                    <Tooltip placement='top' title={`This event occurred ${model.numDuplicates} times`} className='cy-tooltip'>
+                      <span className={cs('num-duplicates', { 'has-alias': model.alias })}>{model.numDuplicates}</span>
+                    </Tooltip>
+                  </span>
+                </span>
+              </div>
+              <Progress model={model} />
             </div>
-            <Progress model={model} />
-          </div>
-        </FlashOnClick>
-        {this._duplicates()}
+          </FlashOnClick>
+          {/* {this._duplicates()} */}
+        </div>
       </div>
     )
   }
 
-  _duplicates () {
-    const { appState, events, model, runnablesStore } = this.props
+  // _duplicates () {
+  //   const { appState, events, model, runnablesStore } = this.props
 
-    if (!this.isOpen || !model.hasDuplicates) return null
+  //   if (!this.isOpen || !model.hasDuplicates) return null
 
-    return (
-      <ul className='duplicates'>
-        {_.map(model.duplicates, (duplicate) => (
-          <Command
-            key={duplicate.id}
-            model={duplicate}
-            appState={appState}
-            events={events}
-            runnablesStore={runnablesStore}
-            aliasesWithDuplicates={null}
-          />
-        ))}
-      </ul>
-    )
-  }
+  //   return (
+  //     <ul className='duplicates'>
+  //       {_.map(model.duplicates, (duplicate) => (
+  //         <Command
+  //           key={duplicate.id}
+  //           model={duplicate}
+  //           appState={appState}
+  //           events={events}
+  //           runnablesStore={runnablesStore}
+  //           aliasesWithDuplicates={null}
+  //         />
+  //       ))}
+  //     </ul>
+  //   )
+  // }
 
   _isPinned () {
-    return this.props.appState.pinnedSnapshotId === this.props.model.id
+    return appState.pinnedSnapshotId === this.props.model.id
   }
 
   _shouldShowClickMessage = () => {
-    return !this.props.appState.isRunning && this._isPinned()
+    return !appState.isRunning && this._isPinned()
   }
 
   @action _toggleOpen = (e: MouseEvent) => {
@@ -280,18 +290,18 @@ export class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
-    if (this.props.appState.isRunning) return
+    if (appState.isRunning) return
 
     const { id } = this.props.model
 
     if (this._isPinned()) {
-      this.props.appState.pinnedSnapshotId = null
-      this.props.events.emit('unpin:snapshot', id)
+      appState.pinnedSnapshotId = null
+      events.emit('unpin:snapshot', id)
       this._snapshot(true)
     } else {
-      this.props.appState.pinnedSnapshotId = id as number
-      this.props.events.emit('pin:snapshot', id)
-      this.props.events.emit('show:command', this.props.model.id)
+      appState.pinnedSnapshotId = id as number
+      events.emit('pin:snapshot', id)
+      events.emit('show:command', this.props.model.id)
     }
   }
 
@@ -313,14 +323,14 @@ export class Command extends Component<Props> {
   // 50ms, it won't show the snapshot at all. so we
   // optimize for both snapshot showing + restoring
   _snapshot (show: boolean) {
-    const { model, runnablesStore } = this.props
+    const { model } = this.props
 
     if (show) {
       runnablesStore.attemptingShowSnapshot = true
 
       this._showTimeout = setTimeout(() => {
         runnablesStore.showingSnapshot = true
-        this.props.events.emit('show:snapshot', model.id)
+        events.emit('show:snapshot', model.id)
       }, 50)
     } else {
       runnablesStore.attemptingShowSnapshot = false
@@ -331,7 +341,7 @@ export class Command extends Component<Props> {
         // we aren't trying to show a different snapshot
         if (runnablesStore.showingSnapshot && !runnablesStore.attemptingShowSnapshot) {
           runnablesStore.showingSnapshot = false
-          this.props.events.emit('hide:snapshot', model.id)
+          events.emit('hide:snapshot', model.id)
         }
       }, 50)
     }

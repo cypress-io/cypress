@@ -9,6 +9,7 @@ const commandProps = (props?: Partial<CommandProps>) => {
     renderProps: {},
     err: {},
     event: false,
+    index: 0,
     number: 1,
     numElements: 1,
     state: 'pending',

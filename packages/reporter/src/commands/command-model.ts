@@ -17,6 +17,7 @@ interface RenderProps {
 export interface CommandProps extends InstrumentProps {
   err?: ErrModel
   event?: boolean
+  index: number
   number?: number
   numElements: number
   renderProps?: RenderProps
@@ -32,6 +33,7 @@ export class CommandModel extends InstrumentModel {
   @observable.struct renderProps: RenderProps = {}
   @observable err?: ErrModel
   @observable event?: boolean = false
+  @observable index: number
   @observable isLongRunning = false
   @observable number?: number
   @observable numElements: number
@@ -66,6 +68,7 @@ export class CommandModel extends InstrumentModel {
 
     this._id = `command-${props.hookId}-${props.id}`
     this.event = props.event
+    this.index = props.index
     this.number = props.number
     this.numElements = props.numElements
     this.renderProps = props.renderProps || {}

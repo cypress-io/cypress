@@ -42,7 +42,8 @@ export class HookModel implements HookProps {
   onCreateModel: Function
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
-  private _currentNumber = 1
+  private _commandIndex = 0
+  private _nonEventNumber = 1
 
   constructor (props: HookProps, extraProps: HookExtraProps) {
     this.hookId = props.hookId
@@ -88,9 +89,11 @@ export class HookModel implements HookProps {
   }
 
   addCommand (command: CommandModel) {
+    command.index = this._commandIndex++
+
     if (!command.event) {
-      command.number = this._currentNumber
-      this._currentNumber++
+      command.number = this._nonEventNumber
+      this._nonEventNumber++
     }
 
     const lastCommand = _.last(this.commands)

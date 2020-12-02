@@ -1,7 +1,7 @@
 .reporter {
   .hooks-container {
     margin-left: 5px;
-    padding: 5px 10px;
+    padding: 5px 20px 5px 10px;
     border-left: 1px dotted #DDD;
 
     .hook-item {
@@ -78,20 +78,14 @@
     }
   }
 
-  .commands-container {
-    background-color: #eef1f4;
-    font-family: $monospace;
-    min-width: $reporter-contents-min-width;
-    padding: 0;
-
-    &:empty {
-      display: none;
-    }
-  }
-
   .command {
     cursor: pointer;
     margin: 0;
+
+    .hooks-container {
+      padding-bottom: 0;
+      padding-top: 0;
+    }
   }
 
   .command-scaled {
@@ -108,16 +102,17 @@
     }
   }
 
-  .command-type-parent {
+  .command-type-parent .command-wrapper {
     border-top: 1px solid #e3e3e3;
 
     &:hover {
       border-top: 1px solid #eef1f4;
     }
 
-    &:first-child {
-      border-top: 0;
-    }
+  }
+
+  .command-index-0 .command-wrapper {
+    border-top: none;
   }
 
   .command-type-child {
@@ -132,7 +127,10 @@
   }
 
   .command-wrapper {
+    background-color: #eef1f4;
     color: #777;
+    font-family: $monospace;
+    min-width: $reporter-contents-min-width;
 
     &:hover {
       background-color: #E0E5E7;
@@ -291,7 +289,7 @@
     }
   }
 
-  .command-state-failed > span > .command-wrapper {
+  .command-state-failed .command-wrapper {
     border-left: 2px solid $fail;
     background-color: $err-header-background;
 
