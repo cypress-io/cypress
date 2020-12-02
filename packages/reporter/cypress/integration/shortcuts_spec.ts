@@ -15,7 +15,7 @@ const runnerStub = () => {
   } as EventEmitterStub
 }
 
-describe('controls', function () {
+describe('shortcuts', function () {
   let runner: EventEmitterStub
 
   beforeEach(function () {
@@ -23,7 +23,7 @@ describe('controls', function () {
 
     cy.fixture('runnables').as('runnables')
 
-    cy.visit('/dist').then((win) => {
+    cy.visit('/').then((win) => {
       win.render({
         runner,
         spec: {

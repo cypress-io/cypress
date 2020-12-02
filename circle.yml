@@ -287,6 +287,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -534,6 +535,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            reporter-integration-tests,
       - run: npx percy finalize --all
 
   cli-visual-tests:
@@ -809,6 +811,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -913,9 +918,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/react build
       - run:
-          name: Run unit test
-          command: yarn workspace @cypress/react test:unit
-      - run:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
@@ -955,7 +957,18 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
-
+  
+  
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test 
+          
   npm-eslint-plugin-dev:
     <<: *defaults
     steps:
@@ -1785,6 +1798,10 @@ linux-workflow: &linux-workflow
         path: examples/webpack-options
         requires:
           - npm-react
+    
+    - npm-create-cypress-tests:
+        requires:
+          - build
 
     - npm-eslint-plugin-dev:
         requires:

@@ -4,7 +4,6 @@
 $cy-tooltip-class: 'cy-tooltip';
 @import '../../node_modules/@cypress/react-tooltip/dist/tooltip.scss';
 @import 'lib/base';
-@import 'lib/shared';
 @import '!(lib)*/**/!(selector-playground.scss)';
 
 @import '../../ui-components/src/dropdown';

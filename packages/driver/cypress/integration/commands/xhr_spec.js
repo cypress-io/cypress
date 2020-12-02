@@ -1086,7 +1086,7 @@ describe('src/cy/commands/xhr', () => {
 
       cy.server()
       .then(function () {
-        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.server\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.http\(\)` instead\./)
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.server\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.intercept\(\)` instead\./)
       })
     })
 
@@ -1275,7 +1275,7 @@ describe('src/cy/commands/xhr', () => {
 
       cy.route('*')
       .then(function () {
-        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.route\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.http\(\)` instead\./)
+        expect(Cypress.utils.warning).to.be.calledWithMatch(/^`cy\.route\(\)` has been deprecated and will be moved to a plugin in a future release\. Consider migrating to using `cy\.intercept\(\)` instead\./)
       })
     })
 

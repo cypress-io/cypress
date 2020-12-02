@@ -1,5 +1,5 @@
+import * as sinon from 'sinon'
 const { expect } = require('chai')
-const sinon = require('sinon')
 const proxyquire = require('proxyquire').noPreserveCache()
 
 type Typescript = {
@@ -9,37 +9,12 @@ type Typescript = {
 let typescript: Typescript
 let createProgram: Typescript['createProgram']
 
-import '../../lib/typescript-overrides'
-
 describe('./lib/typescript-overrides', () => {
   beforeEach(() => {
     createProgram = sinon.stub()
     typescript = {
       createProgram,
     }
-  })
-
-  context('.getSourceMapOverride', () => {
-    it('is null by default', () => {
-      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-        typescript,
-      })
-
-      expect(typescriptOverrides.getSourceMapOverride()).to.be.null
-    })
-  })
-
-  context('.tryRequireTypescript', () => {
-    it('gracefully returns error when typescript cannot be required', () => {
-      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-        typescript: null,
-      })
-
-      const err = typescriptOverrides.tryRequireTypescript()
-
-      expect(err).to.be.instanceOf(Error)
-      expect(err.message).to.eq(`Cannot find module 'typescript'`)
-    })
   })
 
   context('.overrideSourceMaps', () => {
@@ -50,8 +25,6 @@ describe('./lib/typescript-overrides', () => {
 
       typescriptOverrides.overrideSourceMaps(true)
 
-      expect(typescriptOverrides.getSourceMapOverride()).to.be.true
-
       typescript.createProgram({
         options: {
           sourceMap: false,
@@ -60,7 +33,6 @@ describe('./lib/typescript-overrides', () => {
         },
       })
 
-      expect(createProgram).to.be.calledOn(typescript)
       expect(createProgram).to.be.calledWith({
         options: {
           sourceMap: true,
@@ -75,8 +47,6 @@ describe('./lib/typescript-overrides', () => {
 
       typescriptOverrides.overrideSourceMaps(false)
 
-      expect(typescriptOverrides.getSourceMapOverride()).to.be.false
-
       typescript.createProgram({
         options: {
           sourceMap: true,
@@ -85,35 +55,9 @@ describe('./lib/typescript-overrides', () => {
         },
       })
 
-      expect(createProgram).to.be.calledOn(typescript)
       expect(createProgram).to.be.calledWith({
         options: {
           sourceMap: false,
-        },
-      })
-    })
-
-    it('does not override sourcemaps', () => {
-      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
-        typescript,
-      })
-
-      expect(typescriptOverrides.getSourceMapOverride()).to.be.null
-
-      typescript.createProgram({
-        options: {
-          sourceMap: true,
-          inlineSources: true,
-          inlineSourceMap: true,
-        },
-      })
-
-      expect(createProgram).to.be.calledOn(typescript)
-      expect(createProgram).to.be.calledWith({
-        options: {
-          sourceMap: true,
-          inlineSources: true,
-          inlineSourceMap: true,
         },
       })
     })
@@ -125,7 +69,23 @@ describe('./lib/typescript-overrides', () => {
 
       typescriptOverrides.overrideSourceMaps(true)
 
-      expect(typescriptOverrides.getSourceMapOverride()).to.be.true
+      typescript.createProgram([], {
+        sourceMap: false,
+        inlineSources: true,
+        inlineSourceMap: true,
+      })
+
+      expect(createProgram).to.be.calledWith([], {
+        sourceMap: true,
+      })
+    })
+
+    it('require "default" typescript if typescript option not specified', () => {
+      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
+        typescript,
+      })
+
+      typescriptOverrides.overrideSourceMaps(true)
 
       typescript.createProgram([], {
         sourceMap: false,
@@ -134,9 +94,60 @@ describe('./lib/typescript-overrides', () => {
       })
 
       expect(createProgram).to.be.calledOn(typescript)
-      expect(createProgram).to.be.calledWith([], {
-        sourceMap: true,
+    })
+
+    it('requires typescript from typescript option if specified', () => {
+      const userCreateProgram = sinon.stub()
+      const userTypescript = {
+        createProgram: userCreateProgram,
+      }
+      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
+        typescript,
+        '/path/to/user/typescript': userTypescript,
       })
+
+      typescriptOverrides.overrideSourceMaps(true, '/path/to/user/typescript')
+
+      userTypescript.createProgram([], {
+        sourceMap: false,
+        inlineSources: true,
+        inlineSourceMap: true,
+      })
+
+      expect(userCreateProgram).to.be.calledOn(userTypescript)
+    })
+
+    it('does not run twice', () => {
+      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
+        typescript,
+        '/path/to/user/typescript': null,
+      })
+
+      typescriptOverrides.overrideSourceMaps(true)
+
+      typescript.createProgram([], {
+        sourceMap: false,
+        inlineSources: true,
+        inlineSourceMap: true,
+      })
+
+      expect(createProgram).to.be.calledOn(typescript)
+
+      const result = typescriptOverrides.overrideSourceMaps(true, '/path/to/user/typescript')
+
+      // result will be the error if it tries to require typescript again
+      expect(result).to.be.undefined
+    })
+
+    it('gracefully returns error when typescript cannot be required', () => {
+      const typescriptOverrides = proxyquire('../../lib/typescript-overrides', {
+        typescript: null,
+      })
+
+      const err = typescriptOverrides.overrideSourceMaps(true)
+
+      expect(err).to.be.instanceOf(Error)
+      expect(err.message).to.eq(`Cannot find module 'typescript'`)
     })
   })
 })

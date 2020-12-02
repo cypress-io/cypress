@@ -46,11 +46,11 @@
         > .collapsible-header-inner:focus {
           outline: 0;
         }
+      }
 
-        .hook-failed-message {
-          color: #E94F5F;
-          display: none;
-        }
+      .hook-failed-message {
+        color: #E94F5F;
+        display: none;
       }
 
       .hook-open-in-ide {
