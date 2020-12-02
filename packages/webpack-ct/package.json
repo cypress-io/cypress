@@ -6,6 +6,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc",
+    "build-prod": "tsc",
     "watch": "tsc -w"
   },
   "dependencies": {
