@@ -438,6 +438,7 @@ The following validation error was thrown by your plugins file (\`/foo/bar/.proj
 You passed: \`invalid:event\`
 
 The following are valid events:
+- devserver:config
 - file:preprocessor
 - before:browser:launch
 - task
