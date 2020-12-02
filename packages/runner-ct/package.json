@@ -12,7 +12,6 @@
     "watch": "webpack --watch --progress"
   },
   "dependencies": {
-    "@packages/driver": "*",
     "cash-dom": "^8.1.0",
     "chai": "^4.2.0",
     "classnames": "2.2.6",
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/preset-env": "^7.12.1",
+    "@packages/driver": "*",
     "babel-loader": "8.1.0",
     "clean-webpack-plugin": "^3.0.0",
     "dart-sass": "^1.25.0",
