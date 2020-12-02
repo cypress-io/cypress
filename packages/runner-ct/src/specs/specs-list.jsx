@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import specsStore from './specs-store'
+import SpecGroup from './spec-group'
 
 @observer
 class SpecsList extends Component {
@@ -10,35 +11,22 @@ class SpecsList extends Component {
     return (
       <div className="specs-list">
         <header>Select tests to run...</header>
-        <ul>
-          {this.specGroup(specGroups)}
+        <ul>{
+
+          Object.keys(specGroups).map((groupKey) => {
+            const group = specGroups[groupKey]
+
+            return (<SpecGroup
+              key={`${groupKey}#${this.props.state.spec?.name}`}
+              groupKey={groupKey}
+              group={group}
+              chooseSpec={(spec) => this.chooseSpec(spec)}
+              isActive={(spec) => this.isActive(spec)}/>)
+          })}
+
         </ul>
       </div>
     )
-  }
-
-  specGroup (groups, parentPath = '') {
-    return Object.keys(groups).map((groupKey) => {
-      const group = groups[groupKey]
-
-      return (<li key={groupKey} >
-        <i className="far fa-plus-square"/>{groupKey}
-        <ul>
-          {Object.keys(group)
-          .map((spec) =>
-            group[spec].name
-              ? this.specUnit(`${parentPath}/${groupKey}`, group[spec], this.isActive(group[spec]))
-              : this.specGroup({ [spec]: group[spec] }, `${parentPath}/${groupKey}`))
-          }
-        </ul>
-      </li>)
-    })
-  }
-
-  specUnit (path, spec, active) {
-    return (<li key={spec.name} onClick={this.chooseSpec(spec)}>
-      <i className={active ? 'fas fa-check-square active' : 'far fa-square'}/>{spec.name.slice(path.length)}
-    </li>)
   }
 
   chooseSpec (spec) {

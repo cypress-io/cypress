@@ -13,21 +13,43 @@
     }
     ul{
         margin-left:10px;
-    }
-    ul ul{
-        padding: 2px 0;
-        color: #555555;
-        margin: 0;
-        position: relative;
+        ul{
+            padding: 2px 0;
+            color: #555555;
+            margin: 0;
+            position: relative;
+            li{
+                margin-left: 10px;
+            }
+            
+            /** 
+             * To achieve the dotted circle line when a directory is expanded, 
+             * we cannot rely on a border. Dotted borders are not configurable.
+             * Instead we create this background-image gradient 
+             * that will have the same effect.
+             */
+            &:before{
+                content: '';
+                position: absolute;
+                z-index: 1;
+                width: 3px;
+                bottom: 0;
+                top: 0;
+                left: 4px;
+                background-size: 3px 3px;
+                background-image: radial-gradient(#999999 30%, transparent 0);
+                background-position: center;
+            }
+        }
     }
     i {
         margin-right: 10px;
         font-size: 12px;
         background-color: #FFF;
-        color:#999999
-    }
-    i.active{
-        color: #4299E1;
+        color:#999999;
+        &.active{
+            color: #4299E1;
+        }
     }
     li {
         padding: 10px 7px;
@@ -35,23 +57,10 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        &:first-child{
+            padding-top: 20px;
+        }
     }
-    li:first-child{
-        padding-top: 20px;
-    }
-    ul ul li{
-        margin-left: 10px;
-    }
-    ul ul:before{
-        content: '';
-        position: absolute;
-        z-index: 1;
-        width: 3px;
-        bottom: 0;
-        top: 0;
-        left: 4px;
-        background-size: 3px 3px;
-        background-image: radial-gradient(#999999 30%, transparent 0);
-        background-position: center;
-    }
+
+    
 }
