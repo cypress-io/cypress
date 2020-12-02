@@ -4,7 +4,7 @@ import { ErrModel } from '../errors/err-model'
 import { InstrumentModel, InstrumentProps } from '../instruments/instrument-model'
 import { TimeoutID } from '../lib/types'
 import { VirtualNodeModel } from '../tree/virtual-node-model'
-import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable-types'
 import { TestModel } from './../test/test-model'
 
 const LONG_RUNNING_THRESHOLD = 1000
@@ -79,8 +79,9 @@ export class CommandModel extends InstrumentModel {
     this.virtualNode = new VirtualNodeModel(this._id, VirtualizableType.Command)
     this.test = test
 
+    // QUESTION: is this.err necessary or used anywhere?
     if (props.err) {
-      this.err = new ErrModel(props.err, this._id)
+      this.err = new ErrModel({ err: props.err })
     }
 
     this._checkLongRunning()
@@ -96,7 +97,7 @@ export class CommandModel extends InstrumentModel {
     this.timeout = props.timeout
 
     if (props.err) {
-      this.err = new ErrModel(props.err, this._id)
+      this.err = new ErrModel({ err: props.err })
     }
 
     this._checkLongRunning()

@@ -6,8 +6,9 @@ import { indentPadding } from '../lib/util'
 import { SuiteModel } from './suite-model'
 import { TestModel } from '../test/test-model'
 
-import { Expandable, ExpandableProps } from '../collapsible/expandable'
+import { Expandable } from '../collapsible/expandable'
 import { Test } from '../test/test'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 interface SuiteProps {
   model: SuiteModel
@@ -26,8 +27,7 @@ export const Suite = observer(({ model }: SuiteProps) => {
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
-  style: React.CSSProperties
-  expandableProps: ExpandableProps
+  virtualizableProps: VirtualizableProps
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -37,14 +37,14 @@ export interface RunnableProps {
 @observer
 export class Runnable extends Component<RunnableProps> {
   render () {
-    const { model, style, expandableProps } = this.props
+    const { model, virtualizableProps } = this.props
 
     return (
       <div
         className={`${model.type} runnable runnable-state-${model.state}`}
-        style={indentPadding(style, model.level)}
+        style={indentPadding(virtualizableProps.style, model.level)}
       >
-        <Expandable expandableProps={expandableProps}>
+        <Expandable virtualizableProps={virtualizableProps}>
           {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
         </Expandable>
       </div>

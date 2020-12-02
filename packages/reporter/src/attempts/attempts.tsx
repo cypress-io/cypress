@@ -5,8 +5,9 @@ import { observer } from 'mobx-react'
 import React, { useEffect } from 'react'
 
 import { AttemptModel } from './attempt-model'
-import { Expandable, ExpandableProps } from '../collapsible/expandable'
+import { Expandable } from '../collapsible/expandable'
 import { indentPadding } from '../lib/util'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 // TODO:
 // - handle scrollIntoView
@@ -21,12 +22,11 @@ const NoCommands = () => (
 
 interface AttemptProps {
   model: AttemptModel
-  style: React.CSSProperties
-  expandableProps: ExpandableProps
+  virtualizableProps: VirtualizableProps
   // scrollIntoView: Function
 }
 
-export const Attempt = observer(({ model, style, expandableProps }: AttemptProps) => {
+export const Attempt = observer(({ model, virtualizableProps }: AttemptProps) => {
   useEffect(() => {
     // scrollIntoView()
 
@@ -37,9 +37,7 @@ export const Attempt = observer(({ model, style, expandableProps }: AttemptProps
       model.index
       model.commands.length
 
-      requestAnimationFrame(() => {
-        expandableProps.measure()
-      })
+      virtualizableProps.measure()
     })
 
     return () => {
@@ -56,10 +54,10 @@ export const Attempt = observer(({ model, style, expandableProps }: AttemptProps
       className={cs('attempt', `runnable-state-${model.test.state}`, `attempt-state-${model.state}`, {
         'show': model.test.hasMultipleAttempts && model.hasCommands,
       })}
-      style={indentPadding(style, model.test.level)}
+      style={indentPadding(virtualizableProps.style, model.test.level)}
     >
       <div className='attempt-header'>
-        <Expandable expandableProps={expandableProps}>
+        <Expandable virtualizableProps={virtualizableProps}>
           <div className='attempt-tag'>
             <div className='open-close-indicator'>
               <i className='fa fa-fw fa-angle-up' />

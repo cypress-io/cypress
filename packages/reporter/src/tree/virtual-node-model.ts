@@ -1,7 +1,7 @@
-import { action, observable } from 'mobx'
+import { observable } from 'mobx'
 import { Node } from 'react-virtualized-tree'
 
-import { VirtualizableType } from './virtualizable'
+import { VirtualizableType } from './virtualizable-types'
 
 export class VirtualNodeModel implements Node {
   @observable id: string

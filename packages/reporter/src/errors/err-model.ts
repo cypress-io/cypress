@@ -2,8 +2,9 @@
 import _ from 'lodash'
 import { computed, observable } from 'mobx'
 
+import { AttemptModel } from '../attempts/attempt-model'
 import { FileDetails } from '@packages/ui-components'
-import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable-types'
 import { VirtualNodeModel } from './../tree/virtual-node-model'
 
 export interface ParsedStackMessageLine {
@@ -35,6 +36,13 @@ export interface ErrProps {
   codeFrame: CodeFrame
 }
 
+interface ErrModelProps {
+  err?: Partial<ErrProps>
+  id?: string
+  level?: number
+  attempt?: AttemptModel
+}
+
 export class ErrModel {
   virtualType = VirtualizableType.Error
 
@@ -47,13 +55,20 @@ export class ErrModel {
   @observable templateType = ''
   @observable.ref codeFrame?: CodeFrame
   @observable level: number
-  @observable virtualNode: VirtualNodeModel
+  @observable virtualNode?: VirtualNodeModel
+  @observable attempt?: AttemptModel
 
-  constructor (props: Partial<ErrProps> = {}, id: string = 'error', level = 0) {
-    this.update(props)
+  constructor (props: ErrModelProps) {
+    this.update(props.err || {})
+    this.level = props.level || 0
 
-    this.level = level
-    this.virtualNode = new VirtualNodeModel(id, this.virtualType)
+    if (props.id) {
+      this.virtualNode = new VirtualNodeModel(props.id, this.virtualType)
+    }
+
+    if (props.attempt) {
+      this.attempt = props.attempt
+    }
   }
 
   @computed get displayMessage () {

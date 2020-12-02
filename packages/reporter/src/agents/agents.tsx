@@ -9,6 +9,7 @@ import { AgentModel } from './agent-model'
 import { Alias } from '../instruments/instrument-model'
 import { indentPadding } from '../lib/util'
 import { Collection } from '../tree/virtual-collection'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 export interface AgentProps {
   model: AgentModel
@@ -25,19 +26,16 @@ export const Agent = observer(({ model }: AgentProps) => (
 
 export interface AgentsProps {
   model: Collection<AgentModel>
-  style: React.CSSProperties
-  measure: Function
+  virtualizableProps: VirtualizableProps
 }
 
-export const Agents = observer(({ model, style, measure }: AgentsProps) => {
+export const Agents = observer(({ model, virtualizableProps }: AgentsProps) => {
   // TODO: abstract this or find a better pattern so this isn't necessary for every component
   useEffect(() => {
     const disposeAutorun = autorun(() => {
       model.items.length
 
-      requestAnimationFrame(() => {
-        measure()
-      })
+      virtualizableProps.measure()
     })
 
     return () => {
@@ -45,25 +43,19 @@ export const Agents = observer(({ model, style, measure }: AgentsProps) => {
     }
   }, [true])
 
-  const onToggle = () => {
-    requestAnimationFrame(() => {
-      measure()
-    })
-  }
-
   return (
     <div
       className={cs('runnable-agents-region', `runnable-state-${model.parent.state}`, {
         'no-agents': !model.items.length,
       })}
-      style={indentPadding(style, model.level)}
+      style={indentPadding(virtualizableProps.style, model.level)}
     >
       <div className='instruments-container hooks-container'>
         <Collapsible
           header={`Spies / Stubs (${model.items.length})`}
           headerClass='hook-header'
           contentClass='instrument-content'
-          onToggle={onToggle}
+          onToggle={virtualizableProps.measure}
         >
           <table>
             <thead>

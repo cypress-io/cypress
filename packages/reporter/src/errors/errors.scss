@@ -52,14 +52,16 @@
     }
   }
 
-  .runnable-err-wrapper {
-    cursor: default;
-    margin: 5px 0 5px 5px;
-    padding-left: 10px;
-    border-left: 1px dotted #DDD;
+  .test-err {
+    padding-bottom: 10px;
+
+    .hooks-container {
+      padding-bottom: 0;
+      padding-top: 0;
+    }
   }
 
-  .runnable-err {
+  .test-err-wrapper {
     border-left: 2px solid $fail;
     background-color: $err-background;
     clear: both;
@@ -72,14 +74,14 @@
     overflow: auto;
   }
 
-  .runnable-err-header {
+  .test-err-header {
     display: flex;
     justify-content: space-between;
     background-color: $err-header-background;
     padding: 5px 10px;
     font-weight: bold;
 
-    .runnable-err-name {
+    .test-err-name {
       flex-grow: 2;
       font-size: 13px;
       line-height: 22px;;
@@ -91,13 +93,13 @@
     }
   }
 
-  .runnable-err-docs-url {
+  .test-err-docs-url {
     margin-left: 0.5em;
     cursor: pointer;
     font-family: $muli;
   }
 
-  .runnable-err-message {
+  .test-err-message {
     padding: 10px;
     font-family: $monospace;
     color: $err-text;
@@ -115,7 +117,7 @@
     }
   }
 
-  .runnable-err-stack-expander {
+  .test-err-stack-expander {
     display: flex;
 
     .collapsible-header {
@@ -156,7 +158,7 @@
       }
     }
 
-    .runnable-err-print {
+    .test-err-print {
       &:focus {
         outline: none;
 
@@ -201,7 +203,7 @@
     }
   }
 
-  .runnable-err-stack-trace {
+  .test-err-stack-trace {
     font-family: $monospace;
     overflow: auto;
     padding: 10px;
@@ -221,7 +223,7 @@
     border: 1px solid #ffe4e7;
     margin: 0 10px 10px;
 
-    .runnable-err-file-path {
+    .test-err-file-path {
       &:before {
         @extend .#{$fa-css-prefix};
         @extend .#{$fa-css-prefix}-file;

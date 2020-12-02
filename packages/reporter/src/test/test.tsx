@@ -6,7 +6,6 @@ import Tooltip from '@cypress/react-tooltip'
 import appState from '../lib/app-state'
 import { TestModel } from './test-model'
 import scroller from '../lib/scroller'
-import { ExpandableProps } from '../collapsible/expandable'
 // import { constants } from 'react-virtualized-tree'
 // import { autorun } from 'mobx'
 
@@ -26,7 +25,7 @@ export const Test = observer(({ model }: TestProps) => {
     const { state, shouldRender } = model
 
     if (appState.autoScrollingEnabled && appState.isRunning && shouldRender && state !== 'processing') {
-      window.requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         // since this executes async in a RAF the ref might be null
         if (containerRef.current) {
           scroller.scrollIntoView(containerRef.current as HTMLElement)

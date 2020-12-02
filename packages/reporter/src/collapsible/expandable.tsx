@@ -1,24 +1,18 @@
 import { action } from 'mobx'
 import React, { ReactNode } from 'react'
-import { renderers, FlattenedNode, NodeAction } from 'react-virtualized-tree'
+import { renderers } from 'react-virtualized-tree'
+
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 export const VirtualExpandable = renderers.Expandable
 
-// TODO: move this to VirtualNodeProps
-export interface ExpandableProps {
-  node: FlattenedNode
-  measure: () => void
-  onChange: (udpateParams: NodeAction) => void
-  index: number
-}
-
 interface Props {
   children: ReactNode
-  expandableProps: ExpandableProps
+  virtualizableProps: VirtualizableProps
 }
 
-export const Expandable = ({ children, expandableProps }: Props) => {
-  const { node } = expandableProps
+export const Expandable = ({ children, virtualizableProps }: Props) => {
+  const { node } = virtualizableProps
 
   const toggle = action(() => {
     node.state!.expanded = !node.state!.expanded
@@ -27,7 +21,7 @@ export const Expandable = ({ children, expandableProps }: Props) => {
   const icon = node.state!.expanded ? 'fa-caret-down' : 'fa-caret-right'
 
   return (
-    <VirtualExpandable {...expandableProps}>
+    <VirtualExpandable {...virtualizableProps}>
       <div className='expandable' onClick={toggle}>
         <i className={`collapsible-indicator fa-fw fas ${icon}`} />
         {children}

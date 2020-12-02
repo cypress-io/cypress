@@ -10,6 +10,7 @@ import Collapsible from '../collapsible/collapsible'
 import { RouteModel } from './route-model'
 import { indentPadding } from '../lib/util'
 import { Collection } from '../tree/virtual-collection'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 export interface RouteProps {
   model: RouteModel
@@ -31,19 +32,15 @@ export const Route = observer(({ model }: RouteProps) => (
 
 export interface RoutesProps {
   model: Collection<RouteModel>
-  style: React.CSSProperties
-  measure: Function
+  virtualizableProps: VirtualizableProps
 }
 
-export const Routes = observer(({ model, style, measure }: RoutesProps) => {
-  // TODO: abstract this or find a better pattern so this isn't necessary for every component
+export const Routes = observer(({ model, virtualizableProps }: RoutesProps) => {
   useEffect(() => {
     const disposeAutorun = autorun(() => {
       model.items.length
 
-      requestAnimationFrame(() => {
-        measure()
-      })
+      virtualizableProps.measure()
     })
 
     return () => {
@@ -51,25 +48,19 @@ export const Routes = observer(({ model, style, measure }: RoutesProps) => {
     }
   }, [true])
 
-  const onToggle = () => {
-    requestAnimationFrame(() => {
-      measure()
-    })
-  }
-
   return (
     <div
       className={cs('runnable-routes-region', `runnable-state-${model.parent.state}`, {
         'no-routes': !model.items.length,
       })}
-      style={indentPadding(style, model.level)}
+      style={indentPadding(virtualizableProps.style, model.level)}
     >
       <div className='instruments-container hooks-container'>
         <Collapsible
           header={`Routes (${model.items.length})`}
           headerClass='hook-header'
           contentClass='instrument-content'
-          onToggle={onToggle}
+          onToggle={virtualizableProps.measure}
         >
           <table>
             <thead>

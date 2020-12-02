@@ -76,7 +76,7 @@ const ErrorStack = observer(({ err }: Props) => {
     }
 
     const link = (
-      <FileNameOpener key={key} className="runnable-err-file-path" fileDetails={stackLine as ParsedStackFileLine} />
+      <FileNameOpener key={key} className="test-err-file-path" fileDetails={stackLine as ParsedStackFileLine} />
     )
 
     return makeLine(key, [whitespace, `at ${fn} (`, link, ')'])

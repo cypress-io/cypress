@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 
 import { Runnable } from '../runnables/runnable-and-suite'
 import { SuiteModel } from '../runnables/suite-model'
@@ -14,64 +14,41 @@ import { HookModel } from '../hooks/hook-model'
 import { TestError } from '../errors/test-error'
 import { Command } from '../commands/command'
 import { CommandModel } from '../commands/command-model'
-import { VirtualNodeModel } from './virtual-node-model'
 import { Collection } from './virtual-collection'
-import { ExpandableProps } from '../collapsible/expandable'
+import { ErrModel } from '../errors/err-model'
+import { VirtualizableModel, VirtualizableProps, VirtualizableType } from './virtualizable-types'
 
-export enum VirtualizableType {
-  Test = 'Test',
-  Suite = 'Suite',
-  Attempt = 'Attempt',
-  AttemptContent = 'AttemptContent',
-  AgentCollection = 'AgentCollection',
-  RouteCollection = 'RouteCollection',
-  HookCollection = 'HookCollection',
-  Hook = 'Hook',
-  Command = 'Command',
-  Error = 'Error',
+interface Props extends VirtualizableProps {
+  model: VirtualizableModel
 }
 
-export interface Virtualizable {
-  virtualType: VirtualizableType
-  virtualNode: VirtualNodeModel
-}
-
-export interface VirtualizableProps extends ExpandableProps {
-  style: React.CSSProperties
-  model: Virtualizable
-}
-
-export const Virtualizable = ({ style, model, node, measure, onChange, index }: VirtualizableProps) => {
-  // useEffect(() => {
-  //   console.log('-> mount', model.virtualType, node.id)
-
-  //   return () => {
-  //     console.log('<- unmount', model.virtualType, node.id)
-  //   }
-  // }, [true])
-
-  // TODO: rename expandableProps to something more generic, like virtualizableProps
-  const expandableProps = { node, measure, onChange, index }
+export const Virtualizable = ({ index, model, measure, node, onChange, style }: Props) => {
+  const wrappedMeasure = () => {
+    requestAnimationFrame(() => {
+      measure()
+    })
+  }
+  const virtualizableProps = { index, node, onChange, style, measure: wrappedMeasure }
 
   switch (model?.virtualType) {
     case VirtualizableType.Suite:
-      return <Runnable model={model as SuiteModel} style={style} expandableProps={expandableProps} />
+      return <Runnable virtualizableProps={virtualizableProps} model={model as SuiteModel} />
     case VirtualizableType.Test:
-      return <Runnable model={model as TestModel} style={style} expandableProps={expandableProps} />
+      return <Runnable virtualizableProps={virtualizableProps} model={model as TestModel} />
     case VirtualizableType.Attempt:
-      return <Attempt model={model as AttemptModel} style={style} expandableProps={expandableProps} />
+      return <Attempt virtualizableProps={virtualizableProps} model={model as AttemptModel} />
     case VirtualizableType.AgentCollection:
-      return <Agents model={model as Collection<AgentModel>} style={style} measure={expandableProps.measure} />
+      return <Agents virtualizableProps={virtualizableProps} model={model as Collection<AgentModel>} />
     case VirtualizableType.RouteCollection:
-      return <Routes model={model as Collection<RouteModel>} style={style} measure={expandableProps.measure} />
+      return <Routes virtualizableProps={virtualizableProps} model={model as Collection<RouteModel>} />
     case VirtualizableType.HookCollection:
       return null
     case VirtualizableType.Hook:
-      return <Hook style={style} model={model as HookModel} expandableProps={expandableProps} />
+      return <Hook virtualizableProps={virtualizableProps} model={model as HookModel} />
     case VirtualizableType.Command:
-      return <Command style={style} model={model as CommandModel} expandableProps={expandableProps} />
+      return <Command virtualizableProps={virtualizableProps} model={model as CommandModel} />
     case VirtualizableType.Error:
-      return <TestError style={style} model={model as AttemptModel} />
+      return <TestError virtualizableProps={virtualizableProps} model={model as ErrModel} />
     default:
       return null
   }

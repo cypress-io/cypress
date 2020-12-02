@@ -3,7 +3,7 @@ import { computed, observable } from 'mobx'
 
 import { RunnableModel } from './runnable-model'
 import { TestModel, TestState } from '../test/test-model'
-import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable-types'
 import { VirtualNodeModel } from '../tree/virtual-node-model'
 
 export class SuiteModel extends RunnableModel {

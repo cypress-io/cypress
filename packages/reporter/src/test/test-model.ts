@@ -10,7 +10,7 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
-import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable-types'
 import { VirtualNodeModel } from '../tree/virtual-node-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'

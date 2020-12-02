@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import React, { MouseEvent } from 'react'
+import React, { MouseEvent, useEffect } from 'react'
 import { observer } from 'mobx-react'
 import Markdown from 'markdown-it'
 
@@ -9,8 +9,10 @@ import ErrorStack from '../errors/error-stack'
 
 import events from '../lib/events'
 import FlashOnClick from '../lib/flash-on-click'
-import { onEnterOrSpace } from '../lib/util'
-import { AttemptModel } from '../attempts/attempt-model'
+import { indentPadding, onEnterOrSpace } from '../lib/util'
+import { ErrModel } from './err-model'
+import { autorun } from 'mobx'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 interface DocsUrlProps {
   url: string | string[]
@@ -23,7 +25,7 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 
   return (<>
     {_.map(urlArray, (url) => (
-      <a className='runnable-err-docs-url' href={url} target='_blank' key={url}>
+      <a className='test-err-docs-url' href={url} target='_blank' key={url}>
         Learn more
       </a>
     ))}
@@ -31,21 +33,36 @@ const DocsUrl = ({ url }: DocsUrlProps) => {
 }
 
 interface TestErrorProps {
-  model: AttemptModel
-  style: React.CSSProperties
+  model: ErrModel
   isTestError?: boolean
+  virtualizableProps: VirtualizableProps
 }
 
-export const TestError = observer((props: TestErrorProps) => {
+export const TestError = observer(({ model, virtualizableProps }: TestErrorProps) => {
+  useEffect(() => {
+    const disposeAutorun = autorun(() => {
+      model.name
+      model.message
+      model.stack
+      model.codeFrame
+
+      virtualizableProps.measure()
+    })
+
+    return () => {
+      disposeAutorun()
+    }
+  }, [true])
+
   const md = new Markdown('zero')
 
   md.enable(['backticks', 'emphasis', 'escape'])
 
   const onPrint = () => {
-    events.emit('show:error', props.model)
+    events.emit('show:error', model.attempt)
   }
 
-  const _onPrintClick = (e: MouseEvent) => {
+  const onPrintClick = (e: MouseEvent) => {
     e.stopPropagation()
 
     onPrint()
@@ -55,36 +72,38 @@ export const TestError = observer((props: TestErrorProps) => {
     return message ? md.renderInline(message) : ''
   }
 
-  const { err } = props.model
+  if (!model) return null
 
-  if (!err) return null
+  const { codeFrame } = model
 
-  const { codeFrame } = err
-
-  if (!err.displayMessage) return null
+  if (!model.displayMessage) return null
 
   return (
-    <div className='runnable-err-wrapper' style={props.style}>
-      <div className='runnable-err'>
-        <div className='runnable-err-header'>
-          <div className='runnable-err-name'>
-            <i className='fas fa-exclamation-circle' />
-            {err.name}
+    <div
+      className={`test-err runnable-state-${model.attempt!.test.state}`}
+      style={indentPadding(virtualizableProps.style, model.level)}
+    >
+      <div className='hooks-container'>
+        <div className='test-err-wrapper'>
+          <div className='test-err-header'>
+            <div className='test-err-name'>
+              <i className='fas fa-exclamation-circle' />
+              {model.name}
+            </div>
           </div>
-        </div>
-        <div className='runnable-err-message'>
-          <span dangerouslySetInnerHTML={{ __html: formattedMessage(err.message) }} />
-          <DocsUrl url={err.docsUrl} />
-        </div>
-        {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
-        {err.stack &&
+          <div className='test-err-message'>
+            <span dangerouslySetInnerHTML={{ __html: formattedMessage(model.message) }} />
+            <DocsUrl url={model.docsUrl} />
+          </div>
+          {codeFrame && <ErrorCodeFrame codeFrame={codeFrame} />}
+          {model.stack &&
           <Collapsible
             header='View stack trace'
-            headerClass='runnable-err-stack-expander'
+            headerClass='test-err-stack-expander'
             headerExtras={
-              <FlashOnClick onClick={_onPrintClick} message="Printed output to your console">
+              <FlashOnClick onClick={onPrintClick} message="Printed output to your console">
                 <div
-                  className="runnable-err-print"
+                  className="test-err-print"
                   onKeyPress={onEnterOrSpace(onPrint)}
                   role='button'
                   tabIndex={0}
@@ -93,11 +112,13 @@ export const TestError = observer((props: TestErrorProps) => {
                 </div>
               </FlashOnClick>
             }
-            contentClass='runnable-err-stack-trace'
+            contentClass='test-err-stack-trace'
+            onToggle={virtualizableProps.measure}
           >
-            <ErrorStack err={err} />
+            <ErrorStack err={model} />
           </Collapsible>
-        }
+          }
+        </div>
       </div>
     </div>
   )

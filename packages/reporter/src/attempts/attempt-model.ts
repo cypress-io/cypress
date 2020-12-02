@@ -11,7 +11,7 @@ import { HookModel, HookName, HookProps } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import { InstrumentModel } from '../instruments/instrument-model'
-import { VirtualizableType } from '../tree/virtualizable'
+import { VirtualizableType } from '../tree/virtualizable-types'
 import { VirtualNodeModel } from './../tree/virtual-node-model'
 
 export class AttemptModel {
@@ -85,19 +85,26 @@ export class AttemptModel {
       type: VirtualizableType.HookCollection,
     })
 
+    // TODO: is this necessary? can we do without the hook collection and just individually add hooks?
     onCreateModel(this.hooks)
     _.each(props.hooks, this._addHook)
 
     _.each(props.commands, this._addCommand)
 
-    this.err = new ErrModel(props.err, `${this.id}-error`, test.level)
+    this.err = new ErrModel({
+      err: props.err,
+      id: `${this.id}-error`,
+      level: test.level,
+      attempt: this,
+    })
+
     onCreateModel(this.err)
 
     this.virtualNode.children = [
       this.agents.virtualNode,
       this.routes.virtualNode,
       this.hooks.virtualNode,
-      this.err.virtualNode,
+      this.err.virtualNode!,
     ]
   }
 
@@ -215,7 +222,6 @@ export class AttemptModel {
 
   _addHook = (props: HookProps) => {
     const hook = new HookModel(props, {
-      test: this.test,
       attempt: this,
       onCreateModel: this.onCreateModel,
     })

@@ -44,7 +44,7 @@ describe('test errors', () => {
 
     it('clicking prints to console', () => {
       cy.spy(runner, 'emit')
-      cy.get('.runnable-err-print').click().should(() => {
+      cy.get('.test-err-print').click().should(() => {
         expect(runner.emit).to.be.calledWith('runner:console:error')
 
         // @ts-ignore
@@ -56,22 +56,22 @@ describe('test errors', () => {
     })
 
     it('shows popup confirming output was printed', () => {
-      cy.get('.runnable-err-print').click()
+      cy.get('.test-err-print').click()
       cy.contains('Printed output to your console')
     })
 
     it('does not collapse test when clicking', () => {
-      cy.get('.runnable-err-print').click()
+      cy.get('.test-err-print').click()
       cy.get('.command-wrapper').should('be.visible')
     })
 
     it('does not expand or collapse stack trace when clicking', () => {
-      cy.get('.runnable-err-print').click()
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+      cy.get('.test-err-print').click()
+      cy.get('.test-err-stack-trace').should('not.be.visible')
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace').should('be.visible')
-      cy.get('.runnable-err-print').click()
-      cy.get('.runnable-err-stack-trace').should('be.visible')
+      cy.get('.test-err-stack-trace').should('be.visible')
+      cy.get('.test-err-print').click()
+      cy.get('.test-err-stack-trace').should('be.visible')
     })
   })
 
@@ -81,19 +81,19 @@ describe('test errors', () => {
     })
 
     it('hides stack trace by default', () => {
-      cy.get('.runnable-err-stack-trace').should('not.be.visible')
+      cy.get('.test-err-stack-trace').should('not.be.visible')
     })
 
     it('opens stack trace on click', () => {
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace').should('be.visible')
+      cy.get('.test-err-stack-trace').should('be.visible')
       cy.percySnapshot()
     })
 
     it('pairs down stack line whitespace', () => {
       cy.contains('View stack trace').click()
 
-      cy.get('.runnable-err-stack-trace').within(() => {
+      cy.get('.test-err-stack-trace').within(() => {
         cy.get('.err-stack-line')
         .should('have.length', 9)
         .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
@@ -114,7 +114,7 @@ describe('test errors', () => {
 
     it('does not include message in stack trace', () => {
       cy.contains('View stack trace').click()
-      cy.get('.runnable-err-stack-trace')
+      cy.get('.test-err-stack-trace')
       .invoke('text')
       .should('not.include', 'Some Error')
       .should('not.include', 'Message line below blank line')
@@ -123,12 +123,12 @@ describe('test errors', () => {
     it('turns files into links', () => {
       cy.contains('View stack trace').click()
 
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path')
+      cy.get('.test-err-stack-trace .test-err-file-path')
       .should('have.length', 2)
       .first()
       .should('have.text', 'my/app.js:2:7')
 
-      cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(1)
+      cy.get('.test-err-stack-trace .test-err-file-path').eq(1)
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
     })
 
@@ -162,13 +162,13 @@ describe('test errors', () => {
     it('displays tooltip on hover', () => {
       cy.contains('View stack trace').click()
 
-      cy.get('.runnable-err-stack-trace a').first().trigger('mouseover')
+      cy.get('.test-err-stack-trace a').first().trigger('mouseover')
       cy.get('.cy-tooltip').first().should('have.text', 'Open in IDE')
     })
 
     itHandlesFileOpening({
       getRunner: () => runner,
-      selector: '.runnable-err-stack-trace a',
+      selector: '.test-err-stack-trace a',
       file: {
         file: '/me/dev/my/app.js',
         line: 2,
@@ -182,13 +182,13 @@ describe('test errors', () => {
     it('shows error name', () => {
       setError(commandErr)
 
-      cy.get('.runnable-err-name').should('contain', commandErr.name)
+      cy.get('.test-err-name').should('contain', commandErr.name)
     })
 
     it('renders and escapes markdown', () => {
       setError(commandErr)
 
-      cy.get('.runnable-err-message')
+      cy.get('.test-err-message')
 
       // renders `foo` as <code>foo</code>
       .contains('code', 'foo')
@@ -197,18 +197,18 @@ describe('test errors', () => {
       })
 
       // renders /`bar/` as `bar`
-      cy.get('.runnable-err-message')
+      cy.get('.test-err-message')
       .should('contain', '`bar`')
 
       // renders **baz** as <strong>baz</strong>
-      cy.get('.runnable-err-message')
+      cy.get('.test-err-message')
       .contains('strong', 'baz')
       .then((content) => {
         expect(content).not.to.contain('**baz**')
       })
 
       // renders *fizz* as <em>fizz</em>
-      cy.get('.runnable-err-message')
+      cy.get('.test-err-message')
       .contains('em', 'fizz')
       .then((content) => {
         expect(content).not.to.contain('*fizz*')
@@ -219,7 +219,7 @@ describe('test errors', () => {
 
     // NOTE: still needs to be implemented
     it.skip('renders and escapes markdown with leading/trailing whitespace', () => {
-      cy.get('.runnable-err-message')
+      cy.get('.test-err-message')
 
       // https://github.com/cypress-io/cypress/issues/1360
       // renders ** buzz ** as <strong> buzz </strong>

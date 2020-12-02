@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
 
 import { VirtualNodeModel } from './virtual-node-model'
-import { VirtualizableType } from './virtualizable'
+import { VirtualizableType } from './virtualizable-types'
 
 export interface CollectionProps {
   id: string

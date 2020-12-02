@@ -15,8 +15,8 @@ import runnablesStore from '../runnables/runnables-store'
 import { Alias, AliasObject } from '../instruments/instrument-model'
 
 import { CommandModel } from './command-model'
-import { ExpandableProps } from '../collapsible/expandable'
 import { indentPadding } from '../lib/util'
+import { VirtualizableProps } from '../tree/virtualizable-types'
 
 const md = new Markdown()
 
@@ -133,9 +133,8 @@ const Progress = observer(({ model }: ProgressProps) => {
 
 interface Props {
   aliasesWithDuplicates: Array<Alias> | null
-  expandableProps: ExpandableProps
   model: CommandModel
-  style: React.CSSProperties
+  virtualizableProps: VirtualizableProps
 }
 
 @observer
@@ -145,7 +144,7 @@ export class Command extends Component<Props> {
   disposeAutorun: Function = () => {}
 
   componentDidMount () {
-    const { expandableProps } = this.props
+    const { virtualizableProps } = this.props
     const model = this.props.model
 
     this.disposeAutorun = autorun(() => {
@@ -153,21 +152,9 @@ export class Command extends Component<Props> {
       model.displayMessage
       model.displayName
       model.name
-      // model.state
-      // model.test.level
-      // model.test.state
-      // model.type
-      // model.event
-      // model.visible
-      // model.state
-      // model.numElements
-      // model.renderProps
-      // model.numElements
       // model.hasDuplicates
 
-      requestAnimationFrame(() => {
-        expandableProps.measure()
-      })
+      virtualizableProps.measure()
     })
   }
 
@@ -176,8 +163,8 @@ export class Command extends Component<Props> {
   }
 
   render () {
-    const { model, aliasesWithDuplicates, style } = this.props
-    const { message: displayMessage, test } = model
+    const { aliasesWithDuplicates, model, virtualizableProps } = this.props
+    const { message, test } = model
 
     return (
       <div
@@ -194,7 +181,7 @@ export class Command extends Component<Props> {
             'command-has-num-elements': model.state !== 'pending' && model.numElements != null,
             'command-is-pinned': this._isPinned(),
             'command-with-indicator': !!model.renderProps.indicator,
-            'command-scaled': displayMessage && displayMessage.length > 100,
+            'command-scaled': message && message.length > 100,
             'no-elements': !model.numElements,
             'multiple-elements': model.numElements > 1,
             'command-has-duplicates': model.hasDuplicates,
@@ -204,7 +191,7 @@ export class Command extends Component<Props> {
         )}
         onMouseOver={() => this._snapshot(true)}
         onMouseOut={() => this._snapshot(false)}
-        style={indentPadding(style, test.level)}
+        style={indentPadding(virtualizableProps.style, test.level)}
       >
         <div className='hooks-container'>
           <FlashOnClick
