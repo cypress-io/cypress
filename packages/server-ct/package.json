@@ -16,5 +16,8 @@
   "peerDependencies": {
     "val-loader": "2.x",
     "webpack": "4.x"
-  }
+  },
+  "files": [
+    "src"
+  ]
 }
