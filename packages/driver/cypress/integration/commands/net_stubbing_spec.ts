@@ -472,6 +472,60 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
+  context('events', function () {
+    // @see https://github.com/cypress-io/cypress/issues/9170
+    it('gracefully handles request received without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        req.reply({ bad: 'should not be received' })
+      })
+      .then(() => {
+        const routeIds = _.keys(state('routes'))
+
+        // delete the driver-side route - the server-side route will still exist and cause an event
+        // to be emitted to the driver
+        delete state('routes')[routeIds[0]]
+        expect(state('routes')).to.deep.eq({})
+
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ foo: 1 })
+      })
+    })
+
+    it('gracefully handles response received without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        state('routes', {})
+
+        req.reply((res) => {
+          res.send({ bad: 'should not be received' })
+        })
+      })
+      .then(() => {
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ foo: 1 })
+      })
+    })
+
+    it('gracefully handles response completed without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        req.reply((res) => {
+          state('routes', {})
+
+          res.send({ bar: 2 })
+        })
+      })
+      .then(() => {
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ bar: 2 })
+      })
+    })
+  })
+
   context('network handling', function () {
     // @see https://github.com/cypress-io/cypress/issues/8497
     it('can load transfer-encoding: chunked redirects', function () {
