@@ -564,11 +564,17 @@ class $Cypress {
 }
 
 function wrapMoment (moment) {
-  return function (...args) {
+  function deprecatedMoment (...args) {
     $errUtils.warnByPath('moment.deprecated')
 
     return moment.apply(moment, args)
   }
+  // copy all existing properties from "moment" like "moment.duration"
+  _.keys(moment).forEach((key) => {
+    deprecatedMoment[key] = moment[key]
+  })
+
+  return deprecatedMoment
 }
 
 // attach to $Cypress to access
