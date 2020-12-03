@@ -259,6 +259,9 @@ describe('Specs List', function () {
         })
 
         it('lists files after folders when in same directory', () => {
+          // 📁 bar
+          // 📁 foo
+          // app
           cy.get('.list-as-table.integration')
           .find('li').first().should('contain', 'accounts')
 
