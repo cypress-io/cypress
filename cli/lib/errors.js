@@ -185,21 +185,17 @@ const invalidCacheDirectory = {
 
 const insufficientPermissionOnSmokeTest = {
   description:
-    'Cypress cannot use some directory due to file permissions',
+    'Cypress cannot access a directory due to file permissions',
   solution: stripIndent`
-    If you are seeing this on some cache directory path
+    If you're seeing this error when accessing a cache directory path
 
       (e.g: ~/.cache or %userprofile%\AppData\Local\Cypress\Cache\<version>\Cypress)
 
-    then try to set CYPRESS_CACHE_FOLDER environment values, e.g.
+    try setting the \`CYPRESS_CACHE_FOLDER\` environment variable and install again.
 
       CYPRESS_CACHE_FOLDER=<Your own directory> cypress install
 
-    and try again, 
-    Or, consider create a folder with your own permission first.
-    If you're working on Windows, See:
-    https://answers.microsoft.com/en-us/windows/forum/windows_10-files-winpc/give-permissions-to-files-and-folders-in-windows/78ee562c-a21f-4a32-8691-73aac1415373
-  `,
+    Or consider creating a folder with the proper permissions first.`,
 }
 
 const versionMismatch = {
