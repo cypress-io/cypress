@@ -563,6 +563,14 @@ class $Cypress {
   }
 }
 
+function wrapMoment (moment) {
+  return function (...args) {
+    $errUtils.warnByPath('moment.deprecated')
+
+    return moment.apply(moment, args)
+  }
+}
+
 // attach to $Cypress to access
 // all of the constructors
 // to enable users to monkeypatch
@@ -588,7 +596,7 @@ $Cypress.prototype.Screenshot = $Screenshot
 $Cypress.prototype.SelectorPlayground = $SelectorPlayground
 $Cypress.prototype.utils = $utils
 $Cypress.prototype._ = _
-$Cypress.prototype.moment = moment
+$Cypress.prototype.moment = wrapMoment(moment)
 $Cypress.prototype.Blob = blobUtil
 $Cypress.prototype.Promise = Promise
 $Cypress.prototype.minimatch = minimatch
