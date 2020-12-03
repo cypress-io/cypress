@@ -2,12 +2,13 @@ import _ from 'lodash'
 
 import {
   Route,
-  Request,
+  Interception,
   CyHttpMessages,
   StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
 } from '../types'
+import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
@@ -18,7 +19,7 @@ import { HandlerFn } from './'
 import Bluebird from 'bluebird'
 
 export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = (Cypress, frame, { getRoute, emitNetEvent }) => {
-  function getRequestLog (route: Route, request: Omit<Request, 'log'>) {
+  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
       displayName: 'req',
@@ -49,7 +50,9 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   const route = getRoute(frame.routeHandlerId)
   const { req, requestId, routeHandlerId } = frame
 
-  const request: Partial<Request> = {
+  parseJsonBody(req)
+
+  const request: Partial<Interception> = {
     id: requestId,
     request: req,
     state: 'Received',
@@ -139,6 +142,10 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
       _.merge(request.request, continueFrame.req)
 
+      if (_.isObject(continueFrame.req!.body)) {
+        continueFrame.req!.body = JSON.stringify(continueFrame.req!.body)
+      }
+
       emitNetEvent('http:request:continue', continueFrame)
     }
 
@@ -149,11 +156,11 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     return sendContinueFrame()
   }
 
-  request.log = getRequestLog(route, request as Omit<Request, 'log'>)
+  request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
-  route.requests[requestId] = request as Request
+  route.requests[requestId] = request as Interception
 
   if (frame.notificationOnly) {
     return
@@ -205,7 +212,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     if (userReq.alias) {
       Cypress.state('aliasedRequests').push({
         alias: userReq.alias,
-        request: request as Request,
+        request: request as Interception,
       })
 
       delete userReq.alias

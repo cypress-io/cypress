@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import concatStream from 'concat-stream'
+import { concatStream } from '@packages/network'
 import Debug from 'debug'
 import url from 'url'
 
@@ -18,7 +18,12 @@ import {
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
 import { getRouteForRequest } from './route-matching'
-import { sendStaticResponse, emit, setResponseFromFixture } from './util'
+import {
+  sendStaticResponse,
+  emit,
+  setResponseFromFixture,
+  setDefaultHeaders,
+} from './util'
 import CyServer from '@packages/server'
 
 const debug = Debug('cypress:net-stubbing:server:intercept-request')
@@ -46,7 +51,10 @@ export const InterceptRequest: RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
-    onResponse: this.onResponse,
+    onResponse: (incomingRes, resStream) => {
+      setDefaultHeaders(this.req, incomingRes)
+      this.onResponse(incomingRes, resStream)
+    },
     req: this.req,
     res: this.res,
   }
@@ -154,8 +162,8 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
 
   // update problematic headers
   // update content-length if available
-  if (backendRequest.req.headers['content-length'] && frame.req.body) {
-    backendRequest.req.headers['content-length'] = frame.req.body.length
+  if (backendRequest.req.headers['content-length'] && frame.req.body != null) {
+    backendRequest.req.headers['content-length'] = Buffer.from(frame.req.body).byteLength.toString()
   }
 
   if (frame.hasResponseHandler) {

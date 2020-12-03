@@ -456,5 +456,12 @@ describe('src/cypress/location', () => {
         })
       })
     })
+
+    // https://github.com/cypress-io/cypress/issues/9360
+    it('does not remove slash when user passed it.', () => {
+      const url = Location.qualifyWithBaseUrl('http://localhost:3500/', '/pageOne?param1=/param/')
+
+      expect(url).to.eq('http://localhost:3500/pageOne?param1=/param/')
+    })
   })
 })

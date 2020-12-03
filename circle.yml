@@ -287,6 +287,7 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
+      - check-conditional-ci
       # make sure the binary and NPM package files are present
       - run: ls -l
       - run: ls -l cypress.zip cypress.tgz
@@ -534,6 +535,7 @@ jobs:
             desktop-gui-component-tests,
             cli-visual-tests,
             runner-integration-tests-chrome,
+            reporter-integration-tests,
       - run: npx percy finalize --all
 
   cli-visual-tests:
@@ -761,41 +763,6 @@ jobs:
           path: /tmp/artifacts
       - store-npm-logs
 
-  desktop-gui-visual-tests:
-    <<: *defaults
-    parallelism: 1
-    steps:
-      - attach_workspace:
-          at: ~/
-      - check-conditional-ci
-      - run:
-          command: yarn build-prod
-          working_directory: packages/desktop-gui
-      - run:
-          name: Desktop GUI server
-          command: yarn start
-          working_directory: packages/desktop-gui
-          background: true
-      - run:
-          # will use PERCY_TOKEN environment variable if available
-          # to tie Percy builds together, use environment variables
-          # https://docs.percy.io/docs/parallel-test-suites
-          # we can use workflow id and list number of jobs with Percy screenshots
-          # if we allow Percy snapshots in more jobs, use the same
-          # PERCY_* variables in all of them
-          # NOTE: we only execute specs with "cy.percySnapshot" commands in them
-          command: |
-            CYPRESS_KONFIG_ENV=production \
-            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
-            PERCY_PARALLEL_TOTAL=1 \
-            yarn percy exec -- \
-            yarn cypress:run \
-              --spec cypress/integration/settings_spec.js,cypress/integration/specs_list_spec.js,cypress/integration/runs_list_spec.js,cypress/integration/login_spec.js
-          working_directory: packages/desktop-gui
-      - verify-mocha-results
-      # we don't really need any artifacts - we are only interested in visual screenshots
-      - store-npm-logs
-
   desktop-gui-component-tests:
     <<: *defaults
     parallelism: 1
@@ -844,6 +811,9 @@ jobs:
           command: |
             CYPRESS_KONFIG_ENV=production \
             CYPRESS_RECORD_KEY=$PACKAGES_RECORD_KEY \
+            PERCY_PARALLEL_NONCE=$CIRCLE_WORKFLOW_ID \
+            PERCY_PARALLEL_TOTAL=-1 \
+            yarn percy exec -- \
             yarn cypress:run --record --parallel --group reporter
           working_directory: packages/reporter
       - verify-mocha-results
@@ -948,9 +918,6 @@ jobs:
           name: Build
           command: yarn workspace @cypress/react build
       - run:
-          name: Run unit test
-          command: yarn workspace @cypress/react test:unit
-      - run:
           name: Run tests
           command: yarn workspace @cypress/react test
       - store-npm-logs
@@ -990,6 +957,17 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
+
+
+  npm-create-cypress-tests:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - run: yarn workspace create-cypress-tests build
+      - run:
+          name: Run unit test
+          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1820,6 +1798,10 @@ linux-workflow: &linux-workflow
         path: examples/webpack-options
         requires:
           - npm-react
+
+    - npm-create-cypress-tests:
+        requires:
+          - build
 
     - npm-eslint-plugin-dev:
         requires:

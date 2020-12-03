@@ -1,4 +1,4 @@
-import { Route, Request } from '../types'
+import { Route, Interception } from '../types'
 import { NetEventFrames } from '@packages/net-stubbing/lib/types'
 import { onRequestReceived } from './request-received'
 import { onResponseReceived } from './response-received'
@@ -6,7 +6,7 @@ import { onRequestComplete } from './request-complete'
 import Bluebird from 'bluebird'
 
 export type HandlerFn<Frame extends NetEventFrames.BaseHttp> = (Cypress: Cypress.Cypress, frame: Frame, opts: {
-  getRequest: (routeHandlerId: string, requestId: string) => Request | undefined
+  getRequest: (routeHandlerId: string, requestId: string) => Interception | undefined
   getRoute: (routeHandlerId: string) => Route | undefined
   emitNetEvent: (eventName: string, frame: any) => Promise<void>
   failCurrentTest: (err: Error) => void
@@ -25,7 +25,7 @@ export function registerEvents (Cypress: Cypress.Cypress) {
     return state('routes')[routeHandlerId]
   }
 
-  function getRequest (routeHandlerId: string, requestId: string): Request | undefined {
+  function getRequest (routeHandlerId: string, requestId: string): Interception | undefined {
     const route = getRoute(routeHandlerId)
 
     if (route) {

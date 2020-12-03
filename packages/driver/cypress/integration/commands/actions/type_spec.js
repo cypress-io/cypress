@@ -385,6 +385,77 @@ describe('src/cy/commands/actions/type - #type', () => {
         expect(args[2]).to.eq(animationDistanceThreshold)
       })
     })
+
+    it('can specify scrollBehavior in options', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in options', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo', { scrollBehavior: false })
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('calls scrollIntoView by default', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+      })
+    })
+
+    it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.type()` failed because the center of this element is hidden from view')
+        expect(cy.state('window').scrollY).to.equal(0)
+        expect(cy.state('window').scrollX).to.equal(0)
+
+        done()
+      })
+
+      // make sure the input is out of view
+      const $body = cy.$$('body')
+
+      $('<div>Long block 5</div>')
+      .css({
+        height: '500px',
+        border: '1px solid red',
+        marginTop: '10px',
+        width: '100%',
+      }).prependTo($body)
+
+      cy.get(':text:first').type('foo', { scrollBehavior: false, timeout: 200 })
+    })
   })
 
   describe('input types where no extra formatting required', () => {

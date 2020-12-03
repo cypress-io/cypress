@@ -267,11 +267,21 @@ const elIsNotElementFromPoint = function ($el) {
   // if the element at point is not a descendent
   // of our $el then we know it's being covered or its
   // not visible
+  if ($elements.isDescendent($el, $elAtPoint)) {
+    return false
+  }
 
   // we also check if the element at point is a
   // parent since pointer-events: none
   // will cause elAtCenterPoint to fall through to parent
-  return !($elements.isDescendent($el, $elAtPoint) || ($elAtPoint && $elements.isAncestor($el, $elAtPoint)))
+  if (
+    ($el.css('pointer-events') === 'none' || $el.parent().css('pointer-events') === 'none') &&
+    ($elAtPoint && $elements.isAncestor($el, $elAtPoint))
+  ) {
+    return false
+  }
+
+  return true
 }
 
 const elIsOutOfBoundsOfAncestorsOverflow = function ($el, $ancestor = $elements.getParent($el)) {

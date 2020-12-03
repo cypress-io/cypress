@@ -216,6 +216,17 @@
       "default": true,
       "description": "Whether to wait for elements to finish animating before executing commands"
     },
+    "scrollBehavior": {
+      "enum": [
+        false,
+        "center",
+        "top",
+        "bottom",
+        "nearest"
+      ],
+      "default": "top",
+      "description": "Viewport position to which an element should be scrolled prior to action commands. Setting `false` disables scrolling."
+    },
     "projectId": {
       "type": "string",
       "default": null,
