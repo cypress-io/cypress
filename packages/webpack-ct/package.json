@@ -22,5 +22,8 @@
   "peerDependencies": {
     "webpack": "> 4"
   },
+  "files": [
+    "dist"
+  ],
   "license": "MIT"
 }
