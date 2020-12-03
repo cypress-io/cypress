@@ -1,14 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const { _ } = Cypress
 
 const expectedDomain = Cypress.env('expectedDomain')
@@ -48,25 +38,25 @@ describe('cookies', () => {
   })
 
   beforeEach(() => {
-    return cy.wrap({ foo: 'bar' })
+    cy.wrap({ foo: 'bar' })
   })
 
   context('with preserve', () => {
     before(() => {
-      return Cypress.Cookies.defaults({
+      Cypress.Cookies.defaults({
         preserve: 'foo1',
       })
     })
 
     it('can get all cookies', () => {
-      const expectedCookieKeys = ['domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry']
+      let expectedCookieKeys = ['domain', 'name', 'value', 'path', 'secure', 'httpOnly', 'expiry']
 
       if (defaultSameSite) {
         // samesite will only be present if it is defined
         expectedCookieKeys.push('sameSite')
       }
 
-      const assertFirstCookie = function (c) {
+      const assertFirstCookie = (c) => {
         expect(c.domain).to.eq(setCookieDomain)
         expect(c.httpOnly).to.eq(false)
         expect(c.name).to.eq('foo')
@@ -75,21 +65,21 @@ describe('cookies', () => {
         expect(c.secure).to.eq(false)
         expect(c.expiry).to.be.a('number')
         expect(c.sameSite).to.eq(defaultSameSite)
-
         expect(c).to.have.keys(expectedCookieKeys)
       }
 
-      return cy
-      .clearCookie('foo1')
-      .setCookie('foo', 'bar').then(assertFirstCookie)
-      .getCookies()
+      cy.clearCookie('foo1')
+      cy.setCookie('foo', 'bar').then(assertFirstCookie)
+      cy.getCookies()
       .should('have.length', 1)
       .its(0)
       .then(assertFirstCookie)
-      .clearCookies()
+
+      cy.clearCookies()
       .should('be.null')
-      .setCookie('wtf', 'bob', { httpOnly: true, path: '/foo', secure: true })
-      .getCookie('wtf').then((c) => {
+
+      cy.setCookie('wtf', 'bob', { httpOnly: true, path: '/foo', secure: true })
+      cy.getCookie('wtf').then((c) => {
         expect(c.domain).to.eq(setCookieDomain)
         expect(c.httpOnly).to.eq(true)
         expect(c.name).to.eq('wtf')
@@ -98,13 +88,14 @@ describe('cookies', () => {
         expect(c.secure).to.eq(true)
         expect(c.expiry).to.be.a('number')
         expect(c.sameSite).to.eq(defaultSameSite)
-
         expect(c).to.have.keys(expectedCookieKeys)
-      }).clearCookie('wtf')
-      .should('be.null')
-      .getCookie('doesNotExist')
-      .should('be.null')
-      .document()
+      })
+
+      cy.clearCookie('wtf').should('be.null')
+
+      cy.getCookie('doesNotExist').should('be.null')
+
+      cy.document()
       .its('cookie')
       .should('be.empty')
     })
@@ -112,105 +103,97 @@ describe('cookies', () => {
     it('resets cookies between tests correctly', () => {
       Cypress.Cookies.preserveOnce('foo2')
 
-      for (let i = 1; i <= 100; i++) {
-        (((i) => {
-          return cy.setCookie(`foo${i}`, `${i}`)
-        }))(i)
-      }
+      Cypress._.times(100, (i) => {
+        cy.setCookie(`foo${i}`, `${i}`)
+      })
 
-      return cy.getCookies().should('have.length', 100)
+      cy.getCookies().should('have.length', 100)
     })
 
     it('should be only two left now', () => {
-      return cy.getCookies().should('have.length', 2)
+      cy.getCookies().should('have.length', 2)
     })
 
     it('handles undefined cookies', () => {
-      return cy.visit('/cookieWithNoName')
+      cy.visit('/cookieWithNoName')
     })
   })
 
   context('without preserve', () => {
     before(() => {
-      return Cypress.Cookies.defaults({
+      Cypress.Cookies.defaults({
         preserve: [],
       })
     })
 
     it('sends set cookies to path', () => {
-      return cy
-      .clearCookies()
-      .setCookie('asdf', 'jkl')
+      cy.clearCookies()
+      cy.setCookie('asdf', 'jkl')
       .request('/requestCookies')
       .its('body').should('deep.eq', { asdf: 'jkl' })
     })
 
     it('handles expired cookies secure', () => {
-      return cy
-      .visit('/set')
-      .getCookie('shouldExpire').should('exist')
-      .visit('/expirationMaxAge')
-      .getCookie('shouldExpire').should('not.exist')
-      .visit('/set')
-      .getCookie('shouldExpire').should('exist')
-      .visit('/expirationExpires')
-      .getCookie('shouldExpire').should('not.exist')
+      cy.visit('/set')
+      cy.getCookie('shouldExpire').should('exist')
+      cy.visit('/expirationMaxAge')
+      cy.getCookie('shouldExpire').should('not.exist')
+      cy.visit('/set')
+      cy.getCookie('shouldExpire').should('exist')
+      cy.visit('/expirationExpires')
+      cy.getCookie('shouldExpire').should('not.exist')
     })
 
     it('issue: #224 sets expired cookies between redirects', () => {
-      return cy
-      .visit('/set')
-      .getCookie('shouldExpire').should('exist')
-      .visit('/expirationRedirect')
-      .url().should('include', '/logout')
-      .getCookie('shouldExpire').should('not.exist')
+      cy.visit('/set')
+      cy.getCookie('shouldExpire').should('exist')
+      cy.visit('/expirationRedirect')
+      cy.url().should('include', '/logout')
+      cy.getCookie('shouldExpire').should('not.exist')
 
-      .visit('/set')
-      .getCookie('shouldExpire').should('exist')
-      .request('/expirationRedirect')
-      .getCookie('shouldExpire').should('not.exist')
+      cy.visit('/set')
+      cy.getCookie('shouldExpire').should('exist')
+      cy.request('/expirationRedirect')
+      cy.getCookie('shouldExpire').should('not.exist')
     })
 
-    it('issue: #1321 failing to set or parse cookie', () => // this is happening because the original cookie was set
-    // with a secure flag, and then expired without the secure
-    // flag.
-    {
-      return cy
-      .visit(`${httpsUrl}/setOneHourFromNowAndSecure`)
-      .getCookies().should('have.length', 1)
+    it('issue: #1321 failing to set or parse cookie', () => {
+      // this is happening because the original cookie was set
+      // with a secure flag, and then expired without the secure flag.
+      cy.visit(`${httpsUrl}/setOneHourFromNowAndSecure`)
+      cy.getCookies().should('have.length', 1)
 
       // secure cookies should have been attached
-      .request(`${httpsUrl}/requestCookies`)
+      cy.request(`${httpsUrl}/requestCookies`)
       .its('body').should('deep.eq', { shouldExpire: 'oneHour' })
 
       // secure cookies should not have been attached
-      .request(`${httpUrl}/requestCookies`)
+      cy.request(`${httpUrl}/requestCookies`)
       .its('body').should('deep.eq', {})
 
-      .visit(`${httpsUrl}/expirationMaxAge`)
-      .getCookies().should('be.empty')
+      cy.visit(`${httpsUrl}/expirationMaxAge`)
+      cy.getCookies().should('be.empty')
     })
 
     it('issue: #2724 does not fail on invalid cookies', () => {
-      return cy.request(`${httpsUrl}/invalidCookies`)
+      cy.request(`${httpsUrl}/invalidCookies`)
     })
 
     // https://github.com/cypress-io/cypress/issues/5453
     it('can set and clear cookie', () => {
       cy.setCookie('foo', 'bar')
       cy.clearCookie('foo')
+      cy.getCookie('foo').should('be.null')
+    });
 
-      return cy.getCookie('foo').should('be.null')
-    })
-
-    return [
+    [
       'visit',
       'request',
     ].forEach((cmd) => {
       context(`in a cy.${cmd}`, () => {
       // https://github.com/cypress-io/cypress/issues/5894
         it('can successfully send cookies as a Cookie header', () => {
-          return cy[cmd]({
+          cy[cmd]({
             url: `/requestCookies${cmd === 'visit' ? 'Html' : ''}`,
             headers: {
               Cookie: 'a=b;b=c;c=s%3APtCc3lNiuqN0AtR9ffgKUnUsDzR5n_4B.qzFDJDvqx8PZNvmOkmcexDs7fRJLOel56Z8Ii6PL%2BFo',
@@ -238,7 +221,7 @@ describe('cookies', () => {
         it('ignores invalid set-cookie headers that contain control chars', () => {
           cy[cmd]('/invalidControlCharCookie')
 
-          return cy.request('/requestCookies')
+          cy.request('/requestCookies')
           .then((res) => {
             return res.body
           }).then((cookies) => {
@@ -258,7 +241,6 @@ describe('cookies', () => {
             cy.getCookies()
             .then((cookies) => {
               expect(cookies).to.have.length(1)
-
               expect(cookies[0]).to.include({
                 name: 'domaincookie',
                 value: 'foo',
@@ -266,8 +248,7 @@ describe('cookies', () => {
             })
 
             cy.request(requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
-
-            return cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
           })
 
           it('is set properly with redirects', () => {
@@ -276,7 +257,6 @@ describe('cookies', () => {
             cy.getCookies()
             .then((cookies) => {
               expect(cookies).to.have.length(1)
-
               expect(cookies[0]).to.include({
                 name: 'domaincookie',
                 value: 'foo',
@@ -289,13 +269,12 @@ describe('cookies', () => {
             }
 
             cy.request(requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
-
-            return cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
+            cy.request('POST', requestCookiesUrl).its('body').should('include', { 'domaincookie': 'foo' })
           })
         })
 
         context('with SameSite', () => {
-          return [
+          [
             { header: 'None', sameSite: 'no_restriction' },
             { header: 'Strict', sameSite: 'strict' },
             { header: 'Lax', sameSite: 'lax' },
@@ -324,27 +303,27 @@ describe('cookies', () => {
 
               cy.visit(`${cookieDumpUrl}Html`)
               .then((res) => {
-                return cy.get('body').then((body) => {
+                cy.get('body').then((body) => {
                   return JSON.parse(body.text())
                 })
               }).then((body) => {
                 expect(body).to.have.property(name).and.eq('someval')
               })
 
-              return cy.request(cookieDumpUrl)
+              cy.request(cookieDumpUrl)
               .then(({ body }) => {
                 expect(body).to.have.property(name).and.eq('someval')
               })
             })
           })
-        })
+        });
 
-        return [
+        [
           ['HTTP', otherUrl],
           ['HTTPS', otherHttpsUrl],
         ].forEach(([protocol, altUrl]) => {
           context(`when redirected to a ${protocol} URL`, () => {
-            return [
+            [
               ['different domain', 7],
               ['same domain', 8],
             ].forEach(([title, n]) => {
@@ -354,7 +333,7 @@ describe('cookies', () => {
                 let expectedGetCookiesArray = []
 
                 _.times(n + 1, (i) => {
-                  return ['foo', 'bar'].forEach((tag) => {
+                  ['foo', 'bar'].forEach((tag) => {
                     const expectedCookie = {
                       'name': `name${tag}${i}`,
                       'value': `val${tag}${i}`,
@@ -368,7 +347,7 @@ describe('cookies', () => {
                       expectedCookie.sameSite = defaultSameSite
                     }
 
-                    return expectedGetCookiesArray.push(expectedCookie)
+                    expectedGetCookiesArray.push(expectedCookie)
                   })
                 })
 
@@ -380,7 +359,7 @@ describe('cookies', () => {
 
                 cy[cmd](`/setCascadingCookies?n=${n}&a=${altUrl}&b=${Cypress.env('baseUrl')}`)
 
-                return cy.getCookies({ domain: null }).then((cookies) => {
+                cy.getCookies({ domain: null }).then((cookies) => {
                 // reverse them so they'll be in the order they were set
                   cookies = _.reverse(_.sortBy(cookies, _.property('name')))
 

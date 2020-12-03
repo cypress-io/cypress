@@ -7,14 +7,14 @@ exports['e2e baseUrl / https / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (base_url_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/base_url_spec.coffee                                           │
+  │ Specs:      1 found (base_url_spec.js)                                                         │
+  │ Searched:   cypress/integration/base_url_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  base_url_spec.coffee                                                            (1 of 1)
+  Running:  base_url_spec.js                                                                (1 of 1)
 
 
   base url
@@ -35,14 +35,14 @@ exports['e2e baseUrl / https / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     base_url_spec.coffee                                                             │
+  │ Spec Ran:     base_url_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/base_url_spec.coffee.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/base_url_spec.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -52,7 +52,7 @@ exports['e2e baseUrl / https / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  base_url_spec.coffee                     XX:XX        1        1        -        -        - │
+  │ ✔  base_url_spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
@@ -68,14 +68,14 @@ exports['e2e baseUrl / http / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (base_url_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/base_url_spec.coffee                                           │
+  │ Specs:      1 found (base_url_spec.js)                                                         │
+  │ Searched:   cypress/integration/base_url_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  base_url_spec.coffee                                                            (1 of 1)
+  Running:  base_url_spec.js                                                                (1 of 1)
 
 
   base url
@@ -96,14 +96,14 @@ exports['e2e baseUrl / http / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     base_url_spec.coffee                                                             │
+  │ Spec Ran:     base_url_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/base_url_spec.coffee.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/base_url_spec.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -113,7 +113,7 @@ exports['e2e baseUrl / http / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  base_url_spec.coffee                     XX:XX        1        1        -        -        - │
+  │ ✔  base_url_spec.js                         XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
