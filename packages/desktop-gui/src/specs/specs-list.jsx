@@ -29,26 +29,26 @@ const formRunButtonLabel = (areTestsAlreadyRunning, specType, specsN) => {
 }
 
 /**
- * Returns array of spec sorted with Dir first, then Spec.
- * @param {any[]} specs array of specs with random order of 'Spec'/'Dir'
+ * Returns array of specs sorted with folders first, then file.
+ * @param {any[]} specs array of specs with random order of 'file'/'folder'
  */
-const separatedSpecList = (specs) => {
-  let retList = []
-  let dirs = []
+const sortedSpecList = (specs) => {
+  let list = []
+  let folders = []
   let files = []
 
   _.map(specs, (spec) => {
     if (spec.hasChildren) {
-      dirs.push(spec)
+      folders.push(spec)
     } else {
       files.push(spec)
     }
   })
 
-  retList = retList.concat(dirs)
-  retList = retList.concat(files)
+  list = list.concat(folders)
+  list = list.concat(files)
 
-  return retList
+  return list
 }
 
 // Note: this component can be mounted and unmounted
@@ -288,7 +288,7 @@ class SpecsList extends Component {
             isExpanded ?
               <div>
                 <ul className={`list-as-table ${specType}`}>
-                  {_.map(separatedSpecList(spec.children), (spec) => this._specItem(spec, nestingLevel + 1))}
+                  {_.map(sortedSpecList(spec.children), (spec) => this._specItem(spec, nestingLevel + 1))}
                 </ul>
               </div> :
               null
