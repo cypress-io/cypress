@@ -12,6 +12,7 @@
   "dependencies": {
     "clean-webpack-plugin": "^3.0.0",
     "val-loader": "^2.1.2",
+    "webpack": "4.X.X",
     "webpack-dev-server": "^3.11.0",
     "webpack-merge": "^5.4.0"
   },
