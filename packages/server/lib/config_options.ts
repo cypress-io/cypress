@@ -261,6 +261,10 @@ export const options = [
     defaultValue: true,
     validation: v.isBoolean,
   }, {
+    name: 'scrollBehavior',
+    defaultValue: 'top',
+    validation: v.isOneOf('center', 'top', 'bottom', 'nearest', false),
+  }, {
     name: 'watchForFileChanges',
     defaultValue: true,
     validation: v.isBoolean,

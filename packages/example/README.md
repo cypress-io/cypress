@@ -1,4 +1,9 @@
-## Example
+
+## Scaffold config files 
+
+The `cypress/plugins/index.js`, `cypress/support/*` and `cypress/tsconfig.json` from this package are used for user scaffolding in `packages/server` and `npm/create-cypress-tests`. This configuration files are by default injected when user instals Cypress.
+
+## Examples
 
 This repo contains the source code for pushing out [https://example.cypress.io](https://example.cypress.io).
 

@@ -1,3 +1,10 @@
+# [@cypress/react-v4.16.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.16...@cypress/react-v4.16.0) (2020-11-30)
+
+
+### Features
+
+* create-cypress-tests wizard ([#8857](https://github.com/cypress-io/cypress/issues/8857)) ([21ee591](https://github.com/cypress-io/cypress/commit/21ee591d1e9c4083a0c67f2062ced92708c0cedd))
+
 # [@cypress/react-v4.15.16](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.15...@cypress/react-v4.15.16) (2020-11-23)
 
 

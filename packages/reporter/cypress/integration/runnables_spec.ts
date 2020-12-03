@@ -50,6 +50,9 @@ describe('runnables', () => {
   it('displays runnables when they load', () => {
     start()
     cy.get('.runnable').should('have.length', 9)
+
+    // ensure the page is loaded before taking snapshot
+    cy.contains('test 4').should('be.visible')
     cy.percySnapshot()
   })
 
