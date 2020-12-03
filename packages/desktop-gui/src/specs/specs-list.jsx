@@ -287,7 +287,7 @@ class SpecsList extends Component {
           {
             isExpanded ?
               <div>
-                <ul className='list-as-table'>
+                <ul className={`list-as-table ${specType}`}>
                   {_.map(separatedSpecList(spec.children), (spec) => this._specItem(spec, nestingLevel + 1))}
                 </ul>
               </div> :
