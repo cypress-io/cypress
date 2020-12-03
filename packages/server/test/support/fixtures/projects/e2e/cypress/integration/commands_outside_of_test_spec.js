@@ -1,15 +1,23 @@
+/* eslint-disable
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("No Running Test", function() {
-  it("foo", () => cy.noop());
+describe('No Running Test', () => {
+  it('foo', () => {
+    return cy.noop()
+  })
 
-  it("bar", function() {});
+  it('bar', () => {})
 
-  return context("nested suite", function() {
-    cy.viewport("iphone-6");
-    return cy.get("h1");
-  });
-});
+  context('nested suite', () => {
+    cy.viewport('iphone-6')
+
+    return cy.get('h1')
+  })
+})

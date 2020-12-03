@@ -1,18 +1,27 @@
+/* eslint-disable
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("ending early",  function() {
-  it("does not end early", function() {});
+describe('ending early', () => {
+  it('does not end early', () => {})
 
-  return it("does end early", function(done) {
+  it('does end early', (done) => {
     cy
-      .noop({})
-      .then(() => Cypress.Promise.delay(1000)).noop({})
-      .wrap({});
+    .noop({})
+    .then(() => {
+      return Cypress.Promise.delay(1000)
+    }).noop({})
+    .wrap({})
 
-    return setTimeout(() => done()
-    , 500);
-  });
-});
+    return setTimeout(() => {
+      return done()
+    }
+    , 500)
+  })
+})
