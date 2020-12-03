@@ -1,9 +1,15 @@
-describe "No Running Test", ->
-  it "foo", ->
-    cy.noop()
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("No Running Test", function() {
+  it("foo", () => cy.noop());
 
-  it "bar", ->
+  it("bar", function() {});
 
-  context "nested suite", ->
-    cy.viewport("iphone-6")
-    cy.get("h1")
+  return context("nested suite", function() {
+    cy.viewport("iphone-6");
+    return cy.get("h1");
+  });
+});

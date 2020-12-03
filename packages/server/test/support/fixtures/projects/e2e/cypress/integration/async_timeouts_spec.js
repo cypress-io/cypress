@@ -1,13 +1,21 @@
-describe "async", ->
-  it "bar fails", (done) ->
-    @timeout(100)
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("async", function() {
+  it("bar fails", function(done) {
+    this.timeout(100);
 
-    cy.on "fail", ->
+    cy.on("fail", function() {});
 
-    ## async caught fail
-    foo.bar()
+    //# async caught fail
+    return foo.bar();
+  });
 
-  it "fails async after cypress command", (done) ->
-    @timeout(100)
+  return it("fails async after cypress command", function(done) {
+    this.timeout(100);
 
-    cy.wait(0)
+    return cy.wait(0);
+  });
+});

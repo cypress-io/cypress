@@ -1,14 +1,18 @@
-describe "ending early",  ->
-  it "does not end early", ->
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("ending early",  function() {
+  it("does not end early", function() {});
 
-  it "does end early", (done) ->
+  return it("does end early", function(done) {
     cy
       .noop({})
-      .then ->
-        Cypress.Promise.delay(1000)
-      .noop({})
-      .wrap({})
+      .then(() => Cypress.Promise.delay(1000)).noop({})
+      .wrap({});
 
-    setTimeout ->
-      done()
-    , 500
+    return setTimeout(() => done()
+    , 500);
+  });
+});
