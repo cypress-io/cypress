@@ -28,7 +28,6 @@ export interface ReporterProps {
   events: Events
   error?: RunnablesErrorModel
   spec: Cypress.Cypress['spec']
-  resetStatsOnSpecChange: boolean
 }
 
 @observer
@@ -50,7 +49,6 @@ class Reporter extends Component<ReporterProps> {
       relative: PropTypes.string.isRequired,
       absolute: PropTypes.string.isRequired,
     }),
-    resetStatsOnSpecChange: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -59,7 +57,6 @@ class Reporter extends Component<ReporterProps> {
     runnablesStore,
     scroller,
     statsStore,
-    resetStatsOnSpecChange: false,
   }
 
   render () {
@@ -82,8 +79,10 @@ class Reporter extends Component<ReporterProps> {
     )
   }
 
+  // this hoof will only trigger if we switch spec file at runtime
+  // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: ReporterProps) {
-    if (this.props.resetStatsOnSpecChange && this.props.spec.relative !== newProps.spec.relative) {
+    if (this.props.spec.relative !== newProps.spec.relative) {
       action('reporter:stats:reset', () => {
         this.props.statsStore.reset()
       })()
