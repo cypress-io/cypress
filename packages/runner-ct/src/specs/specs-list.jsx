@@ -2,49 +2,34 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import specsStore from './specs-store'
 import SpecGroup from './spec-group'
-import StateContext from './spec-context'
 
 @observer
 class SpecsList extends Component {
   render () {
+    const { state } = this.props
     const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : {}
 
     return (
       <div className="specs-list">
         <header>Select tests to run...</header>
-        <StateContext.Provider value={{
-          activeSpec: this.props.state.spec?.name,
-          chooseSpec: (spec) => this.chooseSpec(spec),
-          isActive,
-        }}>
-          <ul>{
+        <ul>{
 
-            Object.keys(specGroups).map((groupKey) => {
-              const group = specGroups[groupKey]
+          Object.keys(specGroups).map((groupKey) => {
+            const group = specGroups[groupKey]
 
-              return (
-                <SpecGroup
-                  key={groupKey}
-                  groupKey={groupKey}
-                  group={group}/>
-              )
-            })}
-
-          </ul>
-        </StateContext.Provider>
+            return (
+              <SpecGroup
+                key={groupKey}
+                active={state.spec?.name}
+                groupKey={groupKey}
+                state={state}
+                group={group}/>
+            )
+          })}
+        </ul>
       </div>
     )
   }
-
-  chooseSpec (spec) {
-    return () => {
-      this.props.state.setSpec(spec)
-    }
-  }
-}
-
-function isActive (spec, activeSpec) {
-  return activeSpec && spec.name === activeSpec
 }
 
 /**
