@@ -22312,10 +22312,10 @@ mocha-banner@1.1.2:
     its-name "1.0.0"
     terminal-banner "1.1.0"
 
-mocha-junit-reporter@1.23.1:
-  version "1.23.1"
-  resolved "https://registry.yarnpkg.com/mocha-junit-reporter/-/mocha-junit-reporter-1.23.1.tgz#ba11519c0b967f404e4123dd69bc4ba022ab0f12"
-  integrity sha512-qeDvKlZyAH2YJE1vhryvjUQ06t2hcnwwu4k5Ddwn0GQINhgEYFhlGM0DwYCVUHq5cuo32qAW6HDsTHt7zz99Ng==
+mocha-junit-reporter@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/mocha-junit-reporter/-/mocha-junit-reporter-2.0.0.tgz#3bf990fce7a42c0d2b718f188553a25d9f24b9a2"
+  integrity sha512-20HoWh2HEfhqmigfXOKUhZQyX23JImskc37ZOhIjBKoBEsb+4cAFRJpAVhFpnvsztLklW/gFVzsrobjLwmX4lA==
   dependencies:
     debug "^2.2.0"
     md5 "^2.1.0"
