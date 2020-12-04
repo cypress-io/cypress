@@ -158,7 +158,6 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 `
 
 exports['e2e spec_isolation fails [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -718,11 +717,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1282,11 +1281,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1846,11 +1845,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -2291,11 +2290,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -2736,11 +2735,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -3181,5 +3180,6 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
