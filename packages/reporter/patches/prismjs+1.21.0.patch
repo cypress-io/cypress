@@ -1,0 +1,12 @@
+diff --git a/node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js b/node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js
+index 5f0a5e0..c607c6b 100644
+--- a/node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js
++++ b/node_modules/prismjs/plugins/line-highlight/prism-line-highlight.js
+@@ -122,6 +122,7 @@
+ 					}
+ 
+ 					line.style.top = (start - offset - 1) * lineHeight + 'px';
++					line.style.width = pre.scrollWidth + 'px';
+ 
+ 					line.textContent = new Array(end - start + 2).join(' \n');
+ 				});
