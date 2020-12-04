@@ -308,6 +308,12 @@ const eventManager = {
     })
 
     Cypress.on('log:changed', (log) => {
+      if (log.instrument === 'command' && log.consoleProps) {
+        log.wallClockStoppedAt = Date.now()
+        log.duration = +log.wallClockStoppedAt - (+new Date(log.wallClockStartedAt))
+        log.consoleProps.Duration = `${log.duration}ms`
+      }
+
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
