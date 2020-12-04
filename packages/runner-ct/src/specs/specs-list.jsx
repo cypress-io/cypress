@@ -39,9 +39,7 @@ class SpecsList extends Component {
  * @param {Array<{name: string}>} specs
  */
 function makeSpecHierarchy (specs) {
-  const groups = {}
-
-  specs.forEach((spec) => {
+  return specs.reduce((groups, spec) => {
     const pathArray = spec.name.split('/')
 
     let currentGroup = groups
@@ -56,9 +54,9 @@ function makeSpecHierarchy (specs) {
         currentGroup[pathPart] = spec
       }
     })
-  })
 
-  return groups
+    return groups
+  }, {})
 }
 
 export default SpecsList
