@@ -17,6 +17,12 @@ class SpecsList extends Component {
           Object.keys(specGroups).map((groupKey) => {
             const group = specGroups[groupKey]
 
+            { // The `active` prop here is used only to
+              // force repaint of the tree when selecting a spec
+              // It is not used for anything else than to patch react
+              // not comparing members of an object (this.props.state in this case)
+            }
+
             return (
               <SpecGroup
                 key={groupKey}
