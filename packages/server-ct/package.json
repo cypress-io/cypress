@@ -7,9 +7,6 @@
     "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/example",
     "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/example"
   },
-  "dependencies": {
-    "send": "^0.17.1"
-  },
   "devDependencies": {
     "val-loader": "2.x",
     "webpack": "4.x"

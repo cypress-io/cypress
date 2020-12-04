@@ -1,5 +1,6 @@
 const _ = require('lodash')
 const path = require('path')
+const send = require('send')
 const debug = require('debug')('cypress:server:runner-ct')
 
 function dist (...args) {
@@ -15,13 +16,11 @@ const getPathToDist = (...args) => {
 module.exports = {
   getPathToDist,
 
-  middleware (send) {
-    return (req, res) => {
-      const pathToFile = getPathToDist(req.params[0])
+  handle (req, res) {
+    const pathToFile = getPathToDist(req.params[0])
 
-      return send(req, pathToFile)
-      .pipe(res)
-    }
+    return send(req, pathToFile)
+    .pipe(res)
   },
 
   serve (req, res, options) {

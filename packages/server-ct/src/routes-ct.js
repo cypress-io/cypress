@@ -1,4 +1,3 @@
-const send = require('send')
 const debug = require('debug')('cypress:server:routes')
 const httpProxy = require('http-proxy')
 
@@ -9,7 +8,9 @@ const staticPkg = require('@packages/static')
 module.exports = ({ app, config, project, onError }) => {
   const proxy = httpProxy.createProxyServer()
 
-  app.get('/__cypress/runner/*', runnerCt.middleware(send))
+  app.get('/__cypress/runner/*', (req, res) => {
+    runnerCt.handle(req, res)
+  })
 
   app.get('/__cypress/static/*', (req, res) => {
     staticPkg.handle(req, res)
