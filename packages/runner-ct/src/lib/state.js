@@ -1,5 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
+import eventManager from './event-manager'
+import { Promise } from 'bluebird'
 
 const _defaults = {
   messageTitle: null,
@@ -58,6 +60,9 @@ export default class State {
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
+  /** @type {"single" | "multi"} */
+  @observable runMode = 'single'
+  @observable multiSpecs = [];
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -151,5 +156,28 @@ export default class State {
 
   @action setSpec (spec) {
     this.spec = spec
+  }
+
+  @action addSpecToMultiMode (spec) {
+    if (this.multiSpecs.some((includedSpec) => includedSpec.name === spec.name)) {
+      return
+    }
+
+    this.runMode = 'multi'
+    this.multiSpecs = [...this.multiSpecs, spec]
+
+    this.runMultiMode().catch((e) => {
+      throw e
+    })
+  }
+
+  runMultiMode = async () => {
+    const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
+
+    this.setSpec(null)
+    for (const spec of this.multiSpecs) {
+      this.setSpec(spec)
+      await waitForRunEnd()
+    }
   }
 }

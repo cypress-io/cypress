@@ -102,12 +102,13 @@ class App extends Component {
           top: 0,
           bottom: 0,
         }}>
-          {spec && (<Reporter
+          {this.props.state.multiSpecs.length > 0 && (<Reporter
             runner={this.props.eventManager.reporterBus}
-            spec={spec}
+            specs={this.props.state.multiSpecs}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
             error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
+            // resetStatsOnSpecChange={this.props.state.runMode !== 'multiple'}
           />)}
         </div>
       </>

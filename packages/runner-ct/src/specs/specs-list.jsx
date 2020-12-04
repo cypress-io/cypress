@@ -6,6 +6,12 @@ import StateContext from './spec-context'
 
 @observer
 class SpecsList extends Component {
+  isActive = (spec) => {
+    return this.props.state.runMode === 'multi'
+      ? this.props.state.multiSpecs.some((includedSpec) => includedSpec.absolute === spec.absolute)
+      : spec.name === this.props.state.spec?.name
+  }
+
   render () {
     const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : {}
 
@@ -14,8 +20,8 @@ class SpecsList extends Component {
         <header>Select tests to run...</header>
         <StateContext.Provider value={{
           activeSpec: this.props.state.spec?.name,
-          chooseSpec: (spec) => this.chooseSpec(spec),
-          isActive,
+          chooseSpec: (spec, isMulti) => isMulti ? this.props.state.addSpecToMultiMode(spec) : this.props.state.setSpec(spec),
+          isActive: this.isActive,
         }}>
           <ul>{
 
@@ -35,16 +41,6 @@ class SpecsList extends Component {
       </div>
     )
   }
-
-  chooseSpec (spec) {
-    return () => {
-      this.props.state.setSpec(spec)
-    }
-  }
-}
-
-function isActive (spec, activeSpec) {
-  return activeSpec && spec.name === activeSpec
 }
 
 /**

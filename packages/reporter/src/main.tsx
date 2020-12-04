@@ -60,18 +60,23 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState, runnablesStore, spec, scroller, error, events, statsStore } = this.props
+    const { appState, runnablesStore, spec, specs, scroller, error, events, statsStore } = this.props
+
+    const specsToShow = specs ? specs : [spec]
 
     return (
       <div className='reporter'>
         <Header appState={appState} statsStore={statsStore} />
-        <Runnables
-          appState={appState}
-          error={error}
-          runnablesStore={runnablesStore}
-          scroller={scroller}
-          spec={spec}
-        />
+        {specsToShow.map((spec) => (
+          <Runnables
+            key={spec.absolute}
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={spec}
+          />
+        ))}
         <ForcedGcWarning
           appState={appState}
           events={events}/>
@@ -82,11 +87,11 @@ class Reporter extends Component<ReporterProps> {
   // this hoof will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: ReporterProps) {
-    if (this.props.spec.relative !== newProps.spec.relative) {
-      action('reporter:stats:reset', () => {
-        this.props.statsStore.reset()
-      })()
-    }
+    // if (this.props.resetStatsOnSpecChange && this.props.spec.relative !== newProps.spec.relative) {
+    //   action('reporter:stats:reset', () => {
+    //     this.props.statsStore.reset()
+    //   })()
+    // }
   }
 
   componentDidMount () {
