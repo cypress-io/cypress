@@ -10,22 +10,24 @@ Vue.config.productionTip = false
 
 describe('hello', () => {
   it('works', async () => {
-    // window.Vue = Vue
-    // new Vue(HelloWorld).$mount('#root')
-    const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })
+    mount(HelloWorld, {
+      attachTo: '#__cy_app',
+      propsData: {
+        msg: 'Hello World!',
+      },
+    })
 
-    expect(wrapper.exists()).to.eq(true)
-    // const ret = await cy.get('h1')
-    // expect(ret.length).to.eq(1)
+    cy.get('h1').contains('Hello World!')
   })
 
   it('works again', async () => {
-    // window.Vue = Vue
-    // new Vue(HelloWorld).$mount('#root')
-    const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })
+    mount(HelloWorld, {
+      attachTo: '#__cy_app',
+      propsData: {
+        msg: 'Hello World!',
+      },
+    })
 
-    expect(wrapper.exists()).to.eq(true)
-    // const ret = await cy.get('h1')
-    // expect(ret.length).to.eq(1)
+    cy.get('h1').contains('Hello World!')
   })
 })
