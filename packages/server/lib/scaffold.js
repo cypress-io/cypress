@@ -157,7 +157,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying example.json into ${folder}`)
 
-      return this._copy(cypressEx.getPathToFixture(), folder, config)
+      return this._copy('fixtures/example.json', folder, config)
     })
   },
 
@@ -172,14 +172,10 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying commands.js and index.js to ${folder}`)
 
-      return cypressEx.getPathToSupportFiles()
-      .then((supportFiles) => {
-        return Promise.all(
-          supportFiles.map((supportFilePath) => {
-            return this._copy(supportFilePath, folder, config)
-          }),
-        )
-      })
+      return Promise.join(
+        this._copy('support/commands.js', folder, config),
+        this._copy('support/index.js', folder, config),
+      )
     })
   },
 
@@ -194,7 +190,7 @@ module.exports = {
     return this.verifyScaffolding(folder, () => {
       debug(`copying index.js into ${folder}`)
 
-      return this._copy(cypressEx.getPathToPlugins(), folder, config)
+      return this._copy('plugins/index.js', folder, config)
     })
   },
 

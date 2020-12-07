@@ -16,33 +16,8 @@ module.exports = {
       )
     )
   },
-  
+
   getFolderName () {
     return 'examples'
   },
-
-  getPathToPlugins() {
-    return path.resolve(__dirname, '..', 'cypress', 'plugins', 'index.js')
-  },
-
-  getPathToSupportFiles() {
-    return glob(
-      path.join(
-        __dirname,
-        '..',
-        'cypress',
-        'support',
-        '**',
-        '*'
-      )
-    )
-  },
-
-  getPathToTsConfig() {
-    return path.resolve(__dirname, '..', 'cypress', 'tsconfig.json')
-  },
-
-  getPathToFixture() {
-    return path.resolve(__dirname, '..', 'cypress', 'fixtures', 'example.json')
-  }
 }

@@ -74,6 +74,9 @@ describe('header', () => {
       cy.get('.passed .num').should('have.text', '2')
       cy.get('.failed .num').should('have.text', '3')
       cy.get('.pending .num').should('have.text', '1')
+
+      // ensure the page is loaded before taking snapshot
+      cy.contains('test 4').should('be.visible')
       cy.percySnapshot()
     })
 

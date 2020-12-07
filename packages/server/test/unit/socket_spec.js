@@ -702,8 +702,8 @@ describe('lib/socket', () => {
         })
 
         it('calls statAsync on .coffee file', function () {
-          return this.socket.onTestFileChange('foo/bar.coffee').then(() => {
-            expect(fs.statAsync).to.be.calledWith('foo/bar.coffee')
+          return this.socket.onTestFileChange('foo/bar_coffee.coffee').then(() => {
+            expect(fs.statAsync).to.be.calledWith('foo/bar_coffee.coffee')
           })
         })
 

@@ -2,7 +2,7 @@ branches:
   only:
     - master
     - develop
-    - v6.0-release
+    - revert-create-cypress-tests
     - /win*/
 
 # https://www.appveyor.com/docs/lang/nodejs-iojs/

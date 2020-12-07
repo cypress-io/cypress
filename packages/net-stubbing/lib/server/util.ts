@@ -17,6 +17,7 @@ import MimeTypes from 'mime-types'
 
 // TODO: move this into net-stubbing once cy.route is removed
 import { parseContentType } from '@packages/server/lib/controllers/xhrs'
+import { CypressIncomingRequest } from '@packages/proxy'
 
 const debug = Debug('cypress:net-stubbing:server:util')
 
@@ -81,6 +82,27 @@ const caseInsensitiveGet = function (obj, lowercaseProperty) {
       return obj[key]
     }
   }
+}
+
+const caseInsensitiveHas = function (obj, lowercaseProperty) {
+  for (let key of Object.keys(obj)) {
+    if (key.toLowerCase() === lowercaseProperty) {
+      return true
+    }
+  }
+
+  return false
+}
+
+export function setDefaultHeaders (req: CypressIncomingRequest, res: IncomingMessage) {
+  const setDefaultHeader = (lowercaseHeader: string, defaultValueFn: () => string) => {
+    if (!caseInsensitiveHas(res.headers, lowercaseHeader)) {
+      res.headers[lowercaseHeader] = defaultValueFn()
+    }
+  }
+
+  setDefaultHeader('access-control-allow-origin', () => caseInsensitiveGet(req.headers, 'origin') || '*')
+  setDefaultHeader('access-control-allow-credentials', _.constant('true'))
 }
 
 export async function setResponseFromFixture (getFixtureFn: GetFixtureFn, staticResponse: BackendStaticResponse) {

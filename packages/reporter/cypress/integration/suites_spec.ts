@@ -34,6 +34,8 @@ describe('suites', () => {
     .closest('.runnable')
     .should('have.class', 'suite')
 
+    // ensure the page is loaded before taking snapshot
+    cy.contains('test 4').should('be.visible')
     cy.percySnapshot()
   })
 
