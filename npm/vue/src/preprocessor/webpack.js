@@ -5,8 +5,7 @@ import util from 'util'
 // https://github.com/cypress-io/cypress-webpack-preprocessor
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const debug = require('debug')('@cypress/vue')
-const VueLoaderPlugin = require('vue-loader/lib/plugin')
-// const { VueLoaderPlugin } = require('vue-loader')
+const { VueLoaderPlugin } = require('vue-loader')
 const fw = require('find-webpack')
 
 // Preventing chunks because we don't serve static assets
@@ -55,7 +54,7 @@ function inlineUrlLoadedAssets (options = {}) {
 function compileTemplate (options = {}) {
   options.resolve = options.resolve || {}
   options.resolve.alias = options.resolve.alias || {}
-  options.resolve.alias['vue$'] = 'vue/dist/vue.esm.js'
+  options.resolve.alias['vue$'] = 'vue/dist/vue.esm-bundler.js'
 }
 
 /**
