@@ -1,31 +1,29 @@
 /* eslint-env mocha,chai,jest */
 
-// import '../main'
 import HelloWorld from './HelloWorld'
-import { mount } from '@vue/test-utils'
+import { mount } from '@cypress/vue'
 import Vue from 'vue'
-// import Vue from 'vue'
 
 Vue.config.productionTip = false
 
 describe('hello', () => {
-  it('works', async () => {
-    // window.Vue = Vue
-    // new Vue(HelloWorld).$mount('#root')
-    const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })
+  it('works!', () => {
+    mount(HelloWorld, {
+      propsData: {
+        msg: 'Hello World!',
+      },
+    })
 
-    expect(wrapper.exists()).to.eq(true)
-    // const ret = await cy.get('h1')
-    // expect(ret.length).to.eq(1)
+    cy.get('h1').contains('Hello World!')
   })
 
-  it('works again', async () => {
-    // window.Vue = Vue
-    // new Vue(HelloWorld).$mount('#root')
-    const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })
+  it('works again', () => {
+    mount(HelloWorld, {
+      propsData: {
+        msg: 'Hello World Again!',
+      },
+    })
 
-    expect(wrapper.exists()).to.eq(true)
-    // const ret = await cy.get('h1')
-    // expect(ret.length).to.eq(1)
+    cy.get('h1').contains('Hello World Again!')
   })
 })
