@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import { h } from 'vue'
 import { mount } from '@cypress/vue'
 
 describe('Single render function component', () => {
@@ -118,18 +119,16 @@ describe('Component with slot', () => {
 describe('Component with arguments', () => {
   // the component definition
   const appComponent = {
-    render (createElement) {
+    render () {
       let a = this.elementtype.split(',')
 
-      return createElement(
+      return h(
         a[0],
         {
-          attrs: {
-            id: a[3],
-            style: `color:${a[1]};font-size:${a[2]};`,
-          },
+          id: a[3],
+          style: `color:${a[1]};font-size:${a[2]};`,
         },
-        this.$slots.default || '<EMPTY>',
+        this.$slots.default ? this.$slots.default() : '<EMPTY>',
       )
     },
     props: {
@@ -155,10 +154,10 @@ describe('Component with arguments', () => {
       {
         template: `
           <div>
-            <app-component :elementtype = "'div,blue,30,div1'">Hello World</app-component>
-            <app-component :elementtype = "'h3,red,30,h3tag'">Hello Peter</app-component>
-            <app-component :elementtype = "'p,green,30,ptag'">Hello John</app-component>
-            <app-component :elementtype = "'div,violet,30,divtag'">Hello Herry</app-component>
+            <app-component :elementtype = "'div,blue,30px,div1'">Hello World</app-component>
+            <app-component :elementtype = "'h3,red,30px,h3tag'">Hello Peter</app-component>
+            <app-component :elementtype = "'p,green,30px,ptag'">Hello John</app-component>
+            <app-component :elementtype = "'div,violet,30px,divtag'">Hello Herry</app-component>
           </div>
         `,
       },
@@ -168,20 +167,20 @@ describe('Component with arguments', () => {
     cy.contains('h3', 'Hello Peter').should(
       'have.attr',
       'style',
-      'color:red;font-size:30;',
+      'color: red; font-size: 30px;',
     )
 
     cy.contains('p', 'Hello John').should(
       'have.attr',
       'style',
-      'color:green;font-size:30;',
+      'color: green; font-size: 30px;',
     )
   })
 
   it('mounts just the component and passes props', () => {
     mount(appComponent, {
-      propsData: {
-        elementtype: 'h3,red,30,h3tag',
+      props: {
+        elementtype: 'h3,red,30px,h3tag',
       },
     })
 
@@ -189,7 +188,7 @@ describe('Component with arguments', () => {
     cy.contains('<EMPTY>').should(
       'have.attr',
       'style',
-      'color:red;font-size:30;',
+      'color:red;font-size:30px;',
     )
   })
 })
