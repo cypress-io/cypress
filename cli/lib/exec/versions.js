@@ -28,12 +28,29 @@ const getVersions = () => {
 
     return state.getBinaryDir()
   })
-  .then(state.getBinaryPkgVersionAsync)
-  .then((binaryVersion) => {
-    return {
-      package: util.pkgVersion(),
-      binary: binaryVersion || 'not installed',
+  .then(state.getBinaryPkgAsync)
+  .then((pkg) => {
+    const versions = {
+      binary: state.getBinaryPkgVersion(pkg),
+      electronVersion: state.getBinaryElectronVersion(pkg),
+      electronNodeVersion: state.getBinaryElectronNodeVersion(pkg),
     }
+
+    debug('binary versions %o', versions)
+
+    return versions
+  })
+  .then((binaryVersions) => {
+    const versions = {
+      package: util.pkgVersion(),
+      binary: binaryVersions.binary || 'not installed',
+      electronVersion: binaryVersions.electronVersion || 'not found',
+      electronNodeVersion: binaryVersions.electronNodeVersion || 'not found',
+    }
+
+    debug('combined versions %o', versions)
+
+    return versions
   })
 }
 

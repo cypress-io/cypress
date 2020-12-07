@@ -15,7 +15,6 @@ The reporter shows the running results of the tests. It includes the following:
   - hooks
   - commands and assertions with detailed information
   - any failures/errors
-- Toggle-able auto-scrolling of command log
 
 ## Building
 
@@ -38,7 +37,6 @@ To see the reporter render, see [Developing the driver](../driver/README.md#Deve
 ### Watching
 
 - Runs `*.js` and `*.jsx` through babel and bundles with browserify into single `dist/reporter.js`
-- Runs associated unit test of file saved and outputs to terminal
 - Compiles `*.scss` files to single `dist/reporter.css`
 
 ```bash
@@ -46,8 +44,6 @@ yarn workspace @packages/reporter watch
 ```
 
 ## Testing
-
-### Cypress
 
 Run Cypress tests found in `cypress/integration`.
 
@@ -58,11 +54,3 @@ yarn workspace @packages/reporter cypress:open
 You'll want to run `yarn workspace @packages/reporter watch` to iterate on the reporter under test while testing.
 
 You'll want to run `yarn workspace @packages/runner watch` to get changes to the main Cypress reporter while testing.
-
-### Enzyme
-
-Run enzyme component tests found in `*.spec` files in `src`:
-
-```bash
-yarn workspace @packages/reporter test
-```

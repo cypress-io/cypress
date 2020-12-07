@@ -60,8 +60,12 @@ $.find.matchesSelector = function (elem, expr) {
 $.expr.pseudos.focus = $dom.isFocused
 $.expr.filters.focus = $dom.isFocused
 $.expr.pseudos.focused = $dom.isFocused
-$.expr.filters.visible = $dom.isVisible
-$.expr.filters.hidden = $dom.isHidden
+
+// we have to add the arrow function here since
+// jquery calls this function with additional parameters
+// https://github.com/jquery/jquery/blob/master/src/selector.js#L1196
+$.expr.filters.visible = (el) => $dom.isVisible(el)
+$.expr.filters.hidden = (el) => $dom.isHidden(el)
 
 $.expr.cacheLength = 1
 

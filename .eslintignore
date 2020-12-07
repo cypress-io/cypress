@@ -11,8 +11,8 @@
 **/support/fixtures/*
 !**/support/fixtures/projects
 **/support/fixtures/projects/**/_fixtures/*
+**/support/fixtures/projects/**/static/*
 **/support/fixtures/projects/**/*.jsx
-**/support/fixtures/projects/**/jquery.js
 **/support/fixtures/projects/**/fail.js
 **/test/fixtures
 **/vendor
@@ -42,3 +42,7 @@ npm/webpack-preprocessor/examples/use-babelrc/cypress/integration/spec.js
 **/.git
 
 /npm/react/bin/*
+/npm/react/**/coverage
+**/.next/**
+/npm/create-cypress-tests/initial-template
+/npm/create-cypress-tests/**/*.template.*

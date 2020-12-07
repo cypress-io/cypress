@@ -17,7 +17,7 @@ let hasVisitedAboutBlank = null
 let currentlyVisitingAboutBlank = null
 let knownCommandCausedInstability = null
 
-const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers selfProxy'
+const REQUEST_URL_OPTS = 'auth failOnStatusCode retryOnNetworkFailure retryOnStatusCodeFailure method body headers'
 .split(' ')
 
 const VISIT_OPTS = 'url log onBeforeLoad onLoad timeout requestTimeout'
@@ -875,11 +875,6 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         if (existingAuth) {
           // strip out the existing url if we have one
           url = url.replace(`${existingAuth}@`, '')
-        }
-
-        // hack to make cy.visits interceptable by network stubbing
-        if (Cypress.config('experimentalNetworkStubbing')) {
-          options.selfProxy = true
         }
 
         return requestUrl(url, options)

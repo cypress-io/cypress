@@ -359,26 +359,43 @@ exports['cli CYPRESS_INTERNAL_ENV catches environment "foo" 1'] = `
 exports['cli version and binary version 1'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['cli version and binary version 2'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+Electron version: not found
+Bundled Node version: not found
+`
+
+exports['cli version with electron and node 1'] = `
+Cypress package version: 1.2.3
+Cypress binary version: X.Y.Z
+Electron version: 10.10.88
+Bundled Node version: 11.10.3
 `
 
 exports['cli version no binary version 1'] = `
 Cypress package version: 1.2.3
 Cypress binary version: not installed
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['cli --version no binary version 1'] = `
 Cypress package version: 1.2.3
 Cypress binary version: not installed
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['cli -v no binary version 1'] = `
 Cypress package version: 1.2.3
 Cypress binary version: not installed
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['cli cypress run warns with space-separated --spec 1'] = `
@@ -445,11 +462,15 @@ exports['cli CYPRESS_INTERNAL_ENV allows and warns when staging environment 1'] 
 exports['cli version and binary version with npm log silent'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['cli version and binary version with npm log warn'] = `
 Cypress package version: 1.2.3
 Cypress binary version: X.Y.Z
+Electron version: not found
+Bundled Node version: not found
 `
 
 exports['prints explanation when no cache'] = `

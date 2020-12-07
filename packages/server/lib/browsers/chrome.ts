@@ -106,6 +106,10 @@ const DEFAULT_ARGS = [
   '--disable-breakpad',
   '--password-store=basic',
   '--use-mock-keychain',
+
+  // write shared memory files into '/tmp' instead of '/dev/shm'
+  // https://github.com/cypress-io/cypress/issues/5336
+  '--disable-dev-shm-usage',
 ]
 
 /**
@@ -262,7 +266,10 @@ const _maybeRecordVideo = async function (client, options) {
   }
 
   debug('starting screencast')
-  client.on('Page.screencastFrame', options.onScreencastFrame)
+  client.on('Page.screencastFrame', (meta) => {
+    options.onScreencastFrame(meta)
+    client.send('Page.screencastFrameAck', { sessionId: meta.sessionId })
+  })
 
   await client.send('Page.startScreencast', {
     format: 'jpeg',

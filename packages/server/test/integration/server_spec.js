@@ -735,7 +735,7 @@ describe('Server', () => {
             url: 'http://mlb.mlb.com/',
             originalUrl: 'http://mlb.com/',
             status: 500,
-            statusText: 'Server Error',
+            statusText: 'Internal Server Error',
             cookies: [],
             redirects: ['307: http://mlb.mlb.com/'],
           })

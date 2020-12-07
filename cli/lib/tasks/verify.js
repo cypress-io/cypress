@@ -318,7 +318,10 @@ const start = (options = {}) => {
     return debug('binaryDir is ', binaryDir)
   })
   .then(() => {
-    return state.getBinaryPkgVersionAsync(binaryDir)
+    return state.getBinaryPkgAsync(binaryDir)
+  })
+  .then((pkg) => {
+    return state.getBinaryPkgVersion(pkg)
   })
   .then((binaryVersion) => {
     if (!binaryVersion) {

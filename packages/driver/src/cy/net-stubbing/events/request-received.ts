@@ -2,12 +2,13 @@ import _ from 'lodash'
 
 import {
   Route,
-  Request,
+  Interception,
   CyHttpMessages,
   StaticResponse,
   SERIALIZABLE_REQ_PROPS,
   NetEventFrames,
 } from '../types'
+import { parseJsonBody } from './utils'
 import {
   validateStaticResponse,
   getBackendStaticResponse,
@@ -18,7 +19,7 @@ import { HandlerFn } from './'
 import Bluebird from 'bluebird'
 
 export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = (Cypress, frame, { getRoute, emitNetEvent }) => {
-  function getRequestLog (route: Route, request: Omit<Request, 'log'>) {
+  function getRequestLog (route: Route, request: Omit<Interception, 'log'>) {
     return Cypress.log({
       name: 'xhr',
       displayName: 'req',
@@ -49,10 +50,14 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
   const route = getRoute(frame.routeHandlerId)
   const { req, requestId, routeHandlerId } = frame
 
-  const request: Partial<Request> = {
+  parseJsonBody(req)
+
+  const request: Partial<Interception> = {
     id: requestId,
     request: req,
     state: 'Received',
+    requestWaited: false,
+    responseWaited: false,
   }
 
   const continueFrame: Partial<NetEventFrames.HttpRequestContinue> = {
@@ -111,7 +116,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     destroy () {
       userReq.reply({
         forceNetworkError: true,
-      })
+      }) // TODO: this misnomer is a holdover from XHR, should be numRequests
     },
   }
 
@@ -124,10 +129,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
     continueSent = true
 
-    if (request) {
-      request.state = 'Intercepted'
-    }
-
     if (continueFrame) {
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
@@ -137,21 +138,28 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
       _.merge(request.request, continueFrame.req)
 
+      if (_.isObject(continueFrame.req!.body)) {
+        continueFrame.req!.body = JSON.stringify(continueFrame.req!.body)
+      }
+
       emitNetEvent('http:request:continue', continueFrame)
     }
 
-    request.log.fireChangeEvent()
+    if (request) {
+      request.state = 'Intercepted'
+      request.log && request.log.fireChangeEvent()
+    }
   }
 
   if (!route) {
     return sendContinueFrame()
   }
 
-  request.log = getRequestLog(route, request as Omit<Request, 'log'>)
+  request.log = getRequestLog(route, request as Omit<Interception, 'log'>)
 
   // TODO: this misnomer is a holdover from XHR, should be numRequests
   route.log.set('numResponses', (route.log.get('numResponses') || 0) + 1)
-  route.requests[requestId] = request as Request
+  route.requests[requestId] = request as Interception
 
   if (frame.notificationOnly) {
     return
@@ -200,6 +208,15 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
     resolved = true
   })
   .then(() => {
+    if (userReq.alias) {
+      Cypress.state('aliasedRequests').push({
+        alias: userReq.alias,
+        request: request as Interception,
+      })
+
+      delete userReq.alias
+    }
+
     if (!replyCalled) {
       // handler function resolved without resolving request, pass on
       continueFrame.tryNextRoute = true

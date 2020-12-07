@@ -85,10 +85,10 @@ function findSpecsOfType (searchOptions, specPattern) {
   }
 
   // example of resolved paths in the returned spec object
-  // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.coffee
+  // filePath                          = /Users/bmann/Dev/my-project/cypress/integration/foo.js
   // integrationFolderPath             = /Users/bmann/Dev/my-project/cypress/integration
-  // relativePathFromSearchFolder      = foo.coffee
-  // relativePathFromProjectRoot       = cypress/integration/foo.coffee
+  // relativePathFromSearchFolder      = foo.js
+  // relativePathFromProjectRoot       = cypress/integration/foo.js
 
   const relativePathFromSearchFolder = (file) => {
     return path.relative(searchFolderPath, file)

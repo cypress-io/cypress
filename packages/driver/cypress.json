@@ -7,6 +7,5 @@
   "reporter": "cypress-multi-reporters",
   "reporterOptions": {
     "configFile": "../../mocha-reporter-config.json"
-  },
-  "experimentalNetworkStubbing": true
+  }
 }

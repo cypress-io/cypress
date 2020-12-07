@@ -5,6 +5,7 @@ const path = require('path')
 const Promise = require('bluebird')
 const proxyquire = require('proxyquire')
 const mockfs = require('mock-fs')
+const { expect } = require('chai')
 const debug = require('debug')('test')
 
 const fs = require(`${lib}/fs`)
@@ -32,8 +33,18 @@ describe('lib/tasks/state', function () {
     os.platform.returns('darwin')
   })
 
-  context('.getBinaryPkgVersionAsync', function () {
-    it('resolves version from version file when it exists', function () {
+  context('.getBinaryPkgVersion', function () {
+    it('returns version if present', () => {
+      expect(state.getBinaryPkgVersion({ version: '1.2.3' })).to.equal('1.2.3')
+    })
+
+    it('returns null if passed null', () => {
+      expect(state.getBinaryPkgVersion(null)).to.equal(null)
+    })
+  })
+
+  context('.getBinaryPkgAsync', function () {
+    it('resolves with loaded file when the file exists', function () {
       sinon
       .stub(fs, 'pathExistsAsync')
       .withArgs(binaryPkgPath)
@@ -44,8 +55,8 @@ describe('lib/tasks/state', function () {
       .withArgs(binaryPkgPath)
       .resolves({ version: '2.0.48' })
 
-      return state.getBinaryPkgVersionAsync(binaryDir).then((binaryVersion) => {
-        expect(binaryVersion).to.equal('2.0.48')
+      return state.getBinaryPkgAsync(binaryDir).then((result) => {
+        expect(result).to.deep.equal({ version: '2.0.48' })
       })
     })
 
@@ -53,9 +64,9 @@ describe('lib/tasks/state', function () {
       sinon.stub(fs, 'pathExistsAsync').resolves(false)
 
       return state
-      .getBinaryPkgVersionAsync(binaryDir)
-      .then((binaryVersion) => {
-        return expect(binaryVersion).to.equal(null)
+      .getBinaryPkgAsync(binaryDir)
+      .then((result) => {
+        return expect(result).to.equal(null)
       })
     })
 
@@ -75,9 +86,9 @@ describe('lib/tasks/state', function () {
       .resolves({ version: '3.4.5' })
 
       return state
-      .getBinaryPkgVersionAsync(customBinaryDir)
-      .then((binaryVersion) => {
-        return expect(binaryVersion).to.equal('3.4.5')
+      .getBinaryPkgAsync(customBinaryDir)
+      .then((result) => {
+        return expect(result).to.deep.equal({ version: '3.4.5' })
       })
     })
   })

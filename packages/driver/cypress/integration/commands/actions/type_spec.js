@@ -254,6 +254,12 @@ describe('src/cy/commands/actions/type - #type', () => {
       })
     })
 
+    it('can type when element has `opacity: 0`', () => {
+      cy.$$('input:text:first').css('opacity', 0)
+      cy.get('input:text:first').type('foo')
+      .should('have.value', 'foo')
+    })
+
     it('waits until element becomes visible', () => {
       const $txt = cy.$$(':text:first').hide()
 
@@ -378,6 +384,77 @@ describe('src/cy/commands/actions/type - #type', () => {
 
         expect(args[2]).to.eq(animationDistanceThreshold)
       })
+    })
+
+    it('can specify scrollBehavior in options', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo', { scrollBehavior: 'bottom' })
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'end' })
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in options', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo', { scrollBehavior: false })
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('does not scroll when scrollBehavior is false in config', { scrollBehavior: false }, () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).not.to.be.called
+      })
+    })
+
+    it('calls scrollIntoView by default', () => {
+      cy.get(':text:first').then((el) => {
+        cy.spy(el[0], 'scrollIntoView')
+      })
+
+      cy.get(':text:first').type('foo')
+
+      cy.get(':text:first').then((el) => {
+        expect(el[0].scrollIntoView).to.be.calledWith({ block: 'start' })
+      })
+    })
+
+    it('errors when scrollBehavior is false and element is out of view and is clicked', (done) => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.include('`cy.type()` failed because the center of this element is hidden from view')
+        expect(cy.state('window').scrollY).to.equal(0)
+        expect(cy.state('window').scrollX).to.equal(0)
+
+        done()
+      })
+
+      // make sure the input is out of view
+      const $body = cy.$$('body')
+
+      $('<div>Long block 5</div>')
+      .css({
+        height: '500px',
+        border: '1px solid red',
+        marginTop: '10px',
+        width: '100%',
+      }).prependTo($body)
+
+      cy.get(':text:first').type('foo', { scrollBehavior: false, timeout: 200 })
     })
   })
 
@@ -1760,20 +1837,14 @@ describe('src/cy/commands/actions/type - #type', () => {
         cy.state('document').documentElement.focus()
         cy.get('div.item:first')
         .type('111')
-
-        cy.get('body').then(expectTextEndsWith('111'))
+        .then(expectTextEndsWith('111'))
       })
 
-      // TODO[breaking]: we should edit div.item:first text content instead of
-      // moving to the end of the host contenteditable. This will allow targeting
-      // specific elements to simplify testing rich editors
       it('can type in body[contenteditable]', () => {
         cy.state('document').body.setAttribute('contenteditable', true)
         cy.state('document').documentElement.focus()
         cy.get('div.item:first')
         .type('111')
-
-        cy.get('body')
         .then(expectTextEndsWith('111'))
       })
 
@@ -2039,6 +2110,16 @@ describe('src/cy/commands/actions/type - #type', () => {
 
           cy.get('input').eq(1).should('have.value', 'bar')
         })
+      })
+
+      // https://github.com/cypress-io/cypress/issues/5480
+      it('does NOT follow focus if target is blurred without another receiving focus', () => {
+        cy.$$('input:first').keydown(_.after(4, function () {
+          this.blur()
+        }))
+
+        cy.get('input:first').type('foobar')
+        .should('have.value', 'foobar')
       })
 
       it('follows focus into date input', () => {
@@ -2369,6 +2450,77 @@ describe('src/cy/commands/actions/type - #type', () => {
           expect(spy).to.not.be.called
         })
       })
+    })
+  })
+
+  // https://github.com/cypress-io/cypress/issues/5694
+  describe('shortcuts', () => {
+    beforeEach(function () {
+      cy.visit('fixtures/dom.html')
+      cy.on('log:added', (attrs, log) => {
+        this.lastLog = log
+      })
+    })
+
+    it('releases modfier keys at the end of the shortcut sequence', () => {
+      cy.get(':text:first').type('h{ctrl+alt++}i')
+      .then(function ($input) {
+        const table = this.lastLog.invoke('consoleProps').table[2]()
+
+        // eslint-disable-next-line
+          console.table(table.data, table.columns)
+
+        const beforeinput = Cypress.isBrowser('firefox') ? '' : ' beforeinput,'
+
+        expect(table.name).to.eq('Keyboard Events')
+        const expectedTable = {
+          1: { 'Details': '{ code: KeyH, which: 72 }', Typed: 'h', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          2: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keydown', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          3: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keydown', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          4: { 'Details': '{ code: Equal, which: 187 }', Typed: '+', 'Events Fired': 'keydown, keyup', 'Active Modifiers': 'alt, ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          5: { 'Details': '{ code: AltLeft, which: 18 }', Typed: '{alt}', 'Events Fired': 'keyup', 'Active Modifiers': 'ctrl', 'Prevented Default': null, 'Target Element': $input[0] },
+          6: { 'Details': '{ code: ControlLeft, which: 17 }', Typed: '{ctrl}', 'Events Fired': 'keyup', 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+          7: { 'Details': '{ code: KeyI, which: 73 }', Typed: 'i', 'Events Fired': `keydown, keypress,${beforeinput} textInput, input, keyup`, 'Active Modifiers': null, 'Prevented Default': null, 'Target Element': $input[0] },
+        }
+
+        // uncomment for debugging
+        // _.each(table.data, (v, i) => expect(v).containSubset(expectedTable[i]))
+        expect(table.data).to.deep.eq(expectedTable)
+      })
+    })
+
+    it('can type a shortcut with special characters', () => {
+      // NOTE: the default actions we implement will NOT be taken into account with modifiers
+      // e.g. we do not the delete the entire word with ctrl+backspace
+      // this matches the same behavior as cy.type('{ctrl}{backspace}')
+      // TODO: maybe change this in the future, it's just more work
+      cy.get(':text:first').type('foo{ctrl+backspace}bar')
+      .should('have.value', 'fobar')
+    })
+
+    it('does not input text when non-shift modifier', () => {
+      // NOTE: in this case the modifier DOES change the default action (when modifier other than Shift is applied, do not insert text)
+      // since most users want to test a user issuing a shortcut, and it's simple for us to implement
+      cy.get(':text:first').type('{ctrl+b}hi')
+      .should('have.value', 'hi')
+    })
+
+    it('throws an error when a wrong modifier is given', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.eq('`asdf` is not a modifier.')
+      })
+
+      cy.get(':text:first').type('{asdf+x}hi')
+    })
+
+    it('throws an error when shortcut is missing key', () => {
+      cy.on('fail', (err) => {
+        expect(err.message).to.contain('{ctrl+}')
+        expect(err.message).to.contain('is not recognized')
+        expect(err.message).to.contain('alt, option, ctrl')
+      })
+
+      cy.get(':text:first').type('{ctrl+}hi')
     })
   })
 

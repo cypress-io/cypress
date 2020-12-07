@@ -231,29 +231,6 @@ const childProcessKilled = (eventName, signal) => {
   }
 }
 
-const removed = {
-  CYPRESS_BINARY_VERSION: {
-    description: stripIndent`
-    The environment variable CYPRESS_BINARY_VERSION has been renamed to CYPRESS_INSTALL_BINARY as of version ${chalk.green(
-    '3.0.0',
-  )}
-    `,
-    solution: stripIndent`
-    You should set CYPRESS_INSTALL_BINARY instead.
-    `,
-  },
-  CYPRESS_SKIP_BINARY_INSTALL: {
-    description: stripIndent`
-    The environment variable CYPRESS_SKIP_BINARY_INSTALL has been removed as of version ${chalk.green(
-    '3.0.0',
-  )}
-    `,
-    solution: stripIndent`
-      To skip the binary install, set CYPRESS_INSTALL_BINARY=0
-    `,
-  },
-}
-
 const CYPRESS_RUN_BINARY = {
   notValid: (value) => {
     const properFormat = `**/${state.getPlatformExecutable()}`
@@ -425,7 +402,6 @@ module.exports = {
     failedUnzip,
     invalidCypressEnv,
     invalidCacheDirectory,
-    removed,
     CYPRESS_RUN_BINARY,
     smokeTestFailure,
     childProcessKilled,
