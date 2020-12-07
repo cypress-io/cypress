@@ -871,7 +871,7 @@ module.exports = {
   },
 
   moment: {
-    deprecated: `\`Cypress.moment\` has been deprecated and will be replaced in a future release. Consider migrating to a different datetime formatter.`,
+    deprecated: `\`Cypress.moment\` has been deprecated and will be removed in a future release. Consider migrating to a different datetime formatter.`,
   },
 
   navigation: {
