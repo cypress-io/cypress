@@ -29,7 +29,7 @@
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "css-loader": "3.4.2",
-    "cypress": "*",
+    "cypress": "../../",
     "eslint-plugin-vue": "^6.2.2",
     "mocha": "7.1.1",
     "tailwindcss": "1.1.4",

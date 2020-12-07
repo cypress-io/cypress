@@ -1,11 +1,16 @@
-import webpack from 'webpack'
-import webpackDevServer from 'webpack-dev-server'
+import { debug as debugFn } from 'debug'
+import { start as createDevServer } from './startServer'
+const debug = debugFn('@cypress/webpack-dev-server:webpack')
 
-import { makeWebpackConfig } from './makeWebpackConfig'
+export async function startDevServer (config, webpackConfig) {
+  const webpackDevServer = await createDevServer(webpackConfig, config)
 
-export async function start (userWebpackConfig = {}, testConfig) {
-  const webpackConfig = await makeWebpackConfig(userWebpackConfig, testConfig)
-  const compiler = webpack(webpackConfig)
+  return new Promise((resolve) => {
+    const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {
+      const port = httpSvr.address().port
 
-  return new webpackDevServer(compiler, { hot: true })
+      debug('Component testing webpack server started on port', port)
+      resolve(port)
+    })
+  })
 }
