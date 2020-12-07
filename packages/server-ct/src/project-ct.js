@@ -119,12 +119,12 @@ class Project {
     })
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
-      // the plugin event for 'devserver:config' and get back
+      // the plugin event for 'componentTesting:startDevServer' and get back
       return specsUtil.find(modifiedConfig)
       .filter((spec) => {
         return spec.specType === 'component'
       }).then((specs) => {
-        return plugins.execute('devserver:config', { specs, config: modifiedConfig })
+        return plugins.execute('componentTesting:startDevServer', { specs, config: modifiedConfig })
         .then((port) => {
           modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 

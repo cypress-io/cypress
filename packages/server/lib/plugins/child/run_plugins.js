@@ -110,7 +110,7 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
-    case 'devserver:config':
+    case 'componentTesting:startDevServer':
       util.wrapChildPromise(ipc, invoke, ids, args)
 
       return

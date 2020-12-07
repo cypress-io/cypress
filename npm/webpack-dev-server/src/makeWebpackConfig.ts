@@ -3,7 +3,7 @@ import * as path from 'path'
 import { merge } from 'webpack-merge'
 import CypressCTOptionsPlugin from './plugin'
 
-const debug = debugFn('cypress:evergreen:webpack')
+const debug = debugFn('cypress:ct:webpack')
 
 export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, files, support }) {
   debug(`User passed in webpack config with values`, userWebpackConfig)
