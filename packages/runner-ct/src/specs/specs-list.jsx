@@ -2,7 +2,6 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import specsStore from './specs-store'
 import SpecGroup from './spec-group'
-import StateContext from './spec-context'
 
 @observer
 class SpecsList extends Component {
@@ -13,34 +12,34 @@ class SpecsList extends Component {
   }
 
   render () {
+    const { state } = this.props
     const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : {}
 
     return (
       <div className="specs-list">
         <header>Select tests to run...</header>
-        <StateContext.Provider value={{
-          isActive: this.isActive,
-          activeSpec: this.props.state.spec?.name,
-          chooseSpec: (spec, isMulti) =>
-            isMulti
-              ? this.props.state.addSpecToMultiMode(spec)
-              : this.props.state.setSingleSpec(spec),
-        }}>
-          <ul>{
+        <ul>{
 
-            Object.keys(specGroups).map((groupKey) => {
-              const group = specGroups[groupKey]
+          Object.keys(specGroups).map((groupKey) => {
+            const group = specGroups[groupKey]
 
-              return (
-                <SpecGroup
-                  key={groupKey}
-                  groupKey={groupKey}
-                  group={group}/>
-              )
-            })}
+            { // The `active` prop here is used only to
+              // force repaint of the tree when selecting a spec
+              // It is not used for anything else than to patch react
+              // not comparing members of an object (this.props.state in this case)
+            }
 
-          </ul>
-        </StateContext.Provider>
+            return (
+              <SpecGroup
+                key={groupKey}
+                active={state.spec?.name}
+                groupKey={groupKey}
+                state={state}
+                group={group}
+              />
+            )
+          })}
+        </ul>
       </div>
     )
   }
@@ -53,9 +52,7 @@ class SpecsList extends Component {
  * @param {Array<{name: string}>} specs
  */
 function makeSpecHierarchy (specs) {
-  const groups = {}
-
-  specs.forEach((spec) => {
+  return specs.reduce((groups, spec) => {
     const pathArray = spec.name.split('/')
 
     let currentGroup = groups
@@ -70,9 +67,9 @@ function makeSpecHierarchy (specs) {
         currentGroup[pathPart] = spec
       }
     })
-  })
 
-  return groups
+    return groups
+  }, {})
 }
 
 export default SpecsList

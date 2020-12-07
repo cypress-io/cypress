@@ -8,14 +8,14 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (multiple_task_registrations_spec.coffee)                                  │
-  │ Searched:   cypress/integration/multiple_task_registrations_spec.coffee                        │
+  │ Specs:      1 found (multiple_task_registrations_spec.js)                                      │
+  │ Searched:   cypress/integration/multiple_task_registrations_spec.js                            │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  multiple_task_registrations_spec.coffee                                         (1 of 1)
+  Running:  multiple_task_registrations_spec.js                                             (1 of 1)
 
 
   ✓ merges task events
@@ -34,7 +34,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     multiple_task_registrations_spec.coffee                                          │
+  │ Spec Ran:     multiple_task_registrations_spec.js                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -42,7 +42,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
   -  Started processing:  Compressing to 32 CRF                                                     
   -  Finished processing: /XXX/XXX/XXX/cypress/videos/multiple_task_registrations_spe     (X second)
-                          c.coffee.mp4                                                              
+                          c.js.mp4                                                                  
 
 
 ====================================================================================================
@@ -52,8 +52,7 @@ Warning: Multiple attempts to register the following task(s): two. Only the last
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  multiple_task_registrations_spec.co      XX:XX        1        1        -        -        - │
-  │    ffee                                                                                        │
+  │ ✔  multiple_task_registrations_spec.js      XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

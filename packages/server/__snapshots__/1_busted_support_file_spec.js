@@ -7,13 +7,13 @@ exports['e2e busted support file passes 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (app_spec.coffee)                                                          │
+  │ Specs:      1 found (app_spec.js)                                                              │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  app_spec.coffee                                                                 (1 of 1)
+  Running:  app_spec.js                                                                     (1 of 1)
 
 Oops...we found an error preparing this test file:
 
@@ -53,14 +53,14 @@ Fix the error in your code and re-run your tests.
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     app_spec.coffee                                                                  │
+  │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.coffee.mp4                 (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -70,7 +70,7 @@ Fix the error in your code and re-run your tests.
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  app_spec.coffee                          XX:XX        -        -        1        -        - │
+  │ ✖  app_spec.js                              XX:XX        -        -        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        -        -        1        -        -  
 
