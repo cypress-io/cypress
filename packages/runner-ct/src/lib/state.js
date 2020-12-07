@@ -158,14 +158,29 @@ export default class State {
     this.spec = spec
   }
 
-  @action addSpecToMultiMode (spec) {
-    if (this.multiSpecs.some((includedSpec) => includedSpec.name === spec.name)) {
-      return
+  @action setSingleSpec (spec) {
+    if (this.runMode === 'multi') {
+      this.runMode = 'single'
+      this.multiSpecs = []
+    }
+
+    this.setSpec(spec)
+  }
+
+  @action addSpecToMultiMode (newSpec) {
+    const sameSpecIndex = this.multiSpecs.findIndex(
+      (existingSpec) => existingSpec.relative === newSpec.relative,
+    )
+
+    if (sameSpecIndex !== -1) {
+      this.multiSpecs = this.multiSpecs.slice(sameSpecIndex)
+    } else if (this.runMode === 'single' && this.spec) {
+      this.multiSpecs = [this.spec, newSpec]
+    } else {
+      this.multiSpecs = [...this.multiSpecs, newSpec]
     }
 
     this.runMode = 'multi'
-    this.multiSpecs = [...this.multiSpecs, spec]
-
     this.runMultiMode().catch((e) => {
       throw e
     })

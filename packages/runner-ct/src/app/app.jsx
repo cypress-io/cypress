@@ -102,14 +102,18 @@ class App extends Component {
           top: 0,
           bottom: 0,
         }}>
-          {this.props.state.multiSpecs.length > 0 && (<Reporter
-            runner={this.props.eventManager.reporterBus}
-            specs={this.props.state.multiSpecs}
-            autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
-            firefoxGcInterval={this.props.config.firefoxGcInterval}
-            // resetStatsOnSpecChange={this.props.state.runMode !== 'multiple'}
-          />)}
+          {this.props.state.spec && (
+            <Reporter
+              runMode={this.props.state.runMode}
+              runner={this.props.eventManager.reporterBus}
+              spec={this.props.state.spec}
+              allSpecs={this.props.state.multiSpecs}
+              autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
+              error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
+              firefoxGcInterval={this.props.config.firefoxGcInterval}
+              resetStatsOnSpecChange={this.props.state.runMode === 'single'}
+            />
+          )}
         </div>
       </>
     )
@@ -167,6 +171,7 @@ App.defaultProps = {
 }
 
 App.propTypes = {
+  runMode: PropTypes.oneOf(['single', 'multi']),
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,

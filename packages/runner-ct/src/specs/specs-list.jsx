@@ -19,9 +19,12 @@ class SpecsList extends Component {
       <div className="specs-list">
         <header>Select tests to run...</header>
         <StateContext.Provider value={{
-          activeSpec: this.props.state.spec?.name,
-          chooseSpec: (spec, isMulti) => isMulti ? this.props.state.addSpecToMultiMode(spec) : this.props.state.setSpec(spec),
           isActive: this.isActive,
+          activeSpec: this.props.state.spec?.name,
+          chooseSpec: (spec, isMulti) =>
+            isMulti
+              ? this.props.state.addSpecToMultiMode(spec)
+              : this.props.state.setSingleSpec(spec),
         }}>
           <ul>{
 
