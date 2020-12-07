@@ -30,3 +30,7 @@
     @extend .#{$fa-css-prefix}-circle-notch;
     color: lighten($pending, 20%);
 }
+
+@mixin suite-state-passed {
+    @extend .#{$fa-css-prefix}-plus;
+}

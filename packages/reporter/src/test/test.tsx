@@ -100,7 +100,7 @@ class Test extends Component<Props, State> {
       </span>
       <span className='runnable-controls'>
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
-          <i className='fas fa-exclamation-triangle' />
+          <i className='fas fa-exclamation-triangle runnable-controls-status' />
         </Tooltip>
         <a onClick={this._openExtendingModal}>Extend</a>
       </span>

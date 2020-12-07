@@ -62,8 +62,13 @@ class StudioRecorder {
     this._log = []
   }
 
+  removeCommand = (index) => {
+    this._log.splice(index, 1)
+    this._emitUpdatedLog()
+  }
+
   _getId = () => {
-    return this._currentId++
+    return `s${this._currentId++}`
   }
 
   _getCommand = (event, $el) => {

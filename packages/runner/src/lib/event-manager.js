@@ -197,6 +197,10 @@ const eventManager = {
       localBus.emit('restart', testId)
     })
 
+    reporterBus.on('studio:remove:command', (index) => {
+      studioRecorder.removeCommand(index)
+    })
+
     localBus.on('update:studio:log', (log) => {
       reporterBus.emit('update:studio:log', log)
     })

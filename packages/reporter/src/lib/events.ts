@@ -227,6 +227,10 @@ const events: Events = {
       appState.startExtendingTest(testId)
       runner.emit('start:extending:test', testId)
     }))
+
+    localBus.on('studio:remove:command', (index) => {
+      runner.emit('studio:remove:command', index)
+    })
   },
 
   emit (event, ...args) {

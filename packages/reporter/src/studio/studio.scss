@@ -1,0 +1,98 @@
+.reporter {
+  .studio {
+    &.runnable-passed {
+      .studio-commands-container {
+        display: block;
+      }
+
+      .runnable-state {
+        @include suite-state-passed;
+      }
+    }
+
+    &.runnable-pending {
+      .runnable-state {
+        @include runnable-state-pending;
+      }
+    }
+
+    &.runnable-failed {
+      .runnable-state {
+        @include runnable-state-failed;
+      }
+    }
+
+    .attempt-item > .collapsible {
+      margin-right: 10px;
+      margin-left: 5px;
+    }
+
+    .studio-header {
+      font-weight: 800;
+      padding: 10px 15px 5px 10px;
+
+      .runnable-title {
+        font-size: 14px;
+      }
+    }
+
+    .studio-commands-container {
+      display: none;
+      padding: 5px 10px 0 10px;
+
+      .studio-command {
+        background-color: #f5f5f5;
+        border: 1px solid #e3e3e3;
+        border-radius: 3px;
+        display: flex;
+        font-family: $monospace;
+        line-height: 20px;
+        margin-bottom: 10px;
+        min-height: 20px;
+
+        div {
+          padding: 6px;
+        }
+
+        .studio-command-number {
+          background: #e8e8ec;
+        }
+
+        .studio-command-method {
+          min-width: 90px;
+          text-transform: uppercase;
+
+          .studio-command-get {
+            color: #959595;
+          }
+        }
+
+        .studio-command-message {
+          flex-grow: 1;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .studio-command-delete a {
+          color: #959595;
+
+          &:hover {
+            color: #6c6c6c;
+          }
+        }
+      }
+
+      .studio-no-commands {
+        color: #959595;
+        font-family: $muli;
+        padding: 6px;
+        text-align: center;
+
+        .studio-no-commands-message {
+          flex-grow: 1;
+        }
+      }
+    }
+  }
+}

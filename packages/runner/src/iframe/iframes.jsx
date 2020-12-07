@@ -57,7 +57,7 @@ export default class Iframes extends Component {
               width,
             }}
           >
-            <div className='studio-loading-spinner'>Loading...</div>
+            <div><i className='fa fa-spinner fa-spin' /></div>
           </div>
         )}
       </div>

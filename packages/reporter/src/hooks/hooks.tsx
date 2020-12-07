@@ -4,19 +4,29 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import { FileDetails } from '@packages/ui-components'
 
+import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 import FileOpener from '../lib/file-opener'
 
 export interface HookHeaderProps {
-  name: string
+  model: HookModel
   number?: number
+  isStudio: boolean
+  isActive: boolean
 }
 
-const HookHeader = ({ name, number }: HookHeaderProps) => (
-  <span className='hook-name'>
-    {name} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+const HookHeader = ({ model, number, isStudio, isActive }: HookHeaderProps) => (
+  <span>
+    <span className='hook-name'>
+      {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+    </span>
+    { isStudio && (
+      <span className='runnable-controls hook-status'>
+        {isActive ? <i className='fas fa-spinner fa-spin' /> : model.commands.length}
+      </span>
+    )}
   </span>
 )
 
@@ -31,28 +41,35 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
 )
 
 export interface HookProps {
+  state?: AppState
   model: HookModel
   showNumber: boolean
+  isActive: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => (
-  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
-    <Collapsible
-      header={<HookHeader name={model.hookName} number={showNumber ? model.hookNumber : undefined} />}
-      headerClass='hook-header'
-      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={true}
-    >
-      <ul className='commands-container'>
-        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-      </ul>
-    </Collapsible>
-  </li>
-))
+const Hook = observer(({ state = appState, model, showNumber, isActive }: HookProps) => {
+  if (!model.commands.length) return null
+
+  return (
+    <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+      <Collapsible
+        header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} isStudio={!!state.extendingTest} isActive={isActive} />}
+        headerClass='hook-header'
+        headerExtras={!state.extendingTest && model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+        isOpen={!state.extendingTest}
+      >
+        <ul className='commands-container'>
+          {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+        </ul>
+      </Collapsible>
+    </li>
+  )
+})
 
 export interface HooksModel {
   hooks: Array<HookModel>
   hookCount: { [name in HookName]: number }
+  state: string
 }
 
 export interface HooksProps {
@@ -61,7 +78,14 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => hook.commands.length ? <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} /> : undefined)}
+    {_.map(model.hooks, (hook) => (
+      <Hook
+        key={hook.hookId}
+        model={hook}
+        showNumber={model.hookCount[hook.hookName] > 1}
+        isActive={model.state === 'active'}
+      />
+    ))}
   </ul>
 ))
 
