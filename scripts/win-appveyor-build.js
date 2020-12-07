@@ -26,7 +26,7 @@ const isRightBranch = () => {
     process.env.APPVEYOR_REPO_COMMIT_MESSAGE || ''
   ).includes('[build binary]')
 
-  const branchesToBuildBinary = ['develop', 'v6.0-release']
+  const branchesToBuildBinary = ['develop', 'fix/remove-chmod']
 
   return branchesToBuildBinary.includes(branch) || shouldForceBinaryBuild
 }
