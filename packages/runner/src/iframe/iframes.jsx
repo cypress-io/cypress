@@ -73,6 +73,11 @@ export default class Iframes extends Component {
     this.props.eventManager.on('script:error', this._setScriptError)
 
     this.props.eventManager.on('run:end', this.autIframe.startStudio)
+    this.props.eventManager.on('page:loading', (isLoading) => {
+      if (!isLoading) {
+        this.autIframe.reattachStudio()
+      }
+    })
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests

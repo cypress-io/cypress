@@ -1,5 +1,9 @@
 .reporter {
   .studio {
+    .runnable-instruments {
+      padding-left: 5px;
+    }
+
     &.runnable-passed {
       .studio-commands-container {
         display: block;

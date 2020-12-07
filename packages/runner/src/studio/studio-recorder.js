@@ -7,14 +7,13 @@ const eventTypes = [
   'click',
   'dblclick',
   'change',
-  'keydown',
-  'select',
-  'submit',
+  'keyup',
+  // 'submit',
 ]
 
 const eventsWithValue = [
   'change',
-  'keydown',
+  'keyup',
   'select',
 ]
 
@@ -36,16 +35,10 @@ class StudioRecorder {
 
   @action start = (body) => {
     this.isActive = true
-    this._body = body
     this._log = []
     this._currentId = 1
 
-    eventTypes.forEach((event) => {
-      this._body.addEventListener(event, this._recordEvent, {
-        capture: true,
-        passive: true,
-      })
-    })
+    this.attachListeners(body)
   }
 
   @action stop = () => {
@@ -56,6 +49,17 @@ class StudioRecorder {
     })
 
     this.isActive = false
+  }
+
+  attachListeners = (body) => {
+    this._body = body
+
+    eventTypes.forEach((event) => {
+      this._body.addEventListener(event, this._recordEvent, {
+        capture: true,
+        passive: true,
+      })
+    })
   }
 
   resetLog = () => {
@@ -79,7 +83,7 @@ class StudioRecorder {
       return 'select'
     }
 
-    if (event.type === 'keydown') {
+    if (event.type === 'keyup') {
       return 'type'
     }
 
@@ -91,11 +95,13 @@ class StudioRecorder {
       return null
     }
 
-    if (event.type === 'keydown') {
-      return event.key
-    }
-
     return $el.val()
+  }
+
+  _shouldRecordEvent = (event, $el) => {
+    const tagName = $el.prop('tagName')
+
+    return !(tagName !== 'INPUT' && event.type === 'keyup')
   }
 
   _recordEvent = (event) => {
@@ -105,6 +111,10 @@ class StudioRecorder {
     }
 
     const $el = $(event.target)
+
+    if (!this._shouldRecordEvent(event, $el)) {
+      return
+    }
 
     const Cypress = eventManager.getCypress()
 
@@ -140,8 +150,7 @@ class StudioRecorder {
 
       if (lastAction.selector === secondLast.selector) {
         if (lastAction.command === 'type' && secondLast.command === 'type') {
-          secondLast.value += lastAction.value
-          this._log.splice(length - 1)
+          this._log.splice(length - 2, 1)
 
           return
         }

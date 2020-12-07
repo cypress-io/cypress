@@ -478,8 +478,10 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     runnable.id = getTestId()
 
     if (runnable.id === getOnlyTest()) {
-      runnable._skipHooksWithLevelGreaterThan = 0
-      runnable.parent._onlyTests.push(runnable)
+      runnable.parent._afterAll = []
+      runnable.parent._afterEach = []
+      runnable.parent._onlyTests = [runnable]
+      runnable.parent._onlySuites = []
     }
 
     // tests have a type of 'test' whereas suites do not have a type property

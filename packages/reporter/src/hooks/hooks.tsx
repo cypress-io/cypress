@@ -35,8 +35,8 @@ export interface HookOpenInIDEProps {
 }
 
 const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
-  <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
-    <i className="fas fa-external-link-alt fa-sm" /> <span>Open in IDE</span>
+  <FileOpener fileDetails={invocationDetails} className='collapsible-header-extras-button'>
+    <i className='fas fa-external-link-alt fa-sm' /> <span>Open in IDE</span>
   </FileOpener>
 )
 
@@ -47,24 +47,20 @@ export interface HookProps {
   isActive: boolean
 }
 
-const Hook = observer(({ state = appState, model, showNumber, isActive }: HookProps) => {
-  if (!model.commands.length) return null
-
-  return (
-    <li className={cs('hook-item', { 'hook-failed': model.failed })}>
-      <Collapsible
-        header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} isStudio={!!state.extendingTest} isActive={isActive} />}
-        headerClass='hook-header'
-        headerExtras={!state.extendingTest && model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-        isOpen={!state.extendingTest}
-      >
-        <ul className='commands-container'>
-          {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
-        </ul>
-      </Collapsible>
-    </li>
-  )
-})
+const Hook = observer(({ state = appState, model, showNumber, isActive }: HookProps) => (
+  <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+    <Collapsible
+      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} isStudio={!!state.extendingTest} isActive={isActive} />}
+      headerClass='hook-header'
+      headerExtras={!state.extendingTest && model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      isOpen={!state.extendingTest}
+    >
+      <ul className='commands-container'>
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+      </ul>
+    </Collapsible>
+  </li>
+))
 
 export interface HooksModel {
   hooks: Array<HookModel>
@@ -78,12 +74,12 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(model.hooks, (hook) => (
+    {_.map(_.filter(model.hooks, (h) => !!h.commands.length), (hook, index, arr) => (
       <Hook
         key={hook.hookId}
         model={hook}
         showNumber={model.hookCount[hook.hookName] > 1}
-        isActive={model.state === 'active'}
+        isActive={model.state === 'active' && index === arr.length - 1}
       />
     ))}
   </ul>

@@ -12,6 +12,10 @@ import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
 
+import { ReactComponent as EllipsesIcon } from '../../static/icons/ellipses.svg'
+import { ReactComponent as KeyboardIcon } from '../../static/icons/keyboard.svg'
+import { ReactComponent as PointerIcon } from '../../static/icons/pointer.svg'
+
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 
@@ -79,6 +83,7 @@ class Test extends Component<Props, State> {
         containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
+        headerExtras={this._addToTest()}
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
@@ -102,9 +107,22 @@ class Test extends Component<Props, State> {
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
           <i className='fas fa-exclamation-triangle runnable-controls-status' />
         </Tooltip>
-        <a onClick={this._openExtendingModal}>Extend</a>
       </span>
     </>)
+  }
+
+  _addToTest () {
+    const { model } = this.props
+
+    if (model.state !== 'passed') {
+      return null
+    }
+
+    return (
+      <a onClick={this._openExtendingModal} className='collapsible-header-extras-button'>
+        <i className='fas fa-plus' /> <span>Extend Test</span>
+      </a>
+    )
   }
 
   _openExtendingModal = (e: MouseEvent) => {
@@ -134,10 +152,23 @@ class Test extends Component<Props, State> {
         isOpen={extendingModalOpen}
         onDismiss={this._closeExtendingModal}
       >
-        <div className='content'>
-          <h1><i className='fas fa-magic icon' /> Cypress Studio <span className='beta'>BETA</span></h1>
+        <div className='body'>
+          <h1 className='title'>
+            <i className='fas fa-magic icon' /> Cypress Studio <span className='beta'>BETA</span>
+          </h1>
+          <div className='diagram'>
+            <EllipsesIcon />
+            <PointerIcon />
+            <EllipsesIcon />
+            <KeyboardIcon />
+            <EllipsesIcon />
+            <PointerIcon />
+            <EllipsesIcon />
+          </div>
           <div className='center'>
-            Interact with your site (click, type) to generate commands.
+            <div className='text'>
+              Interact with your site (click, type, etc.) to generate commands.
+            </div>
             <button className='get-started' onClick={this._startExtendingTest}>
               Get Started
             </button>

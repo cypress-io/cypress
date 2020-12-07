@@ -230,20 +230,36 @@
     flex-direction: column;
 
     .runnable-wrapper {
-      .collapsible-header-inner {
-        width: 100%;
+      display: flex;
 
-        .collapsible-header-text {
-          display: flex;
+      .collapsible-header-extras-button {
+        padding: 5px 10px;
+      }
 
-          .runnable-title {
-            flex-grow: 1;
-            padding-right: 10px;
-          }
+      &:hover {
+        .collapsible-header-extras-button {
+          display: block;
+        }
+      }
 
-          .runnable-controls {
-            justify-self: flex-end;
-            min-width: 20px;
+      .collapsible-header {
+        flex-grow: 1;
+
+        .collapsible-header-inner {
+          width: 100%;
+
+          .collapsible-header-text {
+            display: flex;
+
+            .runnable-title {
+              flex-grow: 1;
+              padding-right: 10px;
+            }
+
+            .runnable-controls {
+              justify-self: flex-end;
+              min-width: 20px;
+            }
           }
         }
       }
@@ -340,6 +356,20 @@
       font-family: $muli;
       font-size: 20px;
       text-align: center;
+    }
+  }
+
+  .collapsible-header-extras-button {
+    align-items: center;
+    color: #6a6b6c;
+    cursor: pointer;
+    display: none;
+
+    &:hover, &:focus {
+      background-color: #f7f8f9;
+      color: #6a6b6c;
+      outline: none;
+      text-decoration: none;
     }
   }
 }

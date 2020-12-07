@@ -1,33 +1,63 @@
 .extending-test-modal {
-  max-width: 20em;
+  max-width: 25em;
 
-  .content {
-    .icon {
-      color: #6a6b6c;
+  .body {
+    font-family: $muli;
+    margin-bottom: 2em;
+    margin-top: -0.8em;
+
+    .title {
+      font-family: $open-sans;
+      font-weight: 600;
+      padding: 0 1em;
+
+      .icon {
+        color: #6a6b6c;
+        margin-right: 5px;
+      }
+
+      .beta {
+        color: #959595;
+        font-weight: 400;
+      }
     }
 
-    .beta {
-      color: #959595;
+    .diagram {
+      background: #17202c;
+      display: flex;
+      justify-content: space-between;
+      margin: 1.2em 0 1em;
+      padding: 1.5em 2em;
     }
 
     .center {
       text-align: center;
-    }
 
-    .get-started {
-      background-color: $pending;
-      padding: 1em;
-      margin-top: 1em;
-      color: #fff;
-      border-radius: 0.5em;
-
-      &:hover {
-        background: darken($pending, 10%);
+      .text {
+        color: #6c6c6c;
+        padding: 0.4em 1em;
       }
 
-      &:focus {
-        outline: none;
+      .get-started {
+        background-color: #3386d4;
+        border-radius: 0.25em;
+        color: #fff;
+        font-family: $muli;
+        padding: 0.8em 4em;
+        margin-top: 1em;
+
+        &:hover {
+          background: darken(#3386d4, 10%);
+        }
+
+        &:focus {
+          outline: none;
+        }
       }
     }
+  }
+
+  .close-button {
+    color: #959595;
   }
 }

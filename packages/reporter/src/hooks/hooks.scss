@@ -21,7 +21,7 @@
           color: #6a6b6c;
         }
 
-        .hook-open-in-ide {
+        .collapsible-header-extras-button {
           display: block;
         }
       }
@@ -49,17 +49,8 @@
         }
       }
 
-      .hook-open-in-ide {
-        align-items: center;
-        color: #6a6b6c;
-        display: none;
+      .collapsible-header-extras-button {
         padding: 4px 10px;
-
-        &:hover, &:focus {
-          background-color: rgba(186, 186, 186, 0.2);
-          outline: none;
-          text-decoration: none;
-        }
 
         i {
           margin-right: 3px;

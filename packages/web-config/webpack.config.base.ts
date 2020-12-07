@@ -127,6 +127,14 @@ const getCommonConfig = () => {
           ],
         },
         {
+          test: /icons\/.*\.svg$/,
+          use: [
+            {
+              loader: require.resolve('@svgr/webpack'),
+            },
+          ],
+        },
+        {
           test: /\.(eot|svg|ttf|woff|woff2)$/,
           use: [
             {
