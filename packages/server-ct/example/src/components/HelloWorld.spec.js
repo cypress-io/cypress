@@ -1,17 +1,14 @@
 /* eslint-env mocha,chai,jest */
 
-// import '../main'
 import HelloWorld from './HelloWorld'
-import { mount } from '@vue/test-utils'
+import { mount } from '@cypress/vue'
 import Vue from 'vue'
-// import Vue from 'vue'
 
 Vue.config.productionTip = false
 
 describe('hello', () => {
-  it('works', async () => {
+  it('works!', () => {
     mount(HelloWorld, {
-      attachTo: '#__cy_app',
       propsData: {
         msg: 'Hello World!',
       },
@@ -20,14 +17,13 @@ describe('hello', () => {
     cy.get('h1').contains('Hello World!')
   })
 
-  it('works again', async () => {
+  it('works again', () => {
     mount(HelloWorld, {
-      attachTo: '#__cy_app',
       propsData: {
-        msg: 'Hello World!',
+        msg: 'Hello World Again!',
       },
     })
 
-    cy.get('h1').contains('Hello World!')
+    cy.get('h1').contains('Hello World Again!')
   })
 })

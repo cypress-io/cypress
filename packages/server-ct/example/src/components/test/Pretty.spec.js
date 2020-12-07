@@ -10,7 +10,6 @@ Vue.config.productionTip = false
 describe('Pretty', () => {
   it('spec works', () => {
     mount(HelloWorld, {
-      attachTo: '#__cy_app',
       propsData: {
         msg: 'Hello World!',
       },

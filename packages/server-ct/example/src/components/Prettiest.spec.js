@@ -8,9 +8,8 @@ import Vue from 'vue'
 Vue.config.productionTip = false
 
 describe('Prettiest', () => {
-  it('spec works', () => {
+  it('spec works!', () => {
     mount(HelloWorld, {
-      attachTo: '#__cy_app',
       propsData: {
         msg: 'Hello World!',
       },
@@ -21,7 +20,6 @@ describe('Prettiest', () => {
 
   it('spec works again', () => {
     mount(HelloWorld, {
-      attachTo: '#__cy_app',
       propsData: {
         msg: 'Hello World!',
       },
