@@ -1,5 +1,5 @@
 {
-  "name": "@packages/webpack-ct",
+  "name": "@cypress/webpack-ct",
   "version": "0.0.0",
   "description": "Launches Webpack Dev Server for Component Testing",
   "private": true,
