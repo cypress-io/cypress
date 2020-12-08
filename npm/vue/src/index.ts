@@ -315,18 +315,12 @@ export const mount = (
     log: false,
   })
   .then((win) => {
-    // @ts-ignore
-    // localVue.config.errorHandler = failTestOnVueError
-
-    // set global Vue instance:
     // 1. convenience for debugging in DevTools
     // 2. some libraries might check for this global
-    // appIframe.contentWindow.Vue = localVue
 
-    // refresh inner Vue instance of Vuex store
     // @ts-ignore
     if (hasStore(component)) {
-      // @ts-ignore
+      // TODO: Figure out how to reset Vue 3/Vuex 4 store.
       // component.store = resetStoreVM(localVue, component)
     }
 
