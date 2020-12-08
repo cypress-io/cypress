@@ -65,9 +65,9 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
     return <RunnablesError error={error} />
   }
 
-  const isLive = specPath === runnablesStore.runningSpec
+  const isRunning = specPath === runnablesStore.runningSpec
 
-  return <RunnablesList runnables={isLive ? runnables : runnablesHistory[specPath]} />
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
 })
 
 export interface RunnablesProps {

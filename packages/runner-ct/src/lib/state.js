@@ -1,7 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
 import eventManager from './event-manager'
-import { Promise } from 'bluebird'
 
 const _defaults = {
   messageTitle: null,
@@ -168,13 +167,14 @@ export default class State {
   }
 
   @action addSpecToMultiMode (newSpec) {
-    const sameSpecIndex = this.multiSpecs.findIndex(
+    const isAlreadyRunningNewSpec = this.multiSpecs.some(
       (existingSpec) => existingSpec.relative === newSpec.relative,
     )
 
-    if (sameSpecIndex !== -1) {
-      this.multiSpecs = this.multiSpecs.slice(sameSpecIndex)
+    if (isAlreadyRunningNewSpec) {
+      this.multiSpecs = this.multiSpecs.filter((existingSpec) => existingSpec.relative !== newSpec.relative)
     } else if (this.runMode === 'single' && this.spec) {
+      // when the new
       this.multiSpecs = [this.spec, newSpec]
     } else {
       this.multiSpecs = [...this.multiSpecs, newSpec]

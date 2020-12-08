@@ -5,12 +5,6 @@ import SpecGroup from './spec-group'
 
 @observer
 class SpecsList extends Component {
-  isActive = (spec) => {
-    return this.props.state.runMode === 'multi'
-      ? this.props.state.multiSpecs.some((includedSpec) => includedSpec.absolute === spec.absolute)
-      : spec.name === this.props.state.spec?.name
-  }
-
   render () {
     const { state } = this.props
     const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : {}
