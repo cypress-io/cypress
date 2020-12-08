@@ -6123,7 +6123,7 @@
   resolved "https://registry.yarnpkg.com/@vue/shared/-/shared-3.0.4.tgz#6dc50f593bdfdeaa6183d1dbc15e2d45e7c6b8b3"
   integrity sha512-Swfbz31AaMX48CpFl+YmIrqOH9MgJMTrltG9e26A4ZxYx9LjGuMV+41WnxFzS3Bc9nbrc6sDPM37G6nIT8NJSg==
 
-"@vue/test-utils@2.0.0-0":
+"@vue/test-utils@2.0.0-beta.12":
   version "2.0.0-beta.12"
   resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-2.0.0-beta.12.tgz#105a32f35c15cc43d470f88e0122f82bcfdf14ff"
   integrity sha512-kRxM1IspG06i7smyVAgbN4C444ssKfnX67ETveZdb1AP7f6Kr3+bV4MmIwOsIZc6t7KK8gzx+clZd2jDeH4kMw==
@@ -33026,7 +33026,7 @@ vue-i18n@8.9.0:
   resolved "https://registry.yarnpkg.com/vue-i18n/-/vue-i18n-8.9.0.tgz#5f084001fe5b4c7ad8c00ee5f11396a88ff2e55b"
   integrity sha512-8wr/D9yU8CLC8ne9stdQn/N58E7GRSUSO75bCucj2AIFTDyjGfoze5RxFvh2w3e7yxgnz5x+ooOIcoX59PHguQ==
 
-vue-loader@16.0.0-0:
+vue-loader@^16.0.0:
   version "16.1.1"
   resolved "https://registry.yarnpkg.com/vue-loader/-/vue-loader-16.1.1.tgz#f5b286d60ac6886684c63a17a184391cc9e0199a"
   integrity sha512-wz/+HFg/3SBayHWAlZXARcnDTl3VOChrfW9YnxvAweiuyKX/7IGx1ad/4yJHmwhgWlOVYMAbTiI7GV8G33PfGQ==
@@ -33035,7 +33035,7 @@ vue-loader@16.0.0-0:
     hash-sum "^2.0.0"
     loader-utils "^2.0.0"
 
-vue-router@4.0.0-0:
+vue-router@^4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/vue-router/-/vue-router-4.0.1.tgz#309240e50524b1e7d4e82e27f0a0fa25fe3d1d71"
   integrity sha512-2C2nRxA2nCusgJyUpvcbd9Bnc9kACp/VLUCK4drXtgeRXHjQliZJcgjjP268vkGvvEKun9jjp8Ic1PpzUgbYKg==
@@ -33049,7 +33049,7 @@ vue@^3.0.0:
     "@vue/runtime-dom" "3.0.4"
     "@vue/shared" "3.0.4"
 
-vuex@4.0.0-0:
+vuex@4.0.0-rc.2:
   version "4.0.0-rc.2"
   resolved "https://registry.yarnpkg.com/vuex/-/vuex-4.0.0-rc.2.tgz#3681c84eb6f5171b039edaa17cc78105e20724f3"
   integrity sha512-HCPzYGea1xL7fMpDoMiHKujC1Bi/HM9LS5ML0Kv55zQtZJvOl0Lq7eWvJoen+SI4Lf7p9V5AqcVsoLPXNBywjg==

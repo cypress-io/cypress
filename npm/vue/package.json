@@ -17,7 +17,7 @@
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-preprocessor": "*",
     "@intlify/vue-i18n-loader": "1.0.0",
-    "@vue/test-utils": "2.0.0-0",
+    "@vue/test-utils": "2.0.0-beta.12",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.2.0",
     "find-webpack": "2.1.0",
@@ -37,9 +37,9 @@
     "typescript": "3.9.6",
     "vue": "^3.0.0",
     "vue-i18n": "8.9.0",
-    "vue-loader": "16.0.0-0",
-    "vue-router": "4.0.0-0",
-    "vuex": "4.0.0-0",
+    "vue-loader": "^16.0.0",
+    "vue-router": "^4.0.0",
+    "vuex": "4.0.0-rc.2",
     "webpack": "4.42.0"
   },
   "peerDependencies": {
