@@ -33603,7 +33603,7 @@ v8flags@^3.2.0:
   dependencies:
     homedir-polyfill "^1.0.1"
 
-val-loader@2.x, val-loader@^2.1.2:
+val-loader@2.x:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/val-loader/-/val-loader-2.1.2.tgz#3f2efaed5791791727df62858ccaa07fc27579e7"
   integrity sha512-slp7F4QaEE3h2dCKb28ulCkgVYqpbTcx9u/8or+lpWGOn5v7+hrQXZ+dGbblrIf2LBkVZBCiinLh7DgYO4Ds5g==
