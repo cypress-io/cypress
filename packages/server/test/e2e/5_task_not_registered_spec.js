@@ -7,7 +7,7 @@ describe('e2e task', () => {
   it('fails', function () {
     return e2e.exec(this, {
       project: Fixtures.projectPath('task-not-registered'),
-      spec: 'task_not_registered_spec.coffee',
+      spec: 'task_not_registered_spec.js',
       sanitizeScreenshotDimensions: true,
       snapshot: true,
       expectedExitCode: 1,

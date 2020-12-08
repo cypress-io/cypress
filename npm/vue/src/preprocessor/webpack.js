@@ -59,6 +59,7 @@ function compileTemplate (options = {}) {
 
 /**
  * Warning: modifies the input object
+<<<<<<< HEAD
  * @param {WebpackOptions} options
  */
 
@@ -74,6 +75,8 @@ function removeForkTsCheckerWebpackPlugin (options) {
 
 /**
  * Warning: modifies the input object
+=======
+>>>>>>> origin
  * @param {Cypress.ConfigOptions} config
  * @param {WebpackOptions} options
  */

@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@types/mime-types": "2.1.0",
-    "concat-stream": "^2.0.0",
     "is-html": "^2.0.0",
     "lodash": "4.17.15",
     "mime-types": "2.1.27",

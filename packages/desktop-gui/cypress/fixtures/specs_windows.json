@@ -23,12 +23,12 @@
   ],
   "unit": [
     {
-      "name": "admin_users\\admin\\users\\bar_list_spec.coffee",
-      "relative": "cypress\\unit\\admin_users\\admin\\users\\bar_list_spec.coffee"
+      "name": "admin_users\\admin\\users\\last_list_spec.coffee",
+      "relative": "cypress\\unit\\admin_users\\admin\\users\\last_list_spec.coffee"
     },
     {
-      "name": "admin_users\\admin\\users\\all\\admin\\last_list_spec.coffee",
-      "relative": "cypress\\unit\\admin_users\\admin\\users\\all\\admin\\last_list_spec.coffee"
+      "name": "admin_users\\admin\\users\\all\\admin\\bar_list_spec.coffee",
+      "relative": "cypress\\unit\\admin_users\\admin\\users\\all\\admin\\bar_list_spec.coffee"
     }
   ]
 }

@@ -54,6 +54,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         y,
         waitForAnimations: config('waitForAnimations'),
         animationDistanceThreshold: config('animationDistanceThreshold'),
+        scrollBehavior: config('scrollBehavior'),
       })
 
       if ($dom.isWindow(options.$el)) {

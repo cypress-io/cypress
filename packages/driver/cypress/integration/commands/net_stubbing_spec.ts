@@ -472,9 +472,64 @@ describe('network stubbing', { retries: 2 }, function () {
     })
   })
 
+  context('events', function () {
+    // @see https://github.com/cypress-io/cypress/issues/9170
+    it('gracefully handles request received without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        req.reply({ bad: 'should not be received' })
+      })
+      .then(() => {
+        const routeIds = _.keys(state('routes'))
+
+        // delete the driver-side route - the server-side route will still exist and cause an event
+        // to be emitted to the driver
+        delete state('routes')[routeIds[0]]
+        expect(state('routes')).to.deep.eq({})
+
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ foo: 1 })
+      })
+    })
+
+    it('gracefully handles response received without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        state('routes', {})
+
+        req.reply((res) => {
+          res.send({ bad: 'should not be received' })
+        })
+      })
+      .then(() => {
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ foo: 1 })
+      })
+    })
+
+    it('gracefully handles response completed without a known route', function () {
+      cy.intercept('/valid.json', (req) => {
+        req.reply((res) => {
+          state('routes', {})
+
+          res.send({ bar: 2 })
+        })
+      })
+      .then(() => {
+        return $.get('/fixtures/valid.json')
+      })
+      .then((body) => {
+        expect(body).to.include({ bar: 2 })
+      })
+    })
+  })
+
   context('network handling', function () {
     // @see https://github.com/cypress-io/cypress/issues/8497
     it('can load transfer-encoding: chunked redirects', function () {
+      cy.intercept('*')
       const url4 = 'http://localhost:3501/fixtures/generic.html'
       const url3 = `http://localhost:3501/redirect?href=${encodeURIComponent(url4)}`
       const url2 = `https://localhost:3502/redirect?chunked=1&href=${encodeURIComponent(url3)}`
@@ -1191,14 +1246,15 @@ describe('network stubbing', { retries: 2 }, function () {
         }).visit('/foo')
       })
 
-      it('can timeout in request handler', {
-        defaultCommandTimeout: 50,
-      }, function (done) {
+      it('can timeout in request handler', function (done) {
         cy.on('fail', (err) => {
+          Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A request callback passed to `cy.intercept\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
+
+        Cypress.config('defaultCommandTimeout', 50)
 
         cy.intercept('/foo', () => {
           return Promise.delay(200)
@@ -1208,10 +1264,10 @@ describe('network stubbing', { retries: 2 }, function () {
 
     context('correctly determines the content-length of an intercepted request', function () {
       it('when body is empty', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = ''
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('0')
 
             done()
@@ -1223,10 +1279,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('when body contains ascii', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = 'this is only ascii'
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('18')
 
             done()
@@ -1238,10 +1294,10 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('when body contains unicode', function (done) {
-        cy.route2('/post-only', function (req) {
+        cy.intercept('/post-only', function (req) {
           req.body = '🙃🤔'
         }).then(function () {
-          cy.route2('/post-only', function (req) {
+          cy.intercept('/post-only', function (req) {
             expect(req.headers['content-length']).to.eq('8')
 
             done()
@@ -1280,6 +1336,18 @@ describe('network stubbing', { retries: 2 }, function () {
           res.send()
         })
       })
+      .as('redirect')
+      .intercept('/fixtures/generic.html').as('dest')
+      .then(() => fetch(url))
+      .wait('@redirect')
+      .wait('@dest')
+    })
+
+    it('can simply wait on redirects without intercepting', function () {
+      const href = `/fixtures/generic.html?t=${Date.now()}`
+      const url = `/redirect?href=${encodeURIComponent(href)}`
+
+      cy.intercept('/redirect')
       .as('redirect')
       .intercept('/fixtures/generic.html').as('dest')
       .then(() => fetch(url))
@@ -1688,8 +1756,8 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         }).then(() => {
           return $.get('/timeout').then((responseText) => {
+            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 475, 500)
             expect(responseText).to.eq(payload)
-            expect(Date.now() - this.start).to.be.closeTo(expectedSeconds * 1000 + 50, 50)
 
             done()
           })
@@ -1798,20 +1866,22 @@ describe('network stubbing', { retries: 2 }, function () {
         .wait('@err', { timeout: 50 })
       })
 
-      it('can timeout in req.reply handler', {
-        defaultCommandTimeout: 50,
-      }, function (done) {
+      it('can timeout in req.reply handler', function (done) {
         cy.on('fail', (err) => {
+          Cypress.config('defaultCommandTimeout', 5000)
           expect(err.message).to.match(/^A response callback passed to `req.reply\(\)` timed out after returning a Promise that took more than the `defaultCommandTimeout` of `50ms` to resolve\./)
 
           done()
         })
 
         cy.intercept('/timeout', (req) => {
+          Cypress.config('defaultCommandTimeout', 50)
+
           req.reply(() => {
             return Promise.delay(200)
           })
-        }).visit('/timeout', { timeout: 500 })
+        })
+        .visit('/timeout')
       })
 
       it('can timeout when retrieving upstream response', {
@@ -1819,7 +1889,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }, function (done) {
         cy.once('fail', (err) => {
           expect(err.message).to.match(/^`req\.reply\(\)` was provided a callback to intercept the upstream response, but the request timed out after the `responseTimeout` of `25ms`\./)
-          .and.contain('ESOCKETTIMEDOUT')
+          .and.match(/ESOCKETTIMEDOUT|ETIMEDOUT/)
 
           done()
         })
@@ -1978,6 +2048,36 @@ describe('network stubbing', { retries: 2 }, function () {
           },
         })
       })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8999
+    it('can spy on a 204 no body response', function () {
+      cy.intercept('/status-code').as('status')
+      .then(() => {
+        $.get('/status-code?code=204')
+      })
+      .wait('@status').its('response.statusCode').should('eq', 204)
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/8934
+    it('can spy on a 304 not modified image response', function () {
+      const url = `/fixtures/media/cypress.png?i=${Date.now()}`
+
+      cy.intercept(url).as('image')
+      .then(() => {
+        $.get({ url, cache: true })
+      })
+      .then(() => {
+        if (Cypress.isBrowser('firefox')) {
+          // strangely, Firefox requires some time to be waited before the first image response will be cached
+          cy.wait(1000)
+        }
+      })
+      .then(() => {
+        $.get({ url, cache: true })
+      })
+      .wait('@image').its('response.statusCode').should('eq', 200)
+      .wait('@image').its('response.statusCode').should('eq', 304)
     })
 
     context('with an intercepted request', function () {
