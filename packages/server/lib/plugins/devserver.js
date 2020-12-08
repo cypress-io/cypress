@@ -31,7 +31,6 @@ const API = {
   emitter: baseEmitter,
 
   getFile (filePath, config) {
-    debugger
     let fileObject; let fileProcessor
 
     debug(`getting file ${filePath}`)

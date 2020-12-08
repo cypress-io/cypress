@@ -41,7 +41,6 @@ const templateEngine = require('./template_engine')
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
-
 const textHtmlContentTypeRe = /^text\/html/i
 
 const ALLOWED_PROXY_BYPASS_URLS = [
