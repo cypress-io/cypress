@@ -1,8 +1,11 @@
 import * as webpack from 'webpack'
+import { EventEmitter } from 'events'
+import _ from 'lodash'
 
 interface CypressOptions {
   files: any[]
   projectRoot: string
+  devserverEvents?: EventEmitter
 }
 
 type CypressCTWebpackContext = {
@@ -10,12 +13,14 @@ type CypressCTWebpackContext = {
 } & webpack.compilation.Compilation
 
 export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInstance {
-  private readonly files: any[] = []
+  private files: any[] = []
   private readonly projectRoot: string
+  private readonly devserverEvents: EventEmitter
 
-  public constructor (options: CypressOptions) {
+  constructor (options: CypressOptions) {
     this.files = options.files
     this.projectRoot = options.projectRoot
+    this.devserverEvents = options.devserverEvents
   }
 
   private pluginFunc = (context: CypressCTWebpackContext, module) => {
@@ -26,6 +31,7 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
     context._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
+      // devserverEvents: this.devserverEvents,
     }
   };
 
@@ -34,8 +40,16 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
-  private plugin = (compilation: any) => {
-    debugger;
+  private plugin = (compilation) => {
+    // console.log(webpackPlugin)
+    this.devserverEvents.on('devserver:specs:changed', (specs) => {
+      if (_.isEqual(specs, this.files)) return
+
+      // add specs
+      compilation.context._cypress.files = specs
+      // retrigger the loader.ts
+    })
+
     // Webpack 5
     /* istanbul ignore next */
     if ('NormalModule' in webpack) {

@@ -23,6 +23,10 @@ ws.on('connect', () => {
   ws.emit('get:component:specs', (specs) => {
     specsStore.setSpecs(specs)
   })
+
+  ws.on('get:specs', () => {
+
+  })
 })
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')

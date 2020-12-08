@@ -3,14 +3,15 @@
 
 // import '../main'
 import HelloWorld from './HelloWorld'
-import { mount } from '@vue/test-utils'
+import { mount } from '@cypress/vue'
+
 import Vue from 'vue'
 // import Vue from 'vue'
 
 Vue.config.productionTip = false
 
 describe('Prettiest', () => {
-  it('spec works', async () => {
+  it('spec works', () => {
     // window.Vue = Vue
     // new Vue(HelloWorld).$mount('#root')
     const wrapper = mount(HelloWorld, { attachTo: '#__cy_app' })

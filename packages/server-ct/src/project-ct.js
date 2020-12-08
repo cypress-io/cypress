@@ -7,6 +7,8 @@ const specsUtil = require('@packages/server/lib/util/specs')
 const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
 const plugins = require('@packages/server/lib/plugins')
+const devserver = require('@packages/server/lib/plugins/devserver')
+const { SpecsController } = require('./specs-controller')
 const Watchers = require('@packages/server/lib/watchers')
 
 const fs = require('@packages/server/lib/util/fs')
@@ -122,8 +124,18 @@ class Project {
       .filter((spec) => {
         return spec.specType === 'component'
       }).then((specs) => {
-        return plugins.execute('devserver:config', { specs, config: modifiedConfig })
+        return devserver.start({ specs, config: modifiedConfig })
         .then((port) => {
+          const specs = new SpecsController(cfg, {
+            onSpecsFound: devserver.updateSpecs,
+          })
+
+          specs.watch()
+
+          devserver.waitForCompilation(() => {
+            this.server.sendSpecsChanged()
+          })
+
           modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
           return modifiedConfig
@@ -245,6 +257,8 @@ class Project {
       onFocusTests: options.onFocusTests,
 
       onSpecChanged: options.onSpecChanged,
+
+      onSpecListChanged: options.onSpecListChanged,
 
       onSavedStateChanged: options.onSavedStateChanged,
 

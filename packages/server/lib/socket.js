@@ -291,6 +291,10 @@ class Socket {
         return socket.join('runner')
       })
 
+      socket.send('specs:updated', () => {
+
+      })
+
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {

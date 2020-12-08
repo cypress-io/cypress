@@ -125,6 +125,7 @@ class Socket {
       onResolveUrl () {},
       onFocusTests () {},
       onSpecChanged () {},
+      onSpecsChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
@@ -396,6 +397,10 @@ class Socket {
         })
       })
     })
+  }
+
+  sendSpecsChanged (specs) {
+    this.toRunner('specs:changed', specs)
   }
 
   end () {

@@ -185,6 +185,10 @@ class Server {
     })
   }
 
+  sendSpecsChanged (specs) {
+    this._socket.sendSpecsChanged(specs)
+  }
+
   startWebsockets (config, options = {}) {
     this._socket.startListening(this._server, config, options)
   }

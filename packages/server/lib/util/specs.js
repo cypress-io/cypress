@@ -249,6 +249,7 @@ const find = (config, specPattern) => {
 
 module.exports = {
   find,
+  findSpecsOfType,
 
   getPatternRelativeToProjectRoot,
 
