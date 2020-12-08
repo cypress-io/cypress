@@ -7,6 +7,7 @@
     "build": "tsc",
     "build-prod": "yarn build",
     "build:watch": "tsc --watch",
+    "cy:open": "node ../../scripts/cypress open --component-testing",
     "cy:run": "node ../../scripts/cypress run --component-testing",
     "start": "node ../../scripts/start.js --component-testing --project ${PWD}/examples/cli2",
     "pretest": "yarn build",
