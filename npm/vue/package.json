@@ -15,7 +15,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-dev-server": "*",
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
@@ -29,7 +29,7 @@
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "css-loader": "3.4.2",
-    "cypress": "../../",
+    "cypress": "*",
     "eslint-plugin-vue": "^6.2.2",
     "mocha": "7.1.1",
     "tailwindcss": "1.1.4",
