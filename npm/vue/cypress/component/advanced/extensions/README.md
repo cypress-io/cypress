@@ -1,16 +1,22 @@
-# Access the component
+# Extensions
 
-If you need to access the mounted component from test, a reference is available at `Cypress.vue` after the `mount` finishes (asynchronously).
+You can use the `extensions` option to install global components, mixins, plugins, etc.
 
 ```js
-mount(...)
-.then(() => {
-  Cypress.vue.<prop> = ...
-  // or call a method
-  Cypress.vue.<method()
+import Bar from './Bar.vue'
+
+const Foo = {
+  template: '<h1>Hello world</h1>'
+}
+
+mount(App, { 
+  extensions: {
+    components: {
+      Foo, // registered globally for use in your component.
+      Bar
+    }
+  }
 })
-// then check the UI
-cy.contains(...)
 ```
 
-See component [Message.vue](Message.vue) and [message-spec.js](message-spec.js)
+See component [Extension.vue](./Extensions.vue) and [extensions.spec.js](./extensions.spec.js)
