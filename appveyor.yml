@@ -2,6 +2,7 @@ branches:
   only:
     - master
     - develop
+    - feature/cross-platform-wizard
     - v6.0-release
     - /win*/
 
