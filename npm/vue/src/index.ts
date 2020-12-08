@@ -45,17 +45,10 @@ const installFilters = (Vue, options) => {
   }
 }
 
-const installPlugins = (Vue, options, props) => {
-  const plugins: VuePlugins =
-      Cypress._.get(props, 'plugins') ||
-      Cypress._.get(options, 'extensions.use') ||
-      Cypress._.get(options, 'extensions.plugins') ||
-      []
-
-  // @ts-ignore
-  plugins.forEach((p) => {
-    Array.isArray(p) ? Vue.use(...p) : Vue.use(p)
-  })
+const installPlugins = (options) => {
+  return Cypress._.get(options, 'extensions.use') ||
+    Cypress._.get(options, 'extensions.plugins') ||
+    []
 }
 
 const installMixins = (options) => {
@@ -414,6 +407,7 @@ export const mount = (
       global: {
         components,
         mixins: installMixins(options),
+        plugins: installPlugins(options),
       },
       ...props,
     })
