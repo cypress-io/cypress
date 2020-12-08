@@ -72,10 +72,15 @@ const events: Events = {
       runnablesStore.updateLog(log)
     }))
 
-    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
+    runner.on('reporter:restart:test:run', action('restart:test:run', (testId) => {
       appState.reset()
       runnablesStore.reset()
       statsStore.reset()
+
+      if (testId) {
+        appState.startExtendingTest(testId)
+      }
+
       runner.emit('reporter:restarted')
     }))
 
@@ -231,6 +236,11 @@ const events: Events = {
     localBus.on('studio:remove:command', (index) => {
       runner.emit('studio:remove:command', index)
     })
+
+    localBus.on('studio:cancel', action('studio:cancel', () => {
+      appState.closeStudio()
+      runner.emit('studio:cancel:runner:restart')
+    }))
   },
 
   emit (event, ...args) {

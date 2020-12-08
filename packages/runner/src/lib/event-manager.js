@@ -132,6 +132,11 @@ const eventManager = {
 
     reporterBus.on('runner:restart', rerun)
 
+    reporterBus.on('studio:cancel:runner:restart', () => {
+      studioRecorder.cancel()
+      rerun()
+    })
+
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
 
@@ -185,16 +190,9 @@ const eventManager = {
     })
 
     reporterBus.on('start:extending:test', (testId) => {
-      if (!Cypress) return
-
-      state.setIsLoading(true)
-
       studioRecorder.setTestId(testId)
 
-      Cypress.stop()
-      Cypress.removeAllListeners()
-
-      localBus.emit('restart', testId)
+      this._reRun(state)
     })
 
     reporterBus.on('studio:remove:command', (index) => {
@@ -253,7 +251,7 @@ const eventManager = {
     return this.Cypress.isBrowser(browserName)
   },
 
-  initialize ($autIframe, config, testId) {
+  initialize ($autIframe, config) {
     performance.mark('initialize-start')
 
     Cypress.initialize({
@@ -267,8 +265,9 @@ const eventManager = {
             return
           }
 
-          if (testId) {
-            Cypress.runner.setOnlyTest(testId)
+          if (studioRecorder.testId) {
+            studioRecorder.startLoading()
+            Cypress.runner.setOnlyTest(studioRecorder.testId)
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
@@ -441,7 +440,7 @@ const eventManager = {
   _restart () {
     return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
-      reporterBus.emit('reporter:restart:test:run')
+      reporterBus.emit('reporter:restart:test:run', studioRecorder.testId)
     })
   },
 

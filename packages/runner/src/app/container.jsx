@@ -4,6 +4,7 @@ import React, { Component } from 'react'
 
 import automation from '../lib/automation'
 import eventManager from '../lib/event-manager'
+import studioRecorder from '../studio/studio-recorder'
 import State from '../lib/state'
 import util from '../lib/util'
 
@@ -90,6 +91,7 @@ class Container extends Component {
 Container.defaultProps = {
   eventManager,
   util,
+  studioRecorder,
 }
 
 Container.propTypes = {

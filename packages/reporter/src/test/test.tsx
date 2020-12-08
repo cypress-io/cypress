@@ -112,12 +112,6 @@ class Test extends Component<Props, State> {
   }
 
   _addToTest () {
-    const { model } = this.props
-
-    if (model.state !== 'passed') {
-      return null
-    }
-
     return (
       <a onClick={this._openExtendingModal} className='collapsible-header-extras-button'>
         <i className='fas fa-plus' /> <span>Extend Test</span>

@@ -99,6 +99,10 @@ class AppState {
   startExtendingTest (testId: string) {
     this.extendingTest = testId
   }
+
+  closeStudio () {
+    this.extendingTest = null
+  }
 }
 
 export { AppState }

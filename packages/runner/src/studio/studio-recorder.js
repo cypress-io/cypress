@@ -19,24 +19,32 @@ const eventsWithValue = [
 
 class StudioRecorder {
   @observable testId = null
+  @observable isLoading = false
   @observable isActive = false
+  @observable _hasStarted = false
 
   @action setTestId = (testId) => {
     this.testId = testId
   }
 
-  @computed get isLoading () {
-    return !!this.testId && !this.isActive
+  @action startLoading = () => {
+    this.isLoading = true
+  }
+
+  @computed get isFinished () {
+    return this._hasStarted && !this.isActive
   }
 
   @computed get isOpen () {
-    return this.isLoading || this.isActive
+    return this.isActive || this.isLoading || this.isFinished
   }
 
   @action start = (body) => {
     this.isActive = true
+    this.isLoading = false
     this._log = []
     this._currentId = 1
+    this._hasStarted = true
 
     this.attachListeners(body)
   }
@@ -49,6 +57,13 @@ class StudioRecorder {
     })
 
     this.isActive = false
+  }
+
+  @action cancel = () => {
+    this.stop()
+
+    this.testId = null
+    this._hasStarted = false
   }
 
   attachListeners = (body) => {
