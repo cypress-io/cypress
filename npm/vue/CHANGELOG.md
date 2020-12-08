@@ -1,3 +1,10 @@
+# [@cypress/vue-v1.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.7...@cypress/vue-v1.1.0-alpha.1) (2020-11-30)
+
+
+### Features
+
+* create-cypress-tests wizard ([#8857](https://github.com/cypress-io/cypress/issues/8857)) ([21ee591](https://github.com/cypress-io/cypress/commit/21ee591d1e9c4083a0c67f2062ced92708c0cedd))
+
 # [@cypress/vue-v1.0.1-alpha.7](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.6...@cypress/vue-v1.0.1-alpha.7) (2020-11-10)
 
 

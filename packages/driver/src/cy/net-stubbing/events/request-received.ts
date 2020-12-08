@@ -129,10 +129,6 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
     continueSent = true
 
-    if (request) {
-      request.state = 'Intercepted'
-    }
-
     if (continueFrame) {
       // copy changeable attributes of userReq to req in frame
       // @ts-ignore
@@ -149,7 +145,10 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
       emitNetEvent('http:request:continue', continueFrame)
     }
 
-    request.log.fireChangeEvent()
+    if (request) {
+      request.state = 'Intercepted'
+      request.log && request.log.fireChangeEvent()
+    }
   }
 
   if (!route) {
