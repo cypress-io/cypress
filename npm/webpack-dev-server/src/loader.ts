@@ -14,6 +14,8 @@ const makeImport = (file, fileKey, chunkName, projectRoot) => {
 }
 
 function buildSpecs (files, projectRoot) {
+  if (!files || !Array.isArray(files)) return `{}`
+
   return `{${files.map((f, i) => {
     return makeImport(f, f.name, `spec-${i}`, projectRoot)
   }).join(',')}}`
