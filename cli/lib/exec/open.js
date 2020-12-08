@@ -35,6 +35,10 @@ module.exports = {
       args.push('--project', options.project)
     }
 
+    if (options.componentTesting) {
+      args.push('--componentTesting', options.componentTesting)
+    }
+
     debug('opening from options %j', options)
     debug('command line arguments %j', args)
 
