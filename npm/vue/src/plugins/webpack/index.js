@@ -1,5 +1,5 @@
 /// <reference types="cypress" />
-const { startDevServer } = require('../../preprocessor/webpack2')
+const { startDevServer } = require('@cypress/webpack-dev-server')
 
 /**
  * Registers Cypress preprocessor for Vue component testing.
@@ -18,7 +18,7 @@ const { startDevServer } = require('../../preprocessor/webpack2')
  */
 const cypressPluginsFn = (on, config, webpackConfig) => {
   require('@cypress/code-coverage/task')(on, config)
-  on('componentTesting:startDevServer', startDevServer(config, webpackConfig))
+  on('componentTesting:startDevServer', () => startDevServer(config, webpackConfig))
 
   return config
 }
