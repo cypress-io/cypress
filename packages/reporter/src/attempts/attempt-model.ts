@@ -78,6 +78,8 @@ export class AttemptModel {
     onCreateModel(this.routes)
     _.each(props.routes, this._addRoute)
 
+    // TODO: get rid of this and flatten out hooks
+    // having it causes a rendering artifact when opening collapsed attempts
     this.hooks = new Collection({
       id: `${this.id}-hooks`,
       level: test.level,
@@ -85,7 +87,6 @@ export class AttemptModel {
       type: VirtualizableType.HookCollection,
     })
 
-    // TODO: is this necessary? can we do without the hook collection and just individually add hooks?
     onCreateModel(this.hooks)
     _.each(props.hooks, this._addHook)
 
@@ -232,7 +233,7 @@ export class AttemptModel {
   }
 
   _addCommand = (props: CommandProps) => {
-    const command = new CommandModel(props, this.test)
+    const command = new CommandModel(props, this.test, this.id)
 
     this._logs[props.id] = command
 

@@ -63,10 +63,10 @@ export class CommandModel extends InstrumentModel {
     return this.numDuplicates > 1
   }
 
-  constructor (props: CommandProps, test: TestModel) {
+  constructor (props: CommandProps, test: TestModel, attemptId: string) {
     super(props)
 
-    this._id = `command-${props.hookId}-${props.id}`
+    this._id = `${attemptId}-${props.hookId}-${props.id}-command`
     this.event = props.event
     this.index = props.index
     this.number = props.number

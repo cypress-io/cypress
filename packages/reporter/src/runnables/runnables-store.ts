@@ -9,9 +9,10 @@ import { RouteModel, RouteProps } from '../routes/route-model'
 import scroller, { Scroller } from '../lib/scroller'
 import { HookProps } from '../hooks/hook-model'
 import { SuiteModel } from './suite-model'
-import { TestModel, TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
+import { TestModel, TestProps, UpdateTestCallback, UpdatableTestProps, TestFooterModel } from '../test/test-model'
 import { RunnableModel } from './runnable-model'
-import { Virtualizable } from './../virtual-tree/virtualizable'
+import { VirtualizableModel, VirtualizableType } from './../virtual-tree/virtualizable-types'
+import { VirtualNodeModel } from '../virtual-tree/virtual-node-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -43,6 +44,7 @@ type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteModel
 class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: Node[] = []
+  @observable scrollToId?: string
   hasTests: boolean = false
   hasSingleTest: boolean = false
 
@@ -51,7 +53,7 @@ class RunnablesStore {
   [key: string]: any
 
   _tests: Record<string, TestModel> = {}
-  _models: Record<string, Virtualizable> = {}
+  _models: Record<string, VirtualizableModel> = {}
   _logs: Record<string, Log> = {}
   _runnablesQueue: Array<RunnableModel> = []
 
@@ -65,6 +67,7 @@ class RunnablesStore {
 
   setRunnables (rootRunnable: RootRunnable) {
     this.runnables = this._createRunnableChildren(rootRunnable, 0)
+    this.runnables.push(this._createRunnablesFooter())
     this.isReady = true
 
     const numTests = _.keys(this._tests).length
@@ -76,15 +79,29 @@ class RunnablesStore {
   }
 
   _createRunnableChildren (runnableProps: RootRunnable, level: number) {
-    return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level).concat(
+    return this._createRunnables<TestProps>('test', runnableProps.tests || [], runnableProps.hooks || [], level)
+    .concat(
       this._createRunnables<SuiteModel>('suite', runnableProps.suites || [], runnableProps.hooks || [], level),
     )
   }
 
   _createRunnables<T> (type: RunnableType, runnables: Array<TestOrSuite<T>>, hooks: Array<HookProps>, level: number) {
-    return _.map(runnables, (runnableProps) => {
+    return _.flatMap(runnables, (runnableProps) => {
       return this._createRunnable(type, runnableProps, hooks, level)
     })
+  }
+
+  _createRunnablesFooter () {
+    // since every virtualized component is rendered in a flat list, this is
+    // the only way to add 'padding' to the bottom of of the runnables
+    const footer = {
+      virtualType: VirtualizableType.RunnablesFooter,
+      virtualNode: new VirtualNodeModel('runnables-footer', VirtualizableType.RunnablesFooter),
+    }
+
+    this._addModel(footer)
+
+    return footer.virtualNode
   }
 
   _createRunnable<T> (type: RunnableType, props: TestOrSuite<T>, hooks: Array<HookProps>, level: number) {
@@ -110,20 +127,30 @@ class RunnablesStore {
     this._tests[test.id] = test
     this._addModel(test)
 
-    return test.virtualNode
+    // since every virtualized component is rendered in a flat list, this is
+    // the only way to add 'padding' to the bottom of each test
+    const footer = new TestFooterModel(test)
+
+    this._addModel(footer)
+
+    return [
+      test.virtualNode,
+      footer.virtualNode,
+    ]
   }
 
-  _addModel = (model: Virtualizable) => {
+  _addModel = (model: VirtualizableModel) => {
     // console.log('add model:', model.virtualType, model.virtualNode.id)
 
     // if (this._models[model.virtualNode.id]) {
-    //   console.warn('duplicate model added:', model.virtualType, model.virtualNode.id)
+    //   console.error('duplicate model added:', model.virtualType, model.virtualNode.id)
     // }
 
     this._models[model.virtualNode.id] = model
   }
 
   // QUESTION: is this necessary with virtualization? Does it get in the way of virtualization?
+  //           try removing it and see if it affects 'start up' time
   //
   // progressively renders the runnables instead of all of them being rendered
   // at once. this prevents a noticeable lag in initial rendering when there
@@ -188,9 +215,13 @@ class RunnablesStore {
     return this._models[id]
   }
 
-  addLog (log: LogProps) {
-    this._withTest(log.testId, (test) => {
-      test.addLog(log)
+  addLog (logProps: LogProps) {
+    this._withTest(logProps.testId, (test) => {
+      const log = test.addLog(logProps)
+
+      if (log && logProps.instrument === 'command') {
+        this.setScrollToId((log as CommandModel).virtualNode.id)
+      }
     })
   }
 
@@ -208,6 +239,15 @@ class RunnablesStore {
     })
   }
 
+  _scrollToHistory: {[key: string]: boolean} = {}
+
+  @action setScrollToId (id: string) {
+    if (this._scrollToHistory[id]) return
+
+    this._scrollToHistory[id] = true
+    this.scrollToId = id
+  }
+
   reset () {
     _.each(defaults, (value, key) => {
       this[key] = value
@@ -217,6 +257,7 @@ class RunnablesStore {
     this._tests = {}
     this._models = {}
     this._runnablesQueue = []
+    this._scrollToHistory = {}
   }
 }
 

@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-virtualized/dist/es/CellMeasurer/CellMeasurer.js b/node_modules/react-virtualized/dist/es/CellMeasurer/CellMeasurer.js
+index 5248725..065ab87 100644
+--- a/node_modules/react-virtualized/dist/es/CellMeasurer/CellMeasurer.js
++++ b/node_modules/react-virtualized/dist/es/CellMeasurer/CellMeasurer.js
+@@ -79,8 +79,14 @@ function (_React$PureComponent) {
+   _createClass(CellMeasurer, [{
+     key: "componentDidMount",
+     value: function componentDidMount() {
++      this._isMounted = true;
+       this._maybeMeasureCell();
+     }
++  }, {
++    key: "componentWillUnmount",
++    value: function componentDidMount() {
++      this._isMounted = false;
++    }
+   }, {
+     key: "componentDidUpdate",
+     value: function componentDidUpdate() {
+@@ -99,7 +105,7 @@ function (_React$PureComponent) {
+     key: "_getCellMeasurements",
+     value: function _getCellMeasurements() {
+       var cache = this.props.cache;
+-      var node = this._child || findDOMNode(this); // TODO Check for a bad combination of fixedWidth and missing numeric width or vice versa with height
++      var node = this._child || (this._isMounted && findDOMNode(this)); // TODO Check for a bad combination of fixedWidth and missing numeric width or vice versa with height
+ 
+       if (node && node.ownerDocument && node.ownerDocument.defaultView && node instanceof node.ownerDocument.defaultView.HTMLElement) {
+         var styleWidth = node.style.width;

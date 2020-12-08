@@ -43,6 +43,17 @@ export interface UpdatableTestProps {
   retries?: TestProps['retries']
 }
 
+export class TestFooterModel {
+  virtualType = VirtualizableType.TestFooter
+  test: TestModel
+  virtualNode: VirtualNodeModel
+
+  constructor (test: TestModel) {
+    this.test = test
+    this.virtualNode = new VirtualNodeModel(`${test.id}-footer`, this.virtualType)
+  }
+}
+
 export class TestModel extends RunnableModel {
   type = 'test'
   virtualType = VirtualizableType.Test

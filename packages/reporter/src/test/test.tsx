@@ -4,7 +4,7 @@ import React, { createRef, useEffect } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
 import appState from '../lib/app-state'
-import { TestModel } from './test-model'
+import { TestFooterModel, TestModel } from './test-model'
 import scroller from '../lib/scroller'
 
 // TODO:
@@ -54,3 +54,14 @@ export const Test = observer(({ model }: TestProps) => {
     </div>
   )
 })
+
+interface TestFooterProps {
+  model: TestFooterModel
+  style: React.CSSProperties
+}
+
+export const TestFooter = ({ model, style }: TestFooterProps) => (
+  <div className={`test-footer runnable-state-${model.test.state}`} style={(style)}>
+    <div />
+  </div>
+)

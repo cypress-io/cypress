@@ -1,8 +1,10 @@
+import _ from 'lodash'
 import React from 'react'
 
 import { Runnable } from '../runnables/runnable-and-suite'
 import { SuiteModel } from '../runnables/suite-model'
-import { TestModel } from '../test/test-model'
+import { TestFooter } from '../test/test'
+import { TestModel, TestFooterModel } from '../test/test-model'
 import { Attempt } from '../attempts/attempts'
 import { AttemptModel } from '../attempts/attempt-model'
 import { Agents } from '../agents/agents'
@@ -25,6 +27,7 @@ interface Props extends VirtualizableProps {
 export const Virtualizable = ({ index, model, measure, node, onChange, style }: Props) => {
   const wrappedMeasure = () => {
     requestAnimationFrame(() => {
+      // console.log('measure')
       measure()
     })
   }
@@ -35,6 +38,8 @@ export const Virtualizable = ({ index, model, measure, node, onChange, style }: 
       return <Runnable virtualizableProps={virtualizableProps} model={model as SuiteModel} />
     case VirtualizableType.Test:
       return <Runnable virtualizableProps={virtualizableProps} model={model as TestModel} />
+    case VirtualizableType.TestFooter:
+      return <TestFooter style={style} model={model as TestFooterModel} />
     case VirtualizableType.Attempt:
       return <Attempt virtualizableProps={virtualizableProps} model={model as AttemptModel} />
     case VirtualizableType.AgentCollection:
@@ -49,6 +54,8 @@ export const Virtualizable = ({ index, model, measure, node, onChange, style }: 
       return <Command virtualizableProps={virtualizableProps} model={model as CommandModel} />
     case VirtualizableType.Error:
       return <TestError virtualizableProps={virtualizableProps} model={model as ErrModel} />
+    case VirtualizableType.RunnablesFooter:
+      return <div className='runnables-footer' style={style}><div /></div>
     default:
       return null
   }

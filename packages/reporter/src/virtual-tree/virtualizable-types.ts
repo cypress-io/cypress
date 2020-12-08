@@ -4,8 +4,10 @@ import { FlattenedNode, NodeAction } from 'react-virtualized-tree'
 import { VirtualNodeModel } from './virtual-node-model'
 
 export enum VirtualizableType {
-  Test = 'Test',
+  RunnablesFooter = 'RunnablesFooter',
   Suite = 'Suite',
+  Test = 'Test',
+  TestFooter = 'TestFooter',
   Attempt = 'Attempt',
   AttemptContent = 'AttemptContent',
   AgentCollection = 'AgentCollection',

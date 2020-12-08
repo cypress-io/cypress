@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-virtualized-tree/es/Tree.js b/node_modules/react-virtualized-tree/es/Tree.js
-index 7dceea3..402ed58 100644
+index 7dceea3..e7d4ec2 100644
 --- a/node_modules/react-virtualized-tree/es/Tree.js
 +++ b/node_modules/react-virtualized-tree/es/Tree.js
 @@ -27,7 +27,7 @@ var Tree = function (_React$Component) {
@@ -11,8 +11,37 @@ index 7dceea3..402ed58 100644
      }), _this.getRowCount = function () {
        var nodes = _this.props.nodes;
  
+diff --git a/node_modules/react-virtualized-tree/es/TreeContainer.js b/node_modules/react-virtualized-tree/es/TreeContainer.js
+index 9414dbb..c0cfbc1 100644
+--- a/node_modules/react-virtualized-tree/es/TreeContainer.js
++++ b/node_modules/react-virtualized-tree/es/TreeContainer.js
+@@ -94,7 +94,10 @@ TreeContainer.propTypes = process.env.NODE_ENV !== "production" ? {
+   children: PropTypes.func.isRequired,
+   nodeMarginLeft: PropTypes.number,
+   width: PropTypes.number,
+-  scrollToId: PropTypes.number,
++  scrollToId: PropTypes.oneOfType([
++    PropTypes.string,
++    PropTypes.number
++  ]),
+   scrollToAlignment: PropTypes.string
+ } : {};
+ 
+diff --git a/node_modules/react-virtualized-tree/index.d.ts b/node_modules/react-virtualized-tree/index.d.ts
+index 7c0e6e5..5258c62 100644
+--- a/node_modules/react-virtualized-tree/index.d.ts
++++ b/node_modules/react-virtualized-tree/index.d.ts
+@@ -38,7 +38,7 @@ export interface TreeProps {
+   children: <T = any>(props: RendererProps<T>) => JSX.Element;
+   nodeMarginLeft?: number;
+   width?: number;
+-  scrollToId?: number;
++  scrollToId?: string | number;
+   scrollToAlignment?: string;
+ }
+ 
 diff --git a/node_modules/react-virtualized-tree/lib/Tree.js b/node_modules/react-virtualized-tree/lib/Tree.js
-index 05ffc48..f7adfb4 100644
+index 05ffc48..a785d68 100644
 --- a/node_modules/react-virtualized-tree/lib/Tree.js
 +++ b/node_modules/react-virtualized-tree/lib/Tree.js
 @@ -43,7 +43,7 @@ var Tree = function (_React$Component) {
