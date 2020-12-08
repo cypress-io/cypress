@@ -22,36 +22,27 @@ function checkMountModeEnabled () {
   }
 }
 
-const registerGlobalComponents = (Vue, options) => {
-  const globalComponents = Cypress._.get(options, 'extensions.components')
+const globalComponents = (options) => {
+  const components = Cypress._.get(options, 'extensions.components')
 
-  if (Cypress._.isPlainObject(globalComponents)) {
-    Cypress._.forEach(globalComponents, (component, id) => {
-      Vue.component(id, component)
-    })
+  if (!Cypress._.isPlainObject(components)) {
+    return {}
   }
+
+  return Cypress._.reduce(components, (result, value, key) => {
+    result[key] = value
+
+    return result
+  }, {})
 }
 
-const installFilters = (Vue, options) => {
-  const filters: VueFilters | undefined = Cypress._.get(
-    options,
-    'extensions.filters',
-  )
-
-  if (Cypress._.isPlainObject(filters)) {
-    Object.keys(filters).forEach((name) => {
-      Vue.filter(name, filters[name])
-    })
-  }
-}
-
-const installPlugins = (options) => {
+const plugins = (options) => {
   return Cypress._.get(options, 'extensions.use') ||
-    Cypress._.get(options, 'extensions.plugins') ||
-    []
+  Cypress._.get(options, 'extensions.plugins') ||
+  []
 }
 
-const installMixins = (options) => {
+const mixins = (options) => {
   const mixins =
     Cypress._.get(options, 'extensions.mixin') ||
     Cypress._.get(options, 'extensions.mixins')
@@ -380,34 +371,14 @@ export const mount = (
 
     el.append(componentNode)
 
-    // setup Vue instance
-    // installFilters(localVue, options)
-    // installMixins(localVue, options)
-    // @ts-ignore
-    // installPlugins(localVue, options, props)
-    // registerGlobalComponents(localVue, options)
-
     // @ts-ignore
     props.attachTo = componentNode
 
-    // const wrapper = localVue.extend(component as any)
-
-    const globalComponents = Cypress._.get(options, 'extensions.components')
-
-    const components = Cypress._.isPlainObject(globalComponents)
-      ?
-      Cypress._.reduce(globalComponents, (result, value, key) => {
-        result[key] = value
-
-        return result
-      }, {})
-      : {}
-
     const VTUWrapper = testUtilsMount(component, {
       global: {
-        components,
-        mixins: installMixins(options),
-        plugins: installPlugins(options),
+        components: globalComponents(options),
+        mixins: mixins(options),
+        plugins: plugins(options),
       },
       ...props,
     })

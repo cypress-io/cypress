@@ -19,7 +19,6 @@ const { onFileDefaultPreprocessor } = require('../../preprocessor/webpack')
 const cypressPluginsFn = (on, config, webpackConfig) => {
   require('@cypress/code-coverage/task')(on, config)
   on('file:preprocessor', onFileDefaultPreprocessor(config, webpackConfig))
-  console.log('c')
 
   return config
 }
