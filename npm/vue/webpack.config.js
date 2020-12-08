@@ -22,7 +22,7 @@ module.exports = {
       // AND `<style>` blocks in `.vue` files
       {
         test: /\.css$/,
-        use: ['vue-style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader'],
       },
       // https://github.com/intlify/vue-i18n-loader
       // {

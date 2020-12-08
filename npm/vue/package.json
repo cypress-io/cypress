@@ -38,6 +38,8 @@
     "vue": "^3.0.0",
     "vue-i18n": "8.9.0",
     "vue-loader": "16.0.0-0",
+    "vue-router": "4.0.0-0",
+    "vuex": "4.0.0-0",
     "webpack": "4.42.0"
   },
   "peerDependencies": {
