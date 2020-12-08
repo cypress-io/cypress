@@ -1,65 +1,46 @@
 /// <reference types="cypress" />
 import { MyPlugin } from './MyPlugin'
 import { MyPluginWithOptions } from './MyPluginWithOptions'
-import { mount, mountCallback } from '@cypress/vue'
-
-const EmptyComponent = { template: '<div></div>' }
+import { mount } from '@cypress/vue'
 
 describe('Single component mount', () => {
+  const Component = {
+    template: '<h1>{{ myPlugin }}</h1>',
+    inject: ['myPlugin'],
+  }
+
   it('has the plugin', () => {
-    const use = [MyPlugin]
+    const plugin = MyPlugin
 
     // extend Vue with plugins
     const extensions = {
-      use,
+      plugins: [plugin],
     }
 
-    mount(EmptyComponent, { extensions })
+    mount(Component, { extensions })
 
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
-  })
-})
-
-describe('Custom plugin MyPlugin', () => {
-  const use = [MyPlugin]
-
-  // extend Vue with plugins
-  const extensions = {
-    use,
-  }
-
-  // use "mountCallback" to register the plugins
-  beforeEach(mountCallback(EmptyComponent, { extensions }))
-
-  it('registers global method on Vue instance', () => {
-    cy.window().its('Vue').its('aPluginMethod').should('be.a', 'function')
-  })
-
-  it('can call this global function', () => {
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
+    cy.get('h1').should('have.text', 'This is a plugin')
   })
 })
 
 describe('Plugins with options', () => {
   it('passes options', () => {
-    const use = [
+    const Component = {
+      template: '<h1>{{ label() }}</h1>',
+    }
+
+    const plugins = [
       MyPlugin, // this plugin does not need options
       [MyPluginWithOptions, { label: 'testing' }], // this plugin needs options
     ]
 
     // extend Vue with plugins
     const extensions = {
-      use,
+      plugins,
     }
 
-    mount(EmptyComponent, { extensions })
+    mount(Component, { extensions })
 
-    // first plugin works
-    cy.window().its('Vue').invoke('aPluginMethod').should('equal', 'foo')
-    // second plugin works
-    cy.window()
-    .its('Vue')
-    .invoke('anotherPluginMethod')
-    .should('equal', 'testing')
+    cy.get('h1').should('have.text', 'testing')
   })
 })

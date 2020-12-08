@@ -188,7 +188,7 @@ describe('Component with arguments', () => {
     cy.contains('<EMPTY>').should(
       'have.attr',
       'style',
-      'color:red;font-size:30px;',
+      'color: red; font-size: 30px;',
     )
   })
 })

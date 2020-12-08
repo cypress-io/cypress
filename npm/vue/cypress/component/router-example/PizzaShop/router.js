@@ -1,12 +1,10 @@
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import PizzaShop from './index'
 import Home from './Home'
 import Order from './Order'
 
-Vue.use(VueRouter)
-
-export default new VueRouter({
+export default createRouter({
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',

@@ -21,17 +21,16 @@ describe('Props', () => {
   })
 
   context('MessageList without props', () => {
-    beforeEach(mountCallback(MessageList))
-
     it('shows no messages', () => {
+      mount(MessageList)
       getItems().should('not.exist')
     })
 
     it('shows messages', () => {
-      getItems().should('not.exist')
-      // after mounting we can set props using "Cypress.vue"
-      cy.log('setting messages').then(() => {
-        Cypress.vue.messages = ['one', 'two']
+      mount(MessageList, {
+        props: {
+          messages: ['one', 'two'],
+        },
       })
 
       getItems().should('have.length', 2)

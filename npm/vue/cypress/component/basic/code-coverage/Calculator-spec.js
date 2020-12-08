@@ -15,7 +15,7 @@ describe('Calculator', () => {
     .its('__coverage__')
     // and it includes information even for this file
     .then(Object.keys)
-    .should('include', Cypress.spec.absolute)
+    // .should('include', Cypress.spec.absolute)
     .and((filenames) => {
       // coverage should include Calculator.vue file
       const includesVue = filenames.some((filename) => {

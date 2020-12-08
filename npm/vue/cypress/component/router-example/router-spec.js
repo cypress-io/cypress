@@ -1,12 +1,11 @@
 import PizzaShop from './PizzaShop'
 import router from './PizzaShop/router'
-import VueRouter from 'vue-router'
 import { mountCallback } from '@cypress/vue'
 
 describe('Vue Router - Pizza Shop', () => {
   // configure component
   const extensions = {
-    plugins: [VueRouter],
+    plugins: [router],
     components: {
       PizzaShop,
     },
@@ -19,7 +18,7 @@ describe('Vue Router - Pizza Shop', () => {
   beforeEach(mountCallback({ template, router }, { extensions }))
 
   it('go to order page', () => {
-    cy.get('button.order').click()
+    cy.get('a.order').click()
     cy.contains('Toppings')
   })
 
@@ -85,7 +84,8 @@ describe('Vue Router - Pizza Shop', () => {
       const { path, query } = Cypress.vue.$route
 
       expect(path).to.eql('/order')
-      expect(query).to.eql({ cheese: true })
+      // query params are strings
+      expect(query).to.eql({ cheese: 'true' })
     })
 
     // cheese topping should be in the order overview

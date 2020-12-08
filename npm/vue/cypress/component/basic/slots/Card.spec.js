@@ -14,7 +14,11 @@ describe('Card', () => {
     cy.contains('Nothing used the Scoped content!').should('be.visible')
   })
 
-  it('renders slots', () => {
+  // TODO: Allow configuring `prefixIdentifiers` compiler option in
+  // Vue Test Utils Next.
+  // https://github.com/vuejs/vue-test-utils-next/blob/a8234faf30480ef5857b2862002d006c8bdf9964/src/utils/compileSlots.ts#L17
+  // This is not valid in a browser environment.
+  xit('renders slots', () => {
     mount(Card, {
       slots: {
         header: '<h1>HEADER</h1>',
@@ -26,9 +30,9 @@ describe('Card', () => {
     cy.contains('div', 'FOOTER')
   })
 
-  it('renders scopedSlots', () => {
+  xit('renders scopedSlots', () => {
     mount(Card, {
-      scopedSlots: {
+      slots: {
         default: '<p>Yay! {{props.content}}</p>',
       },
     })
