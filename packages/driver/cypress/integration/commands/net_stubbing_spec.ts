@@ -2199,5 +2199,49 @@ describe('network stubbing', { retries: 2 }, function () {
         .then(testResponse('something different', done))
       })
     })
+
+    // @see https://github.com/cypress-io/cypress/issues/9580
+    context.only('overwrite cy.intercept', () => {
+      it('works with an alias by default', () => {
+        // sanity test before testing it with the cy.intercept overwrite
+        cy.intercept('/foo', 'my value').as('netAlias')
+          .then(() => {
+            return $.get('/foo')
+          })
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with an alias and function', { retries: 0 }, () => {
+        let thenCalled
+
+        Cypress.Commands.overwrite('intercept', function (intercept, ...args) {
+          return cy.log('intercept!').then(function () {
+            thenCalled = true
+            return intercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', 'my value').as('netAlias')
+          .then(() => {
+            return $.get('/foo')
+        })
+        // .then(() => {
+        //   expect(thenCalled, 'overwrite was called').to.be.true
+        //   // now make sure the alias is set
+        //   // @ts-ignore
+        //   debugger
+        //   expect(cy.getAlias('@netAlias'), 'alias is set').to.deep.include({
+        //     alias: 'netAlias',
+        //     subject: null
+        //   })
+        // })
+        // .then(() => {
+        //   // confirm the alias exists
+        //   console.log('getting net alias')
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+        // })
+        // .then(done)
+      })
+    })
   })
 })

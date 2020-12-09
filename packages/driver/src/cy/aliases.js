@@ -45,6 +45,8 @@ const validateAlias = (alias) => {
 
 const create = (cy) => {
   const addAlias = (ctx, aliasObj) => {
+    console.log('addAlias ctx', ctx)
+    console.log('aliasObject', aliasObj)
     const { alias, subject } = aliasObj
 
     const aliases = cy.state('aliases') || {}

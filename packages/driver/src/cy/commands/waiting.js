@@ -55,6 +55,7 @@ module.exports = (Commands, Cypress, cy, state) => {
   }
 
   const waitString = (subject, str, options) => {
+    debugger
     let log
 
     if (options.log !== false) {
