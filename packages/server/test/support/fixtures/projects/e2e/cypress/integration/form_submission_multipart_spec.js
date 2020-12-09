@@ -1,82 +1,106 @@
+/* eslint-disable
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const { Blob, _ } = Cypress;
+const { Blob, _ } = Cypress
 
-Cypress.Commands.add('setFile', { prevSubject: "element" }, function(element, filePath) {
+Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) => {
   const mimeTypes = {
-    jpeg: "image/jpeg",
-    jpg: "image/jpeg",
-    png: "image/png",
-    pdf: "application/pdf"
-  };
+    jpeg: 'image/jpeg',
+    jpg: 'image/jpeg',
+    png: 'image/png',
+    pdf: 'application/pdf',
+  }
 
-  const filePathSplitted = filePath.split('.').pop();
-  const mimeType = mimeTypes[filePathSplitted] !== undefined ? mimeTypes[filePathSplitted] : null;
+  const filePathSplitted = filePath.split('.').pop()
+  const mimeType = mimeTypes[filePathSplitted] !== undefined ? mimeTypes[filePathSplitted] : null
 
-  const fixtureOrReadFile = function(filePath) {
-    if (_.startsWith(filePath, "/")) {
-      return cy.readFile(filePath, "base64");
+  const fixtureOrReadFile = function (filePath) {
+    if (_.startsWith(filePath, '/')) {
+      return cy.readFile(filePath, 'base64')
     }
 
-    return cy.fixture(filePath, "base64");
-  };
+    return cy.fixture(filePath, 'base64')
+  }
 
-  return fixtureOrReadFile(filePath).then(image => new Promise(resolve => { 
-    const blob = Blob.base64StringToBlob(image);
-    const elementNode = element[0];
-    const file = new File([ blob ], filePath, {type: mimeType});
-    const dataTransfer = new DataTransfer;
-    dataTransfer.items.add(file);
-    elementNode.files = dataTransfer.files;
-    const result = elementNode.dispatchEvent(new Event("change", { bubbles: true }));
+  return fixtureOrReadFile(filePath).then((image) => {
+    return new Promise((resolve) => {
+      const blob = Blob.base64StringToBlob(image)
+      const elementNode = element[0]
+      const file = new File([blob], filePath, { type: mimeType })
+      const dataTransfer = new DataTransfer
 
-    return resolve(result);
-  }));
-});  
+      dataTransfer.items.add(file)
+      elementNode.files = dataTransfer.files
+      const result = elementNode.dispatchEvent(new Event('change', { bubbles: true }))
 
-describe("<form> submissions", function() {
-  it("can submit a form correctly", () => cy
-  .visit("/")
-  .get("input[type=text]")
-  .type("hello world")
-  .get("input[type=submit]")
-  .click()
-  .document()
-  .contains('hello+world'));
+      return resolve(result)
+    })
+  })
+})
 
-  it("can submit a multipart/form-data form correctly", () => cy
-  .visit("/multipart-form-data")
-  .get("input[type=text]")
-  .type("hello world")
-  .get("input[type=submit]")
-  .click()
-  .document()
-  .contains('hello world'));
-
-  return context("can submit a multipart/form-data form with attachments", function() {
-    const testUpload = (fixturePath, containsOpts= {}) => cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
-    .get("input[type=file]")
-    .setFile(fixturePath)
-    .get("input[type=submit]")
+describe('<form> submissions', () => {
+  it('can submit a form correctly', () => {
+    return cy
+    .visit('/')
+    .get('input[type=text]')
+    .type('hello world')
+    .get('input[type=submit]')
     .click()
     .document()
-    .contains('files match', containsOpts);
+    .contains('hello+world')
+  })
 
-    it("image/png", () => testUpload("../../static/javascript-logo.png"));
+  it('can submit a multipart/form-data form correctly', () => {
+    return cy
+    .visit('/multipart-form-data')
+    .get('input[type=text]')
+    .type('hello world')
+    .get('input[type=submit]')
+    .click()
+    .document()
+    .contains('hello world')
+  })
 
-    it("application/pdf", () => testUpload("sample.pdf"));
+  context('can submit a multipart/form-data form with attachments', () => {
+    const testUpload = (fixturePath, containsOpts = {}) => {
+      return cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
+      .get('input[type=file]')
+      .setFile(fixturePath)
+      .get('input[type=submit]')
+      .click()
+      .document()
+      .contains('files match', containsOpts)
+    }
 
-    it("image/jpeg", () => testUpload("sample.jpg"));
+    it('image/png', () => {
+      return testUpload('../../static/javascript-logo.png')
+    })
 
-    //# https://github.com/cypress-io/cypress/issues/4253
-    it("large application/pdf", () => testUpload("bigger-sample.pdf"));
+    it('application/pdf', () => {
+      return testUpload('sample.pdf')
+    })
 
-    //# https://github.com/cypress-io/cypress/issues/4240
-    return it("large image/jpeg", () => testUpload(Cypress.env("PATH_TO_LARGE_IMAGE"), {
-      timeout: 120000
-    }));
-  });
-});
+    it('image/jpeg', () => {
+      return testUpload('sample.jpg')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4253
+    it('large application/pdf', () => {
+      return testUpload('bigger-sample.pdf')
+    })
+
+    // https://github.com/cypress-io/cypress/issues/4240
+    it('large image/jpeg', () => {
+      return testUpload(Cypress.env('PATH_TO_LARGE_IMAGE'), {
+        timeout: 120000,
+      })
+    })
+  })
+})

@@ -1,64 +1,86 @@
+/* eslint-disable
+    brace-style,
+    mocha/no-global-tests,
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-const testAfterRuns = [];
+const testAfterRuns = []
 
-Cypress.on("test:after:run", test => testAfterRuns.push(test.title));
+Cypress.on('test:after:run', (test) => {
+  return testAfterRuns.push(test.title)
+})
 
-//# this should run
-it("t1a", function() {});
+// this should run
+it('t1a', () => {})
 
-//# these 3 should be skipped
-describe("s1a", function() {
-  beforeEach(() => cy.get(".does-not-exist", {timeout: 100}));
+// these 3 should be skipped
+describe('s1a', () => {
+  beforeEach(() => {
+    return cy.get('.does-not-exist', { timeout: 100 })
+  })
 
-  it("t2a", function() {});
-  it("t3a", function() {});
-  return it("t4a", function() {});
-});
+  it('t2a', () => {})
+  it('t3a', () => {})
 
-//# these 3 should run
-describe("s2a", function() {
-  it("t5a", function() {});
-  it("t6a", function() {});
-  return it("t7a", function() {});
-});
+  it('t4a', () => {})
+})
 
-describe("s3a", function() {
-  before(() => cy.wrap().then(function() {
-    throw new Error("s3a before hook failed");
-  }));
+// these 3 should run
+describe('s2a', () => {
+  it('t5a', () => {})
+  it('t6a', () => {})
 
-  after(() => //# it should not have fired test:after:run
-  //# for t8a yet
-  expect(testAfterRuns).to.deep.eq([
-    "t1a",
-    "t2a",
-    "t5a",
-    "t6a",
-    "t7a"
-  ]));
+  it('t7a', () => {})
+})
 
-  it("t8a", function() {});
-  return it("t9a", function() {});
-});
+describe('s3a', () => {
+  before(() => {
+    return cy.wrap().then(() => {
+      throw new Error('s3a before hook failed')
+    })
+  })
 
-describe("s4a", function() {
-  before(function() {
-    throw new Error("s4a before hook failed");
-  });
+  after(() => // it should not have fired test:after:run
+  // for t8a yet
+  {
+    expect(testAfterRuns).to.deep.eq([
+      't1a',
+      't2a',
+      't5a',
+      't6a',
+      't7a',
+    ])
+  })
 
-  return it("t10a", function() {});
-});
+  it('t8a', () => {})
 
-describe("s5a", () => it("fires all test:after:run events", () => expect(testAfterRuns).to.deep.eq([
-  "t1a",
-  "t2a",
-  "t5a",
-  "t6a",
-  "t7a",
-  "t8a",
-  "t10a"
-])));
+  it('t9a', () => {})
+})
+
+describe('s4a', () => {
+  before(() => {
+    throw new Error('s4a before hook failed')
+  })
+
+  it('t10a', () => {})
+})
+
+describe('s5a', () => {
+  it('fires all test:after:run events', () => {
+    expect(testAfterRuns).to.deep.eq([
+      't1a',
+      't2a',
+      't5a',
+      't6a',
+      't7a',
+      't8a',
+      't10a',
+    ])
+  })
+})
