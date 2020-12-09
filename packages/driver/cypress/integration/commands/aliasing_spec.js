@@ -326,6 +326,10 @@ describe('src/cy/commands/aliasing', () => {
           expect(cy.getAlias('@myAlias'), 'alias value')
           .to.have.property('subject', 'alias value')
         })
+        .then(() => {
+          // cy.get returns the alias
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
       })
 
       it('works with wrap', () => {
@@ -337,24 +341,20 @@ describe('src/cy/commands/aliasing', () => {
           return wrapFn(value)
         })
 
-        cy.wrap('my value')
-        .then(() => {
-          expect(wrapCalled, 'overwrite was called').to.be.true
-        })
-
         cy.wrap('alias value').as('myAlias')
         .then(() => {
+          expect(wrapCalled, 'overwrite was called').to.be.true
           expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
           expect(cy.getAlias('@myAlias'), 'alias value')
           .to.have.property('subject', 'alias value')
         })
         .then(() => {
           // verify cy.get works in arrow function
-          cy.get('myAlias').should('be.equal', 'alias value')
+          cy.get('@myAlias').should('be.equal', 'alias value')
         })
         .then(function () {
           // verify cy.get works in regular function
-          cy.get('myAlias').should('be.equal', 'alias value')
+          cy.get('@myAlias').should('be.equal', 'alias value')
         })
       })
     })
