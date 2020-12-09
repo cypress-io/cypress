@@ -125,8 +125,12 @@ const sanitizeAndConvertNestedArgs = (str, argname) => {
   la(is.unemptyString(argname), 'missing config argname to be parsed')
 
   try {
-  // if this is valid JSON then just
-  // parse it and call it a day
+    if (typeof str === 'object') {
+      return str
+    }
+
+    // if this is valid JSON then just
+    // parse it and call it a day
     const parsed = tryJSONParse(str)
 
     if (parsed) {
