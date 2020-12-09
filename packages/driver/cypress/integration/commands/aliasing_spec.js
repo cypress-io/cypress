@@ -357,6 +357,61 @@ describe('src/cy/commands/aliasing', () => {
           cy.get('@myAlias').should('be.equal', 'alias value')
         })
       })
+
+      it('works with wrap.then', () => {
+        let wrapCalled
+        let thenCalled
+
+        Cypress.Commands.overwrite('wrap', (wrapFn, value) => {
+          wrapCalled = true
+
+          return cy.log(`wrapped "${value}"`).then(() => {
+            thenCalled = true
+
+            return wrapFn(value)
+          })
+        })
+
+        cy.wrap('alias value').as('myAlias')
+        .then(() => {
+          expect(wrapCalled, 'overwrite was called').to.be.true
+          expect(thenCalled, 'then was called').to.be.true
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
+        })
+        .then(() => {
+          // verify cy.get works in arrow function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
+        .then(function () {
+          // verify cy.get works in regular function
+          cy.get('@myAlias').should('be.equal', 'alias value')
+        })
+      })
+
+      it('passes this to then callback function', () => {
+        // sanity test before the next one
+        cy.wrap(1).as('myAlias')
+        cy.wrap(2).then(function (subj) {
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
+          expect(this.myAlias, 'this has the alias as a property').to.eq(1)
+        })
+      })
+
+      it('works with .then function overwrite', () => {
+        Cypress.Commands.overwrite('then', function (originalCommand, subject, fn, options = {}) {
+          return originalCommand.call(null, subject, options, fn)
+        })
+
+        cy.wrap(1).as('myAlias')
+        cy.wrap(2).then(function (subj) {
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
+          expect(this.myAlias).to.eq(1) // undefined
+        })
+      })
     })
   })
 
