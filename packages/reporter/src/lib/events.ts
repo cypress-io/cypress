@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
+import { FileDetails } from '@packages/ui-components'
 import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
@@ -246,6 +247,10 @@ const events: Events = {
       appState.closeStudio()
       runner.emit('studio:cancel:runner:restart')
     }))
+
+    localBus.on('studio:save', (fileDetails: FileDetails) => {
+      runner.emit('studio:save', fileDetails)
+    })
   },
 
   emit (event, ...args) {

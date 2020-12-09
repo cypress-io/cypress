@@ -42,7 +42,8 @@ class StudioRecorder {
   @action start = (body) => {
     this.isActive = true
     this.isLoading = false
-    this._log = []
+    this.isSaving = false
+    this.log = []
     this._currentId = 1
     this._hasStarted = true
 
@@ -64,13 +65,21 @@ class StudioRecorder {
 
     this.testId = null
     this._hasStarted = false
+    this.isSaving = false
   }
 
   @action reset = () => {
     this.stop()
 
-    this._log = []
+    this.log = []
     this._hasStarted = false
+    this.isSaving = false
+  }
+
+  @action save = () => {
+    this.stop()
+
+    this.isSaving = true
   }
 
   attachListeners = (body) => {
@@ -85,7 +94,7 @@ class StudioRecorder {
   }
 
   removeCommand = (index) => {
-    this._log.splice(index, 1)
+    this.log.splice(index, 1)
     this._emitUpdatedLog()
   }
 
@@ -145,7 +154,7 @@ class StudioRecorder {
       value: this._getValue(event, $el),
     })
 
-    this._log.push(action)
+    this.log.push(action)
 
     this._filterLog()
 
@@ -153,31 +162,31 @@ class StudioRecorder {
   }
 
   _filterLog = () => {
-    const { length } = this._log
+    const { length } = this.log
 
-    const lastAction = this._log[length - 1]
+    const lastAction = this.log[length - 1]
 
     if (lastAction.command === 'change') {
-      this._log.splice(length - 1)
+      this.log.splice(length - 1)
 
       return
     }
 
     if (length > 1) {
-      const secondLast = this._log[length - 2]
+      const secondLast = this.log[length - 2]
 
       if (lastAction.selector === secondLast.selector) {
         if (lastAction.command === 'type' && secondLast.command === 'type') {
-          this._log.splice(length - 2, 1)
+          this.log.splice(length - 2, 1)
 
           return
         }
 
         if (lastAction.command === 'dblclick' && secondLast.command === 'click' && length > 2) {
-          const thirdLast = this._log[length - 3]
+          const thirdLast = this.log[length - 3]
 
           if (lastAction.selector === thirdLast.selector && thirdLast.command === 'click') {
-            this._log.splice(length - 3, 2)
+            this.log.splice(length - 3, 2)
           }
         }
       }
@@ -185,7 +194,7 @@ class StudioRecorder {
   }
 
   _emitUpdatedLog = () => {
-    eventManager.emit('update:studio:log', this._log)
+    eventManager.emit('update:studio:log', this.log)
   }
 }
 

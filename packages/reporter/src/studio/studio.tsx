@@ -38,7 +38,7 @@ const StudioNoCommands = () => (
 
 interface StudioControlsProps {
   events: Events
-  isValid: boolean
+  model: TestModel
 }
 
 class StudioControls extends Component<StudioControlsProps> {
@@ -49,15 +49,25 @@ class StudioControls extends Component<StudioControlsProps> {
   cancel = (e: MouseEvent) => {
     e.preventDefault()
 
-    events.emit('studio:cancel')
+    this.props.events.emit('studio:cancel')
+  }
+
+  save = (e: MouseEvent) => {
+    e.preventDefault()
+
+    const { events, model } = this.props
+
+    events.emit('studio:save', model.invocationDetails)
   }
 
   render () {
+    const isValid = !!this.props.model.studioCommands.length
+
     return (
       <div className='studio-controls'>
         <button className='studio-cancel' onClick={this.cancel}>Cancel</button>
-        <button className='studio-run' disabled={!this.props.isValid}>Run Test</button>
-        <button className='studio-save' disabled={!this.props.isValid}>Save Test</button>
+        <button className='studio-run' disabled={!isValid}>Run Test</button>
+        <button className='studio-save' disabled={!isValid} onClick={this.save}>Save Test</button>
       </div>
     )
   }
@@ -139,7 +149,7 @@ class Studio extends Component<StudioProps> {
               <ul className='studio-commands-container'>
                 {!model.studioCommands.length && model.state === 'passed' && <StudioNoCommands />}
                 {model.studioCommands.map((command, index) => <StudioCommand key={command.id} index={index} model={command} />)}
-                <StudioControls isValid={!!model.studioCommands.length} />
+                <StudioControls model={model} />
               </ul>
             </div>
           </div>

@@ -6,6 +6,7 @@ const socketIo = require('@packages/socket')
 
 const editors = require('./util/editors')
 const { openFile } = require('./util/file-opener')
+const { appendStudioCommandsToTest } = require('./util/spec_writer')
 const fs = require('./util/fs')
 const open = require('./util/open')
 const exec = require('./exec')
@@ -463,6 +464,11 @@ class Socket {
 
       socket.on('open:file', (fileDetails) => {
         openFile(fileDetails)
+      })
+
+      socket.on('studio:save', (fileDetails, commandLog, cb) => {
+        appendStudioCommandsToTest(fileDetails, commandLog)
+        .then(cb)
       })
 
       reporterEvents.forEach((event) => {

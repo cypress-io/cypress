@@ -20,6 +20,7 @@
     "test-watch": "./test/support/watch test"
   },
   "dependencies": {
+    "@babel/parser": "7.12.7",
     "@benmalka/foxdriver": "0.4.1",
     "@cypress/commit-info": "2.2.0",
     "@cypress/get-windows-proxy": "1.6.1",
@@ -31,6 +32,7 @@
     "@cypress/webpack-preprocessor": "*",
     "@ffmpeg-installer/ffmpeg": "1.0.20",
     "ansi_up": "4.0.4",
+    "ast-types": "0.13.3",
     "black-hole-stream": "0.0.1",
     "bluebird": "3.7.0",
     "chai": "1.10.0",
@@ -94,6 +96,7 @@
     "pluralize": "8.0.0",
     "ramda": "0.24.1",
     "randomstring": "1.1.5",
+    "recast": "0.19.1",
     "resolve": "1.17.0",
     "return-deep-diff": "0.4.0",
     "sanitize-filename": "1.6.3",

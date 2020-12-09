@@ -26,7 +26,6 @@ const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
-const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
 const socketToDriverEvents = 'net:event'.split(' ')
 
 const localBus = new EventEmitter()
@@ -87,8 +86,12 @@ const eventManager = {
       }
     })
 
-    _.each(socketRerunEvents, (event) => {
-      ws.on(event, rerun)
+    ws.on('runner:restart', rerun)
+
+    ws.on('watched:file:changed', () => {
+      if (!studioRecorder.isSaving) {
+        rerun()
+      }
     })
 
     _.each(socketToDriverEvents, (event) => {
@@ -197,6 +200,13 @@ const eventManager = {
 
     reporterBus.on('studio:remove:command', (index) => {
       studioRecorder.removeCommand(index)
+    })
+
+    reporterBus.on('studio:save', (fileDetails) => {
+      studioRecorder.stop()
+      ws.emit('studio:save', fileDetails, studioRecorder.log, () => {
+        reporterBus.emit('studio:cancel')
+      })
     })
 
     localBus.on('update:studio:log', (log) => {
