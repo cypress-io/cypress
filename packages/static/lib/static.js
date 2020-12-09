@@ -13,7 +13,7 @@ const getPathToDist = (...args) => {
 module.exports = {
   getPathToDist,
 
-  middleware (send) {
+  handle (send) {
     return (req, res) => {
       const pathToFile = getPathToDist(req.params[0])
 
