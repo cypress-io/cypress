@@ -82,8 +82,12 @@ const validateNoBreakingConfig = (cfg) => {
   })
 }
 
-const validate = (cfg, onErr) => {
+const validate = (cfg, onErr, skip) => {
   return _.each(cfg, (value, key) => {
+    // when a key is explicitely skipped it is automatically validated
+    // useful in certain modes where we do not use some config values
+    if (skip && skip.indexOf(key)) return
+
     const validationFn = validationRules[key]
 
     // does this key have a validation rule?
@@ -338,7 +342,7 @@ module.exports = {
     })
   },
 
-  updateWithPluginValues (cfg, overrides) {
+  updateWithPluginValues (cfg, overrides, skip) {
     if (!overrides) {
       overrides = {}
     }
@@ -355,7 +359,7 @@ module.exports = {
       }
 
       return errors.throw('CONFIG_VALIDATION_ERROR', errMsg)
-    })
+    }, skip)
 
     let originalResolvedBrowsers = cfg && cfg.resolved && cfg.resolved.browsers && R.clone(cfg.resolved.browsers)
 
