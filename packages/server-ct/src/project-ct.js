@@ -10,6 +10,7 @@ const plugins = require('@packages/server/lib/plugins')
 const devserver = require('@packages/server/lib/plugins/devserver')
 const { SpecsController } = require('./specs-controller')
 const Watchers = require('@packages/server/lib/watchers')
+const browsers = require('@packages/server/lib/browsers')
 
 const fs = require('@packages/server/lib/util/fs')
 const cwd = require('@packages/server/lib/cwd')
@@ -18,6 +19,8 @@ const settings = require('@packages/server/lib/util/settings')
 const Server = require('./server-ct')
 
 const localCwd = cwd()
+
+const DEFAULT_BROWSER_NAME = 'chrome'
 
 class Project {
   constructor (projectRoot) {
@@ -109,11 +112,25 @@ class Project {
       configFile: settings.pathToConfigFile(this.projectRoot, options),
     })
     .then((modifiedCfg) => {
+      if (modifiedCfg.browsers.length) {
+        return Promise.resolve(modifiedCfg)
+      }
+
+      // add chrome as a default browser if none has been specified
+      return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME).then((browser) => {
+        modifiedCfg.browsers = [browser]
+
+        return modifiedCfg
+      })
+    })
+    .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
       updatedConfig.componentTesting = true
+
+      debug('updated config: %o', updatedConfig)
 
       return updatedConfig
     })
