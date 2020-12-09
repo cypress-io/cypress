@@ -8,6 +8,7 @@ const config = require('@packages/server/lib/config')
 const savedState = require('@packages/server/lib/saved_state')
 const plugins = require('@packages/server/lib/plugins')
 const Watchers = require('@packages/server/lib/watchers')
+const browsersUtils = require('@packages/server/lib/browsers')
 
 const fs = require('@packages/server/lib/util/fs')
 const cwd = require('@packages/server/lib/cwd')
@@ -102,33 +103,42 @@ class Project {
     // internals and breaking cypress
     const allowedCfg = config.allowed(cfg)
 
-    return plugins.init(allowedCfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-    })
-    .then((modifiedCfg) => {
-      debug('plugin config yielded: %o', modifiedCfg)
+    return browsersUtils.getAllBrowsersWith().then((browsers) => {
+      return plugins.init(allowedCfg, {
+        projectRoot: this.projectRoot,
+        configFile: settings.pathToConfigFile(this.projectRoot, options),
+      })
+      .then((modifiedCfg) => {
+        debug('plugin config yielded: %o', modifiedCfg)
 
-      const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+        debug('set browsers', browsers)
+        // FIXME: remove the filter when the function below will validate electron
+        // ../../server/lib/utils/validation.js/isValidBrowser()
+        // remove browsers that don't have a version as they will yield an error
+        // in this case, we are talking about electron that could be wrongly excluded
+        modifiedCfg.browsers = browsers.filter((b) => b.version.length)
 
-      updatedConfig.componentTesting = true
+        const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
 
-      debug('updated config: %o', updatedConfig)
+        updatedConfig.componentTesting = true
 
-      return updatedConfig
-    })
-    .then((modifiedConfig) => {
+        debug('updated config: %o', updatedConfig)
+
+        return updatedConfig
+      })
+      .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
-      // the plugin event for 'componentTesting:startDevServer' and get back
-      return specsUtil.find(modifiedConfig)
-      .filter((spec) => {
-        return spec.specType === 'component'
-      }).then((specs) => {
-        return plugins.execute('componentTesting:startDevServer', { specs, config: modifiedConfig })
-        .then((port) => {
-          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
+      // the plugin event for 'devserver:config' and get back
+        return specsUtil.find(modifiedConfig)
+        .filter((spec) => {
+          return spec.specType === 'component'
+        }).then((specs) => {
+          return plugins.execute('devserver:config', { specs, config: modifiedConfig })
+          .then((port) => {
+            modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
-          return modifiedConfig
+            return modifiedConfig
+          })
         })
       })
     })
