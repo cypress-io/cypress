@@ -1,6 +1,7 @@
 const _ = require('lodash')
 const Promise = require('bluebird')
-const { waitForRoute } = require('../net-stubbing')
+const { waitForRoute } = require('../net-stubbing/wait-for-route')
+const { isDynamicAliasingPossible } = require('../net-stubbing/aliasing')
 const ordinal = require('ordinal')
 
 const $errUtils = require('../../cypress/error_utils')
@@ -24,13 +25,6 @@ const throwErr = (arg) => {
 }
 
 module.exports = (Commands, Cypress, cy, state) => {
-  const isDynamicAliasingPossible = () => {
-    // dynamic aliasing is possible if a route with dynamic interception has been defined
-    return _.find(state('routes'), (route) => {
-      return _.isFunction(route.handler)
-    })
-  }
-
   let userOptions = null
 
   const waitNumber = (subject, ms, options) => {
@@ -121,7 +115,7 @@ module.exports = (Commands, Cypress, cy, state) => {
         // before cy.intercept, we could know when an alias did/did not exist, because they
         // were declared synchronously. with cy.intercept, req.alias can be used to dynamically
         // create aliases, so we cannot know at wait-time if an alias exists or not
-        if (!isDynamicAliasingPossible()) {
+        if (!isDynamicAliasingPossible(state)) {
           throw err
         }
 
