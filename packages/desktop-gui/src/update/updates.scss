@@ -1,41 +1,11 @@
 .update-modal.os-dialog {
-  background: #fff;
-  padding: 0;
 
   a:hover {
     cursor: pointer !important;
   }
 
-  header {
-    border-bottom: solid 1px #E1E2E4;
-    padding: 1em 2em 0.4em;
-
-    i {
-      margin-right: 0.4rem;
-    }
-  }
-
-  .close {
-    border-radius: 3px;
-    font-size: 2.2rem;
-    padding: 0.5rem;
-    margin-right: 1.4rem;
-    margin-top: 1rem;
-
-    i {
-      width: 1em;
-    }
-
-    &:hover,
-    &:focus {
-      background: #E1E2E4;
-      color: #4D4D64;
-    }
-  }
-
-  section {
+  .modal-header {
     color: #505050;
-    padding: 1em 2em;
   }
 
   ol {

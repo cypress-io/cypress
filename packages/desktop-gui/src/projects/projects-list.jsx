@@ -49,7 +49,7 @@ class ProjectsList extends Component {
           <i className='fas fa-exclamation-triangle'></i>{' '}
           <strong>Error</strong>
         </p>
-        <p dangerouslySetInnerHTML={{
+        <p className="mb-0" dangerouslySetInnerHTML={{
           __html: projectsStore.error.message.split('\n').join('<br />'),
         }} />
       </div>

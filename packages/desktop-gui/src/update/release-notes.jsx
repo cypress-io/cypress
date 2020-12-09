@@ -14,7 +14,7 @@ export const LoadingReleaseNotes = () => (
   </div>
 )
 
-export const ReleaseNotes = observer(({ onShowInstructions }) => {
+export const ReleaseNotes = observer(({ onShowInstructions, onModalClose }) => {
   const contentsRef = createRef()
   const notes = updateStore.releaseNotes
 
@@ -82,19 +82,25 @@ export const ReleaseNotes = observer(({ onShowInstructions }) => {
 
   return (
     <div className='release-notes'>
-      <header>
+      <div className="modal-header">
         <h4>{notes.title}</h4>
-      </header>
-      {notes.bannerImage && <img width="548" src={notes.bannerImage} />}
-      <section className='contents' ref={contentsRef}></section>
-      <section className='update-cta'>
-        <button onClick={onShowInstructions}>Update Now</button>
-      </section>
-      {notes.externalLink && notes.externalLinkText && (
-        <section className='external-link'>
-          <button onClick={openExternalLink}>{notes.externalLinkText}</button>
+        <button onClick={onModalClose} type="button" className="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div className="modal-body">
+        {notes.bannerImage && <img width="548" src={notes.bannerImage} />}
+        <section className='contents' ref={contentsRef}></section>
+        <section className='update-cta'>
+          <button onClick={onShowInstructions}>Update Now</button>
         </section>
-      )}
+        {notes.externalLink && notes.externalLinkText && (
+          <section className='external-link'>
+            <button onClick={openExternalLink}>{notes.externalLinkText}</button>
+          </section>
+        )}
+      </div>
+
     </div>
   )
 })

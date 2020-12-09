@@ -98,14 +98,17 @@ const ProjectInstructions = observer(() => {
   )
 })
 
-export const UpdateInstructions = observer(() => (
+export const UpdateInstructions = observer(({ onModalClose }) => (
   <>
-    <header>
+    <div className="modal-header">
       <h4><i className='fas fa-arrow-alt-circle-up'></i> Update to Version {updateStore.newVersion}</h4>
-    </header>
-    <section>
+      <button onClick={onModalClose} type="button" className="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div className="modal-body">
       <p>You are currently running <strong>Version {appStore.displayVersion}</strong></p>
       {appStore.isGlobalMode ? <GlobalInstructions /> : <ProjectInstructions />}
-    </section>
+    </div>
   </>
 ))

@@ -26,20 +26,6 @@
   }
 }
 
-@mixin td-width($col, $width) {
-  #{$col} { width: $width; }
-}
-
-@mixin table-columns($widths...) {
-  $n: 1;
-  $var: "td:nth-child(" + $n + ")";
-  @each $width in $widths {
-    @include td-width($var, $width);
-    $n: $n + 1;
-    $var: "td:nth-child(" + $n + ")";
-  }
-}
-
 @mixin text-overflow-custom {
   overflow: visible;
   text-overflow: clip;

@@ -436,7 +436,7 @@ describe('Connect to Dashboard', function () {
         })
 
         it('closes modal', () => {
-          cy.get('.modal').should('not.exist')
+          cy.get('.modal').should('not.be.visible')
         })
 
         it('updates localStorage projects cache', () => {

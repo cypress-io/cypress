@@ -93,7 +93,7 @@ class LoginForm extends Component {
           <i className='fas fa-exclamation-triangle'></i>{' '}
           <strong>Can't Log In</strong>
         </p>
-        <p>{this._errorMessage(error.message)}</p>
+        <p className="mb-0">{this._errorMessage(error.message)}</p>
       </div>
     )
   }

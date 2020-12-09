@@ -356,11 +356,17 @@
   }
 
   .radio label {
+    display: flex;
     padding-left: 21px;
     overflow: auto;
 
     input[type='radio'] {
       margin-top: 2px;
+    }
+
+    p {
+      margin-bottom: 0;
+      margin-left: 8px;
     }
   }
 
