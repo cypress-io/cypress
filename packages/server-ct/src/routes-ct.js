@@ -1,5 +1,6 @@
-const debug = require('debug')('cypress:server:routes')
 const httpProxy = require('http-proxy')
+const send = require('send')
+const debug = require('debug')('cypress:server:routes')
 
 // const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
@@ -13,7 +14,10 @@ module.exports = ({ app, config, project, onError }) => {
   })
 
   app.get('/__cypress/static/*', (req, res) => {
-    staticPkg.handle(req, res)
+    const pathToFile = staticPkg.getPathToDist(req.params[0])
+
+    return send(req, pathToFile)
+    .pipe(res)
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {

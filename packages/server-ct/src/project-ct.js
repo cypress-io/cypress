@@ -133,7 +133,9 @@ class Project {
         .filter((spec) => {
           return spec.specType === 'component'
         }).then((specs) => {
-          return plugins.execute('devserver:config', { specs, config: modifiedConfig })
+          const argz = { specs, config: modifiedConfig }
+
+          return plugins.execute('componentTesting:startDevServer', argz)
           .then((port) => {
             modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
