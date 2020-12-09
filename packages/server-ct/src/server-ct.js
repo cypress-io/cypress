@@ -173,6 +173,10 @@ class Server {
     return this._socket && this._socket.onTestFileChange(filePath)
   }
 
+  sendSpecsChanged (specs) {
+    return this._socket && this._socket.sendSpecsChanged(specs)
+  }
+
   onRequest (fn) {
     this._middleware = fn
   }

@@ -1,3 +1,5 @@
+// copied from server/lib/socket.js
+
 const _ = require('lodash')
 const debug = require('debug')('cypress:server-ct:socket')
 const Bluebird = require('bluebird')
@@ -104,6 +106,7 @@ class Socket {
       onResolveUrl () {},
       onFocusTests () {},
       onSpecChanged () {},
+      onSpecsChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
@@ -366,6 +369,10 @@ class Socket {
         })
       })
     })
+  }
+
+  sendSpecsChanged (specs) {
+    this.toRunner('specs:changed', specs)
   }
 
   end () {
