@@ -66,6 +66,13 @@ class StudioRecorder {
     this._hasStarted = false
   }
 
+  @action reset = () => {
+    this.stop()
+
+    this._log = []
+    this._hasStarted = false
+  }
+
   attachListeners = (body) => {
     this._body = body
 
@@ -75,10 +82,6 @@ class StudioRecorder {
         passive: true,
       })
     })
-  }
-
-  resetLog = () => {
-    this._log = []
   }
 
   removeCommand = (index) => {

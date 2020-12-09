@@ -94,13 +94,31 @@
       }
 
       .studio-no-commands {
+        animation: flash-border 3s linear infinite;
+        border: 2px solid #3386d4;
         color: #959595;
         font-family: $muli;
-        padding: 6px;
+        font-size: 14px;
+        padding: 8px;
         text-align: center;
 
         .studio-no-commands-message {
           flex-grow: 1;
+        }
+
+        .studio-no-commands-icon {
+          font-size: 16px;
+          margin-right: 10px;
+        }
+      }
+
+      @keyframes flash-border {
+        0%, 100% {
+          border-color: #3386d4;
+        }
+
+        50% {
+          border-color: #f5f5f5;
         }
       }
     }
@@ -134,10 +152,11 @@
         margin-left: auto;
         margin-right: 10px;
         color: #3386d4;
-        border: 2px solid #3386d4;
+        border: 1px solid #3386d4;
 
         &:hover {
-          background-color: darken(#fff, 5%)
+          background-color: #3386d4;
+          color: #fff;
         }
 
         &[disabled],
@@ -160,8 +179,8 @@
         &[disabled],
         &[disabled]:hover,
         &[disabled]:active {
-          background-color: lighten(#3386d4, 10%);
-          color: #f2f2f2;
+          background-color: #3386d4;
+          opacity: 0.5;
         }
       }
     }

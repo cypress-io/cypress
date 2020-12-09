@@ -365,9 +365,10 @@
     }
 
     .studio-controls {
+      display: flex;
       margin-left: auto;
 
-      .button-save {
+      .button-studio {
         border-left: solid 1px #e3e3e3;
         font-size: 1.25em;
       }

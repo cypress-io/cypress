@@ -32,7 +32,7 @@ const StudioHeader = observer(({ model }: { model: TestModel }) => (
 const StudioNoCommands = () => (
   <li className='studio-command studio-no-commands'>
     <span className='studio-no-commands-message'>Interact with your site to add test commands.</span>
-    <span><i className='fa fa-long-arrow-alt-right' /></span>
+    <span className='studio-no-commands-icon'><i className='fa fa-arrow-right' /></span>
   </li>
 )
 

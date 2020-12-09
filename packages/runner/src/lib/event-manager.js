@@ -203,6 +203,10 @@ const eventManager = {
       reporterBus.emit('update:studio:log', log)
     })
 
+    localBus.on('studio:cancel', () => {
+      reporterBus.emit('studio:cancel')
+    })
+
     const $window = $(window)
 
     $window.on('hashchange', rerun)

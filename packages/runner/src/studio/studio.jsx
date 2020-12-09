@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 
+import eventManager from '../lib/event-manager'
+
 class Studio extends Component {
   render () {
     const { model } = this.props
@@ -17,12 +19,38 @@ class Studio extends Component {
         </div>
         <div className='studio-controls'>
           <Tooltip
+            title='Close Studio'
+            className='cy-tooltip'
+            visible={model.isLoading ? false : null}
+          >
+            <button
+              className='header-button button-studio'
+              disabled={model.isLoading}
+              onClick={this._close}
+            >
+              <i className='fas fa-times' />
+            </button>
+          </Tooltip>
+          <Tooltip
+            title='Restart'
+            className='cy-tooltip'
+            visible={model.isLoading ? false : null}
+          >
+            <button
+              className='header-button button-studio'
+              disabled={model.isLoading}
+              onClick={this._restart}
+            >
+              <i className='fas fa-undo' />
+            </button>
+          </Tooltip>
+          <Tooltip
             title='Save Test'
             className='cy-tooltip'
             visible={model.isLoading ? false : null}
           >
             <button
-              className='header-button button-save'
+              className='header-button button-studio'
               disabled={model.isLoading}
             >
               <i className='fas fa-save' />
@@ -35,6 +63,15 @@ class Studio extends Component {
 
   showAvailableCommands = (e) => {
     e.preventDefault()
+  }
+
+  _restart = () => {
+    this.props.model.reset()
+    eventManager.emit('restart')
+  }
+
+  _close = () => {
+    eventManager.emit('studio:cancel')
   }
 }
 

@@ -151,6 +151,11 @@ const events: Events = {
       }
     }))
 
+    runner.on('studio:cancel', action('studio:cancel', () => {
+      appState.closeStudio()
+      runner.emit('studio:cancel:runner:restart')
+    }))
+
     localBus.on('resume', action('resume', () => {
       appState.resume()
       statsStore.resume()
