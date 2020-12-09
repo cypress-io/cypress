@@ -33,6 +33,7 @@
     "html-webpack-plugin": "^4.5.0",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
+    "ts-mocha": "8.0.0",
     "watch": "^1.0.2",
     "webpack": "4.44.2"
   },
