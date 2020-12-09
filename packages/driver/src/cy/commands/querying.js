@@ -179,9 +179,7 @@ module.exports = (Commands, Cypress, cy, state) => {
       try {
         aliasObj = cy.getAlias(toSelect)
       } catch (err) {
-        // before cy.intercept, we could know when an alias did/did not exist, because they
-        // were declared synchronously. with cy.intercept, req.alias can be used to dynamically
-        // create aliases, so we cannot know at wait-time if an alias exists or not
+        // possibly this is a dynamic alias, check to see if there is a request
         const alias = toSelect.slice(1)
         const [request] = getAliasedRequests(alias, state)
 
@@ -196,7 +194,6 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       if (!aliasObj && isDynamicAliasingPossible(state)) {
-        // possibly this is a dynamic alias, check to see if there is a request
         const requests = getAliasedRequests(toSelect, state)
 
         if (requests.length) {

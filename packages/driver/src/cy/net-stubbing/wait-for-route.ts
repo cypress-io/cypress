@@ -18,7 +18,6 @@ function getPredicateForSpecifier (specifier: string): Partial<Interception> {
 
 export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Interception | null {
   // 1. Create an array of known requests that have this alias.
-  // Start with request-level (req.alias = '...') aliases that could be a match.
   const candidateRequests = getAliasedRequests(alias, state)
 
   // 2. Find the first request without responseWaited/requestWaited

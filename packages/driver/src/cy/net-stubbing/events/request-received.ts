@@ -54,7 +54,7 @@ export const onRequestReceived: HandlerFn<NetEventFrames.HttpRequestReceived> = 
 
   const request: Partial<Interception> = {
     id: requestId,
-    routeHandlerId: frame.routeHandlerId,
+    routeHandlerId,
     request: req,
     state: 'Received',
     requestWaited: false,
