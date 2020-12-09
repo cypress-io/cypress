@@ -5,6 +5,7 @@ const $dom = require('../../dom')
 const $elements = require('../../dom/elements')
 const $errUtils = require('../../cypress/error_utils')
 const { resolveShadowDomInclusion } = require('../../cypress/shadow_dom_utils')
+const { getAliasedRequests, isDynamicAliasingPossible } = require('../net-stubbing/aliasing')
 
 module.exports = (Commands, Cypress, cy, state) => {
   Commands.addAll({
@@ -175,7 +176,37 @@ module.exports = (Commands, Cypress, cy, state) => {
         toSelect = _.join(_.dropRight(allParts, 1), '.')
       }
 
-      aliasObj = cy.getAlias(toSelect)
+      try {
+        aliasObj = cy.getAlias(toSelect)
+      } catch (err) {
+        // before cy.intercept, we could know when an alias did/did not exist, because they
+        // were declared synchronously. with cy.intercept, req.alias can be used to dynamically
+        // create aliases, so we cannot know at wait-time if an alias exists or not
+        const alias = toSelect.slice(1)
+        const [request] = getAliasedRequests(alias, state)
+
+        if (!isDynamicAliasingPossible(state) || !request) {
+          throw err
+        }
+
+        aliasObj = {
+          alias,
+          command: state('routes')[request.routeHandlerId].command,
+        }
+      }
+
+      if (!aliasObj && isDynamicAliasingPossible(state)) {
+        // possibly this is a dynamic alias, check to see if there is a request
+        const requests = getAliasedRequests(toSelect, state)
+
+        if (requests.length) {
+          aliasObj = {
+            alias: toSelect,
+            command: state('routes')[requests[0].routeHandlerId].command,
+          }
+        }
+      }
+
       if (aliasObj) {
         let { subject, alias, command } = aliasObj
 
@@ -244,6 +275,26 @@ module.exports = (Commands, Cypress, cy, state) => {
             log(requests, 'route')
 
             return requests
+          }
+
+          if (['route2', 'intercept'].includes(command.get('name'))) {
+            const requests = getAliasedRequests(alias, state)
+            const specifier = /\.(all|[\d]+)$/.exec(selector)
+
+            if (specifier) {
+              const [, index] = specifier
+
+              if (index === 'all') {
+                return requests
+              }
+
+              return requests[Number(index)] || null
+            }
+
+            log(requests, command.get('name'))
+
+            // by default return the latest match
+            return _.last(requests) || null
           }
 
           // log as primitive

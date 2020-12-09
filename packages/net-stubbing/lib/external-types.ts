@@ -180,6 +180,7 @@ export type NumberMatcher = number | number[]
  */
 export interface Interception {
   id: string
+  routeHandlerId: string
   /* @internal */
   log: any
   request: CyHttpMessages.IncomingRequest
@@ -215,6 +216,7 @@ export interface Route {
   handler: RouteHandler
   hitCount: number
   requests: { [key: string]: Interception }
+  command: any
 }
 
 export interface RouteMap { [key: string]: Route }
