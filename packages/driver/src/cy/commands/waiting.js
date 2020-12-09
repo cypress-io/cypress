@@ -55,7 +55,6 @@ module.exports = (Commands, Cypress, cy, state) => {
   }
 
   const waitString = (subject, str, options) => {
-    debugger
     let log
 
     if (options.log !== false) {
@@ -163,11 +162,28 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('referencesAlias', aliases)
       }
 
-      if (command && !['route', 'route2', 'intercept'].includes(command.get('name'))) {
-        $errUtils.throwErrByPath('wait.invalid_alias', {
-          onFail: options._log,
-          args: { alias },
-        })
+      const isNetworkInterceptCommand = (command) => {
+        const commandsThatCreateNetworkIntercepts = ['route', 'route2', 'intercept']
+        const commandName = command.get('name')
+
+        return commandsThatCreateNetworkIntercepts.includes(commandName)
+      }
+
+      const findNetworkAlias = (alias) => {
+        const routes = cy.state('routes') || {}
+
+        return _.find(_.values(routes), { alias })
+      }
+
+      const isNetworkAlias = (alias) => Boolean(findNetworkAlias(alias))
+
+      if (command && !isNetworkInterceptCommand(command)) {
+        if (!isNetworkAlias(alias)) {
+          $errUtils.throwErrByPath('wait.invalid_alias', {
+            onFail: options._log,
+            args: { alias },
+          })
+        }
       }
 
       // create shallow copy of each options object
