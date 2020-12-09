@@ -26,7 +26,7 @@ const clientSideError = function (err) {
     type: "BUNDLE_ERROR",
     error: ${JSON.stringify(err)}
   })
-}())\ 
+}())\
 `
 }
 
