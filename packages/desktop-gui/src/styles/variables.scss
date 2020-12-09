@@ -53,4 +53,8 @@ $font-mono: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 $font-title: "Fira Sans", font-sans;
 $font-size: 16px;
 $line-height: 1.7em;
+
+// bootstrap 3 compatibility
 $font-size-base: 0.875rem !default;
+$line-height-base: 1.428571429 !default;
+$font-family-base: "Helvetica Neue", Helvetica, Arial, sans-serif;

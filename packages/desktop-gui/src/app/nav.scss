@@ -41,7 +41,6 @@
         color: #555;
         margin-right: 5px;
         position: relative;
-        top: -1px;
       }
     }
 
@@ -105,6 +104,11 @@
     position: relative;
     top: -1px;
   }
+}
+
+// bootstrap 3 compatibility
+.navbar {
+   border: 1px solid transparent;
 }
 
 .navbar .container-fluid {
