@@ -2306,7 +2306,7 @@ describe('network stubbing', { retries: 2 }, function () {
         cy.wait('@netAlias').its('response.body').should('equal', 'my value')
       })
 
-      it('works with an alias and arrow function', { retries: 0 }, () => {
+      it('works with an alias and arrow function', () => {
         let myInterceptCalled
 
         cy.spy(cy, 'log')
@@ -2320,6 +2320,34 @@ describe('network stubbing', { retries: 2 }, function () {
         })
 
         cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with dynamic alias', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', (originalIntercept, ...args) => {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', (req) => {
+          req.alias = 'netAlias'
+          req.reply('my value')
+        })
         .then(() => {
           return $.get('/foo')
         })
