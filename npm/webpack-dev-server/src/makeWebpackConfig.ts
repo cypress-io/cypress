@@ -12,9 +12,9 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   debug(`Merging Evergreen's webpack config with users'`)
 
-  debug(`Support files`, support)
-
   debug(`New webpack entries`, files)
+  debug(`Project root`, projectRoot)
+  debug(`Support files`, support)
 
   const entry = path.resolve(__dirname, './browser.js')
 

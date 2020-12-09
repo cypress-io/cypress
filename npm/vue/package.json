@@ -6,11 +6,11 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "yarn build",
-    "build:watch": "tsc --watch",
     "cy:open": "node ../../scripts/cypress open --component-testing",
     "cy:run": "node ../../scripts/cypress run --component-testing",
     "pretest": "yarn build",
-    "test": "yarn cy:run"
+    "test": "yarn cy:run",
+    "watch": "tsc --watch"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
