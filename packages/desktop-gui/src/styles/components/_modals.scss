@@ -1,5 +1,11 @@
-.modal-dialog {
-  width: 550px;
+.modal {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.modal, .modal-dialog {
+  max-width: 550px !important;
 }
 
 .close {

@@ -32,3 +32,28 @@
   font-weight: 600;
   font-size: 12px;
 }
+
+/** Bootstrap 4 changed the secondary (previously default) button style quite a bit, for now, let's keep the old colors **/
+.btn-secondary {
+  color: #333;
+  background-color: #fff;
+  border-color: #ccc;
+
+  &:focus {
+    color: #333;
+    background-color: #e6e6e6;
+    border-color: #8c8c8c;
+  }
+
+  &:hover {
+      color: #333;
+      background-color: #e6e6e6;
+      border-color: #adadad;
+  }
+
+  &:active {
+      color: #333;
+      background-color: #e6e6e6;
+      border-color: #adadad;
+  }
+}
