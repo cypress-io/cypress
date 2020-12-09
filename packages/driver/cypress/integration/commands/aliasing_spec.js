@@ -316,6 +316,48 @@ describe('src/cy/commands/aliasing', () => {
         })
       })
     })
+
+    context('works with command overwrite', () => {
+      it('works without overwrite', () => {
+        // sanity check without command overwrite
+        cy.wrap('alias value').as('myAlias')
+        .then(() => {
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
+        })
+      })
+
+      it('works with wrap', () => {
+        let wrapCalled
+
+        Cypress.Commands.overwrite('wrap', (wrapFn, value) => {
+          wrapCalled = true
+
+          return wrapFn(value)
+        })
+
+        cy.wrap('my value')
+        .then(() => {
+          expect(wrapCalled, 'overwrite was called').to.be.true
+        })
+
+        cy.wrap('alias value').as('myAlias')
+        .then(() => {
+          expect(cy.getAlias('@myAlias'), 'alias exists').to.exist
+          expect(cy.getAlias('@myAlias'), 'alias value')
+          .to.have.property('subject', 'alias value')
+        })
+        .then(() => {
+          // verify cy.get works in arrow function
+          cy.get('myAlias').should('be.equal', 'alias value')
+        })
+        .then(function () {
+          // verify cy.get works in regular function
+          cy.get('myAlias').should('be.equal', 'alias value')
+        })
+      })
+    })
   })
 
   context('#replayCommandsFrom', () => {
