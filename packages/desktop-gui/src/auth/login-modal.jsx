@@ -114,7 +114,7 @@ class LoginContent extends Component {
           </button>
         </p>
         <p>The following error was encountered:</p>
-        <pre className='alert alert-danger'><code>{this.state.apiError}</code></pre>
+        <pre className='alert alert-danger'>{this.state.apiError}</pre>
         <a onClick={this._openAPIHelp}>Learn more</a>
       </div>
     )
