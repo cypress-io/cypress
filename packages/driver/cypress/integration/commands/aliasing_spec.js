@@ -317,6 +317,7 @@ describe('src/cy/commands/aliasing', () => {
       })
     })
 
+    // @see https://github.com/cypress-io/cypress/issues/5101
     context('works with command overwrite', () => {
       it('works without overwrite', () => {
         // sanity check without command overwrite
@@ -401,6 +402,7 @@ describe('src/cy/commands/aliasing', () => {
       })
 
       it('works with .then function overwrite', () => {
+        // use explicit arguments and Function.prototype.call
         Cypress.Commands.overwrite('then', function (originalCommand, subject, fn, options = {}) {
           return originalCommand.call(null, subject, options, fn)
         })
@@ -409,7 +411,21 @@ describe('src/cy/commands/aliasing', () => {
         cy.wrap(2).then(function (subj) {
           expect(subj, 'subject').to.equal(2)
           expect(this, 'this is defined').to.not.be.undefined
-          expect(this.myAlias).to.eq(1) // undefined
+          expect(this.myAlias).to.eq(1)
+        })
+      })
+
+      it('works with .then arrow overwrite', () => {
+        // make sure we can pass arrow functions
+        Cypress.Commands.overwrite('then', (originalCommand, ...args) => {
+          return originalCommand(...args)
+        })
+
+        cy.wrap(1).as('myAlias')
+        cy.wrap(2).then(function (subj) {
+          expect(subj, 'subject').to.equal(2)
+          expect(this, 'this is defined').to.not.be.undefined
+          expect(this.myAlias).to.eq(1)
         })
       })
     })
