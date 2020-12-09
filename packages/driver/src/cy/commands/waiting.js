@@ -163,16 +163,16 @@ module.exports = (Commands, Cypress, cy, state) => {
         return commandsThatCreateNetworkIntercepts.includes(commandName)
       }
 
-      const findNetworkAlias = (alias) => {
+      const findInterceptAlias = (alias) => {
         const routes = cy.state('routes') || {}
 
         return _.find(_.values(routes), { alias })
       }
 
-      const isNetworkAlias = (alias) => Boolean(findNetworkAlias(alias))
+      const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
 
       if (command && !isNetworkInterceptCommand(command)) {
-        if (!isNetworkAlias(alias)) {
+        if (!isInterceptAlias(alias)) {
           $errUtils.throwErrByPath('wait.invalid_alias', {
             onFail: options._log,
             args: { alias },
