@@ -183,7 +183,7 @@ class RunsList extends Component {
       if (errors.isUnauthorized(this.runsStore.error)) {
         return this._permissionMessage()
 
-      // other error, but only show if we don't already have runs
+      // other error, show if we don't already have runs
       }
 
       if (!this.runsStore.isLoaded) {
@@ -223,7 +223,7 @@ class RunsList extends Component {
             </button>
           </h5>
           <div>
-            <a href="#" className='btn btn-sm see-all-runs' onClick={this._openRuns}>
+            <a href="#" className='btn btn-sm see-all-runs btn-link' onClick={this._openRuns}>
               See all runs <i className='fas fa-external-link-alt'></i>
             </a>
           </div>
