@@ -129,12 +129,12 @@ class Project {
         return devserver.start({ specs, config: modifiedConfig })
         .then((port) => {
           const specs = new SpecsController(cfg, {
-            onSpecsFound: (specs) => {
+            onSpecListChanged: (specs) => {
               // send new files to dev server
               devserver.updateSpecs(specs)
 
               // send new files to frontend
-              this.server.sendSpecsChanged(specs)
+              this.server.sendSpecList(specs)
             },
           })
 
@@ -261,8 +261,6 @@ class Project {
       onFocusTests: options.onFocusTests,
 
       onSpecChanged: options.onSpecChanged,
-
-      onSpecListChanged: options.onSpecListChanged,
 
       onSavedStateChanged: options.onSavedStateChanged,
 

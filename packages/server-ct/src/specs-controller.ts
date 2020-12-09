@@ -8,11 +8,11 @@ type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
 
 interface SpecsControllerOptions {
-  onSpecsFound: (specFiles?: SpecFiles) => {}
+  onSpecListChanged: (specFiles?: SpecFiles) => {}
 }
 
 const defaultOptions = {
-  onSpecsFound () {},
+  onSpecListChanged () {},
 } as SpecsControllerOptions
 
 export class SpecsController {
@@ -41,7 +41,7 @@ export class SpecsController {
     if (_.isEqual(newSpecs, this.specFiles)) return
 
     this.specFiles = newSpecs
-    this.options.onSpecsFound(this.specFiles)
+    this.options.onSpecListChanged(this.specFiles)
   }
 
   async getSpecFiles (): Promise<SpecFiles> {

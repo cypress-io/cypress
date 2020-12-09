@@ -42,8 +42,6 @@ class Socket {
     this.ended = false
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
-    if (config.watchForFileChanges) {
-    }
   }
 
   onTestFileChange (filePath) {
@@ -106,7 +104,6 @@ class Socket {
       onResolveUrl () {},
       onFocusTests () {},
       onSpecChanged () {},
-      onSpecsChanged () {},
       onChromiumRun () {},
       onReloadBrowser () {},
       checkForAppErrors () {},
@@ -371,7 +368,7 @@ class Socket {
     })
   }
 
-  sendSpecsChanged (specs) {
+  sendSpecList (specs) {
     this.toRunner('specs:changed', specs)
   }
 

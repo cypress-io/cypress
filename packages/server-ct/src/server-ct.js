@@ -173,8 +173,8 @@ class Server {
     return this._socket && this._socket.onTestFileChange(filePath)
   }
 
-  sendSpecsChanged (specs) {
-    return this._socket && this._socket.sendSpecsChanged(specs)
+  sendSpecList (specs) {
+    return this._socket && this._socket.sendSpecList(specs)
   }
 
   onRequest (fn) {
