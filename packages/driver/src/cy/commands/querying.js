@@ -276,6 +276,7 @@ module.exports = (Commands, Cypress, cy, state) => {
 
           if (['route2', 'intercept'].includes(command.get('name'))) {
             const requests = getAliasedRequests(alias, state)
+            // detect alias.all and alias.index
             const specifier = /\.(all|[\d]+)$/.exec(selector)
 
             if (specifier) {
