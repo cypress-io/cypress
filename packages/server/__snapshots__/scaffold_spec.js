@@ -342,11 +342,11 @@ exports['lib/scaffold .support creates supportFolder and commands.js and index.j
 //
 //
 // -- This is a child command --
-// Cypress.Commands.add("drag", { prevSubject: "element"}, (subject, options) => { ... })
+// Cypress.Commands.add("drag", { prevSubject: 'element'}, (subject, options) => { ... })
 //
 //
 // -- This is a dual command --
-// Cypress.Commands.add("dismiss", { prevSubject: "optional"}, (subject, options) => { ... })
+// Cypress.Commands.add("dismiss", { prevSubject: 'optional'}, (subject, options) => { ... })
 //
 //
 // -- This will overwrite an existing command --
