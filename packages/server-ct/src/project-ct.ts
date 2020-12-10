@@ -274,7 +274,7 @@ export default class Project {
   //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
 
-  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Record<string, any> = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
     let { reporter } = cfg
@@ -290,7 +290,7 @@ export default class Project {
 
       onSavedStateChanged: options.onSavedStateChanged,
 
-      onCaptureVideoFrames: (data: any) => {
+      onCaptureVideoFrames: (data: unknown) => {
         // TODO: move this to browser automation middleware
         // @ts-ignore - this method deos not appear to exist or be used.
         this.emit('capture:video:frames', data)
