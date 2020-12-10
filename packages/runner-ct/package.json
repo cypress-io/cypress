@@ -9,7 +9,7 @@
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: yarn build'",
-    "test-unit": "ts-mocha src/**/*.spec.ts",
+    "test-unit": "ts-mocha --config ./test/.mocharc.js",
     "watch": "webpack --watch --progress"
   },
   "dependencies": {
