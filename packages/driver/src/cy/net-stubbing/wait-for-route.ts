@@ -5,7 +5,7 @@ import {
 } from './types'
 import { getAliasedRequests } from './aliasing'
 
-const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete']
+const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete', 'Errored']
 
 function getPredicateForSpecifier (specifier: string): Partial<Interception> {
   if (specifier === 'request') {

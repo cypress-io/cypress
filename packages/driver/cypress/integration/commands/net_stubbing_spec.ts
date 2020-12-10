@@ -1839,13 +1839,7 @@ describe('network stubbing', { retries: 2 }, function () {
       it('doesn\'t fail test if network error occurs retrieving response and response is not intercepted', {
         // TODO: for some reason, this test is busted in FF
         browser: '!firefox',
-      }, function (done) {
-        cy.on('fail', (err) => {
-          // the test should have failed due to cy.wait, as opposed to because of a network error
-          expect(err.message).to.contain('Timed out retrying')
-          done()
-        })
-
+      }, function () {
         cy.intercept('/should-err', function (req) {
           req.reply()
         })
@@ -2147,6 +2141,21 @@ describe('network stubbing', { retries: 2 }, function () {
         cy.intercept('/foo').as('foo')
         cy.get('@foo').should('be.null')
       })
+    })
+
+    // @see https://github.com/cypress-io/cypress/issues/9062
+    it('can spy on a request using forceNetworkError', function () {
+      cy.intercept('/foo', { forceNetworkError: true })
+      .as('err')
+      .then(() => {
+        $.get('/foo')
+      })
+      .wait('@err').should('have.property', 'error')
+      .and('include', {
+        message: 'forceNetworkError called',
+        name: 'Error',
+      })
+      .get('@err').should('not.have.property', 'response')
     })
 
     context('with an intercepted request', function () {
