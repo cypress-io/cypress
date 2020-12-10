@@ -1,4 +1,5 @@
 const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
   mode: 'development',
@@ -7,16 +8,11 @@ module.exports = {
       chunks: 'all',
     },
   },
-  resolve: {
-    alias: {
-      // this enables loading the "full" version of vue
-      // instead of only loading the vue runtime
-      vue$: 'vue/dist/vue.esm.js',
-    },
-  },
-
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
   },
+  plugins: [new HtmlWebpackPlugin({
+    template: path.join(__dirname, '../index-template.html'),
+  })],
 }
