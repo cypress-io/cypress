@@ -290,7 +290,7 @@ export default class Project {
 
       onSavedStateChanged: options.onSavedStateChanged,
 
-      onCaptureVideoFrames: (data: any) => {
+      onCaptureVideoFrames: (data: unknown) => {
         // TODO: move this to browser automation middleware
         // @ts-ignore - this method deos not appear to exist or be used.
         this.emit('capture:video:frames', data)
