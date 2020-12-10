@@ -2,7 +2,6 @@
 
 import _ from 'lodash'
 import _debug from 'debug'
-const debug = _debug('cypress:server-ct:socket')
 import Bluebird from 'bluebird'
 import socketIo from '@packages/socket'
 import { getUserEditor, setUserEditor } from '@packages/server/lib/util/editors'
@@ -11,7 +10,20 @@ import open from '@packages/server/lib/util/open'
 import errors from '@packages/server/lib/errors'
 import specsUtil from '@packages/server/lib/util/specs'
 
-const runnerEvents = [
+const debug = _debug('cypress:server-ct:socket')
+
+type RunnerEvent =
+  'reporter:restart:test:run'
+  | 'runnables:ready'
+  | 'run:start'
+  | 'test:before:run:async'
+  | 'reporter:log:add'
+  | 'reporter:log:state:changed'
+  | 'paused'
+  | 'test:after:hooks'
+  | 'run:end'
+
+const runnerEvents: RunnerEvent[] = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -23,7 +35,16 @@ const runnerEvents = [
   'run:end',
 ]
 
-const reporterEvents = [
+type ReporterEvent =
+  'runner:restart'
+ | 'runner:abort'
+ | 'runner:console:log'
+ | 'runner:console:error'
+ | 'runner:show:snapshot'
+ | 'runner:hide:snapshot'
+ | 'reporter:restarted'
+
+const reporterEvents: ReporterEvent[] = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -38,7 +59,7 @@ const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
 }
 
-class Socket {
+export default class Socket {
   private ended: boolean
   private io: SocketIO.Server
   private testsDir: string[]
@@ -394,5 +415,3 @@ class Socket {
     return (this.io != null ? this.io.close() : undefined)
   }
 }
-
-module.exports = Socket
