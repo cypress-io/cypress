@@ -118,10 +118,10 @@ class SetupProject extends Component {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
+          <label htmlFor='projectName' className='control-label float-left'>
             What's the name of the project?
           </label>
-          <p className='help-block pull-right'>(You can change this later)</p>
+          <p className='help-block float-right'>(You can change this later)</p>
         </div>
         <div>
           <input
@@ -143,7 +143,7 @@ class SetupProject extends Component {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
+          <label htmlFor='projectName' className='control-label float-left'>
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
@@ -153,7 +153,7 @@ class SetupProject extends Component {
           </label>
           <a
             href='#'
-            className='btn btn-link manage-orgs-btn pull-right'
+            className='btn btn-link manage-orgs-btn float-right'
             onClick={this._openManageOrgs}>
             Manage organizations
           </a>
