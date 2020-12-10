@@ -4,4 +4,6 @@ module.exports = (on, config) => {
   on('devserver:config', () => {
     return webpackConfig
   })
+
+  return config
 }

@@ -1,8 +1,5 @@
 const browsers = require('@packages/server/lib/browsers')
 const Project = require('./src/project-ct')
-
-const DEFAULT_BROWSER_NAME = 'chrome'
-
 const start = (projectRoot, options) => {
   const project = new Project(projectRoot)
 
@@ -22,12 +19,11 @@ const start = (projectRoot, options) => {
       },
     }
 
-    return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME)
-    .then((browser) => {
-      project.setCurrentSpecAndBrowser(null, browser)
+    const [browser] = cfg.browsers
 
-      return browsers.open(browser, options, automation)
-    })
+    project.setCurrentSpecAndBrowser(null, browser)
+
+    return browsers.open(browser, options, automation)
   })
 }
 
