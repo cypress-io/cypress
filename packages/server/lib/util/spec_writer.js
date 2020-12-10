@@ -1,6 +1,7 @@
 const fs = require('./fs')
 const { builders, visit } = require('ast-types')
 const recast = require('recast')
+const parser = require('@babel/parser')
 
 const studioComment = builders.block(' ==== Generated with Cypress Studio ==== ', true, false)
 
@@ -78,8 +79,18 @@ module.exports = {
     return fs.readFile(path)
     .then((contents) => {
       const ast = recast.parse(contents, {
-        parser: require('@babel/parser'),
         wrapColumn: 180,
+        parser: {
+          parse (source) {
+            return parser.parse(source, {
+              errorRecovery: true,
+              sourceType: 'unambiguous',
+              plugins: [
+                'typescript',
+              ],
+            })
+          },
+        },
       })
 
       visit(ast, astRules)
