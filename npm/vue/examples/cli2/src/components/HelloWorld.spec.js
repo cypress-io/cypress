@@ -2,9 +2,6 @@
 
 import HelloWorld from './HelloWorld'
 import { mount } from '@cypress/vue'
-import Vue from 'vue'
-
-Vue.config.productionTip = false
 
 describe('hello', () => {
   it('works!', () => {

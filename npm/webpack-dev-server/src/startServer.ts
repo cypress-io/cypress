@@ -3,11 +3,12 @@ import webpackDevServer from 'webpack-dev-server'
 
 import { makeWebpackConfig } from './makeWebpackConfig'
 
-export async function start (userWebpackConfig = {}, { specs, config }) {
+export async function start (userWebpackConfig = {}, { specs, config, devserverEvents }) {
   const webpackConfig = await makeWebpackConfig(userWebpackConfig, {
     files: specs,
     projectRoot: config.projectRoot,
     support: '',
+    devserverEvents,
   })
   const compiler = webpack(webpackConfig)
 
