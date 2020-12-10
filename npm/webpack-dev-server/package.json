@@ -14,10 +14,12 @@
   },
   "devDependencies": {
     "@types/webpack": "^4.1.4",
+    "@types/webpack-dev-server": "^3.11.1",
     "webpack": "^4.44.2",
     "webpack-dev-server": "^3.11.0"
   },
   "peerDependencies": {
+    "html-webpack-plugin": "> 3",
     "webpack": "> 4"
   },
   "files": [
