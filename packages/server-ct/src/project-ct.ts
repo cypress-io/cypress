@@ -1,29 +1,41 @@
-const _ = require('lodash')
-const path = require('path')
-const debug = require('debug')('cypress:server-ct:project')
-const Bluebird = require('bluebird')
+import _ from 'lodash'
+import path from 'path'
+import _debug from 'debug'
+const debug = _debug('cypress:server-ct:project')
+import Bluebird from 'bluebird'
 
-const specsUtil = require('@packages/server/lib/util/specs')
-const config = require('@packages/server/lib/config')
-const savedState = require('@packages/server/lib/saved_state')
-const plugins = require('@packages/server/lib/plugins')
-const devserver = require('@packages/server/lib/plugins/devserver')
-const { SpecsController } = require('./specs-controller')
-const Watchers = require('@packages/server/lib/watchers')
-const browsers = require('@packages/server/lib/browsers')
+import specsUtil from '@packages/server/lib/util/specs'
+import config from '@packages/server/lib/config'
+import savedState from '@packages/server/lib/saved_state'
+import plugins from '@packages/server/lib/plugins'
+import devserver from '@packages/server/lib/plugins/devserver'
+import { SpecsController } from './specs-controller'
+import Watchers from '@packages/server/lib/watchers'
+import browsers from '@packages/server/lib/browsers'
 
-const fs = require('@packages/server/lib/util/fs')
-const cwd = require('@packages/server/lib/cwd')
-const settings = require('@packages/server/lib/util/settings')
+import fs from '@packages/server/lib/util/fs'
+import cwd from '@packages/server/lib/cwd'
+import settings from '@packages/server/lib/util/settings'
 
-const Server = require('./server-ct')
+import { Server } from './server-ct'
+import Runnables from '@packages/reporter/src/runnables/runnables'
+import { Reporter } from '@packages/reporter'
 
 const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-class Project {
-  constructor (projectRoot) {
+export default class Project {
+  private projectRoot: string
+  private watchers: Watchers
+  private cfg: any
+  private server: Server
+  private options: Record<string, any>
+  private spec: Cypress.Cypress['spec']
+  private browser: any
+  private automation: any
+
+  constructor (projectRoot: string) {
     if (!(this instanceof Project)) {
       return new Project(projectRoot)
     }
@@ -59,6 +71,7 @@ class Project {
       return this._initPlugins(cfg, options)
       .then((cfg) => {
         // return this.server.open(cfg, this, options.onError, options.onWarning)
+        // @ts-ignore
         return this.server.open(cfg, this)
         .spread((port, warning) => {
           // if we didnt have a cfg.port
@@ -84,13 +97,13 @@ class Project {
 
           // options.onSavedStateChanged = (state) => this.saveState(state)
 
-          return Bluebird.join(
+          return Bluebird.all([
             this.watchSettingsAndStartWebsockets(options, cfg),
             // this.scaffold(cfg),
-          )
+          ])
           .then(() => {
             return Bluebird.join(
-              // this.checkSupportFile(cfg),
+              // @ts-ignore - should move this to async/await for sanity
               this.watchPluginsFile(cfg, options),
             )
           })
@@ -137,14 +150,15 @@ class Project {
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
+      // @ts-ignore - let's not attempt to TS all the things in packages/server
       return specsUtil.find(modifiedConfig)
-      .filter((spec) => {
+      .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'
       }).then((specs) => {
         return devserver.start({ specs, config: modifiedConfig })
         .then((port) => {
           const specs = new SpecsController(cfg, {
-            onSpecListChanged: (specs) => {
+            onSpecListChanged: (specs: Cypress.Cypress['spec'][]) => {
               // send new files to dev server
               devserver.updateSpecs(specs)
 
@@ -191,11 +205,11 @@ class Project {
     this.spec = null
     this.browser = null
 
-    return Bluebird.join(
+    return Bluebird.all([
       this.server ? this.server.close() : undefined,
       this.watchers ? this.watchers.close() : undefined,
       // preprocessor.close(),
-    )
+    ])
     .then(() => {
       return process.chdir(localCwd)
     })
@@ -263,10 +277,10 @@ class Project {
   //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
 
-  watchSettingsAndStartWebsockets (options = {}, cfg = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
-    let { reporter } = cfg
+    let { reporter } = cfg as { reporter: Reporter }
 
     // this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -279,16 +293,18 @@ class Project {
 
       onSavedStateChanged: options.onSavedStateChanged,
 
-      onCaptureVideoFrames: (data) => {
+      onCaptureVideoFrames: (data: unknown) => {
         // TODO: move this to browser automation middleware
+        // @ts-ignore - this method deos not appear to exist or be used.
         this.emit('capture:video:frames', data)
       },
 
-      onConnect: (id) => {
+      onConnect: (id: number) => {
+        // @ts-ignore - this method deos not appear to exist or be used.
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables (runnables) {
+      onSetRunnables (runnables: Runnables) {
         debug('received runnables %o', runnables)
 
         if (reporter != null) {
@@ -312,6 +328,7 @@ class Project {
             this.server.end(),
           ])
           .spread((stats = {}) => {
+            // @ts-ignore - this method deos not appear to exist
             this.emit('end', stats)
           })
         }
@@ -360,5 +377,3 @@ class Project {
     })
   }
 }
-
-module.exports = Project
