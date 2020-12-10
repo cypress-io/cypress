@@ -150,14 +150,35 @@ class Server {
   }
 
   close () {
-    return Bluebird.join(
+    return Bluebird.all([
       this._close(),
       this._socket != null ? this._socket.close() : undefined,
       this._fileServer != null ? this._fileServer.close() : undefined,
       this._httpsProxy != null ? this._httpsProxy.close() : undefined,
-    )
+    ])
     .then(() => {
       this._middleware = null
+    })
+  }
+
+  reset () {
+    debug('resetting project instance %s', this.projectRoot)
+
+    this.spec = null
+    this.browser = null
+
+    return Promise.try(() => {
+      if (this.automation) {
+        this.automation.reset()
+      }
+
+      let state
+
+      if (this.server) {
+        state = this.server.reset()
+      }
+
+      return state
     })
   }
 
