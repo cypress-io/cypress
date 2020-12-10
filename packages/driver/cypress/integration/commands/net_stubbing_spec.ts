@@ -2151,7 +2151,11 @@ describe('network stubbing', { retries: 2 }, function () {
         $.get('/foo')
       })
       .wait('@err').should('have.property', 'error')
-      .and('not.have.property', 'response')
+      .and('include', {
+        message: 'forceNetworkError called',
+        name: 'Error',
+      })
+      .get('@err').should('not.have.property', 'response')
     })
 
     context('with an intercepted request', function () {
