@@ -172,10 +172,18 @@ module.exports = (Commands, Cypress, cy, state) => {
       const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
 
       const isRouteAlias = (alias) => {
-        const routes = cy.state('aliasRequests') || {}
-        const routeAliases = _.keys(routes)
+        // has all aliases saved using cy.as() command
+        const aliases = cy.state('aliases') || {}
 
-        return _.includes(routeAliases, alias)
+        const aliasObject = aliases[alias]
+
+        if (!aliasObject) {
+          return false
+        }
+
+        // cy.route aliases have subject that has all XHR properties
+        // let's check one of them
+        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
       }
 
       if (command && !isNetworkInterceptCommand(command)) {
