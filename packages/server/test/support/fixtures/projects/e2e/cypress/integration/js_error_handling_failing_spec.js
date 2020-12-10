@@ -1,43 +1,30 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 describe('s1', () => {
   context('without an afterEach hook', () => {
     beforeEach(() => {
-      return cy
-      .server()
-      .visit('/js_errors.html')
-      .get('body')
+      cy.server()
+      cy.visit('/js_errors.html')
+      cy.get('body')
     })
 
     // fail
     it('t1', () => {
-      return cy
-      .get('.ref')
+      cy.get('.ref')
       .click()
       .should('have.class', 'active')
     })
 
     // fail
     it('t2', () => {
-      return cy
-      .route(/foo/, 'foo html').as('getFoo')
-      .get('.xhr').click()
-      .wait('@getFoo')
-      .get('.xhr').should('have.class', 'active')
+      cy.route(/foo/, 'foo html').as('getFoo')
+      cy.get('.xhr').click()
+      cy.wait('@getFoo')
+      cy.get('.xhr').should('have.class', 'active')
     })
 
     // pass
     it('t3', () => {
-      return cy.get('body')
+      cy.get('body')
     })
   })
 
@@ -45,45 +32,42 @@ describe('s1', () => {
     const runs = []
 
     beforeEach(() => {
-      return cy
-      .server()
-      .visit('/js_errors.html')
-      .get('body')
+      cy.server()
+      cy.visit('/js_errors.html')
+      cy.get('body')
     })
 
     afterEach(() => {
-      return cy.wrap({}).then(() => {
-        return runs.push(true)
+      cy.wrap({}).then(() => {
+        runs.push(true)
       })
     })
 
     // fail
     it('t4', () => {
-      return cy
-      .get('.ref')
+      cy.get('.ref')
       .click()
       .should('have.class', 'active')
     })
 
     // fail
     it('t5', () => {
-      return cy.then(() => {
+      cy.then(() => {
         throw new Error('baz')
       })
     })
 
     // pass
-    it('t6', () => // should have runs two afterEach's
-    {
+    it('t6', () => {
+      // should have runs two afterEach's
       expect(runs).to.have.length(2)
     })
   })
 
-  context('cross origin script errors', () => // fail
-  {
+  context('cross origin script errors', () => {
+    // fail
     it('explains where script errored', () => {
-      return cy
-      .visit('/cross_origin_script.html')
+      cy.visit('/cross_origin_script.html')
       .then(() => {
         throw new Error('should have failed but did not')
       })
@@ -92,8 +76,7 @@ describe('s1', () => {
 
   context('bad gzipped content', () => {
     it('destroys the request socket', () => {
-      return cy
-      .visit('http://localhost:1123/index.html')
+      cy.visit('http://localhost:1123/index.html')
       .then((win) => {
         return new Cypress.Promise((resolve) => {
           const script = win.document.createElement('script')

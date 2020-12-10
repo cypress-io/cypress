@@ -1,52 +1,42 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 let invokedDoesNotRun = false
 let invokedDoesRun = false
 let afterVisitCommand = false
 const runnableAfterRunAsync = []
 const testAfterRun = []
 
-Cypress.on('runnable:after:run:async', (obj, runnable) => {
+Cypress.on('runnable:after:run:async', (obj) => {
   if (obj.err) {
-    return runnableAfterRunAsync.push(obj.title)
+    runnableAfterRunAsync.push(obj.title)
   }
 })
 
 Cypress.on('test:after:run', (test) => {
-  return testAfterRun.push(test.title)
+  testAfterRun.push(test.title)
 })
 
 describe('uncaught hook error should continue to fire all mocha events', () => {
   context('s1', () => {
-    beforeEach(() => // when this beforeEach hook fails
-    // it will skip invoking the test
-    // but run the other suite
-    {
-      return cy.visit('http://localhost:7878/visit_error.html').then(() => // it should cancel the command queue on
-      // uncaught error and NOT reach this code
-      {
-        return afterVisitCommand = true
+    beforeEach(() => {
+      // when this beforeEach hook fails
+      // it will skip invoking the test
+      // but run the other suite
+      cy.visit('http://localhost:7878/visit_error.html').then(() => {
+        // it should cancel the command queue on
+        // uncaught error and NOT reach this code
+        afterVisitCommand = true
       })
     })
 
     // TODO: look at why this is running.......
     it('does not run', () => {
-      return invokedDoesNotRun = true
+      invokedDoesNotRun = true
     })
   })
 
   context('s2', () => {
     it('does run', () => {
-      return invokedDoesRun = true
+      invokedDoesRun = true
     })
 
     it('also runs', () => {

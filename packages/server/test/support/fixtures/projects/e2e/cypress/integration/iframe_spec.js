@@ -1,18 +1,6 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 let count = 0
-const {
-  action,
-} = Cypress
+const { action } = Cypress
 
 Cypress.action = function (str) {
   if (str === 'app:window:before:load') {
@@ -39,51 +27,47 @@ const ensureWeCanTalkToTheIframe = function ($iframe) {
 }
 
 describe('iframes', () => {
-  it('can snapshot iframes which arent loaded', () => // snapshotting after the click should insert
-  // an iframe which isnt yet loaded so when we
-  // snapshot the h1 we ensure it doesnt fail
-  {
-    return cy
-    .visit('http://www.foo.com:1616/insert_iframe')
-    .get('button').click()
-    .get('iframe')
+  it('can snapshot iframes which arent loaded', () => {
+    // snapshotting after the click should insert
+    // an iframe which isnt yet loaded so when we
+    // snapshot the h1 we ensure it doesnt fail
+    cy.visit('http://www.foo.com:1616/insert_iframe')
+    cy.get('button').click()
+    cy.get('iframe')
   })
 
   it('can access nested iframes over http server', () => {
-    return cy
-    .visit('http://localhost:1616')
-    .get('iframe').then(ensureWeCanTalkToTheIframe)
+    cy.visit('http://localhost:1616')
+    cy.get('iframe').then(ensureWeCanTalkToTheIframe)
   })
 
   it('can access iframes over file server', () => {
-    return cy
-    .visit('/outer.html')
-    .get('iframe').then(ensureWeCanTalkToTheIframe)
+    cy.visit('/outer.html')
+    cy.get('iframe').then(ensureWeCanTalkToTheIframe)
   })
 
   it('does not throw on cross origin iframes', () => {
-    return cy
-    .visit('http://www.foo.com:1616/cross')
-    .get('iframe')
+    cy.visit('http://www.foo.com:1616/cross')
+    cy.get('iframe')
   })
 
   it('continues to inject even on 5xx responses', () => {
-    return cy
-    .visit('http://localhost:1616/500')
-    .get('iframe').then(ensureWeCanTalkToTheIframe)
+    cy.visit('http://localhost:1616/500')
+    cy.get('iframe').then(ensureWeCanTalkToTheIframe)
   })
 
   it('injects on file server 4xx errors', () => {
-    return cy
-    .visit('/outer_404.html')
-    .get('iframe').then(($iframe) => {
+    cy.visit('/outer_404.html')
+    cy.get('iframe').then(($iframe) => {
       const br = $iframe.contents().find('br')
 
       expect(br.length).to.eq(4)
 
       expect(count).to.eq(1)
-    }).get('a').click()
-    .get('body').then(($body) => {
+    })
+
+    cy.get('a').click()
+    cy.get('body').then(($body) => {
       expect($body).to.contain('Cypress errored trying to serve this file')
       expect($body).to.contain('page/does-not-exist')
 
@@ -91,10 +75,9 @@ describe('iframes', () => {
     })
   })
 
-  it('does not inject into xhr\'s', () => {
-    return cy
-    .visit('http://localhost:1616/')
-    .window().then((win) => {
+  it('does not inject into xhrs', () => {
+    cy.visit('http://localhost:1616/')
+    cy.window().then((win) => {
       return new Cypress.Promise((resolve) => {
         const xhr = new win.XMLHttpRequest
 

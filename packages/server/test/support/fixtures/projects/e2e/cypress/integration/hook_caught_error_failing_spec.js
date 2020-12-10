@@ -1,19 +1,8 @@
-/* eslint-disable
-    brace-style,
-    mocha/no-global-tests,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable mocha/no-global-tests, no-undef */
 const testAfterRuns = []
 
 Cypress.on('test:after:run', (test) => {
-  return testAfterRuns.push(test.title)
+  testAfterRuns.push(test.title)
 })
 
 // this should run
@@ -22,7 +11,7 @@ it('t1a', () => {})
 // these 3 should be skipped
 describe('s1a', () => {
   beforeEach(() => {
-    return cy.get('.does-not-exist', { timeout: 100 })
+    cy.get('.does-not-exist', { timeout: 100 })
   })
 
   it('t2a', () => {})
@@ -41,14 +30,14 @@ describe('s2a', () => {
 
 describe('s3a', () => {
   before(() => {
-    return cy.wrap().then(() => {
+    cy.wrap().then(() => {
       throw new Error('s3a before hook failed')
     })
   })
 
-  after(() => // it should not have fired test:after:run
-  // for t8a yet
-  {
+  after(() => {
+    // it should not have fired test:after:run
+    // for t8a yet
     expect(testAfterRuns).to.deep.eq([
       't1a',
       't2a',

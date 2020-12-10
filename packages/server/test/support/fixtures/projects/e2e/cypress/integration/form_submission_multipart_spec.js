@@ -1,13 +1,4 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const { Blob, _ } = Cypress
 
 Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) => {
@@ -47,58 +38,62 @@ Cypress.Commands.add('setFile', { prevSubject: 'element' }, (element, filePath) 
 
 describe('<form> submissions', () => {
   it('can submit a form correctly', () => {
-    return cy
-    .visit('/')
-    .get('input[type=text]')
+    cy.visit('/')
+    cy.get('input[type=text]')
     .type('hello world')
-    .get('input[type=submit]')
+
+    cy.get('input[type=submit]')
     .click()
-    .document()
+
+    cy.document()
     .contains('hello+world')
   })
 
   it('can submit a multipart/form-data form correctly', () => {
-    return cy
-    .visit('/multipart-form-data')
-    .get('input[type=text]')
+    cy.visit('/multipart-form-data')
+    cy.get('input[type=text]')
     .type('hello world')
-    .get('input[type=submit]')
+
+    cy.get('input[type=submit]')
     .click()
-    .document()
+
+    cy.document()
     .contains('hello world')
   })
 
   context('can submit a multipart/form-data form with attachments', () => {
     const testUpload = (fixturePath, containsOpts = {}) => {
-      return cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
-      .get('input[type=file]')
+      cy.visit(`/multipart-with-attachment?fixturePath=${fixturePath}`)
+      cy.get('input[type=file]')
       .setFile(fixturePath)
-      .get('input[type=submit]')
+
+      cy.get('input[type=submit]')
       .click()
-      .document()
+
+      cy.document()
       .contains('files match', containsOpts)
     }
 
     it('image/png', () => {
-      return testUpload('../../static/javascript-logo.png')
+      testUpload('../../static/javascript-logo.png')
     })
 
     it('application/pdf', () => {
-      return testUpload('sample.pdf')
+      testUpload('sample.pdf')
     })
 
     it('image/jpeg', () => {
-      return testUpload('sample.jpg')
+      testUpload('sample.jpg')
     })
 
     // https://github.com/cypress-io/cypress/issues/4253
     it('large application/pdf', () => {
-      return testUpload('bigger-sample.pdf')
+      testUpload('bigger-sample.pdf')
     })
 
     // https://github.com/cypress-io/cypress/issues/4240
     it('large image/jpeg', () => {
-      return testUpload(Cypress.env('PATH_TO_LARGE_IMAGE'), {
+      testUpload(Cypress.env('PATH_TO_LARGE_IMAGE'), {
         timeout: 120000,
       })
     })
