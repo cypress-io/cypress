@@ -83,7 +83,7 @@ export const ReleaseNotes = observer(({ onShowInstructions, onModalClose }) => {
   return (
     <div className='release-notes'>
       <div className="modal-header">
-        <h4>{notes.title}</h4>
+        <h4 className="modal-title">{notes.title}</h4>
         <button onClick={onModalClose} type="button" className="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>

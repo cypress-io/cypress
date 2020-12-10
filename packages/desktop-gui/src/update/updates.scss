@@ -13,27 +13,21 @@
 
     li {
       list-style: none;
-      margin: 1.7rem 0;
+      margin: 1rem 0;
 
       span {
         display: block;
-        margin: 1.2rem 0;
+        margin: 0.875rem 0;
 
         &:last-child {
-          margin-top: 1.7rem;
+          margin-top: 1rem;
         }
       }
     }
   }
 
   p {
-    margin: 0 0 1.7rem;
-  }
-
-  .project-mode-instructions {
-    ol li:last-child {
-      margin-top: 2.2rem;
-    }
+    margin: 0 0 1rem;
   }
 
   .global-mode-instructions {
