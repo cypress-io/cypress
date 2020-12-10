@@ -23,7 +23,7 @@ const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-class Project {
+export default class Project {
   private projectRoot: string
   private watchers: Watchers
   private cfg: any
@@ -53,7 +53,7 @@ class Project {
     debug('Project created %s', this.projectRoot)
   }
 
-  async open (options = {}) {
+  open (options = {}) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
     this.server = new Server()
@@ -374,5 +374,3 @@ class Project {
     })
   }
 }
-
-module.exports = Project
