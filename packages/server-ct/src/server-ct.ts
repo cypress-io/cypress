@@ -5,11 +5,11 @@ import express, { Request } from 'express'
 import Bluebird from 'bluebird'
 import allowDestroy from '@packages/server/lib/util/server_destroy'
 import templateEngine from '@packages/server/lib/template_engine'
-import Socket from './socket-ct'
+import { Socket } from './socket-ct'
 
 const debug = _debug('cypress:server-ct:server')
 
-class Server {
+export class Server {
   private _request: Request
   private _middleware
   private _server: http.Server
@@ -20,6 +20,11 @@ class Server {
   private _fileServer
   private _httpsProxy
   private _urlResolver
+  private automation
+  private server: Server
+  private projectRoot: string
+  private spec: Cypress.Cypress['spec']
+  private browser: unknown
 
   constructor () {
     if (!(this instanceof Server)) {
@@ -167,7 +172,7 @@ class Server {
     this.spec = null
     this.browser = null
 
-    return Promise.try(() => {
+    try {
       if (this.automation) {
         this.automation.reset()
       }
@@ -179,7 +184,9 @@ class Server {
       }
 
       return state
-    })
+    } catch (e) {
+      // do not do anything
+    }
   }
 
   end () {
@@ -214,5 +221,3 @@ class Server {
     this._socket.startListening(this._server, config, options)
   }
 }
-
-module.exports = Server

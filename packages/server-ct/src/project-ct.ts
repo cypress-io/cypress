@@ -17,7 +17,9 @@ import fs from '@packages/server/lib/util/fs'
 import cwd from '@packages/server/lib/cwd'
 import settings from '@packages/server/lib/util/settings'
 
-import Server from './server-ct'
+import { Server } from './server-ct'
+import Runnables from '@packages/reporter/src/runnables/runnables'
+import { Reporter } from '@packages/reporter'
 
 const localCwd = cwd()
 
@@ -69,6 +71,7 @@ export default class Project {
       return this._initPlugins(cfg, options)
       .then((cfg) => {
         // return this.server.open(cfg, this, options.onError, options.onWarning)
+        // @ts-ignore
         return this.server.open(cfg, this)
         .spread((port, warning) => {
           // if we didnt have a cfg.port
@@ -277,7 +280,7 @@ export default class Project {
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
-    let { reporter } = cfg
+    let { reporter } = cfg as { reporter: Reporter }
 
     // this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -301,7 +304,7 @@ export default class Project {
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables (runnables) {
+      onSetRunnables (runnables: Runnables) {
         debug('received runnables %o', runnables)
 
         if (reporter != null) {

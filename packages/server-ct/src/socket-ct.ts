@@ -1,16 +1,29 @@
 // copied from server/lib/socket.js
 
-const _ = require('lodash')
-const debug = require('debug')('cypress:server-ct:socket')
-const Bluebird = require('bluebird')
-const socketIo = require('@packages/socket')
-const editors = require('@packages/server/lib/util/editors')
-const { openFile } = require('@packages/server/lib/util/file-opener')
-const open = require('@packages/server/lib/util/open')
-const errors = require('@packages/server/lib/errors')
-const specsUtil = require('@packages/server/lib/util/specs')
+import _ from 'lodash'
+import _debug from 'debug'
+import Bluebird from 'bluebird'
+import socketIo from '@packages/socket'
+import { getUserEditor, setUserEditor } from '@packages/server/lib/util/editors'
+import { openFile } from '@packages/server/lib/util/file-opener'
+import open from '@packages/server/lib/util/open'
+import errors from '@packages/server/lib/errors'
+import specsUtil from '@packages/server/lib/util/specs'
 
-const runnerEvents = [
+const debug = _debug('cypress:server-ct:socket')
+
+type RunnerEvent =
+  'reporter:restart:test:run'
+  | 'runnables:ready'
+  | 'run:start'
+  | 'test:before:run:async'
+  | 'reporter:log:add'
+  | 'reporter:log:state:changed'
+  | 'paused'
+  | 'test:after:hooks'
+  | 'run:end'
+
+const runnerEvents: RunnerEvent[] = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -22,7 +35,16 @@ const runnerEvents = [
   'run:end',
 ]
 
-const reporterEvents = [
+type ReporterEvent =
+  'runner:restart'
+ | 'runner:abort'
+ | 'runner:console:log'
+ | 'runner:console:error'
+ | 'runner:show:snapshot'
+ | 'runner:hide:snapshot'
+ | 'reporter:restarted'
+
+const reporterEvents: ReporterEvent[] = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -33,26 +55,30 @@ const reporterEvents = [
   'reporter:restarted',
 ]
 
-const retry = (fn) => {
+const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
 }
 
-class Socket {
-  constructor (config) {
+export class Socket {
+  private ended: boolean
+  private io: SocketIO.Server
+  private testsDir: string[]
+
+  constructor (config: Record<string, any>) {
     this.ended = false
 
     this.onTestFileChange = this.onTestFileChange.bind(this)
   }
 
-  onTestFileChange (filePath) {
+  onTestFileChange (filePath: string) {
     debug('test file changed %o', filePath)
   }
 
-  toReporter (event, data) {
+  toReporter (event: string, data: any) {
     return this.io && this.io.to('reporter').emit(event, data)
   }
 
-  toRunner (event, data) {
+  toRunner (event: string, data: any) {
     return this.io && this.io.to('runner').emit(event, data)
   }
 
@@ -80,13 +106,13 @@ class Socket {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createIo (server, path, cookie) {
+  createIo (server: number, path: string, cookie: string | boolean) {
     return socketIo.server(server, {
       path,
       destroyUpgrade: false,
       serveClient: false,
       cookie,
-      parser: socketIo.circularParser,
+      parser: socketIo.circularParser as any,
       transports: ['websocket'],
     })
   }
@@ -171,7 +197,7 @@ class Socket {
           })
         })
 
-        socket.on('automation:push:request', (message, data, cb) => {
+        socket.on('automation:push:request', (message: string, data: any, cb: (...args: unknown[]) => any) => {
           // just immediately callback because there
           // is not really an 'ack' here
           if (cb) {
@@ -208,9 +234,10 @@ class Socket {
       // need to update the specs in memory whenever
       // they change to avoid querying the filesystem
       // everytime the specs change
-      socket.on('get:component:specs', (cb) => {
+      socket.on('get:component:specs', (cb: (...vals: unknown[]) => void) => {
+        // @ts-ignore - let's not attempt to TS all the things in packages/server
         return specsUtil.find(config)
-        .filter((spec) => {
+        .filter((spec: Cypress.Cypress['spec']) => {
           return spec.specType === 'component'
         })
         .then(cb)
@@ -232,7 +259,7 @@ class Socket {
         return cb()
       })
 
-      socket.on('mocha', (...args) => {
+      socket.on('mocha', (...args: unknown[]) => {
         return options.onMocha.apply(options, args)
       })
 
@@ -243,7 +270,7 @@ class Socket {
         })
       })
 
-      socket.on('reload:browser', (url, browser) => {
+      socket.on('reload:browser', (url: string, browser: any) => {
         return options.onReloadBrowser(url, browser)
       })
 
@@ -276,7 +303,7 @@ class Socket {
         })
       })
 
-      socket.on('backend:request', (eventName, ...args) => {
+      socket.on('backend:request', (eventName: string, ...args) => {
         // cb is always the last argument
         const cb = args.pop()
 
@@ -342,12 +369,12 @@ class Socket {
       })
 
       socket.on('get:user:editor', (cb) => {
-        editors.getUserEditor(false)
+        getUserEditor(false)
         .then(cb)
       })
 
       socket.on('set:user:editor', (editor) => {
-        editors.setUserEditor(editor)
+        setUserEditor(editor)
       })
 
       socket.on('open:file', (fileDetails) => {
@@ -388,5 +415,3 @@ class Socket {
     return (this.io != null ? this.io.close() : undefined)
   }
 }
-
-module.exports = Socket
