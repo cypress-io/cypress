@@ -26,6 +26,8 @@
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
+    "@vue/cli-plugin-babel": "~4.4.0",
+    "@vue/cli-service": "~4.4.0",
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "css-loader": "3.4.2",

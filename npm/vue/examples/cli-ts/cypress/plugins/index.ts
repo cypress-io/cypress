@@ -5,5 +5,5 @@ module.exports = (on, config) => {
   preprocessor(on, config, webpackConfig)
 
   // IMPORTANT return the config object
-  // return config
+  return config
 }
