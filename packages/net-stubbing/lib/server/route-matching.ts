@@ -121,3 +121,37 @@ export function getRouteForRequest (routes: BackendRoute[], req: CypressIncoming
     return _doesRouteMatch(route.routeMatcher, req)
   })
 }
+
+/**
+ * Is this a CORS preflight request that could be for an existing route?
+ * If there is a matching route with method = 'OPTIONS', returns false.
+ */
+export function matchesRoutePreflight (routes: BackendRoute[], req: CypressIncomingRequest) {
+  if (req.method !== 'OPTIONS' || !req.headers['access-control-request-method']) {
+    // not a valid preflight request
+    return false
+  }
+
+  let hasCorsOverride = false
+
+  const matchingRoutes = _.filter(routes, ({ routeMatcher }) => {
+    // omit headers from matching since preflight req will not send headers
+    const preflightMatcher = { ...routeMatcher }
+
+    delete preflightMatcher.method
+    delete preflightMatcher.headers
+    delete preflightMatcher.auth
+
+    if (!_doesRouteMatch(preflightMatcher, req)) {
+      return false
+    }
+
+    if (routeMatcher.method && /options/i.test(String(routeMatcher.method))) {
+      hasCorsOverride = true
+    }
+
+    return true
+  })
+
+  return !hasCorsOverride && matchingRoutes.length
+}

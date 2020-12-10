@@ -594,6 +594,61 @@ describe('network stubbing', { retries: 2 }, function () {
         .wait('@foo').its('response.body').should('eq', 'replaced the body')
       })
     })
+
+    // @see https://github.com/cypress-io/cypress/issues/9599
+    context('cors preflight', function () {
+      const corsUrl = 'http://diff.foobar.com:3501/no-cors'
+
+      before(() => {
+        cy.visit('http://127.0.0.1:3500/fixtures/dom.html')
+      })
+
+      it('responds to OPTIONS requests', function () {
+        cy.request({ method: 'OPTIONS', url: corsUrl })
+        .then((res) => {
+          expect(res.headers).to.not.have.property('access-control-allow-origin')
+
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then((res) => {
+            expect(res).to.eq('intercepted DELETE')
+          })
+        })
+      })
+
+      it('can be overwritten', function () {
+        cy.intercept('OPTIONS', '/no-cors', (req) => {
+          req.reply({
+            headers: {
+              'access-control-allow-origin': 'http://wrong.invalid',
+            },
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
+      })
+    })
   })
 
   context('stubbing with static responses', function () {
