@@ -1,6 +1,6 @@
 import cs from 'classnames'
 import React, { Component } from 'react'
-import { SpecFile } from './spec-file'
+import { SpecItem } from './spec-item'
 
 class SpecGroup extends Component {
   constructor (props) {
@@ -19,19 +19,7 @@ class SpecGroup extends Component {
       </a>
       <ul className={cs(!isOpen && 'group-hidden')}>
         {group.specs.map((item) => {
-          const newParentPath = `${parentPath}/${group.shortName}`
-
-          return item.type === 'file'
-            ? <SpecFile
-              key={item.shortName}
-              path={item.name}
-              state={state}
-              spec={item}/>
-            : <SpecGroup
-              key={item.shortName}
-              group={item}
-              state={state}
-              parentPath={newParentPath}/>
+          return <SpecItem key={item.shortName} item={item} state={state} parentPath={parentPath}/>
         })}
 
       </ul>
@@ -39,4 +27,4 @@ class SpecGroup extends Component {
   }
 }
 
-export default SpecGroup
+export { SpecGroup }

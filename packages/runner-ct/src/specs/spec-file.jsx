@@ -1,18 +1,18 @@
 import React from 'react'
 
 function isActive (spec, activeSpec) {
-  return activeSpec && spec.name === activeSpec
+  return activeSpec && spec.name === activeSpec?.name
 }
 
-export function SpecFile(props) {
+export function SpecFile ({ spec, state }) {
   return (
-    <li 
-      key={props.spec.name} 
-      onClick={() => props.state.setSpec(props.spec.name)}
+    <li
+      key={spec.name}
+      onClick={() => state.setSpec(spec)}
     >
       <i className={
-        isActive(props.spec, props.state.spec?.name) 
-        ? 'fas fa-check-square active' : 'far fa-square'} />
-        {props.spec.shortName}
+        isActive(spec, state.spec)
+          ? 'fas fa-check-square active' : 'far fa-square'} />
+      {spec.shortName}
     </li>)
 }
