@@ -6,7 +6,7 @@ const Bluebird = require('bluebird')
 
 const allowDestroy = require('@packages/server/lib/util/server_destroy')
 const templateEngine = require('@packages/server/lib/template_engine')
-const Socket = require('./socket-ct')
+const { Socket } = require('./socket-ct')
 
 class Server {
   constructor () {

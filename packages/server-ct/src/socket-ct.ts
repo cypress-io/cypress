@@ -59,7 +59,7 @@ const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
 }
 
-export default class Socket {
+export class Socket {
   private ended: boolean
   private io: SocketIO.Server
   private testsDir: string[]
