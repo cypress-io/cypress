@@ -4,7 +4,7 @@
 const webpackConfig = require('../../../../../npm/evergreen/examples/webpack-vue-cli/node_modules/@vue/cli-service/webpack.config')
 
 module.exports = (on, config) => {
-  on('componentTesting:startDevServer', () => {
+  on('devserver:start', () => {
     return webpackConfig
   })
 

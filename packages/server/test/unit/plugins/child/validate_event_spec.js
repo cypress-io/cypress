@@ -4,7 +4,7 @@ const _ = require('lodash')
 const validateEvent = require('../../../../lib/plugins/child/validate_event')
 
 const events = [
-  ['componentTesting:startDevServer', 'a function', () => {}],
+  ['devserver:start', 'a function', () => {}],
   ['file:preprocessor', 'a function', () => {}],
   ['before:browser:launch', 'a function', () => {}],
   ['after:screenshot', 'a function', () => {}],
@@ -21,7 +21,7 @@ describe('lib/plugins/child/validate_event', () => {
 You passed: \`undefined\`
 
 The following are valid events:
-- componentTesting:startDevServer
+- devserver:start
 - file:preprocessor
 - before:browser:launch
 - task
@@ -45,7 +45,7 @@ The following are valid events:
 You passed: \`invalid:event:name\`
 
 The following are valid events:
-- componentTesting:startDevServer
+- devserver:start
 - file:preprocessor
 - before:browser:launch
 - task
