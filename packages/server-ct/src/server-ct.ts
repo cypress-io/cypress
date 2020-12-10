@@ -1,28 +1,30 @@
-const _ = require('lodash')
-const http = require('http')
-const debug = require('debug')('cypress:server-ct:server')
-const express = require('express')
-const Bluebird = require('bluebird')
+import http from 'http'
+import { promisify } from 'util'
+import _debug from 'debug'
+import express, { Request } from 'express'
+import Bluebird from 'bluebird'
+import allowDestroy from '@packages/server/lib/util/server_destroy'
+import templateEngine from '@packages/server/lib/template_engine'
+import Socket from './socket-ct'
 
-const allowDestroy = require('@packages/server/lib/util/server_destroy')
-const templateEngine = require('@packages/server/lib/template_engine')
-const Socket = require('./socket-ct')
+const debug = _debug('cypress:server-ct:server')
 
 class Server {
+  private _request: Request
+  private _middleware
+  private _server: http.Server
+  private isListening: boolean
+  private _socket: Socket
+  private _baseUrl: string
+  private _nodeProxy
+  private _fileServer
+  private _httpsProxy
+  private _urlResolver
+
   constructor () {
     if (!(this instanceof Server)) {
       return new Server()
     }
-
-    this._request = null
-    this._middleware = null
-    this._server = null
-    this._socket = null
-    this._baseUrl = null
-    this._nodeProxy = null
-    this._fileServer = null
-    this._httpsProxy = null
-    this._urlResolver = null
   }
 
   createExpressApp (config) {
@@ -91,7 +93,7 @@ class Server {
         // and the err no is EADDRINUSE
         // then we know to display the custom err message
         if (err.code === 'EADDRINUSE') {
-          return reject(this.portInUseErr(port))
+          return reject(`Port ${port} is already in use`)
         }
       }
 
@@ -102,10 +104,6 @@ class Server {
         return resolve([port])
       })
     })
-  }
-
-  _port () {
-    return _.chain(this._server).invoke('address').get('port').value()
   }
 
   _listen (port, onError) {
@@ -119,21 +117,24 @@ class Server {
 
         this._server.removeListener('error', onError)
 
-        return resolve(address.port)
+        return resolve(typeof address === 'string' ? address : address.port)
       }
 
       return this._server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
-  _onRequest (headers, automationRequest, options) {
-    return this._request.sendPromise(headers, automationRequest, options)
-  }
-
   _callRequestListeners (server, listeners, req, res) {
     return listeners.map((listener) => {
       return listener.call(server, req, res)
     })
+  }
+
+  async _destroyAsync () {
+    allowDestroy(this._server)
+
+    return promisify(this._server.close)()
+    .catch(() => { }) // dont catch any errors
   }
 
   _close () {
@@ -143,19 +144,17 @@ class Server {
       return Bluebird.resolve()
     }
 
-    return this._server.destroyAsync()
-    .then(() => {
-      this.isListening = false
-    })
+    this._server.close()
+    this.isListening = false
   }
 
   close () {
-    return Bluebird.join(
+    return Bluebird.all([
       this._close(),
       this._socket != null ? this._socket.close() : undefined,
       this._fileServer != null ? this._fileServer.close() : undefined,
       this._httpsProxy != null ? this._httpsProxy.close() : undefined,
-    )
+    ])
     .then(() => {
       this._middleware = null
     })
