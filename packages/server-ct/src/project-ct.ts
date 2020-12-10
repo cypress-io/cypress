@@ -61,7 +61,7 @@ export default class Project {
     debug('project options %o', options)
     this.options = options
 
-    this.getConfig(options)
+    return this.getConfig(options)
     .tap(() => {
       process.chdir(this.projectRoot)
     })
