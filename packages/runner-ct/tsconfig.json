@@ -49,6 +49,7 @@
     "types": [],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true
     // "noResolve": true
