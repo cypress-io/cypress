@@ -4,7 +4,6 @@ export class SpecsStore {
   @observable specs = []
 
   @action setSpecs (specs) {
-    console.log('setSpecs')
     this.specs = specs
   }
 }
