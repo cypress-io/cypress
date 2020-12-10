@@ -138,8 +138,13 @@ pre.line-nums {
 }
 
 pre.copy-to-clipboard {
+  padding: 9.5px;
   & > span, & > code {
     padding-right: 15px;
+  }
+
+  & > code {
+    background-color: transparent;
   }
   
   .action-copy {
