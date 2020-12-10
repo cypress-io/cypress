@@ -2,6 +2,7 @@ import http from 'http'
 import { promisify } from 'util'
 import _debug from 'debug'
 import express, { Request } from 'express'
+import { AddressInfo } from 'net'
 import Bluebird from 'bluebird'
 import allowDestroy from '@packages/server/lib/util/server_destroy'
 import templateEngine from '@packages/server/lib/template_engine'
@@ -109,7 +110,7 @@ class Server {
   _listen (port, onError) {
     return new Bluebird((resolve) => {
       const listener = () => {
-        const address = this._server.address()
+        const address = this._server.address() as AddressInfo
 
         this.isListening = true
 
@@ -117,7 +118,7 @@ class Server {
 
         this._server.removeListener('error', onError)
 
-        return resolve(typeof address === 'string' ? address : address.port)
+        return resolve(address.port)
       }
 
       return this._server.listen(port || 0, '127.0.0.1', listener)
