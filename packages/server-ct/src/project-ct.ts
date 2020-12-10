@@ -274,7 +274,7 @@ export default class Project {
   //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
 
-  watchSettingsAndStartWebsockets (options: Record<string, any> = {}, cfg: Record<string, any> = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
     let { reporter } = cfg
