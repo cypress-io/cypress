@@ -161,6 +161,27 @@ class Server {
     })
   }
 
+  reset () {
+    debug('resetting project instance %s', this.projectRoot)
+
+    this.spec = null
+    this.browser = null
+
+    return Promise.try(() => {
+      if (this.automation) {
+        this.automation.reset()
+      }
+
+      let state
+
+      if (this.server) {
+        state = this.server.reset()
+      }
+
+      return state
+    })
+  }
+
   end () {
     return this._socket && this._socket.end()
   }
