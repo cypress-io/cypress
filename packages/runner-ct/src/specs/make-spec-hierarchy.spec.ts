@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { makeSpecHierarchy, SpecFolderOrSpecFile } from '../../../src/specs/make-spec-hierarchy'
+import { makeSpecHierarchy, SpecFolderOrSpecFile } from './make-spec-hierarchy'
 
 const files = [
   { name: 'forOfStatement.js' },
