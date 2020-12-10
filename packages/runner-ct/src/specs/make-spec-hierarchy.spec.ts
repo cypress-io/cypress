@@ -14,7 +14,7 @@ describe('makeSpecHierarchy', () => {
       {
         name: 'forOfStatement.js',
         shortName: 'forOfStatement.js',
-        type: 'file'
+        type: 'file',
       },
       {
         shortName: 'foo',
@@ -27,11 +27,11 @@ describe('makeSpecHierarchy', () => {
               {
                 shortName: 'bar.js',
                 name: 'foo/y/bar.js',
-                type: 'file'
-              }
-            ]
-          }
-        ]
+                type: 'file',
+              },
+            ],
+          },
+        ],
       },
     ]
 
