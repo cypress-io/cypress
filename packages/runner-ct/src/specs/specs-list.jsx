@@ -13,7 +13,7 @@ class SpecsList extends Component {
     return (
       <div className="specs-list">
         <header>Select tests to run...</header>
-        <ul>{
+        <ul className="specs-list-container">{
           specGroups.map((item) => {
             { // The `active` prop here is used only to
               // force repaint of the tree when selecting a spec
