@@ -1,7 +1,8 @@
-const webpackConfig = require('@vue/cli-service/webpack.config')
+/// <reference types="cypress" />
+const preprocessor = require('../../dist/plugins/webpack')
 
 module.exports = (on, config) => {
-  on('devserver:start', () => {
-    return webpackConfig
-  })
+  preprocessor(on, config, require('@vue/cli-service/webpack.config'))
+
+  return config
 }

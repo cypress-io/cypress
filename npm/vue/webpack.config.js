@@ -2,9 +2,18 @@
 // The default for running tests in this project
 // https://vue-loader.vuejs.org/guide/#manual-setup
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const path = require('path')
 
 module.exports = {
+  mode: 'development',
+  output: {
+    path: path.join(__dirname, 'dist'),
+    filename: 'js/[name].js',
+    publicPath: '/',
+    chunkFilename: 'js/[name].js',
+  },
+
   resolve: {
     extensions: ['.js', '.json', '.vue'],
     alias: {
