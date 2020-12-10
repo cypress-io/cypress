@@ -9,6 +9,7 @@
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
     "postinstall": "echo '@packages/runner needs: yarn build'",
+    "test-unit": "ts-mocha --config ./test/.mocharc.js",
     "watch": "webpack --watch --progress"
   },
   "dependencies": {
@@ -33,6 +34,7 @@
     "html-webpack-plugin": "^4.5.0",
     "sass-loader": "^10.0.3",
     "ts-loader": "^8.0.5",
+    "ts-mocha": "8.0.0",
     "watch": "^1.0.2",
     "webpack": "4.44.2"
   },

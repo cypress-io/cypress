@@ -1,5 +1,6 @@
 import cs from 'classnames'
 import React, { Component } from 'react'
+import { SpecFile } from './spec-file'
 
 class SpecGroup extends Component {
   constructor (props) {
@@ -8,28 +9,27 @@ class SpecGroup extends Component {
   }
 
   render () {
-    const { group, groupKey, parentPath = '', state } = this.props
+    const { group, parentPath = '', state } = this.props
     const { isOpen } = this.state
 
-    return (<li key={groupKey} >
+    return (<li key={group.shortName} >
       <a onClick={() => this.setState({ isOpen: !isOpen })} >
         <i className={cs('far', isOpen ? 'fa-minus-square' : 'fa-plus-square')}/>
-        {groupKey}
+        {group.shortName}
       </a>
       <ul className={cs(!isOpen && 'group-hidden')}>
-        {Object.keys(group)
-        .map((spec) => {
-          const newParentPath = `${parentPath}/${groupKey}`
+        {group.specs.map((item) => {
+          const newParentPath = `${parentPath}/${group.shortName}`
 
-          return group[spec].name
+          return item.type === 'file'
             ? <SpecFile
-              key={spec}
-              path={newParentPath}
+              key={item.shortName}
+              path={item.name}
               state={state}
-              spec={group[spec]}/>
-            : <SpecGroup key={spec}
-              groupKey={spec}
-              group={group[spec]}
+              spec={item}/>
+            : <SpecGroup
+              key={item.shortName}
+              group={item}
               state={state}
               parentPath={newParentPath}/>
         })}
@@ -37,18 +37,6 @@ class SpecGroup extends Component {
       </ul>
     </li>)
   }
-}
-
-function SpecFile ({ path, spec, state }) {
-  return (
-    <li key={spec.name} onClick={() => state.setSpec(spec)}>
-      <i className={isActive(spec, state.spec?.name) ? 'fas fa-check-square active' : 'far fa-square'}/>
-      {spec.name.slice(path.length)}
-    </li>)
-}
-
-function isActive (spec, activeSpec) {
-  return activeSpec && spec.name === activeSpec
 }
 
 export default SpecGroup
