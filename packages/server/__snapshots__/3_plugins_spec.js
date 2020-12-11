@@ -384,17 +384,10 @@ The following error was thrown by a plugin. We stopped running your tests becaus
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
 
 
 ====================================================================================================
