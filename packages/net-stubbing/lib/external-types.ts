@@ -193,6 +193,10 @@ export interface Interception {
   /* @internal */
   responseHandler?: HttpResponseInterceptor
   /**
+   * The error that occurred during this request.
+   */
+  error?: Error
+  /**
    * Was `cy.wait()` used to wait on the response to this request?
    * @internal
    */
