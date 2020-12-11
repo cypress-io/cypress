@@ -9,7 +9,7 @@
     "cy:open": "node ../../scripts/cypress open --component-testing",
     "cy:run": "node ../../scripts/cypress run --component-testing",
     "pretest": "yarn build",
-    "test": "yarn cy:run",
+    "test": "echo \"no tests setup\"",
     "watch": "tsc --watch"
   },
   "dependencies": {
