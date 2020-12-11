@@ -51,7 +51,7 @@ module.exports = (value) => {
 
   const obj = fromJson(value)
 
-  if (obj) {
+  if (obj && typeof obj === 'object') {
     return obj
   }
 
