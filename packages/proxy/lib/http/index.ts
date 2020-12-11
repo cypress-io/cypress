@@ -40,6 +40,12 @@ type HttpMiddlewareCtx<T> = {
   deferSourceMapRewrite: (opts: { js: string, url: string }) => string
 } & T
 
+export const defaultMiddleware = {
+  [HttpStages.IncomingRequest]: RequestMiddleware,
+  [HttpStages.IncomingResponse]: ResponseMiddleware,
+  [HttpStages.Error]: ErrorMiddleware,
+}
+
 export type ServerCtx = Readonly<{
   config: CyServer.Config
   getFileServerToken: () => string
@@ -197,11 +203,7 @@ export class Http {
     this.request = opts.request
 
     if (typeof opts.middleware === 'undefined') {
-      this.middleware = {
-        [HttpStages.IncomingRequest]: RequestMiddleware,
-        [HttpStages.IncomingResponse]: ResponseMiddleware,
-        [HttpStages.Error]: ErrorMiddleware,
-      }
+      this.middleware = defaultMiddleware
     }
   }
 

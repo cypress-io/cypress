@@ -105,6 +105,9 @@ describe('forced gc', () => {
       cy.get('.forced-gc-warning').should('be.visible')
       cy.contains('GC Duration: 0.00')
       cy.contains('Running GC...')
+
+      // ensure the page is loaded before taking snapshot
+      cy.contains('test 4').should('be.visible')
       cy.percySnapshot()
     })
 

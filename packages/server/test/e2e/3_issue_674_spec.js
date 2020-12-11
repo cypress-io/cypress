@@ -5,7 +5,7 @@ describe('e2e issue 674', () => {
 
   // https://github.com/cypress-io/cypress/issues/674
   e2e.it('fails', {
-    spec: 'issue_674_spec.coffee',
+    spec: 'issue_674_spec.js',
     snapshot: true,
     expectedExitCode: 1,
   })

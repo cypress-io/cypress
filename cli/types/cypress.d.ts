@@ -164,6 +164,9 @@ declare namespace Cypress {
      */
     minimatch: typeof Minimatch.minimatch
     /**
+     * @deprecated Will be removed in a future version.
+     * Consider including your own datetime formatter in your tests.
+     *
      * Cypress automatically includes moment.js and exposes it as Cypress.moment.
      *
      * @see https://on.cypress.io/moment

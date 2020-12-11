@@ -6,7 +6,7 @@ describe('e2e config', () => {
 
   it('provides various environment details', function () {
     return e2e.exec(this, {
-      spec: 'config_passing_spec.coffee',
+      spec: 'config_passing_spec.js',
       snapshot: true,
       config: {
         env: {

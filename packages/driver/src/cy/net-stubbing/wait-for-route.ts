@@ -1,11 +1,11 @@
 import _ from 'lodash'
 import {
   Interception,
-  Route,
   InterceptionState,
 } from './types'
+import { getAliasedRequests } from './aliasing'
 
-const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete']
+const RESPONSE_WAITED_STATES: InterceptionState[] = ['ResponseIntercepted', 'Complete', 'Errored']
 
 function getPredicateForSpecifier (specifier: string): Partial<Interception> {
   if (specifier === 'request') {
@@ -18,16 +18,7 @@ function getPredicateForSpecifier (specifier: string): Partial<Interception> {
 
 export function waitForRoute (alias: string, state: Cypress.State, specifier: 'request' | 'response' | string): Interception | null {
   // 1. Create an array of known requests that have this alias.
-  // Start with request-level (req.alias = '...') aliases that could be a match.
-  const candidateRequests = _.filter(state('aliasedRequests'), { alias })
-  .map(({ request }) => request)
-
-  // Now add route-level (cy.intercept(...).as()) aliased requests.
-  const route: Route = _.find(state('routes'), { alias })
-
-  if (route) {
-    Array.prototype.push.apply(candidateRequests, _.values(route.requests))
-  }
+  const candidateRequests = getAliasedRequests(alias, state)
 
   // 2. Find the first request without responseWaited/requestWaited
   const predicate = getPredicateForSpecifier(specifier)
