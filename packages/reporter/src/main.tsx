@@ -1,5 +1,6 @@
-import { action } from 'mobx'
+import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
+import cs from 'classnames'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
@@ -18,7 +19,7 @@ import shortcuts from './lib/shortcuts'
 import Header from './header/header'
 import Runnables from './runnables/runnables'
 
-export interface ReporterProps {
+type ReporterProps = {
   appState: AppState
   autoScrollingEnabled?: boolean
   runnablesStore: RunnablesStore
@@ -27,8 +28,14 @@ export interface ReporterProps {
   statsStore: StatsStore
   events: Events
   error?: RunnablesErrorModel
+  resetStatsOnSpecChange?: boolean
   spec: Cypress.Cypress['spec']
-}
+} & ({
+  runMode: 'single',
+} | {
+  runMode: 'multi',
+  allSpecs: Array<Cypress.Cypress['spec']>
+})
 
 @observer
 class Reporter extends Component<ReporterProps> {
@@ -52,6 +59,7 @@ class Reporter extends Component<ReporterProps> {
   }
 
   static defaultProps = {
+    runMode: 'single',
     appState,
     events,
     runnablesStore,
@@ -60,18 +68,30 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState, runnablesStore, spec, scroller, error, events, statsStore } = this.props
+    const { appState, runMode, runnablesStore, scroller, error, events, statsStore } = this.props
 
     return (
-      <div className='reporter'>
+      <div className={cs('reporter', { multiSpecs: runMode === 'multi' })}>
         <Header appState={appState} statsStore={statsStore} />
-        <Runnables
-          appState={appState}
-          error={error}
-          runnablesStore={runnablesStore}
-          scroller={scroller}
-          spec={spec}
-        />
+        {this.props.runMode === 'single' ? (
+          <Runnables
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={this.props.spec}
+          />
+        ) : this.props.allSpecs.map((spec) => (
+          <Runnables
+            key={spec.relative}
+            appState={appState}
+            error={error}
+            runnablesStore={runnablesStore}
+            scroller={scroller}
+            spec={spec}
+          />
+        ))}
+
         <ForcedGcWarning
           appState={appState}
           events={events}/>
@@ -79,18 +99,23 @@ class Reporter extends Component<ReporterProps> {
     )
   }
 
-  // this hoof will only trigger if we switch spec file at runtime
+  // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
   componentDidUpdate (newProps: ReporterProps) {
-    if (this.props.spec.relative !== newProps.spec.relative) {
-      action('reporter:stats:reset', () => {
+    this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
+
+    if (
+      this.props.resetStatsOnSpecChange &&
+      this.props.spec.relative !== newProps.spec.relative
+    ) {
+      runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
-      })()
+      })
     }
   }
 
   componentDidMount () {
-    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+    const { spec, appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
@@ -107,6 +132,7 @@ class Reporter extends Component<ReporterProps> {
 
     shortcuts.start()
     EQ.init()
+    this.props.runnablesStore.setRunningSpec(spec.relative)
   }
 
   componentWillUnmount () {
