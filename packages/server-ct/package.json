@@ -7,7 +7,6 @@
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
   },
   "devDependencies": {
-    "@types/mocha": "5.2.7",
     "ts-mocha": "8.0.0"
   }
 }
