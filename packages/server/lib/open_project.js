@@ -4,10 +4,12 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+
 const Project = require('./project')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
+const runEvents = require('./plugins/run_events')
 
 const moduleFactory = () => {
   let openProject = null
@@ -133,7 +135,14 @@ const moduleFactory = () => {
               spec.relative,
             )
 
-            return browsers.open(browser, options, automation)
+            return Promise.try(() => {
+              if (!cfg.isTextTerminal) {
+                return runEvents.execute('before:spec', spec)
+              }
+            })
+            .then(() => {
+              return browsers.open(browser, options, automation)
+            })
           }
 
           return relaunchBrowser()

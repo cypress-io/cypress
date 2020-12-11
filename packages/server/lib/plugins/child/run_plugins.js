@@ -114,6 +114,9 @@ const execute = (ipc, event, ids, args = []) => {
     'before:browser:launch' () {
       browserLaunch.wrap(ipc, invoke, ids, args)
     },
+    'before:spec' () {
+      util.wrapChildPromise(ipc, invoke, ids, args)
+    },
     'file:preprocessor' () {
       preprocessor.wrap(ipc, invoke, ids, args)
     },

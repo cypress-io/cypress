@@ -16,10 +16,11 @@ const isObject = (event, handler) => {
 }
 
 const eventValidators = {
-  'file:preprocessor': isFunction,
-  'before:browser:launch': isFunction,
-  'task': isObject,
   'after:screenshot': isFunction,
+  'before:browser:launch': isFunction,
+  'before:spec': isFunction,
+  'file:preprocessor': isFunction,
+  'task': isObject,
   '_get:task:keys': isFunction,
   '_get:task:body': isFunction,
 }

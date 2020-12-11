@@ -102,6 +102,7 @@ const init = (config, options) => {
       projectRoot: options.projectRoot,
       configFile: options.configFile,
       version: pkg.version,
+      isInteractive: options.isInteractive,
     })
 
     ipc.send('load', config)
