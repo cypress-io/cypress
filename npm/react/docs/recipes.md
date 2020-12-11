@@ -32,6 +32,30 @@ See example repo [bahmutov/try-cra-with-unit-test](https://github.com/bahmutov/t
 
 **Tip:** `plugins/react-scripts` is just loading `plugins/cra-v3`.
 
+### With custom webpack preprocessor options
+
+To modify the `preprocessorOptions` that are passed into the `webpackPreprocessor` you can pass a function as `preprocessorOptionsFinal` option into the `react-scripts` plugin, e.g.
+
+```js
+// cypress/plugins/index.js
+module.exports = (on, config) => {
+  require('@cypress/react/plugins/react-scripts')(on, config, {
+      preprocessorOptionsFinal(preprocessorOptions) {
+          preprocessorOptions.webpackOptions.devtool = false
+
+          // IMPORTANT to return preprocessorOptions
+          return preprocessorOptions
+      },
+  })
+
+  // IMPORTANT to return the config object
+  // with the any changed environment variables
+  return config
+}
+```
+
+This would disable the source maps when the CRA app builds
+
 ## Next.js
 
 ```js

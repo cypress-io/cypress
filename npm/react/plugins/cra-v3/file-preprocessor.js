@@ -29,7 +29,7 @@ const getWebpackPreprocessorOptions = (opts) => {
   return options
 }
 
-module.exports = (config) => {
+module.exports = (config, options = {}) => {
   debug('env object %o', config.env)
 
   const coverageIsDisabled =
@@ -64,7 +64,15 @@ module.exports = (config) => {
     // insert Babel plugin to mock named imports
     looseModules: true,
   }
-  const preprocessorOptions = getWebpackPreprocessorOptions(opts)
+  let preprocessorOptions = getWebpackPreprocessorOptions(opts)
+
+  if (
+    options.preprocessorOptionsFinal &&
+    typeof options.preprocessorOptionsFinal === 'function'
+  ) {
+    debug('preprocessorOptionsFinal callback found')
+    preprocessorOptions = options.preprocessorOptionsFinal(preprocessorOptions)
+  }
 
   debug('final webpack options %o', preprocessorOptions.webpackOptions)
 
