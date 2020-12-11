@@ -25,9 +25,9 @@ const localCwd = cwd()
 const DEFAULT_BROWSER_NAME = 'chrome'
 
 export default class Project {
+  cfg: any
   private projectRoot: string
   private watchers: Watchers
-  private cfg: any
   private server: Server
   private options: Record<string, any>
   private spec: Cypress.Cypress['spec']
@@ -335,7 +335,7 @@ export default class Project {
     })
   }
 
-  setCurrentSpecAndBrowser (spec, browser) {
+  setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
     this.spec = spec
     this.browser = browser
   }
