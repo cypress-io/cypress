@@ -1,4 +1,4 @@
-import * as webpack from 'webpack'
+import webpack, { Compiler, compilation, Plugin } from 'webpack'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
 
@@ -10,9 +10,9 @@ interface CypressOptions {
 
 type CypressCTWebpackContext = {
   _cypress: CypressOptions
-} & webpack.compilation.Compilation
+} & compilation.Compilation
 
-export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInstance {
+export default class CypressCTOptionsPlugin implements Plugin {
   private readonly files: any[] = []
   private readonly projectRoot: string
   private readonly devserverEvents: EventEmitter
@@ -60,13 +60,13 @@ export default class CypressCTOptionsPlugin implements webpack.WebpackPluginInst
     }
 
     // Webpack 4
-    (compilation as webpack.compilation.Compilation).hooks.normalModuleLoader.tap(
+    (compilation as compilation.Compilation).hooks.normalModuleLoader.tap(
       'CypressCTOptionsPlugin',
       this.pluginFunc,
     )
   };
 
-  apply (compiler: webpack.Compiler): void {
+  apply (compiler: Compiler): void {
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', this.plugin)
   }
 }
