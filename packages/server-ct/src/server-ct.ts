@@ -6,6 +6,7 @@ import Bluebird from 'bluebird'
 import allowDestroy from '@packages/server/lib/util/server_destroy'
 import templateEngine from '@packages/server/lib/template_engine'
 import { Socket } from './socket-ct'
+import { initializeRoutes } from './routes-ct'
 
 const debug = _debug('cypress:server-ct:server')
 
@@ -58,8 +59,8 @@ export class Server {
     return app
   }
 
-  createRoutes (...args) {
-    return require('./routes-ct').apply(null, args)
+  createRoutes (...args: unknown[]) {
+    return initializeRoutes.apply(null, args)
   }
 
   getHttpServer () {

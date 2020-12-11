@@ -1,12 +1,22 @@
-const httpProxy = require('http-proxy')
-const send = require('send')
-const debug = require('debug')('cypress:server:routes')
-
+import httpProxy from 'http-proxy'
+import send from 'send'
+import { Express, ErrorRequestHandler } from 'express'
+import debugFn from 'debug'
+import Project from './project-ct'
 // const files = require('@packages/server/lib/controllers/files')
-const runnerCt = require('@packages/runner-ct')
-const staticPkg = require('@packages/static')
+import runnerCt from '@packages/runner-ct'
+import staticPkg from '@packages/static'
 
-module.exports = ({ app, config, project, onError }) => {
+const debug = debugFn('cypress:server:routes')
+
+interface InitializeRoutes {
+  app: Express
+  config: Record<string, any>
+  project: Project
+  onError: (...args: unknown[]) => any
+}
+
+export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
   app.get('/__cypress/runner/*', (req, res) => {
@@ -58,12 +68,14 @@ module.exports = ({ app, config, project, onError }) => {
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  app.use((err, req, res) => {
+  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, next) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)
     res.set('x-cypress-stack', JSON.stringify(err.stack))
 
     res.sendStatus(500)
-  })
+  }
+
+  app.use(errorHandlingMiddleware)
 }
