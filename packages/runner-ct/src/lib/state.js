@@ -1,5 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
+import eventManager from './event-manager'
 
 const _defaults = {
   messageTitle: null,
@@ -58,6 +59,9 @@ export default class State {
 
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
+  /** @type {"single" | "multi"} */
+  @observable runMode = 'single'
+  @observable multiSpecs = [];
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -151,5 +155,44 @@ export default class State {
 
   @action setSpec (spec) {
     this.spec = spec
+  }
+
+  @action setSingleSpec (spec) {
+    if (this.runMode === 'multi') {
+      this.runMode = 'single'
+      this.multiSpecs = []
+    }
+
+    this.setSpec(spec)
+  }
+
+  @action addSpecToMultiMode (newSpec) {
+    const isAlreadyRunningNewSpec = this.multiSpecs.some(
+      (existingSpec) => existingSpec.relative === newSpec.relative,
+    )
+
+    if (isAlreadyRunningNewSpec) {
+      this.multiSpecs = this.multiSpecs.filter((existingSpec) => existingSpec.relative !== newSpec.relative)
+    } else if (this.runMode === 'single' && this.spec) {
+      // when the new
+      this.multiSpecs = [this.spec, newSpec]
+    } else {
+      this.multiSpecs = [...this.multiSpecs, newSpec]
+    }
+
+    this.runMode = 'multi'
+    this.runMultiMode().catch((e) => {
+      throw e
+    })
+  }
+
+  runMultiMode = async () => {
+    const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
+
+    this.setSpec(null)
+    for (const spec of this.multiSpecs) {
+      this.setSpec(spec)
+      await waitForRunEnd()
+    }
   }
 }
