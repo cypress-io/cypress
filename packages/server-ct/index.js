@@ -1,5 +1,5 @@
 const browsers = require('@packages/server/lib/browsers')
-const Project = require('./src/project-ct').default
+const Project = require('./dist/project-ct').default
 const start = (projectRoot, options) => {
   const project = new Project(projectRoot)
 
