@@ -1,6 +1,6 @@
+const httpProxy = require('http-proxy')
 const send = require('send')
 const debug = require('debug')('cypress:server:routes')
-const httpProxy = require('http-proxy')
 
 // const files = require('@packages/server/lib/controllers/files')
 const runnerCt = require('@packages/runner-ct')
@@ -9,10 +9,15 @@ const staticPkg = require('@packages/static')
 module.exports = ({ app, config, project, onError }) => {
   const proxy = httpProxy.createProxyServer()
 
-  app.get('/__cypress/runner/*', runnerCt.middleware(send))
+  app.get('/__cypress/runner/*', (req, res) => {
+    runnerCt.handle(req, res)
+  })
 
   app.get('/__cypress/static/*', (req, res) => {
-    staticPkg.handle(req, res)
+    const pathToFile = staticPkg.getPathToDist(req.params[0])
+
+    return send(req, pathToFile)
+    .pipe(res)
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {

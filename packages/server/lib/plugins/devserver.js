@@ -23,7 +23,7 @@ const API = {
   emitter: baseEmitter,
 
   start ({ specs, config }) {
-    return plugins.execute('devserver:config', { specs, config })
+    return plugins.execute('devserver:start', { specs, config })
   },
 
   updateSpecs (specs) {

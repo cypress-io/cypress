@@ -2,22 +2,6 @@
   "name": "@packages/server-ct",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "prestart": "node scripts/checkExample.js",
-    "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/example",
-    "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/example"
-  },
-  "dependencies": {
-    "send": "^0.17.1"
-  },
-  "devDependencies": {
-    "val-loader": "2.x",
-    "webpack": "4.x"
-  },
-  "peerDependencies": {
-    "val-loader": "2.x",
-    "webpack": "4.x"
-  },
   "files": [
     "src"
   ]

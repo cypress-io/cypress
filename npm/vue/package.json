@@ -6,16 +6,16 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "yarn build",
-    "build:watch": "tsc --watch",
-    "cy:open": "node ../../scripts/cypress open",
-    "cy:run": "node ../../scripts/cypress run",
+    "cy:open": "node ../../scripts/cypress open --component-testing",
+    "cy:run": "node ../../scripts/cypress run --component-testing",
     "pretest": "yarn build",
-    "test": "yarn cy:run"
+    "test": "echo \"no tests setup\"",
+    "watch": "tsc --watch"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-dev-server": "*",
     "@intlify/vue-i18n-loader": "1.0.0",
     "@vue/test-utils": "1.0.3",
     "babel-plugin-istanbul": "6.0.0",
@@ -26,6 +26,8 @@
   "devDependencies": {
     "@babel/core": "7.9.0",
     "@babel/preset-env": "7.9.5",
+    "@vue/cli-plugin-babel": "~4.4.0",
+    "@vue/cli-service": "~4.4.0",
     "axios": "0.19.2",
     "babel-loader": "8.1.0",
     "css-loader": "3.4.2",

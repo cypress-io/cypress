@@ -3,7 +3,7 @@ import * as path from 'path'
 import { merge } from 'webpack-merge'
 import CypressCTOptionsPlugin from './plugin'
 
-const debug = debugFn('cypress:evergreen:webpack')
+const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
 export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, files, support, devserverEvents }) {
   debug(`User passed in webpack config with values`, userWebpackConfig)
@@ -12,9 +12,9 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   debug(`Merging Evergreen's webpack config with users'`)
 
-  debug(`Support files`, support)
-
   debug(`New webpack entries`, files)
+  debug(`Project root`, projectRoot)
+  debug(`Support files`, support)
 
   const entry = path.resolve(__dirname, './browser.js')
 

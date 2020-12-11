@@ -111,7 +111,7 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
-    case 'devserver:config':
+    case 'devserver:start':
       devserver.wrap(ipc, invoke, ids, args)
 
       return

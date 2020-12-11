@@ -1,5 +1,4 @@
 /* eslint-env mocha,chai,jest */
-/* globals cy */
 
 import HelloWorld from './HelloWorld'
 import { mount } from '@cypress/vue'
