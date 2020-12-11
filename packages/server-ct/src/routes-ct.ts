@@ -68,7 +68,7 @@ export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
   // during routing just log them out to
   // the console and send 500 status
   // and report to raygun (in production)
-  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res, next) => {
+  const errorHandlingMiddleware: ErrorRequestHandler = (err, req, res) => {
     console.log(err.stack) // eslint-disable-line no-console
 
     res.set('x-cypress-error', err.message)

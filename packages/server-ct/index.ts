@@ -1,36 +1,19 @@
 import browsers from '@packages/server/lib/browsers'
 import Project from './src/project-ct'
 
-interface OpenConfig {
-  componentTesting: boolean
-  project: string
-  cwd: string
-  invokedFromCli: boolean
-  config: Record<string, unknown>
-  projectRoot: string
-  browsers: Cypress.Browser[]
-  proxyUrl: string
-  userAgent: boolean
-  socketIoRoute: string
-  chromeWebSecurity: boolean
-  proxyServer?: string
-}
-
 // Partial because there are probably other options that are not included in this type.
-export const start = async (projectRoot: string, options: OpenConfig) => {
+export const start = async (projectRoot: string, options: unknown) => {
   const project = new Project(projectRoot)
 
   const { cfg } = await project.open(options)
 
-  options.browsers = cfg.browsers
-  options.proxyUrl = cfg.proxyUrl
-  options.userAgent = cfg.userAgent
-  options.proxyServer = null
-  options.socketIoRoute = cfg.socketIoRoute
-  options.chromeWebSecurity = cfg.chromeWebSecurity
-
-  // @ts-ignore
-  options.url = cfg.browserUrl
+  options.browsers = cfg.browsers // Cypress.Browser[]
+  options.proxyUrl = cfg.proxyUrl // string
+  options.userAgent = cfg.userAgent // string
+  options.proxyServer = null // null
+  options.socketIoRoute = cfg.socketIoRoute // string
+  options.chromeWebSecurity = cfg.chromeWebSecurity // boolean
+  options.url = cfg.browserUrl // string
 
   const automation = {
     use () {
