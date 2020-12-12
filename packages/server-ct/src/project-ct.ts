@@ -18,8 +18,7 @@ import cwd from '@packages/server/lib/cwd'
 import settings from '@packages/server/lib/util/settings'
 
 import { Server } from './server-ct'
-import Runnables from '@packages/reporter/src/runnables/runnables'
-import { Reporter } from '@packages/reporter'
+import { RunnablesStore, RootRunnable } from '@packages/reporter/src/runnables/runnables-store'
 
 const localCwd = cwd()
 
@@ -280,7 +279,7 @@ export default class Project {
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
-    let { reporter } = cfg as { reporter: Reporter }
+    let { reporter } = cfg as { reporter: RunnablesStore }
 
     // this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -304,7 +303,7 @@ export default class Project {
         this.emit('socket:connected', id)
       },
 
-      onSetRunnables (runnables: Runnables) {
+      onSetRunnables (runnables: RootRunnable) {
         debug('received runnables %o', runnables)
 
         if (reporter != null) {

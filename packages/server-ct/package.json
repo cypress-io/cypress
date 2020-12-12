@@ -2,7 +2,11 @@
   "name": "@packages/server-ct",
   "version": "0.0.0",
   "private": true,
-  "files": [
-    "src"
-  ]
+  "main": "index.js",
+  "scripts": {
+    "test-unit": "ts-mocha --config ./test/.mocharc.js"
+  },
+  "devDependencies": {
+    "ts-mocha": "8.0.0"
+  }
 }

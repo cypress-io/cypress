@@ -643,6 +643,20 @@ jobs:
           path: /tmp/cypress
       - store-npm-logs
 
+  server-ct-unit-tests:
+    <<: *defaults
+    parallelism: 1
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run: yarn test-unit --scope @packages/server-ct
+      - verify-mocha-results:
+          expectedResultCount: 1
+      - store_test_results:
+          path: /tmp/cypress
+      - store-npm-logs
+
   server-integration-tests:
     <<: *defaults
     parallelism: 1
