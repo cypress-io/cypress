@@ -192,7 +192,7 @@ class SpecsList extends Component {
 
     const { project } = this.props
 
-    specsStore.setSelectedSpec(spec)
+    specsStore.setSelectedSpecs([spec])
 
     if (spec.relative === '__all') {
       if (specsStore.filter) {
@@ -208,7 +208,7 @@ class SpecsList extends Component {
       this.runAllSavedLabel = 'Running 1 spec'
     }
 
-    return projectsApi.runSpec(project, spec, project.chosenBrowser, specsStore.filter)
+    return projectsApi.runSpecs(project, [spec], project.chosenBrowser, specsStore.filter)
   }
 
   _setExpandRootFolder (specFolderPath, isExpanded, e) {
@@ -225,6 +225,10 @@ class SpecsList extends Component {
     specsStore.toggleExpandSpecFolder(specFolderPath)
   }
 
+  get _selectedSpec () {
+    return specsStore.selectedSpecs[0]
+  }
+
   _folderContent (spec, nestingLevel) {
     const isExpanded = spec.isExpanded
     const specType = spec.specType || 'integration'
@@ -236,13 +240,13 @@ class SpecsList extends Component {
 
       if (this._areTestsRunning()) {
         // selected spec must be set
-        if (specsStore.selectedSpec) {
+        if (this._selectedSpec) {
           // only show the button matching current running spec type
-          if (spec.specType !== specsStore.selectedSpec.specType) {
-            return <></>
+          if (spec.specType !== specsStore.selectedSpecs.specType) {
+            return
           }
 
-          if (specsStore.selectedSpec.relative !== '__all') {
+          if (this._selectedSpec.relative !== '__all') {
             // we are only running 1 spec
             buttonText = `${word} 1 spec`
           }

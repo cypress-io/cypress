@@ -60,7 +60,7 @@ export class SpecsStore {
   @observable error
   @observable isLoading = false
   @observable filter
-  @observable selectedSpec
+  @observable selectedSpecs
 
   @computed get specs () {
     return this._tree(this._files)
@@ -80,7 +80,7 @@ export class SpecsStore {
     this.isLoading = false
   }
 
-  @action setChosenSpec (spec) {
+  @action setChosenSpecs (spec) {
     this.chosenSpecPath = spec ? formRelativePath(spec) : null
   }
 
@@ -136,8 +136,8 @@ export class SpecsStore {
     this.filter = null
   }
 
-  @action setSelectedSpec (spec) {
-    this.selectedSpec = spec
+  @action setSelectedSpecs (specs) {
+    this.selectedSpecs = specs
   }
 
   isChosen (spec) {

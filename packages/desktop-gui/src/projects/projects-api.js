@@ -64,8 +64,8 @@ const addProject = (path) => {
 }
 
 // TODO: refactor to take options object
-const runSpec = (project, spec, browser, specFilter) => {
-  specsStore.setChosenSpec(spec)
+const runSpecs = (project, specs, browser, specFilter) => {
+  specsStore.setChosenSpecs(specs)
   project.setChosenBrowser(browser)
 
   const launchBrowser = () => {
@@ -73,9 +73,9 @@ const runSpec = (project, spec, browser, specFilter) => {
 
     const launchOptions = {
       browser,
-      spec: spec.file,
-      specType: spec.specType,
-      relative: spec.relative,
+      specs: specs.map((spec) => spec.file),
+      specType: specs[0].specType,
+      relative: specs[0].relative,
       specFilter,
     }
 
@@ -91,20 +91,20 @@ const runSpec = (project, spec, browser, specFilter) => {
       if (data.browserClosed) {
         project.browserClosed()
 
-        specsStore.setChosenSpec(null)
+        specsStore.setChosenSpecs([])
 
         ipc.offLaunchBrowser()
       }
     })
   }
 
-  return closeBrowser(null, spec)
+  return closeBrowser(null, specs)
   .then(launchBrowser)
 }
 
-const closeBrowser = (project, spec) => {
-  if (!spec) {
-    specsStore.setChosenSpec(null)
+const closeBrowser = (project, specs) => {
+  if (!specs.length) {
+    specsStore.setChosenSpecs([])
   }
 
   if (project) {
@@ -244,7 +244,7 @@ export default {
   addProject,
   removeProject,
   updateProject,
-  runSpec,
+  runSpecs,
   closeBrowser,
   getRecordKeys,
   pingBaseUrl,
