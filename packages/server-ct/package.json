@@ -4,9 +4,19 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "prestart": "node scripts/checkExample.js",
+    "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/example",
+    "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/example",
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
+  },
+  "dependencies": {
+    "send": "^0.17.1"
   },
   "devDependencies": {
     "ts-mocha": "8.0.0"
-  }
+  },
+  "peerDependencies": {},
+  "files": [
+    "src"
+  ]
 }
