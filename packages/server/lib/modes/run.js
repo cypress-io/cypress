@@ -910,7 +910,8 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    console.log('launchBrowser', options.specs)
+    const { browser, specs, writeVideoFrame, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -952,7 +953,9 @@ module.exports = {
       return project.onWarning
     }
 
-    return openProject.launch(browser, spec, browserOpts)
+    console.log('openProject.launch')
+
+    return openProject.launch(browser, specs, browserOpts)
   },
 
   listenForProjectEnd (project, exit) {

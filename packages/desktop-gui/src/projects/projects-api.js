@@ -73,7 +73,7 @@ const runSpecs = (project, specs, browser, specFilter) => {
 
     const launchOptions = {
       browser,
-      specs: specs.map((spec) => spec.file),
+      specs,
       specType: specs[0].specType,
       relative: specs[0].relative,
       specFilter,

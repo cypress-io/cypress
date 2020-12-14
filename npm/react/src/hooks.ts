@@ -1,7 +1,7 @@
 // @ts-ignore
 const unfetch = require('unfetch/dist/unfetch.js')
 // @ts-ignore
-const isComponentSpec = () => Cypress.spec.specType === 'component'
+const isComponentSpec = () => Cypress.specs.every((spec) => spec.specType === 'component')
 
 // When running component specs, we cannot allow "cy.visit"
 // because it will wipe out our preparation work, and does not make much sense

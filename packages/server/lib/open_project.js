@@ -51,7 +51,9 @@ const moduleFactory = () => {
       return openProject
     },
 
-    launch (browser, spec, options = {}) {
+    launch (browser, specs, options = {}) {
+      const spec = specs[0]
+
       debug('resetting project state, preparing to launch browser %s for spec %o options %o',
         browser.name, spec, options)
 
@@ -90,7 +92,7 @@ const moduleFactory = () => {
           // so we can pass it down
           options.browser = browser
 
-          openProject.setCurrentSpecAndBrowser(spec, browser)
+          openProject.setCurrentSpecAndBrowser(specs, browser)
 
           const automation = openProject.getAutomation()
 

@@ -26,14 +26,14 @@ module.exports = {
 
     let { config, getRemoteState, project } = options
 
-    const { spec, browser } = project.getCurrentSpecAndBrowser()
+    const { specs, browser } = project.getCurrentSpecAndBrowser()
 
     config = _.clone(config)
     config.remote = getRemoteState()
     config.version = pkg.version
     config.platform = os.platform()
     config.arch = os.arch()
-    config.spec = spec
+    config.specs = specs
     config.browser = browser
 
     debug('serving runner index.html with config %o',

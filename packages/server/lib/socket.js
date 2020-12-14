@@ -70,7 +70,18 @@ class Socket {
     })
   }
 
-  watchTestFileByPath (config, specConfig, options) {
+  watchTestFileByPath (config, specsConfig, options) {
+    const specConfig = specsConfig[0]
+
+    /*
+    {
+  name: 'app_spec.js',
+  absolute: '/Users/lachlan/code/work/cypress/packages/desktop-gui/cypress/integration/app_spec.js',
+  relative: 'cypress/integration/app_spec.js',
+  specType: 'integration',
+  specFilter: null
+}
+*/
     debug('watching spec with config %o', specConfig)
 
     const cleanIntegrationPrefix = (s) => {

@@ -376,13 +376,13 @@ class Project extends EE {
     this.server.changeToUrl(url)
   }
 
-  setCurrentSpecAndBrowser (spec, browser) {
-    this.spec = spec
+  setCurrentSpecAndBrowser (specs, browser) {
+    this.specs = specs
     this.browser = browser
   }
 
   getCurrentSpecAndBrowser () {
-    return _.pick(this, 'spec', 'browser')
+    return _.pick(this, 'specs', 'browser')
   }
 
   setBrowsers (browsers = []) {

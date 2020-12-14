@@ -246,6 +246,13 @@ declare namespace Cypress {
     }
 
     /**
+     * Specs to be executed
+     * @example
+     *
+     */
+    specs: Cypress.Cypress['spec'][]
+
+    /**
      * Information about the browser currently running the tests
      */
     browser: Browser

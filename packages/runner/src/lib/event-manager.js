@@ -222,7 +222,7 @@ const eventManager = {
 
     this._addListeners()
 
-    ws.emit('watch:test:file', config.spec)
+    ws.emit('watch:test:file', config.specs)
   },
 
   isBrowser (browserName) {

@@ -7,7 +7,7 @@ import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
 
-import errorMessages from '../errors/error-messages'
+// import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
 import State from '../lib/state'
 
@@ -22,9 +22,9 @@ class App extends Component {
 
   render () {
     /**
-     * @type {Cypress.Cypress['spec']}
+     * @type {Cypress.Cypress['spec'][]}
      */
-    const spec = this.props.config.spec
+    const specs = this.props.config.specs
 
     const NO_COMMAND_LOG = this.props.config.env && this.props.config.env.NO_COMMAND_LOG
 
@@ -40,9 +40,9 @@ class App extends Component {
         >
           {Boolean(NO_COMMAND_LOG) || <Reporter
             runner={this.props.eventManager.reporterBus}
-            spec={spec}
+            specs={specs}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={errorMessages.reporterError(this.props.state.scriptError, spec.relative)}
+            error={null}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
           />}
         </div>

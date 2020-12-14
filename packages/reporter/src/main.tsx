@@ -27,30 +27,11 @@ export interface ReporterProps {
   statsStore: StatsStore
   events: Events
   error?: RunnablesErrorModel
-  spec: Cypress.Cypress['spec']
+  specs: Cypress.Cypress['spec'][]
 }
 
 @observer
 class Reporter extends Component<ReporterProps> {
-  static propTypes = {
-    autoScrollingEnabled: PropTypes.bool,
-    error: PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      link: PropTypes.string,
-      callout: PropTypes.string,
-      message: PropTypes.string.isRequired,
-    }),
-    runner: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-    spec: PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      relative: PropTypes.string.isRequired,
-      absolute: PropTypes.string.isRequired,
-    }),
-  }
-
   static defaultProps = {
     appState,
     events,
@@ -60,20 +41,18 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState } = this.props
-
     return (
       <div className='reporter'>
-        <Header appState={appState} statsStore={this.props.statsStore} />
+        <Header appState={this.props.appState} statsStore={this.props.statsStore} />
         <Runnables
-          appState={appState}
+          appState={this.props.appState}
           error={this.props.error}
           runnablesStore={this.props.runnablesStore}
           scroller={this.props.scroller}
-          spec={this.props.spec}
+          specs={this.props.specs}
         />
         <ForcedGcWarning
-          appState={appState}
+          appState={this.props.appState}
           events={this.props.events}/>
       </div>
     )
