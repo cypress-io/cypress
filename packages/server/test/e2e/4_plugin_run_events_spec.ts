@@ -9,6 +9,21 @@ describe('e2e plugin run events', () => {
     project: Fixtures.projectPath('plugin-run-events'),
     spec: '*',
     snapshot: true,
+    config: {
+      video: false,
+    },
+  })
+
+  e2e.it('fails if experimentalRunEvents is not enabled', {
+    browser: 'electron',
+    project: Fixtures.projectPath('plugin-run-events'),
+    spec: '*',
+    snapshot: true,
+    expectedExitCode: 1,
+    config: {
+      experimentalRunEvents: false,
+      video: false,
+    },
   })
 
   e2e.it('fails run if server event handler throws', {
@@ -17,5 +32,8 @@ describe('e2e plugin run events', () => {
     spec: '*',
     snapshot: true,
     expectedExitCode: 1,
+    config: {
+      video: false,
+    },
   })
 })

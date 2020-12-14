@@ -5,10 +5,11 @@ exports['e2e plugin run events / sends server events'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (run_events_spec_1.js, run_events_spec_2.js)                               │
-  │ Searched:   cypress/integration/*                                                              │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        2 found (run_events_spec_1.js, run_events_spec_2.js)                             │
+  │ Searched:     cypress/integration/*                                                            │
+  │ Experiments:  experimentalRunEvents=true                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -33,16 +34,10 @@ before:spec is awaited
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     run_events_spec_1.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/run_events_spec_1.js.mp4            (X second)
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -66,16 +61,10 @@ before:spec is awaited
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     run_events_spec_2.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/run_events_spec_2.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -101,10 +90,11 @@ exports['e2e plugin run events / fails run if server event handler throws'] = `
   (Run Starting)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (run_event_throws_spec.js)                                                 │
-  │ Searched:   cypress/integration/*                                                              │
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (run_event_throws_spec.js)                                               │
+  │ Searched:     cypress/integration/*                                                            │
+  │ Experiments:  experimentalRunEvents=true                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
@@ -119,4 +109,13 @@ Error: error thrown in before:spec
       [stack trace lines]
 
 
+`
+
+exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
+The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
+
+ Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
+
+To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
+      [stack trace lines]
 `

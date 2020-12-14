@@ -1236,7 +1236,7 @@ module.exports = {
         displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
-      return this.runSpec(spec, options, estimated)
+      return this.runSpec(config, spec, options, estimated)
       .get('results')
       .tap((results) => {
         return debug('spec results %o', results)
@@ -1304,7 +1304,7 @@ module.exports = {
     })
   },
 
-  runSpec (spec = {}, options = {}, estimated) {
+  runSpec (config, spec = {}, options = {}, estimated) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1322,7 +1322,7 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', spec)
+    return runEvents.execute('before:spec', config, spec)
     .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and

@@ -433,7 +433,6 @@ You passed: \`invalid:event\`
 The following are valid events:
 - after:screenshot
 - before:browser:launch
-- before:spec
 - file:preprocessor
 - task
 
