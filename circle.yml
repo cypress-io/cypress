@@ -896,13 +896,13 @@ jobs:
 
   npm-webpack-batteries-included-preprocessor:
     <<: *defaults
-      steps:
-        - attach_workspace:
-            at: ~/
-        - check-conditional-ci
-        - run:
-            name: Run tests
-            command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
 
   npm-vue:
     <<: *defaults
