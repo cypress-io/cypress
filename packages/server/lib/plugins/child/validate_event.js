@@ -34,8 +34,13 @@ const eventValidators = {
   '_get:task:body': isFunction,
 }
 
+const runEvents = {
+  'after:spec': true,
+  'before:spec': true,
+}
+
 const validateEvent = (event, handler, config) => {
-  if (event === 'before:spec') {
+  if (runEvents[event]) {
     return isValidRunEvent(event, handler, config)
   }
 
