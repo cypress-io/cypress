@@ -11,8 +11,8 @@ Thanks for taking the time to contribute! :smile:
 
 **Want to dive deeper into how Cypress works? There are several ways you can help with the development of Cypress:**
 
-- [Report bugs](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=&template=1-bug-report.md&title=) by opening an issue.
-- [Request features](https://github.com/cypress-io/cypress/issues/new?assignees=&labels=&template=3-feature.md&title=) by opening an issue.
+- [Report bugs](https://github.com/cypress-io/cypress/issues/new?template=1-bug-report.md) by opening an issue.
+- [Request features](https://github.com/cypress-io/cypress/issues/new?template=3-feature.md) by opening an issue.
 - [Help triage existing issue](#triaging-issues).
 - Write code to address an issue. We have some issues labeled as [`first-timers-only`](https://github.com/cypress-io/cypress/labels/first-timers-only) that are good place to start. [Please thoroughly read our writing code guide](#writing-code).
 
