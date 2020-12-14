@@ -188,7 +188,7 @@ describe('e2e plugins', function () {
   })
 
   describe('extra properties', function () {
-    it('passes isInteractive, projectRoot, and default configFile to plugins function', function () {
+    it('passes projectRoot and default configFile to plugins function', function () {
       return e2e.exec(this, {
         spec: 'plugins_config_extras_spec.js',
         config: {

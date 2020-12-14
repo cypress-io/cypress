@@ -9,7 +9,6 @@ const Project = require('./project')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
-const runEvents = require('./plugins/run_events')
 
 const moduleFactory = () => {
   let openProject = null
@@ -135,14 +134,7 @@ const moduleFactory = () => {
               spec.relative,
             )
 
-            return Promise.try(() => {
-              if (!cfg.isTextTerminal) {
-                return runEvents.execute('before:spec', spec)
-              }
-            })
-            .then(() => {
-              return browsers.open(browser, options, automation)
-            })
+            return browsers.open(browser, options, automation)
           }
 
           return relaunchBrowser()

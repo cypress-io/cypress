@@ -5,7 +5,6 @@ const browsers = require(`${root}lib/browsers`)
 const Project = require(`${root}lib/project`)
 const openProject = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
-const runEvents = require(`${root}lib/plugins/run_events`)
 
 describe('lib/open_project', () => {
   beforeEach(function () {
@@ -89,30 +88,6 @@ describe('lib/open_project', () => {
         expect(this.browser.isHeaded).to.be.true
 
         expect(this.browser.isHeadless).to.be.false
-      })
-    })
-
-    describe('before:spec event', function () {
-      beforeEach(function () {
-        this.setupAndLaunch = (config) => {
-          Project.prototype.getConfig.resolves(config)
-          openProject.getProject().options = {}
-          sinon.stub(runEvents, 'execute')
-
-          return openProject.launch(this.browser, this.spec)
-        }
-      })
-
-      it('executes "before:spec" event if in interactive mode', function () {
-        return this.setupAndLaunch({ isTextTerminal: false }).then(() => {
-          expect(runEvents.execute).to.be.calledWith('before:spec')
-        })
-      })
-
-      it('does not execute "before:spec" event if in run mode', function () {
-        return this.setupAndLaunch({ isTextTerminal: true }).then(() => {
-          expect(runEvents.execute).not.to.be.calledWith('before:spec')
-        })
       })
     })
   })

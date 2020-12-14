@@ -10,5 +10,3 @@ module.exports = (on) => {
     })
   })
 }
-
-// TODO: add tests for isInteractive

@@ -151,8 +151,6 @@ class Project extends EE {
   }
 
   _initPlugins (cfg, options) {
-    const isInteractive = !cfg.isTextTerminal
-
     // only init plugins with the
     // allowed config values to
     // prevent tampering with the
@@ -160,7 +158,6 @@ class Project extends EE {
     cfg = config.allowed(cfg)
 
     return plugins.init(cfg, {
-      isInteractive,
       projectRoot: this.projectRoot,
       configFile: settings.pathToConfigFile(this.projectRoot, options),
       onError (err) {
