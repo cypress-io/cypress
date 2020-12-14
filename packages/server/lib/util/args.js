@@ -259,7 +259,7 @@ module.exports = {
     }
 
     if (tag) {
-      options.tag = strToArray(tag)
+      options.tag = typeof tag === 'string' ? strToArray(tag) : tag
     }
 
     if (env) {
