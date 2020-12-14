@@ -2277,5 +2277,96 @@ describe('network stubbing', { retries: 2 }, function () {
         .then(testResponse('something different', done))
       })
     })
+
+    // @see https://github.com/cypress-io/cypress/issues/9580
+    context('overwrite cy.intercept', () => {
+      it('works with an alias by default', () => {
+        // sanity test before testing it with the cy.intercept overwrite
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with an alias and function', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', function (originalIntercept, ...args) {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with an alias and arrow function', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', (originalIntercept, ...args) => {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', 'my value').as('netAlias')
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+
+      it('works with dynamic alias', () => {
+        let myInterceptCalled
+
+        cy.spy(cy, 'log')
+
+        Cypress.Commands.overwrite('intercept', (originalIntercept, ...args) => {
+          return cy.log('intercept!').then(() => {
+            myInterceptCalled = true
+
+            return originalIntercept(...args)
+          })
+        })
+
+        cy.intercept('/foo', (req) => {
+          req.alias = 'netAlias'
+          req.reply('my value')
+        })
+        .then(() => {
+          return $.get('/foo')
+        })
+        .then(() => {
+          expect(myInterceptCalled, 'my intercept was called').to.be.true
+          expect(cy.log).to.have.been.calledWith('intercept!')
+        })
+
+        cy.wait('@netAlias').its('response.body').should('equal', 'my value')
+      })
+    })
   })
 })
