@@ -82,7 +82,11 @@ module.exports = {
 
         // just run the gui code directly here
         // and pass our options directly to main
-        debug('running Electron currently')
+        if (options.componentTesting) {
+          debug('skipping running Electron when in componentTesting mode')
+        } else {
+          debug('running Electron currently')
+        }
 
         return require('./modes')(mode, options)
       }
