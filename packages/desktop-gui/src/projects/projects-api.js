@@ -74,8 +74,6 @@ const runSpecs = (project, specs, browser, specFilter) => {
     const launchOptions = {
       browser,
       specs,
-      specType: specs[0].specType,
-      relative: specs[0].relative,
       specFilter,
     }
 
