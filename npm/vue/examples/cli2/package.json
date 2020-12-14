@@ -1,19 +1,12 @@
 {
   "name": "example",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "build": "vue-cli-service build",
-    "serve": "vue-cli-service serve"
-  },
-  "dependencies": {
-    "core-js": "^3.6.5",
-    "vue": "^2.6.11"
-  },
+  "scripts": {},
   "devDependencies": {
-    "@vue/cli-plugin-babel": "~4.5.0",
-    "@vue/cli-service": "~4.5.0",
-    "vue-template-compiler": "^2.6.11"
+    "@cypress/webpack-dev-server": "file:../../../npm/webpack-dev-server",
+    "html-webpack-plugin": "3.2.0",
+    "webpack": "4.44.2"
   },
   "browserslist": [
     "> 1%",
