@@ -7,13 +7,12 @@ const eventTypes = [
   'click',
   'dblclick',
   'change',
-  'keyup',
-  // 'submit',
+  'keydown',
 ]
 
 const eventsWithValue = [
   'change',
-  'keyup',
+  'keydown',
   'select',
 ]
 
@@ -51,11 +50,7 @@ class StudioRecorder {
   }
 
   @action stop = () => {
-    eventTypes.forEach((event) => {
-      this._body.removeEventListener(event, this._recordEvent, {
-        capture: true,
-      })
-    })
+    this.removeListeners()
 
     this.isActive = false
   }
@@ -93,6 +88,14 @@ class StudioRecorder {
     })
   }
 
+  removeListeners = () => {
+    eventTypes.forEach((event) => {
+      this._body.removeEventListener(event, this._recordEvent, {
+        capture: true,
+      })
+    })
+  }
+
   removeCommand = (index) => {
     this.log.splice(index, 1)
     this._emitUpdatedLog()
@@ -106,20 +109,96 @@ class StudioRecorder {
     const tagName = $el.prop('tagName')
     const { type } = event
 
-    if (tagName === 'SELECT' && event.type === 'change') {
+    if (tagName === 'SELECT' && type === 'change') {
       return 'select'
     }
 
-    if (event.type === 'keyup') {
+    if (type === 'keydown') {
       return 'type'
+    }
+
+    if (type === 'click' && tagName === 'INPUT') {
+      const inputType = $el.prop('type')
+      const checked = $el.prop('checked')
+
+      if (inputType === 'radio' || (inputType === 'checkbox' && checked)) {
+        return 'check'
+      }
+
+      if (inputType === 'checkbox') {
+        return 'uncheck'
+      }
     }
 
     return type
   }
 
+  _addModifierKeys = (key, event) => {
+    const { altKey, ctrlKey, metaKey, shiftKey } = event
+
+    return `{${altKey ? 'alt+' : ''}${ctrlKey ? 'ctrl+' : ''}${metaKey ? 'meta+' : ''}${shiftKey ? 'shift+' : ''}${key}}`
+  }
+
+  _getSpecialKey = (key) => {
+    switch (key) {
+      case '{':
+        return '{'
+      case 'ArrowDown':
+        return 'downarrow'
+      case 'ArrowLeft':
+        return 'leftarrow'
+      case 'ArrowRight':
+        return 'rightarrow'
+      case 'ArrowUp':
+        return 'uparrow'
+      case 'Backspace':
+        return 'backspace'
+      case 'Delete':
+        return 'del'
+      case 'Enter':
+        return 'enter'
+      case 'Escape':
+        return 'esc'
+      case 'Insert':
+        return 'insert'
+      case 'PageDown':
+        return 'pagedown'
+      case 'PageUp':
+        return 'pageup'
+      default:
+        return null
+    }
+  }
+
+  _getKeyValue = (event) => {
+    const { key, altKey, ctrlKey, metaKey } = event
+
+    if (key.length === 1 && key !== '{') {
+      // we explicitly check here so we don't accidentally add shift
+      // as a modifier key if its not needed
+      if (!altKey && !ctrlKey && !metaKey) {
+        return key
+      }
+
+      return this._addModifierKeys(key.toLowerCase(), event)
+    }
+
+    const specialKey = this._getSpecialKey(key)
+
+    if (specialKey) {
+      return this._addModifierKeys(specialKey, event)
+    }
+
+    return ''
+  }
+
   _getValue = (event, $el) => {
     if (!eventsWithValue.includes(event.type)) {
       return null
+    }
+
+    if (event.type === 'keydown') {
+      return this._getKeyValue(event)
     }
 
     return $el.val()
@@ -128,7 +207,7 @@ class StudioRecorder {
   _shouldRecordEvent = (event, $el) => {
     const tagName = $el.prop('tagName')
 
-    return !(tagName !== 'INPUT' && event.type === 'keyup')
+    return !(tagName !== 'INPUT' && event.type === 'keydown')
   }
 
   _recordEvent = (event) => {
@@ -177,6 +256,13 @@ class StudioRecorder {
 
       if (lastAction.selector === secondLast.selector) {
         if (lastAction.command === 'type' && secondLast.command === 'type') {
+          secondLast.value += lastAction.value
+          this.log.splice(length - 1)
+
+          return
+        }
+
+        if (lastAction.command === 'select' && secondLast.command === 'click') {
           this.log.splice(length - 2, 1)
 
           return
