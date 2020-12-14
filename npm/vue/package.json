@@ -8,9 +8,7 @@
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/cypress open --component-testing",
     "cy:run": "node ../../scripts/cypress run --component-testing",
-    "pretest": "yarn build",
-    "test": "echo \"no tests setup\"",
-    "watch": "tsc --watch"
+    "test": "echo \"no tests setup\""
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
