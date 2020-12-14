@@ -7,7 +7,7 @@ import { findDOMNode } from 'react-dom'
 import { Reporter } from '@packages/reporter'
 import { $ } from '@packages/driver'
 
-// import errorMessages from '../errors/error-messages'
+import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
 import State from '../lib/state'
 
@@ -42,7 +42,7 @@ class App extends Component {
             runner={this.props.eventManager.reporterBus}
             specs={specs}
             autoScrollingEnabled={this.props.config.state.autoScrollingEnabled}
-            error={null}
+            error={errorMessages.reporterError(this.props.state.scriptError, specs[0].relative)}
             firefoxGcInterval={this.props.config.firefoxGcInterval}
           />}
         </div>
