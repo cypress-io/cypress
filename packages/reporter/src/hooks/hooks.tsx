@@ -4,7 +4,6 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import { FileDetails } from '@packages/ui-components'
 
-import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
@@ -13,20 +12,13 @@ import FileOpener from '../lib/file-opener'
 export interface HookHeaderProps {
   model: HookModel
   number?: number
-  isStudio: boolean
-  isActive: boolean
 }
 
-const HookHeader = ({ model, number, isStudio, isActive }: HookHeaderProps) => (
+const HookHeader = ({ model, number }: HookHeaderProps) => (
   <span>
     <span className='hook-name'>
       {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
     </span>
-    { isStudio && (
-      <span className='runnable-controls hook-status'>
-        {isActive ? <i className='fas fa-spinner fa-spin' /> : model.commands.length}
-      </span>
-    )}
   </span>
 )
 
@@ -35,25 +27,23 @@ export interface HookOpenInIDEProps {
 }
 
 const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
-  <FileOpener fileDetails={invocationDetails} className='collapsible-header-extras-button'>
+  <FileOpener fileDetails={invocationDetails} className='hook-open-in-ide'>
     <i className='fas fa-external-link-alt fa-sm' /> <span>Open in IDE</span>
   </FileOpener>
 )
 
 export interface HookProps {
-  state?: AppState
   model: HookModel
   showNumber: boolean
-  isActive: boolean
 }
 
-const Hook = observer(({ state = appState, model, showNumber, isActive }: HookProps) => (
+const Hook = observer(({ model, showNumber }: HookProps) => (
   <li className={cs('hook-item', { 'hook-failed': model.failed })}>
     <Collapsible
-      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} isStudio={!!state.extendingTest} isActive={isActive} />}
+      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
       headerClass='hook-header'
-      headerExtras={!state.extendingTest && model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-      isOpen={!state.extendingTest}
+      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      isOpen={true}
     >
       <ul className='commands-container'>
         {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
@@ -74,14 +64,7 @@ export interface HooksProps {
 
 const Hooks = observer(({ model }: HooksProps) => (
   <ul className='hooks-container'>
-    {_.map(_.filter(model.hooks, (h) => !!h.commands.length), (hook, index, arr) => (
-      <Hook
-        key={hook.hookId}
-        model={hook}
-        showNumber={model.hookCount[hook.hookName] > 1}
-        isActive={model.state === 'active' && index === arr.length - 1}
-      />
-    ))}
+    {_.map(model.hooks, (hook) => hook.commands.length ? <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} /> : undefined)}
   </ul>
 ))
 

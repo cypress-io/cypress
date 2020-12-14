@@ -12,6 +12,10 @@
       }
     }
 
+    i {
+      margin-right: 3px;
+    }
+
     .hook-header {
       display: flex;
       width: 100%;
@@ -21,7 +25,7 @@
           color: #6a6b6c;
         }
 
-        .collapsible-header-extras-button {
+        .hook-open-in-ide {
           display: block;
         }
       }
@@ -42,35 +46,29 @@
         > .collapsible-header-inner:focus {
           outline: 0;
         }
-
-        .hook-failed-message {
-          color: #E94F5F;
-          display: none;
-        }
       }
 
-      .collapsible-header-extras-button {
+      .hook-failed-message {
+        color: #E94F5F;
+        display: none;
+      }
+
+      .hook-open-in-ide {
+        align-items: center;
+        color: #6a6b6c;
+        display: none;
         padding: 4px 10px;
 
-        i {
-          margin-right: 3px;
+        &:hover, &:focus {
+          background-color: rgba(186, 186, 186, 0.2);
+          outline: none;
+          text-decoration: none;
         }
       }
     }
 
     .hook-failed .hook-failed-message {
       display: inline;
-    }
-
-    .hook-status {
-      background-color: #e8e8ec;
-      border-radius: 5px;
-      min-width: 26px;
-      text-align: center;
-
-      i {
-        color: #b4b5bc;
-      }
     }
   }
 }

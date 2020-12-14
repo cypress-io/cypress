@@ -83,7 +83,6 @@ class Test extends Component<Props, State> {
         containerRef={this.containerRef}
         header={this._header()}
         headerClass='runnable-wrapper'
-        headerExtras={this._addToTest()}
         headerStyle={{ paddingLeft: indent(model.level) }}
         contentClass='runnable-instruments'
         isOpen={model.isOpen}
@@ -107,16 +106,13 @@ class Test extends Component<Props, State> {
         <Tooltip placement='top' title='One or more commands failed' className='cy-tooltip'>
           <i className='fas fa-exclamation-triangle runnable-controls-status' />
         </Tooltip>
+        <Tooltip placement='top' title='Add Commands to Test' className='cy-tooltip'>
+          <a onClick={this._openExtendingModal}>
+            <i className='fas fa-magic runnable-controls-studio' />
+          </a>
+        </Tooltip>
       </span>
     </>)
-  }
-
-  _addToTest () {
-    return (
-      <a onClick={this._openExtendingModal} className='collapsible-header-extras-button'>
-        <i className='fas fa-plus' /> <span>Extend Test</span>
-      </a>
-    )
   }
 
   _openExtendingModal = (e: MouseEvent) => {
@@ -141,14 +137,14 @@ class Test extends Component<Props, State> {
 
     return (
       <Dialog
-        className='extending-test-modal'
-        aria-label='Start extending a test'
+        className='studio-modal'
+        aria-label='Start Studio'
         isOpen={extendingModalOpen}
         onDismiss={this._closeExtendingModal}
       >
         <div className='body'>
           <h1 className='title'>
-            <i className='fas fa-magic icon' /> Cypress Studio <span className='beta'>BETA</span>
+            <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
           </h1>
           <div className='diagram'>
             <EllipsesIcon />

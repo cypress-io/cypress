@@ -219,6 +219,11 @@
       visibility: hidden;
       font-size: 15px;
     }
+
+    .runnable-controls-studio {
+      color: #3386d4;
+      opacity: 0;
+    }
   }
 
   .test.runnable-failed .runnable-controls .runnable-controls-status {
@@ -229,37 +234,29 @@
     display: flex;
     flex-direction: column;
 
-    .runnable-wrapper {
-      display: flex;
+    .runnable-wrapper .collapsible-header-inner {
+      width: 100%;
 
-      .collapsible-header-extras-button {
-        padding: 5px 10px;
-      }
+      .collapsible-header-text {
+        display: flex;
 
-      &:hover {
-        .collapsible-header-extras-button {
-          display: block;
+        .runnable-title {
+          flex-grow: 1;
+          padding-right: 10px;
+        }
+
+        .runnable-controls {
+          justify-self: flex-end;
+          min-width: 20px;
         }
       }
 
-      .collapsible-header {
-        flex-grow: 1;
+      &:hover {
+        .runnable-controls-studio {
+          opacity: 0.5;
 
-        .collapsible-header-inner {
-          width: 100%;
-
-          .collapsible-header-text {
-            display: flex;
-
-            .runnable-title {
-              flex-grow: 1;
-              padding-right: 10px;
-            }
-
-            .runnable-controls {
-              justify-self: flex-end;
-              min-width: 20px;
-            }
+          &:hover {
+            opacity: 1;
           }
         }
       }
@@ -356,20 +353,6 @@
       font-family: $muli;
       font-size: 20px;
       text-align: center;
-    }
-  }
-
-  .collapsible-header-extras-button {
-    align-items: center;
-    color: #6a6b6c;
-    cursor: pointer;
-    display: none;
-
-    &:hover, &:focus {
-      background-color: #f7f8f9;
-      color: #6a6b6c;
-      outline: none;
-      text-decoration: none;
     }
   }
 }

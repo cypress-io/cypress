@@ -11,6 +11,8 @@
 
       .runnable-state {
         @include suite-state-passed;
+
+        color: #3386d4;
       }
     }
 
@@ -76,12 +78,6 @@
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-
-          //&:hover {
-          //  white-space: normal;
-          //  overflow: visible;
-          //  text-overflow: clip;
-          //}
         }
 
         .studio-command-delete a {
