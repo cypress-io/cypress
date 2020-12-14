@@ -12,12 +12,10 @@ import { indent } from '../lib/util'
 import runnablesStore, { RunnablesStore } from '../runnables/runnables-store'
 import TestModel from './test-model'
 
-import { ReactComponent as EllipsesIcon } from '../../static/icons/ellipses.svg'
-import { ReactComponent as KeyboardIcon } from '../../static/icons/keyboard.svg'
-import { ReactComponent as PointerIcon } from '../../static/icons/pointer.svg'
-
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
+
+import studioGif from '../../static/studio.gif'
 
 interface Props {
   events: Events
@@ -146,14 +144,8 @@ class Test extends Component<Props, State> {
           <h1 className='title'>
             <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
           </h1>
-          <div className='diagram'>
-            <EllipsesIcon />
-            <PointerIcon />
-            <EllipsesIcon />
-            <KeyboardIcon />
-            <EllipsesIcon />
-            <PointerIcon />
-            <EllipsesIcon />
+          <div className='gif'>
+            <img src={studioGif} alt='Studio' />
           </div>
           <div className='center'>
             <div className='text'>

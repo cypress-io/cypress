@@ -1,5 +1,5 @@
 .studio-modal {
-  max-width: 25em;
+  max-width: 35em;
 
   .body {
     font-family: $muli;
@@ -22,12 +22,13 @@
       }
     }
 
-    .diagram {
-      background: #17202c;
-      display: flex;
-      justify-content: space-between;
-      margin: 1.2em 0 1em;
-      padding: 1.5em 2em;
+    .gif {
+      margin: 15px 0;
+      width: 100%;
+
+      img {
+        width: 100%;
+      }
     }
 
     .center {
