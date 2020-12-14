@@ -28,7 +28,7 @@
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
     "@cypress/webpack-batteries-included-preprocessor": "2.1.3",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@ffmpeg-installer/ffmpeg": "1.0.20",
     "ansi_up": "4.0.4",
     "black-hole-stream": "0.0.1",

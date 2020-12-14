@@ -18,7 +18,7 @@
     "@cypress/icons": "0.7.0",
     "@cypress/json-schemas": "5.35.1",
     "@cypress/react-tooltip": "0.5.3",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fortawesome/fontawesome-free": "5.11.2",
     "@packages/web-config": "*",
     "bluebird": "3.5.3",
