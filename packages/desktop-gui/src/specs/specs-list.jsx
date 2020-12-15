@@ -227,7 +227,7 @@ class SpecsList extends Component {
   }
 
   get _selectedSpec () {
-    return specsStore.selectedSpecs[0]
+    return specsStore.selectedSpecs.length && specsStore.selectedSpecs[0]
   }
 
   _folderContent (spec, nestingLevel) {

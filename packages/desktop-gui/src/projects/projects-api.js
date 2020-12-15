@@ -100,10 +100,8 @@ const runSpecs = (project, specs, browser, specFilter) => {
   .then(launchBrowser)
 }
 
-const closeBrowser = (project, specs) => {
-  if (!specs.length) {
-    specsStore.setChosenSpecs([])
-  }
+const closeBrowser = (project, specs = []) => {
+  specsStore.setChosenSpecs(specs)
 
   if (project) {
     project.browserClosed()

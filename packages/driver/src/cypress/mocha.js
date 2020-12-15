@@ -503,7 +503,7 @@ const create = (specWindow, Cypress, config) => {
 
   const _runner = getRunner(_mocha)
 
-  _mocha.suite.file = Cypress.specs[0].relative
+  _mocha.suite.file = Cypress.specs.length && Cypress.specs[0].relative
 
   return {
     _mocha,
