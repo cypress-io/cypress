@@ -1,6 +1,6 @@
 {
   "name": "@packages/driver",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "scripts": {
     "clean-deps": "rm -rf node_modules",
@@ -17,10 +17,10 @@
     "@cypress/unique-selector": "0.4.2",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
-    "@packages/network": "*",
-    "@packages/runner": "*",
-    "@packages/server": "*",
-    "@packages/ts": "*",
+    "@packages/network": "0.0.0-development",
+    "@packages/runner": "0.0.0-development",
+    "@packages/server": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
     "@types/chalk": "^2.2.0",
     "@types/common-tags": "^1.8.0",
     "@types/lodash": "^4.14.123",
