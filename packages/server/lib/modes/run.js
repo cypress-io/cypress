@@ -910,8 +910,7 @@ module.exports = {
   },
 
   launchBrowser (options = {}) {
-    console.log('launchBrowser', options.specs)
-    const { browser, specs, writeVideoFrame, project, screenshots, projectRoot, onError } = options
+    const { browser, spec, writeVideoFrame, project, screenshots, projectRoot, onError } = options
 
     const browserOpts = getDefaultBrowserOptsByFamily(browser, project, writeVideoFrame, onError)
 
@@ -953,9 +952,7 @@ module.exports = {
       return project.onWarning
     }
 
-    console.log('openProject.launch')
-
-    return openProject.launch(browser, specs, browserOpts)
+    return openProject.launch(browser, [spec], browserOpts)
   },
 
   listenForProjectEnd (project, exit) {
@@ -1329,7 +1326,6 @@ module.exports = {
     // finishes running all of the tests.
     // we're using an event emitter interface
     // to gracefully handle this in promise land
-
     return this.maybeStartVideoRecording({
       spec,
       browser,
