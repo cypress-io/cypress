@@ -28,11 +28,13 @@ describe('test errors', () => {
 
       win.render({
         runner,
-        spec: {
-          name: 'foo.js',
-          relative: 'relative/path/to/foo.js',
-          absolute: '/absolute/path/to/foo.js',
-        },
+        specs: [
+          {
+            name: 'foo.js',
+            relative: 'relative/path/to/foo.js',
+            absolute: '/absolute/path/to/foo.js',
+          },
+        ],
       })
     })
   })

@@ -17,11 +17,13 @@ describe('header', () => {
     cy.visit('/').then((win) => {
       win.render({
         runner,
-        spec: {
-          name: 'foo',
-          absolute: '/foo/bar',
-          relative: 'foo/bar',
-        },
+        specs: [
+          {
+            name: 'foo',
+            absolute: '/foo/bar',
+            relative: 'foo/bar',
+          },
+        ],
       })
     })
 

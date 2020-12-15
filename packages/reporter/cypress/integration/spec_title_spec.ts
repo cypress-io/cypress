@@ -10,7 +10,7 @@ describe('spec title', () => {
 
     start = (spec: Cypress.Cypress['spec']) => {
       cy.visit('/').then((win) => {
-        win.render({ runner, spec })
+        win.render({ runner, specs: [spec] })
       })
 
       cy.get('.reporter').then(() => {
