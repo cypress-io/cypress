@@ -4,15 +4,13 @@
 const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 
-const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
 const resolve = require('../../util/resolve')
+const browserLaunch = require('./browser_launch')
 const task = require('./task')
 const util = require('../util')
 const validateEvent = require('./validate_event')
 const { registerTsNode } = require('../../util/ts-node')
-
-const ARRAY_METHODS = ['concat', 'push', 'unshift', 'slice', 'pop', 'shift', 'slice', 'splice', 'filter', 'map', 'forEach', 'reduce', 'reverse', 'splice', 'includes']
 
 let registeredEventsById = {}
 let registeredEventsByName = {}
@@ -47,7 +45,7 @@ const load = (ipc, config, pluginsFile) => {
   // we track the register calls and then send them all at once
   // to the parent process
   const register = (event, handler) => {
-    const { isValid, error } = validateEvent(event, handler)
+    const { isValid, error } = validateEvent(event, handler, config)
 
     if (!isValid) {
       ipc.send('load:error', 'PLUGINS_VALIDATION_ERROR', pluginsFile, error.stack)
@@ -109,71 +107,37 @@ const load = (ipc, config, pluginsFile) => {
 const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
-  switch (event) {
-    case 'after:screenshot':
+  const handlers = {
+    'after:screenshot' () {
       util.wrapChildPromise(ipc, invoke, ids, args)
-
-      return
-    case 'file:preprocessor':
+    },
+    'after:spec' () {
+      util.wrapChildPromise(ipc, invoke, ids, args)
+    },
+    'before:browser:launch' () {
+      browserLaunch.wrap(ipc, invoke, ids, args)
+    },
+    'before:spec' () {
+      util.wrapChildPromise(ipc, invoke, ids, args)
+    },
+    'file:preprocessor' () {
       preprocessor.wrap(ipc, invoke, ids, args)
-
-      return
-    case 'before:browser:launch': {
-      // TODO: remove in next breaking release
-      // This will send a warning message when a deprecated API is used
-      // define array-like functions on this object so we can warn about using deprecated array API
-      // while still fufiling desired behavior
-      const [, launchOptions] = args
-
-      let hasEmittedWarning = false
-
-      ARRAY_METHODS.forEach((name) => {
-        const boundFn = launchOptions.args[name].bind(launchOptions.args)
-
-        launchOptions[name] = function () {
-          if (hasEmittedWarning) return
-
-          hasEmittedWarning = true
-
-          const warning = errors.get('DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS')
-
-          ipc.send('warning', util.serializeError(warning))
-
-          // eslint-disable-next-line prefer-rest-params
-          return boundFn.apply(this, arguments)
-        }
-      })
-
-      Object.defineProperty(launchOptions, 'length', {
-        get () {
-          return this.args.length
-        },
-      })
-
-      launchOptions[Symbol.iterator] = launchOptions.args[Symbol.iterator].bind(launchOptions.args)
-
-      util.wrapChildPromise(ipc, invoke, ids, args)
-
-      return
-    }
-
-    case 'task':
+    },
+    'task' () {
       task.wrap(ipc, registeredEventsById, ids, args)
-
-      return
-    case '_get:task:keys':
+    },
+    '_get:task:keys' () {
       task.getKeys(ipc, registeredEventsById, ids)
-
-      return
-    case '_get:task:body':
+    },
+    '_get:task:body' () {
       task.getBody(ipc, registeredEventsById, ids, args)
-
-      return
-    default:
+    },
+    'default' () {
       debug('unexpected execute message:', event, args)
-
-      return
+    },
   }
+
+  ;(handlers[event] || handlers['default'])()
 }
 
 let tsRegistered = false

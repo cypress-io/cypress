@@ -180,6 +180,7 @@ export type NumberMatcher = number | number[]
  */
 export interface Interception {
   id: string
+  routeHandlerId: string
   /* @internal */
   log: any
   request: CyHttpMessages.IncomingRequest
@@ -191,6 +192,10 @@ export interface Interception {
   response?: CyHttpMessages.IncomingResponse
   /* @internal */
   responseHandler?: HttpResponseInterceptor
+  /**
+   * The error that occurred during this request.
+   */
+  error?: Error
   /**
    * Was `cy.wait()` used to wait on the response to this request?
    * @internal
@@ -215,6 +220,7 @@ export interface Route {
   handler: RouteHandler
   hitCount: number
   requests: { [key: string]: Interception }
+  command: any
 }
 
 export interface RouteMap { [key: string]: Route }

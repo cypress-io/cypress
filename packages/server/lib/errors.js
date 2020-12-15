@@ -930,6 +930,14 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
 
         https://on.cypress.io/configuration
         `
+    case 'PLUGINS_RUN_EVENT_ERROR':
+      return stripIndent`\
+        An error was thrown in your plugins file while executing the handler for the '${chalk.blue(arg1)}' event.
+
+        The error we received was:
+
+        ${chalk.yellow(arg2)}
+      `
     default:
   }
 }
