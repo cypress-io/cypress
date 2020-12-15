@@ -490,7 +490,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when eventually times out', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('Timed out retrying after 50ms. expected \'<button>\' to have class \'does-not-have-class\'')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'<button>\' to have class \'does-not-have-class\'')
 
           done()
         })

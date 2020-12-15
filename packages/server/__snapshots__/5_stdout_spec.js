@@ -458,7 +458,7 @@ exports['e2e stdout / displays assertion errors'] = `
   2) assertion errors
        fails with assertion diff, with retries:
 
-      AssertionError: Timed out retrying after  XX:XX. expected [] to deeply equal [ 1, 2, 3 ]
+      AssertionError: Timed out retrying after  XX:XX: expected [] to deeply equal [ 1, 2, 3 ]
       + expected - actual
 
       -[]
@@ -473,7 +473,7 @@ exports['e2e stdout / displays assertion errors'] = `
 
   4) assertion errors
        fails with dom assertion without diff, with retries:
-     AssertionError: Timed out retrying after  XX:XX. expected '<body>' to have class 'foo'
+     AssertionError: Timed out retrying after  XX:XX: expected '<body>' to have class 'foo'
       [stack trace lines]
 
 

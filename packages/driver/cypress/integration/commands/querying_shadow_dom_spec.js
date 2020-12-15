@@ -191,7 +191,7 @@ describe('src/cy/commands/querying - shadow dom', () => {
 
     it('has a custom error message if it cannot find a root', (done) => {
       cy.on('fail', (err) => {
-        expect(err.message).to.equal(`Timed out retrying after 0ms. Expected the subject to host a shadow root, but never found it.`)
+        expect(err.message).to.equal(`Timed out retrying after 0ms: Expected the subject to host a shadow root, but never found it.`)
         expect(err.docsUrl).to.equal('https://on.cypress.io/shadow')
 
         done()

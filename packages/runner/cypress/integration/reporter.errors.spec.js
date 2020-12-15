@@ -67,13 +67,13 @@ describe('errors ui', () => {
     verify.it('failure', {
       file,
       column: 8,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
 
     verify.it('chained failure', {
       file,
       column: 20,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
@@ -95,7 +95,7 @@ describe('errors ui', () => {
     verify.it('command failure', {
       file,
       column: 10,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
@@ -117,13 +117,13 @@ describe('errors ui', () => {
     verify.it('standard assertion failure', {
       file,
       column: 6,
-      message: 'Timed out retrying after 0ms. expected {} to have property \'foo\'',
+      message: 'Timed out retrying after 0ms: expected {} to have property \'foo\'',
     })
 
     verify.it('after multiple', {
       file,
       column: 6,
-      message: 'Timed out retrying after 0ms. expected \'foo\' to equal \'bar\'',
+      message: 'Timed out retrying after 0ms: expected \'foo\' to equal \'bar\'',
     })
 
     verify.it('after multiple callbacks exception', {
@@ -150,7 +150,7 @@ describe('errors ui', () => {
     verify.it('command failure after success', {
       file,
       column: 8,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
@@ -523,7 +523,7 @@ describe('errors ui', () => {
     verify.it('command failure', {
       file,
       column: 6,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
       codeFrameText: `add('failCommand'`,
     })
   })
@@ -546,7 +546,7 @@ describe('errors ui', () => {
     verify.it('command failure', {
       file,
       column: 8,
-      message: 'Timed out retrying after 0ms. Expected to find element: #does-not-exist, but never found it',
+      message: 'Timed out retrying after 0ms: Expected to find element: #does-not-exist, but never found it',
     })
   })
 
