@@ -458,7 +458,7 @@ exports['e2e stdout / displays assertion errors'] = `
   2) assertion errors
        fails with assertion diff, with retries:
 
-      AssertionError: Timed out retrying after  XX:XX: expected [] to deeply equal [ 1, 2, 3 ]
+      Timed out retrying after  XX:XX
       + expected - actual
 
       -[]
