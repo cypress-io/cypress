@@ -250,7 +250,7 @@ declare namespace Cypress {
      * @example
      *
      */
-    specs: Cypress.Cypress['spec'][]
+    specs: Array<Cypress.Cypress['spec']>
 
     /**
      * Information about the browser currently running the tests
