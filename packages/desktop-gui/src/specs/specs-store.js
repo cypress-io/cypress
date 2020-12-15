@@ -80,7 +80,7 @@ export class SpecsStore {
     this.isLoading = false
   }
 
-  @action setChosenSpecs (spec) {
+  @action setChosenSpec (spec) {
     this.chosenSpecPath = spec ? formRelativePath(spec) : null
   }
 

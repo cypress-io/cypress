@@ -65,7 +65,7 @@ const addProject = (path) => {
 
 // TODO: refactor to take options object
 const runSpecs = (project, specs, browser, specFilter) => {
-  specsStore.setChosenSpecs(specs)
+  specsStore.setChosenSpec(specs[0])
   project.setChosenBrowser(browser)
 
   const launchBrowser = () => {
@@ -89,7 +89,7 @@ const runSpecs = (project, specs, browser, specFilter) => {
       if (data.browserClosed) {
         project.browserClosed()
 
-        specsStore.setChosenSpecs([])
+        specsStore.setChosenSpec(null)
 
         ipc.offLaunchBrowser()
       }
@@ -101,7 +101,7 @@ const runSpecs = (project, specs, browser, specFilter) => {
 }
 
 const closeBrowser = (project, specs = []) => {
-  specsStore.setChosenSpecs(specs)
+  specsStore.setChosenSpec(specs.length ? specs[0] : null)
 
   if (project) {
     project.browserClosed()
