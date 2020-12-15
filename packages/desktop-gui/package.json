@@ -1,6 +1,6 @@
 {
   "name": "@packages/desktop-gui",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "lib/gui.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "@cypress/react-tooltip": "0.5.3",
     "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fortawesome/fontawesome-free": "5.11.2",
-    "@packages/web-config": "*",
+    "@packages/web-config": "0.0.0-development",
     "bluebird": "3.5.3",
     "bootstrap-sass": "3.4.1",
     "classnames": "2.2.6",
