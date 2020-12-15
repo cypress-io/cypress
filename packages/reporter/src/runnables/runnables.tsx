@@ -67,7 +67,7 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
 interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
-  specs: Cypress.Cypress['spec'][]
+  spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState
 }
@@ -75,14 +75,14 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { error, runnablesStore, specs } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
-        <RunnableHeader spec={specs[0]} />
+        <RunnableHeader spec={spec} />
         <RunnablesContent
           runnablesStore={runnablesStore}
-          specPath={specs[0].relative}
+          specPath={spec.relative}
           error={error}
         />
       </div>

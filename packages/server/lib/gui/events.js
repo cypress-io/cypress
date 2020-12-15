@@ -134,7 +134,6 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       // is there a way to lint the arguments received?
       debug('launching browser for \'%s\' spec: %o', arg.specType, arg.spec)
       debug('full list of options %o', arg)
-      const spec = arg.specs[0]
 
       // the "arg" should have objects for
       //   - browser
@@ -142,12 +141,14 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       //       name, absolute, relative
       //   - specType: "integration" | "component"
       //   - specFilter (optional): the string user searched for
-      const fullSpec = _.merge({}, spec, {
-        specType: arg.specType,
-        specFilter: arg.specFilter,
+      const fullSpecs = arg.specs.map((spec) => {
+        return _.merge({}, spec, {
+          specType: arg.specType,
+          specFilter: arg.specFilter,
+        })
       })
 
-      return openProject.launch(arg.browser, [fullSpec], {
+      return openProject.launch(arg.browser, fullSpecs, {
         projectRoot: options.projectRoot,
         onBrowserOpen () {
           return send({ browserOpened: true })

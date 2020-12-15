@@ -1,6 +1,5 @@
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
-import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 // @ts-ignore
@@ -43,17 +42,21 @@ class Reporter extends Component<ReporterProps> {
   render () {
     return (
       <div className='reporter'>
-        <Header appState={this.props.appState} statsStore={this.props.statsStore} />
-        <Runnables
-          appState={this.props.appState}
-          error={this.props.error}
-          runnablesStore={this.props.runnablesStore}
-          scroller={this.props.scroller}
-          specs={this.props.specs}
-        />
-        <ForcedGcWarning
-          appState={this.props.appState}
-          events={this.props.events}/>
+        {this.props.specs.map((spec) => (
+          <>
+            <Header appState={this.props.appState} statsStore={this.props.statsStore} />
+            <Runnables
+              appState={this.props.appState}
+              error={this.props.error}
+              runnablesStore={this.props.runnablesStore}
+              scroller={this.props.scroller}
+              spec={spec}
+            />
+            <ForcedGcWarning
+              appState={this.props.appState}
+              events={this.props.events} />
+          </>
+        ))}
       </div>
     )
   }

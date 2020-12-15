@@ -191,8 +191,9 @@ class SpecsList extends Component {
     e.stopPropagation()
 
     const { project } = this.props
+    const specs = [spec]
 
-    specsStore.setSelectedSpecs([spec])
+    specsStore.setSelectedSpecs(specs)
 
     if (spec.relative === '__all') {
       if (specsStore.filter) {
@@ -208,7 +209,7 @@ class SpecsList extends Component {
       this.runAllSavedLabel = 'Running 1 spec'
     }
 
-    return projectsApi.runSpecs(project, [spec], project.chosenBrowser, specsStore.filter)
+    return projectsApi.runSpecs(project, specs, project.chosenBrowser, specsStore.filter)
   }
 
   _setExpandRootFolder (specFolderPath, isExpanded, e) {
