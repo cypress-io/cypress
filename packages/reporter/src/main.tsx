@@ -43,7 +43,7 @@ class Reporter extends Component<ReporterProps> {
     return (
       <div className='reporter'>
         {this.props.specs.map((spec) => (
-          <>
+          <React.Fragment key={spec.absolute}>
             <Header appState={this.props.appState} statsStore={this.props.statsStore} />
             <Runnables
               appState={this.props.appState}
@@ -55,7 +55,7 @@ class Reporter extends Component<ReporterProps> {
             <ForcedGcWarning
               appState={this.props.appState}
               events={this.props.events} />
-          </>
+          </React.Fragment>
         ))}
       </div>
     )

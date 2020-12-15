@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events'
+import { ReporterProps } from '../../src/main'
 import { RunnablesErrorModel } from '../../src/runnables/runnable-error'
 import { RootRunnable } from './../../src/runnables/runnables-store'
 
@@ -21,13 +22,15 @@ describe('runnables', () => {
 
     render = (renderProps: RenderProps = {}) => {
       cy.visit('/').then((win) => {
-        win.render(Object.assign({
+        win.render(Object.assign<Partial<ReporterProps>, unknown>({
           runner,
-          spec: {
-            name: 'foo',
-            absolute: '/foo/bar',
-            relative: 'foo/bar',
-          },
+          specs: [
+            {
+              name: 'foo',
+              absolute: '/foo/bar',
+              relative: 'foo/bar',
+            },
+          ],
         }, renderProps))
       })
     }
