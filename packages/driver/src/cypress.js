@@ -99,6 +99,7 @@ class $Cypress {
     // a few static props for the host OS, browser
     // and the current version of Cypress
     this.arch = config.arch
+    this.spec = config.specs[0]
     this.specs = config.specs
     this.version = config.version
     this.browser = config.browser
