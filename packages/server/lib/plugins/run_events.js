@@ -4,7 +4,7 @@ const errors = require('../errors')
 const plugins = require('../plugins')
 
 module.exports = {
-  execute: Promise.method((eventName, config, ...args) => {
+  execute: Promise.method((eventName, config = {}, ...args) => {
     if (!config.experimentalRunEvents) return
 
     if (!plugins.has(eventName)) return
