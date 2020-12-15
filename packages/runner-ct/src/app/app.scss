@@ -10,6 +10,14 @@
   }
 }
 
+.ct-bottom-pane { 
+  height: 100%;
+  .reporter { 
+    position: static;
+    height: 100%;
+  }
+}
+
 // styles for react-split-pane
 .Resizer {
   background: #000;
