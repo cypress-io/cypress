@@ -7,7 +7,7 @@ Application Data: /user/app/data/path
 Browser Profiles: /user/app/data/path/to/browsers
 Binary Caches: /user/path/to/binary/cache
 
-Cypress Version: 0.0.0
+Cypress Version: 0.0.0-development
 System Platform: linux (Foo-OsVersion)
 System Memory: 1.2 GB free 400 MB
 
@@ -29,7 +29,7 @@ Application Data: /user/app/data/path
 Browser Profiles: /user/app/data/path/to/browsers
 Binary Caches: /user/path/to/binary/cache
 
-Cypress Version: 0.0.0
+Cypress Version: 0.0.0-development
 System Platform: linux (Foo-OsVersion)
 System Memory: 1.2 GB free 400 MB
 
@@ -48,7 +48,7 @@ Application Data: /user/app/data/path
 Browser Profiles: /user/app/data/path/to/browsers
 Binary Caches: /user/path/to/binary/cache
 
-Cypress Version: 0.0.0
+Cypress Version: 0.0.0-development
 System Platform: linux (Foo-OsVersion)
 System Memory: 1.2 GB free 400 MB
 
