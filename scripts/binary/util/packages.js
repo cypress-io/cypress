@@ -161,7 +161,7 @@ const copyAllToDist = function (distDir) {
   return fs.ensureDirAsync(distDir)
   .then(generateGlobs)
   .then((globs) => {
-    debug('copying the following globs %o', globs)
+    console.log('Copying the following globs %o', globs)
 
     return Promise.resolve(externalUtils.globby(globs))
     .map(copyPackage, { concurrency: 1 })
