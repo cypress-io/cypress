@@ -56,17 +56,44 @@ const runAllBuild = _.partial(npx, ['lerna', 'run', 'build-prod', '--ignore', 'c
 // removes transpiled JS files in the original package folders
 const runAllCleanJs = _.partial(npx, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
 
-// @returns string[] with names of packages, e.g. ['runner', 'driver', 'server']
-const getPackagesWithScript = (scriptName) => {
-  return Promise.resolve(glob('./packages/*/package.json'))
-  .map((pkgPath) => {
-    return fs.readJsonAsync(pkgPath)
-    .then((json) => {
-      if (json.scripts != null ? json.scripts.build : undefined) {
-        return path.basename(path.dirname(pkgPath))
-      }
+// gets a list of all the packages within /npm
+// that are used in the binary
+const getLocalPublicPackages = function (basePath = '.') {
+  const publicPkgs = []
+
+  const addPublicPkg = function (pkg) {
+    if (!publicPkgs.includes(pkg)) {
+      publicPkgs.push(pkg)
+
+      return addDepsByGlob(`${basePath}/npm/${pkg}/package.json`)
+    }
+
+    return Promise.resolve()
+  }
+
+  const addDepsByGlob = function (pattern) {
+    return Promise.resolve(glob(pattern))
+    .map((pkgPath) => {
+      return fs.readJsonAsync(pkgPath)
+      .then((json) => {
+        const { dependencies } = json
+
+        if (dependencies) {
+          return Promise.all(_.map(dependencies, (version, pkg) => {
+            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
+
+            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
+              return addPublicPkg(parsedPkg[2])
+            }
+          }))
+        }
+      })
     })
-  }).filter(Boolean)
+  }
+
+  return addDepsByGlob(`${basePath}/packages/*/package.json`).then(() => {
+    return publicPkgs
+  })
 }
 
 const copyAllToDist = function (distDir) {
@@ -111,6 +138,13 @@ const copyAllToDist = function (distDir) {
     .map(copyRelativePathToDist, { concurrency: 1 })
   }
 
+  const generateGlobs = function () {
+    return getLocalPublicPackages()
+    .then((localPkgs) => {
+      return localPkgs.map(((pkg) => `./npm/${pkg}`)).concat('./packages/*')
+    })
+  }
+
   // fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
   // 1/1  41688
   // 1/5  42218
@@ -125,8 +159,11 @@ const copyAllToDist = function (distDir) {
   const started = new Date()
 
   return fs.ensureDirAsync(distDir)
-  .then(() => {
-    return glob('./packages/*')
+  .then(generateGlobs)
+  .then((globs) => {
+    debug('copying the following globs %o', globs)
+
+    return Promise.resolve(externalUtils.globby(globs))
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)
@@ -284,7 +321,7 @@ module.exports = {
 
   forceNpmInstall,
 
-  getPackagesWithScript,
+  getLocalPublicPackages,
 }
 
 if (!module.parent) {

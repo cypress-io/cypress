@@ -41,7 +41,13 @@ describe('packages', () => {
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
+    const globbyStub = sinon.stub(externalUtils, 'globby')
+
+    globbyStub
+    .withArgs(['./packages/*'])
+    .resolves(['./packages/coffee'])
+
+    globbyStub
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
@@ -60,36 +66,162 @@ describe('packages', () => {
     snapshot(files)
   })
 
-  it('can find packages with script', async () => {
+  it('can find local npm dependencies', async () => {
     mockfs(
       {
         'packages': {
           'foo': {
             'package.json': JSON.stringify({
-              scripts: {
-                build: 'somefoo',
+              'dependencies': {
+                '@cypress/package-a': '0.0.0-development',
+                '@cypress/package-b': '1.0.0',
+                'lodash': '1.0.0',
               },
             }),
           },
           'bar': {
             'package.json': JSON.stringify({
-              scripts: {
-                start: 'somefoo',
+              'dependencies': {
+                '@cypress/package-a': '0.0.0-development',
+                '@cypress/package-c': '0.0.0-development',
+                'lodash': '1.0.0',
+                'react': '16.0.0',
               },
             }),
           },
           'baz': {
             'package.json': JSON.stringify({
-              main: 'somefoo',
+              'dependencies': {
+                '@cypress/package-b': '1.0.0',
+                'react': '16.0.0',
+              },
             }),
           },
         },
       },
     )
 
-    const res = await packages.getPackagesWithScript('build')
+    const res = await packages.getLocalPublicPackages()
 
-    expect(res).deep.eq(['foo'])
+    expect(res).deep.eq(['package-a', 'package-c'])
+  })
+
+  it('can find nested local npm dependencies', async () => {
+    mockfs(
+      {
+        'npm': {
+          'package-a': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                '@cypress/package-c': '0.0.0-development',
+                'lodash': '1.0.0',
+              },
+            }),
+          },
+          'package-b': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                'lodash': '1.0.0',
+              },
+            }),
+          },
+          'package-c': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                '@cypress/package-d': '0.0.0-development',
+                'react': '16.0.0',
+              },
+            }),
+          },
+          'package-d': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                'lodash': '1.0.0',
+              },
+            }),
+          },
+        },
+        'packages': {
+          'foo': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                '@cypress/package-a': '0.0.0-development',
+                '@cypress/package-b': '1.0.0',
+                'lodash': '1.0.0',
+              },
+            }),
+          },
+          'bar': {
+            'package.json': JSON.stringify({
+              'dependencies': {
+                '@cypress/package-b': '1.0.0',
+                'react': '16.0.0',
+              },
+            }),
+          },
+        },
+      },
+    )
+
+    const res = await packages.getLocalPublicPackages()
+
+    expect(res).deep.eq(['package-a', 'package-c', 'package-d'])
+  })
+
+  it('can copy files with local npm dependencies', async () => {
+    sinon.stub(os, 'tmpdir').returns('/tmp')
+
+    mockfs({
+      'npm': {
+        'package-a': {
+          'package.json': JSON.stringify({
+            'main': 'src/main.js',
+            'name': '@cypress/package-a',
+            'files': ['lib'],
+          }),
+          'src': { 'main.js': Buffer.from('console.error()') },
+          'lib': { 'foo.js': '{}' },
+        },
+      },
+      'packages': {
+        'coffee': {
+          'package.json': JSON.stringify({
+            'main': 'src/main.js',
+            'name': 'foo',
+            'files': ['lib'],
+            'dependencies': {
+              '@cypress/package-a': '0.0.0-development',
+            },
+          }),
+          'src': { 'main.js': Buffer.from('console.log()') },
+          'lib': { 'foo.js': '{}' },
+        },
+      },
+    })
+
+    const globbyStub = sinon.stub(externalUtils, 'globby')
+
+    globbyStub
+    .withArgs(['./npm/package-a', './packages/*'])
+    .resolves(['./npm/package-a', './packages/coffee'])
+
+    globbyStub
+    .withArgs(['package.json', 'lib', 'src/main.js'])
+    .resolves([
+      'package.json',
+      'lib/foo.js',
+      'src/main.js',
+    ])
+
+    const destinationFolder = os.tmpdir()
+
+    debug('destination folder %s', destinationFolder)
+
+    await packages.copyAllToDist(destinationFolder)
+
+    const files = getFs()
+
+    snapshot(files)
   })
 })
 
@@ -119,6 +251,18 @@ describe('transformRequires', () => {
       },
       },
     })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
 
     // should return number of transformed requires
     await expect(transformRequires(buildRoot)).to.eventually.eq(2)
@@ -160,9 +304,140 @@ describe('transformRequires', () => {
       },
     })
 
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+    ])
+
     await transformRequires(buildRoot)
 
     snapshot(getFs())
+  })
+
+  it('can find and replace symlink requires including nested local npm packages', async function () {
+    if (os.platform() !== 'linux') {
+      return this.skip()
+    }
+
+    const buildRoot = 'build/linux/Cypress/resources/app'
+
+    mockfs({
+      [buildRoot]: {
+        'npm': {
+          'package-a': {
+            'package.json': JSON.stringify({
+              'main': 'src/main.js',
+              'name': 'foo',
+              'files': ['lib'],
+              'dependencies': {
+                '@cypress/package-b': '0.0.0-development',
+              },
+            }),
+            'src': { 'main.js': Buffer.from('console.error()') },
+            'lib': { 'foo.js': /*js*/`require("@cypress/package-b/src/main")${''}` },
+          },
+          'package-b': {
+            'package.json': JSON.stringify({
+              'main': 'src/main.js',
+              'name': 'foo',
+              'files': ['lib'],
+              'dependencies': {
+                '@cypress/package-c': '0.0.0-development',
+              },
+            }),
+            'src': { 'main.js': Buffer.from('console.warn()') },
+            'lib': { 'foo.js': /*js*/`require("@cypress/package-c/src/main")${''}` },
+          },
+          'package-c': {
+            'package.json': JSON.stringify({
+              'main': 'src/main.js',
+              'name': 'foo',
+              'files': ['lib'],
+              'dependencies': {
+                'lodash': '1.0.0',
+              },
+            }),
+            'src': { 'main.js': Buffer.from('console.log()') },
+            'lib': { 'foo.js': /*js*/`require("@cypress/package-d/src/main")${''}` },
+            // ^^ should not be replaced since package-d isn't local
+          },
+        },
+        'packages': {
+          'foo': {
+            'package.json': JSON.stringify({
+              'main': 'src/main.js',
+              'name': 'foo',
+              'files': ['lib'],
+              'dependencies': {
+                '@cypress/package-a': '0.0.0-development',
+              },
+            }),
+            'src': { 'main.js': Buffer.from('console.log()') },
+            'lib': {
+              'foo.js': /*js*/`require("@packages/bar/src/main")${''}`,
+              'baz.js': /*js*/`require("@cypress/package-a/src/main")${''}`,
+            },
+          },
+          'bar': {
+            'package.json': JSON.stringify({
+              'main': 'src/main.js',
+              'name': 'bar',
+              'files': ['lib'],
+              'dependencies': {
+                '@cypress/package-b': '0.0.0-development',
+              },
+            }),
+            'src': { 'main.js': Buffer.from('console.log()') },
+            'lib': {
+              'foo.js': `require("@packages/foo/lib/somefoo")${''}`,
+              'baz.js': `require("@cypress/package-b/lib/somefoo")${''}`,
+            },
+            'node_modules': { 'no-search.js': '' },
+            'dist': { 'no-search.js': '' },
+          },
+        },
+      },
+    })
+
+    sinon.stub(externalUtils, 'globby')
+    .withArgs([
+      'build/linux/Cypress/resources/app/packages/**/*.js',
+      'build/linux/Cypress/resources/app/npm/**/*.js',
+    ])
+    .resolves([
+      'build/linux/Cypress/resources/app/npm/package-a/src/main.js',
+      'build/linux/Cypress/resources/app/npm/package-a/lib/foo.js',
+      'build/linux/Cypress/resources/app/npm/package-b/src/main.js',
+      'build/linux/Cypress/resources/app/npm/package-b/lib/foo.js',
+      'build/linux/Cypress/resources/app/npm/package-c/src/main.js',
+      'build/linux/Cypress/resources/app/npm/package-c/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/foo/src/main.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/foo/lib/baz.js',
+      'build/linux/Cypress/resources/app/packages/bar/src/main.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/foo.js',
+      'build/linux/Cypress/resources/app/packages/bar/lib/baz.js',
+    ])
+
+    // should return number of transformed requires
+    await expect(transformRequires(buildRoot)).to.eventually.eq(6)
+
+    const files = getFs()
+
+    if (debug.enabled) {
+      debug('returned file system')
+      /* eslint-disable-next-line no-console */
+      console.error(files)
+    }
+
+    snapshot(files)
   })
 })
 
