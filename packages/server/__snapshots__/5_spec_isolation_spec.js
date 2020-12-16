@@ -441,7 +441,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after XX:XX: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
@@ -1005,7 +1005,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after XX:XX: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
@@ -1569,7 +1569,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after XX:XX: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
