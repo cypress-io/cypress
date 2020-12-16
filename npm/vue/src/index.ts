@@ -70,17 +70,16 @@ const installMixins = (Vue, options) => {
   }
 }
 
-// @ts-ignore
-const hasStore = ({ store }: { store: any }) => store && store._vm
+const hasStore = ({ store }: { store: any }) => store && store._vm // @ts-ignore
 
-const forEachValue = (obj: Record<string, unknown>, fn: (value: unknown, key: string) => void) => {
+const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
   return Object.keys(obj).forEach((key) => fn(obj[key], key))
 }
 
 const resetStoreVM = (Vue, { store }) => {
   // bind store public getters
   store.getters = {}
-  const wrappedGetters = store._wrappedGetters
+  const wrappedGetters = store._wrappedGetters as Record<string, (store: any) => void>
   const computed = {}
 
   forEachValue(wrappedGetters, (fn, key) => {
