@@ -199,13 +199,7 @@ describe('packages', () => {
       },
     })
 
-    const globbyStub = sinon.stub(externalUtils, 'globby')
-
-    globbyStub
-    .withArgs(['./npm/package-a', './packages/*'])
-    .resolves(['./npm/package-a', './packages/coffee'])
-
-    globbyStub
+    sinon.stub(externalUtils, 'globby')
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
