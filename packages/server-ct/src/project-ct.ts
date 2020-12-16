@@ -77,6 +77,8 @@ export default class ProjectCt {
           // then get the port once we
           // open the server
 
+          cfg.proxyServer = null
+
           if (!cfg.port) {
             cfg.port = port
 
@@ -283,7 +285,30 @@ export default class ProjectCt {
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
+    const { projectRoot } = cfg
     let { reporter } = cfg as { reporter: RunnablesStore }
+
+    // if we've passed down reporter
+    // then record these via mocha reporter
+    if (cfg.report) {
+      try {
+        Reporter.loadReporter(reporter, projectRoot)
+      } catch (err) {
+        const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
+
+        // only include the message if this is the standard MODULE_NOT_FOUND
+        // else include the whole stack
+        const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
+
+        errors.throw('INVALID_REPORTER_NAME', {
+          paths,
+          error: errorMsg,
+          name: reporter,
+        })
+      }
+
+      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
+    }
 
     // this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -348,6 +373,12 @@ export default class ProjectCt {
     return _.pick(this, 'spec', 'browser')
   }
 
+  getAutomation () {
+    return {
+      use () { },
+    }
+  }
+
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
@@ -377,6 +408,94 @@ export default class ProjectCt {
       cfg.state = state
 
       return cfg
+    })
+  }
+
+  getSpecUrl (absoluteSpecPath, specType) {
+    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+
+    return this.getConfig()
+    .then((cfg) => {
+      // if we don't have a absoluteSpecPath or its __all
+      if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+
+        debug('returning url to run all specs: %s', url)
+
+        return url
+      }
+
+      // TODO:
+      // to handle both unit + integration tests we need
+      // to figure out (based on the config) where this absoluteSpecPath
+      // lives. does it live in the integrationFolder or
+      // the unit folder?
+      // once we determine that we can then prefix it correctly
+      // with either integration or unit
+      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
+      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+
+      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+
+      return url
+    })
+  }
+
+  getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
+    const { integrationFolder, componentFolder, projectRoot } = cfg
+
+    // for now hard code the 'type' as integration
+    // but in the future accept something different here
+
+    // strip out the integration folder and prepend with "/"
+    // example:
+    //
+    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration
+    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.js
+    //
+    // becomes /integration/foo.js
+
+    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+
+    const url = `/${path.join(type, path.relative(
+      folderToUse,
+      path.resolve(projectRoot, pathToSpec),
+    ))}`
+
+    debug('prefixed path for spec %o', { pathToSpec, type, url })
+
+    return url
+  }
+
+  normalizeSpecUrl (browserUrl, specUrl) {
+    const replacer = (match) => match.replace('//', '/')
+
+    return [
+      browserUrl,
+      '#/tests',
+      escapeFilenameInUrl(specUrl),
+    ].join('/').replace(multipleForwardSlashesRe, replacer)
+  }
+
+  getProjectId () {
+    return this.verifyExistence()
+    .then(() => {
+      return settings.read(this.projectRoot, this.options)
+    }).then((readSettings) => {
+      if (readSettings && readSettings.projectId) {
+        return readSettings.projectId
+      }
+
+      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    })
+  }
+
+  verifyExistence () {
+    return fs
+    .statAsync(this.projectRoot)
+    .return(this)
+    .catch(() => {
+      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     })
   }
 }
