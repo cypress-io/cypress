@@ -20,11 +20,14 @@ const createProps = () => ({
     viewportHeight: 800,
     viewportWidth: 500,
     state: {},
-    spec: {
-      name: 'foo.js',
-      relative: 'relative/path/to/foo.js',
-      absolute: '/absolute/path/to/foo.js',
-    },
+    specs: [
+      {
+
+        name: 'foo.js',
+        relative: 'relative/path/to/foo.js',
+        absolute: '/absolute/path/to/foo.js',
+      },
+    ],
   },
   eventManager: {
     notifyRunningSpec: sinon.spy(),
@@ -72,7 +75,7 @@ describe('<App />', () => {
     props.config.integrationFolder = 'path/to/int'
     const component = shallowRender(<App {...props} />)
 
-    expect(component.find(Reporter)).to.have.prop('spec').deep.eq(props.config.spec)
+    expect(component.find(Reporter)).to.have.prop('specs').deep.eq(props.config.specs)
   })
 
   it('renders the <Reporter /> with the autoScrollingEnabled flag', () => {
