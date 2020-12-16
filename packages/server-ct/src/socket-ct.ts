@@ -9,6 +9,9 @@ import { openFile } from '@packages/server/lib/util/file-opener'
 import open from '@packages/server/lib/util/open'
 import errors from '@packages/server/lib/errors'
 import specsUtil from '@packages/server/lib/util/specs'
+import * as netStubbing from '@packages/net-stubbing'
+import { GetFixtureFn } from '@packages/net-stubbing/lib/server/types'
+import * as fixture from '@packages/server/lib/fixture'
 
 const debug = _debug('cypress:server-ct:socket')
 
@@ -61,7 +64,7 @@ const retry = (fn: (res: any) => void) => {
 
 export class Socket {
   private ended: boolean
-  private io: SocketIO.Server
+  private io: socketIo.Server
   private testsDir: string[]
 
   constructor (config: Record<string, any>) {
@@ -146,11 +149,11 @@ export class Socket {
 
     this.io = this.createIo(server, socketIoRoute, socketIoCookie)
 
-    const automationRequest = (message, data) => {
+    const automationRequest = (_message: string, _data: Record<string, unknown>) => {
       // return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
-    return this.io.on('connection', (socket) => {
+    return this.io.on('connection', (socket: any) => {
       debug('socket connected')
 
       // cache the headers so we can access
@@ -197,7 +200,7 @@ export class Socket {
           })
         })
 
-        socket.on('automation:push:request', (message: string, data: any, cb: (...args: unknown[]) => any) => {
+        socket.on('automation:push:request', (_message: string, _data: Record<string, unknown>, cb: (...args: unknown[]) => any) => {
           // just immediately callback because there
           // is not really an 'ack' here
           if (cb) {
@@ -278,7 +281,7 @@ export class Socket {
         return options.onFocusTests()
       })
 
-      socket.on('is:automation:client:connected', (data = {}, cb) => {
+      socket.on('is:automation:client:connected', (data: Record<string, any>, cb: (...args: unknown[]) => void) => {
         const isConnected = () => {
           return automationRequest('is:automation:client:connected', data)
         }
@@ -298,7 +301,7 @@ export class Socket {
         .timeout(data.timeout != null ? data.timeout : 1000)
         .then(() => {
           return cb(true)
-        }).catch(Bluebird.TimeoutError, (err) => {
+        }).catch(Bluebird.TimeoutError, () => {
           return cb(false)
         })
       })
@@ -308,6 +311,7 @@ export class Socket {
         const cb = args.pop()
 
         debug('backend:request %o', { eventName, args })
+        const getFixture: GetFixtureFn = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
         const backendRequest = () => {
           switch (eventName) {
@@ -324,6 +328,15 @@ export class Socket {
               return options.onRequest(headers, automationRequest, args[0])
             case 'reset:server:state':
               return options.onResetServerState()
+            case 'net':
+              return netStubbing.onNetEvent({
+                eventName: args[0],
+                frame: args[1],
+                state: options.netStubbingState,
+                socket: this,
+                getFixture,
+                args,
+              })
             default:
               throw new Error(
                 `You requested a backend event we cannot handle: ${eventName}`,
@@ -340,9 +353,7 @@ export class Socket {
       })
 
       socket.on('get:existing:run:state', (cb) => {
-        let s
-
-        s = existingState
+        const s = existingState
 
         if (s) {
           existingState = null
