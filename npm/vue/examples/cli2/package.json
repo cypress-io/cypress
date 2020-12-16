@@ -1,6 +1,6 @@
 {
-  "name": "example",
-  "version": "0.1.0",
+  "name": "vue-cli-2-example",
+  "version": "0.0.0",
   "private": true,
   "scripts": {
     "build": "vue-cli-service build",

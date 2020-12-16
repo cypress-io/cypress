@@ -10,7 +10,14 @@
     "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/../../npm/vue",
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
   },
+  "dependencies": {
+    "send": "^0.17.1"
+  },
   "devDependencies": {
     "ts-mocha": "8.0.0"
-  }
+  },
+  "peerDependencies": {},
+  "files": [
+    "src"
+  ]
 }
