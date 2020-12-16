@@ -2,7 +2,6 @@ import Debug from 'debug'
 import _ from 'lodash'
 import path from 'path'
 import send from 'send'
-import { SpecsController } from '@packages/server-ct/src/specs-controller'
 
 const debug = Debug('cypress:server:runner-ct')
 
@@ -16,7 +15,7 @@ const getPathToDist = (...args) => {
   return dist(...args)
 }
 
-module.exports = {
+export default {
   getPathToDist,
 
   handle (req, res) {
