@@ -1,28 +1,27 @@
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import { EventEmitter } from 'events'
 import _ from 'lodash'
 import path from 'path'
-import _debug from 'debug'
-const debug = _debug('cypress:server-ct:project')
-import Bluebird from 'bluebird'
-
-import specsUtil from '@packages/server/lib/util/specs'
+import { RootRunnable, RunnablesStore } from '@packages/reporter/src/runnables/runnables-store'
 import config from '@packages/server/lib/config'
-import savedState from '@packages/server/lib/saved_state'
+import cwd from '@packages/server/lib/cwd'
+import errors from '@packages/server/lib/errors'
 import plugins from '@packages/server/lib/plugins'
 import devserver from '@packages/server/lib/plugins/devserver'
-import { SpecsController } from './specs-controller'
-import Watchers from '@packages/server/lib/watchers'
-import browsers from '@packages/server/lib/browsers'
-
+import Reporter from '@packages/server/lib/reporter'
+import savedState from '@packages/server/lib/saved_state'
+import { escapeFilenameInUrl } from '@packages/server/lib/util/escape_filename'
 import fs from '@packages/server/lib/util/fs'
-import cwd from '@packages/server/lib/cwd'
 import settings from '@packages/server/lib/util/settings'
-
+import specsUtil from '@packages/server/lib/util/specs'
+import Watchers from '@packages/server/lib/watchers'
 import { Server } from './server-ct'
-import { RunnablesStore, RootRunnable } from '@packages/reporter/src/runnables/runnables-store'
+import { SpecsController } from './specs-controller'
 
+const debug = Debug('cypress:server-ct:project')
 const localCwd = cwd()
-
-const DEFAULT_BROWSER_NAME = 'chrome'
+const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
 export default class ProjectCt extends EventEmitter {
   cfg: any
@@ -128,18 +127,6 @@ export default class ProjectCt extends EventEmitter {
       configFile: settings.pathToConfigFile(this.projectRoot, options),
     })
     .then((modifiedCfg) => {
-      if (modifiedCfg.browsers.length) {
-        return Promise.resolve(modifiedCfg)
-      }
-
-      // add chrome as a default browser if none has been specified
-      return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME).then((browser) => {
-        modifiedCfg.browsers = [browser]
-
-        return modifiedCfg
-      })
-    })
-    .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
@@ -154,6 +141,7 @@ export default class ProjectCt extends EventEmitter {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
+
       return specsUtil.find(modifiedConfig)
       .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'

@@ -1,28 +1,25 @@
 import browsers from '@packages/server/lib/browsers'
-import ProjectCt from './src/project-ct'
+import openProject from '@packages/server/lib/open_project'
 
 // Partial because there are probably other options that are not included in this type.
-export const start = async (projectRoot: string, options: unknown) => {
-  const project = new ProjectCt(projectRoot)
+export const start = async (projectRoot: string, args: {}) => {
+  // add chrome as a default browser if none has been specified
+  return browsers.ensureAndGetByNameOrPath(args.browser)
+  .then((browser: Cypress.Browser) => {
+    const spec = {
+      name: 'All Specs',
+      absolute: '__all',
+      relative: '__all',
+      specType: 'component',
+    }
 
-  const { cfg } = await project.open(options)
+    const options = {
+      browsers: [browser],
+    }
 
-  options.browsers = cfg.browsers // Cypress.Browser[]
-  options.proxyUrl = cfg.proxyUrl // string
-  options.userAgent = cfg.userAgent // string
-  options.proxyServer = null // null
-  options.socketIoRoute = cfg.socketIoRoute // string
-  options.chromeWebSecurity = cfg.chromeWebSecurity // boolean
-  options.url = cfg.browserUrl // string
-
-  const automation = {
-    use () {
-    },
-  }
-
-  const [browser] = cfg.browsers as Cypress.Browser[]
-
-  project.setCurrentSpecAndBrowser(null, browser)
-
-  return browsers.open(browser, options, automation)
+    return openProject.create(projectRoot, args, options)
+    .then((project) => {
+      return openProject.launch(browser, spec)
+    })
+  })
 }
