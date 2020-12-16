@@ -140,7 +140,7 @@ const buildCypressApp = function (platform, version, options = {}) {
   }
 
   const npmInstallPublicPackages = function () {
-    log('#npmInstallPackages')
+    log('#npmInstallPublicPackages')
 
     const pathToPackages = distDir('npm', '*')
 
@@ -148,7 +148,7 @@ const buildCypressApp = function (platform, version, options = {}) {
   }
 
   const npmInstallPrivatePackages = function () {
-    log('#npmInstallPackages')
+    log('#npmInstallPrivatePackages')
 
     const pathToPackages = distDir('packages', '*')
 
@@ -278,6 +278,26 @@ require('./packages/server')\
     return iconFilename
   }
 
+  const removeDevElectronApp = function () {
+    log('#removeDevElectronApp')
+    // when we copy packages/electron, we get the "dist" folder with
+    // empty Electron app, symlinked to our server folder
+    // in production build, we do not need this link, and it
+    // would not work anyway with code signing
+
+    // hint: you can see all symlinks in the build folder
+    // using "find build/darwin/Cypress.app/ -type l -ls"
+    console.log('platform', platform)
+    const electronDistFolder = distDir('packages', 'electron', 'dist')
+
+    la(check.unemptyString(electronDistFolder),
+      'empty electron dist folder for platform', platform)
+
+    console.log(`Removing unnecessary folder '${electronDistFolder}'`)
+
+    return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
+  }
+
   const electronPackAndSign = function () {
     log('#electronPackAndSign')
 
@@ -315,26 +335,6 @@ require('./packages/server')\
     console.log(args.join(' '))
 
     return execa('electron-builder', args, opts)
-  }
-
-  const removeDevElectronApp = function () {
-    log('#removeDevElectronApp')
-    // when we copy packages/electron, we get the "dist" folder with
-    // empty Electron app, symlinked to our server folder
-    // in production build, we do not need this link, and it
-    // would not work anyway with code signing
-
-    // hint: you can see all symlinks in the build folder
-    // using "find build/darwin/Cypress.app/ -type l -ls"
-    console.log('platform', platform)
-    const electronDistFolder = distDir('packages', 'electron', 'dist')
-
-    la(check.unemptyString(electronDistFolder),
-      'empty electron dist folder for platform', platform)
-
-    console.log(`Removing unnecessary folder '${electronDistFolder}'`)
-
-    return fs.removeAsync(electronDistFolder) // .catch(_.noop) why are we ignoring an error here?!
   }
 
   const lsDistFolder = function () {

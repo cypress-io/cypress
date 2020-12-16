@@ -1831,17 +1831,6 @@
     debug "3.1.0"
     lazy-ass "1.6.0"
 
-"@cypress/eslint-plugin-dev@*":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@cypress/eslint-plugin-dev/-/eslint-plugin-dev-5.0.2.tgz#b7b59a836d55afd59f15b6410e37d4c624f5adad"
-  integrity sha512-VlmFYfCo8HnrKRBUOmkzOvtTvCNALNAei4fF5+TdUgmofU13nUxDccmB/SArhExMgSuAikHGQGPDFC2+NKJ0ew==
-  dependencies:
-    bluebird "^3.5.5"
-    chalk "^2.4.2"
-    eslint-rule-composer "^0.3.0"
-    lodash "^4.17.15"
-    shelljs "^0.8.3"
-
 "@cypress/get-windows-proxy@1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.1.tgz#61a29d0271b38deaafc24b22a661bab684b6743f"
@@ -2002,27 +1991,6 @@
   integrity sha512-eTzoodaUESR8lAJkgvTVnF9bs7M1P4aiDsH4jbywcszb3IjJRLLvrMRZp7VDWID33to79EiqyfOudOzXXpuJjQ==
   dependencies:
     css.escape "^1.5.1"
-
-"@cypress/webpack-batteries-included-preprocessor@*":
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-2.1.3.tgz#da6a21e7634f78b0939e97581cd6b95d200bc743"
-  integrity sha512-fTktM5ZY4oL53sJWgehehOmkIV7/6l8nZm83gd4M6s/psw7V/rrr7W4mfZvDPECAadO0Ov0nnOPvlBhO9IYpLg==
-  dependencies:
-    "@babel/core" "^7.11.1"
-    "@babel/plugin-proposal-class-properties" "^7.10.4"
-    "@babel/plugin-proposal-object-rest-spread" "^7.11.0"
-    "@babel/plugin-transform-runtime" "^7.11.0"
-    "@babel/preset-env" "^7.11.0"
-    "@babel/preset-react" "^7.10.4"
-    "@babel/runtime" "^7.11.2"
-    babel-loader "^8.1.0"
-    babel-plugin-add-module-exports "^1.0.2"
-    coffee-loader "^0.9.0"
-    coffeescript "^1.12.7"
-    ts-loader "^8.0.2"
-    tsconfig-package "npm:tsconfig@^7.0.0"
-    tsconfig-paths-webpack-plugin "^3.3.0"
-    webpack "^4.44.1"
 
 "@cypress/webpack-preprocessor@5.4.2":
   version "5.4.2"
@@ -2320,7 +2288,7 @@
     resolve "^0.6.3"
     strip-json-comments "^1.0.4"
 
-"@fellow/eslint-plugin-coffee@0.4.13", "@fellow/eslint-plugin-coffee@^0.4.13":
+"@fellow/eslint-plugin-coffee@0.4.13":
   version "0.4.13"
   resolved "https://registry.yarnpkg.com/@fellow/eslint-plugin-coffee/-/eslint-plugin-coffee-0.4.13.tgz#28946316e92bca00920e11efefb084c0f4cd76b0"
   integrity sha512-7/dBoPmLXWPMq2Tk3AX/yeIA35c0YyNkVF92h1RIsTgGiv9O6IjWFQ39LdywUdoBH6HXFPBGUjlo+zenKFBOlw==
@@ -14147,13 +14115,6 @@ eslint-plugin-cypress@2.11.1:
   version "2.11.1"
   resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.11.1.tgz#a945e2774b88211e2c706a059d431e262b5c2862"
   integrity sha512-MxMYoReSO5+IZMGgpBZHHSx64zYPSPTpXDwsgW7ChlJTF/sA+obqRbHplxD6sBStE+g4Mi0LCLkG4t9liu//mQ==
-  dependencies:
-    globals "^11.12.0"
-
-eslint-plugin-cypress@^2.11.1:
-  version "2.11.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-cypress/-/eslint-plugin-cypress-2.11.2.tgz#a8f3fe7ec840f55e4cea37671f93293e6c3e76a0"
-  integrity sha512-1SergF1sGbVhsf7MYfOLiBhdOg6wqyeV9pXUAIDIffYTGMN3dTBQS9nFAzhLsHhO+Bn0GaVM1Ecm71XUidQ7VA==
   dependencies:
     globals "^11.12.0"
 
