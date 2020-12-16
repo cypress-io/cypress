@@ -35,6 +35,8 @@ const transformRequires = async function (buildResourcePath) {
     let shouldWriteFile = false
 
     const replace = function (requireRE, pathPrefix, pkgPrefix = pathPrefix) {
+      debug(requireRE)
+
       fileStr = fileStr.replace(requireRE, (...match) => {
         debug(match.slice(0, -1))
         const pkg = match[2]

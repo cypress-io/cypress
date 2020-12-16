@@ -58,21 +58,21 @@ const runAllCleanJs = _.partial(npx, ['lerna', 'run', 'clean-js', '--ignore', 'c
 
 // gets a list of all the packages within /npm
 // that are used in the binary
-const getLocalPublicPackages = function (basePath = '.') {
+const getLocalPublicPackages = function (basePath = process.cwd()) {
   const publicPkgs = []
 
   const addPublicPkg = function (pkg) {
     if (!publicPkgs.includes(pkg)) {
       publicPkgs.push(pkg)
 
-      return addDepsByGlob(`${basePath}/npm/${pkg}/package.json`)
+      return addDepsByGlob(`./npm/${pkg}/package.json`)
     }
 
     return Promise.resolve()
   }
 
   const addDepsByGlob = function (pattern) {
-    return Promise.resolve(glob(pattern))
+    return Promise.resolve(glob(pattern, { cwd: basePath }))
     .map((pkgPath) => {
       return fs.readJsonAsync(pkgPath)
       .then((json) => {
@@ -96,7 +96,7 @@ const getLocalPublicPackages = function (basePath = '.') {
     })
   }
 
-  return addDepsByGlob(`${basePath}/packages/*/package.json`).then(() => {
+  return addDepsByGlob('./packages/*/package.json').then(() => {
     return publicPkgs
   })
 }
