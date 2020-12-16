@@ -24,7 +24,7 @@ const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-export default class ProjectCt {
+export default class ProjectCt extends EventEmitter {
   cfg: any
   private projectRoot: string
   private watchers: Watchers
@@ -35,8 +35,10 @@ export default class ProjectCt {
   private automation: any
 
   constructor (projectRoot: string) {
-    if (!(this instanceof Project)) {
-      return new Project(projectRoot)
+    super()
+
+    if (!(this instanceof ProjectCt)) {
+      return new ProjectCt(projectRoot)
     }
 
     if (!projectRoot) {
@@ -356,7 +358,6 @@ export default class ProjectCt {
             this.server.end(),
           ])
           .spread((stats = {}) => {
-            // @ts-ignore - this method deos not appear to exist
             this.emit('end', stats)
           })
         }
