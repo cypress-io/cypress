@@ -76,7 +76,12 @@ const getLocalPublicPackages = function (basePath = '.') {
     .map((pkgPath) => {
       return fs.readJsonAsync(pkgPath)
       .then((json) => {
-        const { dependencies } = json
+        let { dependencies, devDependencies, name } = json
+
+        // we specify local dependencies within dev for server
+        if (name === '@packages/server') {
+          dependencies = dependencies.concat(devDependencies)
+        }
 
         if (dependencies) {
           return Promise.all(_.map(dependencies, (version, pkg) => {
