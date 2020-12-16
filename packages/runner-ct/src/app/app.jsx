@@ -23,12 +23,11 @@ const App = observer(
       <>
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
           <SpecsList state={state} />
-          <SplitPane split="horizontal" defaultSize="60%" minSize="20%" maxSize="80%">
+          <SplitPane split="horizontal" primary="second" defaultSize="60%" minSize="20%" maxSize="80%">
             <div className="runner runner-ct container">
               <Header {...props} />
               <Iframes {...props} />
               <Message state={state} />
-
             </div>
 
             <BottomPane>
