@@ -76,7 +76,12 @@ const getLocalPublicPackages = function (basePath = '.') {
     .map((pkgPath) => {
       return fs.readJsonAsync(pkgPath)
       .then((json) => {
-        const { dependencies } = json
+        let { dependencies, devDependencies, name } = json
+
+        // we specify local dependencies within dev for server
+        if (name === '@packages/server') {
+          dependencies = { ...dependencies, ...devDependencies }
+        }
 
         if (dependencies) {
           return Promise.all(_.map(dependencies, (version, pkg) => {
@@ -141,7 +146,7 @@ const copyAllToDist = function (distDir) {
   const generateGlobs = function () {
     return getLocalPublicPackages()
     .then((localPkgs) => {
-      return localPkgs.map(((pkg) => `./npm/${pkg}`)).concat('./packages/*')
+      return localPkgs.map(((pkg) => `./npm/${pkg}`))
     })
   }
 
@@ -160,10 +165,13 @@ const copyAllToDist = function (distDir) {
 
   return fs.ensureDirAsync(distDir)
   .then(generateGlobs)
-  .then((globs) => {
-    console.log('Copying the following globs %o', globs)
+  .then((publicPkgs) => {
+    return glob('./packages/*').then((privatePkgs) => {
+      console.log('Copying the following public npm packages', publicPkgs)
+      console.log('Copying the following private packages', privatePkgs)
 
-    return Promise.resolve(externalUtils.globby(globs))
+      return privatePkgs.concat(publicPkgs)
+    })
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)

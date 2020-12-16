@@ -175,12 +175,12 @@ describe('packages', () => {
       'npm': {
         'package-a': {
           'package.json': JSON.stringify({
-            'main': 'src/main.js',
+            'main': 'src/index.js',
             'name': '@cypress/package-a',
             'files': ['lib'],
           }),
-          'src': { 'main.js': Buffer.from('console.error()') },
-          'lib': { 'foo.js': '{}' },
+          'src': { 'index.js': Buffer.from('console.error()') },
+          'lib': { 'bar.js': '{}' },
         },
       },
       'packages': {
@@ -202,15 +202,19 @@ describe('packages', () => {
     const globbyStub = sinon.stub(externalUtils, 'globby')
 
     globbyStub
-    .withArgs(['./npm/package-a', './packages/*'])
-    .resolves(['./npm/package-a', './packages/coffee'])
-
-    globbyStub
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
       'lib/foo.js',
       'src/main.js',
+    ])
+
+    globbyStub
+    .withArgs(['package.json', 'lib', 'src/index.js'])
+    .resolves([
+      'package.json',
+      'lib/bar.js',
+      'src/index.js',
     ])
 
     const destinationFolder = os.tmpdir()
