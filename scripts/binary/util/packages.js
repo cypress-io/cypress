@@ -80,7 +80,7 @@ const getLocalPublicPackages = function (basePath = '.') {
 
         // we specify local dependencies within dev for server
         if (name === '@packages/server') {
-          dependencies = dependencies.concat(devDependencies)
+          dependencies = { ...dependencies, ...devDependencies }
         }
 
         if (dependencies) {
