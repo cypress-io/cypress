@@ -68,10 +68,10 @@ export default class Project {
     })
     .then((cfg) => {
       return this._initPlugins(cfg, options)
-      .then((cfg) => {
+      .then(({ cfg, specs }) => {
         // return this.server.open(cfg, this, options.onError, options.onWarning)
         // @ts-ignore
-        return this.server.open(cfg, this)
+        return this.server.open(cfg, specs, this)
         .spread((port, warning) => {
           // if we didnt have a cfg.port
           // then get the port once we
@@ -156,8 +156,12 @@ export default class Project {
       }).then((specs) => {
         return devserver.start({ specs, config: modifiedConfig })
         .then((port) => {
-          const specs = new SpecsController(cfg, {
-            onSpecListChanged: (specs: Cypress.Cypress['spec'][]) => {
+          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
+
+          const specs = new SpecsController(cfg)
+
+          specs.watch({
+            onSpecsChanged: (specs) => {
               // send new files to dev server
               devserver.updateSpecs(specs)
 
@@ -166,11 +170,11 @@ export default class Project {
             },
           })
 
-          specs.watch()
-
-          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
-
-          return modifiedConfig
+          return specs.storeSpecFiles()
+          .return({
+            specs,
+            cfg: modifiedConfig,
+          })
         })
       })
     })

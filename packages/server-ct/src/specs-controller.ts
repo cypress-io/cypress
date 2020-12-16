@@ -1,3 +1,4 @@
+import Bluebird from 'bluebird'
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
 import { findSpecsOfType } from '@packages/server/lib/util/specs'
@@ -5,20 +6,21 @@ import { findSpecsOfType } from '@packages/server/lib/util/specs'
 type SpecFile = Cypress.Cypress['spec']
 type SpecFiles = SpecFile[]
 
-interface SpecsControllerOptions {
-  onSpecListChanged: (specFiles?: SpecFiles) => {}
+interface SpecsWatcherOptions {
+  onSpecsChanged: (specFiles: SpecFiles) => void
 }
 
-const defaultOptions = {
-  onSpecListChanged () {},
-} as SpecsControllerOptions
+const COMMON_SEARCH_OPTIONS = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
+
+// TODO: shouldn't this be on the trailing edge, not leading?
+const debounce = (fn) => _.debounce(fn, 250, { leading: true })
 
 export class SpecsController {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
-  constructor (private cypressConfig, private options) {
-    this.options = _.defaultsDeep(options, defaultOptions)
+  constructor (private cypressConfig) {
+
   }
 
   get specDirectory () {
@@ -33,30 +35,41 @@ export class SpecsController {
     }
   }
 
-  private async onChange () {
-    const newSpecs = await this.getSpecFiles()
-
-    if (_.isEqual(newSpecs, this.specFiles)) return
-
-    this.specFiles = newSpecs
-    this.options.onSpecListChanged(this.specFiles)
+  storeSpecFiles (): Bluebird<void> {
+    return this.getSpecFiles()
+    .then((specFiles) => {
+      this.specFiles = specFiles
+    })
   }
 
-  async getSpecFiles (): Promise<SpecFiles> {
-    const commonSearchOptions = ['fixturesFolder', 'supportFile', 'projectRoot', 'javascripts', 'testFiles', 'ignoreTestFiles']
-    const searchOptions = _.pick(this.cypressConfig, commonSearchOptions)
+  getSpecFiles (): Bluebird<SpecFiles> {
+    const searchOptions = _.pick(this.cypressConfig, COMMON_SEARCH_OPTIONS)
 
     searchOptions.searchFolder = this.specDirectory
 
     return findSpecsOfType(searchOptions)
   }
 
-  watch () {
-    const debounce = (fn) => _.debounce(fn, 250, { leading: true })
-
+  watch (options?: SpecsWatcherOptions) {
     this.watcher = chokidar.watch(this.cypressConfig.testFiles, this.watchOptions)
 
-    this.watcher.on('add', debounce(this.onChange.bind(this)))
-    this.watcher.on('unlink', debounce(this.onChange.bind(this)))
+    if (options?.onSpecsChanged) {
+      const onSpecsChanged = debounce(async () => {
+        const newSpecs = await this.getSpecFiles()
+
+        if (_.isEqual(newSpecs, this.specFiles)) return
+
+        this.specFiles = newSpecs
+
+        options.onSpecsChanged(newSpecs)
+      })
+
+      this.watcher.on('add', onSpecsChanged)
+      this.watcher.on('unlink', onSpecsChanged)
+    }
+  }
+
+  reset (): void {
+    this.watcher?.removeAllListeners()
   }
 }

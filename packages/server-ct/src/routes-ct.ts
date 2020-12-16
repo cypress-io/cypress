@@ -1,22 +1,24 @@
+import Debug from 'debug'
+import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
-import { Express, ErrorRequestHandler } from 'express'
-import debugFn from 'debug'
-import Project from './project-ct'
 // const files = require('@packages/server/lib/controllers/files')
 import runnerCt from '@packages/runner-ct'
 import staticPkg from '@packages/static'
+import ProjectCt from './project-ct'
+import { SpecsController } from './specs-controller'
 
-const debug = debugFn('cypress:server:routes')
+const debug = Debug('cypress:server:routes')
 
 interface InitializeRoutes {
   app: Express
+  specs: SpecsController
   config: Record<string, any>
   project: Project
   onError: (...args: unknown[]) => any
 }
 
-export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
+export function initializeRoutes ({ app, config, specs, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
   app.get('/__cypress/runner/*', (req, res) => {
@@ -48,6 +50,7 @@ export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runnerCt.serve(req, res, {
+      specs,
       config,
       project,
     })
