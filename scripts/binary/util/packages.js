@@ -160,11 +160,13 @@ const copyAllToDist = function (distDir) {
 
   return fs.ensureDirAsync(distDir)
   .then(generateGlobs)
-  .then((globs) => {
-    debug('copying the following globs %o', globs)
+  .then((publicPkgs) => {
+    return glob('./packages/*').then((privatePkgs) => {
+      console.log('Copying the following public npm packages', publicPkgs)
+      console.log('Copying the following private packages', privatePkgs)
 
-    return glob('./packages/*')
-    .then((pkgs) => pkgs.concat(globs))
+      return privatePkgs.concat(publicPkgs)
+    })
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)
