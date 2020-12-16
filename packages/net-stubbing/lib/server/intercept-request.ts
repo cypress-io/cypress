@@ -34,7 +34,7 @@ const debug = Debug('cypress:net-stubbing:server:intercept-request')
 export const InterceptRequest: RequestMiddleware = function () {
   if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
     // send positive CORS preflight response
-    return sendStaticResponse(this.res, {
+    return sendStaticResponse(this, {
       statusCode: 204,
       headers: {
         'access-control-max-age': '-1',
@@ -43,7 +43,7 @@ export const InterceptRequest: RequestMiddleware = function () {
         'access-control-allow-methods': this.req.headers['access-control-request-method'] || '*',
         'access-control-allow-headers': this.req.headers['access-control-request-headers'] || '*',
       },
-    }, this.onResponse)
+    })
   }
 
   const route = getRouteForRequest(this.netStubbingState.routes, this.req)
