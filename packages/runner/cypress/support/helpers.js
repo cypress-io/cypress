@@ -273,11 +273,13 @@ function createCypress (defaultOptions = {}) {
 
         const c = _.extend({}, Cypress.config(), {
           isTextTerminal: false,
-          spec: {
-            relative: 'relative/path/to/spec.js',
-            absolute: '/absolute/path/to/spec.js',
-            name: 'empty_spec.js',
-          },
+          specs: [
+            {
+              relative: 'relative/path/to/spec.js',
+              absolute: '/absolute/path/to/spec.js',
+              name: 'empty_spec.js',
+            },
+          ],
         }, opts.config)
 
         c.state = {}
