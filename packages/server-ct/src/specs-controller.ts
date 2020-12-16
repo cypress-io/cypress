@@ -1,5 +1,3 @@
-/// <reference path="../../../cli/types/cypress.d.ts" />
-
 import chokidar, { FSWatcher } from 'chokidar'
 import _ from 'lodash'
 import { findSpecsOfType } from '@packages/server/lib/util/specs'
