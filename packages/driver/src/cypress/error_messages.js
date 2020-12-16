@@ -820,7 +820,9 @@ module.exports = {
       docsUrl: 'https://on.cypress.io/cannot-execute-commands-outside-test',
     },
     private_custom_command_interface: 'You cannot use the undocumented private command interface: `{{method}}`',
-    retry_timed_out: 'Timed out retrying: ',
+    retry_timed_out ({ ms }) {
+      return `Timed out retrying after ${ms}ms: `
+    },
   },
 
   mocha: {
