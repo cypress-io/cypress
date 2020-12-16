@@ -1,12 +1,7 @@
 const fs = require('fs')
 const glob = require('glob')
 const minimist = require('minimist')
-// const { workspaces } = require('@packages/root')
 const path = require('path')
-
-// const { packages } = workspaces
-
-// const PATH_REGEX = /('|")(.*\.\.\/)(.+\/)(lib|src)/g
 
 const args = minimist(process.argv.slice(2))
 
