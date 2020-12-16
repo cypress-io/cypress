@@ -10,6 +10,7 @@ import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
+import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
   return spec ? `${prefix}/${namespace}/iframes/${spec.relative}` : ''
@@ -20,23 +21,17 @@ export default class Iframes extends Component {
   _disposers = []
 
   render () {
-    const { width, height, scale, marginLeft, headerHeight, scriptError } = this.props.state
+    const { width, height, scriptError } = this.props.state
 
     return (
       <div
-        className={cs('iframes-container', { 'has-error': !!scriptError })}
-        style={{
-          top: headerHeight,
-          left: this.props.state.absoluteReporterWidth,
-        }}
+        className={cs('iframes-ct-container', { 'has-error': !!scriptError })}
       >
         <div
           ref='container'
           className='size-container'
           style={{
-            marginLeft,
             height,
-            transform: `scale(${scale})`,
             width,
           }}
         />
