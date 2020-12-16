@@ -1451,6 +1451,12 @@ module.exports = {
             chromePolicyCheck.run(onWarning)
           }
 
+          if (options.componentTesting) {
+            specs = specs.filter((spec) => {
+              return spec.specType === 'component'
+            })
+          }
+
           const runAllSpecs = ({ beforeSpecRun, afterSpecRun, runUrl, parallel }) => {
             return this.runSpecs({
               beforeSpecRun,
