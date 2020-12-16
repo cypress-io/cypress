@@ -9,7 +9,6 @@ import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
-import specsStore from '../specs/specs-store'
 
 const ws = client.connect({
   path: '/__socket.io',
@@ -19,10 +18,6 @@ const ws = client.connect({
 
 ws.on('connect', () => {
   ws.emit('runner:connected')
-
-  ws.emit('get:component:specs', (specs) => {
-    specsStore.setSpecs(specs)
-  })
 })
 
 const driverToReporterEvents = 'paused before:firefox:force:gc after:firefox:force:gc'.split(' ')
@@ -92,7 +87,7 @@ const eventManager = {
     })
 
     ws.on('component:specs:changed', (specs) => {
-      specsStore.setSpecs(specs)
+      state.setSpecs(specs)
     })
 
     _.each(socketRerunEvents, (event) => {
@@ -194,8 +189,6 @@ const eventManager = {
 
     const $window = $(window)
 
-    $window.on('hashchange', rerun)
-
     // when we actually unload then
     // nuke all of the cookies again
     // so we clear out unload
@@ -229,7 +222,7 @@ const eventManager = {
     // expose Cypress globally
     window.Cypress = Cypress
 
-    this._addListeners()
+    this._addCypressListeners(Cypress)
 
     ws.emit('watch:test:file', config.spec)
   },
@@ -289,7 +282,7 @@ const eventManager = {
     })
   },
 
-  _addListeners () {
+  _addCypressListeners (Cypress) {
     Cypress.on('message', (msg, data, cb) => {
       ws.emit('client:request', msg, data, cb)
     })
