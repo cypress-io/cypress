@@ -74,7 +74,7 @@ const getLocalPublicPackages = function (basePath = process.cwd()) {
   const addDepsByGlob = function (pattern) {
     return Promise.resolve(glob(pattern, { cwd: basePath }))
     .map((pkgPath) => {
-      return fs.readJsonAsync(pkgPath)
+      return fs.readJsonAsync(path.join(basePath, pkgPath))
       .then((json) => {
         let { dependencies, devDependencies, name } = json
 
