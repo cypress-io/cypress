@@ -66,7 +66,9 @@ const create = (Cypress, state, timeout, clearTimeout, whenStable, finishAsserti
 
         ({ error, onFail } = options)
 
-        const prependMsg = $errUtils.errByPath('miscellaneous.retry_timed_out').message
+        const prependMsg = $errUtils.errByPath('miscellaneous.retry_timed_out', {
+          ms: options._runnableTimeout,
+        }).message
 
         const retryErrProps = $errUtils.modifyErrMsg(error, prependMsg, (msg1, msg2) => {
           return `${msg2}${msg1}`
