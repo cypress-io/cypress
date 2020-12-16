@@ -4975,7 +4975,7 @@ declare namespace Cypress {
     dimensions?: Dimensions
   }
 
-  interface FileObject {
+  interface FileObject extends NodeEventEmitter {
     filePath: string
     outputPath: string
     shouldWatch: boolean
