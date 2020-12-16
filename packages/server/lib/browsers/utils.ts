@@ -236,6 +236,12 @@ export = {
 
       debug('found browsers %o', { browsers })
 
+      if (!process.versions.electron) {
+        debug('not in electron, skipping adding electron browser')
+
+        return browsers
+      }
+
       // @ts-ignore
       const version = process.versions.chrome || ''
 

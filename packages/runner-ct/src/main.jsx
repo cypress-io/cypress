@@ -1,10 +1,11 @@
-import { action, configure } from 'mobx'
+import { autorun, action, configure } from 'mobx'
 import React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 
 import State from './lib/state'
 import Container from './app/container'
+import util from './lib/util'
 
 // to support async/await
 import 'regenerator-runtime/runtime'
@@ -23,7 +24,30 @@ const Runner = {
         configState.reporterWidth = 0
       }
 
+      configState.specs = config.specs
+
       const state = new State(configState)
+
+      const setSpecByUrlHash = () => {
+        const specPath = util.specPath()
+
+        if (specPath) {
+          state.updateSpecByUrl(specPath)
+        }
+      }
+
+      setSpecByUrlHash()
+
+      // anytime the hash changes, see if we need to set a new spec
+      window.addEventListener('hashchange', setSpecByUrlHash)
+
+      autorun(() => {
+        const { spec } = state
+
+        if (spec) {
+          util.updateSpecPath(spec.name)
+        }
+      })
 
       Runner.state = state
       Runner.configureMobx = configure

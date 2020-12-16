@@ -292,6 +292,12 @@ module.exports = {
       options.config = {}
     }
 
+    // TODO: this is a quick hack to trick cypress into
+    // thinking experimental component testing is enabled
+    if (options.componentTesting) {
+      options.config.experimentalComponentTesting = true
+    }
+
     _.extend(options.config, configValues)
 
     // remove them from the root options object

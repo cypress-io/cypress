@@ -1,6 +1,5 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import specsStore from './specs-store'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
 
@@ -8,7 +7,8 @@ import { SpecItem } from './spec-item'
 class SpecsList extends Component {
   render () {
     const { state } = this.props
-    const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : []
+
+    const specGroups = state.specs.length ? makeSpecHierarchy(state.specs) : []
 
     return (
       <div className="specs-list">

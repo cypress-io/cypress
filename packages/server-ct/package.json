@@ -4,9 +4,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "prestart": "node scripts/checkExample.js",
-    "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/example",
-    "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/example",
+    "cypress:open": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/../../npm/vue",
+    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/../../npm/vue",
+    "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/../../npm/vue",
+    "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/../../npm/vue",
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
   },
   "dependencies": {

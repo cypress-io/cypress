@@ -1,14 +1,14 @@
 // copied from server/lib/socket.js
 
-import _ from 'lodash'
-import _debug from 'debug'
 import Bluebird from 'bluebird'
-import socketIo from '@packages/socket'
+import _debug from 'debug'
+import _ from 'lodash'
+import errors from '@packages/server/lib/errors'
 import { getUserEditor, setUserEditor } from '@packages/server/lib/util/editors'
 import { openFile } from '@packages/server/lib/util/file-opener'
 import open from '@packages/server/lib/util/open'
-import errors from '@packages/server/lib/errors'
 import specsUtil from '@packages/server/lib/util/specs'
+import socketIo from '@packages/socket'
 
 const debug = _debug('cypress:server-ct:socket')
 
@@ -226,21 +226,6 @@ export class Socket {
         socket.inRunnerRoom = true
 
         return socket.join('runner')
-      })
-
-      // TODO: this is just an example... the specs
-      // likely need to be cached in memory and served
-      // by the project controller, and the watchers
-      // need to update the specs in memory whenever
-      // they change to avoid querying the filesystem
-      // everytime the specs change
-      socket.on('get:component:specs', (cb: (...vals: unknown[]) => void) => {
-        // @ts-ignore - let's not attempt to TS all the things in packages/server
-        return specsUtil.find(config)
-        .filter((spec: Cypress.Cypress['spec']) => {
-          return spec.specType === 'component'
-        })
-        .then(cb)
       })
 
       // TODO: what to do about runner disconnections?

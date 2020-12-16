@@ -1,7 +1,10 @@
-const _ = require('lodash')
-const path = require('path')
-const send = require('send')
-const debug = require('debug')('cypress:server:runner-ct')
+import Debug from 'debug'
+import _ from 'lodash'
+import path from 'path'
+import send from 'send'
+import { SpecsController } from '@packages/server-ct/src/specs-controller'
+
+const debug = Debug('cypress:server:runner-ct')
 
 function dist (...args) {
   const paths = [__dirname, '..', 'dist'].concat(args)
@@ -24,7 +27,8 @@ module.exports = {
   },
 
   serve (req, res, options) {
-    let { config, project } = options
+    let { config } = options
+    const { specs, project } = options
 
     const { browser } = project.getCurrentSpecAndBrowser()
 
@@ -37,6 +41,7 @@ module.exports = {
     .clone()
     .extend({
       browser,
+      specs: specs.specFiles,
     })
     .value()
 
