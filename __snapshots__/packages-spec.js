@@ -31,12 +31,12 @@ exports['packages can copy files with local npm dependencies 1'] = {
   "[cwd]": {
     "npm": {
       "package-a": {
-        "package.json": "{\"main\":\"src/main.js\",\"name\":\"@cypress/package-a\",\"files\":[\"lib\"]}",
+        "package.json": "{\"main\":\"src/index.js\",\"name\":\"@cypress/package-a\",\"files\":[\"lib\"]}",
         "src": {
-          "main.js": "console.error()"
+          "index.js": "console.error()"
         },
         "lib": {
-          "foo.js": "{}"
+          "bar.js": "{}"
         }
       }
     },
@@ -55,12 +55,12 @@ exports['packages can copy files with local npm dependencies 1'] = {
   "tmp": {
     "npm": {
       "package-a": {
-        "package.json": "{\"main\":\"src/main.js\",\"name\":\"@cypress/package-a\",\"files\":[\"lib\"]}",
+        "package.json": "{\"main\":\"src/index.js\",\"name\":\"@cypress/package-a\",\"files\":[\"lib\"]}",
         "src": {
-          "main.js": "console.error()"
+          "index.js": "console.error()"
         },
         "lib": {
-          "foo.js": "{}"
+          "bar.js": "{}"
         }
       }
     },
