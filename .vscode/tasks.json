@@ -4,6 +4,20 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "rename yarn workspace packages",
+      "type": "shell",
+      "command": "node ./scripts/rename-workspace-packages --file ${file}",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
       "label": "decaffeinate-bulk file",
       "type": "shell",
       "command": "yarn decaffeinate-bulk convert --file ${file}",
