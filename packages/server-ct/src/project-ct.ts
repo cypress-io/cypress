@@ -24,7 +24,7 @@ const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-export default class Project {
+export default class ProjectCt {
   cfg: any
   private projectRoot: string
   private watchers: Watchers

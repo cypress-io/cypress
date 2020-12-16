@@ -1,9 +1,9 @@
 import browsers from '@packages/server/lib/browsers'
-import Project from './src/project-ct'
+import ProjectCt from './src/project-ct'
 
 // Partial because there are probably other options that are not included in this type.
 export const start = async (projectRoot: string, options: unknown) => {
-  const project = new Project(projectRoot)
+  const project = new ProjectCt(projectRoot)
 
   const { cfg } = await project.open(options)
 

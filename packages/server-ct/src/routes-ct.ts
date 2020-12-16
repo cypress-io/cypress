@@ -14,7 +14,7 @@ interface InitializeRoutes {
   app: Express
   specs: SpecsController
   config: Record<string, any>
-  project: Project
+  project: ProjectCt
   onError: (...args: unknown[]) => any
 }
 
