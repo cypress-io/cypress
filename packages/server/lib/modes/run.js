@@ -1129,20 +1129,19 @@ module.exports = {
 
       await runEvents.execute('after:spec', config, _.cloneDeep(spec), _.cloneDeep(results))
 
-      const videoExists = startedVideoCapture ? await fs.pathExists(videoName) : false
+      const videoExists = videoName ? await fs.pathExists(videoName) : false
 
       if (startedVideoCapture && !videoExists) {
         // the video file no longer exists at the path where we expect it,
         // likely because the user deleted it in the after:spec event
         errors.warning('VIDEO_DOESNT_EXIST', videoName)
+
+        results.video = null
       }
 
-      // QUESTION: null out results.video? it doesn't happen when video capture fails
-      // what happens to dashboard results when video capture fails?
-
       const hasFailingTests = _.get(stats, 'failures') > 0
-      // we should upload the video if we upload on passes (the default)
-      // or if we have any failures and have started the video
+      // we should upload the video if the video still exists and we upload on
+      // passes (the default) or if we have any failures and have started the video
       const shouldUploadVideo = videoExists && (videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests)))
 
       results.shouldUploadVideo = shouldUploadVideo
