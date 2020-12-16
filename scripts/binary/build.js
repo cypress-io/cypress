@@ -139,7 +139,15 @@ const buildCypressApp = function (platform, version, options = {}) {
     })
   }
 
-  const npmInstallPackages = function () {
+  const npmInstallPublicPackages = function () {
+    log('#npmInstallPackages')
+
+    const pathToPackages = distDir('npm', '*')
+
+    return packages.npmInstallAll(pathToPackages)
+  }
+
+  const npmInstallPrivatePackages = function () {
     log('#npmInstallPackages')
 
     const pathToPackages = distDir('packages', '*')
@@ -441,7 +449,8 @@ require('./packages/server')\
   .then(cleanupPlatform)
   .then(buildPackages)
   .then(copyPackages)
-  .then(npmInstallPackages)
+  .then(npmInstallPublicPackages)
+  .then(npmInstallPrivatePackages)
   .then(createRootPackage)
   .then(removeTypeScript)
   .then(cleanJs)
