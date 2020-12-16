@@ -65,7 +65,7 @@ const addProject = (path) => {
 
 // TODO: refactor to take options object
 const runSpecs = (project, specs, browser, specFilter) => {
-  specsStore.setChosenSpec(specs[0])
+  specsStore.setChosenSpec(specs && specs.length && specs[0] || null)
   project.setChosenBrowser(browser)
 
   const launchBrowser = () => {
