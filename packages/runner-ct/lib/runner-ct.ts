@@ -1,7 +1,9 @@
-const _ = require('lodash')
-const path = require('path')
-const send = require('send')
-const debug = require('debug')('cypress:server:runner-ct')
+import Debug from 'debug'
+import _ from 'lodash'
+import path from 'path'
+import send from 'send'
+
+const debug = Debug('cypress:server:runner-ct')
 
 function dist (...args) {
   const paths = [__dirname, '..', 'dist'].concat(args)
@@ -13,7 +15,7 @@ const getPathToDist = (...args) => {
   return dist(...args)
 }
 
-module.exports = {
+export default {
   getPathToDist,
 
   handle (req, res) {
