@@ -61,6 +61,7 @@ export const InterceptRequest: RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
+    onError: this.onError,
     onResponse: (incomingRes, resStream) => {
       setDefaultHeaders(this.req, incomingRes)
       this.onResponse(incomingRes, resStream)
@@ -119,7 +120,7 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
 
     return ensureBody(() => {
       emitReceived()
-      sendStaticResponse(request.res, staticResponse, request.onResponse!)
+      sendStaticResponse(request, staticResponse)
     })
   }
 
@@ -193,7 +194,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   if (frame.staticResponse) {
     await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
-    return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
+    return sendStaticResponse(backendRequest, frame.staticResponse)
   }
 
   backendRequest.continueRequest()

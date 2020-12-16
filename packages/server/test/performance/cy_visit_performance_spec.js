@@ -29,7 +29,7 @@ context('cy.visit performance tests', function () {
 
   e2e.it('passes', {
     onStdout,
-    spec: 'fast_visit_spec.coffee',
+    spec: 'fast_visit_spec.js',
     snapshot: true,
     onRun (exec, browser, ctx) {
       return exec({

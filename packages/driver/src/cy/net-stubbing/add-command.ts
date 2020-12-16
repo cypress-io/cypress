@@ -254,6 +254,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       handler,
       hitCount: 0,
       requests: {},
+      command: state('current'),
     }
 
     if (alias) {
