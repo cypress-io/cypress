@@ -407,7 +407,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -441,13 +441,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying after 100ms: expected true to be false",
+                "message": "Timed out retrying: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -523,7 +523,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -645,7 +645,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -708,7 +708,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
@@ -971,7 +971,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1005,13 +1005,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying after 100ms: expected true to be false",
+                "message": "Timed out retrying: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -1087,7 +1087,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1209,7 +1209,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1272,7 +1272,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
@@ -1535,7 +1535,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1569,13 +1569,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying after 100ms: expected true to be false",
+                "message": "Timed out retrying: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -1651,7 +1651,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1773,7 +1773,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -1836,7 +1836,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
@@ -2157,7 +2157,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -2281,7 +2281,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
@@ -2602,7 +2602,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -2726,7 +2726,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
@@ -3047,7 +3047,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     },
     {
       "stats": {
@@ -3171,7 +3171,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
         "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_retrying_spec.js",
         "specType": "integration"
       },
-      "shouldUploadVideo": true
+      "shouldUploadVideo": false
     }
   ],
   "browserPath": "path/to/browser",
