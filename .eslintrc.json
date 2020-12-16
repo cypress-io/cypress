@@ -6,6 +6,9 @@
     "plugin:@cypress/dev/general"
   ],
   "rules": {
+    "@typescript-eslint/no-var-requires": "off",
+    "no-useless-constructor": "off",
+    "@typescript-eslint/no-useless-constructor": "off",
     "prefer-spread": "off",
     "prefer-rest-params": "off"
   },
