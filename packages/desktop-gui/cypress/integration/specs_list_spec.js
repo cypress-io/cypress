@@ -239,7 +239,7 @@ describe('Specs List', function () {
       })
 
       context('displays list of specs', function () {
-        it('lists main folders of specs', function () {
+        it('lists main folders of specs', () => {
           cy.get('.folder.level-0').should('have.length', 2)
           cy.contains('.folder.level-0', 'integration')
           cy.contains('.folder.level-0', 'component')
@@ -253,9 +253,20 @@ describe('Specs List', function () {
           cy.get('.folder.level-0 .file.level-1 a').contains('app_spec.coffee')
         })
 
-        it('lists folder with \'.\'', function () {
+        it('lists folder with "."', function () {
           cy.get('.file').should('have.length', this.numSpecs)
           cy.get('.folder').should('have.length', 10)
+        })
+
+        it('lists files after folders when in same directory', () => {
+          // 📁 bar
+          // 📁 foo
+          // app
+          cy.get('.list-as-table.integration')
+          .find('li').first().should('contain', 'accounts')
+
+          cy.get('.list-as-table.integration')
+          .find('li').last().should('contain', 'app_spec')
         })
       })
 
@@ -290,10 +301,10 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', this.numSpecs)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
-          cy.get('.file').should('have.length', 6)
+          cy.get('.file').should('have.length', 7)
 
           cy.get(lastExpandedFolderSelector).click()
           cy.get('.file').should('have.length', 5)
@@ -317,7 +328,6 @@ describe('Specs List', function () {
           cy.get('.file').should('have.length', 1)
 
           cy.get(lastExpandedFolderSelector).click()
-
           cy.get('.file').should('have.length', 0)
         })
       })

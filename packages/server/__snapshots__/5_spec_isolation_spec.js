@@ -158,7 +158,6 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 `
 
 exports['e2e spec_isolation fails [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -442,13 +441,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying: expected true to be false",
+                "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -718,11 +717,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1006,13 +1005,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying: expected true to be false",
+                "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -1282,11 +1281,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation fails [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -1570,13 +1569,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           ],
           "state": "failed",
           "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
-          "displayError": "AssertionError: Timed out retrying: expected true to be false\n      [stack trace lines]",
+          "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
               "state": "failed",
               "error": {
                 "name": "AssertionError",
-                "message": "Timed out retrying: expected true to be false",
+                "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
                   "line": 3,
@@ -1846,11 +1845,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -2291,11 +2290,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -2736,11 +2735,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }
 
 exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
-  "status": "finished",
   "startedTestsAt": "2018-02-01T20:14:19.323Z",
   "endedTestsAt": "2018-02-01T20:14:19.323Z",
   "totalDuration": 5555,
@@ -3181,5 +3180,6 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
   "osName": "FooOS",
   "osVersion": "1234",
   "cypressVersion": "9.9.9",
-  "config": {}
+  "config": {},
+  "status": "finished"
 }

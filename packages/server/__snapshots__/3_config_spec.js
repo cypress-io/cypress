@@ -7,14 +7,14 @@ exports['e2e config provides various environment details 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (config_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/config_passing_spec.coffee                                     │
+  │ Specs:      1 found (config_passing_spec.js)                                                   │
+  │ Searched:   cypress/integration/config_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  config_passing_spec.coffee                                                      (1 of 1)
+  Running:  config_passing_spec.js                                                          (1 of 1)
 
 
   Cypress static methods + props
@@ -41,14 +41,14 @@ exports['e2e config provides various environment details 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     config_passing_spec.coffee                                                       │
+  │ Spec Ran:     config_passing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/config_passing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -58,7 +58,7 @@ exports['e2e config provides various environment details 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  config_passing_spec.coffee               XX:XX        6        6        -        -        - │
+  │ ✔  config_passing_spec.js                   XX:XX        6        6        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        6        6        -        -        -  
 
@@ -92,7 +92,7 @@ exports['e2e config applies defaultCommandTimeout globally 1'] = `
 
   1) short defaultCommandTimeout
        times out looking for a missing element:
-     AssertionError: Timed out retrying: Expected to find element: \`#bar\`, but never found it.
+     AssertionError: Timed out retrying after 1000ms: Expected to find element: \`#bar\`, but never found it.
       [stack trace lines]
 
 

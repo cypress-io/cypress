@@ -136,7 +136,7 @@ describe('e2e fetch polyfill', () => {
   })
 
   e2e.it('passes', {
-    spec: 'fetch_spec.coffee',
+    spec: 'fetch_spec.js',
     snapshot: false,
     config: {
       experimentalFetchPolyfill: true,
@@ -153,7 +153,7 @@ describe('e2e no fetch polyfill', () => {
   })
 
   e2e.it('passes', {
-    spec: 'fetch_no_polyfill_spec.coffee',
+    spec: 'fetch_no_polyfill_spec.js',
     snapshot: false,
     config: {
       experimentalFetchPolyfill: false,
