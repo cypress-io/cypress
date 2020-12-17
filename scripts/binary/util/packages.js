@@ -9,7 +9,6 @@ const la = require('lazy-ass')
 const check = require('check-more-types')
 const execa = require('execa')
 const R = require('ramda')
-const os = require('os')
 const prettyMs = require('pretty-ms')
 const pluralize = require('pluralize')
 const debug = require('debug')('cypress:binary')
@@ -262,68 +261,12 @@ const npmInstallAll = function (pathToPackages) {
   })
 }
 
-const removePackageJson = function (filename) {
-  if (filename.endsWith('/package.json')) {
-    return path.dirname(filename)
-  }
-
-  return filename
-}
-
-const ensureFoundSomething = function (files) {
-  if (files.length === 0) {
-    throw new Error('Could not find any files')
-  }
-
-  return files
-}
-
-const symlinkType = function () {
-  if (os.platform() === 'win32') {
-    return 'junction'
-  }
-
-  return 'dir'
-}
-
-const symlinkAll = function (pathToDistPackages, pathTo) {
-  console.log('symlink these packages', pathToDistPackages)
-  la(check.unemptyString(pathToDistPackages),
-    'missing paths to dist packages', pathToDistPackages)
-
-  const symlink = function (pkg) {
-    // console.log(pkg, dist)
-    // strip off the initial './'
-    // ./packages/foo -> node_modules/@packages/foo
-    pkg = removePackageJson(pkg)
-    const dest = pathTo('node_modules', '@packages', path.basename(pkg))
-    const relativeDest = path.relative(`${dest}/..`, pkg)
-
-    const type = symlinkType()
-
-    console.log(relativeDest, 'link ->', dest, 'type', type)
-
-    return fs.ensureSymlinkAsync(relativeDest, dest, symlinkType)
-    .catch((err) => {
-      if (!err.message.includes('EEXIST')) {
-        throw err
-      }
-    })
-  }
-
-  return glob(pathToDistPackages)
-  .then(ensureFoundSomething)
-  .map(symlink)
-}
-
 module.exports = {
   runAllBuild,
 
   copyAllToDist,
 
   npmInstallAll,
-
-  symlinkAll,
 
   runAllCleanJs,
 
