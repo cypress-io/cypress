@@ -220,7 +220,7 @@ class Project extends EE {
   }
 
   checkSupportFile (cfg) {
-    let supportFile = cfg.supportFile
+    const supportFile = cfg.supportFile
 
     if (supportFile) {
       return fs.pathExists(supportFile)
