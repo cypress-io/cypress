@@ -16,7 +16,7 @@ import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
 import shortcuts from './lib/shortcuts'
 
-import Header from './header/header'
+import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
 type ReporterProps = {
@@ -30,6 +30,7 @@ type ReporterProps = {
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
   spec: Cypress.Cypress['spec']
+  renderHeader?: (props: ReporterHeaderProps) => JSX.Element
 } & ({
   runMode: 'single',
 } | {
@@ -68,11 +69,21 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState, runMode, runnablesStore, scroller, error, events, statsStore } = this.props
+    const {
+      appState,
+      runMode,
+      runnablesStore,
+      scroller,
+      error,
+      events,
+      statsStore,
+      renderHeader = (props) => <Header {...props} />,
+    } = this.props
 
     return (
       <div className={cs('reporter', { multiSpecs: runMode === 'multi' })}>
-        <Header appState={appState} statsStore={statsStore} />
+        {renderHeader({ appState, statsStore })}
+
         {this.props.runMode === 'single' ? (
           <Runnables
             appState={appState}
