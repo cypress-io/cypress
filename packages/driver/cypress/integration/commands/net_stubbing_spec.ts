@@ -597,6 +597,9 @@ describe('network stubbing', { retries: 2 }, function () {
 
     // @see https://github.com/cypress-io/cypress/issues/9599
     context('cors preflight', function () {
+      // a different domain from the page own domain
+      // NOTE: this domain is redirected back to the local host test server
+      // using "hosts" setting in the "cypress.json" file
       const corsUrl = 'http://diff.foobar.com:3501/no-cors'
 
       before(() => {
