@@ -16,6 +16,7 @@ const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')
 const videoCapture = require('../video_capture')
+const runEvents = require('../plugins/run_events')
 const fs = require('../util/fs')
 const env = require('../util/env')
 const trash = require('../util/trash')
@@ -1235,7 +1236,7 @@ module.exports = {
         displaySpecHeader(spec.name, index + 1, length, estimated)
       }
 
-      return this.runSpec(spec, options, estimated)
+      return this.runSpec(config, spec, options, estimated)
       .get('results')
       .tap((results) => {
         return debug('spec results %o', results)
@@ -1303,7 +1304,7 @@ module.exports = {
     })
   },
 
-  runSpec (spec = {}, options = {}, estimated) {
+  runSpec (config, spec = {}, options = {}, estimated) {
     const { project, browser, onError } = options
 
     const { isHeadless } = browser
@@ -1321,17 +1322,19 @@ module.exports = {
 
     const screenshots = []
 
+    return runEvents.execute('before:spec', config, spec)
+    .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and
     // finishes running all of the tests.
     // we're using an event emitter interface
     // to gracefully handle this in promise land
-
-    return this.maybeStartVideoRecording({
-      spec,
-      browser,
-      video: options.video,
-      videosFolder: options.videosFolder,
+      return this.maybeStartVideoRecording({
+        spec,
+        browser,
+        video: options.video,
+        videosFolder: options.videosFolder,
+      })
     })
     .then((videoRecordProps = {}) => {
       return Promise.props({
