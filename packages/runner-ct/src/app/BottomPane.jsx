@@ -8,8 +8,9 @@ export const BottomPane = observer(
   function BottomPane ({ state, config, onResizingEnabledChange, eventManager }) {
     const headerRef = React.useRef(null)
     const paneContainerRef = React.useRef(null)
-    /** @type {React.Ref<number | null>} */
-    const previousPaneHeight = React.useRef(null)
+    const [previousPaneHeight, setPreviousPaneHeight] = React.useState(null)
+
+    const isCollapsed = previousPaneHeight !== null
 
     const handleCollapse = React.useCallback(() => {
       if (!headerRef.current || !paneContainerRef.current) {
@@ -27,16 +28,16 @@ export const BottomPane = observer(
         paneElement.style.height = `${newHeight}px`
       }
 
-      if (previousPaneHeight.current !== null) {
+      if (isCollapsed) {
         onResizingEnabledChange(true)
-        setPaneHeight(previousPaneHeight.current)
-        previousPaneHeight.current = null
+        setPaneHeight(previousPaneHeight)
+        setPreviousPaneHeight(null)
       } else {
         onResizingEnabledChange(false)
-        previousPaneHeight.current = paneElement.getBoundingClientRect().height
+        setPreviousPaneHeight(paneElement.getBoundingClientRect().height)
         setPaneHeight(headerRef.current.getBoundingClientRect().height)
       }
-    }, [])
+    }, [previousPaneHeight])
 
     return (
       <div ref={paneContainerRef} className="ct-bottom-pane" style={{ height: 12 }}>
@@ -54,6 +55,7 @@ export const BottomPane = observer(
               <ReporterHeader
                 {...props}
                 ref={headerRef}
+                isCollapsed={isCollapsed}
                 onCollapse={handleCollapse}
               />
             )}

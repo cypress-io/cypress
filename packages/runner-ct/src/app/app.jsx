@@ -17,13 +17,20 @@ import './app.scss'
 const App = observer(
   function App (props) {
     const { state, eventManager, config } = props
-    const [resizingEnabled, setResizingEnabled] = React.useState(false)
+    const [resizingEnabled, setResizingEnabled] = React.useState(true)
 
     return (
       <>
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
           <SpecsList state={state} />
-          <SplitPane allowResize={resizingEnabled} split="horizontal" primary="second" defaultSize="40%" minSize="20%" maxSize="80%">
+          <SplitPane
+            allowResize={resizingEnabled}
+            split="horizontal"
+            primary="second"
+            defaultSize="40%"
+            minSize="20%"
+            maxSize="80%"
+          >
             <div className="runner runner-ct container">
               <Header {...props} />
               <Iframes {...props} />

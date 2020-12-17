@@ -16,6 +16,25 @@
   .reporter { 
     height: 100%;
     width: 100%;
+    
+    .collapse-reporter-btn {
+      width: auto;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+
+      svg {
+        margin-right: 4px;
+        transition: transform .2s ease-in-out;
+      }
+
+      &.collapsed {
+        svg { 
+          transform: rotate(180deg);
+        }
+      }
+    }
   }
 }
 
