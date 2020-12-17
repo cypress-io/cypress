@@ -5,7 +5,7 @@ const path = require('path')
 const check = require('check-more-types')
 const debug = require('debug')('cypress:server:specs')
 const minimatch = require('minimatch')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 const pluralize = require('pluralize')
 const glob = require('./glob')
 const Table = require('cli-table3')
@@ -168,7 +168,7 @@ function findSpecsOfType (searchOptions, specPattern) {
     })
   }
 
-  return Promise.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
+  return Bluebird.mapSeries(testFilesPatterns, findOnePattern).then(_.flatten)
 }
 
 /**
@@ -235,7 +235,7 @@ const find = (config, specPattern) => {
     console.error(table.toString())
   }
 
-  return Promise.all([
+  return Bluebird.all([
     findIntegrationSpecs(),
     findComponentSpecs(),
   ])

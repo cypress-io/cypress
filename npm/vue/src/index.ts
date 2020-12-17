@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+import Vue from 'vue'
 import {
   createLocalVue,
   mount as testUtilsMount,
@@ -14,8 +15,7 @@ const defaultOptions: (keyof MountOptions)[] = [
 ]
 
 function checkMountModeEnabled () {
-  // @ts-ignore
-  if (Cypress.spec.specType !== 'component') {
+  if (!Cypress.spec.relative.includes('cypress/component')) {
     throw new Error(
       `In order to use mount or unmount functions please place the spec in component folder`,
     )
@@ -70,17 +70,16 @@ const installMixins = (Vue, options) => {
   }
 }
 
-// @ts-ignore
-const hasStore = ({ store }: { store: object }) => store && store._vm
+const hasStore = ({ store }: { store: any }) => store && store._vm // @ts-ignore
 
-const forEachValue = (obj: object, fn: Function) => {
+const forEachValue = <T>(obj: Record<string, T>, fn: (value: T, key: string) => void) => {
   return Object.keys(obj).forEach((key) => fn(obj[key], key))
 }
 
 const resetStoreVM = (Vue, { store }) => {
   // bind store public getters
   store.getters = {}
-  const wrappedGetters = store._wrappedGetters
+  const wrappedGetters = store._wrappedGetters as Record<string, (store: any) => void>
   const computed = {}
 
   forEachValue(wrappedGetters, (fn, key) => {
@@ -120,13 +119,13 @@ type VueComponent = Vue.ComponentOptions<any> | Vue.VueConstructor
  *
  * @interface ComponentOptions
  */
-interface ComponentOptions {}
+type ComponentOptions = Record<string, unknown>
 
 // local placeholder types
-type VueLocalComponents = object
+type VueLocalComponents = Record<string, VueComponent>
 
 type VueFilters = {
-  [key: string]: Function
+  [key: string]: (value: string) => string
 }
 
 type VueMixin = unknown
@@ -280,6 +279,7 @@ type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUti
 // so here we extend the global Cypress namespace and its Cypress interface
 declare global {
   // eslint-disable-next-line no-redeclare
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Cypress {
       /**

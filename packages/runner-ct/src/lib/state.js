@@ -1,4 +1,5 @@
 import { action, computed, observable } from 'mobx'
+import _ from 'lodash'
 import automation from './automation'
 import eventManager from './event-manager'
 
@@ -18,6 +19,7 @@ const _defaults = {
   isLoadingUrl: false,
 
   spec: null,
+  specs: [],
 }
 
 export default class State {
@@ -66,9 +68,11 @@ export default class State {
   constructor ({
     reporterWidth = _defaults.reporterWidth,
     spec = _defaults.spec,
+    specs = _defaults.specs,
   }) {
     this.reporterWidth = reporterWidth
     this.spec = spec
+    this.specs = specs
 
     // TODO: receive chosen spec from state and set it here
   }
@@ -155,6 +159,18 @@ export default class State {
 
   @action setSpec (spec) {
     this.spec = spec
+  }
+
+  @action setSpecs (specs) {
+    this.specs = specs
+  }
+
+  @action updateSpecByUrl (specUrl) {
+    const foundSpec = _.find(this.specs, { name: specUrl })
+
+    if (foundSpec) {
+      this.spec = foundSpec
+    }
   }
 
   @action setSingleSpec (spec) {

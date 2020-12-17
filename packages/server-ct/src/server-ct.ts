@@ -1,12 +1,12 @@
-import http from 'http'
-import { promisify } from 'util'
+import Bluebird from 'bluebird'
 import _debug from 'debug'
 import express, { Request } from 'express'
-import Bluebird from 'bluebird'
-import allowDestroy from '@packages/server/lib/util/server_destroy'
+import http from 'http'
+import { promisify } from 'util'
 import templateEngine from '@packages/server/lib/template_engine'
-import { Socket } from './socket-ct'
+import allowDestroy from '@packages/server/lib/util/server_destroy'
 import { initializeRoutes } from './routes-ct'
+import { Socket } from './socket-ct'
 
 const debug = _debug('cypress:server-ct:server')
 
@@ -67,7 +67,7 @@ export class Server {
     return this._server
   }
 
-  open (config = {}, project, onError, onWarning) {
+  open (config = {}, specs, project, onError, onWarning) {
     debug('server open')
 
     return Bluebird.try(() => {
@@ -78,6 +78,7 @@ export class Server {
       this.createRoutes({
         app,
         config,
+        specs,
         // onError,
         project,
       })

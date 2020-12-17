@@ -1,30 +1,29 @@
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import { EventEmitter } from 'events'
 import _ from 'lodash'
 import path from 'path'
-import _debug from 'debug'
-const debug = _debug('cypress:server-ct:project')
-import Bluebird from 'bluebird'
-
-import specsUtil from '@packages/server/lib/util/specs'
+import { RootRunnable, RunnablesStore } from '@packages/reporter/src/runnables/runnables-store'
 import config from '@packages/server/lib/config'
-import savedState from '@packages/server/lib/saved_state'
+import cwd from '@packages/server/lib/cwd'
+import errors from '@packages/server/lib/errors'
 import plugins from '@packages/server/lib/plugins'
 import devserver from '@packages/server/lib/plugins/devserver'
-import { SpecsController } from './specs-controller'
-import Watchers from '@packages/server/lib/watchers'
-import browsers from '@packages/server/lib/browsers'
-
+import Reporter from '@packages/server/lib/reporter'
+import savedState from '@packages/server/lib/saved_state'
+import { escapeFilenameInUrl } from '@packages/server/lib/util/escape_filename'
 import fs from '@packages/server/lib/util/fs'
-import cwd from '@packages/server/lib/cwd'
 import settings from '@packages/server/lib/util/settings'
-
+import specsUtil from '@packages/server/lib/util/specs'
+import Watchers from '@packages/server/lib/watchers'
 import { Server } from './server-ct'
-import { RunnablesStore, RootRunnable } from '@packages/reporter/src/runnables/runnables-store'
+import { SpecsController } from './specs-controller'
 
+const debug = Debug('cypress:server-ct:project')
 const localCwd = cwd()
+const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
-const DEFAULT_BROWSER_NAME = 'chrome'
-
-export default class Project {
+export default class ProjectCt extends EventEmitter {
   cfg: any
   private projectRoot: string
   private watchers: Watchers
@@ -35,8 +34,10 @@ export default class Project {
   private automation: any
 
   constructor (projectRoot: string) {
-    if (!(this instanceof Project)) {
-      return new Project(projectRoot)
+    super()
+
+    if (!(this instanceof ProjectCt)) {
+      return new ProjectCt(projectRoot)
     }
 
     if (!projectRoot) {
@@ -68,14 +69,16 @@ export default class Project {
     })
     .then((cfg) => {
       return this._initPlugins(cfg, options)
-      .then((cfg) => {
+      .then(({ cfg, specs }) => {
         // return this.server.open(cfg, this, options.onError, options.onWarning)
         // @ts-ignore
-        return this.server.open(cfg, this)
+        return this.server.open(cfg, specs, this)
         .spread((port, warning) => {
           // if we didnt have a cfg.port
           // then get the port once we
           // open the server
+
+          cfg.proxyServer = null
 
           if (!cfg.port) {
             cfg.port = port
@@ -124,18 +127,6 @@ export default class Project {
       configFile: settings.pathToConfigFile(this.projectRoot, options),
     })
     .then((modifiedCfg) => {
-      if (modifiedCfg.browsers.length) {
-        return Promise.resolve(modifiedCfg)
-      }
-
-      // add chrome as a default browser if none has been specified
-      return browsers.ensureAndGetByNameOrPath(DEFAULT_BROWSER_NAME).then((browser) => {
-        modifiedCfg.browsers = [browser]
-
-        return modifiedCfg
-      })
-    })
-    .then((modifiedCfg) => {
       debug('plugin config yielded: %o', modifiedCfg)
 
       const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
@@ -150,14 +141,19 @@ export default class Project {
       // now that plugins have been initialized, we want to execute
       // the plugin event for 'devserver:config' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
+
       return specsUtil.find(modifiedConfig)
       .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'
       }).then((specs) => {
         return devserver.start({ specs, config: modifiedConfig })
         .then((port) => {
-          const specs = new SpecsController(cfg, {
-            onSpecListChanged: (specs: Cypress.Cypress['spec'][]) => {
+          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
+
+          const specs = new SpecsController(cfg)
+
+          specs.watch({
+            onSpecsChanged: (specs) => {
               // send new files to dev server
               devserver.updateSpecs(specs)
 
@@ -166,11 +162,11 @@ export default class Project {
             },
           })
 
-          specs.watch()
-
-          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
-
-          return modifiedConfig
+          return specs.storeSpecFiles()
+          .return({
+            specs,
+            cfg: modifiedConfig,
+          })
         })
       })
     })
@@ -279,7 +275,30 @@ export default class Project {
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
+    const { projectRoot } = cfg
     let { reporter } = cfg as { reporter: RunnablesStore }
+
+    // if we've passed down reporter
+    // then record these via mocha reporter
+    if (cfg.report) {
+      try {
+        Reporter.loadReporter(reporter, projectRoot)
+      } catch (err) {
+        const paths = Reporter.getSearchPathsForReporter(reporter, projectRoot)
+
+        // only include the message if this is the standard MODULE_NOT_FOUND
+        // else include the whole stack
+        const errorMsg = err.code === 'MODULE_NOT_FOUND' ? err.message : err.stack
+
+        errors.throw('INVALID_REPORTER_NAME', {
+          paths,
+          error: errorMsg,
+          name: reporter,
+        })
+      }
+
+      reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
+    }
 
     // this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
@@ -327,7 +346,6 @@ export default class Project {
             this.server.end(),
           ])
           .spread((stats = {}) => {
-            // @ts-ignore - this method deos not appear to exist
             this.emit('end', stats)
           })
         }
@@ -342,6 +360,12 @@ export default class Project {
 
   getCurrentSpecAndBrowser () {
     return _.pick(this, 'spec', 'browser')
+  }
+
+  getAutomation () {
+    return {
+      use () { },
+    }
   }
 
   // returns project config (user settings + defaults + cypress.json)
@@ -373,6 +397,94 @@ export default class Project {
       cfg.state = state
 
       return cfg
+    })
+  }
+
+  getSpecUrl (absoluteSpecPath, specType) {
+    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+
+    return this.getConfig()
+    .then((cfg) => {
+      // if we don't have a absoluteSpecPath or its __all
+      if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
+        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+
+        debug('returning url to run all specs: %s', url)
+
+        return url
+      }
+
+      // TODO:
+      // to handle both unit + integration tests we need
+      // to figure out (based on the config) where this absoluteSpecPath
+      // lives. does it live in the integrationFolder or
+      // the unit folder?
+      // once we determine that we can then prefix it correctly
+      // with either integration or unit
+      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
+      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
+
+      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+
+      return url
+    })
+  }
+
+  getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
+    const { integrationFolder, componentFolder, projectRoot } = cfg
+
+    // for now hard code the 'type' as integration
+    // but in the future accept something different here
+
+    // strip out the integration folder and prepend with "/"
+    // example:
+    //
+    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration
+    // /Users/bmann/Dev/cypress-app/.projects/cypress/integration/foo.js
+    //
+    // becomes /integration/foo.js
+
+    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+
+    const url = `/${path.join(type, path.relative(
+      folderToUse,
+      path.resolve(projectRoot, pathToSpec),
+    ))}`
+
+    debug('prefixed path for spec %o', { pathToSpec, type, url })
+
+    return url
+  }
+
+  normalizeSpecUrl (browserUrl, specUrl) {
+    const replacer = (match) => match.replace('//', '/')
+
+    return [
+      browserUrl,
+      '#/tests',
+      escapeFilenameInUrl(specUrl),
+    ].join('/').replace(multipleForwardSlashesRe, replacer)
+  }
+
+  getProjectId () {
+    return this.verifyExistence()
+    .then(() => {
+      return settings.read(this.projectRoot, this.options)
+    }).then((readSettings) => {
+      if (readSettings && readSettings.projectId) {
+        return readSettings.projectId
+      }
+
+      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
+    })
+  }
+
+  verifyExistence () {
+    return fs
+    .statAsync(this.projectRoot)
+    .return(this)
+    .catch(() => {
+      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
     })
   }
 }
