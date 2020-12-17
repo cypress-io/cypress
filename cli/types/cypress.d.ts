@@ -2570,6 +2570,11 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
+     * Allows listening to the `before:spec` event in the plugins file.
+     * @default false
+     */
+    experimentalRunEvents: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
@@ -4970,7 +4975,7 @@ declare namespace Cypress {
     dimensions?: Dimensions
   }
 
-  interface FileObject {
+  interface FileObject extends NodeEventEmitter {
     filePath: string
     outputPath: string
     shouldWatch: boolean
