@@ -30,41 +30,46 @@ class StudioCommand extends Component<StudioCommandProps> {
     return (
       <li className='studio-command-group'>
         <div className='command command-name-get command-state-passed command-type-parent'>
-          <div className='command-wrapper'>
-            <div className='command-wrapper-text'>
-              <span className='command-number'>
-                {index + 1}
-              </span>
-              <span className='command-method'>
-                get
-              </span>
-              <span className='command-message'>
-                <span className='command-message-text'>
-                  {model.selector}
+          <span>
+            <div className='command-wrapper'>
+              <div className='command-wrapper-text'>
+                <span className='command-number'>
+                  {index + 1}
                 </span>
-              </span>
-              <span className='command-controls' onClick={this.remove}>
-                <i className='far fa-times-circle' />
-              </span>
+                <span className='command-method'>
+                get
+                </span>
+                <span className='command-message'>
+                  <span className='command-message-text'>
+                    {model.selector}
+                  </span>
+                </span>
+                <span className='command-controls' onClick={this.remove}>
+                  <i className='far fa-times-circle' />
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
         </div>
         <div className='command command-name-get command-state-passed command-type-child'>
-          <div className='command-wrapper'>
-            <div className='command-wrapper-text'>
-              <span className='command-number' />
-              <span className='command-method'>
-                {model.command}
-              </span>
-              <span className='command-message'>
-                <span className='command-message-text'>
-                  {!!model.value && `"${model.value}"`}
+          <span>
+            <div className='command-wrapper'>
+              <div className='command-wrapper-text'>
+                <span className='command-number' />
+                <span className='command-method'>
+                  {model.command}
                 </span>
-              </span>
+                <span className='command-message'>
+                  <span className='command-message-text'>
+                    {!!model.value && `"${model.value}"`}
+                  </span>
+                </span>
+              </div>
             </div>
-          </div>
+          </span>
         </div>
-      </li>)
+      </li>
+    )
   }
 }
 

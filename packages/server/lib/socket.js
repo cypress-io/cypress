@@ -466,8 +466,8 @@ class Socket {
         openFile(fileDetails)
       })
 
-      socket.on('studio:save', (fileDetails, commandLog, cb) => {
-        appendStudioCommandsToTest(fileDetails, commandLog)
+      socket.on('studio:save', (fileDetails, commandLogs, cb) => {
+        appendStudioCommandsToTest(fileDetails, commandLogs)
         .then(cb)
       })
 

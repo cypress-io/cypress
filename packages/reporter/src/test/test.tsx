@@ -15,8 +15,6 @@ import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 
-import studioGif from '../../static/studio.gif'
-
 interface Props {
   events: Events
   appState: AppState
@@ -145,7 +143,7 @@ class Test extends Component<Props, State> {
             <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
           </h1>
           <div className='gif'>
-            <img src={studioGif} alt='Studio' />
+            <img src={require('../../static/studio.gif')} alt='Studio' />
           </div>
           <div className='center'>
             <div className='text'>

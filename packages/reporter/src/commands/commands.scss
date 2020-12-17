@@ -580,7 +580,7 @@
     &:hover {
       border-top: 1px solid #eef1f4;
 
-      .command-wrapper {
+      .command-state-passed .command-wrapper {
         background-color: #E0E5E7;
       }
     }
@@ -613,32 +613,21 @@
   }
 
   .studio-command-group.studio-no-commands {
-    animation: flash-border 3s linear infinite;
-    border: 2px solid #3386d4;
-
     .command-wrapper {
+      cursor: auto;
       padding: 5px 10px;
-
-      &:hover {
-        background-color: #eef1f4;
-      }
 
       .command-message {
         text-align: center;
       }
 
-      .command-controls {
-        color: #777;
-      }
-    }
+      .command-controls i {
+        color: $pending;
 
-    @keyframes flash-border {
-      0%, 100% {
-        border-color: #3386d4;
-      }
-
-      50% {
-        border-color: #eef1f4;
+        &:hover {
+          color: $pending;
+          cursor: auto;
+        }
       }
     }
   }

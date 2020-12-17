@@ -248,8 +248,11 @@ const events: Events = {
       runner.emit('studio:cancel:runner:restart')
     }))
 
-    localBus.on('studio:save', (fileDetails: FileDetails) => {
-      runner.emit('studio:save', fileDetails)
+    localBus.on('studio:save', (fileDetails: FileDetails, closeStudio: boolean) => {
+      runner.emit('studio:save', {
+        fileDetails,
+        closeStudio,
+      })
     })
   },
 

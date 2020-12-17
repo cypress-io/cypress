@@ -36,19 +36,21 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
 
 const StudioNoCommands = () => (
   <li className='studio-command-group studio-no-commands'>
-    <div className='command command-name-get command-state-passed command-type-parent'>
-      <div className='command-wrapper'>
-        <div className='command-wrapper-text'>
-          <span className='command-message'>
-            <span className='command-message-text'>
+    <div className='command command-name-get command-state-pending command-type-parent'>
+      <span>
+        <div className='command-wrapper'>
+          <div className='command-wrapper-text'>
+            <span className='command-message'>
+              <span className='command-message-text'>
               Interact with your site to add test commands.
+              </span>
             </span>
-          </span>
-          <span className='command-controls'>
-            <i className='fa fa-arrow-right' />
-          </span>
+            <span className='command-controls'>
+              <i className='fa fa-arrow-right' />
+            </span>
+          </div>
         </div>
-      </div>
+      </span>
     </div>
   </li>
 )

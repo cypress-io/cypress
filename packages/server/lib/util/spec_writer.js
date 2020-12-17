@@ -33,7 +33,7 @@ const generateCypressCommand = (cmd, first) => {
 }
 
 module.exports = {
-  appendStudioCommandsToTest: (fileDetails, commandLog) => {
+  appendStudioCommandsToTest: (fileDetails, commandLogs) => {
     const { absoluteFile, line, column } = fileDetails
 
     const astRules = {
@@ -62,7 +62,7 @@ module.exports = {
 
             const body = fn.body.body
 
-            commandLog.forEach((command, index) => {
+            commandLogs.forEach((command, index) => {
               body.push(generateCypressCommand(command, index === 0))
             })
 

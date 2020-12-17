@@ -18,6 +18,7 @@ const eventsWithValue = [
 
 class StudioRecorder {
   @observable testId = null
+  @observable logs = []
   @observable isLoading = false
   @observable isActive = false
   @observable _hasStarted = false
@@ -38,10 +39,17 @@ class StudioRecorder {
     return this.isActive || this.isLoading || this.isFinished
   }
 
+  @computed get isEmpty () {
+    return this.logs.length === 0
+  }
+
+  @computed get isReady () {
+    return this.isOpen && this.isEmpty && !this.isLoading
+  }
+
   @action start = (body) => {
     this.isActive = true
     this.isLoading = false
-    this.isSaving = false
     this.logs = []
     this._currentId = 1
     this._hasStarted = true
@@ -60,21 +68,11 @@ class StudioRecorder {
 
     this.testId = null
     this._hasStarted = false
-    this.isSaving = false
   }
 
-  @action reset = () => {
-    this.stop()
-
-    this.logs = []
-    this._hasStarted = false
-    this.isSaving = false
-  }
-
-  @action save = () => {
-    this.stop()
-
-    this.isSaving = true
+  @action removeCommand = (index) => {
+    this.logs.splice(index, 1)
+    this._emitUpdatedLog()
   }
 
   attachListeners = (body) => {
@@ -94,11 +92,6 @@ class StudioRecorder {
         capture: true,
       })
     })
-  }
-
-  removeCommand = (index) => {
-    this.logs.splice(index, 1)
-    this._emitUpdatedLog()
   }
 
   _getId = () => {
@@ -210,7 +203,7 @@ class StudioRecorder {
     return !(tagName !== 'INPUT' && event.type === 'keydown')
   }
 
-  _recordEvent = (event) => {
+  @action _recordEvent = (event) => {
     // only capture events sent by the actual user
     if (!event.isTrusted) {
       return

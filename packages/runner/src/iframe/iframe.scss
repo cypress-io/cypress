@@ -61,6 +61,20 @@
     border: 4px solid #b4d5f8;
   }
 
+  .studio-is-ready .aut-iframe {
+    animation: flash-iframe-border 2s linear infinite;
+
+    @keyframes flash-iframe-border {
+      0%, 100% {
+        border-color: #4997e4;
+      }
+
+      50% {
+        border-color: #b4d5f8;
+      }
+    }
+  }
+
   .studio-loading-cover {
     align-items: center;
     background: rgba(0, 0, 0, 0.3);

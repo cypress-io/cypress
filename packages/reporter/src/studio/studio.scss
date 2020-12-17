@@ -66,30 +66,10 @@
         }
       }
 
-      .studio-run {
-        background-color: #fff;
-        margin-left: auto;
-        margin-right: 10px;
-        color: #3386d4;
-        border: 1px solid #3386d4;
-
-        &:hover {
-          background-color: #3386d4;
-          color: #fff;
-        }
-
-        &[disabled],
-        &[disabled]:hover,
-        &[disabled]:active {
-          background-color: #fff;
-          border-color: lighten(#3386d4, 10%);
-          color: lighten(#3386d4, 10%);
-        }
-      }
-
       .studio-save {
         background-color: #3386d4;
         color: #fff;
+        margin-left: auto;
 
         &:hover {
           background-color: darken(#3386d4, 10%);
