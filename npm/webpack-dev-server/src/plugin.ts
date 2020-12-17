@@ -13,12 +13,12 @@ interface CypressOptions {
   devserverEvents?: EventEmitter
 }
 
-type CypressCTWebpackContext = {
+interface CypressCTWebpackContext extends compilation.Compilation {
   _cypress: CypressOptions
-} & compilation.Compilation
+}
 
 export default class CypressCTOptionsPlugin implements Plugin {
-  private files: any[] = []
+  private files: string[] = []
   private readonly projectRoot: string
   private readonly devserverEvents: EventEmitter
 
@@ -28,11 +28,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
     this.devserverEvents = options.devserverEvents
   }
 
-  private pluginFunc = (context: CypressCTWebpackContext, module) => {
-    if (!module.resource) {
-      return
-    }
-
+  private pluginFunc = (context: CypressCTWebpackContext, module: compilation.Module) => {
     context._cypress = {
       files: this.files,
       projectRoot: this.projectRoot,
@@ -44,12 +40,12 @@ export default class CypressCTOptionsPlugin implements Plugin {
    * @param compilation webpack 4 `compilation.Compilation`, webpack 5
    *   `Compilation`
    */
-  private plugin = (compilation) => {
+  private plugin = (compilation: compilation.Compilation) => {
     this.devserverEvents.on('devserver:specs:changed', (specs) => {
       if (_.isEqual(specs, this.files)) return
 
       this.files = specs
-      const inputFileSystem = compilation.inputFileSystem as any
+      const inputFileSystem = compilation.inputFileSystem
       const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
 
       utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
@@ -68,7 +64,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
     }
 
     // Webpack 4
-    (compilation as compilation.Compilation).hooks.normalModuleLoader.tap(
+    compilation.hooks.normalModuleLoader.tap(
       'CypressCTOptionsPlugin',
       this.pluginFunc,
     )
