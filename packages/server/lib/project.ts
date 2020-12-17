@@ -2,7 +2,7 @@ const _ = require('lodash')
 const R = require('ramda')
 const EE = require('events')
 const path = require('path')
-const Promise = require('bluebird')
+const Bluebird = require('bluebird')
 const commitInfo = require('@cypress/commit-info')
 const la = require('lazy-ass')
 const check = require('check-more-types')
@@ -135,12 +135,12 @@ class Project extends EE {
 
         options.onSavedStateChanged = (state) => this.saveState(state)
 
-        return Promise.join(
+        return Bluebird.join(
           this.watchSettingsAndStartWebsockets(options, cfg),
           this.scaffold(cfg),
         )
         .then(() => {
-          return Promise.join(
+          return Bluebird.join(
             this.checkSupportFile(cfg),
             this.watchPluginsFile(cfg, options),
           )
@@ -172,7 +172,7 @@ class Project extends EE {
   }
 
   getRuns () {
-    return Promise.all([
+    return Bluebird.all([
       this.getProjectId(),
       user.ensureAuthToken(),
     ])
@@ -187,7 +187,7 @@ class Project extends EE {
     this.spec = null
     this.browser = null
 
-    return Promise.try(() => {
+    return Bluebird.try(() => {
       if (this.automation) {
         this.automation.reset()
       }
@@ -209,7 +209,7 @@ class Project extends EE {
     this.spec = null
     this.browser = null
 
-    return Promise.join(
+    return Bluebird.join(
       this.server ? this.server.close() : undefined,
       this.watchers ? this.watchers.close() : undefined,
       preprocessor.close(),
@@ -235,7 +235,7 @@ class Project extends EE {
   watchPluginsFile (cfg, options) {
     debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
     if (!cfg.pluginsFile || options.isTextTerminal) {
-      return Promise.resolve()
+      return Bluebird.resolve()
     }
 
     return fs.pathExists(cfg.pluginsFile)
@@ -277,7 +277,7 @@ class Project extends EE {
         // dont fire change events if we generated
         // a project id less than 1 second ago
         if (this.generatedProjectIdTimestamp &&
-          ((new Date - this.generatedProjectIdTimestamp) < 1000)) {
+          ((Date.now() - this.generatedProjectIdTimestamp) < 1000)) {
           return
         }
 
@@ -360,7 +360,7 @@ class Project extends EE {
         reporter.emit(event, runnable)
 
         if (event === 'end') {
-          return Promise.all([
+          return Bluebird.all([
             (reporter != null ? reporter.end() : undefined),
             this.server.end(),
           ])
@@ -416,7 +416,7 @@ class Project extends EE {
     if (this.cfg) {
       debug('project has config %o', this.cfg)
 
-      return Promise.resolve(this.cfg)
+      return Bluebird.resolve(this.cfg)
     }
 
     const setNewProject = (cfg) => {
@@ -578,7 +578,7 @@ class Project extends EE {
       debug('will not scaffold integration or fixtures folder')
     }
 
-    return Promise.all(scaffolds)
+    return Bluebird.all(scaffolds)
   }
 
   writeProjectId (id) {
@@ -638,7 +638,7 @@ class Project extends EE {
   }
 
   getRecordKeys () {
-    return Promise.all([
+    return Bluebird.all([
       this.getProjectId(),
       user.ensureAuthToken(),
     ])
@@ -670,7 +670,7 @@ class Project extends EE {
     // this assumes that the configFile for a cached project is 'cypress.json'
     // https://git.io/JeGyF
     .map((projectRoot) => {
-      return Promise.props({
+      return Bluebird.props({
         path: projectRoot,
         id: settings.id(projectRoot),
       })
@@ -719,7 +719,7 @@ class Project extends EE {
         debug(`got ${projects.length} projects`)
         const projectsIndex = _.keyBy(projects, 'id')
 
-        return Promise.all(_.map(clientProjects, (clientProject) => {
+        return Bluebird.all(_.map(clientProjects, (clientProject) => {
           debug('looking at', clientProject.path)
           // not a CI project, just mark as valid and return
           if (!clientProject.id) {
@@ -753,7 +753,7 @@ class Project extends EE {
     if (!clientProject.id) {
       debug('no project id')
 
-      return Promise.resolve(Project._mergeState(clientProject, 'VALID'))
+      return Bluebird.resolve(Project._mergeState(clientProject, 'VALID'))
     }
 
     return user.ensureAuthToken().then((authToken) => {
@@ -771,7 +771,7 @@ class Project extends EE {
     // don't cache a project if a non-default configFile is set
     // https://git.io/JeGyF
     if (settings.configFile(options) !== 'cypress.json') {
-      return Promise.resolve({ path })
+      return Bluebird.resolve({ path })
     }
 
     return cache.insertProject(path)
