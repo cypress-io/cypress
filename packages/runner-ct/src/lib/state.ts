@@ -3,7 +3,28 @@ import _ from 'lodash'
 import automation from './automation'
 import eventManager from './event-manager'
 
-const _defaults = {
+interface Defaults {
+  messageTitle: string | null
+  messageDescription: string | null
+  messageType: string
+  messageControls: unknown
+
+  width: number
+  height: number
+
+  reporterWidth: number | null
+
+  url: string
+  highlightUrl: boolean
+  isLoadingUrl: boolean
+
+  spec: Cypress.Cypress['spec'] | null
+  specs: Cypress.Cypress['spec'][]
+
+  callbackAfterUpdate: ((...args: unknown[]) => void) | null
+}
+
+const _defaults: Defaults = {
   messageTitle: null,
   messageDescription: null,
   messageType: '',
@@ -20,6 +41,8 @@ const _defaults = {
 
   spec: null,
   specs: [],
+
+  callbackAfterUpdate: null
 }
 
 export default class State {
@@ -31,6 +54,7 @@ export default class State {
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
+  @observable callbackAfterUpdate = _defaults.callbackAfterUpdate
   @observable.ref messageControls = _defaults.messageControls
 
   @observable snapshot = {
@@ -63,7 +87,7 @@ export default class State {
   @observable specs = _defaults.specs
   /** @type {"single" | "multi"} */
   @observable runMode = 'single'
-  @observable multiSpecs = [];
+  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -157,7 +181,7 @@ export default class State {
     this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
-  @action setSpec (spec) {
+  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
     this.spec = spec
   }
 
@@ -182,7 +206,7 @@ export default class State {
     this.setSpec(spec)
   }
 
-  @action addSpecToMultiMode (newSpec) {
+  @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
     const isAlreadyRunningNewSpec = this.multiSpecs.some(
       (existingSpec) => existingSpec.relative === newSpec.relative,
     )

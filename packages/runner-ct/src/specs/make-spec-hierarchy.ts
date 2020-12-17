@@ -20,7 +20,7 @@ export function makeSpecHierarchy (specs: { name: string }[]) {
   // to save the existing folder paths
   const kvpGroups: { [fullPath: string]: SpecFolder } = {}
 
-  return specs.reduce((groups, spec) => {
+  return specs.reduce<SpecFolderOrSpecFile[]>((groups, spec) => {
     const pathArray = spec.name.split('/')
     let currentSpecArray: SpecFolderOrSpecFile[] = groups
     let currentPath = ''

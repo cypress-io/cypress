@@ -1,10 +1,15 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
+import State from '../lib/state'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
 
+interface SpecsListProps {
+  state: State
+}
+
 @observer
-class SpecsList extends Component {
+class SpecsList extends Component<SpecsListProps> {
   render () {
     const { state } = this.props
 
@@ -12,6 +17,7 @@ class SpecsList extends Component {
 
     return (
       <div className="specs-list">
+
         <header>Select tests to run...</header>
         <ul className="specs-list-container">{
           specGroups.map((item) => {
