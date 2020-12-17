@@ -11,7 +11,7 @@ class Studio extends Component {
       <div className='header-popup studio'>
         <div className='studio-title'>
           <span className='icon'><i className='fas fa-magic' /></span>{' '}
-          <span className='title'>CYPRESS STUDIO</span>{' '}
+          <span className='title'>STUDIO</span>{' '}
           <span className='beta'>BETA</span>
         </div>
         <div className='available-commands' onClick={this.showAvailableCommands}>

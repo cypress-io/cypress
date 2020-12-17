@@ -146,9 +146,9 @@ const events: Events = {
       appState.setFirefoxGcInterval(gcInterval)
     }))
 
-    runner.on('update:studio:log', action('update:studio:log', (log: StudioCommand[]) => {
+    runner.on('update:studio:logs', action('update:studio:logs', (logs: StudioCommand[]) => {
       if (appState.extendingTest) {
-        runnablesStore.updateStudioLog(appState.extendingTest, log)
+        runnablesStore.updateStudioLogs(appState.extendingTest, logs)
       }
     }))
 

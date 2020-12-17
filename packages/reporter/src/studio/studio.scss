@@ -42,86 +42,9 @@
       }
     }
 
-    .studio-commands-container {
-      display: none;
-      padding: 5px 10px 0 10px;
-
-      .studio-command {
-        background-color: #f5f5f5;
-        border: 1px solid #e3e3e3;
-        border-radius: 3px;
-        display: flex;
-        font-family: $monospace;
-        line-height: 20px;
-        margin-bottom: 10px;
-        min-height: 20px;
-
-        div {
-          padding: 6px;
-        }
-
-        .studio-command-number {
-          background: #e8e8ec;
-        }
-
-        .studio-command-method {
-          min-width: 90px;
-          text-transform: uppercase;
-
-          .studio-command-get {
-            color: #959595;
-          }
-        }
-
-        .studio-command-message {
-          flex-grow: 1;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .studio-command-delete a {
-          color: #959595;
-
-          &:hover {
-            color: #6c6c6c;
-          }
-        }
-      }
-
-      .studio-no-commands {
-        animation: flash-border 3s linear infinite;
-        border: 2px solid #3386d4;
-        color: #959595;
-        font-family: $muli;
-        font-size: 14px;
-        padding: 8px;
-        text-align: center;
-
-        .studio-no-commands-message {
-          flex-grow: 1;
-        }
-
-        .studio-no-commands-icon {
-          font-size: 16px;
-          margin-right: 10px;
-        }
-      }
-
-      @keyframes flash-border {
-        0%, 100% {
-          border-color: #3386d4;
-        }
-
-        50% {
-          border-color: #f5f5f5;
-        }
-      }
-    }
-
     .studio-controls {
       display: flex;
-      margin: 15px 0 10px;
+      margin: 20px 10px 10px;
 
       button {
         border-radius: 5px;

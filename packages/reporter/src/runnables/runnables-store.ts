@@ -176,9 +176,9 @@ class RunnablesStore {
     })
   }
 
-  updateStudioLog (id: string, log: StudioCommand[]) {
+  updateStudioLogs (id: string, logs: StudioCommand[]) {
     this._withTest(id, (test) => {
-      test.setStudioCommands(log)
+      test.updateStudioLogs(logs)
     })
   }
 

@@ -64,6 +64,10 @@ export default class Test extends Runnable {
       hookId: props.id.toString(),
       hookName: 'test body',
       invocationDetails: props.invocationDetails,
+    }, {
+      hookId: `${props.id.toString()}-studio`,
+      hookName: 'studio commands',
+      isStudio: true,
     }]
 
     _.each(props.prevAttempts || [], (attempt) => this._addAttempt(attempt))
@@ -117,6 +121,12 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
+  @computed get studioIsNotEmpty () {
+    return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
+      return attempt.studioIsNotEmpty
+    })
+  }
+
   isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
@@ -130,6 +140,12 @@ export default class Test extends Runnable {
   updateLog (props: LogProps) {
     this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
+    })
+  }
+
+  updateStudioLogs (logs: StudioCommand[]) {
+    this._withAttempt(this.currentRetry, (attempt: Attempt) => {
+      attempt.updateStudioLogs(logs)
     })
   }
 

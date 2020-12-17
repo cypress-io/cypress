@@ -6,13 +6,15 @@ import { FileDetails } from '@packages/ui-components'
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
+import StudioCommand from '../studio/studio-command-model'
 
-export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body'
+export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 
 export interface HookProps {
   hookId: string
   hookName: HookName
   invocationDetails?: FileDetails
+  isStudio?: boolean
 }
 
 export default class Hook implements HookProps {
@@ -21,7 +23,9 @@ export default class Hook implements HookProps {
   @observable hookNumber?: number
   @observable invocationDetails?: FileDetails
   @observable invocationOrder?: number
-  @observable commands: Array<CommandModel> = []
+  @observable commands: CommandModel[] = []
+  @observable studioCommands: StudioCommand[] = []
+  @observable isStudio: boolean
   @observable failed = false
 
   private _aliasesWithDuplicatesCache: Array<Alias> | null = null
@@ -31,6 +35,7 @@ export default class Hook implements HookProps {
     this.hookId = props.hookId
     this.hookName = props.hookName
     this.invocationDetails = props.invocationDetails
+    this.isStudio = !!props.isStudio
   }
 
   @computed get aliasesWithDuplicates () {
@@ -66,6 +71,10 @@ export default class Hook implements HookProps {
     return this._aliasesWithDuplicatesCache
   }
 
+  @computed get studioIsNotEmpty () {
+    return this.studioCommands.length > 0
+  }
+
   addCommand (command: CommandModel) {
     if (!command.event) {
       command.number = this._currentNumber
@@ -82,6 +91,10 @@ export default class Hook implements HookProps {
     } else {
       this.commands.push(command)
     }
+  }
+
+  updateStudioLogs = (logs: StudioCommand[]) => {
+    this.studioCommands = logs
   }
 
   commandMatchingErr (errToMatch: Err) {

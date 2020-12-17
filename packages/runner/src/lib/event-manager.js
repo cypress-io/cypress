@@ -204,13 +204,13 @@ const eventManager = {
 
     reporterBus.on('studio:save', (fileDetails) => {
       studioRecorder.stop()
-      ws.emit('studio:save', fileDetails, studioRecorder.log, () => {
+      ws.emit('studio:save', fileDetails, studioRecorder.logs, () => {
         reporterBus.emit('studio:cancel')
       })
     })
 
-    localBus.on('update:studio:log', (log) => {
-      reporterBus.emit('update:studio:log', log)
+    localBus.on('update:studio:logs', (logs) => {
+      reporterBus.emit('update:studio:logs', logs)
     })
 
     localBus.on('studio:cancel', () => {

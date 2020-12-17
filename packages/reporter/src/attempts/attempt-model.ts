@@ -10,6 +10,7 @@ import Hook, { HookName } from '../hooks/hook-model'
 import { FileDetails } from '@packages/ui-components'
 import { LogProps } from '../runnables/runnables-store'
 import Log from '../instruments/instrument-model'
+import StudioCommand from '../studio/studio-command-model'
 
 export default class Attempt {
   @observable agents: Agent[] = []
@@ -28,6 +29,7 @@ export default class Attempt {
     'after all': 0,
     'after each': 0,
     'test body': 0,
+    'studio commands': 0,
   }
   @observable _isOpen: boolean|null = null
 
@@ -87,6 +89,12 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
+  @computed get studioIsNotEmpty () {
+    const hookIndex = _.findIndex(this.hooks, { isStudio: true })
+
+    return this.hooks[hookIndex].studioIsNotEmpty
+  }
+
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {
@@ -110,6 +118,12 @@ export default class Attempt {
     if (log) {
       log.update(props)
     }
+  }
+
+  updateStudioLogs (logs: StudioCommand[]) {
+    const hookIndex = _.findIndex(this.hooks, { isStudio: true })
+
+    this.hooks[hookIndex].updateStudioLogs(logs)
   }
 
   commandMatchingErr () {
