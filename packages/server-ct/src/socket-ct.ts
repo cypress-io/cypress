@@ -391,7 +391,7 @@ export class Socket {
   }
 
   sendSpecList (specs) {
-    this.toRunner('specs:changed', specs)
+    this.toRunner('component:specs:changed', specs)
   }
 
   end () {
