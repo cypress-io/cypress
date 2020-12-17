@@ -12,7 +12,7 @@ const fetchScript = (scriptWindow, script) => {
 }
 
 const extractSourceMap = ([script, contents]) => {
-  script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`
+  script.fullyQualifiedUrl = `${window.top.location.origin}${script.relativeUrl}`.replace(/ /g, '%20')
 
   const sourceMap = $sourceMapUtils.extractSourceMap(script, contents)
 
