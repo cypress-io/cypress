@@ -43,6 +43,18 @@ Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-ro
 
 
 
+Warning: We failed processing this video.
+
+This error will not alter the exit code.
+
+TimeoutError: operation timed out
+      [stack trace lines]
+
+Warning: We could not find the video at the following path, so we were unable to process it.
+
+Video path: /foo/bar/.projects/read-only-project-root/cypress/videos/spec.js.mp4
+
+This error will not alter the exit code.
 
   (Results)
 
@@ -53,18 +65,10 @@ Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-ro
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     spec.js                                                                          │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-Error: ffmpeg exited with code 1: /foo/bar/.projects/read-only-project-root/cypress/videos/spec.js.mp4: No such file or directory
-
-      [stack trace lines]
 
 
 ====================================================================================================
