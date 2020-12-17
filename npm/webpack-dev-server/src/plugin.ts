@@ -1,6 +1,11 @@
 import webpack, { Compiler, compilation, Plugin } from 'webpack'
 import { EventEmitter } from 'events'
 import _ from 'lodash'
+import semver from 'semver'
+import fs, { PathLike } from 'fs'
+import path from 'path'
+
+type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string | number | Date) => void
 
 interface CypressOptions {
   files: any[]
@@ -13,7 +18,7 @@ type CypressCTWebpackContext = {
 } & compilation.Compilation
 
 export default class CypressCTOptionsPlugin implements Plugin {
-  private readonly files: any[] = []
+  private files: any[] = []
   private readonly projectRoot: string
   private readonly devserverEvents: EventEmitter
 
@@ -43,8 +48,11 @@ export default class CypressCTOptionsPlugin implements Plugin {
     this.devserverEvents.on('devserver:specs:changed', (specs) => {
       if (_.isEqual(specs, this.files)) return
 
-      // add specs
-      // trigger the loader.ts with new files to serve
+      this.files = specs
+      const inputFileSystem = compilation.inputFileSystem as any
+      const utimesSync: UtimesSync = semver.gt('4.0.0', webpack.version) ? inputFileSystem.fileSystem.utimesSync : fs.utimesSync
+
+      utimesSync(path.resolve(__dirname, 'browser.js'), new Date(), new Date())
     })
 
     // Webpack 5
