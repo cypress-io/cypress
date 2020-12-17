@@ -18,6 +18,10 @@ const createApp = (port) => {
 
   app.set('view engine', 'html')
 
+  app.all('/no-cors', (req, res) => {
+    res.end(req.method)
+  })
+
   app.use(require('cors')())
   app.use(require('compression')())
   app.use(bodyParser.urlencoded({ extended: false }))
