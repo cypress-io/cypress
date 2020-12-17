@@ -19,6 +19,7 @@ module.exports = {
     alias: {
       // point at the built file
       '@cypress/vue': path.join(__dirname, 'dist'),
+      vue: 'vue/dist/vue.esm.js',
     },
   },
   module: {
