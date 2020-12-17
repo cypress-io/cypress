@@ -604,10 +604,12 @@ describe('network stubbing', { retries: 2 }, function () {
       })
 
       it('responds to OPTIONS requests', function () {
+        // `/no-cors/` will respond with a 200, but missing valid preflight response
         cy.request({ method: 'OPTIONS', url: corsUrl })
         .then((res) => {
           expect(res.headers).to.not.have.property('access-control-allow-origin')
 
+          // so this ajax request should fail due to CORS
           return $.ajax({ method: 'DELETE', url: corsUrl })
           .then(() => {
             throw new Error('should not succeed')
@@ -620,6 +622,7 @@ describe('network stubbing', { retries: 2 }, function () {
           req.reply(`intercepted ${req.method}`)
         })
         .then(() => {
+          // but now, the same ajax request succeeds, because the cy.intercept provides CORS
           return $.ajax({ method: 'DELETE', url: corsUrl })
           .then((res) => {
             expect(res).to.eq('intercepted DELETE')
