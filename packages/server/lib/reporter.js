@@ -133,6 +133,9 @@ const toMochaProps = (testProps) => {
 
 const mergeRunnable = (eventName) => {
   return (function (testProps, runnables) {
+    debug('merging runnable %s', eventName)
+    const started = +new Date()
+
     toMochaProps(testProps)
 
     const runnable = runnables[testProps.id]
@@ -152,7 +155,19 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    return _.extend(runnable, testProps)
+    const merged = _.extend(runnable, testProps)
+
+    debug('merging done')
+    const finished = +new Date()
+    const elapsed = finished - started
+
+    if (elapsed > 100 && debug.enabled) {
+      debug('Hmm, merging took %dms', elapsed)
+      debug('runnable %o', runnable)
+      debug('test props %o', testProps)
+    }
+
+    return merged
   })
 }
 
