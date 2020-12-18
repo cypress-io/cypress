@@ -49,14 +49,11 @@ const createCLIExecutable = (command) => {
 
 const yarn = createCLIExecutable('yarn')
 const npx = createCLIExecutable('npx')
-const rm = createCLIExecutable('rm')
 
 const runAllBuild = _.partial(npx, ['lerna', 'run', 'build-prod', '--ignore', 'cli'])
 
 // removes transpiled JS files in the original package folders
 const runAllCleanJs = _.partial(npx, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
-
-const cleanNpmFolder = _.partial(rm, ['-rf', './npm'])
 
 const copyAllToDist = function (distDir) {
   const copyRelativePathToDist = function (relative) {
@@ -273,8 +270,6 @@ module.exports = {
   forceNpmInstall,
 
   replaceLocalNpmVersions,
-
-  cleanNpmFolder,
 }
 
 if (!module.parent) {

@@ -147,7 +147,7 @@ const buildCypressApp = function (platform, version, options = {}) {
   const cleanLocalNpmPackages = function () {
     log('#cleanLocalNpmPackages')
 
-    return packages.cleanNpmFolder({ cwd: distDir() })
+    return fs.removeAsync(`${distDir()}/npm`)
   }
 
   /**
