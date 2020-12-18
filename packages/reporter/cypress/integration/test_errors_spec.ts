@@ -95,20 +95,23 @@ describe('test errors', () => {
 
       cy.get('.runnable-err-stack-trace').within(() => {
         cy.get('.err-stack-line')
-        .should('have.length', 9)
+        .should('have.length', 10)
         .first().should('have.text', 'at foo.bar (my/app.js:2:7)')
 
         cy.get('.err-stack-line')
         .eq(1).should('have.text', '  at baz.qux (cypress/integration/foo_spec.js:5:2)')
 
         cy.get('.err-stack-line')
-        .eq(2).should('have.text', 'At previous event:')
+        .eq(2).should('have.text', '  at space (cypress/integration/a b.js:34:99)')
 
         cy.get('.err-stack-line')
-        .eq(3).should('have.text', '  at bar.baz (http://localhost:1234/me/dev/my/app.js:8:11)')
+        .eq(3).should('have.text', 'At previous event:')
 
         cy.get('.err-stack-line')
-        .eq(4).should('have.text', '  at callFn (cypress://../driver/src/cypress/runner.js:9:12)')
+        .eq(4).should('have.text', '  at bar.baz (http://localhost:1234/me/dev/my/app.js:8:11)')
+
+        cy.get('.err-stack-line')
+        .eq(5).should('have.text', '  at callFn (cypress://../driver/src/cypress/runner.js:9:12)')
       })
     })
 
@@ -124,12 +127,15 @@ describe('test errors', () => {
       cy.contains('View stack trace').click()
 
       cy.get('.runnable-err-stack-trace .runnable-err-file-path')
-      .should('have.length', 2)
+      .should('have.length', 3)
       .first()
       .should('have.text', 'my/app.js:2:7')
 
       cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(1)
       .should('have.text', 'cypress/integration/foo_spec.js:5:2')
+
+      cy.get('.runnable-err-stack-trace .runnable-err-file-path').eq(2)
+      .should('have.text', 'cypress/integration/a b.js:34:99')
     })
 
     it('does not turn cypress:// files into links', () => {

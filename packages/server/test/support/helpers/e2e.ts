@@ -43,6 +43,8 @@ const browserNameVersionRe = /(Browser\:\s+)(Custom |)(Electron|Chrome|Canary|Ch
 const availableBrowsersRe = /(Available browsers found on your system are:)([\s\S]+)/g
 const crossOriginErrorRe = /(Blocked a frame .* from accessing a cross-origin frame.*|Permission denied.*cross-origin object.*)/gm
 const whiteSpaceBetweenNewlines = /\n\s+\n/
+const retryDuration = /Timed out retrying after (\d+)ms/g
+const escapedRetryDuration = /TORA(\d+)/g
 
 export const STDOUT_DURATION_IN_TABLES_RE = /(\s+?)(\d+ms|\d+:\d+:?\d+)/g
 
@@ -154,8 +156,12 @@ const normalizeStdout = function (str, options: any = {}) {
   .replace(browserNameVersionRe, replaceBrowserName)
   // numbers in parenths
   .replace(/\s\(\d+([ms]|ms)\)/g, '')
+  // escape "Timed out retrying" messages
+  .replace(retryDuration, 'TORA$1')
   // 12:35 -> XX:XX
   .replace(STDOUT_DURATION_IN_TABLES_RE, replaceDurationInTables)
+  // restore "Timed out retrying" messages
+  .replace(escapedRetryDuration, 'Timed out retrying after $1ms')
   .replace(/(coffee|js)-\d{3}/g, '$1-456')
   // Cypress: 2.1.0 -> Cypress: 1.2.3
   .replace(/(Cypress\:\s+)(\d+\.\d+\.\d+)/g, replaceCypressVersion)
