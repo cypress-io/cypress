@@ -24,7 +24,7 @@ exports['e2e issue 173 / failing'] = `
   1 failing
 
   1) fails:
-     AssertionError: Timed out retrying: Expected to find element: \`element_does_not_exist\`, but never found it.
+     AssertionError: Timed out retrying after 200ms: Expected to find element: \`element_does_not_exist\`, but never found it.
       [stack trace lines]
 
 
