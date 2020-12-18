@@ -145,7 +145,9 @@ const replaceLocalNpmVersions = function (basePath) {
 
   const updatePackageJson = function (pattern) {
     return Promise.resolve(glob(pattern, { cwd: basePath }))
-    .map((pkgJsonPath) => {
+    .map((pkgPath) => {
+      const pkgJsonPath = path.join(basePath, pkgPath)
+
       return fs.readJsonAsync(pkgJsonPath)
       .then((json) => {
         const { dependencies } = json
@@ -158,9 +160,7 @@ const replaceLocalNpmVersions = function (basePath) {
             if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
               const pkgName = parsedPkg[2]
 
-              const pkgPath = path.resolve(`./npm/${pkgName}`)
-
-              json.dependencies[`@cypress/${pkgName}`] = `file:${pkgPath}`
+              json.dependencies[`@cypress/${pkgName}`] = `file:${path.join(basePath, 'npm', pkgName)}`
               shouldWriteFile = true
 
               return updateNpmPackage(pkgName)
