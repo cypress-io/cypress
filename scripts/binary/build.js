@@ -124,24 +124,30 @@ const buildCypressApp = function (platform, version, options = {}) {
     .then(R.tap(logBuiltAllPackages))
   }
 
-  const replaceLocalNpmVersions = function () {
-    log('#replaceLocalNpmVersions')
-
-    return packages.replaceLocalNpmVersions()
-  }
-
   const copyPackages = function () {
     log('#copyPackages')
 
     return packages.copyAllToDist(distDir())
   }
 
-  const npmInstallPrivatePackages = function () {
-    log('#npmInstallPrivatePackages')
+  const replaceLocalNpmVersions = function () {
+    log('#replaceLocalNpmVersions')
+
+    return packages.replaceLocalNpmVersions(distDir())
+  }
+
+  const npmInstallPackages = function () {
+    log('#npmInstallPackages')
 
     const pathToPackages = distDir('packages', '*')
 
     return packages.npmInstallAll(pathToPackages)
+  }
+
+  const cleanLocalNpmPackages = function () {
+    log('#cleanLocalNpmPackages')
+
+    return packages.cleanNpmFolder({ cwd: distDir() })
   }
 
   /**
@@ -446,9 +452,10 @@ require('./packages/server')\
   .then(checkPlatform)
   .then(cleanupPlatform)
   .then(buildPackages)
-  .then(replaceLocalNpmVersions)
   .then(copyPackages)
-  .then(npmInstallPrivatePackages)
+  .then(replaceLocalNpmVersions)
+  .then(npmInstallPackages)
+  .then(cleanLocalNpmPackages)
   .then(createRootPackage)
   .then(removeTypeScript)
   .then(cleanJs)

@@ -49,11 +49,14 @@ const createCLIExecutable = (command) => {
 
 const yarn = createCLIExecutable('yarn')
 const npx = createCLIExecutable('npx')
+const rm = createCLIExecutable('rm')
 
 const runAllBuild = _.partial(npx, ['lerna', 'run', 'build-prod', '--ignore', 'cli'])
 
 // removes transpiled JS files in the original package folders
 const runAllCleanJs = _.partial(npx, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
+
+const cleanNpmFolder = _.partial(rm, ['-rf', './npm'])
 
 const copyAllToDist = function (distDir) {
   const copyRelativePathToDist = function (relative) {
@@ -112,7 +115,7 @@ const copyAllToDist = function (distDir) {
 
   return fs.ensureDirAsync(distDir)
   .then(() => {
-    return glob('./packages/*')
+    return externalUtils.globby(['./packages/*', './npm/*'])
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)
@@ -125,23 +128,21 @@ const copyAllToDist = function (distDir) {
 // with the path to the package
 // we need to do this instead of just changing the symlink (like we do for require('@packages/...'))
 // so the packages actually get installed to node_modules and work with peer dependencies
-const replaceLocalNpmVersions = function () {
+const replaceLocalNpmVersions = function (basePath) {
   const visited = []
 
   const updateNpmPackage = function (pkg) {
     if (!visited.includes(pkg)) {
       visited.push(pkg)
 
-      return removeDevDependencies(`./npm/${pkg}`).then(() => {
-        return updatePackageJson(`./npm/${pkg}/package.json`)
-      })
+      return updatePackageJson(`./npm/${pkg}/package.json`)
     }
 
     return Promise.resolve()
   }
 
   const updatePackageJson = function (pattern) {
-    return Promise.resolve(glob(pattern))
+    return Promise.resolve(glob(pattern, { cwd: basePath }))
     .map((pkgJsonPath) => {
       return fs.readJsonAsync(pkgJsonPath)
       .then((json) => {
@@ -272,6 +273,8 @@ module.exports = {
   forceNpmInstall,
 
   replaceLocalNpmVersions,
+
+  cleanNpmFolder,
 }
 
 if (!module.parent) {
