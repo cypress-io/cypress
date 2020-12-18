@@ -27,6 +27,17 @@ describe('e2e specs', () => {
     return e2e.exec(this, {
       project,
       snapshot: false,
+      expectedExitCode: 0,
+    })
+  })
+
+  it('handles the fixtures folder being the subfolder of integration', function () {
+    const project = Fixtures.projectPath('fixture-subfolder-of-integration')
+
+    return e2e.exec(this, {
+      project,
+      snapshot: false,
+      expectedExitCode: 0,
     })
   })
 })
