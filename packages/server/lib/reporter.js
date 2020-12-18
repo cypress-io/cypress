@@ -141,12 +141,15 @@ const mergeRunnable = (eventName) => {
     const runnable = runnables[testProps.id]
 
     if (eventName === 'test:before:run') {
+      debug('test props current retry %d, runnable %d',
+        testProps._currentRetry, runnable._currentRetry)
       if (testProps._currentRetry > runnable._currentRetry) {
         debug('test retried:', testProps.title)
         const prevAttempts = runnable.prevAttempts || []
 
         delete runnable.prevAttempts
         const prevAttempt = _.cloneDeep(runnable)
+        debug('cloned previous runnable')
 
         delete runnable.failedFromHookId
         delete runnable.err
@@ -155,7 +158,19 @@ const mergeRunnable = (eventName) => {
       }
     }
 
-    const merged = _.extend(runnable, testProps)
+    // note: _.extend modifies the first argument
+    if (eventName === 'test:before:run') {
+      const propsToMerge = Object.keys(testProps)
+      // debug('runnable props %o', Object.keys(runnable))
+      debug('test props properties %o', propsToMerge)
+      propsToMerge.forEach(prop => {
+        debug('merging %s', prop)
+        runnable[prop] = testProps[prop]
+      })
+      // Object.assign(runnable, testProps)
+    } else {
+      _.extend(runnable, testProps)
+    }
 
     debug('merging done')
     const finished = +new Date()
@@ -167,7 +182,7 @@ const mergeRunnable = (eventName) => {
       debug('test props %o', testProps)
     }
 
-    return merged
+    return runnable
   })
 }
 
