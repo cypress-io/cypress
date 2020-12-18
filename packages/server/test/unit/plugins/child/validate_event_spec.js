@@ -68,26 +68,33 @@ The following are valid events:
   })
 
   describe('run events', () => {
-    it('returns error when before:spec event is registered without experimentalRunEvents flag enabled', () => {
-      const { isValid, error } = validateEvent('before:spec', {}, { experimentalRunEvents: false })
+    const runEvents = [
+      'before:spec',
+      'after:spec',
+    ]
 
-      expect(isValid).to.be.false
-      expect(error.message).to.equal(`The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
+    _.each(runEvents, (event) => {
+      it(`returns error when ${event} event is registed without experimentalRunEvents flag enabled`, () => {
+        const { isValid, error } = validateEvent(event, {}, { experimentalRunEvents: false })
+
+        expect(isValid).to.be.false
+        expect(error.message).to.equal(`The \`${event}\` event requires the experimentalRunEvents flag to be enabled.
 
 To enable it, set \`"experimentalRunEvents": true\` in your cypress.json`)
-    })
+      })
 
-    it('returns error when event handler of before:spec is not a function', () => {
-      const { isValid, error } = validateEvent('before:spec', 'invalid type', { experimentalRunEvents: true })
+      it(`returns error when event handler of ${event} is not a function`, () => {
+        const { isValid, error } = validateEvent(event, 'invalid type', { experimentalRunEvents: true })
 
-      expect(isValid).to.be.false
-      expect(error.message).to.equal(`The handler for the event \`before:spec\` must be a function`)
-    })
+        expect(isValid).to.be.false
+        expect(error.message).to.equal(`The handler for the event \`${event}\` must be a function`)
+      })
 
-    it('returns success when event handler of before:spec is a function', () => {
-      const { isValid } = validateEvent('before:spec', () => {}, { experimentalRunEvents: true })
+      it(`returns success when event handler of ${event} is a function`, () => {
+        const { isValid } = validateEvent(event, () => {}, { experimentalRunEvents: true })
 
-      expect(isValid).to.be.true
+        expect(isValid).to.be.true
+      })
     })
   })
 })

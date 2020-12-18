@@ -111,6 +111,9 @@ const execute = (ipc, event, ids, args = []) => {
     'after:screenshot' () {
       util.wrapChildPromise(ipc, invoke, ids, args)
     },
+    'after:spec' () {
+      util.wrapChildPromise(ipc, invoke, ids, args)
+    },
     'before:browser:launch' () {
       browserLaunch.wrap(ipc, invoke, ids, args)
     },

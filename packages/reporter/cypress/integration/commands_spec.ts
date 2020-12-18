@@ -47,6 +47,14 @@ describe('commands', () => {
 
   it('displays all the commands', () => {
     cy.get('.command').should('have.length', 9)
+
+    // ensure progress bar is no longer visible
+    // for snapshot
+    cy.contains('#in-progress')
+    .closest('.command')
+    .find('.command-progress span')
+    .should('not.be.visible')
+
     cy.percySnapshot()
   })
 
