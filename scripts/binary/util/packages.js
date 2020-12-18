@@ -132,7 +132,9 @@ const replaceLocalNpmVersions = function () {
     if (!visited.includes(pkg)) {
       visited.push(pkg)
 
-      return updatePackageJson(`./npm/${pkg}/package.json`)
+      return removeDevDependencies(`./npm/${pkg}`).then(() => {
+        return updatePackageJson(`./npm/${pkg}/package.json`)
+      })
     }
 
     return Promise.resolve()
@@ -163,7 +165,7 @@ const replaceLocalNpmVersions = function () {
           }))
           .then(() => {
             if (shouldWriteFile) {
-              return fs.writeJson(pkgJsonPath, json)
+              return fs.writeJsonAsync(pkgJsonPath, json, { spaces: 2 })
             }
           })
         }
