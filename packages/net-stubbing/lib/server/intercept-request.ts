@@ -110,7 +110,7 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     }
 
     request.req.pipe(concatStream((reqBody) => {
-      request.req.body = frame.req.body = reqBody.toString()
+      request.req.body = reqBody.byteLength ? reqBody : undefined
       cb()
     }))
   }
