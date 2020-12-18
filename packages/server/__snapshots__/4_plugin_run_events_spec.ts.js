@@ -1,12 +1,3 @@
-exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
-
- Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
-
-To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
-      [stack trace lines]
-`
-
 exports['e2e plugin run events / sends events'] = `
 
 ====================================================================================================
@@ -96,34 +87,6 @@ after:spec is awaited
 
 `
 
-exports['e2e plugin run events / fails run if event handler throws'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:      1.2.3                                                                            │
-  │ Browser:      FooBrowser 88                                                                    │
-  │ Specs:        1 found (run_event_throws_spec.js)                                               │
-  │ Searched:     cypress/integration/*                                                            │
-  │ Experiments:  experimentalRunEvents=true                                                       │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  run_event_throws_spec.js                                                        (1 of 1)
-An error was thrown in your plugins file while executing the handler for the 'before:spec' event.
-
-The error we received was:
-
-Error: error thrown in before:spec
-      [stack trace lines]
-
-
-`
-
 exports['e2e plugin run events / handles video being deleted in after:spec'] = `
 
 ====================================================================================================
@@ -179,6 +142,43 @@ This error will not alter the exit code.
   │ ✔  after_spec_deletes_video.js              XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+
+
+`
+
+exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
+The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
+
+ Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
+
+To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
+      [stack trace lines]
+`
+
+exports['e2e plugin run events / fails run if event handler throws'] = `
+
+====================================================================================================
+
+  (Run Starting)
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:      1.2.3                                                                            │
+  │ Browser:      FooBrowser 88                                                                    │
+  │ Specs:        1 found (run_event_throws_spec.js)                                               │
+  │ Searched:     cypress/integration/*                                                            │
+  │ Experiments:  experimentalRunEvents=true                                                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+────────────────────────────────────────────────────────────────────────────────────────────────────
+                                                                                                    
+  Running:  run_event_throws_spec.js                                                        (1 of 1)
+An error was thrown in your plugins file while executing the handler for the 'before:spec' event.
+
+The error we received was:
+
+Error: error thrown in before:spec
+      [stack trace lines]
 
 
 `
