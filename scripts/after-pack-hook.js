@@ -12,7 +12,7 @@ module.exports = async function (params) {
   console.log(params.electronPlatformName)
   console.log('****************************')
 
-  const packages = await globby(['packages/*/node_modules', 'npm/*/node_modules'], {
+  const packages = await globby('packages/*/node_modules', {
     cwd: params.packager.info._appDir,
     onlyFiles: false,
   })

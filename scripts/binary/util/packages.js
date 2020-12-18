@@ -55,51 +55,6 @@ const runAllBuild = _.partial(npx, ['lerna', 'run', 'build-prod', '--ignore', 'c
 // removes transpiled JS files in the original package folders
 const runAllCleanJs = _.partial(npx, ['lerna', 'run', 'clean-js', '--ignore', 'cli'])
 
-// gets a list of all the packages within /npm
-// that are used in the binary
-const getLocalPublicPackages = function (basePath = process.cwd()) {
-  const publicPkgs = []
-
-  const addPublicPkg = function (pkg) {
-    if (!publicPkgs.includes(pkg)) {
-      publicPkgs.push(pkg)
-
-      return addDepsByGlob(`./npm/${pkg}/package.json`)
-    }
-
-    return Promise.resolve()
-  }
-
-  const addDepsByGlob = function (pattern) {
-    return Promise.resolve(glob(pattern, { cwd: basePath }))
-    .map((pkgPath) => {
-      return fs.readJsonAsync(path.join(basePath, pkgPath))
-      .then((json) => {
-        let { dependencies, devDependencies, name } = json
-
-        // we specify local dependencies within dev for server
-        if (name === '@packages/server') {
-          dependencies = { ...dependencies, ...devDependencies }
-        }
-
-        if (dependencies) {
-          return Promise.all(_.map(dependencies, (version, pkg) => {
-            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
-
-            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
-              return addPublicPkg(parsedPkg[2])
-            }
-          }))
-        }
-      })
-    })
-  }
-
-  return addDepsByGlob('./packages/*/package.json').then(() => {
-    return publicPkgs
-  })
-}
-
 const copyAllToDist = function (distDir) {
   const copyRelativePathToDist = function (relative) {
     const dest = path.join(distDir, relative)
@@ -142,13 +97,6 @@ const copyAllToDist = function (distDir) {
     .map(copyRelativePathToDist, { concurrency: 1 })
   }
 
-  const generateGlobs = function () {
-    return getLocalPublicPackages()
-    .then((localPkgs) => {
-      return localPkgs.map(((pkg) => `./npm/${pkg}`))
-    })
-  }
-
   // fs-extra concurrency tests (copyPackage / copyRelativePathToDist)
   // 1/1  41688
   // 1/5  42218
@@ -163,20 +111,69 @@ const copyAllToDist = function (distDir) {
   const started = new Date()
 
   return fs.ensureDirAsync(distDir)
-  .then(generateGlobs)
-  .then((publicPkgs) => {
-    return glob('./packages/*').then((privatePkgs) => {
-      console.log('Copying the following public npm packages', publicPkgs)
-      console.log('Copying the following private packages', privatePkgs)
-
-      return privatePkgs.concat(publicPkgs)
-    })
+  .then(() => {
+    return glob('./packages/*')
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)
 
     return console.log('')
   })
+}
+
+// replaces local npm version 0.0.0-development
+// with the path to the package
+// we need to do this instead of just changing the symlink (like we do for require('@packages/...'))
+// so the packages actually get installed to node_modules and work with peer dependencies
+const replaceLocalNpmVersions = function () {
+  const visited = []
+
+  const updateNpmPackage = function (pkg) {
+    if (!visited.includes(pkg)) {
+      visited.push(pkg)
+
+      return updatePackageJson(`./npm/${pkg}/package.json`)
+    }
+
+    return Promise.resolve()
+  }
+
+  const updatePackageJson = function (pattern) {
+    return Promise.resolve(glob(pattern))
+    .map((pkgJsonPath) => {
+      return fs.readJsonAsync(pkgJsonPath)
+      .then((json) => {
+        const { dependencies } = json
+        let shouldWriteFile = false
+
+        if (dependencies) {
+          return Promise.all(_.map(dependencies, (version, pkg) => {
+            const parsedPkg = /(@cypress\/)(.*)/g.exec(pkg)
+
+            if (parsedPkg && parsedPkg.length === 3 && version === '0.0.0-development') {
+              const pkgName = parsedPkg[2]
+
+              const pkgPath = path.resolve(`./npm/${pkgName}`)
+
+              json.dependencies[`@cypress/${pkgName}`] = `file:${pkgPath}`
+              shouldWriteFile = true
+
+              return updateNpmPackage(pkgName)
+            }
+          }))
+          .then(() => {
+            if (shouldWriteFile) {
+              return fs.writeJson(pkgJsonPath, json)
+            }
+          })
+        }
+
+        return Promise.resolve()
+      })
+    })
+  }
+
+  return updatePackageJson('./packages/*/package.json')
 }
 
 const forceNpmInstall = function (packagePath, packageToInstall) {
@@ -272,7 +269,7 @@ module.exports = {
 
   forceNpmInstall,
 
-  getLocalPublicPackages,
+  replaceLocalNpmVersions,
 }
 
 if (!module.parent) {

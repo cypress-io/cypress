@@ -124,27 +124,16 @@ const buildCypressApp = function (platform, version, options = {}) {
     .then(R.tap(logBuiltAllPackages))
   }
 
+  const replaceLocalNpmVersions = function () {
+    log('#replaceLocalNpmVersions')
+
+    return packages.replaceLocalNpmVersions()
+  }
+
   const copyPackages = function () {
     log('#copyPackages')
 
     return packages.copyAllToDist(distDir())
-  }
-
-  const transformSymlinkRequires = function () {
-    log('#transformSymlinkRequires')
-
-    return transformRequires(distDir())
-    .then((replaceCount) => {
-      return la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
-    })
-  }
-
-  const npmInstallPublicPackages = function () {
-    log('#npmInstallPublicPackages')
-
-    const pathToPackages = distDir('npm', '*')
-
-    return packages.npmInstallAll(pathToPackages)
   }
 
   const npmInstallPrivatePackages = function () {
@@ -219,6 +208,21 @@ require('./packages/server')\
     })
   }
 
+  const cleanJs = function () {
+    log('#cleanJs')
+
+    return packages.runAllCleanJs()
+  }
+
+  const transformSymlinkRequires = function () {
+    log('#transformSymlinkRequires')
+
+    return transformRequires(distDir())
+    .then((replaceCount) => {
+      return la(replaceCount > 5, 'expected to replace more than 5 symlink requires, but only replaced', replaceCount)
+    })
+  }
+
   // we also don't need ".bin" links inside Electron application
   // thus we can go through dist/packages/*/node_modules and remove all ".bin" folders
   const removeBinFolders = function () {
@@ -257,12 +261,6 @@ require('./packages/server')\
 
       return console.log(paths)
     })
-  }
-
-  const cleanJs = function () {
-    log('#cleanJs')
-
-    return packages.runAllCleanJs()
   }
 
   const getIconFilename = function (platform) {
@@ -448,8 +446,8 @@ require('./packages/server')\
   .then(checkPlatform)
   .then(cleanupPlatform)
   .then(buildPackages)
+  .then(replaceLocalNpmVersions)
   .then(copyPackages)
-  .then(npmInstallPublicPackages)
   .then(npmInstallPrivatePackages)
   .then(createRootPackage)
   .then(removeTypeScript)
