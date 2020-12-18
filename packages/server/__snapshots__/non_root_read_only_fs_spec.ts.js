@@ -24,11 +24,6 @@ If you don't require screenshots or videos to be stored you can safely ignore th
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
   Running:  spec.js                                                                         (1 of 1)
-Warning: We failed to record the video.
-
-This error will not alter the exit code.
-
-Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-root/cypress/videos'
 
 
   1) fails
@@ -43,18 +38,6 @@ Error: EACCES: permission denied, mkdir '/foo/bar/.projects/read-only-project-ro
 
 
 
-Warning: We failed processing this video.
-
-This error will not alter the exit code.
-
-TimeoutError: operation timed out
-      [stack trace lines]
-
-Warning: We could not find the video at the following path, so we were unable to process it.
-
-Video path: /foo/bar/.projects/read-only-project-root/cypress/videos/spec.js.mp4
-
-This error will not alter the exit code.
 
   (Results)
 
