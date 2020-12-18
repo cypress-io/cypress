@@ -2,9 +2,7 @@ import React from 'react'
 import { SpecFile } from './spec-file'
 import { SpecGroup } from './spec-group'
 
-export function SpecItem ({ item, state, parentPath }) {
-  const newParentPath = `${parentPath}/${item.shortName}`
-
+export function SpecItem ({ item, state }) {
   return item.type === 'file'
     ? <SpecFile
       path={item.name}
@@ -13,5 +11,5 @@ export function SpecItem ({ item, state, parentPath }) {
     : <SpecGroup
       group={item}
       state={state}
-      parentPath={newParentPath}/>
+    />
 }
