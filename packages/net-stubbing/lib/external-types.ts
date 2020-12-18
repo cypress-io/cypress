@@ -230,13 +230,9 @@ export interface RouteMap { [key: string]: Route }
  */
 export type RouteMatcher = StringMatcher | RouteMatcherOptions
 
-export interface RouteMatcherCompatOptions {
-  response?: string | object
-}
-
 export type RouteMatcherOptions = RouteMatcherOptionsGeneric<StringMatcher>
 
-export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions {
+export interface RouteMatcherOptionsGeneric<S> {
   /**
    * Match against the username and password used in HTTP Basic authentication.
    */
@@ -254,6 +250,11 @@ export interface RouteMatcherOptionsGeneric<S> extends RouteMatcherCompatOptions
    * If 'false', only HTTP requests will be matched.
    */
   https?: boolean
+  /**
+   * If `true`, will match the supplied `url` against incoming `path`s.
+   * Cannot be set without `url` or with `path`.
+   */
+  matchUrlAgainstPath?: boolean
   /**
    * Match against the request's HTTP method.
    * @default '*'

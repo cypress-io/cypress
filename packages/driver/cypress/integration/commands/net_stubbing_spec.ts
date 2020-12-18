@@ -60,6 +60,7 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: url,
           },
+          matchUrlAgainstPath: true,
         },
         staticResponse: {
           body: 'bar',
@@ -68,7 +69,7 @@ describe('network stubbing', { retries: 2 }, function () {
       }
 
       const expectedRoute = {
-        options: { url },
+        options: { url, matchUrlAgainstPath: true },
         handler,
       }
 
@@ -87,12 +88,13 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: url,
           },
+          matchUrlAgainstPath: true,
         },
         hasInterceptor: true,
       }
 
       const expectedRoute = {
-        options: { url },
+        options: { url, matchUrlAgainstPath: true },
         handler,
       }
 
@@ -124,7 +126,6 @@ describe('network stubbing', { retries: 2 }, function () {
           quuz: /(.*)quux/gi,
         },
         url: 'http://foo.invalid',
-        webSocket: false,
       }
 
       const expectedEvent = {
@@ -181,7 +182,6 @@ describe('network stubbing', { retries: 2 }, function () {
             type: 'glob',
             value: options.url,
           },
-          webSocket: options.webSocket,
         },
         hasInterceptor: true,
       }
@@ -1120,6 +1120,29 @@ describe('network stubbing', { retries: 2 }, function () {
           })
         })
         .wait('@foo')
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/9379
+      context('falls back to matching by path if plain string is passed', function () {
+        it('matches globs against path', function (done) {
+          cy.intercept('/foo/*', (req) => {
+            expect(req.url).to.include('/foo/1')
+            done()
+          })
+          .then(() => {
+            $.ajax({ url: '/foo/1', cache: true })
+          })
+        })
+
+        it('matches nested globs against path', function (done) {
+          cy.intercept('/foo/*/bar', (req) => {
+            expect(req.url).to.match(/\/foo\/1\/bar$/)
+            done()
+          })
+          .then(() => {
+            $.get({ url: '/foo/1/bar', cache: true })
+          })
+        })
       })
     })
 
