@@ -112,7 +112,12 @@ const copyAllToDist = function (distDir) {
 
   return fs.ensureDirAsync(distDir)
   .then(() => {
-    return Promise.resolve(externalUtils.globby(['./packages/*', './npm/*']))
+    const globs = ['./packages/*', './npm/*']
+    const globOptions = {
+      onlyFiles: false,
+    }
+
+    return Promise.resolve(externalUtils.globby(globs, globOptions))
     .map(copyPackage, { concurrency: 1 })
   }).then(() => {
     console.log('Finished Copying %dms', new Date() - started)
