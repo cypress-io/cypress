@@ -17,7 +17,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getRouteForRequest } from './route-matching'
+import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
 import {
   sendStaticResponse,
   emit,
@@ -30,12 +30,22 @@ const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
  * Called when a new request is received in the proxy layer.
- * @param project
- * @param req
- * @param res
- * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
 export const InterceptRequest: RequestMiddleware = function () {
+  if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+    // send positive CORS preflight response
+    return sendStaticResponse(this, {
+      statusCode: 204,
+      headers: {
+        'access-control-max-age': '-1',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': this.req.headers.origin || '*',
+        'access-control-allow-methods': this.req.headers['access-control-request-method'] || '*',
+        'access-control-allow-headers': this.req.headers['access-control-request-headers'] || '*',
+      },
+    })
+  }
+
   const route = getRouteForRequest(this.netStubbingState.routes, this.req)
 
   if (!route) {

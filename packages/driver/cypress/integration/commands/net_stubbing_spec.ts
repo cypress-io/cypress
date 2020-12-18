@@ -594,6 +594,67 @@ describe('network stubbing', { retries: 2 }, function () {
         .wait('@foo').its('response.body').should('eq', 'replaced the body')
       })
     })
+
+    // @see https://github.com/cypress-io/cypress/issues/9599
+    context('cors preflight', function () {
+      // a different domain from the page own domain
+      // NOTE: this domain is redirected back to the local host test server
+      // using "hosts" setting in the "cypress.json" file
+      const corsUrl = 'http://diff.foobar.com:3501/no-cors'
+
+      before(() => {
+        cy.visit('http://127.0.0.1:3500/fixtures/dom.html')
+      })
+
+      it('responds to OPTIONS requests', function () {
+        // `/no-cors/` will respond with a 200, but missing valid preflight response
+        cy.request({ method: 'OPTIONS', url: corsUrl })
+        .then((res) => {
+          expect(res.headers).to.not.have.property('access-control-allow-origin')
+
+          // so this ajax request should fail due to CORS
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          // but now, the same ajax request succeeds, because the cy.intercept provides CORS
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then((res) => {
+            expect(res).to.eq('intercepted DELETE')
+          })
+        })
+      })
+
+      it('can be overwritten', function () {
+        cy.intercept('OPTIONS', '/no-cors', (req) => {
+          req.reply({
+            headers: {
+              'access-control-allow-origin': 'http://wrong.invalid',
+            },
+          })
+        })
+        .intercept('/no-cors', (req) => {
+          req.reply(`intercepted ${req.method}`)
+        })
+        .then(() => {
+          return $.ajax({ method: 'DELETE', url: corsUrl })
+          .then(() => {
+            throw new Error('should not succeed')
+          })
+          .catch((res) => {
+            expect(res).to.include({ statusText: 'error' })
+          })
+        })
+      })
+    })
   })
 
   context('stubbing with static responses', function () {
