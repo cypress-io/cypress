@@ -4,7 +4,7 @@ import Fixtures from '../support/helpers/fixtures'
 describe('e2e plugin run events', () => {
   e2e.setup()
 
-  e2e.it('sends server events', {
+  e2e.it('sends events', {
     browser: 'electron',
     project: Fixtures.projectPath('plugin-run-events'),
     spec: '*',
@@ -26,7 +26,7 @@ describe('e2e plugin run events', () => {
     },
   })
 
-  e2e.it('fails run if server event handler throws', {
+  e2e.it('fails run if event handler throws', {
     browser: 'electron',
     project: Fixtures.projectPath('plugin-run-event-throws'),
     spec: '*',

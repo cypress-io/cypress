@@ -1,4 +1,13 @@
-exports['e2e plugin run events / sends server events'] = `
+exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
+The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
+
+ Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
+
+To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
+      [stack trace lines]
+`
+
+exports['e2e plugin run events / sends events'] = `
 
 ====================================================================================================
 
@@ -39,6 +48,8 @@ before:spec is awaited
   │ Spec Ran:     run_events_spec_1.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+spec:end: cypress/integration/run_events_spec_1.js { tests: 1, passes: 1, failures: 0 }
+after:spec is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -66,6 +77,8 @@ before:spec is awaited
   │ Spec Ran:     run_events_spec_2.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+spec:end: cypress/integration/run_events_spec_2.js { tests: 1, passes: 1, failures: 0 }
+after:spec is awaited
 
 ====================================================================================================
 
@@ -83,7 +96,7 @@ before:spec is awaited
 
 `
 
-exports['e2e plugin run events / fails run if server event handler throws'] = `
+exports['e2e plugin run events / fails run if event handler throws'] = `
 
 ====================================================================================================
 
@@ -109,13 +122,4 @@ Error: error thrown in before:spec
       [stack trace lines]
 
 
-`
-
-exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
-The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
-
- Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
-
-To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
-      [stack trace lines]
 `
