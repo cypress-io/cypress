@@ -1249,13 +1249,29 @@ module.exports = {
       })
     }
 
-    return iterateThroughSpecs({
-      specs,
+    const beforeRunDetails = {
+      browser,
       config,
+      cypressVersion: pkg.version,
+      group,
       parallel,
-      runEachSpec,
-      afterSpecRun,
-      beforeSpecRun,
+      runUrl,
+      specs,
+      specPattern,
+      system: _.pick(sys, 'osName', 'osVersion'),
+      tag,
+    }
+
+    return runEvents.execute('before:run', config, beforeRunDetails)
+    .then(() => {
+      return iterateThroughSpecs({
+        specs,
+        config,
+        parallel,
+        runEachSpec,
+        afterSpecRun,
+        beforeSpecRun,
+      })
     })
     .then((runs = []) => {
       results.status = 'finished'
