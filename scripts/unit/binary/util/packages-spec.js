@@ -41,7 +41,13 @@ describe('packages', () => {
       },
     })
 
-    sinon.stub(externalUtils, 'globby')
+    const globbyStub = sinon.stub(externalUtils, 'globby')
+
+    globbyStub
+    .withArgs(['./packages/*', './npm/*'])
+    .resolves(['./packages/coffee'])
+
+    globbyStub
     .withArgs(['package.json', 'lib', 'src/main.js'])
     .resolves([
       'package.json',
