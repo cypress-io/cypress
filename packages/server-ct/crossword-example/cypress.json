@@ -1,5 +1,4 @@
 {
-  "pluginsFile": "tests/plugins/index.js",
   "integrationFolder": "tests/e2e",
   "experimentalComponentTesting": true,
   "experimentalFetchPolyfill": true,
