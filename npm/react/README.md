@@ -432,15 +432,6 @@ Because finding and modifying Webpack settings while running this plugin is done
 DEBUG=@cypress/react,find-webpack
 ```
 
-## Migration guide
-
-### From v3 to v4
-
-The old v3 `main` branch is available as branch [v3](https://github.com/cypress-io/cypress-react-unit-test/tree/v3)
-
-- the `cy.mount` is now simply `import { mount } from '@cypress/react'`
-- the support file is simply `require('@cypress/react/support')`
-
 ## Related tools
 
 Same feature for unit testing components from other frameworks using Cypress
