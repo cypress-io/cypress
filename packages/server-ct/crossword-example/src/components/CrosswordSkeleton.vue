@@ -11,7 +11,7 @@
 </template>
 
 <script>
-  import crosswords from '~/cypress/fixtures/crosswords'
+  import crosswords from '../../cypress/fixtures/crosswords'
   export default {
     props: {
       crossword: { default: null }
