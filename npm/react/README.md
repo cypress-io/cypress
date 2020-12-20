@@ -386,8 +386,7 @@ const webpackOptions = {
 }
 ```
 
-<!--  TODO FIX THE LINK -->
-Keep your eye on issue [#156](https://github.com/bahmutov/cypress-react-unut-test/issues/156) for more information.
+Keep your eye on issue [#9663](https://github.com/cypress-io/cypress/issues/9663) for more information.
 
 </details>
 
@@ -403,7 +402,7 @@ See related issue [#141](https://github.com/bahmutov/cypress-react-unit-test/rea
 <details id="gatsby-not-supported">
   <summary>Gatsby.js projects not supported</summary>
 
-Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/bahmutov/@cypress/react/issues/307)
+Currently, this project cannot find Webpack settings used by Gatsby.js, thus it cannot bundle specs and application code correctly. Keep an eye on [#307](https://github.com/cypress-io/cypress/issues/9671)
 
 </details>
 
@@ -432,15 +431,6 @@ Because finding and modifying Webpack settings while running this plugin is done
 ```
 DEBUG=@cypress/react,find-webpack
 ```
-
-## Migration guide
-
-### From v3 to v4
-
-The old v3 `main` branch is available as branch [v3](https://github.com/bahmutov/@cypress/react/tree/v3)
-
-- the `cy.mount` is now simply `import { mount } from '@cypress/react'`
-- the support file is simply `require('@cypress/react/support')`
 
 ## Related tools
 
