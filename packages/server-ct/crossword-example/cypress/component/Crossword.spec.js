@@ -4,7 +4,7 @@ import router from '@/router'
 import store from '@/store'
 import Vuex from 'vuex'
 import VueRouter from 'vue-router'
-import crosswords from '~/cypress/fixtures/crosswords'
+import crosswords from '../fixtures/crosswords'
 
 const board = '[data-testid=crossword]'
 const loading = '[data-testid=crossword-skeleton]'

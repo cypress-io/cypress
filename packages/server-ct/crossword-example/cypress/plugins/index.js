@@ -16,10 +16,10 @@
 // }
 
 /// <reference types="cypress" />
-const preprocessor = require('@cypress/vue/dist/plugins/webpack')
+const { startDevServer } = require('@cypress/webpack-dev-server')
 
 module.exports = (on, config) => {
-  preprocessor(on, config, require('../../webpack.config.js'))
+  on('devserver:start', (options) => startDevServer(options))
 
   return config
 }
