@@ -1290,7 +1290,8 @@ module.exports = {
 
       const { each, remapKeys, remove, renameKey, setValue } = objUtils
 
-      // Remap module API result json to remove private props and rename props to make more user-friendly
+      // Remap results for module API/after:run to remove private props and
+      // rename props to make more user-friendly
       const moduleAPIResults = remapKeys(results, {
         runs: each((run) => ({
           tests: each((test) => ({
@@ -1322,7 +1323,11 @@ module.exports = {
         })),
       })
 
-      return writeOutput(outputPath, moduleAPIResults).return(results)
+      return runEvents.execute('after:run', config, moduleAPIResults)
+      .then(() => {
+        return writeOutput(outputPath, moduleAPIResults)
+      })
+      .return(results)
     })
   },
 

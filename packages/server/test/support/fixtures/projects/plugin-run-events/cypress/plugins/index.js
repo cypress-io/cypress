@@ -12,6 +12,16 @@ module.exports = (on) => {
     })
   })
 
+  on('after:run', (results) => {
+    const { totalTests, totalPassed, totalFailed } = results
+
+    console.log('after:run:', { totalTests, totalPassed, totalFailed })
+
+    return Promise.delay(10).then(() => {
+      return console.log('after:run is awaited')
+    })
+  })
+
   on('before:spec', (spec) => {
     console.log('before:spec:', spec.relative)
 
