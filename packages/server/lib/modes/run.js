@@ -1140,9 +1140,9 @@ module.exports = {
       }
 
       const hasFailingTests = _.get(stats, 'failures') > 0
-      // we should upload the video if the video still exists and we upload on
-      // passes (the default) or if we have any failures and have started the video
-      const shouldUploadVideo = videoExists && (videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests)))
+      // we should upload the video if we upload on passes (by default)
+      // or if we have any failures and have started the video
+      const shouldUploadVideo = videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
 
       results.shouldUploadVideo = shouldUploadVideo
 
