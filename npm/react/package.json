@@ -107,11 +107,10 @@
   },
   "files": [
     "dist",
-    "lib",
     "support",
     "plugins"
   ],
-  "types": "lib",
+  "types": "dist",
   "license": "MIT",
   "repository": {
     "type": "git",
