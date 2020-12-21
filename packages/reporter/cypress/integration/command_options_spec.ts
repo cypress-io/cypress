@@ -7,7 +7,7 @@ describe('command options', () => {
     const runner = new EventEmitter()
 
     cy.visit('/').then((win) => {
-      render = ({ isInteractive = true } = {}) => {
+      render = ({ isInteractive = true }: any = {}) => {
         win.render({
           isInteractive,
           runner,
