@@ -24,7 +24,7 @@ export const Message = observer(({ model }: MessageProps) => (
     { model.options && Object.keys(model.options).length > 0
       ?
       <span className="command-message-options">
-        <ObjectViewer obj={model.options} />
+        <ObjectViewer obj={model.options} isOpen={!appState.isInteractive} />
       </span>
       : null
     }

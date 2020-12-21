@@ -22,6 +22,7 @@ const defaults: DefaultAppState = {
 class AppState {
   @observable autoScrollingEnabled = true
   @observable forcingGc = defaults.forcingGc
+  @observable isInteractive = true
   @observable isPaused = defaults.isPaused
   @observable isRunning = defaults.isRunning
   @observable nextCommandName = defaults.nextCommandName
@@ -79,6 +80,10 @@ class AppState {
       this._resetAutoScrollingEnabledTo = isEnabled
       this.autoScrollingEnabled = isEnabled
     }
+  }
+
+  setIsInteractive (isInteractive: boolean) {
+    this.isInteractive = isInteractive
   }
 
   reset () {

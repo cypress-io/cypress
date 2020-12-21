@@ -4,9 +4,10 @@ import Collapsible from '../collapsible/collapsible'
 
 interface ObjectViewerProps {
   obj: Record<any, any>
+  isOpen: boolean
 }
 
-export const ObjectViewer = ({ obj }: ObjectViewerProps) => {
+export const ObjectViewer = ({ obj, isOpen }: ObjectViewerProps) => {
   return Object.keys(obj).length === 1 && !_.isObject(obj[Object.keys(obj)[0]])
     ? (
       <div className="object-viewer">
@@ -19,6 +20,7 @@ export const ObjectViewer = ({ obj }: ObjectViewerProps) => {
           collapsed: 'Show options',
           expanded: 'Hide options',
         }}
+        isOpen={isOpen}
       >
         <pre>{JSON.stringify(obj, null, 4)}</pre>
       </Collapsible>
