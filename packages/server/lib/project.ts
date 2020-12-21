@@ -1,37 +1,37 @@
-const _ = require('lodash')
-const R = require('ramda')
-const EE = require('events')
-const path = require('path')
-const Bluebird = require('bluebird')
-const commitInfo = require('@cypress/commit-info')
-const la = require('lazy-ass')
-const check = require('check-more-types')
-const scaffoldDebug = require('debug')('cypress:server:scaffold')
-const debug = require('debug')('cypress:server:project')
-const cwd = require('./cwd')
-const api = require('./api')
-const user = require('./user')
-const cache = require('./cache')
-const config = require('./config')
-const logger = require('./logger')
-const errors = require('./errors')
-const Server = require('./server')
-const plugins = require('./plugins')
-const scaffold = require('./scaffold')
-const Watchers = require('./watchers')
-const Reporter = require('./reporter')
-const browsers = require('./browsers')
-const savedState = require('./saved_state')
-const Automation = require('./automation')
-const preprocessor = require('./plugins/preprocessor')
-const fs = require('./util/fs')
-const keys = require('./util/keys')
-const settings = require('./util/settings')
-const specsUtil = require('./util/specs')
-const { escapeFilenameInUrl } = require('./util/escape_filename')
+import Bluebird from 'bluebird'
+import check from 'check-more-types'
+import Debug from 'debug'
+import EE from 'events'
+import la from 'lazy-ass'
+import _ from 'lodash'
+import path from 'path'
+import R from 'ramda'
+import commitInfo from '@cypress/commit-info'
+import api from './api'
+import Automation from './automation'
+import browsers from './browsers'
+import cache from './cache'
+import config from './config'
+import cwd from './cwd'
+import errors from './errors'
+import logger from './logger'
+import plugins from './plugins'
+import preprocessor from './plugins/preprocessor'
+import Reporter from './reporter'
+import savedState from './saved_state'
+import scaffold from './scaffold'
+import Server from './server'
+import user from './user'
+import { escapeFilenameInUrl } from './util/escape_filename'
+import fs from './util/fs'
+import keys from './util/keys'
+import settings from './util/settings'
+import specsUtil from './util/specs'
+import Watchers from './watchers'
 
+const debug = Debug('cypress:server:project')
+const debugScaffold = Debug('cypress:server:scaffold')
 const localCwd = cwd()
-
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
 class Project extends EE {
@@ -434,7 +434,7 @@ class Project extends EE {
       .then((untouchedScaffold) => {
         const userHasSeenOnBoarding = _.get(cfg, 'state.showedOnBoardingModal', false)
 
-        scaffoldDebug(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
+        debugScaffold(`untouched scaffold ${untouchedScaffold} modal closed ${userHasSeenOnBoarding}`)
         cfg.isNewProject = untouchedScaffold && !userHasSeenOnBoarding
       })
     }
