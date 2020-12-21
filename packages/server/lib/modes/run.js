@@ -1127,7 +1127,7 @@ module.exports = {
         .catch(warnVideoRecordingFailed)
       }
 
-      await runEvents.execute('after:spec', config, _.cloneDeep(spec), _.cloneDeep(results))
+      await runEvents.execute('after:spec', config, spec, results)
 
       const videoExists = videoName ? await fs.pathExists(videoName) : false
 
@@ -1344,7 +1344,7 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, _.cloneDeep(spec))
+    return runEvents.execute('before:spec', config, spec)
     .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and
