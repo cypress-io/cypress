@@ -240,6 +240,11 @@
       "default": "bundled",
       "description": "If set to 'system', Cypress will try to find a Node.js executable on your path to use when executing your plugins. Otherwise, Cypress will use the Node version bundled with Cypress."
     },
+    "experimentalRunEvents": {
+      "type": "boolean",
+      "default": false,
+      "description": "Allows listening to the `before:run`, `before:spec`, and `after:spec` events in the plugins file."
+    },
     "experimentalSourceRewriting": {
       "type": "boolean",
       "default": false,

@@ -156,11 +156,43 @@ module.exports = (Commands, Cypress, cy, state) => {
         log.set('referencesAlias', aliases)
       }
 
-      if (command && !['route', 'route2', 'intercept'].includes(command.get('name'))) {
-        $errUtils.throwErrByPath('wait.invalid_alias', {
-          onFail: options._log,
-          args: { alias },
-        })
+      const isNetworkInterceptCommand = (command) => {
+        const commandsThatCreateNetworkIntercepts = ['route', 'route2', 'intercept']
+        const commandName = command.get('name')
+
+        return commandsThatCreateNetworkIntercepts.includes(commandName)
+      }
+
+      const findInterceptAlias = (alias) => {
+        const routes = cy.state('routes') || {}
+
+        return _.find(_.values(routes), { alias })
+      }
+
+      const isInterceptAlias = (alias) => Boolean(findInterceptAlias(alias))
+
+      const isRouteAlias = (alias) => {
+        // has all aliases saved using cy.as() command
+        const aliases = cy.state('aliases') || {}
+
+        const aliasObject = aliases[alias]
+
+        if (!aliasObject) {
+          return false
+        }
+
+        // cy.route aliases have subject that has all XHR properties
+        // let's check one of them
+        return aliasObj.subject && Boolean(aliasObject.subject.xhrUrl)
+      }
+
+      if (command && !isNetworkInterceptCommand(command)) {
+        if (!isInterceptAlias(alias) && !isRouteAlias(alias)) {
+          $errUtils.throwErrByPath('wait.invalid_alias', {
+            onFail: options._log,
+            args: { alias },
+          })
+        }
       }
 
       // create shallow copy of each options object
