@@ -52,6 +52,14 @@ describe('intercept-request', function () {
       expect(_doesRouteMatch(matcher, req as CypressIncomingRequest)).to.eq(expected)
     }
 
+    it('matches exact URL', function () {
+      tryMatch({
+        proxiedUrl: 'https://google.com/foo',
+      }, {
+        url: 'https://google.com/foo',
+      })
+    })
+
     it('matches on url as regexp', function () {
       tryMatch({
         proxiedUrl: 'https://google.com/foo',
@@ -163,6 +171,16 @@ describe('intercept-request', function () {
         }, {
           matchUrlAgainstPath: true,
           url: '/*/nested?k=*',
+        })
+      })
+
+      // @see https://github.com/cypress-io/cypress/issues/14256
+      it('matches when url has missing leading slash', function () {
+        tryMatch({
+          proxiedUrl: 'http://foo.com/services/api/agenda/Appointment?id=25',
+        }, {
+          matchUrlAgainstPath: true,
+          url: 'services/api/agenda/Appointment?id=**',
         })
       })
     })

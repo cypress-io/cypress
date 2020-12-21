@@ -26,7 +26,17 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
     // for convenience, attempt to match `url` against `path`?
     const shouldTryMatchingPath = field === 'url' && routeMatcher.matchUrlAgainstPath
 
-    const stringMatch = (value: string, matcher: string) => value === matcher || minimatch(value, matcher, { matchBase: true }) || (field === 'url' && value.includes(matcher))
+    const stringMatch = (value: string, matcher: string) => {
+      return (
+        minimatch(value, matcher, { matchBase: true }) ||
+      (field === 'url' && (
+        // substring match
+        value.includes(matcher) ||
+        // be nice and match paths that are missing leading slashes
+        (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
+      ))
+      )
+    }
 
     if (typeof value !== 'string') {
       value = String(value)
