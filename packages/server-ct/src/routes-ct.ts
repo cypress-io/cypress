@@ -19,18 +19,18 @@ interface InitializeRoutes {
 export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
-  app.get('/__cypress/runner/*', (req, res) => {
+  app.get(`/${config.namespace}/runner/*`, (req, res) => {
     runnerCt.handle(req, res)
   })
 
-  app.get('/__cypress/static/*', (req, res) => {
+  app.get(`/${config.namespace}/static/*`, (req, res) => {
     const pathToFile = staticPkg.getPathToDist(req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
   })
 
-  app.get('/__cypress/iframes/*', (req, res) => {
+  app.get(`/${config.namespace}/iframes/*`, (req, res) => {
     req.url = '/'
     proxy.web(req, res, { target: config.webpackDevServerUrl })
     // localhost:myPort/index.html
@@ -42,6 +42,18 @@ export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
     // const getRemoteState = _.constant({ domainName: null })
     //
     // files.handleIframe(req, res, config, getRemoteState, extraOptions)
+  })
+
+  app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end chunk by requested URL:', req.url)
+
+    runnerCt.serveChunk(req, res, { config })
+  })
+
+  app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
+
+    runnerCt.serveChunk(req, res, { config })
   })
 
   app.get(config.clientRoute, (req, res) => {

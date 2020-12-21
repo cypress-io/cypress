@@ -12,7 +12,7 @@ import $Cypress, { $ } from '@packages/driver'
 import specsStore from '../specs/specs-store'
 
 const ws = client.connect({
-  path: '/__socket.io',
+  path: window.__cypressConfig.socketIoRoute,
   transports: ['websocket'],
   parser: circularParser,
 })

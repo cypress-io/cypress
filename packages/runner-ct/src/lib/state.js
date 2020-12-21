@@ -1,6 +1,5 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
-import eventManager from './event-manager'
 
 const _defaults = {
   messageTitle: null,
@@ -187,6 +186,7 @@ export default class State {
   }
 
   runMultiMode = async () => {
+    const eventManager = await import(/* webpackChunkName: "ctChunk-EventManager" */'./event-manager').then((module) => module.default)
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)

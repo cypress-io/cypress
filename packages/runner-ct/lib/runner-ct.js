@@ -56,7 +56,14 @@ module.exports = {
 
     return res.render(runnerPath, {
       base64Config,
+      namespace: config.namespace,
       projectName: config.projectName,
     })
+  },
+  serveChunk (req, res, options) {
+    let { config } = options
+    let pathToFile = getPathToDist(req.originalUrl.replace(config.clientRoute, ''))
+
+    return send(req, pathToFile).pipe(res)
   },
 }
