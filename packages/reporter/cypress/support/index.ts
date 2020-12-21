@@ -1,4 +1,8 @@
 // @ts-ignore
 import installCustomPercyCommand from '@packages/ui-components/cypress/support/customPercyCommand'
 
-installCustomPercyCommand()
+installCustomPercyCommand({
+  elementOverrides: {
+    '.command-progress': true,
+  },
+})
