@@ -13,7 +13,7 @@ const babelLoader = _.find(commonConfig.module.rules, (rule) => {
 
 // @ts-ignore
 babelLoader.use.options.plugins.push([require.resolve('babel-plugin-prismjs'), {
-  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx'],
+  'languages': ['javascript', 'coffeescript', 'typescript', 'jsx', 'tsx', 'json'],
   'plugins': ['line-numbers', 'line-highlight'],
   'theme': 'default',
   'css': false,

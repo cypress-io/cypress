@@ -1,5 +1,7 @@
-import React from 'react'
+import React, { useRef, useEffect } from 'react'
 import _ from 'lodash'
+import Prism from 'prismjs'
+
 import Collapsible from '../collapsible/collapsible'
 
 interface ObjectViewerProps {
@@ -24,9 +26,29 @@ export const ObjectViewer = ({ obj, isOpen }: ObjectViewerProps) => {
         }}
         isOpen={isOpen}
       >
-        <pre>{JSON.stringify(obj, null, 4)}</pre>
+        <JsonCode obj={obj} />
       </Collapsible>
     )
+}
+
+interface JsonCodeProps {
+  obj: Record<any, any>
+}
+
+const JsonCode = ({ obj }: JsonCodeProps) => {
+  const ref = useRef<HTMLPreElement>(null)
+
+  useEffect(() => {
+    if (ref.current) {
+      Prism.highlightAllUnder(ref.current)
+    }
+  })
+
+  return (
+    <pre ref={ref}>
+      <code className='language-json'>{JSON.stringify(obj, null, 4)}</code>
+    </pre>
+  )
 }
 
 const encode = (val: any) => {
