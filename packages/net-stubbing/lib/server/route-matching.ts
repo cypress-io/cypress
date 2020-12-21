@@ -28,13 +28,14 @@ export function _doesRouteMatch (routeMatcher: RouteMatcherOptions, req: Cypress
 
     const stringMatch = (value: string, matcher: string) => {
       return (
+        value === matcher ||
         minimatch(value, matcher, { matchBase: true }) ||
-      (field === 'url' && (
-        // substring match
-        value.includes(matcher) ||
-        // be nice and match paths that are missing leading slashes
-        (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
-      ))
+        (field === 'url' && (
+          // substring match
+          value.includes(matcher) ||
+          // be nice and match paths that are missing leading slashes
+          (value[0] === '/' && matcher[0] !== '/' && stringMatch(value, `/${matcher}`))
+        ))
       )
     }
 
