@@ -2577,7 +2577,7 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Allows listening to the `before:run`, `before:spec`, and `after:spec` events in the plugins file.
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.
      * @default false
      */
     experimentalRunEvents: boolean
@@ -5018,6 +5018,7 @@ declare namespace Cypress {
   }
 
   interface PluginEvents {
+    (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
     (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void

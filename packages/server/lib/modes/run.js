@@ -1127,7 +1127,7 @@ module.exports = {
         .catch(warnVideoRecordingFailed)
       }
 
-      await runEvents.execute('after:spec', config, _.cloneDeep(spec), _.cloneDeep(results))
+      await runEvents.execute('after:spec', config, spec, results)
 
       const videoExists = videoName ? await fs.pathExists(videoName) : false
 
@@ -1290,7 +1290,8 @@ module.exports = {
 
       const { each, remapKeys, remove, renameKey, setValue } = objUtils
 
-      // Remap module API result json to remove private props and rename props to make more user-friendly
+      // Remap results for module API/after:run to remove private props and
+      // rename props to make more user-friendly
       const moduleAPIResults = remapKeys(results, {
         runs: each((run) => ({
           tests: each((test) => ({
@@ -1322,7 +1323,11 @@ module.exports = {
         })),
       })
 
-      return writeOutput(outputPath, moduleAPIResults).return(results)
+      return runEvents.execute('after:run', config, moduleAPIResults)
+      .then(() => {
+        return writeOutput(outputPath, moduleAPIResults)
+      })
+      .return(results)
     })
   },
 
@@ -1344,7 +1349,7 @@ module.exports = {
 
     const screenshots = []
 
-    return runEvents.execute('before:spec', config, _.cloneDeep(spec))
+    return runEvents.execute('before:spec', config, spec)
     .then(() => {
     // we know we're done running headlessly
     // when the renderer has connected and

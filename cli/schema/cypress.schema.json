@@ -243,7 +243,7 @@
     "experimentalRunEvents": {
       "type": "boolean",
       "default": false,
-      "description": "Allows listening to the `before:run`, `before:spec`, and `after:spec` events in the plugins file."
+      "description": "Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file."
     },
     "experimentalSourceRewriting": {
       "type": "boolean",

@@ -112,6 +112,7 @@ const execute = (ipc, event, ids, args = []) => {
   }
 
   const handlers = {
+    'after:run': wrapChildPromise,
     'after:screenshot': wrapChildPromise,
     'after:spec': wrapChildPromise,
     'before:browser:launch' () {
