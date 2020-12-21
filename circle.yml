@@ -180,6 +180,34 @@ commands:
           path: /tmp/artifacts
       - store-npm-logs
 
+  run-runner-ct-integration-tests:
+    parameters:
+      browser:
+        description: browser to run
+        type: string
+      percy:
+        description: enable percy
+        type: boolean
+        default: false
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run: 
+          name: Rune @cypress/vue component testing server
+          backgorund: true
+          command: yarn workspace @packages/runner-ct cy:start-component-tests:vue
+      - run: npx wait-on http://localhost:4444/__ct/
+      - run:
+          command: |
+            cmd=$([[ <<parameters.percy>> == 'true' ]] && echo 'yarn percy exec --') || true
+
+            $cmd yarn workspace @packages/runner cy:run --browser <<parameters.browser>>
+      - store_test_results:
+          path: /tmp/cypress
+      - store_artifacts:
+          path: /tmp/artifacts
+
   run-e2e-tests:
     parameters:
       browser:
@@ -736,6 +764,12 @@ jobs:
     steps:
       - run-runner-integration-tests:
           browser: firefox
+
+  runner-ct-integration-tests:
+    <<: *defaults
+    steps:
+      - run-runner-ct-integration-tests:
+          browser: chrome
 
   driver-integration-tests-chrome:
     <<: *defaults
@@ -1701,6 +1735,9 @@ linux-workflow: &linux-workflow
         requires:
           - build
     - runner-integration-tests-firefox:
+        requires:
+          - build
+    - runner-ct-integration-tests:
         requires:
           - build
 
