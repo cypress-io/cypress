@@ -39,10 +39,22 @@ describe('commands', () => {
     })
 
     cy.contains('http://localhost:3000') // ensure test content has loaded
+
+    // ensure the page is loaded before proceeding
+    // this makes visual snapshots stable
+    cy.get('.focus-tests-text').should('be.visible')
   })
 
   it('displays all the commands', () => {
     cy.get('.command').should('have.length', 9)
+
+    // ensure progress bar is no longer visible
+    // for snapshot
+    cy.contains('#in-progress')
+    .closest('.command')
+    .find('.command-progress span')
+    .should('not.be.visible')
+
     cy.percySnapshot()
   })
 
