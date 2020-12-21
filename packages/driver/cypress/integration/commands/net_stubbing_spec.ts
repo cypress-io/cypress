@@ -406,6 +406,32 @@ describe('network stubbing', { retries: 2 }, function () {
             },
           })
         })
+
+        it('must set `url` with `matchUrlAgainstPath`', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`matchUrlAgainstPath` requires a `url` to be specified.')
+
+            done()
+          })
+
+          cy.intercept({
+            matchUrlAgainstPath: true,
+          })
+        })
+
+        it('must not set `path` with `matchUrlAgainstPath`', function (done) {
+          cy.on('fail', function (err) {
+            expect(err.message).to.include('`matchUrlAgainstPath` and `path` cannot both be set.')
+
+            done()
+          })
+
+          cy.intercept({
+            matchUrlAgainstPath: true,
+            path: '*',
+            url: '*',
+          })
+        })
       })
 
       context('with invalid handler', function () {
