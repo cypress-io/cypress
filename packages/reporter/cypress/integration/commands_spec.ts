@@ -39,6 +39,10 @@ describe('commands', () => {
     })
 
     cy.contains('http://localhost:3000') // ensure test content has loaded
+
+    // ensure the page is loaded before proceeding
+    // this makes visual snapshots stable
+    cy.get('.focus-tests-text').should('be.visible')
   })
 
   it('displays all the commands', () => {
