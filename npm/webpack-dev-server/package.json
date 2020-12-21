@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "debug": "^4.3.1",
+    "find-webpack": "2.2.0",
     "semver": "^7.3.4",
     "webpack-merge": "^5.4.0"
   },

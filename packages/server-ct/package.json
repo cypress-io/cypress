@@ -4,6 +4,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "cypress:open": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
+    "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
+    "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
     "prestart": "node scripts/checkExample.js",
     "start": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/example",
     "start-debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/example",
