@@ -12,6 +12,8 @@ exports['e2e plugin run events / sends events'] = `
   │ Experiments:  experimentalRunEvents=true                                                       │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
+before:run: cypress/integration/run_events_spec_1.js electron
+before:run is awaited
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
@@ -149,7 +151,7 @@ This error will not alter the exit code.
 exports['e2e plugin run events / fails if experimentalRunEvents is not enabled'] = `
 The following validation error was thrown by your plugins file (\`/foo/bar/.projects/plugin-run-events/cypress/plugins/index.js\`).
 
- Error: The \`before:spec\` event requires the experimentalRunEvents flag to be enabled.
+ Error: The \`before:run\` event requires the experimentalRunEvents flag to be enabled.
 
 To enable it, set \`"experimentalRunEvents": true\` in your cypress.json
       [stack trace lines]

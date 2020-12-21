@@ -2577,7 +2577,7 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
-     * Allows listening to the `before:spec` and `after:spec` events in the plugins file.
+     * Allows listening to the `before:run`, `before:spec`, and `after:spec` events in the plugins file.
      * @default false
      */
     experimentalRunEvents: boolean
@@ -4999,9 +4999,28 @@ declare namespace Cypress {
     [key: string]: Task
   }
 
+  interface SystemDetails {
+    osName: string
+    osVersion: string
+  }
+
+  interface BeforeRunDetails {
+    browser: Browser
+    config: ConfigOptions
+    cypressVersion: string
+    group?: string
+    parallel: boolean
+    runUrl?: string
+    specs: Spec[]
+    specPattern: string[]
+    system: SystemDetails
+    tag?: string
+  }
+
   interface PluginEvents {
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
     (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
+    (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void
     (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
     (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void

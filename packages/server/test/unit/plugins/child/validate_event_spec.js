@@ -69,6 +69,7 @@ The following are valid events:
 
   describe('run events', () => {
     const runEvents = [
+      'before:run',
       'before:spec',
       'after:spec',
     ]

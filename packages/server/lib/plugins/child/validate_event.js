@@ -36,6 +36,7 @@ const eventValidators = {
 
 const runEvents = {
   'after:spec': true,
+  'before:run': true,
   'before:spec': true,
 }
 

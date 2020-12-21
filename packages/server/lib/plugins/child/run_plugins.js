@@ -107,19 +107,18 @@ const load = (ipc, config, pluginsFile) => {
 const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
+  const wrapChildPromise = () => {
+    util.wrapChildPromise(ipc, invoke, ids, args)
+  }
+
   const handlers = {
-    'after:screenshot' () {
-      util.wrapChildPromise(ipc, invoke, ids, args)
-    },
-    'after:spec' () {
-      util.wrapChildPromise(ipc, invoke, ids, args)
-    },
+    'after:screenshot': wrapChildPromise,
+    'after:spec': wrapChildPromise,
     'before:browser:launch' () {
       browserLaunch.wrap(ipc, invoke, ids, args)
     },
-    'before:spec' () {
-      util.wrapChildPromise(ipc, invoke, ids, args)
-    },
+    'before:run': wrapChildPromise,
+    'before:spec': wrapChildPromise,
     'file:preprocessor' () {
       preprocessor.wrap(ipc, invoke, ids, args)
     },
