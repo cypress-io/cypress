@@ -1,3 +1,10 @@
+# [@cypress/react-v4.16.1](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.0...@cypress/react-v4.16.1) (2020-12-21)
+
+
+### Bug Fixes
+
+* **react:** link types from the correct directory ([#14255](https://github.com/cypress-io/cypress/issues/14255)) ([e2bc209](https://github.com/cypress-io/cypress/commit/e2bc2091a9e242b9a46276d57eddfd6daefdd4c8))
+
 # [@cypress/react-v4.16.0](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.15.16...@cypress/react-v4.16.0) (2020-11-30)
 
 
