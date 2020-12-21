@@ -37,7 +37,7 @@ const nonPngRules = _.filter(commonConfig.module.rules, (rule) => {
 pngRule.use[0].options = {
   name: '[name].[ext]',
   outputPath: 'img',
-  publicPath: '/__cypress/runner/img/',
+  publicPath: '/__cypress-ct123/runner/img/',
 }
 
 // @ts-ignore

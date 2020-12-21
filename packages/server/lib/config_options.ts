@@ -34,7 +34,7 @@ export const options = [
     validation: v.isBoolean,
   }, {
     name: 'clientRoute',
-    defaultValue: '/__/',
+    defaultValue: '/__ct/',
     isInternal: true,
   }, {
     name: 'componentFolder',

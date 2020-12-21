@@ -230,7 +230,7 @@ function createCypress (defaultOptions = {}) {
               {
                 absolute: relativeFile,
                 relative: relativeFile,
-                relativeUrl: `/__cypress/tests?p=${relativeFile}`,
+                relativeUrl: `/__cypress-ct123/tests?p=${relativeFile}`,
               },
             ])
 
