@@ -7,9 +7,9 @@ describe('command options', () => {
     const runner = new EventEmitter()
 
     cy.visit('/').then((win) => {
-      render = () => {
+      render = ({ isInteractive = true } = {}) => {
         win.render({
-          // isInteractive,
+          isInteractive,
           runner,
           spec: {
             name: 'foo',
@@ -36,6 +36,26 @@ describe('command options', () => {
       cy.get('.command-name-click .command-message-options').should('be.visible')
       cy.get('.command-name-scrollIntoView .command-message-options').should('be.visible')
       cy.get('.command-name-clearCookies .command-message-options').should('be.visible')
+    })
+  })
+
+  describe('interactive mode', () => {
+    beforeEach(() => {
+      render()
+    })
+
+    it('does not auto-expand options', () => {
+      cy.get('.command-name-clearCookies .command-message-options .collapsible').should('not.have.class', 'is-open')
+    })
+  })
+
+  describe('non-interactive mode', () => {
+    beforeEach(() => {
+      render({ isInteractive: false })
+    })
+
+    it('shows options as text in <pre>', () => {
+      cy.get('.command-name-clearCookies .command-message-options .collapsible').should('have.class', 'is-open')
     })
   })
 })

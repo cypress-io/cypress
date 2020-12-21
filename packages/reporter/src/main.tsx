@@ -53,6 +53,16 @@ class Reporter extends Component<ReporterProps> {
     }),
   }
 
+  constructor (props: ReporterProps) {
+    super(props)
+
+    const { appState, isInteractive } = this.props
+
+    action('set:config:values', () => {
+      appState.setIsInteractive(isInteractive)
+    })()
+  }
+
   static defaultProps = {
     appState,
     events,
@@ -79,17 +89,6 @@ class Reporter extends Component<ReporterProps> {
           events={this.props.events}/>
       </div>
     )
-  }
-
-  componentDidUpdate (prevProps: ReporterProps) {
-    // This component is loaded twice with isInteractive undefined and true in "open" mode
-    if (this.props.isInteractive !== prevProps.isInteractive) {
-      const { appState, isInteractive } = this.props
-
-      action('set:config:values', () => {
-        appState.setIsInteractive(isInteractive)
-      })()
-    }
   }
 
   componentDidMount () {
