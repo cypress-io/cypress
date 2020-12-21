@@ -24,5 +24,9 @@ export const start = async (projectRoot: string, options: unknown) => {
 
   project.setCurrentSpecAndBrowser(null, browser)
 
+  if (process.env.E2E_OVER_COMPONENT_TESTS) {
+    return Promise.resolve()
+  }
+
   return browsers.open(browser, options, automation)
 }

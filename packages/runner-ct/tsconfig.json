@@ -13,6 +13,7 @@
     "noImplicitAny": false,
     "noImplicitThis": false,
     "preserveWatchOutput": true,
+    "allowSyntheticDefaultExports": true,
     // "checkJs": true,                       /* Report errors in .js files. */
     // "jsx": "preserve",                     /* Specify JSX code generation: 'preserve', 'react-native', or 'react'. */
     /* Generates corresponding '.d.ts' file. */
@@ -48,7 +49,6 @@
     // "rootDirs": ["../driver/src"],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
     "types": [],                           /* Type declaration files to be included in compilation. */
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
     "noErrorTruncation": true,
     "experimentalDecorators": true

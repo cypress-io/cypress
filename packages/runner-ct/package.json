@@ -8,6 +8,9 @@
     "build": "webpack",
     "build-prod": "cross-env NODE_ENV=production yarn build",
     "clean-deps": "rm -rf node_modules",
+    "cy:open": "node ../../scripts/cypress open",
+    "cy:run": "node ../../scripts/cypress run",
+    "cy:start-component-tests:vue": "cross-env E2E_OVER_COMPONENT_TESTS=true node ../../scripts/cypress open --component-testing -P ../../npm/vue",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test-unit": "ts-mocha --config ./test/.mocharc.js",
     "watch": "webpack --watch --progress"
