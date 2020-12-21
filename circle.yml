@@ -194,8 +194,8 @@ commands:
           at: ~/
       - check-conditional-ci
       - run: 
-          name: Rune @cypress/vue component testing server
-          backgorund: true
+          name: Run @cypress/vue component testing server
+          background: true
           command: yarn workspace @packages/runner-ct cy:start-component-tests:vue
       - run: npx wait-on http://localhost:4444/__ct/
       - run:
