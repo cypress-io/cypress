@@ -17,7 +17,6 @@ import errors from './errors'
 import logger from './logger'
 import plugins from './plugins'
 import preprocessor from './plugins/preprocessor'
-import ProjectBase from './project-base'
 import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
@@ -30,17 +29,18 @@ import settings from './util/settings'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 
-const debug = Debug('cypress:server:project')
-const debugScaffold = Debug('cypress:server:scaffold')
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
-class Project extends ProjectBase {
+const debug = Debug('cypress:server:project')
+const debugScaffold = Debug('cypress:server:scaffold')
+
+class ProjectBase extends EE {
   constructor (projectRoot) {
     super()
 
-    if (!(this instanceof Project)) {
-      return new Project(projectRoot)
+    if (!(this instanceof ProjectBase)) {
+      return new ProjectBase(projectRoot)
     }
 
     if (!projectRoot) {
@@ -693,16 +693,16 @@ class Project extends ProjectBase {
     .then((project) => {
       debug('got project from api')
 
-      return Project._mergeDetails(clientProject, project)
+      return ProjectBase._mergeDetails(clientProject, project)
     }).catch((err) => {
       debug('failed to get project from api', err.statusCode)
       switch (err.statusCode) {
         case 404:
           // project doesn't exist
-          return Project._mergeState(clientProject, 'INVALID')
+          return ProjectBase._mergeState(clientProject, 'INVALID')
         case 403:
           // project exists, but user isn't authorized for it
-          return Project._mergeState(clientProject, 'UNAUTHORIZED')
+          return ProjectBase._mergeState(clientProject, 'UNAUTHORIZED')
         default:
           throw err
       }
@@ -726,7 +726,7 @@ class Project extends ProjectBase {
           if (!clientProject.id) {
             debug('no project id')
 
-            return Project._mergeState(clientProject, 'VALID')
+            return ProjectBase._mergeState(clientProject, 'VALID')
           }
 
           const project = projectsIndex[clientProject.id]
@@ -735,14 +735,14 @@ class Project extends ProjectBase {
             debug('found matching:', project)
 
             // merge in details for matching project
-            return Project._mergeDetails(clientProject, project)
+            return ProjectBase._mergeDetails(clientProject, project)
           }
 
           debug('did not find matching:', project)
 
           // project has id, but no matching project found
           // check if it doesn't exist or if user isn't authorized
-          return Project._getProject(clientProject, authToken)
+          return ProjectBase._getProject(clientProject, authToken)
         }))
       })
     })
@@ -754,13 +754,13 @@ class Project extends ProjectBase {
     if (!clientProject.id) {
       debug('no project id')
 
-      return Bluebird.resolve(Project._mergeState(clientProject, 'VALID'))
+      return Bluebird.resolve(ProjectBase._mergeState(clientProject, 'VALID'))
     }
 
     return user.ensureAuthToken().then((authToken) => {
       debug('got auth token: %o', { authToken: keys.hide(authToken) })
 
-      return Project._getProject(clientProject, authToken)
+      return ProjectBase._getProject(clientProject, authToken)
     })
   }
 
@@ -787,7 +787,7 @@ class Project extends ProjectBase {
   }
 
   static id (path) {
-    return new Project(path).getProjectId()
+    return new ProjectBase(path).getProjectId()
   }
 
   static ensureExists (path, options) {
@@ -796,12 +796,12 @@ class Project extends ProjectBase {
   }
 
   static config (path) {
-    return new Project(path).getConfig()
+    return new ProjectBase(path).getConfig()
   }
 
   static getSecretKeyByPath (path) {
     // get project id
-    return Project.id(path)
+    return ProjectBase.id(path)
     .then((id) => {
       return user.ensureAuthToken()
       .then((authToken) => {
@@ -815,7 +815,7 @@ class Project extends ProjectBase {
 
   static generateSecretKeyByPath (path) {
     // get project id
-    return Project.id(path)
+    return ProjectBase.id(path)
     .then((id) => {
       return user.ensureAuthToken()
       .then((authToken) => {
@@ -843,7 +843,7 @@ class Project extends ProjectBase {
       debug('full spec pattern "%s"', specPattern)
     }
 
-    return new Project(projectRoot)
+    return new ProjectBase(projectRoot)
     .getConfig()
     // TODO: handle wild card pattern or spec filename
     .then((cfg) => {
@@ -853,4 +853,4 @@ class Project extends ProjectBase {
   }
 }
 
-module.exports = Project
+module.exports = ProjectBase
