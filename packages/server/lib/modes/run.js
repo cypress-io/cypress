@@ -1110,30 +1110,14 @@ module.exports = {
 
       results.spec = spec
 
-      if (!quiet) {
-        this.displayResults(results, estimated)
-        if (screenshots && screenshots.length) {
-          this.displayScreenshots(screenshots)
-        }
-      }
-
       const { tests, stats } = results
-
       const attempts = _.flatMap(tests, (test) => test.attempts)
-
-      const hasFailingTests = _.get(stats, 'failures') > 0
 
       // if we have a video recording
       if (startedVideoCapture && tests && tests.length) {
         // always set the video timestamp on tests
         Reporter.setVideoTimestamp(startedVideoCapture, attempts)
       }
-
-      // we should upload the video if we upload on passes (by default)
-      // or if we have any failures and have started the video
-      const suv = Boolean(videoUploadOnPasses === true || (startedVideoCapture && hasFailingTests))
-
-      results.shouldUploadVideo = suv
 
       let videoCaptureFailed = false
 
@@ -1145,20 +1129,44 @@ module.exports = {
 
       await runEvents.execute('after:spec', config, _.cloneDeep(spec), _.cloneDeep(results))
 
+      const videoExists = videoName ? await fs.pathExists(videoName) : false
+
+      if (startedVideoCapture && !videoExists) {
+        // the video file no longer exists at the path where we expect it,
+        // likely because the user deleted it in the after:spec event
+        errors.warning('VIDEO_DOESNT_EXIST', videoName)
+
+        results.video = null
+      }
+
+      const hasFailingTests = _.get(stats, 'failures') > 0
+      // we should upload the video if we upload on passes (by default)
+      // or if we have any failures and have started the video
+      const shouldUploadVideo = videoUploadOnPasses === true || Boolean((startedVideoCapture && hasFailingTests))
+
+      results.shouldUploadVideo = shouldUploadVideo
+
+      if (!quiet) {
+        this.displayResults(results, estimated)
+        if (screenshots && screenshots.length) {
+          this.displayScreenshots(screenshots)
+        }
+      }
+
       // always close the browser now as opposed to letting
       // it exit naturally with the parent process due to
       // electron bug in windows
       debug('attempting to close the browser')
       await openProject.closeBrowser()
 
-      if (endVideoCapture && !videoCaptureFailed) {
+      if (videoExists && endVideoCapture && !videoCaptureFailed) {
         const ffmpegChaptersConfig = videoCapture.generateFfmpegChaptersConfig(results.tests)
 
         await this.postProcessRecording(
           videoName,
           compressedVideoName,
           videoCompression,
-          suv,
+          shouldUploadVideo,
           quiet,
           ffmpegChaptersConfig,
         )

@@ -14,6 +14,13 @@ describe('e2e plugin run events', () => {
     },
   })
 
+  e2e.it('handles video being deleted in after:spec', {
+    browser: 'electron',
+    project: Fixtures.projectPath('plugin-after-spec-deletes-video'),
+    spec: '*',
+    snapshot: true,
+  })
+
   e2e.it('fails if experimentalRunEvents is not enabled', {
     browser: 'electron',
     project: Fixtures.projectPath('plugin-run-events'),

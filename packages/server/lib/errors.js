@@ -111,6 +111,13 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         This error will not alter the exit code.
 
         ${arg1}`
+    case 'VIDEO_DOESNT_EXIST':
+      return stripIndent`\
+        Warning: We could not find the video at the following path, so we were unable to process it.
+
+        Video path: ${arg1}
+
+        This error will not alter the exit code.`
     case 'CHROME_WEB_SECURITY_NOT_SUPPORTED':
       return stripIndent`\
         Your project has set the configuration option: \`chromeWebSecurity: false\`
