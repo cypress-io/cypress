@@ -6,19 +6,19 @@ import send from 'send'
 import runnerCt from '@packages/runner-ct'
 import staticPkg from '@packages/static'
 import ProjectCt from './project-ct'
-import { SpecsController } from './specs-controller'
+import SpecsStore from './specs-controller'
 
 const debug = Debug('cypress:server:routes')
 
 interface InitializeRoutes {
   app: Express
-  specs: SpecsController
+  specsStore: SpecsStore
   config: Record<string, any>
   project: ProjectCt
   onError: (...args: unknown[]) => any
 }
 
-export function initializeRoutes ({ app, config, specs, project }: InitializeRoutes) {
+export function initializeRoutes ({ app, config, specsStore, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
   app.get('/__cypress/runner/*', (req, res) => {
@@ -53,6 +53,7 @@ export function initializeRoutes ({ app, config, specs, project }: InitializeRou
       specs,
       config,
       project,
+      specsStore,
     })
   })
 

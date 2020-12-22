@@ -18,7 +18,7 @@ import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import Watchers from '@packages/server/lib/watchers'
 import { Server } from './server-ct'
-import { SpecsController } from './specs-controller'
+import SpecsStore from './specs-controller'
 
 const debug = Debug('cypress:server-ct:project')
 const localCwd = cwd()
@@ -155,9 +155,9 @@ export default class ProjectCt extends ProjectBase {
         .then((port) => {
           modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
-          const specs = new SpecsController(cfg)
+          const specsStore = new SpecsStore(cfg)
 
-          specs.watch({
+          specsStore.watch({
             onSpecsChanged: (specs) => {
               // send new files to dev server
               devserver.updateSpecs(specs)
@@ -167,9 +167,9 @@ export default class ProjectCt extends ProjectBase {
             },
           })
 
-          return specs.storeSpecFiles()
+          return specsStore.storeSpecFiles()
           .return({
-            specs,
+            specsStore,
             cfg: modifiedConfig,
           })
         })
