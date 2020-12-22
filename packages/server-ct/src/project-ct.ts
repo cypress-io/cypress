@@ -20,6 +20,8 @@ import Watchers from '@packages/server/lib/watchers'
 import { Server } from './server-ct'
 import SpecsStore from './specs-controller'
 
+export * from '@packages/server/lib/project-base'
+
 const debug = Debug('cypress:server-ct:project')
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g

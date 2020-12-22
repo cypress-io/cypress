@@ -2,9 +2,9 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
-// const files = require('@packages/server/lib/controllers/files')
-import runnerCt from '@packages/runner-ct'
 import staticPkg from '@packages/static'
+// const files = require('@packages/server/lib/controllers/files')
+import { handle, serve } from './controllers/controllers-ct'
 import ProjectCt from './project-ct'
 import SpecsStore from './specs-controller'
 
@@ -21,9 +21,7 @@ interface InitializeRoutes {
 export function initializeRoutes ({ app, config, specsStore, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
-  app.get('/__cypress/runner/*', (req, res) => {
-    runnerCt.handle(req, res)
-  })
+  app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
     const pathToFile = staticPkg.getPathToDist(req.params[0])
@@ -49,8 +47,7 @@ export function initializeRoutes ({ app, config, specsStore, project }: Initiali
   app.get(config.clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)
 
-    runnerCt.serve(req, res, {
-      specs,
+    serve(req, res, {
       config,
       project,
       specsStore,
