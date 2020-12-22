@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const socketIo = require(`${root}../socket`)
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
-const Server = require(`${root}lib/server`)
+const { Server } = require(`${root}lib/server`)
 const Automation = require(`${root}lib/automation`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 

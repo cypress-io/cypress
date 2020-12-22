@@ -23,7 +23,7 @@ const videoCapture = require(`${root}../lib/video_capture`)
 const settings = require(`${root}../lib/util/settings`)
 
 // mutates mocha test runner - needed for `test.titlePath`
-require(`${root}../lib/project-e2e`).default
+require(`${root}../lib/project-e2e`)
 
 cp = Bluebird.promisifyAll(cp)
 
