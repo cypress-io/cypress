@@ -665,7 +665,6 @@ module.exports = {
 
     _.extend(obj, {
       proxyUrl,
-      proxyServer: proxyUrl,
       browserUrl: rootUrl + obj.clientRoute,
       reporterUrl: rootUrl + obj.reporterRoute,
       xhrUrl: obj.namespace + obj.xhrRoute,
