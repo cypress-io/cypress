@@ -21,18 +21,18 @@ interface InitializeRoutes {
 export function initializeRoutes ({ app, config, specs, project }: InitializeRoutes) {
   const proxy = httpProxy.createProxyServer()
 
-  app.get('/__cypress-ct123/runner/*', (req, res) => {
+  app.get('/__cypress/runner/*', (req, res) => {
     runnerCt.handle(req, res)
   })
 
-  app.get('/__cypress-ct123/static/*', (req, res) => {
+  app.get('/__cypress/static/*', (req, res) => {
     const pathToFile = staticPkg.getPathToDist(req.params[0])
 
     return send(req, pathToFile)
     .pipe(res)
   })
 
-  app.get('/__cypress-ct123/iframes/*', (req, res) => {
+  app.get('/__cypress/iframes/*', (req, res) => {
     req.url = '/'
     proxy.web(req, res, { target: config.webpackDevServerUrl })
     // localhost:myPort/index.html

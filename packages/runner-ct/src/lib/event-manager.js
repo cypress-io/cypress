@@ -11,7 +11,7 @@ import logger from './logger'
 import $Cypress, { $ } from '@packages/driver'
 
 const ws = client.connect({
-  path: '/kekekekeke__socket.io123',
+  path: '/__socket.io',
   transports: ['websocket'],
   parser: circularParser,
 })
