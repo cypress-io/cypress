@@ -6,7 +6,7 @@ import ProjectBase from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
 import ServerCt from './server-ct'
-import SpecsStore from './specs-controller'
+import SpecsStore from './specs-store'
 
 export * from '@packages/server/lib/project-base'
 
