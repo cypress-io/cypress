@@ -60,7 +60,18 @@ class ProjectBase extends EE {
     this.automation = null
     this.getConfig = this.getConfig.bind(this)
 
-    debug('Project created %s', this.projectRoot)
+    debug('Project created %o', {
+      projectType: this.projectType,
+      projectRoot: this.projectRoot,
+    })
+  }
+
+  get projectType () {
+    if (this.constructor === ProjectBase) {
+      return 'base'
+    }
+
+    throw new Error('Project#projectType must be defined')
   }
 
   open (options = {}) {

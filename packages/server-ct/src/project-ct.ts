@@ -33,6 +33,10 @@ export default class ProjectCt extends EventEmitter {
   private browser: any
   private automation: any
 
+  get projectType () {
+    return 'ct'
+  }
+
   constructor (projectRoot: string) {
     super()
 
