@@ -3,13 +3,13 @@
 import Bluebird from 'bluebird'
 import _debug from 'debug'
 import _ from 'lodash'
+import * as netStubbing from '@packages/net-stubbing'
+import { GetFixtureFn } from '@packages/net-stubbing/lib/server/types'
 import errors from '@packages/server/lib/errors'
+import * as fixture from '@packages/server/lib/fixture'
 import { getUserEditor, setUserEditor } from '@packages/server/lib/util/editors'
 import { openFile } from '@packages/server/lib/util/file-opener'
 import open from '@packages/server/lib/util/open'
-import * as netStubbing from '@packages/net-stubbing'
-import { GetFixtureFn } from '@packages/net-stubbing/lib/server/types'
-import * as fixture from '@packages/server/lib/fixture'
 import socketIo from '@packages/socket'
 
 const debug = _debug('cypress:server-ct:socket')
@@ -119,7 +119,7 @@ export class Socket {
     })
   }
 
-  startListening (server, config, options) {
+  startListening (server, automation, config, options) {
     let existingState = null
 
     _.defaults(options, {
