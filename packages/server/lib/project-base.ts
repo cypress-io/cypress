@@ -33,6 +33,8 @@ interface CloseOptions {
   onClose: () => any
 }
 
+export type Cfg = Record<string, any>
+
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
