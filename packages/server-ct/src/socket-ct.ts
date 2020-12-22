@@ -238,6 +238,7 @@ export class Socket {
 
       socket.on('spec:changed', (spec) => {
         console.log('SPEC CHANGED!!!!')
+
         return options.onSpecChanged(spec)
       })
 

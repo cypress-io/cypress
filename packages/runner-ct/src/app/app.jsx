@@ -25,7 +25,7 @@ const App = observer(
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
           <div>
             <SpecsList state={state} />
-            <SelectMode 
+            <SelectMode
               onChange={state.setMode}
               mode={state.mode}
             />

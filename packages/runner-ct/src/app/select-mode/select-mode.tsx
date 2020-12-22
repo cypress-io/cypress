@@ -11,7 +11,7 @@ interface SelectModeProps {
 eventManager.on('devserver:specs:changed', () => console.log('Change'))
 
 export const SelectMode = observer(
-  function SelectMode(props: SelectModeProps) {
+  function SelectMode (props: SelectModeProps) {
     const handle = () => {
       eventManager.emit('restart')
     }
@@ -42,5 +42,5 @@ export const SelectMode = observer(
         </div>
       </React.Fragment>
     )
-  }
+  },
 )

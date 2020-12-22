@@ -47,7 +47,7 @@ const _defaults: Defaults = {
   specs: [],
 
   callbackAfterUpdate: null,
-  mode: 'workbench'
+  mode: 'workbench',
 }
 
 export default class State {
