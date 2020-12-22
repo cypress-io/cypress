@@ -251,7 +251,7 @@ module.exports = {
 
       case 'getKey':
         // print the key + exit
-        return require('./project').getSecretKeyByPath(options.projectRoot)
+        return require('./project-base').getSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)
@@ -259,7 +259,7 @@ module.exports = {
 
       case 'generateKey':
         // generate + print the key + exit
-        return require('./project').generateSecretKeyByPath(options.projectRoot)
+        return require('./project-base').generateSecretKeyByPath(options.projectRoot)
         .then((key) => {
           return console.log(key) // eslint-disable-line no-console
         }).then(exit0)

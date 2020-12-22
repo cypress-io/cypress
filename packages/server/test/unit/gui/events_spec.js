@@ -8,7 +8,7 @@ const debug = require('debug')('test')
 const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
-const Project = require(`${root}../lib/project`)
+const ProjectE2E = require(`${root}../lib/project-e2e`)
 const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
@@ -399,7 +399,7 @@ describe('lib/gui/events', () => {
   context('user events', () => {
     describe('get:orgs', () => {
       it('returns array of orgs', function () {
-        sinon.stub(Project, 'getOrgs').resolves([])
+        sinon.stub(ProjectE2E, 'getOrgs').resolves([])
 
         return this.handleEvent('get:orgs').then((assert) => {
           return assert.sendCalledWith([])
@@ -409,7 +409,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Project, 'getOrgs').rejects(err)
+        sinon.stub(ProjectE2E, 'getOrgs').rejects(err)
 
         return this.handleEvent('get:orgs').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -440,10 +440,10 @@ describe('lib/gui/events', () => {
 
       it('works even after project is opened (issue #227)', function () {
         sinon.stub(open, 'opn').resolves('okay')
-        sinon.stub(Project.prototype, 'open').resolves()
-        sinon.stub(Project.prototype, 'getConfig').resolves({ some: 'config' })
+        sinon.stub(ProjectE2E.prototype, 'open').resolves()
+        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
 
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('open:finder', 'path')
         }).then((assert) => {
@@ -458,7 +458,7 @@ describe('lib/gui/events', () => {
   context('project events', () => {
     describe('get:projects', () => {
       it('returns array of projects', function () {
-        sinon.stub(Project, 'getPathsAndIds').resolves([])
+        sinon.stub(ProjectE2E, 'getPathsAndIds').resolves([])
 
         return this.handleEvent('get:projects').then((assert) => {
           return assert.sendCalledWith([])
@@ -468,7 +468,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Project, 'getPathsAndIds').rejects(err)
+        sinon.stub(ProjectE2E, 'getPathsAndIds').rejects(err)
 
         return this.handleEvent('get:projects').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -478,7 +478,7 @@ describe('lib/gui/events', () => {
 
     describe('get:project:statuses', () => {
       it('returns array of projects with statuses', function () {
-        sinon.stub(Project, 'getProjectStatuses').resolves([])
+        sinon.stub(ProjectE2E, 'getProjectStatuses').resolves([])
 
         return this.handleEvent('get:project:statuses').then((assert) => {
           return assert.sendCalledWith([])
@@ -488,7 +488,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Project, 'getProjectStatuses').rejects(err)
+        sinon.stub(ProjectE2E, 'getProjectStatuses').rejects(err)
 
         return this.handleEvent('get:project:statuses').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -498,7 +498,7 @@ describe('lib/gui/events', () => {
 
     describe('get:project:status', () => {
       it('returns project returned by Project.getProjectStatus', function () {
-        sinon.stub(Project, 'getProjectStatus').resolves('project')
+        sinon.stub(ProjectE2E, 'getProjectStatus').resolves('project')
 
         return this.handleEvent('get:project:status').then((assert) => {
           return assert.sendCalledWith('project')
@@ -508,7 +508,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Project, 'getProjectStatus').rejects(err)
+        sinon.stub(ProjectE2E, 'getProjectStatus').rejects(err)
 
         return this.handleEvent('get:project:status').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -518,9 +518,9 @@ describe('lib/gui/events', () => {
 
     describe('add:project', () => {
       it('adds project + returns result', function () {
-        sinon.stub(Project, 'add').withArgs('/_test-output/path/to/project', this.options).resolves('result')
+        sinon.stub(ProjectE2E, 'add').withArgs('/_test-output/path/to/project', this.options).resolves('result')
 
-        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
+        return this.handleEvent('add:project', '/_test-output/path/to/project-e2e').then((assert) => {
           return assert.sendCalledWith('result')
         })
       })
@@ -528,9 +528,9 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(Project, 'add').withArgs('/_test-output/path/to/project', this.options).rejects(err)
+        sinon.stub(ProjectE2E, 'add').withArgs('/_test-output/path/to/project', this.options).rejects(err)
 
-        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
+        return this.handleEvent('add:project', '/_test-output/path/to/project-e2e').then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })
@@ -538,19 +538,19 @@ describe('lib/gui/events', () => {
 
     describe('remove:project', () => {
       it('remove project + returns arg', function () {
-        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project').resolves()
+        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').resolves()
 
-        return this.handleEvent('remove:project', '/_test-output/path/to/project').then((assert) => {
-          return assert.sendCalledWith('/_test-output/path/to/project')
+        return this.handleEvent('remove:project', '/_test-output/path/to/project-e2e').then((assert) => {
+          return assert.sendCalledWith('/_test-output/path/to/project-e2e')
         })
       })
 
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project').rejects(err)
+        sinon.stub(cache, 'removeProject').withArgs('/_test-output/path/to/project-e2e').rejects(err)
 
-        return this.handleEvent('remove:project', '/_test-output/path/to/project').then((assert) => {
+        return this.handleEvent('remove:project', '/_test-output/path/to/project-e2e').then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })
@@ -562,10 +562,10 @@ describe('lib/gui/events', () => {
         sinon.stub(browsers, 'getAllBrowsersWith')
         browsers.getAllBrowsersWith.resolves([])
         browsers.getAllBrowsersWith.withArgs('/usr/bin/baz-browser').resolves([{ foo: 'bar' }])
-        this.open = sinon.stub(Project.prototype, 'open').resolves()
-        sinon.stub(Project.prototype, 'close').resolves()
+        this.open = sinon.stub(ProjectE2E.prototype, 'open').resolves()
+        sinon.stub(ProjectE2E.prototype, 'close').resolves()
 
-        return sinon.stub(Project.prototype, 'getConfig').resolves({ some: 'config' })
+        return sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
       })
 
       afterEach(() => {
@@ -573,7 +573,7 @@ describe('lib/gui/events', () => {
       })
 
       it('open project + returns config', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then((assert) => {
           return assert.sendCalledWith({ some: 'config' })
         })
@@ -584,14 +584,14 @@ describe('lib/gui/events', () => {
 
         this.open.rejects(err)
 
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })
 
       it('sends \'focus:tests\' onFocusTests', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('on:focus:tests')
         }).then((assert) => {
@@ -602,7 +602,7 @@ describe('lib/gui/events', () => {
       })
 
       it('sends \'config:changed\' onSettingsChanged', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('on:config:changed')
         }).then((assert) => {
@@ -613,7 +613,7 @@ describe('lib/gui/events', () => {
       })
 
       it('sends \'spec:changed\' onSpecChanged', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('on:spec:changed')
         }).then((assert) => {
@@ -624,7 +624,7 @@ describe('lib/gui/events', () => {
       })
 
       it('sends \'project:warning\' onWarning', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('on:project:warning')
         }).then((assert) => {
@@ -635,7 +635,7 @@ describe('lib/gui/events', () => {
       })
 
       it('sends \'project:error\' onError', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           return this.handleEvent('on:project:error')
         }).then((assert) => {
@@ -646,7 +646,7 @@ describe('lib/gui/events', () => {
       })
 
       it('calls browsers.getAllBrowsersWith with no args when no browser specified', function () {
-        return this.handleEvent('open:project', '/_test-output/path/to/project').then(() => {
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e').then(() => {
           expect(browsers.getAllBrowsersWith).to.be.calledWith()
         })
       })
@@ -655,7 +655,7 @@ describe('lib/gui/events', () => {
         sinon.stub(openProject, 'create').resolves()
         this.options.browser = '/usr/bin/baz-browser'
 
-        return this.handleEvent('open:project', '/_test-output/path/to/project').then(() => {
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e').then(() => {
           expect(browsers.getAllBrowsersWith).to.be.calledWith(this.options.browser)
 
           expect(openProject.create).to.be.calledWithMatch(
@@ -682,7 +682,7 @@ describe('lib/gui/events', () => {
 
         sinon.stub(chromePolicyCheck, 'run').callsArgWith(0, new Error)
 
-        return this.handleEvent('open:project', '/_test-output/path/to/project').then(() => {
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e').then(() => {
           expect(browsers.getAllBrowsersWith).to.be.calledWith(this.options.browser)
 
           expect(openProject.create).to.be.calledWithMatch(
@@ -708,7 +708,7 @@ describe('lib/gui/events', () => {
 
     describe('close:project', () => {
       beforeEach(() => {
-        return sinon.stub(Project.prototype, 'close').withArgs({ sync: true }).resolves()
+        return sinon.stub(ProjectE2E.prototype, 'close').withArgs({ sync: true }).resolves()
       })
 
       it('is noop and returns null when no project is open', function () {
@@ -720,10 +720,10 @@ describe('lib/gui/events', () => {
       })
 
       it('closes down open project and returns null', function () {
-        sinon.stub(Project.prototype, 'getConfig').resolves({})
-        sinon.stub(Project.prototype, 'open').resolves()
+        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({})
+        sinon.stub(ProjectE2E.prototype, 'open').resolves()
 
-        return this.handleEvent('open:project', '/_test-output/path/to/project')
+        return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
           // it should store the opened project
           expect(openProject.getProject()).not.to.be.null

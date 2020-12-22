@@ -655,6 +655,7 @@ module.exports = {
   setUrls (obj) {
     obj = _.clone(obj)
 
+    // TODO: rename this to be proxyServer
     const proxyUrl = `http://localhost:${obj.port}`
 
     const rootUrl = obj.baseUrl ?
@@ -664,6 +665,7 @@ module.exports = {
 
     _.extend(obj, {
       proxyUrl,
+      proxyServer: proxyUrl,
       browserUrl: rootUrl + obj.clientRoute,
       reporterUrl: rootUrl + obj.reporterRoute,
       xhrUrl: obj.namespace + obj.xhrRoute,

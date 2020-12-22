@@ -19,7 +19,7 @@ const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
 const Server = require(`${root}lib/server`)
-const Project = require(`${root}lib/project`)
+const ProjectE2E = require(`${root}lib/project-e2e`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
@@ -120,7 +120,7 @@ describe('Routes', () => {
         }
 
         const open = () => {
-          this.project = new Project('/path/to/project')
+          this.project = new ProjectE2E('/path/to/project-e2e')
 
           cfg.pluginsFile = false
 
