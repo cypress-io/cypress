@@ -1,43 +1,33 @@
 require('./cwd')
 
-const _ = require('lodash')
-const url = require('url')
-const http = require('http')
-const stream = require('stream')
-const express = require('express')
-const Promise = require('bluebird')
-const evilDns = require('evil-dns')
-const isHtml = require('is-html')
-const httpProxy = require('http-proxy')
-const la = require('lazy-ass')
-const httpsProxy = require('@packages/https-proxy')
-const compression = require('compression')
-const debug = require('debug')('cypress:server:server')
-const {
-  agent,
-  concatStream,
-  cors,
-  uri,
-} = require('@packages/network')
-const { NetworkProxy } = require('@packages/proxy')
-const {
-  netStubbingState,
-  getRouteForRequest,
-} = require('@packages/net-stubbing')
-const { createInitialWorkers } = require('@packages/rewriter')
-const origin = require('./util/origin')
-const ensureUrl = require('./util/ensure-url')
-const appData = require('./util/app_data')
-const statusCode = require('./util/status_code')
-const headersUtil = require('./util/headers')
-const allowDestroy = require('./util/server_destroy')
-const { SocketAllowed } = require('./util/socket_allowed')
-const errors = require('./errors')
-const logger = require('./logger')
-const Socket = require('./socket')
-const Request = require('./request')
-const fileServer = require('./file_server')
-const templateEngine = require('./template_engine')
+import Bluebird from 'bluebird'
+import compression from 'compression'
+import Debug from 'debug'
+import evilDns from 'evil-dns'
+import express from 'express'
+import http from 'http'
+import httpProxy from 'http-proxy'
+import isHtml from 'is-html'
+import la from 'lazy-ass'
+import _ from 'lodash'
+import stream from 'stream'
+import url from 'url'
+import httpsProxy from '@packages/https-proxy'
+import { getRouteForRequest, netStubbingState } from '@packages/net-stubbing'
+import { agent, concatStream, cors, uri } from '@packages/network'
+import { NetworkProxy } from '@packages/proxy'
+import errors from './errors'
+import fileServer from './file_server'
+import logger from './logger'
+import Request from './request'
+import Socket from './socket'
+import templateEngine from './template_engine'
+import appData from './util/app_data'
+import * as ensureUrl from './util/ensure-url'
+import headersUtil from './util/headers'
+import origin from './util/origin'
+import allowDestroy from './util/server_destroy'
+import statusCode from './util/status_code'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
@@ -48,6 +38,8 @@ const ALLOWED_PROXY_BYPASS_URLS = [
   '/__cypress/runner/cypress_runner.css',
   '/__cypress/static/favicon.ico',
 ]
+
+const debug = Debug('cypress:server:server')
 
 const _isNonProxiedRequest = (req) => {
   // proxied HTTP requests have a URL like: "http://example.com/foo"
@@ -72,8 +64,6 @@ const _forceProxyMiddleware = function (clientRoute) {
 }
 
 const isResponseHtml = function (contentType, responseBuffer) {
-  let body
-
   if (contentType) {
     // want to match anything starting with 'text/html'
     // including 'text/html;charset=utf-8' and 'Text/HTML'
@@ -81,7 +71,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
     return textHtmlContentTypeRe.test(contentType)
   }
 
-  body = _.invoke(responseBuffer, 'toString')
+  const body = _.invoke(responseBuffer, 'toString')
 
   if (body) {
     return isHtml(body)
@@ -199,7 +189,7 @@ class Server {
 
     la(_.isPlainObject(config), 'expected plain config object', config)
 
-    return Promise.try(() => {
+    return Bluebird.try(() => {
       const app = this.createExpressApp(config)
 
       logger.setSettings(config)
@@ -241,11 +231,11 @@ class Server {
 
     this._netStubbingState = netStubbingState()
     this._networkProxy = new NetworkProxy({
-      socket: this._socket,
-      netStubbingState: this._netStubbingState,
       config,
       getRemoteState,
       getFileServerToken,
+      socket: this._socket,
+      netStubbingState: this._netStubbingState,
       request: this._request,
     })
   }
@@ -257,7 +247,7 @@ class Server {
   }
 
   createServer (app, config, project, request, onWarning) {
-    return new Promise((resolve, reject) => {
+    return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
       this._server = http.createServer(app)
@@ -307,7 +297,7 @@ class Server {
 
       return this._listen(port, onError)
       .then((port) => {
-        return Promise.all([
+        return Bluebird.all([
           httpsProxy.create(appData.path('proxy'), port, {
             onRequest: callListeners,
             onUpgrade: onSniUpgrade,
@@ -358,7 +348,7 @@ class Server {
   }
 
   _listen (port, onError) {
-    return new Promise((resolve) => {
+    return new Bluebird((resolve) => {
       const listener = () => {
         const address = this._server.address()
 
@@ -411,7 +401,7 @@ class Server {
   }
 
   _onRequest (headers, automationRequest, options) {
-    return this._request.sendPromise(headers, automationRequest, options)
+    return this._request.sendBluebird(headers, automationRequest, options)
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
@@ -466,7 +456,7 @@ class Server {
       return !!getRouteForRequest(this._netStubbingState.routes, proxiedReq)
     }
 
-    return this._urlResolver = (p = new Promise((resolve, reject, onCancel) => {
+    return this._urlResolver = (p = new Bluebird((resolve, reject, onCancel) => {
       let urlFile
 
       onCancel(() => {
@@ -825,7 +815,7 @@ class Server {
     // bail early we dont have a server or we're not
     // currently listening
     if (!this._server || !this.isListening) {
-      return Promise.resolve()
+      return Bluebird.resolve()
     }
 
     return this._server.destroyAsync()
@@ -835,7 +825,7 @@ class Server {
   }
 
   close () {
-    return Promise.join(
+    return Bluebird.join(
       this._close(),
       this._socket != null ? this._socket.close() : undefined,
       this._fileServer != null ? this._fileServer.close() : undefined,
@@ -886,4 +876,4 @@ class Server {
   }
 }
 
-module.exports = Server
+export default Server
