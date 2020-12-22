@@ -178,20 +178,7 @@ export default class ProjectCt extends ProjectBase {
   }
 
   close () {
-    debug('closing project instance %s', this.projectRoot)
-
-    this.cfg = null
-    this.spec = null
-    this.browser = null
-
-    return Bluebird.all([
-      this.server ? this.server.close() : undefined,
-      this.watchers ? this.watchers.close() : undefined,
-      // preprocessor.close(),
-    ])
-    .then(() => {
-      return process.chdir(localCwd)
-    })
+    return super.close()
   }
 
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
