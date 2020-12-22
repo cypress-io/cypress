@@ -2,7 +2,6 @@ import Bluebird from 'bluebird'
 import _debug from 'debug'
 import express, { Request } from 'express'
 import http from 'http'
-import { promisify } from 'util'
 import templateEngine from '@packages/server/lib/template_engine'
 import allowDestroy from '@packages/server/lib/util/server_destroy'
 import { initializeRoutes } from './routes-ct'
@@ -12,7 +11,7 @@ type WarningErr = Record<string, any>
 
 const debug = _debug('cypress:server-ct:server')
 
-export default class ServerCt {
+export class ServerCt {
   private _request: Request
   private _middleware
   private _server: http.Server
@@ -24,16 +23,6 @@ export default class ServerCt {
   private _httpsProxy
   private _urlResolver
   private automation
-  private server: Server
-  private projectRoot: string
-  private spec: Cypress.Cypress['spec']
-  private browser: unknown
-
-  constructor () {
-    if (!(this instanceof Server)) {
-      return new Server()
-    }
-  }
 
   createExpressApp (config) {
     const { morgan } = config
@@ -139,12 +128,6 @@ export default class ServerCt {
     })
   }
 
-  _destroyAsync () {
-    allowDestroy(this._server)
-
-    return promisify(this._server.close)()
-  }
-
   _close () {
     // bail early we dont have a server or we're not
     // currently listening
@@ -152,10 +135,10 @@ export default class ServerCt {
       return Bluebird.resolve()
     }
 
-    return this._destroyAsync()
+    return this._server.destroyAsync()
     .then(() => {
       this.isListening = false
-    }).catch(() => { }) // don't catch any errors
+    })
   }
 
   close () {
@@ -171,26 +154,7 @@ export default class ServerCt {
   }
 
   reset () {
-    debug('resetting project instance %s', this.projectRoot)
-
-    this.spec = null
-    this.browser = null
-
-    try {
-      if (this.automation) {
-        this.automation.reset()
-      }
-
-      let state
-
-      if (this.server) {
-        state = this.server.reset()
-      }
-
-      return state
-    } catch (e) {
-      // do not do anything
-    }
+    // TODO: implement this
   }
 
   end () {
@@ -221,7 +185,7 @@ export default class ServerCt {
     })
   }
 
-  startWebsockets (config, options = {}) {
-    this._socket.startListening(this._server, config, options)
+  startWebsockets (automation, config, options = {}) {
+    this._socket.startListening(this._server, automation, config, options)
   }
 }
