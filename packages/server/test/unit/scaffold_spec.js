@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const cypressEx = require('@packages/example')
 const snapshot = require('snap-shot-it')
 const config = require(`${root}lib/config`)
-const Project = require(`${root}lib/project`)
+const ProjectE2E = require(`${root}lib/project-e2e`)
 const scaffold = require(`${root}lib/scaffold`)
 const fs = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
@@ -40,7 +40,7 @@ describe('lib/scaffold', () => {
 
     it('is false when files.length isnt 1', function () {
       const id = () => {
-        this.ids = new Project(this.idsPath)
+        this.ids = new ProjectE2E(this.idsPath)
 
         return this.ids.getConfig()
         .then((cfg) => {
@@ -53,7 +53,7 @@ describe('lib/scaffold', () => {
       }
 
       const todo = () => {
-        this.todos = new Project(this.todosPath)
+        this.todos = new ProjectE2E(this.todosPath)
 
         return this.todos.getConfig()
         .then((cfg) => {
@@ -70,7 +70,7 @@ describe('lib/scaffold', () => {
 
     it('is true when files, name + bytes match to scaffold', function () {
       // TODO this test really can move to scaffold
-      const pristine = new Project(this.pristinePath)
+      const pristine = new ProjectE2E(this.pristinePath)
 
       return pristine.getConfig()
       .then((cfg) => {
@@ -84,7 +84,7 @@ describe('lib/scaffold', () => {
 
     it('is false when bytes dont match scaffold', function () {
       // TODO this test really can move to scaffold
-      const pristine = new Project(this.pristinePath)
+      const pristine = new ProjectE2E(this.pristinePath)
 
       return pristine.getConfig()
       .then((cfg) => {

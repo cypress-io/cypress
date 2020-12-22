@@ -31,7 +31,8 @@ const cache = require(`${root}lib/cache`)
 const errors = require(`${root}lib/errors`)
 const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
-const Project = require(`${root}lib/project`)
+const ProjectBase = require(`${root}lib/project-base`)
+const ProjectE2E = require(`${root}lib/project-e2e`)
 const Server = require(`${root}lib/server`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
@@ -137,7 +138,10 @@ describe('lib/cypress', () => {
     sinon.spy(console, 'log')
 
     // to make sure our Electron browser mock object passes validation during tests
-    process.versions.chrome = ELECTRON_BROWSER.version
+    sinon.stub(process, 'versions').value({
+      chrome: ELECTRON_BROWSER.version,
+      electron: '123.45.6789',
+    })
 
     this.expectExitWith = (code) => {
       expect(process.exit).to.be.calledWith(code)
@@ -277,7 +281,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ name: 'brian', authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -325,7 +329,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -347,7 +351,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ name: 'brian', authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -395,7 +399,7 @@ describe('lib/cypress', () => {
       return Promise.all([
         user.set({ authToken: 'auth-token-123' }),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -499,7 +503,7 @@ describe('lib/cypress', () => {
       }).then(() => {
         expect(api.createProject).not.to.be.called
 
-        return (new Project(this.noScaffolding)).getProjectId()
+        return (new ProjectBase(this.noScaffolding)).getProjectId()
         .then(() => {
           throw new Error('should have caught error but did not')
         }).catch((err) => {
@@ -1348,7 +1352,7 @@ describe('lib/cypress', () => {
         // make sure we have no user object
         user.set({}),
 
-        Project.id(this.todosPath)
+        ProjectBase.id(this.todosPath)
         .then((id) => {
           this.projectId = id
         }),
@@ -1789,7 +1793,7 @@ describe('lib/cypress', () => {
     })
 
     it('passes filtered options to Project#open and sets cli config', function () {
-      const getConfig = sinon.spy(Project.prototype, 'getConfig')
+      const getConfig = sinon.spy(ProjectE2E.prototype, 'getConfig')
       const open = sinon.stub(Server.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'

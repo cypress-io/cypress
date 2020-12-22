@@ -5,7 +5,7 @@ const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
 const ProjectCt = require('@packages/server-ct/src/project-ct').default
-const Project = require('./project')
+const ProjectE2E = require('./project-e2e')
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')
@@ -297,7 +297,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = args.componentTesting ? new ProjectCt(path) : new Project(path)
+      openProject = args.componentTesting ? new ProjectCt(path) : new ProjectE2E(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {

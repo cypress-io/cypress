@@ -14,7 +14,7 @@ const open = require('../util/open')
 const user = require('../user')
 const errors = require('../errors')
 const Updater = require('../updater')
-const Project = require('../project')
+const ProjectBase = require('../project-base')
 const openProject = require('../open_project')
 const ensureUrl = require('../util/ensure-url')
 const chromePolicyCheck = require('../util/chrome_policy_check')
@@ -227,32 +227,32 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       return send(null)
 
     case 'get:orgs':
-      return Project.getOrgs()
+      return ProjectBase.getOrgs()
       .then(send)
       .catch(sendErr)
 
     case 'get:projects':
-      return Project.getPathsAndIds()
+      return ProjectBase.getPathsAndIds()
       .then(send)
       .catch(sendErr)
 
     case 'get:project:statuses':
-      return Project.getProjectStatuses(arg)
+      return ProjectBase.getProjectStatuses(arg)
       .then(send)
       .catch(sendErr)
 
     case 'get:project:status':
-      return Project.getProjectStatus(arg)
+      return ProjectBase.getProjectStatus(arg)
       .then(send)
       .catch(sendErr)
 
     case 'add:project':
-      return Project.add(arg, options)
+      return ProjectBase.add(arg, options)
       .then(send)
       .catch(sendErr)
 
     case 'remove:project':
-      return Project.remove(arg)
+      return ProjectBase.remove(arg)
       .then(() => {
         return send(arg)
       })
