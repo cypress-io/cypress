@@ -27,7 +27,7 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
         projectRoot,
         devserverEvents,
       }),
-      new HotModuleReplacementPlugin()
+      new HotModuleReplacementPlugin(),
     ],
   }
 
