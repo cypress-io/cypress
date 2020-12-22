@@ -36,6 +36,8 @@ const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
 class ProjectE2E extends ProjectBase {
+  get projectType () {
+    return 'e2e'
   }
 
   open (options = {}) {
