@@ -29,6 +29,10 @@ import settings from './util/settings'
 import specsUtil from './util/specs'
 import Watchers from './watchers'
 
+interface CloseOptions {
+  onClose: () => any
+}
+
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
@@ -214,7 +218,7 @@ export default class ProjectBase extends EE {
     })
   }
 
-  close () {
+  close (options?: CloseOptions) {
     debug('closing project instance %s', this.projectRoot)
 
     this.cfg = null
@@ -222,12 +226,12 @@ export default class ProjectBase extends EE {
     this.browser = null
 
     return Bluebird.join(
-      this.server ? this.server.close() : undefined,
-      this.watchers ? this.watchers.close() : undefined,
-      preprocessor.close(),
+      this.server?.close(),
+      this.watchers?.close(),
+      options?.onClose(),
     )
     .then(() => {
-      return process.chdir(localCwd)
+      process.chdir(localCwd)
     })
   }
 
