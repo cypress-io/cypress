@@ -2,16 +2,13 @@ import _ from 'lodash'
 import { $ } from '@packages/driver'
 
 import dom from '../lib/dom'
-import logger from '../lib/logger'
 import eventManager from '../lib/event-manager'
 import visitFailure from './visit-failure'
 import blankContents from './blank-contents'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 
 export default class AutIframe {
   constructor (config) {
     this.config = config
-    this.debouncedToggleSelectorPlayground = _.debounce(this.toggleSelectorPlayground, 300)
   }
 
   create () {
@@ -73,8 +70,6 @@ export default class AutIframe {
     this._body().remove()
     this._insertBodyStyles(body.get(), bodyStyles)
     $html.append(body.get())
-
-    this.debouncedToggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
   }
 
   _replaceHtmlAttrs ($html, htmlAttrs) {
@@ -217,150 +212,6 @@ export default class AutIframe {
 
   removeHighlights = () => {
     this._contents() && this._contents().find('.__cypress-highlight').remove()
-  }
-
-  toggleSelectorPlayground = (isEnabled) => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    if (isEnabled) {
-      $body.on('mouseenter', this._resetShowHighlight)
-      $body.on('mousemove', this._onSelectorMouseMove)
-      $body.on('mouseleave', this._clearHighlight)
-    } else {
-      $body.off('mouseenter', this._resetShowHighlight)
-      $body.off('mousemove', this._onSelectorMouseMove)
-      $body.off('mouseleave', this._clearHighlight)
-      if (this._highlightedEl) {
-        this._clearHighlight()
-      }
-    }
-  }
-
-  _resetShowHighlight = () => {
-    selectorPlaygroundModel.setShowingHighlight(false)
-  }
-
-  _onSelectorMouseMove = (e) => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    let el = e.target
-    let $el = $(el)
-
-    const $ancestorHighlight = $el.closest('.__cypress-selector-playground')
-
-    if ($ancestorHighlight.length) {
-      $el = $ancestorHighlight
-    }
-
-    if ($ancestorHighlight.length || $el.hasClass('__cypress-selector-playground')) {
-      const $highlight = $el
-
-      $highlight.css('display', 'none')
-      el = this._document().elementFromPoint(e.clientX, e.clientY)
-      $el = $(el)
-      $highlight.css('display', 'block')
-    }
-
-    if (this._highlightedEl === el) return
-
-    this._highlightedEl = el
-
-    const Cypress = eventManager.getCypress()
-
-    const selector = Cypress.SelectorPlayground.getSelector($el)
-
-    dom.addOrUpdateSelectorPlaygroundHighlight({
-      $el,
-      selector,
-      $body,
-      showTooltip: true,
-      onClick: () => {
-        selectorPlaygroundModel.setNumElements(1)
-        selectorPlaygroundModel.resetMethod()
-        selectorPlaygroundModel.setSelector(selector)
-      },
-    })
-  }
-
-  _clearHighlight = () => {
-    const $body = this._body()
-
-    if (!$body) return
-
-    dom.addOrUpdateSelectorPlaygroundHighlight({ $el: null, $body })
-    if (this._highlightedEl) {
-      this._highlightedEl = null
-    }
-  }
-
-  toggleSelectorHighlight (isShowingHighlight) {
-    if (!isShowingHighlight) {
-      this._clearHighlight()
-
-      return
-    }
-
-    const Cypress = eventManager.getCypress()
-
-    const $el = this.getElements(Cypress.dom)
-
-    selectorPlaygroundModel.setValidity(!!$el)
-
-    if ($el) {
-      selectorPlaygroundModel.setNumElements($el.length)
-
-      if ($el.length) {
-        dom.scrollIntoView(this._window(), $el[0])
-      }
-    }
-
-    dom.addOrUpdateSelectorPlaygroundHighlight({
-      $el: $el && $el.length ? $el : null,
-      selector: selectorPlaygroundModel.selector,
-      $body: this._body(),
-      showTooltip: false,
-    })
-  }
-
-  getElements (cypressDom) {
-    const { selector, method } = selectorPlaygroundModel
-    const $contents = this._contents()
-
-    if (!$contents || !selector) return
-
-    return dom.getElementsForSelector({
-      method,
-      selector,
-      cypressDom,
-      $root: $contents,
-    })
-  }
-
-  printSelectorElementsToConsole () {
-    logger.clearLog()
-
-    const Cypress = eventManager.getCypress()
-
-    const $el = this.getElements(Cypress.dom)
-
-    const command = `cy.${selectorPlaygroundModel.method}('${selectorPlaygroundModel.selector}')`
-
-    if (!$el) {
-      return logger.logFormatted({
-        Command: command,
-        Yielded: 'Nothing',
-      })
-    }
-
-    logger.logFormatted({
-      Command: command,
-      Elements: $el.length,
-      Yielded: Cypress.dom.getElements($el),
-    })
   }
 
   beforeScreenshot = (config) => {

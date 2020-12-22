@@ -9,7 +9,6 @@ import ScriptError from '../errors/script-error'
 import SnapshotControls from './snapshot-controls'
 
 import IframeModel from './iframe-model'
-import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import './iframes.scss'
 
 export function getSpecUrl ({ namespace, spec }, prefix = '') {
@@ -58,14 +57,6 @@ export default class Iframes extends Component {
     })
 
     this.props.eventManager.on('print:selector:elements:to:console', this._printSelectorElementsToConsole)
-
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorPlayground(selectorPlaygroundModel.isEnabled)
-    }))
-
-    this._disposers.push(autorun(() => {
-      this.autIframe.toggleSelectorHighlight(selectorPlaygroundModel.isShowingHighlight)
-    }))
 
     this.props.eventManager.start(this.props.config)
 
