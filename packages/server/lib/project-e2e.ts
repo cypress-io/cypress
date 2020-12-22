@@ -35,7 +35,7 @@ const debugScaffold = Debug('cypress:server:scaffold')
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
-class ProjectE2E extends ProjectBase {
+export default class ProjectE2E extends ProjectBase {
   get projectType () {
     return 'e2e'
   }
@@ -168,5 +168,3 @@ class ProjectE2E extends ProjectBase {
     })
   }
 }
-
-module.exports = ProjectE2E

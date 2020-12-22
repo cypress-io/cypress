@@ -10,7 +10,7 @@ const cache = require(`${root}lib/cache`)
 const config = require(`${root}lib/config`)
 const scaffold = require(`${root}lib/scaffold`)
 const Server = require(`${root}lib/server`)
-const ProjectE2E = require(`${root}lib/project-e2e`)
+const ProjectE2E = require(`${root}lib/project-e2e`).default
 const Automation = require(`${root}lib/automation`)
 const savedState = require(`${root}lib/saved_state`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
@@ -50,7 +50,7 @@ describe('lib/project-e2e', () => {
   it('requires a projectRoot', () => {
     const fn = () => new ProjectE2E()
 
-    expect(fn).to.throw('Instantiating lib/project-e2e requires a projectRoot!')
+    expect(fn).to.throw('Instantiating lib/project requires a projectRoot!')
   })
 
   it('always resolves the projectRoot to be absolute', () => {
