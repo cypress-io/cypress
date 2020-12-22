@@ -9,6 +9,7 @@ import cwd from '@packages/server/lib/cwd'
 import errors from '@packages/server/lib/errors'
 import plugins from '@packages/server/lib/plugins'
 import devserver from '@packages/server/lib/plugins/devserver'
+import ProjectBase from '@packages/server/lib/project-base'
 import Reporter from '@packages/server/lib/reporter'
 import savedState from '@packages/server/lib/saved_state'
 import { escapeFilenameInUrl } from '@packages/server/lib/util/escape_filename'
@@ -23,7 +24,7 @@ const debug = Debug('cypress:server-ct:project')
 const localCwd = cwd()
 const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 
-export default class ProjectCt extends EventEmitter {
+export default class ProjectCt extends ProjectBase {
   cfg: any
   private projectRoot: string
   private watchers: Watchers
@@ -176,27 +177,6 @@ export default class ProjectCt extends EventEmitter {
     })
   }
 
-  reset () {
-    debug('resetting project instance %s', this.projectRoot)
-
-    this.spec = null
-    this.browser = null
-
-    return Bluebird.try(() => {
-      if (this.automation) {
-        this.automation.reset()
-      }
-
-      let state
-
-      if (this.server) {
-        state = this.server.reset()
-      }
-
-      return state
-    })
-  }
-
   close () {
     debug('closing project instance %s', this.projectRoot)
 
@@ -213,68 +193,6 @@ export default class ProjectCt extends EventEmitter {
       return process.chdir(localCwd)
     })
   }
-
-  watchPluginsFile (cfg, options) {
-    debug(`attempt watch plugins file: ${cfg.pluginsFile}`)
-    if (!cfg.pluginsFile || options.isTextTerminal) {
-      return Bluebird.resolve()
-    }
-
-    return fs.pathExists(cfg.pluginsFile)
-    .then((found) => {
-      debug(`plugins file found? ${found}`)
-      // ignore if not found. plugins#init will throw the right error
-      if (!found) {
-        return
-      }
-
-      debug('watch plugins file')
-
-      return this.watchers.watchTree(cfg.pluginsFile, {
-        onChange: () => {
-          // TODO: completely re-open project instead?
-          debug('plugins file changed')
-
-          // re-init plugins after a change
-          this._initPlugins(cfg, options)
-          .catch((err) => {
-            options.onError(err)
-          })
-        },
-      })
-    })
-  }
-
-  // watchSettings (onSettingsChanged, options) {
-  //   // bail if we havent been told to
-  //   // watch anything (like in run mode)
-  //   if (!onSettingsChanged) {
-  //     return
-  //   }
-
-  //   debug('watch settings files')
-
-  //   const obj = {
-  //     onChange: () => {
-  //       // dont fire change events if we generated
-  //       // a project id less than 1 second ago
-  //       if (this.generatedProjectIdTimestamp &&
-  //         ((new Date - this.generatedProjectIdTimestamp) < 1000)) {
-  //         return
-  //       }
-
-  //       // call our callback function
-  //       // when settings change!
-  //       onSettingsChanged.call(this)
-  //     },
-  //   }
-
-  //   if (options.configFile !== false) {
-  //     this.watchers.watch(settings.pathToConfigFile(this.projectRoot, options), obj)
-  //   }
-
-  //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
-  // }
 
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
@@ -458,37 +376,5 @@ export default class ProjectCt extends EventEmitter {
     debug('prefixed path for spec %o', { pathToSpec, type, url })
 
     return url
-  }
-
-  normalizeSpecUrl (browserUrl, specUrl) {
-    const replacer = (match) => match.replace('//', '/')
-
-    return [
-      browserUrl,
-      '#/tests',
-      escapeFilenameInUrl(specUrl),
-    ].join('/').replace(multipleForwardSlashesRe, replacer)
-  }
-
-  getProjectId () {
-    return this.verifyExistence()
-    .then(() => {
-      return settings.read(this.projectRoot, this.options)
-    }).then((readSettings) => {
-      if (readSettings && readSettings.projectId) {
-        return readSettings.projectId
-      }
-
-      errors.throw('NO_PROJECT_ID', settings.configFile(this.options), this.projectRoot)
-    })
-  }
-
-  verifyExistence () {
-    return fs
-    .statAsync(this.projectRoot)
-    .return(this)
-    .catch(() => {
-      errors.throw('NO_PROJECT_FOUND_AT_PROJECT_ROOT', this.projectRoot)
-    })
   }
 }
