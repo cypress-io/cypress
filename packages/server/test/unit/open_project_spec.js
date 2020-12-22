@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const chokidar = require('chokidar')
 const browsers = require(`${root}lib/browsers`)
-const ProjectE2E = require(`${root}lib/project-e2e`)
+const ProjectE2E = require(`${root}lib/project-e2e`).default
 const openProject = require(`${root}lib/open_project`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
 

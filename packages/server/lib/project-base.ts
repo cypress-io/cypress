@@ -35,7 +35,7 @@ const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-class ProjectBase extends EE {
+export default class ProjectBase extends EE {
   constructor (projectRoot) {
     super()
 
@@ -863,5 +863,3 @@ class ProjectBase extends EE {
     .then(R.map(R.prop('name')))
   }
 }
-
-module.exports = ProjectBase
