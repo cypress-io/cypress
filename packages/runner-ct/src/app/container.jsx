@@ -22,6 +22,7 @@ class Container extends Component {
   }
 
   componentDidMount () {
+    console.log(this.props.config)
     this.props.eventManager.addGlobalListeners(this.props.state, {
       element: automationElementId,
       string: this.randomString,

@@ -1,3 +1,4 @@
+import { HotModuleReplacementPlugin } from 'webpack'
 import { debug as debugFn } from 'debug'
 import * as path from 'path'
 import { merge } from 'webpack-merge'
@@ -18,6 +19,7 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   const entry = path.resolve(__dirname, './browser.js')
 
+  console.log('INSTALL!!!!')
   const dynamicWebpackConfig = {
     plugins: [
       new CypressCTOptionsPlugin({
@@ -25,6 +27,7 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
         projectRoot,
         devserverEvents,
       }),
+      new HotModuleReplacementPlugin()
     ],
   }
 

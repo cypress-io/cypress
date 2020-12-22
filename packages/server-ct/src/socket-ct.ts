@@ -220,6 +220,10 @@ export class Socket {
 
       // TODO: what to do about reporter disconnections?
 
+      socket.on('message', () => {
+        console.log('MEssage...')
+      })
+
       socket.on('runner:connected', () => {
         if (socket.inRunnerRoom) {
           return
@@ -233,6 +237,7 @@ export class Socket {
       // TODO: what to do about runner disconnections?
 
       socket.on('spec:changed', (spec) => {
+        console.log('SPEC CHANGED!!!!')
         return options.onSpecChanged(spec)
       })
 

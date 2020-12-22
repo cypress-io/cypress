@@ -17,7 +17,7 @@ describe('Cell', () => {
   })
 
   describe('blacked out', () => {
-    it('renders a blocked out cell when showLetter is set and its blocked out', () => {
+    it('renders a ddblocked out cell when showLetter is set and its blocked out', () => {
       const cellConfig = { letter: '.', blockedOut: true, showLetter: true }
 
       mount(Cell, { propsData: cellConfig })

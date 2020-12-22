@@ -13,6 +13,7 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import { BottomPane } from './BottomPane'
+import { SelectMode } from './select-mode'
 import './app.scss'
 
 const App = observer(
@@ -22,7 +23,13 @@ const App = observer(
     return (
       <>
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
-          <SpecsList state={state} />
+          <div>
+            <SpecsList state={state} />
+            <SelectMode 
+              onChange={state.setMode}
+              mode={state.mode}
+            />
+          </div>
           <SplitPane split="horizontal" primary="second" defaultSize="60%" minSize="20%" maxSize="80%">
             <div className="runner runner-ct container">
               <Header {...props} />

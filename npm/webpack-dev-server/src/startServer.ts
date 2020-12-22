@@ -21,5 +21,8 @@ export async function start (userWebpackConfig = {}, { specs, config, devserverE
 
   debug('starting webpack dev server')
 
-  return new WebpackDevServer(compiler, { hot: true, noInfo: !debug.enabled })
+  return new WebpackDevServer(compiler, { 
+    hot: true, 
+    noInfo: !debug.enabled,
+  })
 }

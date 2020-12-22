@@ -86,7 +86,13 @@ const eventManager = {
       }
     })
 
+    ws.on('devserver:specs:changed', (specs) => {
+      console.log('Dev server!!!')
+      // state.setSpecs(specs)
+    })
+
     ws.on('component:specs:changed', (specs) => {
+      console.log('Changed!')
       state.setSpecs(specs)
     })
 
@@ -176,6 +182,7 @@ const eventManager = {
     })
 
     reporterBus.on('save:state', (state) => {
+      console.log('SAVE!!')
       this.saveState(state)
     })
 
@@ -429,6 +436,7 @@ const eventManager = {
   },
 
   notifyRunningSpec (specFile) {
+    console.log('SPEC CHANGED')
     ws.emit('spec:changed', specFile)
   },
 

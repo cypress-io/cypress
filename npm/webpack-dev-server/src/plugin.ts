@@ -72,5 +72,8 @@ export default class CypressCTOptionsPlugin implements Plugin {
 
   apply (compiler: Compiler): void {
     compiler.hooks.compilation.tap('CypressCTOptionsPlugin', this.plugin)
+    compiler.hooks.compilation.tap('afterEmit', () => {
+      console.log('AFTER EMIT')
+    })
   }
 }

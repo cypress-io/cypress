@@ -2,6 +2,8 @@ import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
 
+export type Mode = 'workbench' | 'watch'
+
 interface Defaults {
   messageTitle: string | null
   messageDescription: string | null
@@ -22,6 +24,7 @@ interface Defaults {
   specs: Cypress.Cypress['spec'][]
 
   callbackAfterUpdate: ((...args: unknown[]) => void) | null
+  mode: Mode
 }
 
 const _defaults: Defaults = {
@@ -44,6 +47,7 @@ const _defaults: Defaults = {
   specs: [],
 
   callbackAfterUpdate: null,
+  mode: 'workbench'
 }
 
 export default class State {
@@ -90,6 +94,7 @@ export default class State {
   /** @type {"single" | "multi"} */
   @observable runMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
+  @observable mode: Mode = 'workbench'
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
@@ -154,6 +159,11 @@ export default class State {
 
   @action setSearchSpecText (text: string) {
     this.specSearchText = text
+  }
+
+  @action setMode (mode: Mode) {
+    console.log('mode', mode)
+    // this.mode = mode
   }
 
   @action updateDimensions (width, height) {
