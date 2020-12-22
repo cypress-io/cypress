@@ -3,7 +3,7 @@ import _ from 'lodash'
 import path from 'path'
 import send from 'send'
 import ProjectCt, { Cfg } from '@packages/server-ct/src/project-ct'
-import SpecsStore from '@packages/server-ct/src/specs-controller'
+import SpecsStore from '@packages/server-ct/src/specs-store'
 
 interface ServeOptions {
   config: Cfg
