@@ -7,16 +7,15 @@ import _ from 'lodash'
 import path from 'path'
 import R from 'ramda'
 import commitInfo from '@cypress/commit-info'
+import { RunnablesStore } from '@packages/reporter/src/runnables/runnables-store'
+import ServerCt from '@packages/server-ct/src/server-ct'
 import api from './api'
 import Automation from './automation'
-import browsers from './browsers'
 import cache from './cache'
 import config from './config'
 import cwd from './cwd'
 import errors from './errors'
 import logger from './logger'
-import plugins from './plugins'
-import preprocessor from './plugins/preprocessor'
 import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
@@ -33,6 +32,12 @@ interface CloseOptions {
   onClose: () => any
 }
 
+interface OpenOptions {
+  onOpen: (cfg: any) => Bluebird<any>
+}
+
+// type ProjectOptions = Record<string, any>
+
 export type Cfg = Record<string, any>
 
 const localCwd = cwd()
@@ -42,12 +47,17 @@ const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
 export default class ProjectBase extends EE {
-  constructor (projectRoot) {
-    super()
+  protected cfg: Cfg | null
+  protected projectRoot: string
+  protected watchers: Watchers
+  protected server: Server | ServerCt | null
+  protected options?: Record<string, any>
+  protected spec: Cypress.Cypress['spec'] | null
+  protected browser: any
+  protected automation: any
 
-    if (!(this instanceof ProjectBase)) {
-      return new ProjectBase(projectRoot)
-    }
+  constructor (projectRoot: string) {
+    super()
 
     if (!projectRoot) {
       throw new Error('Instantiating lib/project requires a projectRoot!')
@@ -80,10 +90,9 @@ export default class ProjectBase extends EE {
     throw new Error('Project#projectType must be defined')
   }
 
-  open (options = {}) {
+  open (options = {}, callbacks: OpenOptions) {
     debug('opening project instance %s', this.projectRoot)
     debug('project open options %o', options)
-    this.server = new Server()
 
     _.defaults(options, {
       report: false,
@@ -117,76 +126,43 @@ export default class ProjectBase extends EE {
 
         return scaffold.plugins(path.dirname(cfg.pluginsFile), cfg)
       }
-    }).then((cfg) => {
-      return this._initPlugins(cfg, options)
-      .then((modifiedCfg) => {
-        debug('plugin config yielded: %o', modifiedCfg)
+    })
+    .then(callbacks.onOpen)
+    .then(({ cfg, port, warning }) => {
+      // if we didnt have a cfg.port
+      // then get the port once we
+      // open the server
+      if (!cfg.port) {
+        cfg.port = port
 
-        const updatedConfig = config.updateWithPluginValues(cfg, modifiedCfg)
+        // and set all the urls again
+        _.extend(cfg, config.setUrls(cfg))
+      }
 
-        debug('updated config: %o', updatedConfig)
+      // store the cfg from
+      // opening the server
+      this.cfg = cfg
 
-        return updatedConfig
-      })
-    }).then((cfg) => {
-      return this.server.open(cfg, this, options.onError, options.onWarning)
-      .spread((port, warning) => {
-        // if we didnt have a cfg.port
-        // then get the port once we
-        // open the server
-        if (!cfg.port) {
-          cfg.port = port
+      debug('project config: %o', _.omit(cfg, 'resolved'))
 
-          // and set all the urls again
-          _.extend(cfg, config.setUrls(cfg))
-        }
+      if (warning) {
+        options.onWarning(warning)
+      }
 
-        // store the cfg from
-        // opening the server
-        this.cfg = cfg
+      options.onSavedStateChanged = (state) => this.saveState(state)
 
-        debug('project config: %o', _.omit(cfg, 'resolved'))
-
-        if (warning) {
-          options.onWarning(warning)
-        }
-
-        options.onSavedStateChanged = (state) => this.saveState(state)
-
+      return Bluebird.join(
+        this.watchSettingsAndStartWebsockets(options, cfg),
+        this.scaffold(cfg),
+      )
+      .then(() => {
         return Bluebird.join(
-          this.watchSettingsAndStartWebsockets(options, cfg),
-          this.scaffold(cfg),
+          this.checkSupportFile(cfg),
+          this.watchPluginsFile(cfg, options),
         )
-        .then(() => {
-          return Bluebird.join(
-            this.checkSupportFile(cfg),
-            this.watchPluginsFile(cfg, options),
-          )
-        })
       })
     })
     .return(this)
-  }
-
-  _initPlugins (cfg, options) {
-    // only init plugins with the
-    // allowed config values to
-    // prevent tampering with the
-    // internals and breaking cypress
-    cfg = config.allowed(cfg)
-
-    return plugins.init(cfg, {
-      projectRoot: this.projectRoot,
-      configFile: settings.pathToConfigFile(this.projectRoot, options),
-      onError (err) {
-        debug('got plugins error', err.stack)
-
-        browsers.close()
-
-        options.onError(err)
-      },
-      onWarning: options.onWarning,
-    })
   }
 
   getRuns () {
@@ -312,10 +288,11 @@ export default class ProjectBase extends EE {
     return this.watchers.watch(settings.pathToCypressEnvJson(this.projectRoot), obj)
   }
 
-  watchSettingsAndStartWebsockets (options = {}, cfg = {}) {
+  watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     this.watchSettings(options.onSettingsChanged, options)
 
-    let { reporter, projectRoot } = cfg
+    const { projectRoot } = cfg
+    let { reporter } = cfg as { reporter: RunnablesStore }
 
     // if we've passed down reporter
     // then record these via mocha reporter
@@ -394,13 +371,16 @@ export default class ProjectBase extends EE {
     this.server.changeToUrl(url)
   }
 
-  setCurrentSpecAndBrowser (spec, browser) {
+  setCurrentSpecAndBrowser (spec, browser: Cypress.Browser) {
     this.spec = spec
     this.browser = browser
   }
 
   getCurrentSpecAndBrowser () {
-    return _.pick(this, 'spec', 'browser')
+    return {
+      spec: this.spec,
+      browser: this.browser,
+    }
   }
 
   setBrowsers (browsers = []) {
@@ -409,6 +389,7 @@ export default class ProjectBase extends EE {
     return this.getConfig()
     .then((cfg) => {
       debug('setting config browsers to %o', browsers)
+
       cfg.browsers = browsers
     })
   }
@@ -426,7 +407,7 @@ export default class ProjectBase extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}) {
+  getConfig (options = {}): Bluebird<Cfg> {
     if (options == null) {
       options = this.options
     }
@@ -563,7 +544,7 @@ export default class ProjectBase extends EE {
     ].join('/').replace(multipleForwardSlashesRe, replacer)
   }
 
-  scaffold (cfg) {
+  scaffold (cfg: Cfg) {
     debug('scaffolding project %s', this.projectRoot)
 
     const scaffolds = []
@@ -615,7 +596,8 @@ export default class ProjectBase extends EE {
     return this.verifyExistence()
     .then(() => {
       return settings.read(this.projectRoot, this.options)
-    }).then((readSettings) => {
+    })
+    .then((readSettings) => {
       if (readSettings && readSettings.projectId) {
         return readSettings.projectId
       }

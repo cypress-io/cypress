@@ -8,9 +8,11 @@ import allowDestroy from '@packages/server/lib/util/server_destroy'
 import { initializeRoutes } from './routes-ct'
 import { Socket } from './socket-ct'
 
+type WarningErr = Record<string, any>
+
 const debug = _debug('cypress:server-ct:server')
 
-export class Server {
+export default class ServerCt {
   private _request: Request
   private _middleware
   private _server: http.Server
@@ -67,7 +69,7 @@ export class Server {
     return this._server
   }
 
-  open (config = {}, specs, project, onError, onWarning) {
+  open (config = {}, specsStore, project, onError, onWarning) {
     debug('server open')
 
     return Bluebird.try(() => {
@@ -78,7 +80,7 @@ export class Server {
       this.createRoutes({
         app,
         config,
-        specs,
+        specsStore,
         // onError,
         project,
       })
@@ -87,7 +89,7 @@ export class Server {
     })
   }
 
-  createServer (app, config, project, request, onWarning) {
+  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr]> {
     return new Bluebird((resolve, reject) => {
       const { port } = config
 
