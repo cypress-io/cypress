@@ -2,9 +2,8 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
+import { handle, serve } from '@packages/runner-ct'
 import staticPkg from '@packages/static'
-// const files = require('@packages/server/lib/controllers/files')
-import { handle, serve } from './controllers/controllers-ct'
 import ProjectCt from './project-ct'
 import SpecsStore from './specs-controller'
 
