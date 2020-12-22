@@ -17,7 +17,7 @@ process.env.CYPRESS_INTERNAL_ENV = 'development'
 
 const CA = require('@packages/https-proxy').CA
 const Config = require('../../lib/config')
-const Server = require('../../lib/server')
+const { Server } = require('../../lib/server')
 const { _getArgs } = require('../../lib/browsers/chrome')
 
 const CHROME_PATH = 'google-chrome'

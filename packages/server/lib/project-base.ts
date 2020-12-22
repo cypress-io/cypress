@@ -8,7 +8,7 @@ import path from 'path'
 import R from 'ramda'
 import commitInfo from '@cypress/commit-info'
 import { RunnablesStore } from '@packages/reporter/src/runnables/runnables-store'
-import ServerCt from '@packages/server-ct/src/server-ct'
+import { ServerCt } from '@packages/server-ct'
 import api from './api'
 import Automation from './automation'
 import cache from './cache'
@@ -19,7 +19,7 @@ import logger from './logger'
 import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
-import Server from './server'
+import { Server } from './server'
 import user from './user'
 import { escapeFilenameInUrl } from './util/escape_filename'
 import fs from './util/fs'
@@ -46,7 +46,7 @@ const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-export default class ProjectBase extends EE {
+export class ProjectBase extends EE {
   protected cfg: Cfg | null
   protected projectRoot: string
   protected watchers: Watchers

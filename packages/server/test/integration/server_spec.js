@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const evilDns = require('evil-dns')
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
-const Server = require(`${root}lib/server`)
+const { Server } = require(`${root}lib/server`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'

@@ -1,6 +1,14 @@
 import browsers from '@packages/server/lib/browsers'
 import openProject from '@packages/server/lib/open_project'
 
+export * from './src/socket-ct'
+
+export * from './src/server-ct'
+
+export * from './src/project-ct'
+
+export * from './src/specs-store'
+
 // Partial because there are probably other options that are not included in this type.
 export const start = async (projectRoot: string, args: {}) => {
   // add chrome as a default browser if none has been specified

@@ -11,7 +11,7 @@ const logSymbols = require('log-symbols')
 
 const recordMode = require('./record')
 const errors = require('../errors')
-const ProjectBase = require('../project-base').default
+const { ProjectBase } = require('../project-base')
 const Reporter = require('../reporter')
 const browserUtils = require('../browsers')
 const openProject = require('../open_project')

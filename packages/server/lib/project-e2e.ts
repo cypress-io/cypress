@@ -3,13 +3,13 @@ import browsers from './browsers'
 import config from './config'
 import plugins from './plugins'
 import preprocessor from './plugins/preprocessor'
-import ProjectBase from './project-base'
-import Server from './server'
+import { ProjectBase } from './project-base'
+import { Server } from './server'
 import settings from './util/settings'
 
 const debug = Debug('cypress:server:project')
 
-export default class ProjectE2E extends ProjectBase {
+export class ProjectE2E extends ProjectBase {
   get projectType () {
     return 'e2e'
   }

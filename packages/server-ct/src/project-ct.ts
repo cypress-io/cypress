@@ -2,17 +2,17 @@ import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'
 import devserver from '@packages/server/lib/plugins/devserver'
-import ProjectBase from '@packages/server/lib/project-base'
+import { ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
-import ServerCt from './server-ct'
-import SpecsStore from './specs-store'
+import { ServerCt } from './server-ct'
+import { SpecsStore } from './specs-store'
 
 export * from '@packages/server/lib/project-base'
 
 const debug = Debug('cypress:server-ct:project')
 
-export default class ProjectCt extends ProjectBase {
+export class ProjectCt extends ProjectBase {
   protected server: ServerCt
 
   get projectType () {

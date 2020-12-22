@@ -27,6 +27,7 @@ import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import origin from './util/origin'
 import allowDestroy from './util/server_destroy'
+import { SocketAllowed } from './util/socket_allowed'
 import statusCode from './util/status_code'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
@@ -106,7 +107,7 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-class Server {
+export class Server {
   constructor () {
     if (!(this instanceof Server)) {
       return new Server()
@@ -875,5 +876,3 @@ class Server {
     return this._normalizeReqUrl(this._server)
   }
 }
-
-export default Server
