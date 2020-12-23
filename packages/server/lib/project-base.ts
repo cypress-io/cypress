@@ -53,8 +53,9 @@ export class ProjectBase extends EE {
   protected server: Server | ServerCt | null
   protected options?: Record<string, any>
   protected spec: Cypress.Cypress['spec'] | null
-  protected browser: any
   protected automation: any
+
+  public browser: any
 
   constructor (projectRoot: string) {
     super()
