@@ -6,9 +6,14 @@ const debug = debugFn('cypress:webpack-dev-server:start')
 
 import { makeWebpackConfig } from './makeWebpackConfig'
 
-export async function start (userWebpackConfig = {}, { specs, config, devserverEvents }): Promise<WebpackDevServer> {
-  const foundConfig = fw.getWebpackOptions()
-  const webpackConfig = await makeWebpackConfig(foundConfig || userWebpackConfig, {
+export async function start (initialWebpackConfig, { specs, config, devserverEvents }): Promise<WebpackDevServer> {
+  if (initialWebpackConfig == null) {
+    debug('User did not pass in any webpack configuration')
+    // TODO: implement a method in find-webpack to return the path where it found the configuration
+    initialWebpackConfig = fw.getWebpackOptions()
+  }
+
+  const webpackConfig = await makeWebpackConfig(initialWebpackConfig, {
     files: specs,
     projectRoot: config.projectRoot,
     support: '',
