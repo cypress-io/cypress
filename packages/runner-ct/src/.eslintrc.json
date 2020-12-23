@@ -5,6 +5,9 @@
   "plugins": [
     "cypress"
   ],
+  "rules": {
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  },
   "env": {
     "cypress/globals": true
   }
