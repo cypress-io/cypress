@@ -167,20 +167,18 @@ class $Cypress {
     return this.runner.run(fn)
   }
 
-  // Callback to execute when module.hot is called in component testing
+  // Method to manually re-execute Runner (usually within $autIframe)
+  // used mainly by Component Testing
   restartRunner () {
-    if (!window.parent.Cypress || !window.parent.Cypress.$autIframe) {
-      throw Error('Cannot re-run spec without Cypress or Cypress.$autIframe')
+    if (!window.top.Cypress) {
+      throw Error('Cannot re-run spec without Cypress')
     }
 
-    const $autIframe = window.parent.Cypress.$autIframe[0]
     // MobX state is only available on the Runner instance
     // which is attached to the top level `window`
-    const state = $autIframe.ownerDocument.defaultView.Runner.state
-
-    // avoid endless restart loop by checking if not in a loading state.
-    if (!state.isLoading) {
-      window.parent.Cypress.$autIframe[0].ownerDocument.defaultView.Runner.emit('restart')
+    // We avoid infinite restart loop by checking if not in a loading state.
+    if (!window.top.Runner.state.isLoading) {
+      window.top.Runner.emit('restart')
     }
   }
 
