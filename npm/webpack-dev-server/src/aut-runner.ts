@@ -30,6 +30,6 @@ export function init (importPromises, parent = (window.opener || window.parent))
   })
 
   return {
-    onHMR: Cypress.onHMR,
+    restartRunner: Cypress.restartRunner,
   }
 }

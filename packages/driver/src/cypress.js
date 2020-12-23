@@ -168,9 +168,9 @@ class $Cypress {
   }
 
   // Callback to execute when module.hot is called in component testing
-  onHMR () {
+  restartRunner () {
     if (!window.parent.Cypress || !window.parent.Cypress.$autIframe[0]) {
-      throw Error('Cannot re-run spec without Cypress or Cypress.$aucIframe')
+      throw Error('Cannot re-run spec without Cypress or Cypress.$autIframe')
     }
 
     const $autIframe = window.parent.Cypress.$autIframe[0]

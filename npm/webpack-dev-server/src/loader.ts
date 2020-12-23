@@ -46,7 +46,7 @@ function buildSpecs (projectRoot: string, files: Cypress.Cypress['spec'][] = [])
 }
 
 // Runs the tests inside the iframe
-export default async function loader (): Promise<string> {
+export default function loader () {
   const { files, projectRoot } = this._cypress as { files: Cypress.Cypress['spec'][], projectRoot: string }
 
   return `
@@ -54,9 +54,13 @@ export default async function loader (): Promise<string> {
 
   const { init } = require(${JSON.stringify(require.resolve('./aut-runner'))})
 
-  const { onHMR } = init(Object.keys(allTheSpecs)
+  const { restartRunner } = init(Object.keys(allTheSpecs)
     .filter(key => allTheSpecs[key].shouldLoad())
     .map(a => allTheSpecs[a].load())
   )
+
+  if (module.hot) {
+    restartRunner()
+  }
   `
 }
