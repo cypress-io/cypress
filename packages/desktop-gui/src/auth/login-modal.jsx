@@ -80,7 +80,12 @@ class LoginContent extends Component {
       <div className='modal-body login'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h1><i className='fas fa-check'></i> Login Successful</h1>
-        <p>You are now logged in{authStore.user ? ` as ${authStore.user.name}` : ''}.</p>
+        <p>You are now logged in{authStore.user ? ` as ${authStore.user.displayName}` : ''}.</p>
+        {
+          !authStore.user.name ?
+            <p>Please go to the <a onClick={this._openDashboardProfile}>Cypress Dashboard</a> to complete the onboarding steps.</p> :
+            null
+        }
         <div className='login-content'>
           <button
             className='btn btn-login btn-primary btn-wide'
@@ -113,6 +118,10 @@ class LoginContent extends Component {
         <a onClick={this._openAPIHelp}>Learn more</a>
       </div>
     )
+  }
+
+  _openDashboardProfile () {
+    ipc.externalOpen('https://on.cypress.io/dashboard/profile')
   }
 
   _openDashboard () {
