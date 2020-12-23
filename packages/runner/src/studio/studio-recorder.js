@@ -51,6 +51,14 @@ class StudioRecorder {
     return this.isOpen && this.isEmpty && !this.isLoading
   }
 
+  @computed get shouldInterceptLogs () {
+    return this._hasStarted
+  }
+
+  @computed get hookId () {
+    return `${this.testId}-studio`
+  }
+
   @action start = (body) => {
     this.isActive = true
     this.isLoading = false
@@ -256,7 +264,7 @@ class StudioRecorder {
     return {
       id,
       testId: this.testId,
-      hookId: `${this.testId}-studio`,
+      hookId: this.hookId,
       name,
       message,
       type,

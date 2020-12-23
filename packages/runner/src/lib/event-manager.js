@@ -368,11 +368,19 @@ const eventManager = {
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
+      if (studioRecorder.shouldInterceptLogs) {
+        displayProps.hookId = studioRecorder.hookId
+      }
+
       reporterBus.emit('reporter:log:add', displayProps)
     })
 
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
+
+      if (studioRecorder.shouldInterceptLogs) {
+        displayProps.hookId = studioRecorder.hookId
+      }
 
       reporterBus.emit('reporter:log:state:changed', displayProps)
     })
