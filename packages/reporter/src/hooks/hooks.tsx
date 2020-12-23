@@ -19,7 +19,9 @@ export interface HookHeaderProps {
 const HookHeader = ({ model, number }: HookHeaderProps) => (
   <span>
     <span className='hook-name'>
-      {model.hookName} {number && `(${number})`} <span className='hook-failed-message'>(failed)</span>
+      {model.hookName} {number && `(${number})`}{' '}
+      <span className='hook-studio-icon'><i className='fas fa-magic' /></span>
+      <span className='hook-failed-message'>(failed)</span>{' '}
     </span>
   </span>
 )
@@ -61,19 +63,7 @@ export interface HookProps {
 }
 
 const Hook = observer(({ model, showNumber }: HookProps) => {
-  const headerExtras = () => {
-    if (model.isStudio) {
-      return <i className='fas fa-magic hook-studio-icon' />
-    }
-
-    if (model.invocationDetails) {
-      return <HookOpenInIDE invocationDetails={model.invocationDetails} />
-    }
-
-    return null
-  }
-
-  const content = () => {
+  const _content = () => {
     if (model.isStudio) {
       if (!model.studioCommands.length) {
         return <StudioNoCommands />
@@ -86,15 +76,15 @@ const Hook = observer(({ model, showNumber }: HookProps) => {
   }
 
   return (
-    <li className={cs('hook-item', { 'hook-failed': model.failed })}>
+    <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
       <Collapsible
         header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
         headerClass='hook-header'
-        headerExtras={headerExtras()}
+        headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
         isOpen={true}
       >
         <ul className='commands-container'>
-          {content()}
+          {_content()}
         </ul>
       </Collapsible>
     </li>
@@ -115,7 +105,7 @@ export interface HooksProps {
 const Hooks = observer(({ state = appState, model }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
-      if (hook.commands.length || (hook.isStudio && state.extendingTest && model.state === 'passed')) {
+      if (hook.commands.length || (hook.isStudio && state.studioIsActive && model.state === 'passed')) {
         return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
       }
 

@@ -27,6 +27,10 @@ class StudioRecorder {
     this.testId = testId
   }
 
+  @action clearTestId = () => {
+    this.testId = null
+  }
+
   @action startLoading = () => {
     this.isLoading = true
   }

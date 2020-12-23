@@ -79,7 +79,7 @@ const events: Events = {
       statsStore.reset()
 
       if (testId) {
-        appState.startExtendingTest(testId)
+        appState.setStudioTestId(testId)
       }
 
       runner.emit('reporter:restarted')
@@ -146,16 +146,19 @@ const events: Events = {
       appState.setFirefoxGcInterval(gcInterval)
     }))
 
+    runner.on('studio:show:modal', action('studio:show:modal', () => {
+      appState.openStudioModal()
+    }))
+
     runner.on('update:studio:logs', action('update:studio:logs', (logs: StudioCommand[]) => {
-      if (appState.extendingTest) {
-        runnablesStore.updateStudioLogs(appState.extendingTest, logs)
+      if (appState.studioIsActive) {
+        runnablesStore.updateStudioLogs(appState.studioTestId!, logs)
       }
     }))
 
-    runner.on('studio:cancel', action('studio:cancel', () => {
-      appState.closeStudio()
-      runner.emit('studio:cancel:runner:restart')
-    }))
+    runner.on('studio:cancel:reporter:restart', () => {
+      localBus.emit('studio:cancel:reporter:restart')
+    })
 
     localBus.on('resume', action('resume', () => {
       appState.resume()
@@ -231,22 +234,27 @@ const events: Events = {
       runner.emit('open:file', fileDetails)
     })
 
-    localBus.on('start:extending:test', action('start:extending:test', (testId) => {
-      appState.reset()
-      runnablesStore.reset()
-      statsStore.reset()
-      appState.startExtendingTest(testId)
-      runner.emit('start:extending:test', testId)
+    localBus.on('studio:init', (testId) => {
+      runner.emit('studio:init', testId)
+    })
+
+    localBus.on('studio:start', action('studio:start', () => {
+      runner.emit('studio:start')
+    }))
+
+    localBus.on('studio:close:modal', action('studio:close:modal', () => {
+      appState.closeStudioModal()
+      runner.emit('studio:close:modal')
+    }))
+
+    localBus.on('studio:cancel:reporter:restart', action('studio:cancel:reporter:restart', () => {
+      appState.closeStudio()
+      runner.emit('studio:cancel:runner:restart')
     }))
 
     localBus.on('studio:remove:command', (index) => {
       runner.emit('studio:remove:command', index)
     })
-
-    localBus.on('studio:cancel', action('studio:cancel', () => {
-      appState.closeStudio()
-      runner.emit('studio:cancel:runner:restart')
-    }))
 
     localBus.on('studio:save', (fileDetails: FileDetails, closeStudio: boolean) => {
       runner.emit('studio:save', {

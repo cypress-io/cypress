@@ -58,7 +58,8 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
       <>
         <div className='studio-controls'>
           <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
-          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._openSaveModal}>Save Test</button>
+          <button className='studio-run' disabled={!studioIsNotEmpty}>Run Test</button>
+          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._saveAndExit}>Save Test</button>
         </div>
         {this._saveModal()}
       </>
@@ -68,7 +69,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
   _cancel = (e: MouseEvent) => {
     e.preventDefault()
 
-    this.props.events.emit('studio:cancel')
+    this.props.events.emit('studio:cancel:reporter:restart')
   }
 
   _save = (closeStudio: boolean) => {

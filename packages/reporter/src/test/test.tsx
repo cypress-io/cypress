@@ -2,8 +2,6 @@ import { observer } from 'mobx-react'
 import React, { Component, createRef, RefObject, MouseEvent } from 'react'
 // @ts-ignore
 import Tooltip from '@cypress/react-tooltip'
-import { Dialog } from '@reach/dialog'
-import VisuallyHidden from '@reach/visually-hidden'
 
 import events, { Events } from '../lib/events'
 import appState, { AppState } from '../lib/app-state'
@@ -23,12 +21,8 @@ interface Props {
   model: TestModel
 }
 
-interface State {
-  extendingModalOpen: boolean
-}
-
 @observer
-class Test extends Component<Props, State> {
+class Test extends Component<Props> {
   static defaultProps = {
     events,
     appState,
@@ -40,8 +34,6 @@ class Test extends Component<Props, State> {
 
   constructor (props: Props) {
     super(props)
-
-    this.state = { extendingModalOpen: false }
 
     this.containerRef = createRef<HTMLDivElement>()
   }
@@ -85,7 +77,6 @@ class Test extends Component<Props, State> {
       >
         {this._contents()}
       </Collapsible>
-      {this._extendingModal()}
     </>)
   }
 
@@ -103,65 +94,12 @@ class Test extends Component<Props, State> {
           <i className='fas fa-exclamation-triangle runnable-controls-status' />
         </Tooltip>
         <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
-          <a onClick={this._openExtendingModal}>
+          <a onClick={this._launchStudio}>
             <i className='fas fa-magic runnable-controls-studio' />
           </a>
         </Tooltip>
       </span>
     </>)
-  }
-
-  _openExtendingModal = (e: MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    this.setState({ extendingModalOpen: true })
-  }
-
-  _startExtendingTest = () => {
-    const { model } = this.props
-
-    events.emit('start:extending:test', model.id)
-  }
-
-  _closeExtendingModal = () => {
-    this.setState({ extendingModalOpen: false })
-  }
-
-  _extendingModal = () => {
-    const { extendingModalOpen } = this.state
-
-    return (
-      <Dialog
-        className='studio-modal'
-        aria-label='Start Studio'
-        isOpen={extendingModalOpen}
-        onDismiss={this._closeExtendingModal}
-      >
-        <div className='body'>
-          <h1 className='title'>
-            <i className='fas fa-magic icon' /> Studio <span className='beta'>BETA</span>
-          </h1>
-          <div className='gif'>
-            <img src={require('../../static/studio.gif')} alt='Studio' />
-          </div>
-          <div className='center'>
-            <div className='text'>
-              Interact with your site (click, type, etc.) to generate commands.
-            </div>
-            <button className='get-started' onClick={this._startExtendingTest}>
-              Get Started
-            </button>
-          </div>
-        </div>
-        <button className='close-button' onClick={this._closeExtendingModal}>
-          <VisuallyHidden>Close</VisuallyHidden>
-          <span aria-hidden>
-            <i className='fas fa-times' />
-          </span>
-        </button>
-      </Dialog>
-    )
   }
 
   _contents () {
@@ -172,6 +110,15 @@ class Test extends Component<Props, State> {
         <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
       </div>
     )
+  }
+
+  _launchStudio = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const { model } = this.props
+
+    events.emit('studio:init', model.id)
   }
 }
 

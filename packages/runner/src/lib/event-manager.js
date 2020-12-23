@@ -132,11 +132,6 @@ const eventManager = {
 
     reporterBus.on('runner:restart', rerun)
 
-    reporterBus.on('studio:cancel:runner:restart', () => {
-      studioRecorder.cancel()
-      rerun()
-    })
-
     function sendEventIfSnapshotProps (logId, event) {
       if (!Cypress) return
 
@@ -189,10 +184,29 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
-    reporterBus.on('start:extending:test', (testId) => {
+    reporterBus.on('studio:init', (testId) => {
       studioRecorder.setTestId(testId)
 
-      this._reRun(state)
+      ws.emit('studio:init', (showedStudioModal) => {
+        if (!showedStudioModal) {
+          reporterBus.emit('studio:show:modal')
+        } else {
+          rerun()
+        }
+      })
+    })
+
+    reporterBus.on('studio:start', () => {
+      rerun()
+    })
+
+    reporterBus.on('studio:close:modal', () => {
+      studioRecorder.clearTestId()
+    })
+
+    reporterBus.on('studio:cancel:runner:restart', () => {
+      studioRecorder.cancel()
+      rerun()
     })
 
     reporterBus.on('studio:remove:command', (index) => {
@@ -203,7 +217,7 @@ const eventManager = {
       studioRecorder.stop()
       ws.emit('studio:save', fileDetails, studioRecorder.logs, () => {
         if (closeStudio) {
-          reporterBus.emit('studio:cancel')
+          reporterBus.emit('studio:cancel:reporter:restart')
         }
         // else {
         //   rerun()
@@ -215,8 +229,8 @@ const eventManager = {
       reporterBus.emit('update:studio:logs', logs)
     })
 
-    localBus.on('studio:cancel', () => {
-      reporterBus.emit('studio:cancel')
+    localBus.on('studio:cancel:reporter:restart', () => {
+      reporterBus.emit('studio:cancel:reporter:restart')
     })
 
     const $window = $(window)

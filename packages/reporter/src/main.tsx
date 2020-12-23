@@ -17,6 +17,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
+import StudioModal from './studio/studio-modal'
 
 export interface ReporterProps {
   appState: AppState
@@ -60,7 +61,7 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState } = this.props
+    const { appState, events } = this.props
 
     return (
       <div className='reporter'>
@@ -74,7 +75,9 @@ class Reporter extends Component<ReporterProps> {
         />
         <ForcedGcWarning
           appState={appState}
-          events={this.props.events}/>
+          events={events}
+        />
+        <StudioModal appState={appState} events={events} />
       </div>
     )
   }

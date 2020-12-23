@@ -53,8 +53,8 @@ const RunnablesContent = observer(({ appState, runnablesStore, specPath, error }
     return <Loading />
   }
 
-  if (appState && appState.extendingTest) {
-    return <Studio model={runnablesStore.testById(appState.extendingTest)} specPath={specPath} />
+  if (appState && appState.studioIsActive) {
+    return <Studio model={runnablesStore.testById(appState.studioTestId)} specPath={specPath} />
   }
 
   // show error if there are no tests, but only if there

@@ -67,9 +67,14 @@
       }
 
       .hook-studio-icon {
-        padding: 4px;
         color: #3386d4;
+        display: none;
+        margin-left: 3px;
       }
+    }
+
+    .hook-studio .hook-studio-icon {
+      display: inline;
     }
 
     .hook-failed .hook-failed-message {

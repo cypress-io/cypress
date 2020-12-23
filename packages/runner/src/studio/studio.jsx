@@ -71,7 +71,7 @@ class Studio extends Component {
   }
 
   _close = () => {
-    eventManager.emit('studio:cancel')
+    eventManager.emit('studio:cancel:restart')
   }
 }
 

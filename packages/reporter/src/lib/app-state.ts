@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { observable } from 'mobx'
+import { computed, observable } from 'mobx'
 
 interface DefaultAppState {
   forcingGc: boolean
@@ -8,7 +8,8 @@ interface DefaultAppState {
   isRunning: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
-  extendingTest: string | null
+  studioTestId: string | null
+  studioModalOpen: boolean
 }
 
 const defaults: DefaultAppState = {
@@ -18,7 +19,8 @@ const defaults: DefaultAppState = {
   isRunning: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
-  extendingTest: null,
+  studioTestId: null,
+  studioModalOpen: false,
 }
 
 class AppState {
@@ -29,11 +31,16 @@ class AppState {
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable firefoxGcInterval = defaults.firefoxGcInterval
-  @observable extendingTest = defaults.extendingTest
+  @observable studioTestId = defaults.studioTestId
+  @observable studioModalOpen = defaults.studioModalOpen
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
+
+  @computed get studioIsActive () {
+    return !!this.studioTestId && !this.studioModalOpen
+  }
 
   startRunning () {
     this.isRunning = true
@@ -84,6 +91,23 @@ class AppState {
     }
   }
 
+  openStudioModal () {
+    this.studioModalOpen = true
+  }
+
+  closeStudioModal () {
+    this.studioModalOpen = false
+  }
+
+  setStudioTestId (studioTestId: string) {
+    this.studioTestId = studioTestId
+  }
+
+  closeStudio () {
+    this.studioModalOpen = defaults.studioModalOpen
+    this.studioTestId = defaults.studioTestId
+  }
+
   reset () {
     _.each(defaults, (value: any, key: string) => {
       this[key] = value
@@ -94,14 +118,6 @@ class AppState {
 
   _resetAutoScrolling () {
     this.autoScrollingEnabled = this._resetAutoScrollingEnabledTo
-  }
-
-  startExtendingTest (testId: string) {
-    this.extendingTest = testId
-  }
-
-  closeStudio () {
-    this.extendingTest = null
   }
 }
 
