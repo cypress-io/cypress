@@ -4,7 +4,6 @@ import React from 'react'
 import { Reporter } from '@packages/reporter'
 
 import errorMessages from '../errors/error-messages'
-import util from '../lib/util'
 import State from '../lib/state'
 
 import SpecsList from '../specs/specs-list'
@@ -12,25 +11,31 @@ import SplitPane from 'react-split-pane'
 import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
-import { BottomPane } from './BottomPane'
 import './app.scss'
 
-const App = observer(
-  function App (props) {
+interface AppProps {
+  state: State;
+  // eslint-disable-next-line
+  eventManager: typeof import('../lib/event-manager').default
+  config: Cypress.ConfigOptions
+}
+
+const App: React.FC<AppProps> = observer(
+  function App (props: AppProps) {
     const { state, eventManager, config } = props
 
     return (
       <>
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
           <SpecsList state={state} />
-          <SplitPane split="horizontal" primary="second" defaultSize="60%" minSize="20%" maxSize="80%">
-            <div className="runner runner-ct container">
-              <Header {...props} />
-              <Iframes {...props} />
-              <Message state={state} />
-            </div>
-
-            <BottomPane>
+          <SplitPane
+            split="vertical"
+            primary="second"
+            defaultSize={config.viewportWidth}
+            minSize="20%"
+            maxSize="80%"
+          >
+            <div>
               {state.spec && (
                 <Reporter
                   runMode={state.runMode}
@@ -38,12 +43,19 @@ const App = observer(
                   spec={state.spec}
                   allSpecs={state.multiSpecs}
                   autoScrollingEnabled={config.state.autoScrollingEnabled}
+                  // @ts-ignore
                   error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                   firefoxGcInterval={config.firefoxGcInterval}
                   resetStatsOnSpecChange={state.runMode === 'single'}
                 />
               )}
-            </BottomPane>
+            </div>
+
+            <div className="runner runner-ct container">
+              <Header {...props} />
+              <Iframes {...props} />
+              <Message state={state} />
+            </div>
           </SplitPane>
         </SplitPane>
 
@@ -55,11 +67,6 @@ const App = observer(
     )
   },
 )
-
-App.defaultProps = {
-  window,
-  util,
-}
 
 App.propTypes = {
   runMode: PropTypes.oneOf(['single', 'multi']),
@@ -78,6 +85,7 @@ App.propTypes = {
     viewportHeight: PropTypes.number.isRequired,
     viewportWidth: PropTypes.number.isRequired,
   }).isRequired,
+  // @ts-expect-error
   eventManager: PropTypes.shape({
     notifyRunningSpec: PropTypes.func.isRequired,
     reporterBus: PropTypes.shape({
