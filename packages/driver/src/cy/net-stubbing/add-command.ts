@@ -67,7 +67,7 @@ function annotateMatcherOptionsTypes (options: RouteMatcherOptions) {
     }
   })
 
-  const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
+  const noAnnotationRequiredFields: (keyof RouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 
@@ -113,8 +113,12 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
     }
   }
 
-  if (_.has(routeMatcher, 'https') && !_.isBoolean(routeMatcher.https)) {
-    return err('`https` must be a boolean.')
+  const booleanProps = ['https', 'matchUrlAgainstPath']
+
+  for (const prop of booleanProps) {
+    if (_.has(routeMatcher, prop) && !_.isBoolean(routeMatcher[prop])) {
+      return err(`\`${prop}\` must be a boolean.`)
+    }
   }
 
   if (_.has(routeMatcher, 'port') && !isNumberMatcher(routeMatcher.port)) {
@@ -130,6 +134,16 @@ function validateRouteMatcherOptions (routeMatcher: RouteMatcherOptions): { isVa
       }
 
       knownFieldNames.push(k)
+    }
+  }
+
+  if (routeMatcher.matchUrlAgainstPath) {
+    if (!routeMatcher.url) {
+      return err('`matchUrlAgainstPath` requires a `url` to be specified.')
+    }
+
+    if (routeMatcher.path) {
+      return err('`matchUrlAgainstPath` and `path` cannot both be set.')
     }
   }
 
@@ -254,6 +268,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       handler,
       hitCount: 0,
       requests: {},
+      command: state('current'),
     }
 
     if (alias) {
@@ -279,6 +294,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
         handler = arg2
 
         return {
+          matchUrlAgainstPath: true,
           method: matcher,
           url,
         }
@@ -287,6 +303,7 @@ export function addCommand (Commands, Cypress: Cypress.Cypress, cy: Cypress.cy, 
       if (isStringMatcher(matcher)) {
         // url, handler
         return {
+          matchUrlAgainstPath: true,
           url: matcher,
         }
       }

@@ -4,7 +4,7 @@ describe('e2e async timeouts', () => {
   e2e.setup()
 
   e2e.it('failing1', {
-    spec: 'async_timeouts_spec.coffee',
+    spec: 'async_timeouts_spec.js',
     snapshot: true,
     expectedExitCode: 2,
   })

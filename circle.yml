@@ -439,12 +439,6 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn check-terminal
 
-      - run:
-          name: Stop .only
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn stop-only-all
-
       - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
@@ -491,7 +485,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             git clean -df
-            yarn lint
+            yarn lint --max-warnings=0
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
@@ -957,17 +951,6 @@ jobs:
           name: Run e2e example tests
           command: yarn test
           working_directory: npm/react/<<parameters.path>>
-
-
-  npm-create-cypress-tests:
-    <<: *defaults
-    steps:
-      - attach_workspace:
-          at: ~/
-      - run: yarn workspace create-cypress-tests build
-      - run:
-          name: Run unit test
-          command: yarn workspace create-cypress-tests test
 
   npm-eslint-plugin-dev:
     <<: *defaults
@@ -1798,10 +1781,6 @@ linux-workflow: &linux-workflow
         path: examples/webpack-options
         requires:
           - npm-react
-
-    - npm-create-cypress-tests:
-        requires:
-          - build
 
     - npm-eslint-plugin-dev:
         requires:

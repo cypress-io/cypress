@@ -703,14 +703,14 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (issue_2196_spec.coffee)                                                   │
-  │ Searched:   cypress/integration/issue_2196_spec.coffee                                         │
+  │ Specs:      1 found (issue_2196_spec.js)                                                       │
+  │ Searched:   cypress/integration/issue_2196_spec.js                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  issue_2196_spec.coffee                                                          (1 of 1)
+  Running:  issue_2196_spec.js                                                              (1 of 1)
 
 
   issue #2196: overwriting visit
@@ -731,14 +731,14 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     issue_2196_spec.coffee                                                           │
+  │ Spec Ran:     issue_2196_spec.js                                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_2196_spec.coffee.mp4          (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/issue_2196_spec.js.mp4              (X second)
 
 
 ====================================================================================================
@@ -748,7 +748,7 @@ exports['e2e visit / low response timeout / calls onBeforeLoad when overwriting 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  issue_2196_spec.coffee                   XX:XX        1        1        -        -        - │
+  │ ✔  issue_2196_spec.js                       XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 

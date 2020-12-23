@@ -46,21 +46,21 @@ describe('e2e cache', () => {
 
   it('passes', function () {
     return e2e.exec(this, {
-      spec: 'cache_spec.coffee',
+      spec: 'cache_spec.js',
       snapshot: true,
     })
   })
 
   it('clears cache when browser is spawned', function () {
     return e2e.exec(this, {
-      spec: 'cache_clearing_spec.coffee',
+      spec: 'cache_clearing_spec.js',
     })
     .then(() => {
       // only 1 request should have gone out
       expect(requestsForCache).to.eq(1)
 
       return e2e.exec(this, {
-        spec: 'cache_clearing_spec.coffee',
+        spec: 'cache_clearing_spec.js',
       })
       .then(() => {
         // and after the cache is cleaned before
