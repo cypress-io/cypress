@@ -1,5 +1,5 @@
+import * as React from 'react'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
 import State from '../lib/state'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
@@ -8,11 +8,8 @@ interface SpecsListProps {
   state: State
 }
 
-@observer
-class SpecsList extends Component<SpecsListProps> {
-  render () {
-    const { state } = this.props
-
+export const SpecsList: React.FC<SpecsListProps> = observer(
+  function SpecsList ({ state }) {
     const specGroups = state.filteredSpecs.length ? makeSpecHierarchy(state.filteredSpecs) : []
 
     return (
@@ -37,7 +34,5 @@ class SpecsList extends Component<SpecsListProps> {
         </ul>
       </div>
     )
-  }
-}
-
-export default SpecsList
+  },
+)
