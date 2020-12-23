@@ -8,7 +8,6 @@ import { $ } from '@packages/driver'
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
-import { getSpecUrl } from '../iframe/iframes'
 
 @observer
 export default class Header extends Component {
@@ -16,7 +15,6 @@ export default class Header extends Component {
 
   render () {
     const { state, config } = this.props
-    const url = state.url.length ? state.url : getSpecUrl(config, window.location.origin)
 
     return (
       <header
@@ -41,17 +39,6 @@ export default class Header extends Component {
               <i aria-hidden="true" className='fas fa-crosshairs' />
             </button>
           </Tooltip>
-          <div
-            className={cs('url-container', {
-              'loading': state.isLoadingUrl,
-              'highlighted': state.highlightUrl,
-            })}
-          >
-            <input className='url' value={url} readOnly onClick={this._openUrl} />
-            <span className='loading-container'>
-              ...loading <i className='fas fa-spinner fa-pulse'></i>
-            </span>
-          </div>
         </div>
         <ul className='menu'>
           <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
@@ -98,10 +85,6 @@ export default class Header extends Component {
 
   _togglePlaygroundOpen = () => {
     selectorPlaygroundModel.toggleOpen()
-  }
-
-  _openUrl = () => {
-    window.open(getSpecUrl(this.props.config, window.location.origin))
   }
 
   @action _toggleViewportMenu = () => {
