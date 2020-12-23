@@ -167,6 +167,21 @@ class $Cypress {
     return this.runner.run(fn)
   }
 
+  // Callback to execute when module.hot is called in component testing
+  onHMR () {
+    if (!window.parent.Cypress || !window.parent.Cypress.$autIframe[0]) {
+      throw Error('Cannot re-run spec without Cypress or Cypress.$aucIframe')
+    }
+
+    const $autIframe = window.parent.Cypress.$autIframe[0]
+    const state = $autIframe.ownerDocument.defaultView.Runner.state
+
+    // avoid endless restart loop by checking if not in a loading state.
+    if (!state.isLoading) {
+      window.parent.Cypress.$autIframe[0].ownerDocument.defaultView.Runner.emit('restart')
+    }
+  }
+
   // onSpecWindow is called as the spec window
   // is being served but BEFORE any of the actual
   // specs or support files have been downloaded
