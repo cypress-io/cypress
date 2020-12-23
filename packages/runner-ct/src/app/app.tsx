@@ -30,7 +30,7 @@ const App: React.FC<AppProps> = observer(
     return (
       <>
         <SplitPane split="vertical" minSize={250} defaultSize="20%" >
-          <SpecsList state={state} />
+          <SpecsList state={state} config={config} />
           <SplitPane
             split="vertical"
             primary="second"
