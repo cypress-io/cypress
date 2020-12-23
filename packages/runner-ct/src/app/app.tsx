@@ -13,6 +13,7 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import './app.scss'
+import { ReporterHeader } from './ReporterHeader'
 
 interface AppProps {
   state: State;
@@ -53,6 +54,7 @@ const App: React.FC<AppProps> = observer(
                   error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                   firefoxGcInterval={config.firefoxGcInterval}
                   resetStatsOnSpecChange={state.runMode === 'single'}
+                  renderReporterHeader={(props) => <ReporterHeader {...props} />}
                 />
               )}
             </div>
