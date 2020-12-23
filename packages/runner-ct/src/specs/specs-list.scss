@@ -42,22 +42,14 @@
         overflow-y: auto;
     }
 
-    ul{
-
+    ul {
         margin-left: 10px;
         transition: all .5s;
 
         &.group-hidden{
             display: none;
         }
-        &.specs-list-container{
-            // position: absolute;
-            // left: 0;
-            // right: 0;
-            // top: 47px;
-            // bottom: 0;
-            // overflow-y: auto;
-        }
+
         ul{
             color: #555555;
             margin: 0;
