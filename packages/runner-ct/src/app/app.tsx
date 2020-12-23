@@ -1,3 +1,4 @@
+import cs from 'classnames'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
@@ -23,6 +24,7 @@ interface AppProps {
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
     const { state, eventManager, config } = props
+    const [isReporterResizing, setIsReporterResizing] = React.useState(false)
 
     return (
       <>
@@ -31,9 +33,13 @@ const App: React.FC<AppProps> = observer(
           <SplitPane
             split="vertical"
             primary="second"
-            defaultSize={config.viewportWidth}
             minSize="20%"
             maxSize="80%"
+            // the viewport + padding left and right
+            defaultSize={config.viewportWidth ? config.viewportWidth + 32 : '20%'}
+            onDragStarted={() => setIsReporterResizing(true)}
+            onDragFinished={() => setIsReporterResizing(false)}
+            className={cs({ 'is-reporter-resizing': isReporterResizing })}
           >
             <div>
               {state.spec && (
