@@ -8,7 +8,7 @@ import config from '@packages/server/lib/config'
 import cwd from '@packages/server/lib/cwd'
 import errors from '@packages/server/lib/errors'
 import plugins from '@packages/server/lib/plugins'
-import devserver from '@packages/server/lib/plugins/devserver'
+import devServer from '@packages/server/lib/plugins/dev-server'
 import Reporter from '@packages/server/lib/reporter'
 import savedState from '@packages/server/lib/saved_state'
 import { escapeFilenameInUrl } from '@packages/server/lib/util/escape_filename'
@@ -139,14 +139,14 @@ export default class ProjectCt extends EventEmitter {
     })
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
-      // the plugin event for 'devserver:config' and get back
+      // the plugin event for 'dev-server:start' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
 
       return specsUtil.find(modifiedConfig)
       .filter((spec: Cypress.Cypress['spec']) => {
         return spec.specType === 'component'
       }).then((specs) => {
-        return devserver.start({ specs, config: modifiedConfig })
+        return devServer.start({ specs, config: modifiedConfig })
         .then((port) => {
           modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
@@ -154,8 +154,9 @@ export default class ProjectCt extends EventEmitter {
 
           specs.watch({
             onSpecsChanged: (specs) => {
+              console.log('THESE ARE MY SPECS', specs)
               // send new files to dev server
-              devserver.updateSpecs(specs)
+              devServer.updateSpecs(specs)
 
               // send new files to frontend
               this.server.sendSpecList(specs)

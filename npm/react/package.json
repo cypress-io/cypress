@@ -6,13 +6,17 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress open",
+    "cy:open": "node ../../scripts/cypress open --component-testing",
+    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/cypress run --component-testing",
+    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "node ../../scripts/cypress run",
     "transpile": "tsc",
     "watch": "tsc -w"
   },
   "dependencies": {
+    "@cypress/webpack-dev-server": "*",
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-preprocessor": "*",
@@ -25,6 +29,7 @@
     "unfetch": "4.1.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.12.10",
     "@babel/core": "7.4.5",
     "@babel/plugin-proposal-class-properties": "7.4.4",
     "@babel/plugin-syntax-dynamic-import": "7.8.3",

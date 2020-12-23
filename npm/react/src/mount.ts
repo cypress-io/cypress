@@ -5,16 +5,6 @@ import { injectStylesBeforeElement } from './utils'
 
 const rootId = 'cypress-root'
 
-const isComponentSpec = () => Cypress.spec.specType === 'component'
-
-function checkMountModeEnabled () {
-  if (!isComponentSpec()) {
-    throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
-    )
-  }
-}
-
 /**
  * Inject custom style text or CSS file or 3rd party style resources
  */
@@ -47,7 +37,6 @@ const injectStyles = (options: MountOptions) => {
  ```
  **/
 export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
-  checkMountModeEnabled()
 
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
@@ -164,7 +153,6 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   ```
  */
 export const unmount = () => {
-  checkMountModeEnabled()
 
   return cy.then(() => {
     cy.log('unmounting...')
