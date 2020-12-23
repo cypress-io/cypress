@@ -6,7 +6,6 @@ import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runna
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
 import scroller, { Scroller } from './scroller'
 import TestModel, { UpdatableTestProps, UpdateTestCallback, TestProps } from '../test/test-model'
-import StudioCommand from '../studio/studio-command-model'
 
 const localBus = new EventEmitter()
 
@@ -148,12 +147,6 @@ const events: Events = {
 
     runner.on('studio:show:modal', action('studio:show:modal', () => {
       appState.openStudioModal()
-    }))
-
-    runner.on('update:studio:logs', action('update:studio:logs', (logs: StudioCommand[]) => {
-      if (appState.studioIsActive) {
-        runnablesStore.updateStudioLogs(appState.studioTestId!, logs)
-      }
     }))
 
     runner.on('studio:cancel:reporter:restart', () => {

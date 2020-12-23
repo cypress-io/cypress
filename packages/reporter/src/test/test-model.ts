@@ -121,31 +121,19 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
-  @computed get studioIsNotEmpty () {
-    return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
-      return attempt.studioIsNotEmpty
-    })
-  }
-
   isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }
 
   addLog = (props: LogProps) => {
-    return this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+    return this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
   }
 
   updateLog (props: LogProps) {
-    this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
+    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
       attempt.updateLog(props)
-    })
-  }
-
-  updateStudioLogs (logs: StudioCommand[]) {
-    this._withAttempt(this.currentRetry, (attempt: Attempt) => {
-      attempt.updateStudioLogs(logs)
     })
   }
 

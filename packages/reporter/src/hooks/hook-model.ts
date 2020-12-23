@@ -6,7 +6,6 @@ import { FileDetails } from '@packages/ui-components'
 import { Alias } from '../instruments/instrument-model'
 import Err from '../errors/err-model'
 import CommandModel from '../commands/command-model'
-import StudioCommand from '../studio/studio-command-model'
 
 export type HookName = 'before all' | 'before each' | 'after all' | 'after each' | 'test body' | 'studio commands'
 
@@ -24,7 +23,6 @@ export default class Hook implements HookProps {
   @observable invocationDetails?: FileDetails
   @observable invocationOrder?: number
   @observable commands: CommandModel[] = []
-  @observable studioCommands: StudioCommand[] = []
   @observable isStudio: boolean
   @observable failed = false
 
@@ -71,10 +69,6 @@ export default class Hook implements HookProps {
     return this._aliasesWithDuplicatesCache
   }
 
-  @computed get studioIsNotEmpty () {
-    return this.studioCommands.length > 0
-  }
-
   addCommand (command: CommandModel) {
     if (!command.event) {
       command.number = this._currentNumber
@@ -91,10 +85,6 @@ export default class Hook implements HookProps {
     } else {
       this.commands.push(command)
     }
-  }
-
-  updateStudioLogs = (logs: StudioCommand[]) => {
-    this.studioCommands = logs
   }
 
   commandMatchingErr (errToMatch: Err) {

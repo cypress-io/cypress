@@ -5,7 +5,7 @@ import eventManager from '../lib/event-manager'
 
 const eventTypes = [
   'click',
-  'dblclick',
+  // 'dblclick',
   'change',
   'keydown',
 ]
@@ -102,7 +102,7 @@ class StudioRecorder {
     return `s${this._currentId++}`
   }
 
-  _getCommand = (event, $el) => {
+  _getName = (event, $el) => {
     const tagName = $el.prop('tagName')
     const { type } = event
 
@@ -189,7 +189,7 @@ class StudioRecorder {
     return ''
   }
 
-  _getValue = (event, $el) => {
+  _getMessage = (event, $el) => {
     if (!eventsWithValue.includes(event.type)) {
       return null
     }
@@ -223,61 +223,99 @@ class StudioRecorder {
 
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
-    const action = ({
-      id: this._getId(),
-      selector,
-      command: this._getCommand(event, $el),
-      value: this._getValue(event, $el),
-    })
+    const name = this._getName(event, $el)
+    const message = this._getMessage(event, $el)
 
-    this.logs.push(action)
+    if (name === 'change') {
+      return
+    }
 
-    this._filterLog()
+    const filteredLog = this._filterLastLog(selector, name, message)
 
-    this._emitUpdatedLog()
-  }
-
-  _filterLog = () => {
-    const { length } = this.logs
-
-    const lastAction = this.logs[length - 1]
-
-    if (lastAction.command === 'change') {
-      this.logs.splice(length - 1)
+    if (filteredLog) {
+      this._updateLog(filteredLog)
 
       return
     }
 
-    if (length > 1) {
-      const secondLast = this.logs[length - 2]
+    this._addLog({
+      id: this._getId(),
+      selector,
+      name,
+      message,
+    })
+  }
 
-      if (lastAction.selector === secondLast.selector) {
-        if (lastAction.command === 'type' && secondLast.command === 'type') {
-          secondLast.value += lastAction.value
-          this.logs.splice(length - 1)
-
-          return
-        }
-
-        if (lastAction.command === 'select' && secondLast.command === 'click') {
-          this.logs.splice(length - 2, 1)
-
-          return
-        }
-
-        if (lastAction.command === 'dblclick' && secondLast.command === 'click' && length > 2) {
-          const thirdLast = this.logs[length - 3]
-
-          if (lastAction.selector === thirdLast.selector && thirdLast.command === 'click') {
-            this.logs.splice(length - 3, 2)
-          }
-        }
-      }
+  _generateLog = ({ id, name, message, type }) => {
+    return {
+      id,
+      testId: this.testId,
+      hookId: `${this.testId}-studio`,
+      name,
+      message,
+      type,
+      state: 'passed',
+      instrument: 'command',
+      number: '',
+      numElements: 1,
+      isStudio: true,
     }
   }
 
-  _emitUpdatedLog = () => {
-    eventManager.emit('update:studio:logs', this.logs)
+  _addLog = (log) => {
+    this.logs.push(log)
+
+    eventManager.emit('reporter:log:add', this._generateLog({
+      id: `${log.id}-get`,
+      name: 'get',
+      message: log.selector,
+      type: 'parent',
+    }))
+
+    eventManager.emit('reporter:log:add', this._generateLog({
+      id: log.id,
+      name: log.name,
+      message: log.value,
+      type: 'child',
+    }))
+  }
+
+  _updateLog = (log) => {
+    const { id, name, message } = log
+
+    eventManager.emit('reporter:log:state:changed', this._generateLog({
+      id,
+      name,
+      message,
+      type: 'child',
+    }))
+  }
+
+  _filterLastLog = (selector, name, message) => {
+    const { length } = this.logs
+
+    if (!length) {
+      return
+    }
+
+    const lastLog = this.logs[length - 1]
+
+    if (selector === lastLog.selector) {
+      if (name === 'type' && lastLog.name === 'type') {
+        lastLog.message += message
+
+        return lastLog
+      }
+
+      if (name === 'select' && lastLog.name === 'click') {
+        lastLog.name = 'select'
+        lastLog.message = message
+
+        return lastLog
+      }
+    }
+
+    return null
   }
 }
 

@@ -6,7 +6,6 @@ import { FileDetails } from '@packages/ui-components'
 
 import appState, { AppState } from '../lib/app-state'
 import Command from '../commands/command'
-import StudioCommand from '../commands/studio-command'
 import Collapsible from '../collapsible/collapsible'
 import HookModel, { HookName } from './hook-model'
 import FileOpener from '../lib/file-opener'
@@ -62,34 +61,21 @@ export interface HookProps {
   showNumber: boolean
 }
 
-const Hook = observer(({ model, showNumber }: HookProps) => {
-  const _content = () => {
-    if (model.isStudio) {
-      if (!model.studioCommands.length) {
-        return <StudioNoCommands />
-      }
-
-      return _.map(model.studioCommands, (studioCommand, i) => <StudioCommand key={studioCommand.id} index={i} model={studioCommand} />)
-    }
-
-    return _.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)
-  }
-
-  return (
-    <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
-      <Collapsible
-        header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
-        headerClass='hook-header'
-        headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
-        isOpen={true}
-      >
-        <ul className='commands-container'>
-          {_content()}
-        </ul>
-      </Collapsible>
-    </li>
-  )
-})
+const Hook = observer(({ model, showNumber }: HookProps) => (
+  <li className={cs('hook-item', { 'hook-failed': model.failed, 'hook-studio': model.isStudio })}>
+    <Collapsible
+      header={<HookHeader model={model} number={showNumber ? model.hookNumber : undefined} />}
+      headerClass='hook-header'
+      headerExtras={model.invocationDetails && <HookOpenInIDE invocationDetails={model.invocationDetails} />}
+      isOpen={true}
+    >
+      <ul className='commands-container'>
+        {model.isStudio && !model.commands.length && <StudioNoCommands />}
+        {_.map(model.commands, (command) => <Command key={command.id} model={command} aliasesWithDuplicates={model.aliasesWithDuplicates} />)}
+      </ul>
+    </Collapsible>
+  </li>
+))
 
 export interface HooksModel {
   hooks: HookModel[]

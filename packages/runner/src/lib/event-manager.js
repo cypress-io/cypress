@@ -225,12 +225,16 @@ const eventManager = {
       })
     })
 
-    localBus.on('update:studio:logs', (logs) => {
-      reporterBus.emit('update:studio:logs', logs)
-    })
-
     localBus.on('studio:cancel:reporter:restart', () => {
       reporterBus.emit('studio:cancel:reporter:restart')
+    })
+
+    localBus.on('reporter:log:add', (log) => {
+      reporterBus.emit('reporter:log:add', log)
+    })
+
+    localBus.on('reporter:log:state:changed', (log) => {
+      reporterBus.emit('reporter:log:state:changed', log)
     })
 
     const $window = $(window)

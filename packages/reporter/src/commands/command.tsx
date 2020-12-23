@@ -117,6 +117,8 @@ interface ProgressProps {
 }
 
 const Progress = observer(({ model }: ProgressProps) => {
+  if (!model.timeout || !model.wallClockStartedAt) return null
+
   const timeElapsed = Date.now() - new Date(model.wallClockStartedAt).getTime()
   const timeRemaining = model.timeout ? model.timeout - timeElapsed : 0
   const percentageRemaining = timeRemaining / model.timeout || 0

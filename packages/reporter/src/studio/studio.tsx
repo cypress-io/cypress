@@ -52,7 +52,7 @@ class StudioControls extends Component<StudioControlsProps, StudioControlsState>
   }
 
   render () {
-    const { studioIsNotEmpty } = this.props.model
+    const studioIsNotEmpty = true
 
     return (
       <>
