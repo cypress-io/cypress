@@ -3,6 +3,7 @@ import * as React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 import { state } from './lib/state'
+import defaultEvents from '@packages/reporter/src/lib/events'
 
 const Container = React.lazy(() => import(/* webpackChunkName: "ctChunk-RunnerContainer" */ './app/container'))
 
@@ -12,6 +13,10 @@ import 'regenerator-runtime/runtime'
 configure({ enforceActions: 'always' })
 
 const Runner = {
+  emit (evt, ...args) {
+    defaultEvents.emit(evt, ...args)
+  },
+
   start (el, base64Config) {
     runInAction('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
