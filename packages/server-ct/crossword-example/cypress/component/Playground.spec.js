@@ -1,6 +1,5 @@
 import { mount } from '@cypress/vue'
 
-console.log('hmm')
 describe('it works', () => {
   it('works', () => {
     const template = `

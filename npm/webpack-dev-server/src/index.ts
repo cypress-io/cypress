@@ -4,13 +4,7 @@ import { start as createDevServer } from './startServer'
 const debug = debugFn('cypress:webpack-dev-server:webpack')
 
 export async function startDevServer (config, webpackConfig) {
-  let webpackDevServer
-  try {
-    webpackDevServer = await createDevServer(webpackConfig, config)
-  } catch (err) {
-    console.log(err)
-    debugger;
-  }
+  const webpackDevServer = await createDevServer(webpackConfig, config)
 
   return new Promise((resolve) => {
     const httpSvr = webpackDevServer.listen(0, '127.0.0.1', () => {

@@ -3,6 +3,9 @@ import ReactDOM, { unmountComponentAtNode } from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 
+import './hooks'
+import 'cypress-react-selector'
+
 const rootId = 'cypress-root'
 
 /**
@@ -37,7 +40,6 @@ const injectStyles = (options: MountOptions) => {
  ```
  **/
 export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
-
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -153,7 +155,6 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   ```
  */
 export const unmount = () => {
-
   return cy.then(() => {
     cy.log('unmounting...')
     const selector = `#${rootId}`

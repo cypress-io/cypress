@@ -30,7 +30,6 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
 
   const mergedConfig = merge(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)
 
-  debugger;
   mergedConfig.entry = entry
 
   return mergedConfig
