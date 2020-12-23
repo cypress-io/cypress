@@ -11,6 +11,7 @@
     "test-unit": "ts-mocha --config ./test/.mocharc.js"
   },
   "dependencies": {
+    "open": "7.3.0",
     "send": "^0.17.1"
   },
   "devDependencies": {

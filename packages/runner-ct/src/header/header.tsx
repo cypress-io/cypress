@@ -5,6 +5,7 @@ import React, { Component } from 'react'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import { getSpecUrl } from '../iframe/iframes'
+import eventManger from '../lib/event-manager'
 
 @observer
 export default class Header extends Component<any> {
@@ -17,7 +18,9 @@ export default class Header extends Component<any> {
       <header
         ref='header'
       >
-
+        <button onClick={() => eventManger.openUrlInSystemBrowser(window.location.href)}>
+          open in system browser
+        </button>
         <ul className='menu'>
           <li className={cs('viewport-info', { 'open': this.showingViewportMenu })}>
             <button onClick={this._toggleViewportMenu}>

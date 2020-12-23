@@ -454,6 +454,10 @@ const eventManager = {
     ws.emit('reload:browser', window.location.toString(), browser && browser.name)
   },
 
+  openUrlInSystemBrowser (url) {
+    ws.emit('open:url:system:browser', url)
+  },
+
   // clear all the cypress specific cookies
   // whenever our app starts
   // and additional when we stop running our tests

@@ -11,6 +11,7 @@ import * as netStubbing from '@packages/net-stubbing'
 import { GetFixtureFn } from '@packages/net-stubbing/lib/server/types'
 import * as fixture from '@packages/server/lib/fixture'
 import socketIo from '@packages/socket'
+import { openUrlInSystemBrowser } from '../lib/systemOpen'
 
 const debug = _debug('cypress:server-ct:socket')
 
@@ -374,6 +375,14 @@ export class Socket {
 
       socket.on('open:file', (fileDetails) => {
         openFile(fileDetails)
+      })
+
+      socket.on('open:url:system:browser', (url) => {
+        debug('open url in system browser %o', { url })
+
+        return openUrlInSystemBrowser(url).catch((e) => {
+          debug('can not open system browser %o', e)
+        })
       })
 
       reporterEvents.forEach((event) => {
