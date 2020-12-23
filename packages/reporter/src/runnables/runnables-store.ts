@@ -189,6 +189,12 @@ class RunnablesStore {
     })
   }
 
+  removeLog (props: LogProps) {
+    this._withTest(props.testId, (test) => {
+      test.removeLog(props)
+    })
+  }
+
   reset () {
     _.each(defaults, (value, key) => {
       this[key] = value

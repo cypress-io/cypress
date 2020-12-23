@@ -70,7 +70,7 @@ export default class Hook implements HookProps {
   }
 
   addCommand (command: CommandModel) {
-    if (!command.event) {
+    if (!command.event && !this.isStudio) {
       command.number = this._currentNumber
       this._currentNumber++
     }
@@ -85,6 +85,12 @@ export default class Hook implements HookProps {
     } else {
       this.commands.push(command)
     }
+  }
+
+  removeCommand (commandId: number) {
+    const commandIndex = _.findIndex(this.commands, { id: commandId })
+
+    this.commands.splice(commandIndex, 1)
   }
 
   commandMatchingErr (errToMatch: Err) {

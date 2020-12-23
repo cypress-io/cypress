@@ -20,6 +20,23 @@
     line-height: 14px;
   }
 
+  .command-is-studio {
+    cursor: auto;
+
+    &.command-type-parent .command-controls .studio-command-remove {
+      display: block;
+      padding-left: 5px;
+
+      &:hover {
+        color: #565554;
+      }
+    }
+
+    .command-wrapper:hover {
+      background-color: #eef1f4;
+    }
+  }
+
   .command-is-event {
     font-style: italic;
 
@@ -381,6 +398,10 @@
       color: #ababab;
     }
 
+    .studio-command-remove {
+      display: none;
+    }
+
     .command-alias {
       font-family: $open-sans;
       font-size: 10px;
@@ -498,7 +519,7 @@
   }
 
   .command-is-pinned,
-  .command:hover {
+  .command:not(.command-is-studio):hover {
     .command-number {
       display: none;
     }

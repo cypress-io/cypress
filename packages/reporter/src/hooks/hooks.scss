@@ -12,10 +12,6 @@
       }
     }
 
-    i {
-      margin-right: 3px;
-    }
-
     .hook-header {
       display: flex;
       width: 100%;
@@ -64,6 +60,10 @@
           outline: none;
           text-decoration: none;
         }
+      }
+
+      i {
+        margin-right: 3px;
       }
 
       .hook-studio-icon {

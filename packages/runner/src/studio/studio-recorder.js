@@ -74,11 +74,6 @@ class StudioRecorder {
     this._hasStarted = false
   }
 
-  @action removeCommand = (index) => {
-    this.logs.splice(index, 1)
-    this._emitUpdatedLog()
-  }
-
   attachListeners = (body) => {
     this._body = body
 
@@ -99,7 +94,7 @@ class StudioRecorder {
   }
 
   _getId = () => {
-    return `s${this._currentId++}`
+    return this._currentId++
   }
 
   _getName = (event, $el) => {
@@ -246,7 +241,18 @@ class StudioRecorder {
     })
   }
 
-  _generateLog = ({ id, name, message, type }) => {
+  @action removeLog = (commandId) => {
+    const index = this.logs.findIndex((command) => command.id === commandId)
+    const log = this.logs[index]
+
+    this.logs.splice(index, 1)
+
+    this._generateBothLogs(log).forEach((commandLog) => {
+      eventManager.emit('reporter:log:remove', commandLog)
+    })
+  }
+
+  _generateLog = ({ id, name, message, type, number }) => {
     return {
       id,
       testId: this.testId,
@@ -256,35 +262,43 @@ class StudioRecorder {
       type,
       state: 'passed',
       instrument: 'command',
-      number: '',
+      number,
       numElements: 1,
       isStudio: true,
     }
   }
 
+  _generateBothLogs = (log) => {
+    return [
+      this._generateLog({
+        id: `s${log.id}-get`,
+        name: 'get',
+        message: log.selector,
+        type: 'parent',
+        number: log.id,
+      }),
+      this._generateLog({
+        id: `s${log.id}`,
+        name: log.name,
+        message: log.message,
+        type: 'child',
+      }),
+    ]
+  }
+
   _addLog = (log) => {
     this.logs.push(log)
 
-    eventManager.emit('reporter:log:add', this._generateLog({
-      id: `${log.id}-get`,
-      name: 'get',
-      message: log.selector,
-      type: 'parent',
-    }))
-
-    eventManager.emit('reporter:log:add', this._generateLog({
-      id: log.id,
-      name: log.name,
-      message: log.value,
-      type: 'child',
-    }))
+    this._generateBothLogs(log).forEach((commandLog) => {
+      eventManager.emit('reporter:log:add', commandLog)
+    })
   }
 
   _updateLog = (log) => {
     const { id, name, message } = log
 
     eventManager.emit('reporter:log:state:changed', this._generateLog({
-      id,
+      id: `s${id}`,
       name,
       message,
       type: 'child',

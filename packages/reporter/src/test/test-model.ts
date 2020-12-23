@@ -137,6 +137,12 @@ export default class Test extends Runnable {
     })
   }
 
+  removeLog (props: LogProps) {
+    this._withAttempt(props.testCurrentRetry || this.currentRetry, (attempt: Attempt) => {
+      attempt.removeLog(props)
+    })
+  }
+
   setStudioCommands (commands: StudioCommand[]) {
     this.studioCommands = commands
   }

@@ -209,8 +209,8 @@ const eventManager = {
       rerun()
     })
 
-    reporterBus.on('studio:remove:command', (index) => {
-      studioRecorder.removeCommand(index)
+    reporterBus.on('studio:remove:command', (commandId) => {
+      studioRecorder.removeLog(commandId)
     })
 
     reporterBus.on('studio:save', ({ fileDetails, closeStudio }) => {
@@ -235,6 +235,10 @@ const eventManager = {
 
     localBus.on('reporter:log:state:changed', (log) => {
       reporterBus.emit('reporter:log:state:changed', log)
+    })
+
+    localBus.on('reporter:log:remove', (log) => {
+      reporterBus.emit('reporter:log:remove', log)
     })
 
     const $window = $(window)
