@@ -139,7 +139,7 @@ const wrapAll = (runnable) => {
   )
 }
 
-const condenseHooks = (runnable, getHookId) => {
+const condenseHooks = (runnable) => {
   runnable._condensedHooks = true
   const hooks = _.compact(_.concat(
     runnable._beforeAll,
@@ -149,10 +149,6 @@ const condenseHooks = (runnable, getHookId) => {
   ))
 
   return _.map(hooks, (hook) => {
-    if (!hook.hookId) {
-      hook.hookId = getHookId()
-    }
-
     if (!hook.hookName) {
       hook.hookName = getHookName(hook)
     }
@@ -431,7 +427,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -449,7 +445,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -473,17 +469,8 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest) => {
+const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
   const normalizeRunnable = (runnable) => {
-    runnable.id = getTestId()
-
-    if (runnable.id === getOnlyTest()) {
-      runnable.parent._afterAll = []
-      runnable.parent._afterEach = []
-      runnable.parent._onlyTests = [runnable]
-      runnable.parent._onlySuites = []
-    }
-
     // tests have a type of 'test' whereas suites do not have a type property
     if (runnable.type == null) {
       runnable.type = 'suite'
@@ -524,17 +511,17 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     }
 
     // merge all hooks into single array
-    runnable.hooks = condenseHooks(runnable, getHookId)
+    runnable.hooks = condenseHooks(runnable)
 
     // reduce this runnable down to its props
     // and collections
-    const test = wrapAll(runnable)
+    const wrappedRunnable = wrapAll(runnable)
 
     if (prevAttempts) {
-      test.prevAttempts = prevAttempts
+      wrappedRunnable.prevAttempts = prevAttempts
     }
 
-    return test
+    return wrappedRunnable
   }
 
   const push = (test) => {
@@ -552,7 +539,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.map(_runnables, (runnable) => {
-          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest)
+          return normalize(runnable, tests, initialTests, onRunnable, onLogsById)
         })
       }
     })
@@ -566,7 +553,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
     if (suite._onlyTests.length) {
       suite.tests = suite._onlyTests
       normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
-        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest)
+        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById)
 
         push(test)
 
@@ -579,7 +566,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       suite.tests = []
       normalizedSuite.tests = []
       _.each(suite._onlySuites, (onlySuite) => {
-        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest)
+        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById)
 
         if (hasOnly(onlySuite)) {
           return filterOnly(normalizedOnlySuite, onlySuite)
@@ -587,12 +574,12 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getTes
       })
 
       suite.suites = _.filter(suite.suites, (childSuite) => {
-        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest)
+        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById)
 
         return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
       })
 
-      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getTestId, getHookId, getOnlyTest))
+      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById))
     }
 
     return suite.tests.length || suite.suites.length
@@ -640,7 +627,7 @@ function getTestFromRunnable (runnable) {
   }
 }
 
-const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest) => {
+const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest) => {
   _runner.on('start', () => {
     return Cypress.action('runner:start', {
       start: new Date(),
@@ -862,8 +849,6 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 }
 
 const create = (specWindow, mocha, Cypress, cy) => {
-  let _id = 0
-  let _hookId = 0
   let _uncaughtFn = null
   let _resumedAtTestIndex = null
 
@@ -947,7 +932,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
   let _testsById = {}
   const _testsQueue = []
   const _testsQueueById = {}
-  let _onlyTest = null
   // only used during normalization
   const _runnables = []
   const _logsById = {}
@@ -956,15 +940,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
     ended: {},
   }
   let _startTime = null
-
-  // increment the id counter
-  const getTestId = () => {
-    return `r${_id += 1}`
-  }
-
-  const getHookId = () => {
-    return `h${_hookId += 1}`
-  }
 
   const setTestsById = (tbid) => {
     return _testsById = tbid
@@ -980,7 +955,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   const onRunnable = (r) => {
     // set defualt retries at onRunnable time instead of onRunnableRun
-    return _runnables.push(r)
+    _runnables.push(r)
   }
 
   const onLogsById = (l) => {
@@ -995,14 +970,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return _test = t
   }
 
-  const getOnlyTest = () => {
-    return _onlyTest
-  }
-
-  const setOnlyTest = (testId) => {
-    _onlyTest = testId
-  }
-
   const getTestById = (id) => {
     // perf short circuit
     if (!id) {
@@ -1012,7 +979,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
     return _testsById[id]
   }
 
-  const replaceRunnable = (runnable, id) => {
+  const replaceTest = (runnable, id) => {
     const testsQueueIndex = _.findIndex(_testsQueue, { id })
 
     _testsQueue.splice(testsQueueIndex, 1, runnable)
@@ -1040,7 +1007,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
     test.prevAttempts = newPrevAttempts
 
-    replaceRunnable(test, test.id)
+    replaceTest(test, test.id)
   }
 
   const maybeHandleRetry = (runnable, err) => {
@@ -1114,7 +1081,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   return {
     onScriptError,
-    setOnlyTest,
 
     normalizeAll (tests) {
       // if we have an uncaught error then slice out
@@ -1137,9 +1103,6 @@ const create = (specWindow, mocha, Cypress, cy) => {
         setTests,
         onRunnable,
         onLogsById,
-        getTestId,
-        getHookId,
-        getOnlyTest,
       )
     },
 
@@ -1148,7 +1111,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
         _startTime = moment().toJSON()
       }
 
-      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getHookId, getTestFromHookOrFindTest)
+      _runnerListeners(_runner, Cypress, _emissions, getTestById, getTest, setTest, getTestFromHookOrFindTest)
 
       return _runner.run((failures) => {
         // if we happen to make it all the way through
@@ -1440,7 +1403,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
       // emit the final 'end' event
       // since our reporter depends on this event
-      // and mocha may never fire this becuase our
+      // and mocha may never fire this because our
       // runnable may never finish
       _runner.emit('end')
 

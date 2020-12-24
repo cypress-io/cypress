@@ -120,7 +120,7 @@ function getInvocationDetails (specWindow, config) {
   }
 }
 
-function overloadMochaHook (fnName, suite, specWindow, config) {
+function overloadMochaHook (fnName, suite, specWindow, config, getHookId) {
   const _fn = suite[fnName]
 
   suite[fnName] = function (title, fn) {
@@ -143,6 +143,10 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
         .setUserInvocationStack(invocationStack)
       }
 
+      if (!hook.hookId) {
+        hook.hookId = getHookId()
+      }
+
       return hook
     }
 
@@ -154,19 +158,34 @@ function overloadMochaHook (fnName, suite, specWindow, config) {
   }
 }
 
-function overloadMochaTest (suite, specWindow, config) {
-  const _fn = suite.addTest
+function overloadMochaAdd (fnName, suite, specWindow, config, getId) {
+  const _fn = suite[fnName]
 
-  suite.addTest = function (test) {
-    if (!test.invocationDetails) {
-      test.invocationDetails = getInvocationDetails(specWindow, config).details
+  suite[fnName] = function (runnable) {
+    if (!runnable.invocationDetails) {
+      runnable.invocationDetails = getInvocationDetails(specWindow, config).details
     }
 
-    return _fn.call(this, test)
+    if (!runnable.id) {
+      runnable.id = getId()
+    }
+
+    return _fn.call(this, runnable)
   }
 }
 
 const ui = (specWindow, _mocha, config) => {
+  let _id = 0
+  let _hookId = 0
+
+  // increment the id counter
+  const getId = () => {
+    return `r${++_id}`
+  }
+  const getHookId = () => {
+    return `h${_hookId += 1}`
+  }
+
   // Override mocha.ui so that the pre-require event is emitted
   // with the iframe's `window` reference, rather than the parent's.
   _mocha.ui = function (name) {
@@ -190,12 +209,13 @@ const ui = (specWindow, _mocha, config) => {
     overloadMochaFnForConfig('context', specWindow)
 
     // overload tests and hooks so that we can get the stack info
-    overloadMochaHook('beforeAll', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('beforeEach', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('afterAll', this.suite.constructor.prototype, specWindow, config)
-    overloadMochaHook('afterEach', this.suite.constructor.prototype, specWindow, config)
+    overloadMochaHook('beforeAll', this.suite.constructor.prototype, specWindow, config, getHookId)
+    overloadMochaHook('beforeEach', this.suite.constructor.prototype, specWindow, config, getHookId)
+    overloadMochaHook('afterAll', this.suite.constructor.prototype, specWindow, config, getHookId)
+    overloadMochaHook('afterEach', this.suite.constructor.prototype, specWindow, config, getHookId)
 
-    overloadMochaTest(this.suite.constructor.prototype, specWindow, config)
+    overloadMochaAdd('addTest', this.suite.constructor.prototype, specWindow, config, getId)
+    overloadMochaAdd('addSuite', this.suite.constructor.prototype, specWindow, config, getId)
 
     return this
   }

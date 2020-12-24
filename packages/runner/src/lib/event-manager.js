@@ -305,7 +305,7 @@ const eventManager = {
 
           if (studioRecorder.testId) {
             studioRecorder.startLoading()
-            Cypress.runner.setOnlyTest(studioRecorder.testId)
+            // Cypress.runner.setOnlyTest(studioRecorder.testId)
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)
