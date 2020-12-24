@@ -55,6 +55,16 @@
           width: 100%;
         }
       }
+
+      &:hover {
+        .runnable-controls-studio {
+          opacity: 0.5;
+
+          &:hover {
+            opacity: 1;
+          }
+        }
+      }
     }
 
     .attempt-item:hover {
@@ -248,16 +258,6 @@
         .runnable-controls {
           justify-self: flex-end;
           min-width: 20px;
-        }
-      }
-
-      &:hover {
-        .runnable-controls-studio {
-          opacity: 0.5;
-
-          &:hover {
-            opacity: 1;
-          }
         }
       }
     }

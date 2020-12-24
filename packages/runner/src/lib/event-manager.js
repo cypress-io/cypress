@@ -184,7 +184,7 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
-    reporterBus.on('studio:init', (testId) => {
+    reporterBus.on('studio:init:test', (testId) => {
       studioRecorder.setTestId(testId)
 
       ws.emit('studio:init', (showedStudioModal) => {

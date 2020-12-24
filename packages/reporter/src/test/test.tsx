@@ -118,7 +118,7 @@ class Test extends Component<Props> {
 
     const { model } = this.props
 
-    events.emit('studio:init', model.id)
+    events.emit('studio:init:test', model.id)
   }
 }
 

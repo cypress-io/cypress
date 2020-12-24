@@ -1,7 +1,9 @@
 import cs from 'classnames'
 import _ from 'lodash'
 import { observer } from 'mobx-react'
-import React, { Component } from 'react'
+import React, { Component, MouseEvent } from 'react'
+// @ts-ignore
+import Tooltip from '@cypress/react-tooltip'
 
 import { indent } from '../lib/util'
 
@@ -18,9 +20,27 @@ interface SuiteProps {
 const Suite = observer(({ model }: SuiteProps) => {
   if (!model.shouldRender) return null
 
+  const _launchStudio = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const _header = () => (
+    <>
+      <span className='runnable-title'>{model.title}</span>
+      <span className='runnable-controls'>
+        <Tooltip placement='right' title='Add New Test to Suite' className='cy-tooltip'>
+          <a onClick={_launchStudio}>
+            <i className='fas fa-magic runnable-controls-studio' />
+          </a>
+        </Tooltip>
+      </span>
+    </>
+  )
+
   return (
     <Collapsible
-      header={<span className='runnable-title'>{model.title}</span>}
+      header={_header()}
       headerClass='runnable-wrapper'
       headerStyle={{ paddingLeft: indent(model.level) }}
       contentClass='runnables-region'

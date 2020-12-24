@@ -231,8 +231,8 @@ const events: Events = {
       runner.emit('open:file', fileDetails)
     })
 
-    localBus.on('studio:init', (testId) => {
-      runner.emit('studio:init', testId)
+    localBus.on('studio:init:test', (testId) => {
+      runner.emit('studio:init:test', testId)
     })
 
     localBus.on('studio:start', action('studio:start', () => {
