@@ -60,6 +60,7 @@ export default {
 
     return res.render(runnerPath, {
       base64Config,
+      namespace: config.namespace,
       projectName: config.projectName,
     })
   },

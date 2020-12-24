@@ -12,6 +12,7 @@ import $Cypress, { $ } from '@packages/driver'
 
 const ws = client.connect({
   path: '/__socket.io',
+  // path: window.__cypressConfig.socketIoRoute,
   transports: ['websocket'],
   parser: circularParser,
 })
