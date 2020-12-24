@@ -10,7 +10,7 @@
     "clean-deps": "rm -rf node_modules",
     "cy:open": "node ../../scripts/cypress open",
     "cy:run": "node ../../scripts/cypress run",
-    "cy:start-component-tests:vue": "./scripts/e2e.sh ../../npm/vue",
+    "cy:start-component-tests:vue": "node scripts/e2e.js ../../npm/vue",
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test-unit": "ts-mocha --config ./test/.mocharc.js --require './test/setup.js'",
     "watch": "webpack --watch --progress"
