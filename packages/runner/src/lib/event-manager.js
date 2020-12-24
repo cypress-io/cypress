@@ -273,6 +273,13 @@ const eventManager = {
   },
 
   setup (config) {
+    if (studioRecorder.testId) {
+      studioRecorder.startLoading()
+
+      config.onlyTestId = studioRecorder.testId
+      config.disableAfterHooks = true
+    }
+
     Cypress = this.Cypress = $Cypress.create(config)
 
     // expose Cypress globally
@@ -301,11 +308,6 @@ const eventManager = {
           if (!Cypress.runner) {
             // the tests have been reloaded
             return
-          }
-
-          if (studioRecorder.testId) {
-            studioRecorder.startLoading()
-            // Cypress.runner.setOnlyTest(studioRecorder.testId)
           }
 
           const runnables = Cypress.runner.normalizeAll(state.tests)

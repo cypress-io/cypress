@@ -124,6 +124,10 @@ function overloadMochaHook (fnName, suite, specWindow, config, getHookId) {
   const _fn = suite[fnName]
 
   suite[fnName] = function (title, fn) {
+    if (config('disableAfterHooks') && (fnName === 'afterEach' || fnName === 'afterAll')) {
+      return
+    }
+
     const _createHook = this._createHook
 
     this._createHook = function (title, fn) {
@@ -162,15 +166,33 @@ function overloadMochaAdd (fnName, suite, specWindow, config, getId) {
   const _fn = suite[fnName]
 
   suite[fnName] = function (runnable) {
-    if (!runnable.invocationDetails) {
-      runnable.invocationDetails = getInvocationDetails(specWindow, config).details
-    }
-
     if (!runnable.id) {
       runnable.id = getId()
     }
 
-    return _fn.call(this, runnable)
+    if (!runnable.invocationDetails) {
+      runnable.invocationDetails = getInvocationDetails(specWindow, config).details
+    }
+
+    const ret = _fn.call(this, runnable)
+
+    if (runnable.id === config('onlyTestId')) {
+      this.appendOnlyTest(runnable)
+    }
+
+    return ret
+  }
+}
+
+function overloadMochaOnly (fnName, propName, suite, onlyId) {
+  if (!onlyId) return
+
+  const _fn = suite[fnName]
+
+  suite[fnName] = function (runnable) {
+    if (runnable.id === onlyId && !_.find(this[propName], { id: onlyId })) {
+      return _fn.call(this, runnable)
+    }
   }
 }
 
@@ -216,6 +238,9 @@ const ui = (specWindow, _mocha, config) => {
 
     overloadMochaAdd('addTest', this.suite.constructor.prototype, specWindow, config, getId)
     overloadMochaAdd('addSuite', this.suite.constructor.prototype, specWindow, config, getId)
+
+    overloadMochaOnly('appendOnlyTest', '_onlyTests', this.suite.constructor.prototype, config('onlyTestId'))
+    overloadMochaOnly('appendOnlySuite', '_onlySuites', this.suite.constructor.prototype, config('onlyTestId'))
 
     return this
   }
