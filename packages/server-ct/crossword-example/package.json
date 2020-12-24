@@ -1,0 +1,37 @@
+{
+  "name": "crossword",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "vue-cli-service build",
+    "serve": "vue-cli-service serve",
+    "test:components": "vue-cli-service test:components",
+    "test:unit": "vue-cli-service test:unit"
+  },
+  "dependencies": {
+    "babel-plugin-istanbul": "^6.0.0",
+    "core-js": "^3.6.5",
+    "lodash": "^4.17.20",
+    "vue": "^2.6.11",
+    "vue-router": "^3.2.0",
+    "vuex": "^3.4.0",
+    "vuex-persist": "^2.2.0"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.8.1",
+    "@vue/cli": "^4.5.7",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-router": "~4.5.0",
+    "@vue/cli-plugin-unit-jest": "~4.5.0",
+    "@vue/cli-plugin-vuex": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/test-utils": "^1.0.3",
+    "cypress": "*",
+    "cypress-vue-unit-test": "3",
+    "nyc": "^15.1.0",
+    "sass": "^1.26.5",
+    "sass-loader": "^8.0.2",
+    "vue-cli-plugin-cypress-experimental": "~1.1.0",
+    "vue-template-compiler": "^2.6.11"
+  }
+}

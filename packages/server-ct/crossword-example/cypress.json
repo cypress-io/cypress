@@ -1,0 +1,11 @@
+{
+  "integrationFolder": "tests/e2e",
+  "experimentalComponentTesting": true,
+  "experimentalFetchPolyfill": true,
+  "timeout": 3000,
+  "defaultCommandTimeout": 3000,
+  "responseTimeout": 3000,
+  "requestTimeout": 3000,
+  "video": false,
+  "screenshotOnRunFailure": false
+}

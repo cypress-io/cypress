@@ -30,23 +30,15 @@ export const handle = (req, res) => {
 }
 
 export const serve = (req, res, options: ServeOptions) => {
-  let { config } = options
-  const { specsStore, project } = options
-
-  const { browser } = project.getCurrentSpecAndBrowser()
+  const config = {
+    ...options.config,
+    browser: options.project.browser,
+    specs: options.specsStore.specFiles,
+  }
 
   // TODO: move the component file watchers in here
   // and update them in memory when they change and serve
   // them straight to the HTML on load
-
-  config = _
-  .chain(config)
-  .clone()
-  .extend({
-    browser,
-    specs: specsStore.specFiles,
-  })
-  .value()
 
   // const webpackConfig = await resolveWebpackConfig(userWebpackConfig, testConfig)
   // const compiler = webpack(webpackConfig)
