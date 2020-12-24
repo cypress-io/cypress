@@ -48,19 +48,19 @@ export function initializeRoutes ({ app, config, specs, project }: InitializeRou
 
   // Used for loading chunks during testing Cypress in Cypress,
   // where we test server-ct with server.
-  if (process.env.E2E_OVER_COMPONENT_TESTS) {
-    app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
-      debug('Serving Cypress front-end chunk by requested URL:', req.url)
+  // if (process.env.E2E_OVER_COMPONENT_TESTS) {
+  app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
-      runnerCt.serveChunk(req, res, { config })
-    })
+    runnerCt.serveChunk(req, res, { config })
+  })
 
-    app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
-      debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
+  app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+    debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
 
-      runnerCt.serveChunk(req, res, { config })
-    })
-  }
+    runnerCt.serveChunk(req, res, { config })
+  })
+  // }
 
   app.get(config.clientRoute, (req, res) => {
     debug('Serving Cypress front-end by requested URL:', req.url)

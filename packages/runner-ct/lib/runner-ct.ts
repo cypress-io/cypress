@@ -64,4 +64,11 @@ export default {
       projectName: config.projectName,
     })
   },
+
+  serveChunk (req, res, options) {
+    const { config } = options
+    const pathToFile = getPathToDist(req.originalUrl.replace(config.clientRoute, ''))
+
+    return send(req, pathToFile).pipe(res)
+  },
 }

@@ -1,12 +1,13 @@
-import { autorun, action, configure } from 'mobx'
-import React from 'react'
+import { autorun, runInAction, configure } from 'mobx'
+import * as React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
 import defaultEvents from '@packages/reporter/src/lib/events'
 
 import State from './lib/state'
-import Container from './app/container'
 import util from './lib/util'
+
+const Container = React.lazy(() => import(/* webpackChunkName: "ctChunk-RunnerContainer" */ './app/container'))
 
 // to support async/await
 import 'regenerator-runtime/runtime'
@@ -19,8 +20,10 @@ const Runner = {
   },
 
   start (el, base64Config) {
-    action('started', () => {
+    runInAction('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
+
+      window.__cypressConfig = config
 
       const NO_COMMAND_LOG = config.env && config.env.NO_COMMAND_LOG
       const configState = config.state || {}
@@ -59,8 +62,12 @@ const Runner = {
 
       state.updateDimensions(config.viewportWidth, config.viewportHeight)
 
-      render(<Container config={config} state={state} />, el)
-    })()
+      render((
+        <React.Suspense fallback={null}>
+          <Container config={config} state={state} />
+        </React.Suspense>
+      ), el)
+    })
   },
 }
 
