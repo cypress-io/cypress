@@ -110,7 +110,8 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     }
 
     request.req.pipe(concatStream((reqBody) => {
-      const isMultipart = frame.req.headers['content-type']?.includes('multipart/form-data')
+      const contentType = frame.req.headers['content-type']
+      const isMultipart = contentType && contentType.includes('multipart/form-data')
 
       request.req.body = frame.req.body = isMultipart ? reqBody : reqBody.toString()
       cb()
