@@ -139,7 +139,7 @@
     "next": {
       "optional": true
     },
-    "types/react": {
+    "@types/react": {
       "optional": true
     },
     "webpack": {
