@@ -54,7 +54,7 @@ const webpackConfig = {
   },
 }
 
-const cypressPluginsFn = (on, config) => {
+module.exports = (on, config) => {
   require('@cypress/code-coverage/task')(on, config)
   on('dev-server:start', (options) => startDevServer(options, webpackConfig))
 
