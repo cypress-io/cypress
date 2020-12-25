@@ -176,7 +176,14 @@ function overloadMochaAdd (fnName, suite, specWindow, config, getId) {
 
     const ret = _fn.call(this, runnable)
 
-    if (runnable.id === config('onlyTestId')) {
+    if (runnable.id === config('onlyNewTestInSuiteId')) {
+      const newTest = new Test('New Test', _.noop)
+
+      newTest.id = getId()
+      config('onlyTestId', newTest.id)
+
+      runnable.addTest(newTest)
+    } else if (runnable.id === config('onlyTestId')) {
       this.appendOnlyTest(runnable)
     }
 

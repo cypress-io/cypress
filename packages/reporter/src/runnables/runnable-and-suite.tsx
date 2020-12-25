@@ -7,6 +7,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import { indent } from '../lib/util'
 
+import events, { Events } from '../lib/events'
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
 
@@ -14,15 +15,18 @@ import SuiteModel from './suite-model'
 import TestModel from '../test/test-model'
 
 interface SuiteProps {
+  eventManager?: Events
   model: SuiteModel
 }
 
-const Suite = observer(({ model }: SuiteProps) => {
+const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
   if (!model.shouldRender) return null
 
   const _launchStudio = (e: MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+
+    eventManager.emit('studio:init:suite', model.id)
   }
 
   const _header = () => (

@@ -18,21 +18,14 @@ const eventsWithValue = [
 
 class StudioRecorder {
   @observable testId = null
+  @observable suiteId = null
   @observable logs = []
   @observable isLoading = false
   @observable isActive = false
   @observable _hasStarted = false
 
-  @action setTestId = (testId) => {
-    this.testId = testId
-  }
-
-  @action clearTestId = () => {
-    this.testId = null
-  }
-
-  @action startLoading = () => {
-    this.isLoading = true
+  @computed get hasRunnableId () {
+    return !!this.testId || !!this.suiteId
   }
 
   @computed get isFinished () {
@@ -51,12 +44,38 @@ class StudioRecorder {
     return this.isOpen && this.isEmpty && !this.isLoading
   }
 
-  @computed get shouldInterceptLogs () {
-    return this._hasStarted
-  }
-
   @computed get hookId () {
     return `${this.testId}-studio`
+  }
+
+  @action setTestId = (testId) => {
+    this.testId = testId
+  }
+
+  @action clearTestId = () => {
+    this.testId = null
+  }
+
+  @action setSuiteId = (suiteId) => {
+    this.clearTestId()
+    this.suiteId = suiteId
+  }
+
+  @action clearSuiteId = () => {
+    this.suiteId = null
+  }
+
+  @action clearRunnableIds = () => {
+    this.clearTestId()
+    this.clearSuiteId()
+  }
+
+  @action startLoading = () => {
+    this.isLoading = true
+  }
+
+  @action setInactive = () => {
+    this.isActive = false
   }
 
   @action start = (body) => {
@@ -77,8 +96,8 @@ class StudioRecorder {
 
   @action cancel = () => {
     this.stop()
+    this.clearRunnableIds()
 
-    this.testId = null
     this._hasStarted = false
   }
 

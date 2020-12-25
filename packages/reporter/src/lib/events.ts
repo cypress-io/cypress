@@ -235,6 +235,10 @@ const events: Events = {
       runner.emit('studio:init:test', testId)
     })
 
+    localBus.on('studio:init:suite', (suiteId) => {
+      runner.emit('studio:init:suite', suiteId)
+    })
+
     localBus.on('studio:start', action('studio:start', () => {
       runner.emit('studio:start')
     }))

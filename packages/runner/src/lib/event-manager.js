@@ -184,9 +184,7 @@ const eventManager = {
       ws.emit('open:file', url)
     })
 
-    reporterBus.on('studio:init:test', (testId) => {
-      studioRecorder.setTestId(testId)
-
+    const studioInit = () => {
       ws.emit('studio:init', (showedStudioModal) => {
         if (!showedStudioModal) {
           reporterBus.emit('studio:show:modal')
@@ -194,6 +192,18 @@ const eventManager = {
           rerun()
         }
       })
+    }
+
+    reporterBus.on('studio:init:test', (testId) => {
+      studioRecorder.setTestId(testId)
+
+      studioInit()
+    })
+
+    reporterBus.on('studio:init:suite', (suiteId) => {
+      studioRecorder.setSuiteId(suiteId)
+
+      studioInit()
     })
 
     reporterBus.on('studio:start', () => {
@@ -273,11 +283,15 @@ const eventManager = {
   },
 
   setup (config) {
-    if (studioRecorder.testId) {
+    if (studioRecorder.hasRunnableId) {
       studioRecorder.startLoading()
-
-      config.onlyTestId = studioRecorder.testId
       config.disableAfterHooks = true
+
+      if (studioRecorder.suiteId) {
+        config.onlyNewTestInSuiteId = studioRecorder.suiteId
+      } else if (studioRecorder.testId) {
+        config.onlyTestId = studioRecorder.testId
+      }
     }
 
     Cypress = this.Cypress = $Cypress.create(config)
@@ -370,7 +384,7 @@ const eventManager = {
     Cypress.on('log:added', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.shouldInterceptLogs) {
+      if (studioRecorder.isActive) {
         displayProps.hookId = studioRecorder.hookId
       }
 
@@ -380,7 +394,7 @@ const eventManager = {
     Cypress.on('log:changed', (log) => {
       const displayProps = Cypress.runner.getDisplayPropsForLog(log)
 
-      if (studioRecorder.shouldInterceptLogs) {
+      if (studioRecorder.isActive) {
         displayProps.hookId = studioRecorder.hookId
       }
 
@@ -439,6 +453,12 @@ const eventManager = {
       Cypress.stop()
       localBus.emit('script:error', err)
     })
+
+    Cypress.on('runner:test:start', (test) => {
+      if (studioRecorder.suiteId) {
+        studioRecorder.setTestId(test.id)
+      }
+    })
   },
 
   _runDriver (state) {
@@ -472,6 +492,8 @@ const eventManager = {
     // when we are re-running we first
     // need to stop cypress always
     Cypress.stop()
+
+    studioRecorder.setInactive()
 
     return this._restart()
     .then(() => {

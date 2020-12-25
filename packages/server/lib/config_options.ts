@@ -149,6 +149,10 @@ export const options = [
     defaultValue: null,
     isInternal: true,
   }, {
+    name: 'onlyNewTestInSuiteId',
+    defaultValue: null,
+    isInternal: true,
+  }, {
     name: 'pageLoadTimeout',
     defaultValue: 60000,
     validation: v.isNumber,
