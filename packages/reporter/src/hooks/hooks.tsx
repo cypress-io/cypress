@@ -91,7 +91,7 @@ export interface HooksProps {
 const Hooks = observer(({ state = appState, model }: HooksProps) => (
   <ul className='hooks-container'>
     {_.map(model.hooks, (hook) => {
-      if (hook.commands.length || (hook.isStudio && state.studioIsActive && model.state === 'passed')) {
+      if (hook.commands.length || (hook.isStudio && state.studioActive && model.state === 'passed')) {
         return <Hook key={hook.hookId} model={hook} showNumber={model.hookCount[hook.hookName] > 1} />
       }
 

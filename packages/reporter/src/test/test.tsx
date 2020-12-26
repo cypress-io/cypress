@@ -13,7 +13,50 @@ import TestModel from './test-model'
 import scroller, { Scroller } from '../lib/scroller'
 import Attempts from '../attempts/attempts'
 
-interface Props {
+interface StudioControlsProps {
+  events: Events
+  model: TestModel
+}
+
+@observer
+class StudioControls extends Component<StudioControlsProps> {
+  static defaultProps = {
+    events,
+  }
+
+  render () {
+    const { studioIsNotEmpty } = this.props.model
+
+    return (
+      <>
+        <div className='studio-controls'>
+          <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+          <button className='studio-run' disabled={!studioIsNotEmpty}>Run Test</button>
+          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._saveAndExit}>Save Test</button>
+        </div>
+      </>
+    )
+  }
+
+  _cancel = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:cancel:reporter:restart')
+  }
+
+  _save = (closeStudio: boolean) => {
+    const { events, model } = this.props
+
+    events.emit('studio:save', model.invocationDetails, closeStudio)
+  }
+
+  _saveAndExit = (e: MouseEvent) => {
+    e.preventDefault()
+    this._save(true)
+  }
+}
+
+interface TestProps {
   events: Events
   appState: AppState
   runnablesStore: RunnablesStore
@@ -22,7 +65,7 @@ interface Props {
 }
 
 @observer
-class Test extends Component<Props> {
+class Test extends Component<TestProps> {
   static defaultProps = {
     events,
     appState,
@@ -32,7 +75,7 @@ class Test extends Component<Props> {
 
   containerRef: RefObject<HTMLDivElement>
 
-  constructor (props: Props) {
+  constructor (props: TestProps) {
     super(props)
 
     this.containerRef = createRef<HTMLDivElement>()
@@ -103,11 +146,12 @@ class Test extends Component<Props> {
   }
 
   _contents () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (
       <div style={{ paddingLeft: indent(model.level) }}>
         <Attempts test={model} scrollIntoView={() => this._scrollIntoView()} />
+        { appState.studioActive && model.state === 'passed' && <StudioControls model={model} /> }
       </div>
     )
   }

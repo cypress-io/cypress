@@ -51,15 +51,15 @@ const Controls = observer(({ events = defaultEvents, appState }: Props) => {
         </Tooltip>
       ))}
       {ifThen(appState.isRunning && !appState.isPaused, (
-        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioIsActives ? false : null}>
-          <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioIsActive}>
+        <Tooltip placement='bottom' title={<p>Stop Running <span className='kbd'>S</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
+          <button aria-label='Stop' className='stop' onClick={emit('stop')} disabled={appState.studioActive}>
             <i className='fas fa-stop' />
           </button>
         </Tooltip>
       ))}
       {ifThen(!appState.isRunning, (
-        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip' visible={appState.studioIsActive ? false : null}>
-          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')} disabled={appState.studioIsActive}>
+        <Tooltip placement='bottom' title={<p>Run All Tests <span className='kbd'>R</span></p>} className='cy-tooltip' visible={appState.studioActive ? false : null}>
+          <button aria-label='Rerun all tests' className='restart' onClick={emit('restart')} disabled={appState.studioActive}>
             <i className='fas fa-redo' />
           </button>
         </Tooltip>

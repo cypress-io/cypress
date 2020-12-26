@@ -211,7 +211,7 @@ const eventManager = {
     })
 
     reporterBus.on('studio:close:modal', () => {
-      studioRecorder.clearTestId()
+      studioRecorder.clearRunnableIds()
     })
 
     reporterBus.on('studio:cancel:runner:restart', () => {
@@ -283,16 +283,7 @@ const eventManager = {
   },
 
   setup (config) {
-    if (studioRecorder.hasRunnableId) {
-      studioRecorder.startLoading()
-      config.disableAfterHooks = true
-
-      if (studioRecorder.suiteId) {
-        config.onlyNewTestInSuiteId = studioRecorder.suiteId
-      } else if (studioRecorder.testId) {
-        config.onlyTestId = studioRecorder.testId
-      }
-    }
+    config = this._modifyConfigForStudio(config)
 
     Cypress = this.Cypress = $Cypress.create(config)
 
@@ -454,7 +445,7 @@ const eventManager = {
       localBus.emit('script:error', err)
     })
 
-    Cypress.on('runner:test:start', (test) => {
+    Cypress.on('test:before:run:async', (test) => {
       if (studioRecorder.suiteId) {
         studioRecorder.setTestId(test.id)
       }
@@ -510,8 +501,25 @@ const eventManager = {
   _restart () {
     return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
-      reporterBus.emit('reporter:restart:test:run', studioRecorder.testId)
+      reporterBus.emit('reporter:restart:test:run', studioRecorder.hasRunnableId)
     })
+  },
+
+  _modifyConfigForStudio (config) {
+    const newConfig = { ...config }
+
+    if (studioRecorder.hasRunnableId) {
+      studioRecorder.startLoading()
+      newConfig.disableAfterHooks = true
+
+      if (studioRecorder.suiteId) {
+        newConfig.onlyNewTestInSuiteId = studioRecorder.suiteId
+      } else if (studioRecorder.testId) {
+        newConfig.onlyTestId = studioRecorder.testId
+      }
+    }
+
+    return newConfig
   },
 
   emit (event, ...args) {

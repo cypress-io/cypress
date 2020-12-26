@@ -262,7 +262,7 @@ class Command extends Component<Props> {
   }
 
   @action _onClick = () => {
-    if (this.props.appState.isRunning || this.props.appState.studioIsActive) return
+    if (this.props.appState.isRunning || this.props.appState.studioActive) return
 
     const { id } = this.props.model
 

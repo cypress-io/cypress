@@ -3,8 +3,8 @@ import React from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
 
-import { Events } from '../lib/events'
-import { AppState } from '../lib/app-state'
+import { Events } from './events'
+import { AppState } from './app-state'
 
 interface Props {
   appState: AppState

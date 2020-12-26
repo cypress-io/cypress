@@ -119,6 +119,12 @@ export default class Test extends Runnable {
     return this.attempts.length - 1
   }
 
+  @computed get studioIsNotEmpty () {
+    return this._withAttempt(this.currentRetry, (attempt: Attempt) => {
+      return attempt.studioIsNotEmpty
+    })
+  }
+
   isLastAttempt (attemptModel: Attempt) {
     return this.lastAttempt === attemptModel
   }

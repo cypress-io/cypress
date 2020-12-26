@@ -88,6 +88,10 @@ export default class Attempt {
     return this.test.isActive || this.isLast
   }
 
+  @computed get studioIsNotEmpty () {
+    return _.some(this.hooks, (hook) => hook.isStudio && hook.commands.length)
+  }
+
   addLog = (props: LogProps) => {
     switch (props.instrument) {
       case 'command': {

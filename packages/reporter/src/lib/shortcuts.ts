@@ -18,9 +18,9 @@ class Shortcuts {
     if (dom.isTextLike(event.target)) return
 
     switch (event.key) {
-      case 'r': !appState.studioIsActive && events.emit('restart')
+      case 'r': !appState.studioActive && events.emit('restart')
         break
-      case 's': !appState.isPaused && !appState.studioIsActive && events.emit('stop')
+      case 's': !appState.isPaused && !appState.studioActive && events.emit('stop')
         break
       case 'f': events.emit('focus:tests')
         break

@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { computed, observable } from 'mobx'
+import { observable } from 'mobx'
 
 interface DefaultAppState {
   forcingGc: boolean
@@ -8,7 +8,7 @@ interface DefaultAppState {
   isRunning: boolean
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
-  studioTestId: string | null
+  studioActive: boolean
   studioModalOpen: boolean
 }
 
@@ -19,7 +19,7 @@ const defaults: DefaultAppState = {
   isRunning: false,
   nextCommandName: null,
   pinnedSnapshotId: null,
-  studioTestId: null,
+  studioActive: false,
   studioModalOpen: false,
 }
 
@@ -31,16 +31,12 @@ class AppState {
   @observable nextCommandName = defaults.nextCommandName
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable firefoxGcInterval = defaults.firefoxGcInterval
-  @observable studioTestId = defaults.studioTestId
+  @observable studioActive = defaults.studioActive
   @observable studioModalOpen = defaults.studioModalOpen
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
   [key: string]: any
-
-  @computed get studioIsActive () {
-    return !!this.studioTestId && !this.studioModalOpen
-  }
 
   startRunning () {
     this.isRunning = true
@@ -91,21 +87,12 @@ class AppState {
     }
   }
 
-  openStudioModal () {
-    this.studioModalOpen = true
+  setStudioActive (studioActive: boolean) {
+    this.studioActive = studioActive
   }
 
-  closeStudioModal () {
-    this.studioModalOpen = false
-  }
-
-  setStudioTestId (studioTestId: string) {
-    this.studioTestId = studioTestId
-  }
-
-  closeStudio () {
-    this.studioModalOpen = defaults.studioModalOpen
-    this.studioTestId = defaults.studioTestId
+  setStudioModal (open: boolean) {
+    this.studioModalOpen = open
   }
 
   reset () {

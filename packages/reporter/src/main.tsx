@@ -17,7 +17,7 @@ import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
-import StudioModal from './studio/studio-modal'
+import StudioModal from './lib/studio-modal'
 
 export interface ReporterProps {
   appState: AppState

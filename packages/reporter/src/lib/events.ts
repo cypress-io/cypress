@@ -76,14 +76,12 @@ const events: Events = {
       runnablesStore.removeLog(log)
     }))
 
-    runner.on('reporter:restart:test:run', action('restart:test:run', (testId) => {
+    runner.on('reporter:restart:test:run', action('restart:test:run', (studioActive) => {
       appState.reset()
       runnablesStore.reset()
       statsStore.reset()
 
-      if (testId) {
-        appState.setStudioTestId(testId)
-      }
+      appState.setStudioActive(studioActive)
 
       runner.emit('reporter:restarted')
     }))
@@ -150,7 +148,7 @@ const events: Events = {
     }))
 
     runner.on('studio:show:modal', action('studio:show:modal', () => {
-      appState.openStudioModal()
+      appState.setStudioModal(true)
     }))
 
     runner.on('studio:cancel:reporter:restart', () => {
@@ -244,12 +242,12 @@ const events: Events = {
     }))
 
     localBus.on('studio:close:modal', action('studio:close:modal', () => {
-      appState.closeStudioModal()
+      appState.setStudioModal(false)
       runner.emit('studio:close:modal')
     }))
 
     localBus.on('studio:cancel:reporter:restart', action('studio:cancel:reporter:restart', () => {
-      appState.closeStudio()
+      appState.setStudioActive(false)
       runner.emit('studio:cancel:runner:restart')
     }))
 

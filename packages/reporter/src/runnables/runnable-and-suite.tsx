@@ -7,6 +7,7 @@ import Tooltip from '@cypress/react-tooltip'
 
 import { indent } from '../lib/util'
 
+import appState, { AppState } from '../lib/app-state'
 import events, { Events } from '../lib/events'
 import Test from '../test/test'
 import Collapsible from '../collapsible/collapsible'
@@ -59,6 +60,7 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
 
 export interface RunnableProps {
   model: TestModel | SuiteModel
+  appState: AppState
 }
 
 // NOTE: some of the driver tests dig into the React instance for this component
@@ -67,13 +69,18 @@ export interface RunnableProps {
 // else the driver tests need to be refactored to support it being functional
 @observer
 class Runnable extends Component<RunnableProps> {
+  static defaultProps = {
+    appState,
+  }
+
   render () {
-    const { model } = this.props
+    const { appState, model } = this.props
 
     return (
       <li
         className={cs(`${model.type} runnable runnable-${model.state}`, {
           'runnable-retried': model.hasRetried,
+          'runnable-studio': appState.studioActive,
         })}
       >
         {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}

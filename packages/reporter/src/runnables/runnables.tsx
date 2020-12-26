@@ -9,7 +9,6 @@ import RunnableHeader from './runnable-header'
 import { RunnablesStore, RunnableArray } from './runnables-store'
 import { Scroller } from '../lib/scroller'
 import { AppState } from '../lib/app-state'
-import Studio from '../studio/studio'
 
 const noTestsError = (specPath: string) => ({
   title: 'No tests found in your file:',
@@ -40,22 +39,17 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
 ))
 
 interface RunnablesContentProps {
-  appState?: AppState
   runnablesStore: RunnablesStore
   specPath: string
   error?: RunnablesErrorModel
 }
 
-const RunnablesContent = observer(({ appState, runnablesStore, specPath, error }: RunnablesContentProps) => {
+const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
   const { isReady, runnables } = runnablesStore
 
   if (!isReady) {
     return <Loading />
   }
-
-  // if (appState && appState.studioIsActive) {
-  //   return <Studio model={runnablesStore.testById(appState.studioTestId)} specPath={specPath} />
-  // }
 
   // show error if there are no tests, but only if there
   // there isn't an error passed down that supercedes it
@@ -77,13 +71,12 @@ interface RunnablesProps {
 @observer
 class Runnables extends Component<RunnablesProps> {
   render () {
-    const { appState, error, runnablesStore, spec } = this.props
+    const { error, runnablesStore, spec } = this.props
 
     return (
       <div ref='container' className='container'>
         <RunnableHeader spec={spec} />
         <RunnablesContent
-          appState={appState}
           runnablesStore={runnablesStore}
           specPath={spec.relative}
           error={error}
