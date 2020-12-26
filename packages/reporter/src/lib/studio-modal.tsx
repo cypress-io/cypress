@@ -31,7 +31,7 @@ const StudioModal = observer(({ appState, events }: Props) => {
         </div>
         <div className='center'>
           <div className='text'>
-            Interact with your site (click, type, etc.) to generate commands.
+            Generate Cypress commands by interacting with your site on the right. Then, save these commands directly to your test file.
           </div>
           <button className='get-started' onClick={_start}>
             Get Started
