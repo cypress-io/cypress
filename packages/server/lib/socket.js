@@ -474,6 +474,7 @@ class Socket {
 
       socket.on('studio:save', (fileDetails, commandLogs, cb) => {
         appendStudioCommandsToTest(fileDetails, commandLogs)
+        .then(studio.setStudioModalShown)
         .then(cb)
       })
 
