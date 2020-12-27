@@ -103,6 +103,13 @@ export class StudioRecorder {
     this.isActive = false
   }
 
+  @action reset = () => {
+    this.stop()
+
+    this.logs = []
+    this._hasStarted = false
+  }
+
   @action cancel = () => {
     this.stop()
     this.clearRunnableIds()

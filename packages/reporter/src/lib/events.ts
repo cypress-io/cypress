@@ -153,6 +153,10 @@ const events: Events = {
       appState.setStudioModal(true)
     }))
 
+    runner.on('studio:cancel', () => {
+      appState.setStudioActive(false)
+    })
+
     runner.on('studio:cancel:reporter:restart', () => {
       localBus.emit('studio:cancel:reporter:restart')
     })

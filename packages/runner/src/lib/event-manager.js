@@ -239,7 +239,7 @@ const eventManager = {
       studioRecorder.stop()
       ws.emit('studio:save', fileDetails, studioRecorder.logs, () => {
         if (closeStudio) {
-          reporterBus.emit('studio:cancel:reporter:restart')
+          reporterBus.emit('studio:cancel')
         }
         // else {
         //   rerun()
