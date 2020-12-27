@@ -26,8 +26,9 @@ const driverToLocalAndReporterEvents = 'run:start run:end'.split(' ')
 const driverToSocketEvents = 'backend:request automation:request mocha recorder:frame'.split(' ')
 const driverTestEvents = 'test:before:run:async test:after:run'.split(' ')
 const driverToLocalEvents = 'viewport:changed config stop url:changed page:loading visit:failed'.split(' ')
-const socketRerunEvents = 'runner:restart watched:file:changed'.split(' ')
+const socketRerunEvents = 'runner:restart'.split(' ')
 const socketToDriverEvents = 'net:event'.split(' ')
+const localToReporterEvents = 'reporter:log:add reporter:log:state:changed reporter:log:remove'.split(' ')
 
 const localBus = new EventEmitter()
 const reporterBus = new EventEmitter()
@@ -87,6 +88,11 @@ const eventManager = {
       }
     })
 
+    ws.on('watched:file:changed', () => {
+      studioRecorder.cancel()
+      rerun()
+    })
+
     _.each(socketRerunEvents, (event) => {
       ws.on(event, rerun)
     })
@@ -94,6 +100,12 @@ const eventManager = {
     _.each(socketToDriverEvents, (event) => {
       ws.on(event, (...args) => {
         Cypress.emit(event, ...args)
+      })
+    })
+
+    _.each(localToReporterEvents, (event) => {
+      localBus.on(event, (...args) => {
+        reporterBus.emit(event, ...args)
       })
     })
 
@@ -239,16 +251,9 @@ const eventManager = {
       reporterBus.emit('studio:cancel:reporter:restart')
     })
 
-    localBus.on('reporter:log:add', (log) => {
-      reporterBus.emit('reporter:log:add', log)
-    })
-
-    localBus.on('reporter:log:state:changed', (log) => {
-      reporterBus.emit('reporter:log:state:changed', log)
-    })
-
-    localBus.on('reporter:log:remove', (log) => {
-      reporterBus.emit('reporter:log:remove', log)
+    localBus.on('studio:visit:url', (url) => {
+      studioRecorder.setVisitUrl(url)
+      Cypress.cy.visit(url)
     })
 
     const $window = $(window)
@@ -283,16 +288,24 @@ const eventManager = {
   },
 
   setup (config) {
-    config = this._modifyConfigForStudio(config)
+    return new Promise((resolve) => {
+      ws.emit('get:existing:run:state', (state = {}) => {
+        this._restoreStudioFromState(state)
 
-    Cypress = this.Cypress = $Cypress.create(config)
+        config = this._modifyConfigForStudio(config)
 
-    // expose Cypress globally
-    window.Cypress = Cypress
+        Cypress = this.Cypress = $Cypress.create(config)
 
-    this._addListeners()
+        // expose Cypress globally
+        window.Cypress = Cypress
 
-    ws.emit('watch:test:file', config.spec)
+        this._addListeners()
+
+        ws.emit('watch:test:file', config.spec)
+
+        resolve()
+      })
+    })
   },
 
   isBrowser (browserName) {
@@ -368,7 +381,14 @@ const eventManager = {
       }
 
       return new Promise((resolve) => {
-        reporterBus.emit('reporter:collect:run:state', resolve)
+        reporterBus.emit('reporter:collect:run:state', (reporterState) => {
+          resolve({
+            ...reporterState,
+            studioTestId: studioRecorder.testId,
+            studioSuiteId: studioRecorder.suiteId,
+            studioVisitUrl: studioRecorder.visitUrl,
+          })
+        })
       })
     })
 
@@ -467,6 +487,7 @@ const eventManager = {
       numPending: state.pending,
       autoScrollingEnabled: state.autoScrollingEnabled,
       scrollTop: state.scrollTop,
+      studioActive: studioRecorder.hasRunnableId,
     })
   },
 
@@ -503,6 +524,20 @@ const eventManager = {
       reporterBus.once('reporter:restarted', resolve)
       reporterBus.emit('reporter:restart:test:run', studioRecorder.hasRunnableId)
     })
+  },
+
+  _restoreStudioFromState (state) {
+    if (state.studioTestId) {
+      studioRecorder.setTestId(state.studioTestId)
+    }
+
+    if (state.studioSuiteId) {
+      studioRecorder.setSuiteId(state.studioSuiteId)
+    }
+
+    if (state.studioVisitUrl) {
+      studioRecorder.setVisitUrl(state.studioVisitUrl)
+    }
   },
 
   _modifyConfigForStudio (config) {

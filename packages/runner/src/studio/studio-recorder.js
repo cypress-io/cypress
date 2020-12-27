@@ -22,6 +22,7 @@ export class StudioRecorder {
   @observable logs = []
   @observable isLoading = false
   @observable isActive = false
+  @observable visitUrl = null
   @observable _hasStarted = false
 
   @computed get hasRunnableId () {
@@ -78,12 +79,20 @@ export class StudioRecorder {
     this.isActive = false
   }
 
+  @action setVisitUrl = (url) => {
+    this.visitUrl = url
+  }
+
   @action start = (body) => {
     this.isActive = true
     this.isLoading = false
     this.logs = []
     this._currentId = 1
     this._hasStarted = true
+
+    if (this.visitUrl) {
+      eventManager.emit('studio:visit:url', this.visitUrl)
+    }
 
     this.attachListeners(body)
   }
@@ -98,6 +107,7 @@ export class StudioRecorder {
     this.stop()
     this.clearRunnableIds()
 
+    this.visitUrl = null
     this._hasStarted = false
   }
 

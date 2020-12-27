@@ -409,8 +409,4 @@ export default class AutIframe {
       studioRecorder.attachListeners(this._body()[0])
     }
   }
-
-  stopStudio = () => {
-    studioRecorder.stop()
-  }
 }

@@ -131,11 +131,11 @@ export default class Iframes extends Component {
     logger.clearLog()
     this._setScriptError(null)
 
-    this.props.eventManager.setup(config)
+    this.props.eventManager.setup(config).then(() => {
+      const $autIframe = this._loadIframes(specPath)
 
-    const $autIframe = this._loadIframes(specPath)
-
-    this.props.eventManager.initialize($autIframe, config)
+      this.props.eventManager.initialize($autIframe, config)
+    })
   }
 
   // jQuery is a better fit for managing these iframes, since they need to get

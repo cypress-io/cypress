@@ -460,7 +460,7 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-function patchSuiteAddTest (Cypress) {
+function patchSuiteAddTest () {
   Mocha.Suite.prototype.addTest = function (...args) {
     const test = args[0]
 
@@ -540,7 +540,7 @@ const override = (Cypress) => {
   patchHookRetries()
   patchRunnerRunTests()
   patchTestClone()
-  patchSuiteAddTest(Cypress)
+  patchSuiteAddTest()
 }
 
 const create = (specWindow, Cypress, config) => {

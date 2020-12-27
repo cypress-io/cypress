@@ -10,6 +10,7 @@ import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import Studio from '../studio/studio'
 import studioRecorder from '../studio/studio-recorder'
+import eventManager from '../lib/event-manager'
 
 @observer
 export default class Header extends Component {
@@ -45,12 +46,13 @@ export default class Header extends Component {
             </button>
           </Tooltip>
           <div className={cs('menu-cover', { 'menu-cover-display': this._studioNeedsUrl() })} />
-          <div
+          <form
             className={cs('url-container', {
               'loading': state.isLoadingUrl,
               'highlighted': state.highlightUrl,
               'menu-open': this._studioNeedsUrl(),
             })}
+            onSubmit={this._studioNeedsUrl() ? this._visitUrlInput : undefined}
           >
             <input
               ref={this.urlInputRef}
@@ -65,9 +67,9 @@ export default class Header extends Component {
             </span>
             <div className='popup-menu url-menu'>
               <p><strong>Please enter a valid URL to visit.</strong></p>
-              <button disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
+              <button type="submit" disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
             </div>
-          </div>
+          </form>
         </div>
         <ul className='menu'>
           <li className={cs('viewport-info', { 'menu-open': this.showingViewportMenu })}>
@@ -135,11 +137,19 @@ export default class Header extends Component {
   }
 
   _studioNeedsUrl = () => {
-    return studioRecorder.isActive && !this.props.state.url
+    return studioRecorder.isActive && !studioRecorder.visitUrl && !this.props.state.url
   }
 
   @action _onUrlInput = (e) => {
     this.urlInput = e.target.value
+  }
+
+  @action _visitUrlInput = (e) => {
+    e.preventDefault()
+
+    eventManager.emit('studio:visit:url', this.urlInput)
+
+    this.urlInput = ''
   }
 
   @action _toggleViewportMenu = () => {

@@ -37,6 +37,7 @@ interface StartInfo extends StatsStoreStartInfo {
   autoScrollingEnabled: boolean
   firefoxGcInterval: number
   scrollTop: number
+  studioActive: boolean
 }
 
 type CollectRunStateCallback = (arg: {
@@ -96,6 +97,7 @@ const events: Events = {
       appState.temporarilySetAutoScrolling(startInfo.autoScrollingEnabled)
       appState.setFirefoxGcInterval(startInfo.firefoxGcInterval)
       runnablesStore.setInitialScrollTop(startInfo.scrollTop)
+      appState.setStudioActive(startInfo.studioActive)
       if (runnablesStore.hasTests) {
         statsStore.start(startInfo)
       }
