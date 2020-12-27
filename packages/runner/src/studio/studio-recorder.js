@@ -16,7 +16,7 @@ const eventsWithValue = [
   'select',
 ]
 
-class StudioRecorder {
+export class StudioRecorder {
   @observable testId = null
   @observable suiteId = null
   @observable logs = []
