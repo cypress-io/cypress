@@ -199,7 +199,7 @@ const eventManager = {
     const studioInit = () => {
       ws.emit('studio:init', (showedStudioModal) => {
         if (!showedStudioModal) {
-          reporterBus.emit('studio:show:modal')
+          studioRecorder.showInitModal()
         } else {
           rerun()
         }
@@ -216,14 +216,6 @@ const eventManager = {
       studioRecorder.setSuiteId(suiteId)
 
       studioInit()
-    })
-
-    reporterBus.on('studio:start', () => {
-      rerun()
-    })
-
-    reporterBus.on('studio:close:modal', () => {
-      studioRecorder.clearRunnableIds()
     })
 
     reporterBus.on('studio:cancel:runner:restart', () => {
@@ -245,6 +237,11 @@ const eventManager = {
         //   rerun()
         // }
       })
+    })
+
+    localBus.on('studio:start', () => {
+      studioRecorder.closeInitModal()
+      rerun()
     })
 
     localBus.on('studio:cancel:reporter:restart', () => {

@@ -149,10 +149,6 @@ const events: Events = {
       appState.setFirefoxGcInterval(gcInterval)
     }))
 
-    runner.on('studio:show:modal', action('studio:show:modal', () => {
-      appState.setStudioModal(true)
-    }))
-
     runner.on('studio:cancel', () => {
       appState.setStudioActive(false)
     })
@@ -242,15 +238,6 @@ const events: Events = {
     localBus.on('studio:init:suite', (suiteId) => {
       runner.emit('studio:init:suite', suiteId)
     })
-
-    localBus.on('studio:start', action('studio:start', () => {
-      runner.emit('studio:start')
-    }))
-
-    localBus.on('studio:close:modal', action('studio:close:modal', () => {
-      appState.setStudioModal(false)
-      runner.emit('studio:close:modal')
-    }))
 
     localBus.on('studio:cancel:reporter:restart', action('studio:cancel:reporter:restart', () => {
       appState.setStudioActive(false)

@@ -3,23 +3,21 @@ import React from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
 
-import { Events } from './events'
-import { AppState } from './app-state'
+import eventManager from '../lib/event-manager'
+import studioRecorder from './studio-recorder'
 
-interface Props {
-  appState: AppState
-  events: Events
-}
-
-const StudioModal = observer(({ appState, events }: Props) => {
-  const _close = () => events.emit('studio:close:modal')
-  const _start = () => events.emit('studio:start')
+const StudioInitModal = observer(() => {
+  const _close = () => {
+    studioRecorder.closeInitModal()
+    studioRecorder.clearRunnableIds()
+  }
+  const _start = () => eventManager.emit('studio:start')
 
   return (
     <Dialog
       className='studio-modal'
       aria-label='Start Studio'
-      isOpen={appState.studioModalOpen}
+      isOpen={studioRecorder.initModalIsOpen}
       onDismiss={_close}
     >
       <div className='body'>
@@ -48,4 +46,10 @@ const StudioModal = observer(({ appState, events }: Props) => {
   )
 })
 
-export default StudioModal
+const StudioModals = observer(() => (
+  <>
+    <StudioInitModal />
+  </>
+))
+
+export default StudioModals

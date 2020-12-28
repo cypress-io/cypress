@@ -17,7 +17,6 @@ import shortcuts from './lib/shortcuts'
 
 import Header from './header/header'
 import Runnables from './runnables/runnables'
-import StudioModal from './lib/studio-modal'
 
 export interface ReporterProps {
   appState: AppState
@@ -77,7 +76,6 @@ class Reporter extends Component<ReporterProps> {
           appState={appState}
           events={events}
         />
-        <StudioModal appState={appState} events={events} />
       </div>
     )
   }

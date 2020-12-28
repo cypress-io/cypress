@@ -19,6 +19,7 @@ const eventsWithValue = [
 export class StudioRecorder {
   @observable testId = null
   @observable suiteId = null
+  @observable initModalIsOpen = false
   @observable logs = []
   @observable isLoading = false
   @observable isActive = false
@@ -69,6 +70,14 @@ export class StudioRecorder {
   @action clearRunnableIds = () => {
     this.clearTestId()
     this.clearSuiteId()
+  }
+
+  @action showInitModal = () => {
+    this.initModalIsOpen = true
+  }
+
+  @action closeInitModal = () => {
+    this.initModalIsOpen = false
   }
 
   @action startLoading = () => {

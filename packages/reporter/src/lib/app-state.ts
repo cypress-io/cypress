@@ -9,7 +9,6 @@ interface DefaultAppState {
   nextCommandName: string | null | undefined
   pinnedSnapshotId: number | string | null
   studioActive: boolean
-  studioModalOpen: boolean
 }
 
 const defaults: DefaultAppState = {
@@ -20,7 +19,6 @@ const defaults: DefaultAppState = {
   nextCommandName: null,
   pinnedSnapshotId: null,
   studioActive: false,
-  studioModalOpen: false,
 }
 
 class AppState {
@@ -32,7 +30,6 @@ class AppState {
   @observable pinnedSnapshotId = defaults.pinnedSnapshotId
   @observable firefoxGcInterval = defaults.firefoxGcInterval
   @observable studioActive = defaults.studioActive
-  @observable studioModalOpen = defaults.studioModalOpen
 
   isStopped = false;
   _resetAutoScrollingEnabledTo = true;
@@ -89,10 +86,6 @@ class AppState {
 
   setStudioActive (studioActive: boolean) {
     this.studioActive = studioActive
-  }
-
-  setStudioModal (open: boolean) {
-    this.studioModalOpen = open
   }
 
   reset () {
