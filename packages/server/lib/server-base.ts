@@ -179,7 +179,7 @@ export class ServerBase {
   }
 
   _port () {
-    return _.chain(this._server).invoke('address').get('port').value()
+    return this._server?.address()?.port
   }
 
   _listen (port, onError) {
