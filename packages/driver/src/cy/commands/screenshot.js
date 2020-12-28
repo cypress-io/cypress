@@ -418,10 +418,15 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         name = null
       }
 
-      const withinSubject = state('withinSubject')
+      // make sure when we capture the entire test runner
+      // we are not limited to "within" subject
+      // https://github.com/cypress-io/cypress/issues/14253
+      if (options.capture !== 'runner') {
+        const withinSubject = state('withinSubject')
 
-      if (withinSubject && $dom.isElement(withinSubject)) {
-        subject = withinSubject
+        if (withinSubject && $dom.isElement(withinSubject)) {
+          subject = withinSubject
+        }
       }
 
       // TODO: handle hook titles
