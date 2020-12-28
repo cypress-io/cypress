@@ -380,8 +380,11 @@ preprocessor.__reset = () => {
   bundles = {}
 }
 
-function cleanseError (err: string) {
-  return err.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '')
+function cleanseError (err: string|Error) {
+  // Error can be either an Error object or a string
+  const message = typeof err == 'string' ? err : (err?.message ?? '');
+
+  return message.replace(/\n\s*at.*/g, '').replace(/From previous event:\n?/g, '');
 }
 
 export = preprocessor
