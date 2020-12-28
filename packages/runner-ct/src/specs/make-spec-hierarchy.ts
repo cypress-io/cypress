@@ -1,15 +1,17 @@
 export type SpecFolderOrSpecFile = SpecFile | SpecFolder
 
-interface SpecFile {
-	type: 'file';
-	name: string;
-	shortName: string;
+export interface SpecFile {
+	type: 'file'
+	name: string
+	shortName: string
 }
-interface SpecFolder {
-	type: 'folder';
-	shortName: string;
-	specs: SpecFolderOrSpecFile[];
+
+export interface SpecFolder {
+	type: 'folder'
+	shortName: string
+	specs: SpecFolderOrSpecFile[]
 }
+
 /**
  * Split specs into group by their
  * first level of folder hierarchy

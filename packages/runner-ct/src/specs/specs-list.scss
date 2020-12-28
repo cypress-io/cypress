@@ -57,6 +57,16 @@
             li{
                 margin-left: 10px;
             }
+
+            .spec-list-file { 
+                display: flex;  
+                align-items: center;
+
+                .spec-list-radio {
+                    margin-right: 8px;
+                    margin-bottom: 1px
+                }
+            }
             
             /** 
              * To achieve the dotted circle line when a directory is expanded, 
