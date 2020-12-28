@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const evilDns = require('evil-dns')
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Fixtures = require(`${root}test/support/helpers/fixtures`)
 
 const s3StaticHtmlUrl = 'https://s3.amazonaws.com/internal-test-runner-assets.cypress.io/index.html'
@@ -22,7 +22,7 @@ describe('Server', () => {
   require('mocha-banner').register()
 
   beforeEach(() => {
-    return sinon.stub(Server.prototype, 'reset')
+    return sinon.stub(ServerE2E.prototype, 'reset')
   })
 
   context('resolving url', () => {
@@ -79,7 +79,7 @@ describe('Server', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new Server()),
+            (this.server = new ServerE2E()),
 
             this.server.open(cfg)
             .spread((port) => {

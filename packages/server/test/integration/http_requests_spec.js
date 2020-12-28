@@ -18,7 +18,7 @@ const pkg = require('@packages/root')
 const SseStream = require('ssestream')
 const EventSource = require('eventsource')
 const config = require(`${root}lib/config`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const { ProjectE2E } = require(`${root}lib/project-e2e`)
 const Watchers = require(`${root}lib/watchers`)
 const pluginsModule = require(`${root}lib/plugins`)
@@ -59,7 +59,7 @@ describe('Routes', () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
 
     sinon.stub(CacheBuster, 'get').returns('-123')
-    sinon.stub(Server.prototype, 'reset')
+    sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(pluginsModule, 'has').returns(false)
 
     nock.enableNetConnect()
@@ -129,7 +129,7 @@ describe('Routes', () => {
             httpsServer.start(8443),
 
             // and open our cypress server
-            (this.server = new Server(new Watchers())),
+            (this.server = new ServerE2E(new Watchers())),
 
             this.server.open(cfg, this.project)
             .spread((port) => {

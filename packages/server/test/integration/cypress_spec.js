@@ -33,7 +33,7 @@ const plugins = require(`${root}lib/plugins`)
 const cypress = require(`${root}lib/cypress`)
 const { ProjectBase } = require(`${root}lib/project-base`)
 const { ProjectE2E } = require(`${root}lib/project-e2e`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Reporter = require(`${root}lib/reporter`)
 const Watchers = require(`${root}lib/watchers`)
 const browsers = require(`${root}lib/browsers`)
@@ -127,7 +127,7 @@ describe('lib/cypress', () => {
     sinon.stub(extension, 'setHostAndPath').resolves()
     sinon.stub(launcher, 'detect').resolves(TYPICAL_BROWSERS)
     sinon.stub(process, 'exit')
-    sinon.stub(Server.prototype, 'reset')
+    sinon.stub(ServerE2E.prototype, 'reset')
     sinon.stub(errors, 'warning')
     .callThrough()
     .withArgs('INVOKED_BINARY_OUTSIDE_NPM_MODULE')
@@ -1215,7 +1215,7 @@ describe('lib/cypress', () => {
 
       it('can change the default port to 5544', function () {
         const listen = sinon.spy(http.Server.prototype, 'listen')
-        const open = sinon.spy(Server.prototype, 'open')
+        const open = sinon.spy(ServerE2E.prototype, 'open')
 
         return cypress.start([`--run-project=${this.todosPath}`, '--port=5544'])
         .then(() => {
@@ -1760,7 +1760,7 @@ describe('lib/cypress', () => {
 
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(Windows, 'open').resolves(this.win)
-      sinon.stub(Server.prototype, 'startWebsockets')
+      sinon.stub(ServerE2E.prototype, 'startWebsockets')
       sinon.spy(Events, 'start')
       sinon.stub(electron.ipcMain, 'on')
     })
@@ -1794,7 +1794,7 @@ describe('lib/cypress', () => {
 
     it('passes filtered options to Project#open and sets cli config', function () {
       const getConfig = sinon.spy(ProjectE2E.prototype, 'getConfig')
-      const open = sinon.stub(Server.prototype, 'open').resolves([])
+      const open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
 
       process.env.CYPRESS_FILE_SERVER_FOLDER = 'foo'
       process.env.CYPRESS_BASE_URL = 'http://localhost'
@@ -1889,7 +1889,7 @@ describe('lib/cypress', () => {
       const event = { sender: { send: sinon.stub() } }
       const warning = { message: 'Blah blah baseUrl blah blah' }
 
-      sinon.stub(Server.prototype, 'open').resolves([2121, warning])
+      sinon.stub(ServerE2E.prototype, 'open').resolves([2121, warning])
 
       return cypress.start(['--port=2121', '--config', 'pageLoadTimeout=1000', '--foo=bar', '--env=baz=baz'])
       .then(() => {
@@ -1906,7 +1906,7 @@ describe('lib/cypress', () => {
     describe('--config-file', () => {
       beforeEach(function () {
         this.filename = 'foo.bar.baz.asdf.quux.json'
-        this.open = sinon.stub(Server.prototype, 'open').resolves([])
+        this.open = sinon.stub(ServerE2E.prototype, 'open').resolves([])
       })
 
       it('reads config from a custom config file', function () {

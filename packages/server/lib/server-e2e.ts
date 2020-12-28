@@ -1,10 +1,6 @@
-require('./cwd')
-
 import Bluebird from 'bluebird'
-import compression from 'compression'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import isHtml from 'is-html'
@@ -13,56 +9,26 @@ import _ from 'lodash'
 import stream from 'stream'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
-import { getRouteForRequest, netStubbingState } from '@packages/net-stubbing'
-import { agent, concatStream, cors, uri } from '@packages/network'
-import { NetworkProxy } from '@packages/proxy'
+import { getRouteForRequest } from '@packages/net-stubbing'
+import { concatStream, cors } from '@packages/network'
 import errors from './errors'
 import fileServer from './file_server'
 import logger from './logger'
 import Request from './request'
+import { ServerBase } from './server-base'
 import Socket from './socket'
-import templateEngine from './template_engine'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import origin from './util/origin'
 import allowDestroy from './util/server_destroy'
-import { SocketAllowed } from './util/socket_allowed'
 import statusCode from './util/status_code'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 const textHtmlContentTypeRe = /^text\/html/i
 
-const ALLOWED_PROXY_BYPASS_URLS = [
-  '/',
-  '/__cypress/runner/cypress_runner.css',
-  '/__cypress/static/favicon.ico',
-]
-
-const debug = Debug('cypress:server:server')
-
-const _isNonProxiedRequest = (req) => {
-  // proxied HTTP requests have a URL like: "http://example.com/foo"
-  // non-proxied HTTP requests have a URL like: "/foo"
-  return req.proxiedUrl.startsWith('/')
-}
-
-const _forceProxyMiddleware = function (clientRoute) {
-  // normalize clientRoute to help with comparison
-  const trimmedClientRoute = _.trimEnd(clientRoute, '/')
-
-  return function (req, res, next) {
-    const trimmedUrl = _.trimEnd(req.proxiedUrl, '/')
-
-    if (_isNonProxiedRequest(req) && !ALLOWED_PROXY_BYPASS_URLS.includes(trimmedUrl) && (trimmedUrl !== trimmedClientRoute)) {
-      // this request is non-proxied and non-allowed, redirect to the runner error page
-      return res.redirect(clientRoute)
-    }
-
-    return next()
-  }
-}
+const debug = Debug('cypress:server:server-e2e')
 
 const isResponseHtml = function (contentType, responseBuffer) {
   if (contentType) {
@@ -81,110 +47,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
   return false
 }
 
-const setProxiedUrl = function (req) {
-  // proxiedUrl is the full URL with scheme, host, and port
-  // it will only be fully-qualified if the request was proxied.
-
-  // this function will set the URL of the request to be the path
-  // only, which can then be used to proxy the request.
-
-  // bail if we've already proxied the url
-  if (req.proxiedUrl) {
-    return
-  }
-
-  // backup the original proxied url
-  // and slice out the host/origin
-  // and only leave the path which is
-  // how browsers would normally send
-  // use their url
-  req.proxiedUrl = uri.removeDefaultPort(req.url).format()
-
-  req.url = uri.getPath(req.url)
-}
-
-const notSSE = (req, res) => {
-  return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
-}
-
-export class Server {
-  constructor () {
-    if (!(this instanceof Server)) {
-      return new Server()
-    }
-
-    this._socketAllowed = new SocketAllowed()
-    this._request = null
-    this._middleware = null
-    this._server = null
-    this._socket = null
-    this._baseUrl = null
-    this._nodeProxy = null
-    this._fileServer = null
-    this._httpsProxy = null
-    this._urlResolver = null
-  }
-
-  createExpressApp (config) {
-    const { morgan, clientRoute } = config
-    const app = express()
-
-    // set the cypress config from the cypress.json file
-    app.set('view engine', 'html')
-
-    // since we use absolute paths, configure express-handlebars to not automatically find layouts
-    // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
-
-    // handle the proxied url in case
-    // we have not yet started our websocket server
-    app.use((req, res, next) => {
-      setProxiedUrl(req)
-
-      // useful for tests
-      if (this._middleware) {
-        this._middleware(req, res)
-      }
-
-      // always continue on
-
-      return next()
-    })
-
-    app.use(_forceProxyMiddleware(clientRoute))
-
-    app.use(require('cookie-parser')())
-    app.use(compression({ filter: notSSE }))
-    if (morgan) {
-      app.use(require('morgan')('dev'))
-    }
-
-    // errorhandler
-    app.use(require('errorhandler')())
-
-    // remove the express powered-by header
-    app.disable('x-powered-by')
-
-    return app
-  }
-
-  createRoutes (...args) {
-    return require('./routes').apply(null, args)
-  }
-
-  getHttpServer () {
-    return this._server
-  }
-
-  portInUseErr (port) {
-    const e = errors.get('PORT_IN_USE_SHORT', port)
-
-    e.port = port
-    e.portInUse = true
-
-    return e
-  }
-
+export class ServerE2E extends ServerBase {
   open (config = {}, project, onError, onWarning) {
     debug('server open')
 
@@ -222,28 +85,6 @@ export class Server {
       })
 
       return this.createServer(app, config, project, this._request, onWarning)
-    })
-  }
-
-  createNetworkProxy (config, getRemoteState) {
-    const getFileServerToken = () => {
-      return this._fileServer.token
-    }
-
-    this._netStubbingState = netStubbingState()
-    this._networkProxy = new NetworkProxy({
-      config,
-      getRemoteState,
-      getFileServerToken,
-      socket: this._socket,
-      netStubbingState: this._netStubbingState,
-      request: this._request,
-    })
-  }
-
-  createHosts (hosts = {}) {
-    return _.each(hosts, (ip, host) => {
-      return evilDns.add(host, ip)
     })
   }
 
@@ -344,26 +185,23 @@ export class Server {
     })
   }
 
-  _port () {
-    return _.chain(this._server).invoke('address').get('port').value()
+  createRoutes (...args) {
+    return require('./routes').apply(null, args)
   }
 
-  _listen (port, onError) {
-    return new Bluebird((resolve) => {
-      const listener = () => {
-        const address = this._server.address()
+  startWebsockets (automation, config, options = {}) {
+    options.onResolveUrl = this._onResolveUrl.bind(this)
+    options.onRequest = this._onRequest.bind(this)
+    options.netStubbingState = this._netStubbingState
 
-        this.isListening = true
+    options.onResetServerState = () => {
+      this._networkProxy.reset()
+      this._netStubbingState.reset()
+    }
 
-        debug('Server listening on ', address)
+    this._socket.startListening(this._server, automation, config, options)
 
-        this._server.removeListener('error', onError)
-
-        return resolve(address.port)
-      }
-
-      return this._server.listen(port || 0, '127.0.0.1', listener)
-    })
+    return this._normalizeReqUrl(this._server)
   }
 
   _getRemoteState () {
@@ -399,10 +237,6 @@ export class Server {
     debug('Getting remote state: %o', props)
 
     return props
-  }
-
-  _onRequest (headers, automationRequest, options) {
-    return this._request.sendBluebird(headers, automationRequest, options)
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
@@ -519,8 +353,6 @@ export class Server {
               domain: cors.getSuperDomain(newUrl),
             })
             .then((cookies) => {
-              let fp
-
               this._remoteVisitingUrl = false
 
               const statusIs2xxOrAllowedFailure = () => {
@@ -544,7 +376,7 @@ export class Server {
               }
 
               // does this response have this cypress header?
-              fp = incomingRes.headers['x-cypress-file-path']
+              const fp = incomingRes.headers['x-cypress-file-path']
 
               if (fp) {
                 // if so we know this is a local file request
@@ -566,7 +398,7 @@ export class Server {
 
                 debug('resolve:url response ended, setting buffer %o', { newUrl, details })
 
-                details.totalTime = new Date() - startTime
+                details.totalTime = Date.now() - startTime
 
                 // TODO: think about moving this logic back into the
                 // frontend so that the driver can be in control of
@@ -712,32 +544,6 @@ export class Server {
     return this._getRemoteState()
   }
 
-  _callRequestListeners (server, listeners, req, res) {
-    return listeners.map((listener) => {
-      return listener.call(server, req, res)
-    })
-  }
-
-  _normalizeReqUrl (server) {
-    // because socket.io removes all of our request
-    // events, it forces the socket.io traffic to be
-    // handled first.
-    // however we need to basically do the same thing
-    // it does and after we call into socket.io go
-    // through and remove all request listeners
-    // and change the req.url by slicing out the host
-    // because the browser is in proxy mode
-    const listeners = server.listeners('request').slice(0)
-
-    server.removeAllListeners('request')
-
-    return server.on('request', (req, res) => {
-      setProxiedUrl(req)
-
-      return this._callRequestListeners(server, listeners, req, res)
-    })
-  }
-
   _retryBaseUrlCheck (baseUrl, onWarning) {
     return ensureUrl.retryIsListening(baseUrl, {
       retryIntervals: [3000, 3000, 4000],
@@ -752,58 +558,6 @@ export class Server {
         return onWarning(warning)
       },
     })
-  }
-
-  proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
-    // bail if this is our own namespaced socket.io request
-
-    if (req.url.startsWith(socketIoRoute)) {
-      if (!this._socketAllowed.isRequestAllowed(req)) {
-        socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
-        socket.end()
-      }
-
-      // we can return here either way, if the socket is still valid socket.io will hook it up
-      return
-    }
-
-    const host = req.headers.host
-
-    if (host) {
-      // get the protocol using req.connection.encrypted
-      // get the port & hostname from host header
-      const fullUrl = `${req.connection.encrypted ? 'https' : 'http'}://${host}`
-      const { hostname, protocol } = url.parse(fullUrl)
-      const { port } = cors.parseUrlIntoDomainTldPort(fullUrl)
-
-      const onProxyErr = (err, req, res) => {
-        return debug('Got ERROR proxying websocket connection', { err, port, protocol, hostname, req })
-      }
-
-      return proxy.ws(req, socket, head, {
-        secure: false,
-        target: {
-          host: hostname,
-          port,
-          protocol,
-        },
-        agent,
-      }, onProxyErr)
-    }
-
-    // we can't do anything with this socket
-    // since we don't know how to proxy it!
-    if (socket.writable) {
-      return socket.end()
-    }
-  }
-
-  reset () {
-    if (this._networkProxy != null) {
-      this._networkProxy.reset()
-    }
-
-    return this._onDomainSet(this._baseUrl != null ? this._baseUrl : '<root>')
   }
 
   _close () {
@@ -823,56 +577,5 @@ export class Server {
     .then(() => {
       this.isListening = false
     })
-  }
-
-  close () {
-    return Bluebird.join(
-      this._close(),
-      this._socket != null ? this._socket.close() : undefined,
-      this._fileServer != null ? this._fileServer.close() : undefined,
-      this._httpsProxy != null ? this._httpsProxy.close() : undefined,
-    )
-    .then(() => {
-      this._middleware = null
-    })
-  }
-
-  end () {
-    return this._socket && this._socket.end()
-  }
-
-  changeToUrl (url) {
-    return this._socket && this._socket.changeToUrl(url)
-  }
-
-  onTestFileChange (filePath) {
-    return this._socket && this._socket.onTestFileChange(filePath)
-  }
-
-  onRequest (fn) {
-    this._middleware = fn
-  }
-
-  onNextRequest (fn) {
-    return this.onRequest((...args) => {
-      fn.apply(this, args)
-
-      this._middleware = null
-    })
-  }
-
-  startWebsockets (automation, config, options = {}) {
-    options.onResolveUrl = this._onResolveUrl.bind(this)
-    options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this._netStubbingState
-
-    options.onResetServerState = () => {
-      this._networkProxy.reset()
-      this._netStubbingState.reset()
-    }
-
-    this._socket.startListening(this._server, automation, config, options)
-
-    return this._normalizeReqUrl(this._server)
   }
 }

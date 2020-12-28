@@ -19,7 +19,7 @@ import logger from './logger'
 import Reporter from './reporter'
 import savedState from './saved_state'
 import scaffold from './scaffold'
-import { Server } from './server'
+import { ServerE2E } from './server-e2e'
 import user from './user'
 import { escapeFilenameInUrl } from './util/escape_filename'
 import fs from './util/fs'
@@ -50,7 +50,7 @@ export class ProjectBase extends EE {
   protected cfg: Cfg | null
   protected projectRoot: string
   protected watchers: Watchers
-  protected server: Server | ServerCt | null
+  protected server: ServerE2E | ServerCt | null
   protected options?: Record<string, any>
   protected spec: Cypress.Cypress['spec'] | null
   protected automation: any

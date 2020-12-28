@@ -4,7 +4,7 @@ import config from './config'
 import plugins from './plugins'
 import preprocessor from './plugins/preprocessor'
 import { ProjectBase } from './project-base'
-import { Server } from './server'
+import { ServerE2E } from './server-e2e'
 import settings from './util/settings'
 
 const debug = Debug('cypress:server:project')
@@ -15,7 +15,7 @@ export class ProjectE2E extends ProjectBase {
   }
 
   open (options = {}) {
-    this.server = new Server()
+    this.server = new ServerE2E()
 
     return super.open(options, {
       onOpen: (cfg) => {

@@ -8,7 +8,7 @@ const Promise = require('bluebird')
 const socketIo = require(`${root}../socket`)
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Automation = require(`${root}lib/automation`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 
@@ -30,7 +30,7 @@ describe('Web Sockets', () => {
       this.cfg = cfg
       this.ws = new ws.Server({ port: wsPort })
 
-      this.server = new Server()
+      this.server = new ServerE2E()
 
       return this.server.open(this.cfg)
       .then(() => {

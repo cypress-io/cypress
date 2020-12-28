@@ -1,61 +1,18 @@
 import Bluebird from 'bluebird'
-import _debug from 'debug'
-import express, { Request } from 'express'
+import Debug from 'debug'
 import http from 'http'
-import templateEngine from '@packages/server/lib/template_engine'
+import { ServerBase } from '@packages/server/lib/server-base'
 import allowDestroy from '@packages/server/lib/util/server_destroy'
 import { initializeRoutes } from './routes-ct'
 import { Socket } from './socket-ct'
 
 type WarningErr = Record<string, any>
 
-const debug = _debug('cypress:server-ct:server')
+const debug = Debug('cypress:server-ct:server')
 
-export class ServerCt {
-  private _request: Request
-  private _middleware
-  private _server: http.Server
-  private isListening: boolean
-  private _socket: Socket
-  private _baseUrl: string
-  private _nodeProxy
-  private _fileServer
-  private _httpsProxy
-  private _urlResolver
-  private automation
-
-  createExpressApp (config) {
-    const { morgan } = config
-    const app = express()
-
-    // set the cypress config from the cypress.json file
-    app.set('view engine', 'html')
-
-    // since we use absolute paths, configure express-handlebars to not automatically find layouts
-    // https://github.com/cypress-io/cypress/issues/2891
-    app.engine('html', templateEngine.render)
-
-    app.use(require('cookie-parser')())
-
-    if (morgan) {
-      app.use(require('morgan')('dev'))
-    }
-
-    // errorhandler
-    app.use(require('errorhandler')())
-
-    // remove the express powered-by header
-    app.disable('x-powered-by')
-
-    return app
-  }
-
+export class ServerCt extends ServerBase {
   createRoutes (...args: unknown[]) {
     return initializeRoutes.apply(null, args)
-  }
-
-  getHttpServer () {
-    return this._server
   }
 
   open (config = {}, specsStore, project, onError, onWarning) {
@@ -104,30 +61,6 @@ export class ServerCt {
     })
   }
 
-  _listen (port, onError) {
-    return new Bluebird((resolve) => {
-      const listener = () => {
-        const address = this._server.address()
-
-        this.isListening = true
-
-        debug('Server listening on ', address)
-
-        this._server.removeListener('error', onError)
-
-        return resolve(typeof address === 'string' ? address : address.port)
-      }
-
-      return this._server.listen(port || 0, '127.0.0.1', listener)
-    })
-  }
-
-  _callRequestListeners (server, listeners, req, res) {
-    return listeners.map((listener) => {
-      return listener.call(server, req, res)
-    })
-  }
-
   _close () {
     // bail early we dont have a server or we're not
     // currently listening
@@ -141,48 +74,12 @@ export class ServerCt {
     })
   }
 
-  close () {
-    return Bluebird.all([
-      this._close(),
-      this._socket != null ? this._socket.close() : undefined,
-      this._fileServer != null ? this._fileServer.close() : undefined,
-      this._httpsProxy != null ? this._httpsProxy.close() : undefined,
-    ])
-    .then(() => {
-      this._middleware = null
-    })
-  }
-
   reset () {
     // TODO: implement this
   }
 
-  end () {
-    return this._socket && this._socket.end()
-  }
-
-  changeToUrl (url) {
-    return this._socket && this._socket.changeToUrl(url)
-  }
-
-  onTestFileChange (filePath) {
-    return this._socket && this._socket.onTestFileChange(filePath)
-  }
-
   sendSpecList (specs) {
     return this._socket && this._socket.sendSpecList(specs)
-  }
-
-  onRequest (fn) {
-    this._middleware = fn
-  }
-
-  onNextRequest (fn) {
-    return this.onRequest((...args) => {
-      fn.apply(this, args)
-
-      this._middleware = null
-    })
   }
 
   startWebsockets (automation, config, options = {}) {
