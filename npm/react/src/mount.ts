@@ -3,17 +3,10 @@ import ReactDOM, { unmountComponentAtNode } from 'react-dom'
 import getDisplayName from './getDisplayName'
 import { injectStylesBeforeElement } from './utils'
 
+import './hooks'
+import 'cypress-react-selector'
+
 const rootId = 'cypress-root'
-
-const isComponentSpec = () => Cypress.spec.specType === 'component'
-
-function checkMountModeEnabled () {
-  if (!isComponentSpec()) {
-    throw new Error(
-      `In order to use mount or unmount functions please place the spec in component folder`,
-    )
-  }
-}
 
 /**
  * Inject custom style text or CSS file or 3rd party style resources
@@ -47,8 +40,6 @@ const injectStyles = (options: MountOptions) => {
  ```
  **/
 export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
-  checkMountModeEnabled()
-
   // Get the display name property via the component constructor
   // @ts-ignore FIXME
   const componentName = getDisplayName(jsx.type, options.alias)
@@ -164,8 +155,6 @@ export const mount = (jsx: React.ReactElement, options: MountOptions = {}) => {
   ```
  */
 export const unmount = () => {
-  checkMountModeEnabled()
-
   return cy.then(() => {
     cy.log('unmounting...')
     const selector = `#${rootId}`

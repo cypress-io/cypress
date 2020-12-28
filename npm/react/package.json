@@ -6,7 +6,10 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress open",
+    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
     "pretest": "yarn transpile",
     "test": "node ../../scripts/cypress run",
     "transpile": "tsc",
@@ -15,6 +18,7 @@
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@cypress/code-coverage": "3.8.1",
+    "@cypress/webpack-dev-server": "*",
     "@cypress/webpack-preprocessor": "*",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",

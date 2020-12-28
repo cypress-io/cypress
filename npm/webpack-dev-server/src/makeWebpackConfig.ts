@@ -5,7 +5,7 @@ import CypressCTOptionsPlugin from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
-export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, files, support, devserverEvents }) {
+export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, files, support, devServerEvents }) {
   debug(`User passed in webpack config with values`, userWebpackConfig)
 
   const defaultWebpackConfig = require('./webpack.config')
@@ -23,7 +23,7 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
       new CypressCTOptionsPlugin({
         files,
         projectRoot,
-        devserverEvents,
+        devServerEvents,
       }),
     ],
   }

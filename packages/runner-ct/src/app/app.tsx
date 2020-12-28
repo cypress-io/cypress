@@ -14,6 +14,7 @@ import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
+import { useWindowSize } from '../lib/useWindowSize'
 
 interface AppProps {
   state: State;
@@ -24,24 +25,34 @@ interface AppProps {
 
 const App: React.FC<AppProps> = observer(
   function App (props: AppProps) {
+    const windowSize = useWindowSize()
+
     const { state, eventManager, config } = props
     const [isReporterResizing, setIsReporterResizing] = React.useState(false)
 
+    // the viewport + padding left and right or fallback to default size
+    const defaultIframeWidth = config.viewportWidth ? config.viewportWidth + 32 : 500
+
     return (
       <>
-        <SplitPane split="vertical" minSize={250} defaultSize="20%" >
-          <SpecsList state={state} config={config} />
+        <SplitPane
+          split="vertical"
+          primary="second"
+          minSize={100}
+          // calculate maxSize of IFRAMES preview to not cover specs list and command log
+          maxSize={windowSize.width - 400}
+          defaultSize={defaultIframeWidth}
+          onDragStarted={() => setIsReporterResizing(true)}
+          onDragFinished={() => setIsReporterResizing(false)}
+          className={cs('reporter-pane', { 'is-reporter-resizing': isReporterResizing })}
+        >
           <SplitPane
-            split="vertical"
             primary="second"
-            minSize="20%"
-            maxSize="80%"
-            // the viewport + padding left and right
-            defaultSize={config.viewportWidth ? config.viewportWidth + 32 : '20%'}
-            onDragStarted={() => setIsReporterResizing(true)}
-            onDragFinished={() => setIsReporterResizing(false)}
-            className={cs({ 'is-reporter-resizing': isReporterResizing })}
+            split="vertical"
+            defaultSize={(windowSize.width - defaultIframeWidth) / 100 * 70}
+            minSize={200}
           >
+            <SpecsList state={state} config={config} />
             <div>
               {state.spec && (
                 <Reporter
@@ -58,13 +69,13 @@ const App: React.FC<AppProps> = observer(
                 />
               )}
             </div>
-
-            <div className="runner runner-ct container">
-              <Header {...props} />
-              <Iframes {...props} />
-              <Message state={state} />
-            </div>
           </SplitPane>
+
+          <div className="runner runner-ct container">
+            <Header {...props} />
+            <Iframes {...props} />
+            <Message state={state} />
+          </div>
         </SplitPane>
 
         {/* these pixels help ensure the browser has painted when taking a screenshot */}

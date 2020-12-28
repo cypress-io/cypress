@@ -2,13 +2,13 @@ const EE = require('events')
 const util = require('../util')
 
 const wrap = (ipc, invoke, ids, [options]) => {
-  const devserverEvents = new EE()
+  const devServerEvents = new EE()
 
-  ipc.on('devserver:specs:changed', (specs) => {
-    devserverEvents.emit('devserver:specs:changed', specs)
+  ipc.on('dev-server:specs:changed', (specs) => {
+    devServerEvents.emit('dev-server:specs:changed', specs)
   })
 
-  options.devserverEvents = devserverEvents
+  options.devServerEvents = devServerEvents
 
   util.wrapChildPromise(ipc, invoke, ids, [options])
 }
