@@ -107,6 +107,7 @@ export class StudioRecorder {
     this.stop()
 
     this.logs = []
+    this.visitUrl = null
     this._hasStarted = false
   }
 

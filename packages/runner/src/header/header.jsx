@@ -147,7 +147,15 @@ export default class Header extends Component {
   @action _visitUrlInput = (e) => {
     e.preventDefault()
 
-    eventManager.emit('studio:visit:url', this.urlInput)
+    const reHttp = /^https?:\/\//
+
+    let url = this.urlInput
+
+    if (!reHttp.test(url)) {
+      url = `http://${url}`
+    }
+
+    eventManager.emit('studio:visit:url', url)
 
     this.urlInput = ''
   }
