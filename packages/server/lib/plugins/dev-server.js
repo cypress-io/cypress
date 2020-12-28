@@ -1,20 +1,20 @@
 require('../cwd')
 
 const EE = require('events')
-const debug = require('debug')('cypress:ct:devserver')
+const debug = require('debug')('cypress:ct:dev-server')
 const plugins = require('../plugins')
 
 const baseEmitter = new EE()
 
 plugins.registerHandler((ipc) => {
-  baseEmitter.on('devserver:specs:changed', (specs) => {
-    ipc.send('devserver:specs:changed', specs)
+  baseEmitter.on('dev-server:specs:changed', (specs) => {
+    ipc.send('dev-server:specs:changed', specs)
   })
 
-  return baseEmitter.on('devserver:close', () => {
+  return baseEmitter.on('dev-server:close', () => {
     debug('base emitter plugin close event')
 
-    return ipc.send('devserver:close')
+    return ipc.send('dev-server:close')
   })
 })
 
@@ -23,15 +23,15 @@ const API = {
   emitter: baseEmitter,
 
   start ({ specs, config }) {
-    return plugins.execute('devserver:start', { specs, config })
+    return plugins.execute('dev-server:start', { specs, config })
   },
 
   updateSpecs (specs) {
-    return baseEmitter.emit('devserver:specs:changed', specs)
+    return baseEmitter.emit('dev-server:specs:changed', specs)
   },
 
   close () {
-    debug('close devserver')
+    debug('close dev-server')
     baseEmitter.emit('close')
 
     return baseEmitter.removeAllListeners()

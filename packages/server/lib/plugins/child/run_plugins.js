@@ -6,7 +6,7 @@ const Promise = require('bluebird')
 
 const errors = require('../../errors')
 const preprocessor = require('./preprocessor')
-const devserver = require('./devserver')
+const devServer = require('./dev-server')
 const resolve = require('../../util/resolve')
 const task = require('./task')
 const util = require('../util')
@@ -111,8 +111,8 @@ const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
   switch (event) {
-    case 'devserver:start':
-      devserver.wrap(ipc, invoke, ids, args)
+    case 'dev-server:start':
+      devServer.wrap(ipc, invoke, ids, args)
 
       return
     case 'after:screenshot':

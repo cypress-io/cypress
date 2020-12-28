@@ -10,7 +10,7 @@ type UtimesSync = (path: PathLike, atime: string | number | Date, mtime: string 
 interface CypressOptions {
   files: any[]
   projectRoot: string
-  devserverEvents?: EventEmitter
+  devServerEvents?: EventEmitter
 }
 
 interface CypressCTWebpackContext extends compilation.Compilation {
@@ -20,12 +20,12 @@ interface CypressCTWebpackContext extends compilation.Compilation {
 export default class CypressCTOptionsPlugin implements Plugin {
   private files: string[] = []
   private readonly projectRoot: string
-  private readonly devserverEvents: EventEmitter
+  private readonly devServerEvents: EventEmitter
 
   constructor (options: CypressOptions) {
     this.files = options.files
     this.projectRoot = options.projectRoot
-    this.devserverEvents = options.devserverEvents
+    this.devServerEvents = options.devServerEvents
   }
 
   private pluginFunc = (context: CypressCTWebpackContext, module: compilation.Module) => {
@@ -41,7 +41,7 @@ export default class CypressCTOptionsPlugin implements Plugin {
    *   `Compilation`
    */
   private plugin = (compilation: compilation.Compilation) => {
-    this.devserverEvents.on('devserver:specs:changed', (specs) => {
+    this.devServerEvents.on('dev-server:specs:changed', (specs) => {
       if (_.isEqual(specs, this.files)) return
 
       this.files = specs
