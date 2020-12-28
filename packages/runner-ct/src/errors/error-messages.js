@@ -1,6 +1,6 @@
 export default {
   reporterError (err, specPath) {
-    if (!err) return null
+    if (!err) return
 
     switch (err.type) {
       case 'BUNDLE_ERROR':
@@ -18,7 +18,7 @@ Fix the error in your code and re-run your tests.
           `,
         }
       default:
-        return null
+        return
     }
   },
 }

@@ -87,7 +87,7 @@ export class State {
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
   /** @type {"single" | "multi"} */
-  @observable runMode = 'single'
+  @observable runMode: 'single' | 'multi' = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   constructor ({

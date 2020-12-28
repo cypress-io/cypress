@@ -1,3 +1,4 @@
+/* global Cypress, JSX */
 import { action, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import cs from 'classnames'
@@ -16,7 +17,7 @@ import scroller, { Scroller } from './lib/scroller'
 import statsStore, { StatsStore } from './header/stats-store'
 import shortcuts from './lib/shortcuts'
 
-import Header from './header/header'
+import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
 type ReporterProps = {
@@ -27,8 +28,10 @@ type ReporterProps = {
   scroller: Scroller
   statsStore: StatsStore
   events: Events
+  firefoxGcInterval: Cypress.ConfigOptions['firefoxGcInterval']
   error?: RunnablesErrorModel
   resetStatsOnSpecChange?: boolean
+  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
 } & ({
   runMode: 'single',
@@ -68,11 +71,20 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState, runMode, runnablesStore, scroller, error, events, statsStore } = this.props
+    const {
+      appState,
+      runMode,
+      runnablesStore,
+      scroller,
+      error,
+      events,
+      statsStore,
+      renderReporterHeader = (props) => <Header {...props}/>,
+    } = this.props
 
     return (
       <div className={cs('reporter', { multiSpecs: runMode === 'multi' })}>
-        <Header appState={appState} statsStore={statsStore} />
+        {renderReporterHeader({ appState, statsStore })}
         {this.props.runMode === 'single' ? (
           <Runnables
             appState={appState}
