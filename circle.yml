@@ -111,9 +111,8 @@ commands:
     steps:
       - attach_workspace:
           at: ~/
-      - check-conditional-ci
       - run:
-          command: yarn workspace @packages/server test ./test/e2e/$(( $CIRCLE_NODE_INDEX ))_downloads_spec.ts --browser <<parameters.browser>>
+          command: yarn workspace @packages/server test ./test/e2e/4_downloads_spec.ts --browser <<parameters.browser>>
       - verify-mocha-results
       - store_test_results:
           path: /tmp/cypress
@@ -264,21 +263,18 @@ jobs:
 
   server-e2e-tests-chrome:
     <<: *defaults
-    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: chrome
 
   server-e2e-tests-electron:
     <<: *defaults
-    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: electron
 
   server-e2e-tests-firefox:
     <<: *defaults
-    parallelism: 8
     steps:
       - run-e2e-tests:
           browser: firefox

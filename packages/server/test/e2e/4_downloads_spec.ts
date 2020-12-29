@@ -5,7 +5,6 @@ describe('e2e downloads', () => {
   e2e.setup()
 
   e2e.it('handles various file downloads', {
-    browser: 'electron',
     project: Fixtures.projectPath('downloads'),
     spec: '*',
     // snapshot: true,
