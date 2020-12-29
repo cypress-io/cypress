@@ -154,7 +154,6 @@ export default class ProjectCt extends EventEmitter {
 
           specs.watch({
             onSpecsChanged: (specs) => {
-              console.log('THESE ARE MY SPECS', specs)
               // send new files to dev server
               devServer.updateSpecs(specs)
 
