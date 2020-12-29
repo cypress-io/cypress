@@ -356,6 +356,26 @@ describe('webpack preprocessor', function () {
           expect(err.message).to.equal(`Webpack Compilation Error\n${errsNoStack.join('\n\n')}`)
         })
       })
+
+      it('it rejects with joined errors when a stats err with error object', function () {
+        const errs = [new Error('foo\nat Object.foo'), 'bar', new Error('baz')]
+        const errsNoStack = ['foo', 'bar', 'baz']
+
+        this.statsApi = {
+          hasErrors () {
+            return true
+          },
+          toJson () {
+            return { errors: errs }
+          },
+        }
+
+        this.compilerApi.run.yields(null, this.statsApi)
+
+        return this.run().catch((err) => {
+          expect(err.message).to.equal(`Webpack Compilation Error\n${errsNoStack.join('\n\n')}`)
+        })
+      })
     })
   })
 })
