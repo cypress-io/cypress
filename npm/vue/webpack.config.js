@@ -28,6 +28,10 @@ module.exports = {
         test: /\.vue$/,
         loader: 'vue-loader',
       },
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+      },
       // this will apply to both plain `.css` files
       // AND `<style>` blocks in `.vue` files
       {
