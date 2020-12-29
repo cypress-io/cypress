@@ -47,11 +47,12 @@ class RunnablesStore {
 
   runningSpec: string | null = null
 
-  hasTests: boolean = false
-  hasSingleTest: boolean = false
+  hasTests = false
+  hasSingleTest = false
 
   private appState: AppState
   private scroller: Scroller
+  // eslint-disable-next-line
   [key: string]: any
 
   _tests: Record<string, TestModel> = {}
@@ -199,7 +200,7 @@ class RunnablesStore {
     })
 
     this.runnables = []
-    this.runnablesHistory = {}
+    // this.runnablesHistory = {}
     this._tests = {}
     this._runnablesQueue = []
   }
@@ -209,12 +210,14 @@ class RunnablesStore {
     const previousSpec = this.runningSpec
 
     this.runningSpec = specPath
+    this.isReady = false
 
     if (!previousSpec || previousSpec === specPath) {
       return
     }
 
     this.runnablesHistory[previousSpec] = this.runnables
+    this.runnables = []
   }
 }
 

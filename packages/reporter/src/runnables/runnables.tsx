@@ -50,8 +50,13 @@ export interface RunnablesContentProps {
 
 const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
   const { isReady, runnables, runnablesHistory } = runnablesStore
+  const isRunning = specPath === runnablesStore.runningSpec
 
-  if (!isReady) {
+  if (!isRunning && runnablesHistory[specPath]) {
+    return <RunnablesList runnables={runnablesHistory[specPath]} />
+  }
+
+  if (!isRunning || !isReady) {
     return <Loading />
   }
 
@@ -61,18 +66,15 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
     error = noTestsError(specPath)
   }
 
-  if (error) {
-    return <RunnablesError error={error} />
-  }
-
-  const isRunning = specPath === runnablesStore.runningSpec
-
-  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
+  return error
+    ? <RunnablesError error={error} />
+    : <RunnablesList runnables={runnables} />
 })
 
 export interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
+  /* eslint-disable-next-line */
   spec: Cypress.Cypress['spec']
   scroller: Scroller
   appState?: AppState

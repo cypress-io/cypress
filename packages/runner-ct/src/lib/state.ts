@@ -1,6 +1,7 @@
 import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
+import eventManager from './event-manager'
 
 interface Defaults {
   messageTitle: string | null
@@ -222,9 +223,12 @@ export default class State {
     )
 
     if (isAlreadyRunningNewSpec) {
-      this.multiSpecs = this.multiSpecs.filter((existingSpec) => existingSpec.relative !== newSpec.relative)
-    } else if (this.runMode === 'single' && this.spec) {
-      // when the new
+      // when newly selected spec is already running as multispecs
+      this.multiSpecs = this.multiSpecs.filter(
+        (existingSpec) => existingSpec.relative !== newSpec.relative,
+      )
+    } else if (this.runMode === 'single' && this.spec && this.spec.relative !== newSpec.relative) {
+      // when some spec is selected and we click on a new one
       this.multiSpecs = [this.spec, newSpec]
     } else {
       this.multiSpecs = [...this.multiSpecs, newSpec]
@@ -237,7 +241,6 @@ export default class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = require('./event-manager')
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)

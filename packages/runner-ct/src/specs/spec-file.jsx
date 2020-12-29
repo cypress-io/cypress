@@ -1,4 +1,5 @@
 import React from 'react'
+import { observer } from 'mobx-react'
 
 function isActive (spec, stateStore) {
   return stateStore.runMode === 'multi'
@@ -6,7 +7,7 @@ function isActive (spec, stateStore) {
     : spec.name === stateStore.spec?.name
 }
 
-export function SpecFile ({ spec, state }) {
+export const SpecFile = observer(function SpecFile ({ spec, state }) {
   return (
     <li
       key={spec.name}
@@ -21,4 +22,4 @@ export function SpecFile ({ spec, state }) {
           ? 'fas fa-check-square active' : 'far fa-square'} />
       {spec.shortName}
     </li>)
-}
+})
