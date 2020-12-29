@@ -6,9 +6,6 @@
   "plugins": [
     "cypress"
   ],
-  "env": {
-    "cypress/globals": true
-  },
   "rules": {
     "react/jsx-filename-extension": [
       0,
@@ -19,5 +16,8 @@
         ]
       }
     ]
+  },
+  "env": {
+    "cypress/globals": true
   }
 }

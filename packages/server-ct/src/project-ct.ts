@@ -158,7 +158,7 @@ export default class Project {
         .then((port) => {
           const specs = new SpecsController(cfg, {
             onSpecListChanged: (specs: Cypress.Cypress['spec'][]) => {
-              // send new files to dev server
+              modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
               devserver.updateSpecs(specs)
 
               // send new files to frontend
@@ -168,9 +168,10 @@ export default class Project {
 
           specs.watch()
 
-          modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
-
-          return modifiedConfig
+          return {
+            ...modifiedConfig,
+            webpackDevServerUrl: `http://localhost:${port}`,
+          }
         })
       })
     })
