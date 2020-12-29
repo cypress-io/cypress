@@ -3,7 +3,6 @@ import $, { Cash } from 'cash-dom'
 const initialCounter = 0
 
 function increment ($counter: Cash) {
-  // Cypress.log($counter)
   const counterEl = $counter[0]!
   const value = parseInt(counterEl.innerText, 10)
 
