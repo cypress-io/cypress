@@ -1,14 +1,14 @@
 export type SpecFolderOrSpecFile = SpecFile | SpecFolder
 
 interface SpecFile {
-	type: 'file';
-	name: string;
-	shortName: string;
+	type: 'file'
+	name: string
+	shortName: string
 }
 interface SpecFolder {
-	type: 'folder';
-	shortName: string;
-	specs: SpecFolderOrSpecFile[];
+	type: 'folder'
+	shortName: string
+	specs: SpecFolderOrSpecFile[]
 }
 /**
  * Split specs into group by their
@@ -20,7 +20,7 @@ export function makeSpecHierarchy (specs: { name: string }[]) {
   // to save the existing folder paths
   const kvpGroups: { [fullPath: string]: SpecFolder } = {}
 
-  return specs.reduce((groups, spec) => {
+  return specs.reduce<SpecFolderOrSpecFile[]>((groups, spec) => {
     const pathArray = spec.name.split('/')
     let currentSpecArray: SpecFolderOrSpecFile[] = groups
     let currentPath = ''

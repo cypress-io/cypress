@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
-import { action } from 'mobx'
+import { action, runInAction } from 'mobx'
 
 import { client, circularParser } from '@packages/socket/lib/browser'
 
@@ -9,7 +9,7 @@ import automation from './automation'
 import logger from './logger'
 
 import $Cypress, { $ } from '@packages/driver'
-import specsStore from '../specs/specs-store'
+import { state } from '../lib/state'
 
 const ws = client.connect({
   path: window.__cypressConfig.socketIoRoute,
@@ -21,7 +21,9 @@ ws.on('connect', () => {
   ws.emit('runner:connected')
 
   ws.emit('get:component:specs', (specs) => {
-    specsStore.setSpecs(specs)
+    runInAction(() => {
+      state.setSpecs(specs)
+    })
   })
 })
 
@@ -92,7 +94,9 @@ const eventManager = {
     })
 
     ws.on('component:specs:changed', (specs) => {
-      specsStore.setSpecs(specs)
+      runInAction(() => {
+        state.setSpecs(specs)
+      })
     })
 
     _.each(socketRerunEvents, (event) => {

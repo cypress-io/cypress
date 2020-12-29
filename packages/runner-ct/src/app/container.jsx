@@ -4,7 +4,7 @@ import React, { Component } from 'react'
 
 import automation from '../lib/automation'
 import eventManager from '../lib/event-manager'
-import State from '../lib/state'
+import { State } from '../lib/state'
 import util from '../lib/util'
 
 import App from './app'

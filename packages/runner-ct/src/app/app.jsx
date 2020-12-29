@@ -5,7 +5,7 @@ import { Reporter } from '@packages/reporter'
 
 import errorMessages from '../errors/error-messages'
 import util from '../lib/util'
-import State from '../lib/state'
+import { State } from '../lib/state'
 
 import SpecsList from '../specs/specs-list'
 import SplitPane from 'react-split-pane'

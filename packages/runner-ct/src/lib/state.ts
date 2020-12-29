@@ -1,7 +1,29 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
 
-const _defaults = {
+interface Defaults {
+  messageTitle: string | null
+  messageDescription: string | null
+  messageType: string
+  messageControls: unknown
+  specSearchText: string
+
+  width: number
+  height: number
+
+  reporterWidth: number | null
+
+  url: string
+  highlightUrl: boolean
+  isLoadingUrl: boolean
+
+  spec: Cypress.Cypress['spec'] | null
+  specs: Cypress.Cypress['spec'][]
+
+  callbackAfterUpdate: ((...args: unknown[]) => void) | null
+}
+
+const _defaults: Defaults = {
   messageTitle: null,
   messageDescription: null,
   messageType: '',
@@ -17,9 +39,12 @@ const _defaults = {
   isLoadingUrl: false,
 
   spec: null,
+  specs: [],
+  callbackAfterUpdate: null,
+  specSearchText: '',
 }
 
-export default class State {
+export class State {
   defaults = _defaults
 
   @observable isLoading = true
@@ -29,6 +54,9 @@ export default class State {
   @observable messageDescription = _defaults.messageDescription
   @observable messageType = _defaults.messageType
   @observable.ref messageControls = _defaults.messageControls
+
+  @observable callbackAfterUpdate = _defaults.callbackAfterUpdate
+  @observable specSearchText = _defaults.specSearchText
 
   @observable snapshot = {
     showingHighlights: true,
@@ -60,14 +88,16 @@ export default class State {
   @observable specs = _defaults.specs
   /** @type {"single" | "multi"} */
   @observable runMode = 'single'
-  @observable multiSpecs = [];
+  @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   constructor ({
     reporterWidth = _defaults.reporterWidth,
     spec = _defaults.spec,
+    specs = _defaults.specs,
   }) {
     this.reporterWidth = reporterWidth
     this.spec = spec
+    this.specs = specs
 
     // TODO: receive chosen spec from state and set it here
   }
@@ -94,6 +124,14 @@ export default class State {
 
   @computed get displayScale () {
     return Math.floor(this.scale * 100)
+  }
+
+  @computed get filteredSpecs (): Cypress.Cypress['spec'][] {
+    return this.specs.filter((spec) => spec.name.toLowerCase().includes(this.specSearchText))
+  }
+
+  @action setSearchSpecText (text: string) {
+    this.specSearchText = text
   }
 
   @computed.struct get messageStyles () {
@@ -152,8 +190,12 @@ export default class State {
     this.isLoadingUrl = _defaults.isLoadingUrl
   }
 
-  @action setSpec (spec) {
+  @action setSpec (spec: Cypress.Cypress['spec'] | null) {
     this.spec = spec
+  }
+
+  @action setSpecs (specs: Cypress.Cypress['spec'][] = []) {
+    this.specs = specs
   }
 
   @action setSingleSpec (spec) {
@@ -165,7 +207,7 @@ export default class State {
     this.setSpec(spec)
   }
 
-  @action addSpecToMultiMode (newSpec) {
+  @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
     const isAlreadyRunningNewSpec = this.multiSpecs.some(
       (existingSpec) => existingSpec.relative === newSpec.relative,
     )
@@ -196,3 +238,5 @@ export default class State {
     }
   }
 }
+
+export const state = new State({})

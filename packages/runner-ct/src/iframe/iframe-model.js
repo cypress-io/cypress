@@ -1,5 +1,5 @@
+import { action, runInAction } from 'mobx'
 import _ from 'lodash'
-import { action } from 'mobx'
 
 import eventManager from '../lib/event-manager'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
@@ -49,11 +49,13 @@ export default class IframeModel {
   }
 
   _updateViewport = ({ viewportWidth, viewportHeight }, cb) => {
-    this.state.updateDimensions(viewportWidth, viewportHeight)
+    runInAction(() => {
+      this.state.updateDimensions(viewportWidth, viewportHeight)
 
-    if (cb) {
-      this.state.setCallbackAfterUpdate(cb)
-    }
+      if (cb) {
+        this.state.setCallbackAfterUpdate(cb)
+      }
+    })
   }
 
   _updateUrl = (url) => {

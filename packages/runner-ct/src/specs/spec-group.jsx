@@ -9,19 +9,22 @@ class SpecGroup extends Component {
   }
 
   render () {
-    const { group, parentPath = '', state } = this.props
+    const { group, state } = this.props
     const { isOpen } = this.state
 
     return (<li key={group.shortName} >
       <a onClick={() => this.setState({ isOpen: !isOpen })} >
-        <i className={cs('far', isOpen ? 'fa-minus-square' : 'fa-plus-square')}/>
+        <i className={cs('far', isOpen ? 'fa-minus-square' : 'fa-plus-square')} />
         {group.shortName}
       </a>
       <ul className={cs(!isOpen && 'group-hidden')}>
         {group.specs.map((item) => {
-          return <SpecItem key={item.shortName} item={item} state={state} parentPath={parentPath}/>
+          return (<SpecItem
+            key={item.shortName}
+            item={item}
+            state={state}
+          />)
         })}
-
       </ul>
     </li>)
   }

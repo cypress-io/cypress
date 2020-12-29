@@ -2,7 +2,7 @@ import { runInAction, configure } from 'mobx'
 import * as React from 'react'
 import { render } from 'react-dom'
 import { utils as driverUtils } from '@packages/driver'
-import State from './lib/state'
+import { state } from './lib/state'
 
 const Container = React.lazy(() => import(/* webpackChunkName: "ctChunk-RunnerContainer" */ './app/container'))
 
@@ -23,8 +23,6 @@ const Runner = {
       if (NO_COMMAND_LOG) {
         configState.reporterWidth = 0
       }
-
-      const state = new State(configState)
 
       Runner.state = state
       Runner.configureMobx = configure

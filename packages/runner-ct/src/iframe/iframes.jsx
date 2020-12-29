@@ -1,5 +1,5 @@
 import cs from 'classnames'
-import { action, autorun } from 'mobx'
+import { action, autorun, runInAction } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { $ } from '@packages/driver'
@@ -169,7 +169,7 @@ export default class Iframes extends Component {
     const cb = this.props.state.callbackAfterUpdate
 
     if (cb) {
-      cb()
+      runInAction(cb)
     }
   }
 

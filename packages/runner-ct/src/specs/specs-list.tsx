@@ -1,18 +1,28 @@
 import { observer } from 'mobx-react'
 import React, { Component } from 'react'
-import specsStore from './specs-store'
+import { State } from '../lib/state'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
 
+interface SpecsListProps {
+  state: State
+}
+
 @observer
-class SpecsList extends Component {
+class SpecsList extends Component<SpecsListProps> {
   render () {
     const { state } = this.props
-    const specGroups = specsStore.specs.length ? makeSpecHierarchy(specsStore.specs) : []
+    const specGroups = state.filteredSpecs.length ? makeSpecHierarchy(state.filteredSpecs) : []
 
     return (
       <div className="specs-list">
-        <header>Select tests to run...</header>
+        <header>
+          <input
+            placeholder='Select tests to run...'
+            value={state.specSearchText}
+            onChange={(e) => this.props.state.setSearchSpecText(e.currentTarget.value.toLowerCase())}
+          />
+        </header>
         <ul className="specs-list-container">{
           specGroups.map((item) => {
             { // The `active` prop here is used only to
@@ -21,7 +31,15 @@ class SpecsList extends Component {
               // not comparing members of an object (this.props.state in this case)
             }
 
-            return <SpecItem key={item.shortName} active={state.spec?.name} item={item} state={state} />
+            return (
+              <SpecItem
+              // @ts-ignore
+                active={state.spec?.name}
+                key={item.shortName}
+                item={item}
+                state={state}
+              />
+            )
           })}
         </ul>
       </div>
