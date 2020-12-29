@@ -60,5 +60,3 @@ module.exports = (on, config) => {
 
   return config
 }
-
-module.exports = cypressPluginsFn
