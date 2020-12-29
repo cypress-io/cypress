@@ -1,6 +1,7 @@
 import Bluebird from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
+import { ChildProcess } from 'child_process'
 
 const chromeRemoteInterface = require('chrome-remote-interface')
 const errors = require('../errors')
@@ -132,7 +133,12 @@ export { chromeRemoteInterface }
 
 type DeferredPromise = { resolve: Function, reject: Function }
 
-export const create = Bluebird.method((target: websocketUrl, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+type CreateOpts = {
+  target?: websocketUrl
+  process?: ChildProcess
+}
+
+export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
   let enqueuedCommands: {command: CRI.Command, params: any, p: DeferredPromise }[] = []
 
@@ -173,10 +179,10 @@ export const create = Bluebird.method((target: websocketUrl, onAsynchronousError
   const connect = () => {
     cri?.close()
 
-    debug('connecting %o', { target })
+    debug('connecting %o', opts)
 
     return chromeRemoteInterface({
-      target,
+      ...opts,
       local: true,
     })
     .then((newCri) => {

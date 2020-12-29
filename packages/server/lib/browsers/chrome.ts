@@ -243,9 +243,15 @@ const _disableRestorePagesPrompt = function (userDir) {
   .catch(() => { })
 }
 
+const supportsStdioCdp = (browser) => browser.majorVersion >= 72
+
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
-const _connectToChromeRemoteInterface = function (port, onError) {
+const _connectToChromeRemoteInterface = function (browser, process, port, onError) {
+  if (supportsStdioCdp(browser)) {
+    return CriClient.create({ process }, onError)
+  }
+
   // @ts-ignore
   la(check.userPort(port), 'expected port number to connect CRI to', port)
 
@@ -255,7 +261,7 @@ const _connectToChromeRemoteInterface = function (port, onError) {
   .then((wsUrl) => {
     debug('received wsUrl %s for port %d', wsUrl, port)
 
-    return CriClient.create(wsUrl, onError)
+    return CriClient.create({ target: wsUrl }, onError)
   })
 }
 
@@ -398,6 +404,10 @@ export = {
     args.push(`--remote-debugging-port=${port}`)
     args.push('--remote-debugging-address=127.0.0.1')
 
+    if (supportsStdioCdp(browser)) {
+      args.push('--remote-debugging-pipe')
+    }
+
     return args
   },
 
@@ -453,14 +463,16 @@ export = {
     // first allows us to connect the remote interface,
     // start video recording and then
     // we will load the actual page
-    const launchedBrowser = await utils.launch(browser, 'about:blank', args)
+    const launchedBrowser = await utils.launch(browser, 'about:blank', args, {
+      pipeStdio: supportsStdioCdp(browser),
+    })
 
     la(launchedBrowser, 'did not get launched browser instance')
 
     // SECOND connect to the Chrome remote interface
     // and when the connection is ready
     // navigate to the actual url
-    const criClient = await this._connectToChromeRemoteInterface(port, options.onError)
+    const criClient = await this._connectToChromeRemoteInterface(browser, launchedBrowser, port, options.onError)
 
     la(criClient, 'expected Chrome remote interface reference', criClient)
 
