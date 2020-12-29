@@ -2,6 +2,7 @@ import { observer } from 'mobx-react'
 import React, { Component } from 'react'
 import { State } from '../lib/state'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
+
 import { SpecItem } from './spec-item'
 
 interface SpecsListProps {
