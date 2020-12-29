@@ -75,6 +75,10 @@ export default class Hook implements HookProps {
       this._currentNumber++
     }
 
+    if (this.isStudio && command.name === 'visit') {
+      command.number = 1
+    }
+
     const lastCommand = _.last(this.commands)
 
     if (lastCommand &&

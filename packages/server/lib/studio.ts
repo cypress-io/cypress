@@ -32,5 +32,10 @@ export const save = (saveInfo: SaveInfo) => {
     return appendCommandsToTest(fileDetails, commands)
   }
 
-  return saveToFile().then(setStudioModalShown)
+  return saveToFile()
+  .then((success) => {
+    return setStudioModalShown()
+    .then(() => success)
+  })
+  .catch(() => false)
 }

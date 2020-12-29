@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import Tooltip from '@cypress/react-tooltip'
+import cs from 'classnames'
 
 import eventManager from '../lib/event-manager'
 
@@ -9,13 +10,18 @@ class Studio extends Component {
 
     return (
       <div className='header-popup studio'>
-        <div className='studio-title'>
-          <span className='icon'><i className='fas fa-magic' /></span>{' '}
-          <span className='title'>STUDIO</span>{' '}
-          <span className='beta'>BETA</span>
+        <div className='text-block'>
+          <span className={cs('icon', { 'is-active': model.isActive })}>
+            <i className='fas' />
+          </span>{' '}
+          <span className='title'>Studio</span>{' '}
+          <span className='beta'>Beta</span>
         </div>
-        <div className='available-commands' onClick={this.showAvailableCommands}>
-          <a href='#'>AVAILABLE COMMANDS</a>
+        <div className='text-block'>
+          <a href='#' onClick={this.showAvailableCommands}>Available Commands</a>
+        </div>
+        <div className='text-block'>
+          <a href='https://on.cypress.io/studio-beta' target='_blank'>Give Feedback</a>
         </div>
         <div className='studio-controls'>
           <Tooltip

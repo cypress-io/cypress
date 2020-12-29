@@ -346,17 +346,44 @@
     font-weight: 600;
     padding: 0;
 
-    .studio-title {
-      border-right: solid 1px #e3e3e3;
+    .text-block {
       padding: 10px;
+      text-transform: uppercase;
 
       .icon {
-        margin-right: 5px;
+        margin-right: 3px;
         color: #3386d4;
+
+        i {
+          @extend .fa-magic;
+        }
+
+        &.is-active {
+          animation: flash-studio-recording 1.5s linear infinite;
+          color: $error;
+
+          i {
+            @extend .fa-circle;
+          }
+        }
+
+        @keyframes flash-studio-recording {
+          0%, 60% {
+            opacity: 1;
+          }
+
+          61%, 100% {
+            opacity: 0;
+          }
+        }
       }
 
       .beta {
         color: #b4b5bc;
+      }
+
+      &:not(:first-child) {
+        border-left: solid 1px #e3e3e3;
       }
     }
 
@@ -429,21 +456,6 @@
       &:active {
         color: #2363CC;
         text-decoration: underline;
-      }
-    }
-
-    &.input-active {
-      animation: flash-url-border 1.5s linear infinite;
-      border-color: #4997e4;
-    }
-
-    @keyframes flash-url-border {
-      0%, 100% {
-        border-color: #4997e4;
-      }
-
-      50% {
-        border-color: #d3d3d3;
       }
     }
   }
@@ -543,29 +555,52 @@
       margin-bottom: 5px;
     }
 
-    button {
-      background-color: #3386d4;
-      border-color: #3386d4;
-      border-radius: 5px;
-      color: #fff;
-      font-family: $font-sans;
-      font-size: 12px;
-      padding: 4px 12px;
+    .menu-buttons {
+      display: flex;
+      justify-content: space-between;
 
-      &:hover, &:focus {
-        background-color: darken(#3386d4, 10%);
-        border-color: #3386d4;
-      }
+      button {
+        border-radius: 5px;
+        font-family: $font-sans;
+        font-size: 12px;
+        padding: 4px 12px;
 
-      &[disabled],
-      &[disabled]:hover,
-      &[disabled]:active {
-        background-color: #3386d4;
-        opacity: 0.5;
-      }
+        i {
+          font-size: 10px;
+        }
 
-      i {
-        font-size: 10px;
+        &:focus {
+          outline: none;
+        }
+
+        &.btn-cancel {
+          background-color: #e8e8ec;
+          border-color: #e8e8ec;
+          color: #777;
+
+          &:hover, &:focus {
+            background-color: darken(#e8e8ec, 5%);
+            border-color: darken(#e8e8ec, 5%);
+          }
+        }
+
+        &.btn-submit {
+          background-color: #3386d4;
+          border-color: #3386d4;
+          color: #fff;
+
+          &:hover, &:focus {
+            background-color: darken(#3386d4, 10%);
+            border-color: darken(#3386d4, 10%);
+          }
+
+          &[disabled],
+          &[disabled]:hover,
+          &[disabled]:active {
+            background-color: #3386d4;
+            opacity: 0.5;
+          }
+        }
       }
     }
 

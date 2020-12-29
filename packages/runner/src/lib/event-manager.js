@@ -237,8 +237,12 @@ const eventManager = {
     })
 
     localBus.on('studio:save', (saveInfo) => {
-      ws.emit('studio:save', saveInfo, () => {
-        reporterBus.emit('studio:cancel')
+      ws.emit('studio:save', saveInfo, (success) => {
+        if (!success) {
+          reporterBus.emit('test:set:state', studioRecorder.saveError, _.noop)
+        } else {
+          reporterBus.emit('studio:cancel')
+        }
       })
     })
 

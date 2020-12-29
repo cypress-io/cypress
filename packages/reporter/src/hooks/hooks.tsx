@@ -84,7 +84,7 @@ export interface HooksModel {
 }
 
 export interface HooksProps {
-  state: AppState
+  state?: AppState
   model: HooksModel
 }
 

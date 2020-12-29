@@ -129,15 +129,22 @@ export const generateAstRules = (fileDetails: { line: number, column: number }, 
 export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command[]) => {
   const { absoluteFile } = fileDetails
 
+  let success = false
+
   const astRules = generateAstRules(fileDetails, ['it', 'specify'], (fn: n.FunctionExpression) => {
     addCommandsToBody(fn.body.body, commands)
+
+    success = true
   })
 
   return rewriteSpec(absoluteFile, astRules)
+  .then(() => success)
 }
 
 export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command[], testName: string) => {
   const { absoluteFile } = fileDetails
+
+  let success = false
 
   const astRules = generateAstRules(fileDetails, ['context', 'describe'], (fn: n.FunctionExpression) => {
     const testBody = b.blockStatement([])
@@ -147,9 +154,12 @@ export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command
     const test = generateTest(testName, testBody)
 
     fn.body.body.push(test)
+
+    success = true
   })
 
   return rewriteSpec(absoluteFile, astRules)
+  .then(() => success)
 }
 
 export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {

@@ -10,6 +10,7 @@ import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import Studio from '../studio/studio'
 import studioRecorder from '../studio/studio-recorder'
+import eventManager from '../lib/event-manager'
 
 @observer
 export default class Header extends Component {
@@ -66,7 +67,10 @@ export default class Header extends Component {
             </span>
             <div className='popup-menu url-menu'>
               <p><strong>Please enter a valid URL to visit.</strong></p>
-              <button type="submit" disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
+              <div className='menu-buttons'>
+                <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
+                <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
+              </div>
             </div>
           </form>
         </div>
@@ -157,6 +161,10 @@ export default class Header extends Component {
     studioRecorder.visitUrl(url)
 
     this.urlInput = ''
+  }
+
+  _cancelStudio = () => {
+    eventManager.emit('studio:cancel:reporter:restart')
   }
 
   @action _toggleViewportMenu = () => {

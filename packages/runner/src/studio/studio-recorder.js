@@ -3,6 +3,12 @@ import { $ } from '@packages/driver'
 
 import eventManager from '../lib/event-manager'
 
+const saveErrorMessage = `\
+Cypress was unable to save these commands to your spec file. \
+Cypress Studio is still in beta and the team is working hard to \
+resolve issues like this. To help us fix this issue more quickly, \
+you can provide us with more information by clicking 'Learn more' below.`
+
 const eventTypes = [
   'click',
   // 'dblclick',
@@ -51,6 +57,17 @@ export class StudioRecorder {
 
   @computed get hookId () {
     return `${this.testId}-studio`
+  }
+
+  @computed get saveError () {
+    return {
+      id: this.testId,
+      err: {
+        name: 'CypressError',
+        message: saveErrorMessage,
+        docsUrl: 'https://on.cypress.io/studio-beta',
+      },
+    }
   }
 
   @action setTestId = (testId) => {
