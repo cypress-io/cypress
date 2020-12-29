@@ -1,9 +1,10 @@
 import cs from 'classnames'
-import { action, observable } from 'mobx'
+import { action, computed, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
+import UrlParse from 'url-parse'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
@@ -45,33 +46,39 @@ export default class Header extends Component {
               <i aria-hidden="true" className='fas fa-crosshairs' />
             </button>
           </Tooltip>
-          <div className={cs('menu-cover', { 'menu-cover-display': this._studioNeedsUrl() })} />
+          <div className={cs('menu-cover', { 'menu-cover-display': this._studioNeedsUrl })} />
           <form
             className={cs('url-container', {
               'loading': state.isLoadingUrl,
               'highlighted': state.highlightUrl,
-              'menu-open': this._studioNeedsUrl(),
+              'menu-open': this._studioNeedsUrl,
+              'url-prefix-enabled': !!this._baseUrl,
             })}
-            onSubmit={this._studioNeedsUrl() ? this._visitUrlInput : undefined}
+            onSubmit={this._studioNeedsUrl ? this._visitUrlInput : undefined}
           >
-            <input
-              ref={this.urlInputRef}
-              className={cs('url', { 'input-active': this._studioNeedsUrl() })}
-              value={this._studioNeedsUrl() ? this.urlInput : state.url}
-              readOnly={!this._studioNeedsUrl()}
-              onChange={this._studioNeedsUrl() ? this._onUrlInput : undefined}
-              onClick={!this._studioNeedsUrl() ? this._openUrl : undefined}
-            />
-            <span className='loading-container'>
+            <span className='url-addon url-prefix'>
+              {`${this._baseUrl}/`}
+            </span>
+            <span className='url-input-wrapper'>
+              <input
+                ref={this.urlInputRef}
+                className={cs('url', { 'input-active': this._studioNeedsUrl })}
+                value={this._studioNeedsUrl ? this.urlInput : state.url}
+                readOnly={!this._studioNeedsUrl}
+                onChange={this._studioNeedsUrl ? this._onUrlInput : undefined}
+                onClick={!this._studioNeedsUrl ? this._openUrl : undefined}
+              />
+              <div className='popup-menu url-menu'>
+                <p><strong>Please enter a valid URL to visit.</strong></p>
+                <div className='menu-buttons'>
+                  <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
+                  <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
+                </div>
+              </div>
+            </span>
+            <span className='url-addon loading-container'>
               ...loading <i className='fas fa-spinner fa-pulse' />
             </span>
-            <div className='popup-menu url-menu'>
-              <p><strong>Please enter a valid URL to visit.</strong></p>
-              <div className='menu-buttons'>
-                <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
-                <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
-              </div>
-            </div>
           </form>
         </div>
         <ul className='menu'>
@@ -120,7 +127,7 @@ export default class Header extends Component {
       this.previousRecorderIsOpen = studioRecorder.isOpen
     }
 
-    if (this._studioNeedsUrl()) {
+    if (this._studioNeedsUrl) {
       this.urlInputRef.current.focus()
     }
   }
@@ -139,8 +146,18 @@ export default class Header extends Component {
     window.open(this.props.state.url)
   }
 
-  _studioNeedsUrl = () => {
+  @computed get _studioNeedsUrl () {
     return studioRecorder.isActive && !studioRecorder.url && !this.props.state.url
+  }
+
+  @computed get _baseUrl () {
+    if (!this._studioNeedsUrl) return
+
+    const url = new UrlParse()
+
+    if (parseInt(url.port) !== this.props.config.port) {
+      return url.origin
+    }
   }
 
   @action _onUrlInput = (e) => {
@@ -152,10 +169,16 @@ export default class Header extends Component {
 
     const reHttp = /^https?:\/\//
 
-    let url = this.urlInput
+    let url
 
-    if (!reHttp.test(url)) {
-      url = `http://${url}`
+    if (this._baseUrl) {
+      url = new UrlParse(this.urlInput, this._baseUrl).toString()
+    } else {
+      url = this.urlInput
+
+      if (!reHttp.test(url)) {
+        url = `http://${url}`
+      }
     }
 
     studioRecorder.visitUrl(url)

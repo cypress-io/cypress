@@ -403,6 +403,7 @@
   }
 
   .url-container {
+    display: flex;
     flex-grow: 2;
     padding: 10px 5px;
     position: relative;
@@ -412,17 +413,37 @@
     }
   }
 
-  .loading-container {
+  .url-addon {
     background-color: #eee;
     border: 1px solid #ccc;
     color: #555;
-    border-radius: 2px 18px 18px 2px;
     display: none;
     font-size: 0.9em;
     height: 26px;
     line-height: 26px;
     padding-left: 5px;
     padding-right: 3px;
+  }
+
+  .url-prefix {
+    border-radius: 18px 2px 2px 18px;
+    border-right: none;
+  }
+
+  .url-prefix-enabled {
+    .url-prefix {
+      display: inline-block;
+    }
+
+    .url {
+      border-bottom-left-radius: 0;
+      border-top-left-radius: 0;
+      padding-left: 5px;
+    }
+  }
+
+  .loading-container {
+    border-radius: 2px 18px 18px 2px;
     position: absolute;
     right: 0;
     top: 10px;
@@ -435,6 +456,10 @@
 
   .loading .loading-container {
     display: inline-block;
+  }
+
+  .url-input-wrapper {
+    width: 100%;
   }
 
   .url {
