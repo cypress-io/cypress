@@ -24,6 +24,8 @@
     "@packages/reporter": "*",
     "@packages/socket": "*",
     "@packages/web-config": "*",
+    "@reach/dialog": "0.10.5",
+    "@reach/visually-hidden": "0.10.4",
     "ansi-to-html": "0.6.14",
     "babel-plugin-prismjs": "1.0.2",
     "bluebird": "3.5.3",

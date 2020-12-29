@@ -227,16 +227,8 @@ const eventManager = {
       studioRecorder.removeLog(commandId)
     })
 
-    reporterBus.on('studio:save', ({ fileDetails, closeStudio }) => {
-      studioRecorder.stop()
-      ws.emit('studio:save', fileDetails, studioRecorder.logs, () => {
-        if (closeStudio) {
-          reporterBus.emit('studio:cancel')
-        }
-        // else {
-        //   rerun()
-        // }
-      })
+    reporterBus.on('studio:save', () => {
+      studioRecorder.startSave()
     })
 
     localBus.on('studio:start', () => {
@@ -244,13 +236,14 @@ const eventManager = {
       rerun()
     })
 
-    localBus.on('studio:cancel:reporter:restart', () => {
-      reporterBus.emit('studio:cancel:reporter:restart')
+    localBus.on('studio:save', (saveInfo) => {
+      ws.emit('studio:save', saveInfo, () => {
+        reporterBus.emit('studio:cancel')
+      })
     })
 
-    localBus.on('studio:visit:url', (url) => {
-      studioRecorder.setVisitUrl(url)
-      Cypress.cy.visit(url)
+    localBus.on('studio:cancel:reporter:restart', () => {
+      reporterBus.emit('studio:cancel:reporter:restart')
     })
 
     const $window = $(window)
@@ -383,7 +376,7 @@ const eventManager = {
             ...reporterState,
             studioTestId: studioRecorder.testId,
             studioSuiteId: studioRecorder.suiteId,
-            studioVisitUrl: studioRecorder.visitUrl,
+            studioUrl: studioRecorder.url,
           })
         })
       })
@@ -466,6 +459,10 @@ const eventManager = {
       if (studioRecorder.suiteId) {
         studioRecorder.setTestId(test.id)
       }
+
+      if (studioRecorder.hasRunnableId) {
+        studioRecorder.setFileDetails(test.invocationDetails)
+      }
     })
   },
 
@@ -532,8 +529,8 @@ const eventManager = {
       studioRecorder.setSuiteId(state.studioSuiteId)
     }
 
-    if (state.studioVisitUrl) {
-      studioRecorder.setVisitUrl(state.studioVisitUrl)
+    if (state.studioUrl) {
+      studioRecorder.setUrl(state.studioUrl)
     }
   },
 

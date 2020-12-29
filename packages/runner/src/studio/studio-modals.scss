@@ -32,9 +32,7 @@
       }
     }
 
-    .center {
-      text-align: center;
-
+    .content {
       .text {
         color: #6c6c6c;
         padding: 0.5em 1em;
@@ -43,9 +41,26 @@
           color: #565554;
           font-weight: 600;
         }
+
+        input {
+          border: 1px solid #9d9ea9;
+          border-radius: 2px;
+          box-sizing: border-box;
+          color: #6c6c6c;
+          display: block;
+          font-size: 16px;
+          font-family: $font-sans;
+          margin-top: 8px;
+          padding: 4px;
+          width: 100%;
+
+          &:focus {
+            outline: none;
+          }
+        }
       }
 
-      .get-started {
+      .btn-main {
         background-color: #3386d4;
         border-radius: 0.25em;
         color: #fff;
@@ -60,44 +75,18 @@
         &:focus {
           outline: none;
         }
+
+        &[disabled],
+        &[disabled]:hover,
+        &[disabled]:active {
+          background-color: #3386d4;
+          opacity: 0.5;
+        }
       }
     }
 
-    .studio-controls {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 1em;
-
-      button {
-        border-radius: 5px;
-        font-family: $font-sans;
-        font-size: 12px;
-        padding: 8px 20px;
-
-        &:focus {
-          outline: none;
-        }
-      }
-
-      .button-outline {
-        background-color: #fff;
-        color: #3386d4;
-        border: 1px solid #3386d4;
-
-        &:hover {
-          background-color: #3386d4;
-          color: #fff;
-        }
-      }
-
-      .button-solid {
-        background-color: #3386d4;
-        color: #fff;
-
-        &:hover {
-          background-color: darken(#3386d4, 10%);
-        }
-      }
+    .center {
+      text-align: center;
     }
   }
 
@@ -107,11 +96,15 @@
 
   &.studio-save-modal {
     max-width: 25em;
+    min-width: 20em;
 
     .body {
       margin-bottom: 1em;
 
-      .center .text {
+      .content .text {
+        border-top: 1px solid #e1e2e4;
+        font-size: 16px;
+        margin-top: 0.8em;
         padding-top: 1em;
       }
     }

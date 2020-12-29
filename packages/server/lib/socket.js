@@ -6,7 +6,6 @@ const socketIo = require('@packages/socket')
 
 const editors = require('./util/editors')
 const { openFile } = require('./util/file-opener')
-const { appendStudioCommandsToTest } = require('./util/spec_writer')
 const fs = require('./util/fs')
 const open = require('./util/open')
 const exec = require('./exec')
@@ -17,7 +16,7 @@ const errors = require('./errors')
 const preprocessor = require('./plugins/preprocessor')
 const netStubbing = require('@packages/net-stubbing')
 const firefoxUtil = require('./browsers/firefox-util').default
-const studio = require('./util/studio')
+const studio = require('./studio')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -472,9 +471,8 @@ class Socket {
         .then(cb)
       })
 
-      socket.on('studio:save', (fileDetails, commandLogs, cb) => {
-        appendStudioCommandsToTest(fileDetails, commandLogs)
-        .then(studio.setStudioModalShown)
+      socket.on('studio:save', (saveInfo, cb) => {
+        studio.save(saveInfo)
         .then(cb)
       })
 

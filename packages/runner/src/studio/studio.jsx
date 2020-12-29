@@ -52,6 +52,7 @@ class Studio extends Component {
             <button
               className='header-button button-studio'
               disabled={model.isLoading}
+              onClick={this._save}
             >
               <i className='fas fa-save' />
             </button>
@@ -65,13 +66,17 @@ class Studio extends Component {
     e.preventDefault()
   }
 
+  _close = () => {
+    eventManager.emit('studio:cancel:reporter:restart')
+  }
+
   _restart = () => {
     this.props.model.reset()
     eventManager.emit('restart')
   }
 
-  _close = () => {
-    eventManager.emit('studio:cancel:reporter:restart')
+  _save = () => {
+    this.props.model.startSave()
   }
 }
 

@@ -1,5 +1,5 @@
 import { observer } from 'mobx-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { Dialog } from '@reach/dialog'
 import VisuallyHidden from '@reach/visually-hidden'
 
@@ -31,9 +31,57 @@ const StudioInitModal = observer(() => {
           <div className='text'>
             Generate Cypress commands by interacting with your site on the right. Then, save these commands directly to your test file.
           </div>
-          <button className='get-started' onClick={_start}>
+          <button className='btn-main' onClick={_start}>
             Get Started
           </button>
+        </div>
+      </div>
+      <button className='close-button' onClick={_close}>
+        <VisuallyHidden>Close</VisuallyHidden>
+        <span aria-hidden>
+          <i className='fas fa-times' />
+        </span>
+      </button>
+    </Dialog>
+  )
+})
+
+const StudioSaveModal = observer(() => {
+  const [name, setName] = useState('')
+
+  const _close = studioRecorder.closeSaveModal
+
+  const _save = (e) => {
+    e.preventDefault()
+
+    if (!name) return
+
+    studioRecorder.save(name)
+  }
+
+  return (
+    <Dialog
+      className='studio-modal studio-save-modal'
+      aria-label='Start Studio'
+      isOpen={studioRecorder.saveModalIsOpen}
+      onDismiss={_close}
+    >
+      <div className='body'>
+        <h1 className='title'>
+          <i className='fas fa-magic icon' /> Save New Test
+        </h1>
+        <div className='content'>
+          <form onSubmit={_save}>
+            <div className='text'>
+              <label className='text-strong' htmlFor='testName'>Test Name</label>
+              <input id='testName' type='text' value={name} onChange={(e) => setName(e.target.value)} required />
+            </div>
+            <div className='center'>
+              <button className='btn-main' type='submit' disabled={!name}>
+                Save Test
+              </button>
+            </div>
+          </form>
         </div>
       </div>
       <button className='close-button' onClick={_close}>
@@ -49,6 +97,7 @@ const StudioInitModal = observer(() => {
 const StudioModals = observer(() => (
   <>
     <StudioInitModal />
+    <StudioSaveModal />
   </>
 ))
 

@@ -3,29 +3,64 @@ import { Visitor, builders as b, namedTypes as n, visit } from 'ast-types'
 import * as recast from 'recast'
 import { parse } from '@babel/parser'
 
-interface Command {
-  selector: string
+export interface Command {
+  selector?: string
   name: string
   message?: string
+}
+
+export interface FileDetails {
+  absoluteFile: string
+  column: number
+  line: number
 }
 
 export const generateCypressCommand = (cmd: Command) => {
   const { selector, name, message } = cmd
 
+  if (selector) {
+    return b.expressionStatement(
+      b.callExpression(
+        b.memberExpression(
+          b.callExpression(
+            b.memberExpression(
+              b.identifier('cy'),
+              b.identifier('get'),
+              false,
+            ),
+            [b.stringLiteral(selector)],
+          ),
+          b.identifier(name),
+        ),
+        message ? [b.stringLiteral(message)] : [],
+      ),
+    )
+  }
+
   return b.expressionStatement(
     b.callExpression(
       b.memberExpression(
-        b.callExpression(
-          b.memberExpression(
-            b.identifier('cy'),
-            b.identifier('get'),
-            false,
-          ),
-          [b.stringLiteral(selector)],
-        ),
+        b.identifier('cy'),
         b.identifier(name),
+        false,
       ),
       message ? [b.stringLiteral(message)] : [],
+    ),
+  )
+}
+
+export const generateTest = (name: string, body: n.BlockStatement) => {
+  return b.expressionStatement(
+    b.callExpression(
+      b.identifier('it'),
+      [
+        b.stringLiteral(name),
+        b.functionExpression(
+          null,
+          [],
+          body,
+        ),
+      ],
     ),
   )
 }
@@ -53,10 +88,10 @@ export const addCommandsToBody = (body: Array<{}>, commands: Command[]) => {
   return body
 }
 
-export const appendStudioCommandsToTest = (fileDetails, commands: Command[]) => {
-  const { absoluteFile, line, column } = fileDetails
+export const generateAstRules = (fileDetails: { line: number, column: number }, fnNames: string[], cb: (fn: n.FunctionExpression) => any): Visitor<{}> => {
+  const { line, column } = fileDetails
 
-  const astRules: Visitor<{}> = {
+  return {
     visitCallExpression (path) {
       const { node } = path
       const { callee } = node
@@ -73,14 +108,14 @@ export const appendStudioCommandsToTest = (fileDetails, commands: Command[]) => 
         const columnStart = identifier.loc.start.column + 1
         const columnEnd = identifier.loc.end.column + 2
 
-        if (identifier.name === 'it' && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
+        if (fnNames.includes(identifier.name) && identifier.loc.start.line === line && columnStart <= column && column <= columnEnd) {
           const fn = node.arguments[1] as n.FunctionExpression
 
           if (!fn) {
             return false
           }
 
-          addCommandsToBody(fn.body.body, commands)
+          cb(fn)
 
           return false
         }
@@ -89,6 +124,30 @@ export const appendStudioCommandsToTest = (fileDetails, commands: Command[]) => 
       return this.traverse(path)
     },
   }
+}
+
+export const appendCommandsToTest = (fileDetails: FileDetails, commands: Command[]) => {
+  const { absoluteFile } = fileDetails
+
+  const astRules = generateAstRules(fileDetails, ['it', 'specify'], (fn: n.FunctionExpression) => {
+    addCommandsToBody(fn.body.body, commands)
+  })
+
+  return rewriteSpec(absoluteFile, astRules)
+}
+
+export const createNewTestInSuite = (fileDetails: FileDetails, commands: Command[], testName: string) => {
+  const { absoluteFile } = fileDetails
+
+  const astRules = generateAstRules(fileDetails, ['context', 'describe'], (fn: n.FunctionExpression) => {
+    const testBody = b.blockStatement([])
+
+    addCommandsToBody(testBody.body, commands)
+
+    const test = generateTest(testName, testBody)
+
+    fn.body.body.push(test)
+  })
 
   return rewriteSpec(absoluteFile, astRules)
 }

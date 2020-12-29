@@ -10,7 +10,6 @@ import SelectorPlayground from '../selector-playground/selector-playground'
 import selectorPlaygroundModel from '../selector-playground/selector-playground-model'
 import Studio from '../studio/studio'
 import studioRecorder from '../studio/studio-recorder'
-import eventManager from '../lib/event-manager'
 
 @observer
 export default class Header extends Component {
@@ -137,7 +136,7 @@ export default class Header extends Component {
   }
 
   _studioNeedsUrl = () => {
-    return studioRecorder.isActive && !studioRecorder.visitUrl && !this.props.state.url
+    return studioRecorder.isActive && !studioRecorder.url && !this.props.state.url
   }
 
   @action _onUrlInput = (e) => {
@@ -155,7 +154,7 @@ export default class Header extends Component {
       url = `http://${url}`
     }
 
-    eventManager.emit('studio:visit:url', url)
+    studioRecorder.visitUrl(url)
 
     this.urlInput = ''
   }

@@ -330,30 +330,10 @@
       }
     }
 
-    .studio-run {
-      background-color: #fff;
-      border: 1px solid #3386d4;
-      color: #3386d4;
-      margin-left: auto;
-      margin-right: 10px;
-
-      &:hover {
-        background-color: #3386d4;
-        color: #fff;
-      }
-
-      &[disabled],
-      &[disabled]:hover,
-      &[disabled]:active {
-        background-color: #fff;
-        color: #3386d4;
-        opacity: 0.5;
-      }
-    }
-
     .studio-save {
       background-color: #3386d4;
       color: #fff;
+      margin-left: auto;
 
       &:hover {
         background-color: darken(#3386d4, 10%);

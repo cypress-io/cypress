@@ -20,11 +20,14 @@ export class StudioRecorder {
   @observable testId = null
   @observable suiteId = null
   @observable initModalIsOpen = false
+  @observable saveModalIsOpen = false
   @observable logs = []
   @observable isLoading = false
   @observable isActive = false
-  @observable visitUrl = null
+  @observable url = null
   @observable _hasStarted = false
+
+  fileDetails = null
 
   @computed get hasRunnableId () {
     return !!this.testId || !!this.suiteId
@@ -80,6 +83,14 @@ export class StudioRecorder {
     this.initModalIsOpen = false
   }
 
+  @action showSaveModal = () => {
+    this.saveModalIsOpen = true
+  }
+
+  @action closeSaveModal = () => {
+    this.saveModalIsOpen = false
+  }
+
   @action startLoading = () => {
     this.isLoading = true
   }
@@ -88,8 +99,12 @@ export class StudioRecorder {
     this.isActive = false
   }
 
-  @action setVisitUrl = (url) => {
-    this.visitUrl = url
+  @action setUrl = (url) => {
+    this.url = url
+  }
+
+  setFileDetails = (fileDetails) => {
+    this.fileDetails = fileDetails
   }
 
   @action start = (body) => {
@@ -99,8 +114,8 @@ export class StudioRecorder {
     this._currentId = 1
     this._hasStarted = true
 
-    if (this.visitUrl) {
-      eventManager.emit('studio:visit:url', this.visitUrl)
+    if (this.url) {
+      this.visitUrl()
     }
 
     this.attachListeners(body)
@@ -116,7 +131,7 @@ export class StudioRecorder {
     this.stop()
 
     this.logs = []
-    this.visitUrl = null
+    this.url = null
     this._hasStarted = false
   }
 
@@ -124,8 +139,44 @@ export class StudioRecorder {
     this.stop()
     this.clearRunnableIds()
 
-    this.visitUrl = null
+    this.url = null
     this._hasStarted = false
+  }
+
+  @action startSave = () => {
+    this.stop()
+
+    if (this.suiteId) {
+      this.showSaveModal()
+    } else {
+      this.save()
+    }
+  }
+
+  @action save = (testName = null) => {
+    this.closeSaveModal()
+
+    eventManager.emit('studio:save', {
+      fileDetails: this.fileDetails,
+      commands: this.logs,
+      isSuite: !!this.suiteId,
+      testName,
+    })
+  }
+
+  @action visitUrl = (url = this.url) => {
+    this.setUrl(url)
+
+    const Cypress = eventManager.getCypress()
+
+    Cypress.cy.visit(this.url)
+
+    this.logs.push({
+      id: this._getId(),
+      selector: null,
+      name: 'visit',
+      message: this.url,
+    })
   }
 
   attachListeners = (body) => {

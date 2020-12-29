@@ -24,6 +24,18 @@ class StudioControls extends Component<StudioControlsProps> {
     events,
   }
 
+  _cancel = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:cancel:reporter:restart')
+  }
+
+  _save = (e: MouseEvent) => {
+    e.preventDefault()
+
+    this.props.events.emit('studio:save')
+  }
+
   render () {
     const { studioIsNotEmpty } = this.props.model
 
@@ -31,28 +43,10 @@ class StudioControls extends Component<StudioControlsProps> {
       <>
         <div className='studio-controls'>
           <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
-          <button className='studio-run' disabled={!studioIsNotEmpty}>Run Test</button>
-          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._saveAndExit}>Save Test</button>
+          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
         </div>
       </>
     )
-  }
-
-  _cancel = (e: MouseEvent) => {
-    e.preventDefault()
-
-    this.props.events.emit('studio:cancel:reporter:restart')
-  }
-
-  _save = (closeStudio: boolean) => {
-    const { events, model } = this.props
-
-    events.emit('studio:save', model.invocationDetails, closeStudio)
-  }
-
-  _saveAndExit = (e: MouseEvent) => {
-    e.preventDefault()
-    this._save(true)
   }
 }
 
@@ -160,7 +154,7 @@ class Test extends Component<TestProps> {
     e.preventDefault()
     e.stopPropagation()
 
-    const { model } = this.props
+    const { model, events } = this.props
 
     events.emit('studio:init:test', model.id)
   }
