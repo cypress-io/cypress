@@ -1,4 +1,5 @@
 const webpackPreprocessor = require('@cypress/webpack-preprocessor')
+const { startDevServer } = require('@cypress/webpack-dev-server')
 const babelConfig = require('../../babel.config.js')
 
 /** @type import("webpack").Configuration */
@@ -63,6 +64,8 @@ const options = {
 }
 
 module.exports = (on, config) => {
+  require('@cypress/code-coverage/task')(on, config)
+  on('devserver:start', (opts) => startDevServer(opts, webpackOptions))
   on('file:preprocessor', webpackPreprocessor(options))
 
   return config
