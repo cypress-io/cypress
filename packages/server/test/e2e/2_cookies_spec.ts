@@ -2,6 +2,7 @@ import moment from 'moment'
 import parser from 'cookie-parser'
 import e2e from '../support/helpers/e2e'
 import humanInterval from 'human-interval'
+import cors from 'cors'
 
 const onServer = function (app) {
   app.use(parser())
@@ -280,5 +281,72 @@ describe('e2e cookies', () => {
         snapshot: true,
       })
     })
+  })
+})
+
+describe('cross-origin cookies, set:cookies', () => {
+  const onServer = (app) => {
+    app.use(parser())
+    app.use(cors({
+      origin: (origin, cb) => {
+        cb(null, true)
+      },
+      credentials: true,
+    }))
+
+    app.get('/cookie/:name', (req, res) => {
+      const name = req.params.name
+
+      if (!name) {
+        throw new Error('cookie options requires name')
+      }
+
+      const cookieStr = Object.keys(req.query)[0]
+
+      console.log(cookieStr)
+      const reqCookie = JSON.parse(cookieStr)
+
+      console.log({ reqCookie })
+      const { value, ...cookie } = reqCookie
+
+      res.cookie(name, value || 'value', {
+        secure: true,
+        sameSite: 'None',
+        ...cookie,
+      })
+
+      res.send(`<h1>${name}</h1>`)
+    })
+  }
+
+  e2e.setup({
+    servers: [{
+      onServer,
+      port: httpPort,
+    }, {
+      onServer,
+      port: httpsPort,
+      https: true,
+    }],
+    settings: {
+      hosts: {
+        '*.foo.com': '127.0.0.1',
+        '*.bar.net': '127.0.0.1',
+        '*.cypress.test': '127.0.0.1',
+      },
+    },
+
+  })
+
+  e2e.it('set:cookies', {
+    config: {
+      video: false,
+      baseUrl: `http://127.0.0.3:${httpPort}`,
+      env: {
+        HTTP: httpPort,
+        HTTPS: httpsPort,
+      },
+    },
+    spec: 'multi_cookies_spec.js',
   })
 })

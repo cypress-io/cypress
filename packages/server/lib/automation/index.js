@@ -100,6 +100,8 @@ module.exports = {
             return cookies.getCookie(data, automate)
           case 'set:cookie':
             return cookies.setCookie(data, automate)
+          case 'set:cookies':
+            return cookies.setCookies(data, automate)
           case 'clear:cookies':
             return cookies.clearCookies(data, automate)
           case 'clear:cookie':

@@ -1408,6 +1408,14 @@ module.exports = {
     whitelist_renamed: `The ${cmd('server')} \`whitelist\` option has been renamed to \`ignore\`. Please rename \`whitelist\` to \`ignore\`.`,
   },
 
+  sessions: {
+    duplicateName: {
+      message: `${cmd('defineSession')} has already been called with the name **{{name}}**. You may not define multiple Sessions with the same name.`,
+      docsUrl: 'https://on.cypress.io/defineSession',
+
+    },
+  },
+
   setCookie: {
     invalid_arguments: {
       message: `${cmd('setCookie')} must be passed two string arguments for \`name\` and \`value\`.`,

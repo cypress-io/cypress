@@ -486,6 +486,7 @@ const Log = function (cy, state, config, obj) {
 const create = function (Cypress, cy, state, config) {
   counter = 0
   const logs = {}
+  let group = null
 
   // give us the ability to change the delay for firing
   // the change event, or default it to 4
@@ -536,6 +537,22 @@ const create = function (Cypress, cy, state, config) {
 
     const log = Log(cy, state, config, options)
 
+    if (options.groupStart) {
+      group = true
+
+      return
+    }
+
+    if (options.groupEnd) {
+      group = null
+
+      return
+    }
+
+    if (group) {
+      if (options.type === 'parent') options.type = 'child'
+    }
+
     // add event emitter interface
     $Events.extend(log)
 
@@ -585,6 +602,14 @@ const create = function (Cypress, cy, state, config) {
     }
 
     addToLogs(log)
+
+    if (options.sessionInfo) {
+      Cypress.emit('session:add', log.toJSON())
+    }
+
+    if (options.emitOnly) {
+      return
+    }
 
     triggerLog(log)
 

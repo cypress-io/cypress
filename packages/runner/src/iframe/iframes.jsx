@@ -51,6 +51,7 @@ export default class Iframes extends Component {
     this.props.eventManager.on('before:screenshot', this.autIframe.beforeScreenshot)
     this.props.eventManager.on('after:screenshot', this.autIframe.afterScreenshot)
     this.props.eventManager.on('script:error', this._setScriptError)
+    this.props.eventManager.on('visit:blank', this.autIframe.visitBlank)
 
     // TODO: need to take headless mode into account
     // may need to not display reporter if more than 200 tests
@@ -116,7 +117,7 @@ export default class Iframes extends Component {
     const $container = $(this.refs.container).empty()
     const $autIframe = this.autIframe.create(this.props.config).appendTo($container)
 
-    this.autIframe.showBlankContents()
+    this.autIframe.showInitialBlankContents()
 
     // specs with type "component" can only arrive if the server has "componentTesting" experiment on
     if (this.props.config.spec.specType === 'component') {

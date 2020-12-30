@@ -924,6 +924,22 @@ declare namespace Cypress {
     debug(options?: Partial<Loggable>): Chainable<Subject>
 
     /**
+     * Define a session for later use in cy.useSession
+     *
+     * @see https://on.cypress.io/defineSession
+     */
+    defineSession(options: SessionOptions): Session
+    defineSession(name: string, steps: () => void|false, options?: OptionalSessionOptions): Session
+
+    /**
+     * Apply a Session's cookie/localStorage data to the current test
+     *
+     * @see https://on.cypress.io/useSession
+     */
+    useSession(sessionReference: Session): Chainable<null>
+    useSession(name: string): Chainable<null>
+
+    /**
      * Get the window.document of the page that is currently active.
      *
      * @see https://on.cypress.io/document
@@ -2632,6 +2648,20 @@ declare namespace Cypress {
     verbose: boolean
   }
 
+  interface OptionalSessionOptions {
+    validate?: () => false|void
+    before?: () => void
+    after?: () => void
+  }
+  interface SessionOptions extends OptionalSessionOptions {
+    name: string
+    steps: () => void
+  }
+
+  interface Session {
+    name: string
+  }
+
   /**
    * Options object to change the default behavior of cy.exec().
    */
@@ -2789,6 +2819,7 @@ declare namespace Cypress {
     httpOnly: boolean
     expiry: number
     sameSite: SameSiteStatus
+    hostOnly?: true
   }
 
   interface ShadowDomOptions {
@@ -5224,6 +5255,7 @@ declare namespace Cypress {
     value: string
     path: string
     domain: string
+    hostOnly?: true
     httpOnly: boolean
     secure: boolean
     expiry?: number

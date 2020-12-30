@@ -10,6 +10,7 @@ import { CommandProps } from '../commands/command-model'
 import { AgentProps } from '../agents/agent-model'
 import { RouteProps } from '../routes/route-model'
 import { RunnablesStore, LogProps } from '../runnables/runnables-store'
+import { SessionProps } from '../sessions/sessions-model'
 
 export type TestState = 'active' | 'failed' | 'pending' | 'passed' | 'processing'
 
@@ -123,6 +124,10 @@ export default class Test extends Runnable {
     return this._withAttempt(props.testCurrentRetry, (attempt: Attempt) => {
       return attempt.addLog(props)
     })
+  }
+
+  addSession (props: SessionProps) {
+    return this._withAttempt(props.testCurrentRetry, (attempt) => attempt._addSession(props))
   }
 
   updateLog (props: LogProps) {

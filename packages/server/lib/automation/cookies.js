@@ -1,8 +1,7 @@
 const _ = require('lodash')
-const Promise = require('bluebird')
 const extension = require('@packages/extension')
 const debug = require('debug')('cypress:server:automation:cookies')
-
+const { isHostOnlyCookie } = require('../browsers/cdp_automation')
 // match the w3c webdriver spec on return cookies
 // https://w3c.github.io/webdriver/webdriver-spec.html#cookies
 const COOKIE_PROPERTIES = 'name value path domain secure httpOnly expiry hostOnly sameSite'.split(' ')
@@ -47,9 +46,11 @@ const normalizeGetCookieProps = function (props) {
     return props
   }
 
-  const cookie = normalizeCookieProps(props)
+  if (props.hostOnly === false || (props.hostOnly && !isHostOnlyCookie(props))) {
+    delete props.hostOnly
+  }
 
-  return _.omit(cookie, 'hostOnly')
+  return normalizeCookieProps(props)
 }
 
 let cookies = function (cyNamespace, cookieNamespace) {
@@ -64,11 +65,17 @@ let cookies = function (cyNamespace, cookieNamespace) {
     return name.startsWith(cyNamespace) || (name === cookieNamespace)
   }
 
+  const throwIfNamespaced = (data) => {
+    if (isNamespaced(data)) {
+      throw new Error('Sorry, you cannot modify a Cypress namespaced cookie.')
+    }
+  }
+
   return {
     getCookies (data, automate) {
       debug('getting:cookies %o', data)
 
-      return automate(data)
+      return automate('get:cookies', data)
       .then((cookies) => {
         cookies = normalizeGetCookies(cookies)
         cookies = _.reject(cookies, isNamespaced)
@@ -97,56 +104,67 @@ let cookies = function (cyNamespace, cookieNamespace) {
     },
 
     setCookie (data, automate) {
-      if (isNamespaced(data)) {
-        throw new Error('Sorry, you cannot set a Cypress namespaced cookie.')
-      } else {
+      throwIfNamespaced(data)
+      const cookie = normalizeCookieProps(data)
+
+      // lets construct the url ourselves right now
+      // unless we already have a URL
+      cookie.url = data.url != null ? data.url : extension.getCookieUrl(data)
+
+      debug('set:cookie %o', cookie)
+
+      return automate(cookie)
+      .then((cookie) => {
+        cookie = normalizeGetCookieProps(cookie)
+
+        debug('received set:cookie %o', cookie)
+
+        return cookie
+      })
+    },
+
+    setCookies (cookies, automate) {
+      cookies = cookies.map((data) => {
+        throwIfNamespaced(data)
         const cookie = normalizeCookieProps(data)
 
         // lets construct the url ourselves right now
         // unless we already have a URL
         cookie.url = data.url != null ? data.url : extension.getCookieUrl(data)
 
-        debug('set:cookie %o', cookie)
+        return cookie
+      })
 
-        return automate(cookie)
-        .then((cookie) => {
-          cookie = normalizeGetCookieProps(cookie)
+      debug('set:cookies %o', cookies)
 
-          debug('received set:cookie %o', cookie)
-
-          return cookie
-        })
-      }
+      return automate('set:cookies', cookies)
+      // .tap(console.log)
+      .return(cookies)
     },
 
     clearCookie (data, automate) {
-      if (isNamespaced(data)) {
-        throw new Error('Sorry, you cannot clear a Cypress namespaced cookie.')
-      } else {
-        debug('clear:cookie %o', data)
+      throwIfNamespaced(data)
+      debug('clear:cookie %o', data)
 
-        return automate(data)
-        .then((cookie) => {
-          cookie = normalizeCookieProps(cookie)
+      return automate(data)
+      .then((cookie) => {
+        cookie = normalizeCookieProps(cookie)
 
-          debug('received clear:cookie %o', cookie)
+        debug('received clear:cookie %o', cookie)
 
-          return cookie
-        })
-      }
+        return cookie
+      })
     },
 
-    clearCookies (data, automate) {
-      cookies = _.reject(normalizeCookies(data), isNamespaced)
+    async clearCookies (data, automate) {
+      const cookiesToClear = await this.getCookies(data || {}, automate)
+
+      cookies = _.reject(normalizeCookies(cookiesToClear), isNamespaced)
 
       debug('clear:cookies %o', cookies)
 
-      const clear = (cookie) => {
-        return automate('clear:cookie', { name: cookie.name, domain: cookie.domain })
-        .then(normalizeCookieProps)
-      }
-
-      return Promise.map(cookies, clear)
+      return automate('clear:cookies', cookies)
+      .mapSeries(normalizeCookieProps)
     },
 
     changeCookie (data) {

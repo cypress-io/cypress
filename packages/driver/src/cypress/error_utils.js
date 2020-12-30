@@ -274,7 +274,7 @@ const replaceErrMsgTokens = (errMessage, args) => {
 }
 
 const errByPath = (msgPath, args) => {
-  let msgValue = _.get($errorMessages, msgPath)
+  let msgValue = _.isObject(msgPath) ? msgPath : _.get($errorMessages, msgPath)
 
   if (!msgValue) {
     return internalErr({ message: `Error message path '${msgPath}' does not exist` })
@@ -385,4 +385,5 @@ module.exports = {
   warnByPath,
   wrapErr,
   getUserInvocationStack,
+  errs: $errorMessages,
 }

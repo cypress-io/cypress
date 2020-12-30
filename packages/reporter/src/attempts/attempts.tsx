@@ -10,6 +10,7 @@ import Routes from '../routes/routes'
 import TestError from '../errors/test-error'
 import TestModel from '../test/test-model'
 import AttemptModel from './attempt-model'
+import Sessions from '../sessions/sessions'
 
 const NoCommands = () => (
   <ul className='hooks-container'>
@@ -35,6 +36,7 @@ function renderAttemptContent (model: AttemptModel) {
 
   return (
     <div className={`attempt-${model.id + 1}`}>
+      <Sessions model={model.sessions} />
       <Agents model={model} />
       <Routes model={model} />
       <div ref='commands' className='runnable-commands-region'>

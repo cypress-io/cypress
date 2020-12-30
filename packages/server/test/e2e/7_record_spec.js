@@ -539,8 +539,6 @@ describe('e2e record', () => {
     setup(routes)
 
     it('passes in parallel with group', function () {
-      this.retries(3)
-
       return Promise.all([
         e2e.exec(this, {
           key: 'f858a2bc-b469-4e48-be67-0876339ee7e1',

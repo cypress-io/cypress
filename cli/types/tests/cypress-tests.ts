@@ -639,3 +639,46 @@ namespace CypressTaskTests {
     val // $ExpectType unknown
   })
 }
+
+namespace CypressSessionsTests {
+  cy.useSession('user')
+  cy.useSession(cy.defineSession({ name: 'user', steps: () => {} }))
+
+  cy.useSession() // $ExpectError
+
+  cy.defineSession('user', () => {})
+  cy.defineSession('user', () => {}, { after: () => {}, before: () => {}, validate: () => {} })
+  cy.defineSession('user', () => {}, { before: () => {} })
+  cy.defineSession({ name: 'user', steps: () => {} })
+
+  cy.defineSession('user') // $ExpectError
+  cy.defineSession({}) // $ExpectError
+  cy.defineSession({ name: 'user' }) // $ExpectError
+}
+
+namespace CypressCookieTests {
+  cy.getCookie('foo') // $ExpectType Chainable<Cookie | null>
+
+  cy.setCookie('foo', 'val', { // $ExpectType Chainable<Cookie>
+    log: false,
+    domain: 'example.com',
+    hostOnly: true,
+    expiry: 123,
+    secure: true,
+    sameSite: 'no_restriction',
+    foo: true, // $ExpectError
+  })
+
+  const cookie: Cypress.Cookie = {} as unknown as Cypress.Cookie
+
+  cookie.hostOnly
+  cookie.domain
+  cookie.expiry
+  cookie.httpOnly
+  cookie.name
+  cookie.path
+  cookie.sameSite
+  cookie.secure
+  cookie.value
+  cookie.foo // $ExpectError
+}

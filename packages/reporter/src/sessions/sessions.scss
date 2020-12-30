@@ -1,0 +1,21 @@
+.sessions-container {
+
+    .clear-sessions {
+      visibility: hidden;
+      text-transform: none;
+      color: #6a6b6c;
+      display: flex;
+      align-items: center;
+      padding: 4px 10px;
+      cursor: pointer;
+
+      &:hover, &:focus {
+        background-color: rgba(186, 186, 186, 0.2);
+      }
+    }
+    &:hover {
+      .clear-sessions {
+        visibility: visible;
+      }
+    }
+}

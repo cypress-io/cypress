@@ -5,7 +5,7 @@ const $utils = require('../../cypress/utils')
 const $errUtils = require('../../cypress/error_utils')
 const $Location = require('../../cypress/location')
 
-const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite'.split(' ')
+const COOKIE_PROPS = 'name value path secure httpOnly expiry domain sameSite hostOnly'.split(' ')
 
 const commandNameRe = /(:)(\w)/
 
@@ -142,9 +142,12 @@ module.exports = function (Commands, Cypress, cy, state, config) {
   // TODO: handle failure here somehow
   // maybe by tapping into the Cypress reset
   // stuff, or handling this in the runner itself?
-  Cypress.on('test:before:run:async', () => {
-    return getAndClear()
-  })
+  // Cypress sessions will clear cookies on its own before each test
+  if (!Cypress.config.experimentalSessionSupport) {
+    Cypress.on('test:before:run:async', () => {
+      return getAndClear()
+    })
+  }
 
   return Commands.addAll({
     getCookie (name, options = {}) {
@@ -238,6 +241,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         path: '/',
         secure: false,
         httpOnly: false,
+        hostOnly: false,
         log: true,
         expiry: $utils.addTwentyYears(),
         timeout: config('responseTimeout'),

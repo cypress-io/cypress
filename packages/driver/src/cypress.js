@@ -411,6 +411,9 @@ class $Cypress {
       case 'cy:visit:failed':
         return this.emit('visit:failed', args[0])
 
+      case 'cy:visit:blank':
+        return this.emitThen('visit:blank', args[0])
+
       case 'cy:viewport:changed':
         return this.emit('viewport:changed', ...args)
 

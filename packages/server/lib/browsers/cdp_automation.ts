@@ -60,10 +60,28 @@ export const _cookieMatches = (cookie: CyCookie, filter: CyCookieFilter) => {
   return true
 }
 
+// without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
+export function isHostOnlyCookie (cookie) {
+  if (cookie.domain[0] === '.') return false
+
+  const parsedDomain = cors.parseDomain(cookie.domain)
+
+  // normally, a non-hostOnly cookie should be prefixed with a .
+  // so if it's not a top-level domain (localhost, ...) or IP address
+  // prefix it with a . so it becomes a non-hostOnly cookie
+
+  return parsedDomain && parsedDomain.tld !== cookie.domain
+}
+
 export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
   const normalizeGetCookieProps = (cookie: cdp.Network.Cookie): CyCookie => {
     if (cookie.expires === -1) {
       delete cookie.expires
+    }
+
+    if (isHostOnlyCookie(cookie)) {
+      // @ts-ignore
+      cookie.hostOnly = true
     }
 
     // @ts-ignore
@@ -105,15 +123,12 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
     .value()
 
     // without this logic, a cookie being set on 'foo.com' will only be set for 'foo.com', not other subdomains
-    if (!cookie.hostOnly && cookie.domain[0] !== '.') {
-      const parsedDomain = cors.parseDomain(cookie.domain)
+    if (!cookie.hostOnly && isHostOnlyCookie(cookie)) {
+      setCookieRequest.domain = `.${cookie.domain}`
+    }
 
-      // normally, a non-hostOnly cookie should be prefixed with a .
-      // so if it's not a top-level domain (localhost, ...) or IP address
-      // prefix it with a . so it becomes a non-hostOnly cookie
-      if (parsedDomain && parsedDomain.tld !== cookie.domain) {
-        setCookieRequest.domain = `.${cookie.domain}`
-      }
+    if (cookie.hostOnly && !isHostOnlyCookie(cookie)) {
+      delete cookie.hostOnly
     }
 
     if (setCookieRequest.name.startsWith('__Host-')) {
@@ -179,6 +194,14 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
           return getCookie(data)
         })
+      case 'set:cookies':
+        setCookie = data.map((cookie) => normalizeSetCookieProps(cookie))
+
+        return sendDebuggerCommandFn('Network.clearBrowserCookies')
+        .then(() => {
+          return sendDebuggerCommandFn('Network.setCookies', { cookies: setCookie })
+        })
+
       case 'clear:cookie':
         return getCookie(data)
         // tap, so we can resolve with the value of the removed cookie
@@ -191,6 +214,21 @@ export const CdpAutomation = (sendDebuggerCommandFn: SendDebuggerCommand) => {
 
           return sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
         })
+
+      case 'clear:cookies':
+        return Bluebird.mapSeries(data as CyCookieFilter[], async (cookie) => {
+          // resolve with the value of the removed cookie
+          // also, getting the cookie via CDP first will ensure that we send a cookie `domain` to CDP
+          // that matches the cookie domain that is really stored
+          const cookieToBeCleared = await getCookie(cookie)
+
+          if (!cookieToBeCleared) return
+
+          await sendDebuggerCommandFn('Network.deleteCookies', _.pick(cookieToBeCleared, 'name', 'domain'))
+
+          return cookieToBeCleared
+        })
+
       case 'is:automation:client:connected':
         return true
       case 'remote:debugger:protocol':

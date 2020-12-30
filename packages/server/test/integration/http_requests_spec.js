@@ -382,6 +382,21 @@ describe('Routes', () => {
     })
   })
 
+  context('GET /__cypress/automation', () => {
+    beforeEach(function () {
+      return this.setup('http://localhost:8443')
+    })
+
+    it('sends localStorage access iframe', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/parent.postMessage.*localStorage/)
+      })
+    })
+  })
+
   context('GET /__cypress/files', () => {
     beforeEach(() => {
       Fixtures.scaffold('todos')

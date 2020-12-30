@@ -35,6 +35,7 @@ const { SocketAllowed } = require('./util/socket_allowed')
 const errors = require('./errors')
 const logger = require('./logger')
 const Socket = require('./socket')
+const session = require('./session')
 const Request = require('./request')
 const fileServer = require('./file_server')
 const templateEngine = require('./template_engine')
@@ -165,7 +166,7 @@ class Server {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      app.use(require('morgan')('dev'))
+      // app.use(require('morgan')('dev'))
     }
 
     // errorhandler
@@ -874,10 +875,12 @@ class Server {
     options.onResolveUrl = this._onResolveUrl.bind(this)
     options.onRequest = this._onRequest.bind(this)
     options.netStubbingState = this._netStubbingState
+    options.getRenderedHTMLOrigins = this._networkProxy.http.getRenderedHTMLOrigins
 
     options.onResetServerState = () => {
       this._networkProxy.reset()
       this._netStubbingState.reset()
+      session.clearSessions()
     }
 
     this._socket.startListening(this._server, automation, config, options)
