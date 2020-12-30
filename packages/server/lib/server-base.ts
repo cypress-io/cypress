@@ -92,7 +92,7 @@ export class ServerBase {
 
   constructor () {
     this._socketAllowed = new SocketAllowed()
-    this._request = null
+    this._request = Request()
     this._middleware = null
     this._server = null
     this._socket = null
@@ -204,7 +204,7 @@ export class ServerBase {
   }
 
   _onRequest (headers, automationRequest, options) {
-    return this._request.sendBluebird(headers, automationRequest, options)
+    return this._request.sendPromise(headers, automationRequest, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {

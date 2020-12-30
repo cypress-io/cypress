@@ -60,8 +60,6 @@ export class ServerE2E extends ServerBase {
 
       logger.setSettings(config)
 
-      // TODO: does not need to be an instance anymore
-      this._request = Request()
       this._nodeProxy = httpProxy.createProxyServer()
       this._socket = new Socket(config)
 
