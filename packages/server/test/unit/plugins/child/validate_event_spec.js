@@ -22,7 +22,6 @@ You passed: \`undefined\`
 
 The following are valid events:
 - devserver:start
-- file:preprocessor
 - after:screenshot
 - before:browser:launch
 - file:preprocessor
@@ -47,7 +46,6 @@ You passed: \`invalid:event:name\`
 
 The following are valid events:
 - devserver:start
-- file:preprocessor
 - after:screenshot
 - before:browser:launch
 - file:preprocessor
