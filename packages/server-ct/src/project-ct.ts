@@ -3,7 +3,7 @@
 import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'
-import devserver from '@packages/server/lib/plugins/devserver'
+import devServer from '@packages/server/lib/plugins/dev-server'
 import { ProjectBase } from '@packages/server/lib/project-base'
 import settings from '@packages/server/lib/util/settings'
 import specsUtil from '@packages/server/lib/util/specs'
@@ -67,7 +67,7 @@ export class ProjectCt extends ProjectBase {
     })
     .then((modifiedConfig) => {
       // now that plugins have been initialized, we want to execute
-      // the plugin event for 'devserver:config' and get back
+      // the plugin event for 'dev-server:start' and get back
       // @ts-ignore - let's not attempt to TS all the things in packages/server
 
       return specsUtil.find(modifiedConfig)
@@ -75,7 +75,7 @@ export class ProjectCt extends ProjectBase {
         return spec.specType === 'component'
       })
       .then((specs) => {
-        return devserver.start({ specs, config: modifiedConfig })
+        return devServer.start({ specs, config: modifiedConfig })
         .then((port) => {
           modifiedConfig.webpackDevServerUrl = `http://localhost:${port}`
 
@@ -84,7 +84,7 @@ export class ProjectCt extends ProjectBase {
           specsStore.watch({
             onSpecsChanged: (specs) => {
               // send new files to dev server
-              devserver.updateSpecs(specs)
+              devServer.updateSpecs(specs)
 
               // send new files to frontend
               this.server.sendSpecList(specs)

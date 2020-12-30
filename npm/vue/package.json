@@ -6,8 +6,8 @@
   "scripts": {
     "build": "tsc",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/cypress open --component-testing",
-    "cy:run": "node ../../scripts/cypress run --component-testing",
+    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
+    "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
     "test": "echo \"no tests setup\""
   },
   "dependencies": {
