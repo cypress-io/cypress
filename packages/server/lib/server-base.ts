@@ -22,6 +22,7 @@ import { SocketAllowed } from './util/socket_allowed'
 const ALLOWED_PROXY_BYPASS_URLS = [
   '/',
   '/__cypress/runner/cypress_runner.css',
+  '/__cypress/runner/cypress_runner.js', // TODO: fix this
   '/__cypress/static/favicon.ico',
 ]
 

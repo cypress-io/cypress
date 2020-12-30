@@ -32,8 +32,6 @@ export class ProjectE2E extends ProjectBase {
           return updatedConfig
         })
         .then((cfg) => {
-          cfg.proxyServer = cfg.proxyUrl
-
           return this.server.open(cfg, this, options.onError, options.onWarning)
           .spread((port, warning) => {
             return {
@@ -43,6 +41,12 @@ export class ProjectE2E extends ProjectBase {
             }
           })
         })
+      },
+
+      onAfterOpen ({ cfg }) {
+        cfg.proxyServer = cfg.proxyUrl
+
+        return cfg
       },
     })
   }

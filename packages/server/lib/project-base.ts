@@ -36,6 +36,7 @@ interface CloseOptions {
 
 interface OpenOptions {
   onOpen: (cfg: any) => Bluebird<any>
+  onAfterOpen: (cfg: any) => Bluebird<any>
 }
 
 // type ProjectOptions = Record<string, any>
@@ -131,7 +132,7 @@ export class ProjectBase extends EE {
       }
     })
     .then(callbacks.onOpen)
-    .then(({ cfg, port, warning }) => {
+    .tap(({ cfg, port, warning }) => {
       // if we didnt have a cfg.port
       // then get the port once we
       // open the server
@@ -141,7 +142,9 @@ export class ProjectBase extends EE {
         // and set all the urls again
         _.extend(cfg, config.setUrls(cfg))
       }
-
+    })
+    .tap(callbacks.onAfterOpen)
+    .then(({ cfg, port, warning }) => {
       // store the cfg from
       // opening the server
       this.cfg = cfg
