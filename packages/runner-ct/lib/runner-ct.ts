@@ -34,7 +34,7 @@ export const serve = (req, res, options: ServeOptions) => {
     ...options.config,
     browser: options.project.browser,
     specs: options.specsStore.specFiles,
-  }
+  } as Cfg
 
   // TODO: move the component file watchers in here
   // and update them in memory when they change and serve

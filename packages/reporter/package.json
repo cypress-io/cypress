@@ -2,7 +2,7 @@
   "name": "@packages/reporter",
   "version": "0.0.0",
   "private": true,
-  "main": "src/main.tsx",
+  "browser": "src/main.tsx",
   "scripts": {
     "build-for-tests": "webpack",
     "clean-deps": "rm -rf node_modules",

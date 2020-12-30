@@ -1,7 +1,10 @@
 {
-  "jsx": "react",
   "extends": "./../ts/tsconfig.json",
-  "compilerOptions": {
-    "types": ["mocha", "node"]
-  }
+  "include": [
+    "src/*.ts",
+    "./src/**/*.ts"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
+  ]
 }

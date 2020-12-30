@@ -1,15 +1,14 @@
 import _ from 'lodash'
 import { action, observable } from 'mobx'
-
-import appState, { AppState } from '../lib/app-state'
 import AgentModel, { AgentProps } from '../agents/agent-model'
 import CommandModel, { CommandProps } from '../commands/command-model'
-import RouteModel, { RouteProps } from '../routes/route-model'
-import scroller, { Scroller } from '../lib/scroller'
 import { HookProps } from '../hooks/hook-model'
-import SuiteModel, { SuiteProps } from './suite-model'
-import TestModel, { TestProps, UpdateTestCallback, UpdatableTestProps } from '../test/test-model'
+import appState, { AppState } from '../lib/app-state'
+import scroller, { Scroller } from '../lib/scroller'
+import RouteModel, { RouteProps } from '../routes/route-model'
+import TestModel, { TestProps, UpdatableTestProps, UpdateTestCallback } from '../test/test-model'
 import RunnableModel from './runnable-model'
+import SuiteModel, { SuiteProps } from './suite-model'
 
 const defaults = {
   hasSingleTest: false,
@@ -40,15 +39,15 @@ export interface RootRunnable {
 type RunnableType = 'test' | 'suite'
 type TestOrSuite<T> = T extends TestProps ? TestProps : SuiteProps
 
-class RunnablesStore {
+export class RunnablesStore {
   @observable isReady = defaults.isReady
   @observable runnables: RunnableArray = []
   @observable runnablesHistory: Record<string, RunnableArray> = {}
 
   runningSpec: string | null = null
 
-  hasTests: boolean = false
-  hasSingleTest: boolean = false
+  hasTests = false
+  hasSingleTest = false
 
   private appState: AppState
   private scroller: Scroller
@@ -217,7 +216,5 @@ class RunnablesStore {
     this.runnablesHistory[previousSpec] = this.runnables
   }
 }
-
-export { RunnablesStore }
 
 export default new RunnablesStore({ appState, scroller })
