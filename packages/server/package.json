@@ -150,7 +150,7 @@
     "chrome-har-capturer": "0.13.4",
     "cors": "2.8.5",
     "cross-env": "6.0.3",
-    "devtools-protocol": "0.0.734984",
+    "devtools-protocol": "0.0.839267",
     "eol": "0.9.1",
     "eventsource": "1.0.7",
     "express-session": "1.16.1",
