@@ -12944,10 +12944,10 @@ detective@^5.0.2, detective@^5.2.0:
     defined "^1.0.0"
     minimist "^1.1.1"
 
-devtools-protocol@0.0.734984:
-  version "0.0.734984"
-  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.734984.tgz#ba2aa691b9e91985a3e693172e62d7d445a68dbf"
-  integrity sha512-B7ZmBBcpYOkAaa/njqm2p9KKqKnZb99kBl2oiZBu7Lr7B3dLAPQz5aax1x+yvwt3x3U+6VAmwpZu7RGy1i95+Q==
+devtools-protocol@0.0.839267:
+  version "0.0.839267"
+  resolved "https://registry.yarnpkg.com/devtools-protocol/-/devtools-protocol-0.0.839267.tgz#6f437369e4664dbd9849723b886f8cedf28607ac"
+  integrity sha512-1DcPo/3PGJVw3INnq2NXO4onJiNFhWJW4YmSRQIiuDK/sW5OD1/LfXCcetrPvMvOBnz5c22DlpnpbYkJRE8MZw==
 
 dezalgo@^1.0.0, dezalgo@~1.0.3:
   version "1.0.3"
