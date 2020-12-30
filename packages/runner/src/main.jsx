@@ -9,6 +9,14 @@ import Container from './app/container'
 configure({ enforceActions: 'always' })
 
 const Runner = {
+  // this is here for the purpose of testing component testing with cypress,
+  // where it expects window.top.Runner.emit to be defined.
+  // It is defined AND used in runner-ct, but not here, so we just
+  // make it a no-op.
+  emit (evt, ...args) {
+    return
+  },
+
   start (el, base64Config) {
     action('started', () => {
       const config = JSON.parse(driverUtils.decodeBase64Unicode(base64Config))
