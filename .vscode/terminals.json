@@ -19,7 +19,7 @@
       "name": "cypress open (CT)",
       "focus": true,
       "onlySingle": true,
-      "execute": false,
+      "execute": true,
       "cwd": "[cwd]/packages/server-ct",
       "command": "yarn cypress:open"
     },
