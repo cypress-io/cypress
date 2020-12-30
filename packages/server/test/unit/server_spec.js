@@ -7,7 +7,7 @@ const Promise = require('bluebird')
 const { connect } = require('@packages/network')
 const config = require(`${root}lib/config`)
 const logger = require(`${root}lib/logger`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Socket = require(`${root}lib/socket`)
 const fileServer = require(`${root}lib/file_server`)
 const ensureUrl = require(`${root}lib/util/ensure-url`)
@@ -32,7 +32,7 @@ describe('lib/server', () => {
     return config.set({ projectRoot: '/foo/bar/' })
     .then((cfg) => {
       this.config = cfg
-      this.server = new Server()
+      this.server = new ServerE2E()
 
       this.oldFileServer = this.server._fileServer
       this.server._fileServer = this.fileServer
@@ -396,7 +396,7 @@ describe('lib/server', () => {
 
   context('#_onDomainSet', () => {
     beforeEach(function () {
-      this.server = new Server()
+      this.server = new ServerE2E()
     })
 
     it('sets port to 443 when omitted and https:', function () {

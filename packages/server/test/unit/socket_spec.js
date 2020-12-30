@@ -8,7 +8,7 @@ const httpsAgent = require('https-proxy-agent')
 const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
 const Socket = require(`${root}lib/socket`)
-const { Server } = require(`${root}lib/server`)
+const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Automation = require(`${root}lib/automation`)
 const exec = require(`${root}lib/exec`)
 const preprocessor = require(`${root}lib/plugins/preprocessor`)
@@ -22,7 +22,7 @@ describe('lib/socket', () => {
     Fixtures.scaffold()
 
     this.todosPath = Fixtures.projectPath('todos')
-    this.server = new Server(this.todosPath)
+    this.server = new ServerE2E(this.todosPath)
 
     return config.get(this.todosPath)
     .then((cfg) => {
