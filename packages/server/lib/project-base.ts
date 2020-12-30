@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'

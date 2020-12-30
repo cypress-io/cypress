@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Debug from 'debug'
 import browsers from './browsers'
 import config from './config'

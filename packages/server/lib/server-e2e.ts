@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import evilDns from 'evil-dns'

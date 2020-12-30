@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import http from 'http'

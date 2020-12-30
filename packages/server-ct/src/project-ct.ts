@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'

@@ -1,3 +1,4 @@
+// @ts-nocheck
 // copied from server/lib/socket.js
 
 import Bluebird from 'bluebird'

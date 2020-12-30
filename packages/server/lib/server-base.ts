@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 require('./cwd')
 
 import Bluebird from 'bluebird'
