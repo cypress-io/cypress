@@ -1099,8 +1099,9 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
         // dont enqueue / inject any new commands if
         // onInjectCommand returns false
         const onInjectCommand = state('onInjectCommand')
+        const injected = _.isFunction(onInjectCommand)
 
-        if (_.isFunction(onInjectCommand)) {
+        if (injected) {
           if (onInjectCommand.call(cy, name, ...args) === false) {
             return
           }
@@ -1112,6 +1113,7 @@ const create = function (specWindow, Cypress, Cookies, state, config, log) {
           type,
           chainerId,
           userInvocationStack,
+          injected,
           fn: wrap(firstCall),
         })
 

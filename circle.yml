@@ -467,12 +467,6 @@ jobs:
             . ./scripts/load-nvm.sh
             yarn check-terminal
 
-      - run:
-          name: Stop .only
-          command: |
-            . ./scripts/load-nvm.sh
-            yarn stop-only-all
-
       - restore_cache:
           name: Restore yarn cache
           key: v{{ .Environment.CACHE_VERSION }}-{{ arch }}-deps-root-{{ checksum "yarn.lock" }}
@@ -519,7 +513,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             git clean -df
-            yarn lint
+            yarn lint --max-warnings=0
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev

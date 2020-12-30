@@ -1,6 +1,7 @@
 {
   "plugins": [
-    "@cypress/dev"
+    "@cypress/dev",
+    "no-only-tests"
   ],
   "extends": [
     "plugin:@cypress/dev/general"
@@ -9,6 +10,7 @@
     "@typescript-eslint/no-var-requires": "off",
     "no-useless-constructor": "off",
     "@typescript-eslint/no-useless-constructor": "off",
+    "no-only-tests/no-only-tests": "warn",
     "prefer-spread": "off",
     "prefer-rest-params": "off",
     "@typescript-eslint/ban-ts-comment": "off",

@@ -47,7 +47,7 @@ module.exports = function (Commands, Cypress, cy, state) {
   // until they're 'really' resolved, so naturally this API
   // supports nesting promises
   const thenFn = function (subject, userOptions, fn) {
-    const ctx = this
+    const ctx = state('ctx')
 
     if (_.isFunction(userOptions)) {
       fn = userOptions

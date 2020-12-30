@@ -35,7 +35,7 @@ const isJquery = (obj) => {
   // as the jquery property of the window constructor
   // for actual jquery, it should be the version number
   // so we ensure that it is a string (rather than HTML element)
-  return hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
+  return !!hasJqueryProperty && typeof _.get(obj, 'constructor.prototype.jquery') === 'string'
 }
 
 // doing a little jiggle wiggle here
