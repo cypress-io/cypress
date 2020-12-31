@@ -81,11 +81,11 @@ module.exports = {
         // if we have an onRequest function
         // then just invoke that
         if ((onReq = get('onRequest'))) {
-          return onReq(msg, data)
+          return Promise.resolve(onReq(msg, data))
         }
 
         // do the default
-        return requestAutomationResponse(msg, data, fn)
+        return Promise.resolve(requestAutomationResponse(msg, data, fn))
       })
     }
 

@@ -1,84 +1,125 @@
-import _ from 'lodash'
-import cookieParser from 'cookie-parser'
-
 import e2e from '../support/helpers/e2e'
+import parser from 'cookie-parser'
 
-export const cookieServer = function (app) {
-  app.use(cookieParser())
+const onServer = function (app) {
+  app.use(parser())
 
-  app.get('/set', (req, res) => {
-    const host = req.get('host')
+  app.get('*', (req, res, next) => {
+    res.cookie(req.path, 'value', {
+      sameSite: 'None',
+      secure: true,
+    })
 
-    res.cookie(host, true)
-    res.send('<div>set cookie</div>')
+    next()
   })
 
-  app.get('/timeout', (req, res) => {
-    setTimeout(() => {
-      res.set('Access-Control-Allow-Origin', '*')
-      .end('it worked')
-    }, req.query.ms)
+  app.get('/link', (req, res) => {
+    res.send('<html><h1>link</h1><a href=\'https://www.foo.com:44665/cross_origin\'>second</a></html>')
   })
 
-  app.get('/cookies*', (req, res) => {
-    return res.send(_.map(req.cookies, (val, k) => `<div>${k}: ${val}</div>`).join('\n'))
+  app.get('/cross_origin', (req, res) => {
+    res.send('<html><h1>cross origin</h1></html>')
   })
 
-  app.get('*', (req, res) => {
-    const host = req.get('host')
+  app.get('/cross_origin_iframe', (req, res) => {
+    res.send('<html><body><h1>cross_origin_iframe</h1><iframe src="https://127.0.0.2:44665/set-localStorage"</body></html>')
+  })
 
-    const domain = host.slice(0, host.lastIndexOf(':'))
+  app.get('/cross_origin_iframe2', (req, res) => {
+    res.send('<html><body><h1>cross_origin_iframe2</h1><iframe src="https://127.0.0.3:44665/set-localStorage2"</body></html>')
+  })
 
-    switch (domain) {
-      case '127.0.0.1':
-        return res
-        .cookie('1', true, {
-          path: '/cookies/one',
-          sameSite: 'lax',
-        })
-        .redirect(`http://${`${domain.slice(0, -1)}2`}:2290/`)
+  app.get('/set-localStorage', (req, res) => {
+    res.send('<html><body><h1>set-localStorage</h1><script>window.localStorage.clear(); window.localStorage.foo = "bar"</script></body></html>')
+  })
 
-      case '127.0.0.2':
-        return res
-        .cookie('2', true, {
-          path: '/cookies/two',
-          sameSite: 'lax',
-        })
-        .redirect(`http://${`${domain.slice(0, -1)}3`}:2290/`)
+  app.get('/set-localStorage2', (req, res) => {
+    res.send('<html><body><h1>set-localStorage2</h2><script>window.localStorage.clear(); window.localStorage.foo = "bar"</script></body></html>')
+  })
 
-      case '127.0.0.3':
-        return res
-        .set('Content-Type', 'text/html')
-        .cookie('3', true, {
-          path: '/cookies/three',
-          sameSite: 'lax',
-        })
-        .send('<html><head></head><body>hi</body></html>')
+  app.get('/make-reqs', (req, res) => {
+    res.send(`<body><script>(function() {
+      fetch('/keep_open')
+      req = new XMLHttpRequest()
+      req.open('GET', '/keep_open')
+      req.send()
 
-      case '127.0.0.4':
-        return res
-        .cookie('4', true, {
-          httpOnly: true,
-          maxAge: 60000,
-        })
-        .cookie('2293-session', true)
-        .send('<html><head></head><body>hi 2</body></html>')
-      default:
-        return res.send('<div>missed cases</div>')
-    }
+    })()</script></body>`)
+  })
+
+  app.get('/redirect', (req, res) => {
+    res.redirect(302)
+  })
+
+  app.get('/keep_open', (req, res) => {
+    // dont respond
+  })
+
+  app.get('/form', (req, res) => {
+    res.send(`\
+<html>
+<h1>form</h1>
+<form method='POST' action='https://www.foo.com:44665/submit'>
+  <input type='submit' name='foo' value='bar' />
+</form>
+</html>\
+`)
+  })
+
+  app.post('/submit', (req, res) => {
+    res.redirect('https://www.foo.com:44665/cross_origin')
+  })
+
+  app.get('/javascript', (req, res) => {
+    res.send(`\
+<html>
+<script type='text/javascript'>
+  window.redirect = function(){
+    window.location.href = 'https://www.foo.com:44665/cross_origin'
+  }
+</script>
+<h1>javascript</h1>
+<button onclick='redirect()'>click me</button>
+</html>\
+`)
+  })
+
+  app.get('/cors', (req, res) => {
+    res.send(`<script>
+      fetch('https://127.0.0.2:44665/cross_origin')
+      .then((res) => res.text())
+      .then(text => {
+        if (text.includes('cross origin')) document.write('success!')
+      })
+      .catch(err => document.write(err.message))
+    </script>`)
   })
 }
 
-describe('e2e requests', () => {
+describe('e2e sessions', () => {
   e2e.setup({
     servers: [{
-      port: 2290,
-      onServer: cookieServer,
+      port: 4466,
+      https: true,
+      onServer,
+    }, {
+      port: 44665,
+      https: true,
+      onServer,
     }],
+    settings: {
+      hosts: {
+        '*.foo.com': '127.0.0.1',
+      },
+    },
   })
 
-  e2e.it.only('passes', {
+  e2e.it('useSession/defineSession + utils test', {
     spec: 'session_spec.js',
     snapshot: true,
+    config: {
+      experimentalSessionSupport: true,
+      video: false,
+    },
   })
 })

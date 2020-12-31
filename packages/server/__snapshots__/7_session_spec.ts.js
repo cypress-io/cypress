@@ -1,4 +1,4 @@
-exports['e2e requests / passes'] = `
+exports['e2e sessions / useSession/defineSession + utils test'] = `
 
 ====================================================================================================
 
@@ -17,32 +17,71 @@ exports['e2e requests / passes'] = `
   Running:  session_spec.js                                                                 (1 of 1)
 
 
-  Cypress.Session utilities
-    ✓ can capture session from point in the test
+  cross origin automations
+    ✓ get localStorage
+    ✓ set localStorage
+    ✓ get localStorage from all origins
+    ✓ only gets localStorage from origins visited in test
+
+  with a blank session
+    ✓ t1
+    ✓ t2
+
+  clears session data beforeEach test even with no useSession
+    ✓ t1
+    ✓ t2
+
+  navigates to about:blank between tests
+    ✓ t1
+    ✓ t2
+
+  navigates to special about:blank after useSession
+    ✓ t1
+    ✓ t2
+
+  save/restore session with cookies and localStorage
+    ✓ t1
+    ✓ t2
+
+  multiple sessions in test
+    ✓ switch session during test
+
+  session hooks - before/after
+    ✓ t1
+    ✓ t2
+
+  options.validate called on subsequent useSessions
+    ✓ t1
+    ✓ t2
+
+  options.validate returning false reruns steps
+    ✓ t1
+    ✓ t2
+
+  consoleProps
+    ✓ t1
+
+  errors
+    ✓ throws error when experimentalSessionSupport not enabled
+    ✓ throws if multiple defineSession calls with same name
 
 
-  1 passing
+  24 passing
 
 
   (Results)
 
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        1                                                                                │
-  │ Passing:      1                                                                                │
+  │ Tests:        24                                                                               │
+  │ Passing:      24                                                                               │
   │ Failing:      0                                                                                │
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     session_spec.js                                                                  │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/session_spec.js.mp4                 (X second)
 
 
 ====================================================================================================
@@ -52,9 +91,9 @@ exports['e2e requests / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  session_spec.js                          XX:XX        1        1        -        -        - │
+  │ ✔  session_spec.js                          XX:XX       24       24        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        1        1        -        -        -  
+    ✔  All specs passed!                        XX:XX       24       24        -        -        -  
 
 
 `
