@@ -113,6 +113,10 @@ const clearOneCookie = (cookie = {}) => {
   }
 
   return Promise.try(() => {
+    if (!cookie.name) {
+      throw new Error(`Removing cookie failed for: ${JSON.stringify(cookie)}. Cookie did not include a name`)
+    }
+
     return browser.cookies.remove(props)
   }).then((details) => {
     if (details) {
