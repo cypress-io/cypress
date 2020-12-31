@@ -1,5 +1,7 @@
 {
   "testFiles": "**/*.spec.*",
   "componentFolder": "src",
-  "experimentalComponentTesting": true
+  "experimentalComponentTesting": true,
+  "video": false,
+  "screenshot": false
 }

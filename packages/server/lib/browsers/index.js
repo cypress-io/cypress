@@ -104,7 +104,6 @@ const ensureAndGetByNameOrPath = function (nameOrPath, returnAll = false, browse
 
       return browser
     }
-
     // did the user give a bad name, or is this actually a path?
     if (isValidPathToBrowser(nameOrPath)) {
       // looks like a path - try to resolve it to a FoundBrowser

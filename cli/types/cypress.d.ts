@@ -2393,6 +2393,18 @@ declare namespace Cypress {
     cmdKey: boolean
   }
 
+  interface InternalConfigOptions {
+    /**
+    * Absolute path to the root of the project to use for Component Testing run mode
+    */
+    runProject?: string
+
+    /**
+    * The name of browser to use for testing, either run mode or interactive mode.
+    */
+    browser?: BrowserName
+  }
+
   interface ResolvedConfigOptions {
     /**
      * Url used as prefix for [cy.visit()](https://on.cypress.io/visit) or [cy.request()](https://on.cypress.io/request) command’s url
@@ -2623,13 +2635,7 @@ declare namespace Cypress {
     */
     projectRoot: string
     /**
-    * Absolute path to the root of the project to use for Component Testing run mode
-    */
-    runProject?: string
-    /**
-     * The 
-    /**
-     * Cypress version.
+     * The Cypress version.
      */
     version: string
   }
