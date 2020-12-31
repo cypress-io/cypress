@@ -60,17 +60,22 @@ export const options = [
     defaultValue: 60000,
     validation: v.isNumber,
   }, {
-    name: 'experimentalSourceRewriting',
-    defaultValue: false,
-    validation: v.isBoolean,
-    isExperimental: true,
-  }, {
     name: 'experimentalComponentTesting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,
   }, {
     name: 'experimentalFetchPolyfill',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalRunEvents',
+    defaultValue: false,
+    validation: v.isBoolean,
+    isExperimental: true,
+  }, {
+    name: 'experimentalSourceRewriting',
     defaultValue: false,
     validation: v.isBoolean,
     isExperimental: true,

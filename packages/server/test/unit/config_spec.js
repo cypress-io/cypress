@@ -1232,6 +1232,7 @@ describe('lib/config', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             fileServerFolder: { value: '', from: 'default' },
             firefoxGcInterval: { value: { openMode: null, runMode: 1 }, from: 'default' },
@@ -1310,6 +1311,7 @@ describe('lib/config', () => {
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },
+            experimentalRunEvents: { value: false, from: 'default' },
             experimentalSourceRewriting: { value: false, from: 'default' },
             env: {
               foo: {

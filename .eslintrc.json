@@ -1,11 +1,13 @@
 {
   "plugins": [
-    "@cypress/dev"
+    "@cypress/dev",
+    "no-only-tests"
   ],
   "extends": [
     "plugin:@cypress/dev/general"
   ],
   "rules": {
+    "no-only-tests/no-only-tests": "warn",
     "prefer-spread": "off",
     "prefer-rest-params": "off"
   },

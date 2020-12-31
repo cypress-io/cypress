@@ -44,6 +44,8 @@ describe('runnables', () => {
   it('displays loader when runnables have not yet loaded', () => {
     render()
     cy.contains('Your tests are loading...').should('be.visible')
+    // ensure the page is loaded before taking snapshot
+    cy.get('.focus-tests-text').should('be.visible')
     cy.percySnapshot()
   })
 

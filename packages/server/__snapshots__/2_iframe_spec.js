@@ -7,14 +7,14 @@ exports['e2e iframes / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (iframe_spec.coffee)                                                       │
-  │ Searched:   cypress/integration/iframe_spec.coffee                                             │
+  │ Specs:      1 found (iframe_spec.js)                                                           │
+  │ Searched:   cypress/integration/iframe_spec.js                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  iframe_spec.coffee                                                              (1 of 1)
+  Running:  iframe_spec.js                                                                  (1 of 1)
 
 
   iframes
@@ -24,7 +24,7 @@ exports['e2e iframes / passes'] = `
     ✓ does not throw on cross origin iframes
     ✓ continues to inject even on 5xx responses
     ✓ injects on file server 4xx errors
-    ✓ does not inject into xhr's
+    ✓ does not inject into xhrs
 
 
   7 passing
@@ -41,14 +41,14 @@ exports['e2e iframes / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     iframe_spec.coffee                                                               │
+  │ Spec Ran:     iframe_spec.js                                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/iframe_spec.coffee.mp4              (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/iframe_spec.js.mp4                  (X second)
 
 
 ====================================================================================================
@@ -58,7 +58,7 @@ exports['e2e iframes / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  iframe_spec.coffee                       XX:XX        7        7        -        -        - │
+  │ ✔  iframe_spec.js                           XX:XX        7        7        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        7        7        -        -        -  
 

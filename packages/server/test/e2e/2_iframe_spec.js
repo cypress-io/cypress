@@ -77,7 +77,7 @@ describe('e2e iframes', () => {
   })
 
   e2e.it('passes', {
-    spec: 'iframe_spec.coffee',
+    spec: 'iframe_spec.js',
     snapshot: true,
     config: {
       hosts: {
