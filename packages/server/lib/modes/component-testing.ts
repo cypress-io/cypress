@@ -8,7 +8,7 @@ import api from './run'
 // 3. open browser to runner-ct entrypoint (top)
 
 // Eslint does not seem to understand /// <reference /> ...
-/* eslint-disable no-undef */ 
+/* eslint-disable no-undef */
 export const run = (options: Cypress.PluginConfigOptions) => {
   // we are in run mode
   if (options.runProject) {
