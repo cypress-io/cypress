@@ -2106,15 +2106,10 @@
     debug "4.1.1"
     lazy-ass "1.6.0"
 
-"@cypress/sinon-chai@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-1.1.0.tgz#35c73ee37c420920d3ef114420a2f11ca6e4f670"
-  integrity sha512-h0VrqzKI10+X8u4Z+ut/bVmgXNdz8cDTCW+sM5kwu85jgLhPAi8bEH0PMmZXNN2KwGhtIIrQUaIZ5Ap74TNqMg==
-
-"@cypress/sinon-chai@2.9.0":
-  version "2.9.0"
-  resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.0.tgz#ebd1ea59eb8ebe9f2283a85afad167ee57776199"
-  integrity sha512-6tPzu+wpPJzqxnQjvIwSy8mzTwok3SrxxxCFwUS22K+x/GxAzENHiPDpfVKYjFYhB66YHzvkkw3Vm+hFTJypKw==
+"@cypress/sinon-chai@2.9.1":
+  version "2.9.1"
+  resolved "https://registry.yarnpkg.com/@cypress/sinon-chai/-/sinon-chai-2.9.1.tgz#1705c0341bc286740979b1b1cac89b7f5d34d6bc"
+  integrity sha512-qwFQ1urghF3mv7CFSDw/LEqIQP12qqKLuW7p6mXR92HP5fPNlgNiZVITWVsupDg7JpOEKfeRTVearo9mkk/5eg==
 
 "@cypress/unique-selector@0.4.2":
   version "0.4.2"
