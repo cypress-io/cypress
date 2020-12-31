@@ -2623,6 +2623,12 @@ declare namespace Cypress {
     */
     projectRoot: string
     /**
+    * Absolute path to the root of the project to use for Component Testing run mode
+    */
+    runProject?: string
+    /**
+     * The 
+    /**
      * Cypress version.
      */
     version: string
