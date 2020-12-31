@@ -283,6 +283,8 @@ describe('runner/cypress retries.ui.spec', { viewportWidth: 600, viewportHeight:
       } }, { config: { retries: 1 } })
       .then(shouldHaveTestResults(0, 1, 0))
 
+      // ensure the page is loaded before taking snapshot
+      cy.contains('skips this')
       cy.percySnapshot()
     })
   })

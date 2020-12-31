@@ -111,7 +111,7 @@ export async function onResponseContinue (state: NetStubbingState, frame: NetEve
 
     const staticResponse = _.chain(frame.staticResponse).clone().assign({ continueResponseAt, throttleKbps }).value()
 
-    return sendStaticResponse(res, staticResponse, backendRequest.onResponse!)
+    return sendStaticResponse(backendRequest, staticResponse)
   }
 
   // merge the changed response attributes with our response and continue
