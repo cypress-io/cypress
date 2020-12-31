@@ -196,4 +196,66 @@ context('network stubbing', () => {
       expect(res.text).to.eq('replaced')
     })
   })
+
+  it('does not modify multipart/form-data files', () => {
+    let sendContentLength = ''
+    let receivedContentLength = ''
+    let realContentLength = ''
+
+    netStubbingState.routes.push({
+      handlerId: '1',
+      routeMatcher: {
+        url: '*',
+      },
+      hasInterceptor: true,
+      getFixture,
+    })
+
+    socket.toDriver.callsFake((_, event, data) => {
+      if (event === 'http:request:received') {
+        sendContentLength = data.req.headers['content-length']
+        onNetEvent({
+          eventName: 'http:request:continue',
+          frame: {
+            routeHandlerId: '1',
+            requestId: data.requestId,
+            req: data.req,
+            res: data.res,
+            hasResponseHandler: false,
+            tryNextRoute: false,
+          },
+          state: netStubbingState,
+          socket,
+          getFixture,
+          args: [],
+        })
+      }
+    })
+
+    destinationApp.post('/', (req, res) => {
+      const chunks = []
+
+      req.on('data', (chunk) => {
+        chunks.push(chunk)
+      })
+
+      req.on('error', (error) => {
+        throw error
+      })
+
+      req.on('end', () => {
+        realContentLength = Buffer.byteLength(Buffer.concat(chunks)).toString()
+        receivedContentLength = req.headers['content-length']
+        res.send('ok')
+      })
+    })
+
+    return supertest(app)
+    .post(`/http://localhost:${destinationPort}`)
+    .attach('file', Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64')) // 1 pixel png image
+    .then(() => {
+      expect(sendContentLength).to.eq(receivedContentLength)
+      expect(sendContentLength).to.eq(realContentLength)
+    })
+  })
 })
