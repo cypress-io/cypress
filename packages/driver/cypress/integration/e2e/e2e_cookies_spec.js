@@ -8,6 +8,8 @@ const cleanse = (cookies) => {
   })
 }
 
+const firefoxDefaultSameSite = Cypress.isBrowser({ family: 'firefox' }) ? { sameSite: 'no_restriction' } : {}
+
 describe('e2e cookies spec', () => {
   it('simple cookie', () => {
     cy.setCookie('foo', 'bar')
@@ -110,6 +112,7 @@ describe('e2e cookies spec', () => {
         'httpOnly': false,
         'hostOnly': true,
         'expiry': 100,
+        ...firefoxDefaultSameSite,
       }])
     })
   })
