@@ -166,7 +166,7 @@ class Server {
     app.use(require('cookie-parser')())
     app.use(compression({ filter: notSSE }))
     if (morgan) {
-      // app.use(require('morgan')('dev'))
+      app.use(require('morgan')('dev'))
     }
 
     // errorhandler

@@ -387,12 +387,21 @@ describe('Routes', () => {
       return this.setup('http://localhost:8443')
     })
 
-    it('sends localStorage access iframe', function () {
-      return this.rp(`http://localhost:8443/__cypress/automation`)
+    it('sends getLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/getLocalStorage`)
       .then((res) => {
         expect(res.statusCode).to.eq(200)
 
-        expect(res.body).to.match(/parent.postMessage.*localStorage/)
+        expect(res.body).to.match(/parent\.postMessage.*localStorage/)
+      })
+    })
+
+    it('sends setLocalStorage', function () {
+      return this.rp(`http://localhost:8443/__cypress/automation/setLocalStorage`)
+      .then((res) => {
+        expect(res.statusCode).to.eq(200)
+
+        expect(res.body).to.match(/localStorage\.setItem/)
       })
     })
   })

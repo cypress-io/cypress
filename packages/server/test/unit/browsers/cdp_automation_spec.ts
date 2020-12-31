@@ -115,7 +115,7 @@ context('lib/browsers/cdp_automation', () => {
       it('returns a specific cookie by name', function () {
         return this.onRequest('get:cookie', { domain: 'google.com', name: 'session' })
         .then((resp) => {
-          expect(resp).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined })
+          expect(resp).to.deep.eq({ name: 'session', value: 'key', path: '/login', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined, hostOnly: true })
         })
       })
 
@@ -178,7 +178,7 @@ context('lib/browsers/cdp_automation', () => {
         return this.onRequest('clear:cookie', { domain: 'google.com', name: 'session' })
         .then((resp) => {
           expect(resp).to.deep.eq(
-            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined },
+            { name: 'session', value: 'key', path: '/', domain: 'google.com', secure: true, httpOnly: true, expirationDate: 123, sameSite: undefined, hostOnly: true },
           )
         })
       })
