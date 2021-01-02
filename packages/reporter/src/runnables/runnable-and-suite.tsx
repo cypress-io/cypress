@@ -35,8 +35,8 @@ const Suite = observer(({ eventManager = events, model }: SuiteProps) => {
       <span className='runnable-title'>{model.title}</span>
       <span className='runnable-controls'>
         <Tooltip placement='right' title='Add New Test to Suite' className='cy-tooltip'>
-          <a onClick={_launchStudio}>
-            <i className='fas fa-magic runnable-controls-studio' />
+          <a onClick={_launchStudio} className='runnable-controls-studio'>
+            <i className='fas fa-magic' />
           </a>
         </Tooltip>
       </span>
@@ -81,6 +81,7 @@ class Runnable extends Component<RunnableProps> {
         className={cs(`${model.type} runnable runnable-${model.state}`, {
           'runnable-retried': model.hasRetried,
           'runnable-studio': appState.studioActive,
+          'runnable-studio-enabled': appState.studioEnabled,
         })}
       >
         {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}

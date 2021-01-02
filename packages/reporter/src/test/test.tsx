@@ -131,8 +131,8 @@ class Test extends Component<TestProps> {
           <i className='fas fa-exclamation-triangle runnable-controls-status' />
         </Tooltip>
         <Tooltip placement='right' title='Add Commands to Test' className='cy-tooltip'>
-          <a onClick={this._launchStudio}>
-            <i className='fas fa-magic runnable-controls-studio' />
+          <a onClick={this._launchStudio} className='runnable-controls-studio'>
+            <i className='fas fa-magic' />
           </a>
         </Tooltip>
       </span>

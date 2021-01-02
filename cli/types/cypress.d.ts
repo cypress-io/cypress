@@ -2588,6 +2588,11 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
+     * Enables Cypress Studio, a feature which generates Cypress commands from user interactions with a site.
+     * @default false
+     */
+    experimentalStudio: boolean
+    /**
      * Number of times to retry a failed test.
      * If a number is set, tests will retry in both runMode and openMode.
      * To enable test retries only in runMode, set e.g. `{ openMode: null, runMode: 2 }`

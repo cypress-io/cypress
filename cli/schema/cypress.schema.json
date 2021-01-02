@@ -255,6 +255,11 @@
       "default": false,
       "description": "Polyfills `window.fetch` to enable Network spying and stubbing"
     },
+    "experimentalStudio": {
+      "type": "boolean",
+      "default": false,
+      "description": "Enables Cypress Studio, a feature which generates Cypress commands from user interactions with a site."
+    },
     "retries": {
       "type": [
         "object",

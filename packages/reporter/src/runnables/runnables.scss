@@ -244,10 +244,15 @@
     .runnable-controls-studio {
       color: #3386d4;
       opacity: 0;
+      visibility: hidden;
     }
   }
 
   .test.runnable-failed .runnable-controls .runnable-controls-status {
+    visibility: visible;
+  }
+
+  .runnable-studio-enabled .runnable-controls .runnable-controls-studio {
     visibility: visible;
   }
 

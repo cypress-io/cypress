@@ -28,6 +28,7 @@ export interface ReporterProps {
   events: Events
   error?: RunnablesErrorModel
   spec: Cypress.Cypress['spec']
+  studioEnabled: boolean
 }
 
 @observer
@@ -49,6 +50,7 @@ class Reporter extends Component<ReporterProps> {
       relative: PropTypes.string.isRequired,
       absolute: PropTypes.string.isRequired,
     }),
+    studioEnabled: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -81,10 +83,14 @@ class Reporter extends Component<ReporterProps> {
   }
 
   componentDidMount () {
-    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore, studioEnabled } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
+    })()
+
+    action('set:studio:enabled', () => {
+      appState.setStudioEnabled(studioEnabled)
     })()
 
     this.props.events.init({
