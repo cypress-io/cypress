@@ -20,5 +20,6 @@ export const run = (options: Options) => {
     api.ready(options)
   }
 
+  // @ts-ignore - types are incomplete...
   return serverCt.start(options.projectRoot, options)
 }
