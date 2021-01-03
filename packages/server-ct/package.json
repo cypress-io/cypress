@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "cypress:open": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
-    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testiug --project ${PWD}/crossword-example",
+    "cypress:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}/crossword-example",
     "cypress:run": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/example",
     "cypress:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}/crossword-example",
     "cypress:run:vue": "NODE_OPTIONS=--max-http-header-size=1048576 node ../../scripts/start.js --component-testing --run-project ${PWD}/../../npm/vue",
