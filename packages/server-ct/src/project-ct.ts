@@ -1,6 +1,7 @@
 import _ from 'lodash'
 import path from 'path'
 import _debug from 'debug'
+import { EventEmitter } from 'events'
 const debug = _debug('cypress:server-ct:project')
 import Bluebird from 'bluebird'
 
@@ -24,7 +25,7 @@ const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-export default class Project {
+export default class Project extends EventEmitter {
   cfg: any
   private projectRoot: string
   private watchers: Watchers
@@ -35,6 +36,8 @@ export default class Project {
   private automation: any
 
   constructor (projectRoot: string) {
+    super()
+
     if (!(this instanceof Project)) {
       return new Project(projectRoot)
     }
@@ -277,6 +280,11 @@ export default class Project {
   //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
 
+  async getProjectId () {
+    // TODO: Share `getProjectId` implementation via a BaseProject class.
+    return (Math.random() * 10000).toFixed()
+  }
+
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)
 
@@ -363,6 +371,18 @@ export default class Project {
     .then((cfg) => {
       return this._setSavedState(cfg)
     })
+  }
+
+  async getSpecUrl () {
+    const cfg = await this.getConfig()
+    console.log(cfg)
+    return `${cfg.browserUrl}Cell.spec.js`
+  }
+
+  getAutomation () {
+    return {
+      use: () => {}
+    }
   }
 
   _setSavedState (cfg) {

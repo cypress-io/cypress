@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+const ProjectCt = require('@packages/server-ct/src/project-ct').default
 
 const Project = require('./project')
 const browsers = require('./browsers')
@@ -297,7 +298,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = new Project(path)
+      openProject = args.componentTesting ? new ProjectCt(path) : new Project(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {
