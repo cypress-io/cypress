@@ -47,18 +47,21 @@ export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
   // Used for loading chunks during testing Cypress in Cypress,
   // where we test server-ct with server.
   app.get(`${config.clientRoute}ctChunk-*`, (req, res) => {
+    console.log('REQUESTING CLIENT CHUNK', req.url, req.baseUrl)
     debug('Serving Cypress front-end chunk by requested URL:', req.url)
 
     runnerCt.serveChunk(req, res, { config })
   })
 
   app.get(`${config.clientRoute}vendors~ctChunk-*`, (req, res) => {
+    console.log('REQUESTING VENDOR CHUNK', req.url, req.baseUrl)
     debug('Serving Cypress front-end vendor chunk by requested URL:', req.url)
 
     runnerCt.serveChunk(req, res, { config })
   })
 
   app.get(config.clientRoute, (req, res) => {
+    console.log('SERVING CYPRESS', req.url, req.baseUrl)
     debug('Serving Cypress front-end by requested URL:', req.url)
 
     runnerCt.serve(req, res, {
@@ -68,6 +71,7 @@ export function initializeRoutes ({ app, config, project }: InitializeRoutes) {
   })
 
   app.all('*', (req, res) => {
+    console.log('REQUESTING', req.url, req.baseUrl)
     proxy.web(req, res, { target: config.webpackDevServerUrl })
     // proxy.web(req, res, { target: webpack, function(e) { ... });
 

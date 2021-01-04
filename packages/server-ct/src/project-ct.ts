@@ -19,12 +19,13 @@ import settings from '@packages/server/lib/util/settings'
 
 import { Server } from './server-ct'
 import { RunnablesStore, RootRunnable } from '@packages/reporter/src/runnables/runnables-store'
+import { BaseProject } from '@packages/server/lib/base_project'
 
 const localCwd = cwd()
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 
-export default class Project {
+export default class Project extends BaseProject {
   cfg: any
   private projectRoot: string
   private watchers: Watchers
@@ -35,6 +36,8 @@ export default class Project {
   private automation: any
 
   constructor (projectRoot: string) {
+    super()
+
     if (!(this instanceof Project)) {
       return new Project(projectRoot)
     }
@@ -276,6 +279,10 @@ export default class Project {
 
   //   return this.watchers.watch(settings.pathToCypressEnvJsthis.projectRoot), obj)
   // }
+
+  getProjectId () {
+    return Bluebird.resolve('Testing')
+  }
 
   watchSettingsAndStartWebsockets (options: Record<string, unknown> = {}, cfg: Record<string, unknown> = {}) {
     // this.watchSettings(options.onSettingsChanged, options)

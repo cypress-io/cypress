@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+const ProjectCt = require('@packages/server-ct/src/project-ct').default
 
 const Project = require('./project')
 const browsers = require('./browsers')
@@ -61,7 +62,23 @@ const moduleFactory = () => {
       // reset to reset server and socket state because
       // of potential domain changes, request buffers, etc
       return this.reset()
-      .then(() => openProject.getSpecUrl(spec.absolute, spec.specType))
+      .then(async () => {
+        const {
+          browserUrl,
+          componentFolder,
+          integrationFolder,
+          projectRoot
+        } = await this.getConfig()
+
+        return openProject.getSpecUrl({
+          browserUrl,
+          componentFolder,
+          projectRoot,
+          integrationFolder,
+          absoluteSpecPath: spec.absolute, 
+          specType: spec.specType,
+        })
+      })
       .then((url) => {
         debug('open project url %s', url)
 
@@ -297,7 +314,7 @@ const moduleFactory = () => {
       debug('and options %o', options)
 
       // store the currently open project
-      openProject = new Project(path)
+      openProject = args.componentTesting ? new ProjectCt(path) : new Project(path)
 
       _.defaults(options, {
         onReloadBrowser: () => {
