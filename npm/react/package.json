@@ -6,19 +6,15 @@
   "scripts": {
     "build": "rimraf dist && yarn transpile",
     "build-prod": "yarn build",
-    "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:open:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --project ${PWD}",
-    "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "cy:run:debug": "NODE_OPTIONS=--max-http-header-size=1048576 node --inspect-brk ../../scripts/start.js --component-testing --run-project ${PWD}",
+    "cy:open": "node ../../scripts/cypress open",
     "pretest": "yarn transpile",
     "test": "node ../../scripts/cypress run",
     "transpile": "tsc",
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@cypress/code-coverage": "3.8.1",
-    "@cypress/webpack-dev-server": "*",
+    "@babel/plugin-transform-modules-commonjs": "7.12.1",
+    "@cypress/code-coverage": "3.8.6",
     "@cypress/webpack-preprocessor": "*",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
@@ -111,11 +107,10 @@
   },
   "files": [
     "dist",
-    "lib",
     "support",
     "plugins"
   ],
-  "types": "lib",
+  "types": "dist",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -138,13 +133,13 @@
     "@babel/preset-env": {
       "optional": true
     },
+    "@types/react": {
+      "optional": true
+    },
     "babel-loader": {
       "optional": true
     },
     "next": {
-      "optional": true
-    },
-    "types/react": {
       "optional": true
     },
     "webpack": {

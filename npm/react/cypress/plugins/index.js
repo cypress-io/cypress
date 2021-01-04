@@ -1,7 +1,8 @@
+const webpackPreprocessor = require('@cypress/webpack-preprocessor')
 const babelConfig = require('../../babel.config.js')
-const { startDevServer } = require('@cypress/webpack-dev-server')
 
-const webpackConfig = {
+/** @type import("webpack").Configuration */
+const webpackOptions = {
   resolve: {
     extensions: ['.js', '.ts', '.jsx', '.tsx'],
   },
@@ -54,9 +55,15 @@ const webpackConfig = {
   },
 }
 
+const options = {
+  // send in the options from your webpack.config.js, so it works the same
+  // as your app's code
+  webpackOptions,
+  watchOptions: {},
+}
+
 module.exports = (on, config) => {
-  require('@cypress/code-coverage/task')(on, config)
-  on('dev-server:start', (options) => startDevServer(options, webpackConfig))
+  on('file:preprocessor', webpackPreprocessor(options))
 
   return config
 }
