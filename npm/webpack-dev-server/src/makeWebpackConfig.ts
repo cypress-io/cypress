@@ -5,20 +5,31 @@ import CypressCTOptionsPlugin from './plugin'
 
 const debug = debugFn('cypress:webpack-dev-server:makeWebpackConfig')
 
-export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, files, support, devServerEvents }) {
-  debug(`User passed in webpack config with values`, userWebpackConfig)
+const mergePublicPath = (baseValue, userValue = '/') => {
+  return path.join(baseValue, userValue, '/')
+}
+
+export async function makeWebpackConfig (userWebpackConfig, config) {
+  const { projectRoot, webpackDevServerPublicPathRoute, files, support, devServerEvents } = config
+
+  debug(`User passed in webpack config with values %o`, userWebpackConfig)
 
   const defaultWebpackConfig = require('./webpack.config')
 
   debug(`Merging Evergreen's webpack config with users'`)
 
-  debug(`New webpack entries`, files)
+  debug(`New webpack entries %o`, files)
   debug(`Project root`, projectRoot)
   debug(`Support files`, support)
 
   const entry = path.resolve(__dirname, './browser.js')
 
+  const publicPath = mergePublicPath(webpackDevServerPublicPathRoute, userWebpackConfig?.output?.publicPath)
+
   const dynamicWebpackConfig = {
+    output: {
+      publicPath,
+    },
     plugins: [
       new CypressCTOptionsPlugin({
         files,
@@ -31,6 +42,8 @@ export async function makeWebpackConfig (userWebpackConfig = {}, { projectRoot, 
   const mergedConfig = merge(userWebpackConfig, defaultWebpackConfig, dynamicWebpackConfig)
 
   mergedConfig.entry = entry
+
+  debug('Merged webpack config %o', mergedConfig)
 
   return mergedConfig
 }

@@ -39,6 +39,18 @@ export function initializeRoutes ({ app, config, specsStore, nodeProxy, networkP
     // our internal index.html handler
     nodeProxy.web(req, res)
   })
+
+  // user app code + spec code
+  // default mounted to /__cypress/src/*
+  app.get(`${config.webpackDevServerPublicPathRoute}*`, (req, res) => {
+    // strip out the webpackDevServerPublicPath from the URL
+    // and forward the remaining params
+    req.url = `/${req.params[0]}`
+
+    // user the node proxy here instead of the network proxy
+    // to avoid the user accidentally intercepting and modifying
+    // their own app.js files + spec.js files
+    nodeProxy.web(req, res)
   })
 
   app.get(config.clientRoute, (req, res) => {
