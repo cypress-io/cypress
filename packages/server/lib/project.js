@@ -479,37 +479,43 @@ class Project extends EE {
     })
   }
 
-  getSpecUrl (absoluteSpecPath, specType) {
-    debug('get spec url: %s for spec type %s', absoluteSpecPath, specType)
+  getSpecUrl (options) {
+    // interface GetSpecUrl {
+    //   absoluteSpecPath: string
+    //   specType: string
+    //   integrationFolder: string
+    //   componentFolder: string
+    //   projectRoot: string
+    //   browserUrl: string
+    // }
 
-    return this.getConfig()
-    .then((cfg) => {
-      // if we don't have a absoluteSpecPath or its __all
-      if (!absoluteSpecPath || (absoluteSpecPath === '__all')) {
-        const url = this.normalizeSpecUrl(cfg.browserUrl, '/__all')
+    debug('get spec url: %s for spec type %s', options.absoluteSpecPath, options.specType)
 
-        debug('returning url to run all specs: %s', url)
+    // if we don't have a absoluteSpecPath or its __all
+    if (!options.absoluteSpecPath || (options.absoluteSpecPath === '__all')) {
+      const url = this.normalizeSpecUrl(options.browserUrl, '/__all')
 
-        return url
-      }
-
-      // TODO:
-      // to handle both unit + integration tests we need
-      // to figure out (based on the config) where this absoluteSpecPath
-      // lives. does it live in the integrationFolder or
-      // the unit folder?
-      // once we determine that we can then prefix it correctly
-      // with either integration or unit
-      const prefixedPath = this.getPrefixedPathToSpec(cfg, absoluteSpecPath, specType)
-      const url = this.normalizeSpecUrl(cfg.browserUrl, prefixedPath)
-
-      debug('return path to spec %o', { specType, absoluteSpecPath, prefixedPath, url })
+      debug('returning url to run all specs: %s', url)
 
       return url
-    })
+    }
+
+    // TODO:
+    // to handle both unit + integration tests we need
+    // to figure out (based on the config) where this absoluteSpecPath
+    // lives. does it live in the integrationFolder or
+    // the unit folder?
+    // once we determine that we can then prefix it correctly
+    // with either integration or unit
+    const prefixedPath = this.getPrefixedPathToSpec(options.absoluteSpecPath, options.specType)
+    const url = this.normalizeSpecUrl(options.browserUrl, prefixedPath)
+
+    debug('return path to spec %o', options.specType, options.absoluteSpecPath, prefixedPath, url)
+
+    return url
   }
 
-  getPrefixedPathToSpec (cfg, pathToSpec, type = 'integration') {
+  getPrefixedPathToSpec (cfg, absoluteSpecPath, specType = 'integration') {
     const { integrationFolder, componentFolder, projectRoot } = cfg
 
     // for now hard code the 'type' as integration
@@ -523,14 +529,14 @@ class Project extends EE {
     //
     // becomes /integration/foo.js
 
-    const folderToUse = type === 'integration' ? integrationFolder : componentFolder
+    const folderToUse = specType === 'integration' ? integrationFolder : componentFolder
 
-    const url = `/${path.join(type, path.relative(
+    const url = `/${path.join(specType, path.relative(
       folderToUse,
-      path.resolve(projectRoot, pathToSpec),
+      path.resolve(projectRoot, absoluteSpecPath),
     ))}`
 
-    debug('prefixed path for spec %o', { pathToSpec, type, url })
+    debug('prefixed path for spec %o', { absoluteSpecPath, specType, url })
 
     return url
   }
