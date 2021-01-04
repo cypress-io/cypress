@@ -119,11 +119,7 @@ const clearOneCookie = (cookie = {}) => {
 
     return browser.cookies.remove(props)
   }).then((details) => {
-    if (details) {
-      return cookie
-    }
-
-    return throwError()
+    return cookie
   }).catch(throwError)
 }
 
