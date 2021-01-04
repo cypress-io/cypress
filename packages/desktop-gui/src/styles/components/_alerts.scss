@@ -118,34 +118,33 @@
   }
 }
 
-.project-content .alert-warning,
-.global-error {
-    margin-bottom: 0;
+.project-content .alert-warning, .global-error {
+  margin-bottom: 0;
 
-    button {
-      font-size: 1em;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
+  button {
+    font-size: 1em;
+    position: absolute;
+    top: 10px;
+    right: 10px;
   }
+}
 
 // Bootstrap 3 colors for migration
 
 .alert.alert-warning {
-    color: rgb(138, 109, 59);
-    background-color: rgb(252, 248, 227);
-    border-color: rgb(250, 235, 204);
+  color: rgb(138, 109, 59);
+  background-color: rgb(252, 248, 227);
+  border-color: rgb(250, 235, 204);
 }
 
 .alert.alert-info {
-	  color: #31708f;
-    background-color: #d9edf7;
-    border-color: #bce8f1;
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
 }
 
 .alert.alert-danger {
-    color: #a94442;
-    background-color: #f2dede;
-    border-color: #ebccd1;
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
 }
