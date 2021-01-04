@@ -16,9 +16,9 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@cypress/code-coverage": "3.8.1",
     "@cypress/webpack-dev-server": "*",
+    "@babel/plugin-transform-modules-commonjs": "7.12.1",
+    "@cypress/code-coverage": "3.8.6",
     "@cypress/webpack-preprocessor": "*",
     "babel-plugin-istanbul": "6.0.0",
     "debug": "4.1.1",
@@ -111,11 +111,10 @@
   },
   "files": [
     "dist",
-    "lib",
     "support",
     "plugins"
   ],
-  "types": "lib",
+  "types": "dist",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -138,13 +137,13 @@
     "@babel/preset-env": {
       "optional": true
     },
+    "@types/react": {
+      "optional": true
+    },
     "babel-loader": {
       "optional": true
     },
     "next": {
-      "optional": true
-    },
-    "types/react": {
       "optional": true
     },
     "webpack": {

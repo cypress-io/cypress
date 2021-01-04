@@ -384,16 +384,10 @@ The following error was thrown by a plugin. We stopped running your tests becaus
   │ Pending:      0                                                                                │
   │ Skipped:      0                                                                                │
   │ Screenshots:  0                                                                                │
-  │ Video:        true                                                                             │
+  │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
   │ Spec Ran:     app_spec.js                                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/app_spec.js.mp4                     (X second)
 
 
 ====================================================================================================
@@ -437,80 +431,13 @@ The following validation error was thrown by your plugins file (\`/foo/bar/.proj
 You passed: \`invalid:event\`
 
 The following are valid events:
-- dev-server:start
-- file:preprocessor
-- before:browser:launch
-- task
+- devserver:start
 - after:screenshot
+- before:browser:launch
+- file:preprocessor
+- task
 
       [stack trace lines]
-`
-
-exports['e2e plugins does not report more screenshots than exist if user overwrites screenshot in afterScreenshot hook 1'] = `
-
-====================================================================================================
-
-  (Run Starting)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Cypress:    1.2.3                                                                              │
-  │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (after_screenshot_overwrite_spec.js)                                       │
-  │ Searched:   cypress/integration/after_screenshot_overwrite_spec.js                             │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-────────────────────────────────────────────────────────────────────────────────────────────────────
-                                                                                                    
-  Running:  after_screenshot_overwrite_spec.js                                              (1 of 1)
-
-
-  ✓ cy.screenshot() - replacement
-  ✓ cy.screenshot() - replacement
-  ✓ cy.screenshot() - replacement
-
-  3 passing
-
-
-  (Results)
-
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ Tests:        3                                                                                │
-  │ Passing:      3                                                                                │
-  │ Failing:      0                                                                                │
-  │ Pending:      0                                                                                │
-  │ Skipped:      0                                                                                │
-  │ Screenshots:  1                                                                                │
-  │ Video:        true                                                                             │
-  │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     after_screenshot_overwrite_spec.js                                               │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-
-
-  (Screenshots)
-
-  -  /XXX/XXX/XXX/screenshot-replacement.png                                                   (2x2)
-
-
-  (Video)
-
-  -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/after_screenshot_overwrite_spec     (X second)
-                          .js.mp4                                                               
-
-
-====================================================================================================
-
-  (Run Finished)
-
-
-       Spec                                              Tests  Passing  Failing  Pending  Skipped  
-  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  after_screenshot_overwrite_spec.js       XX:XX        3        3        -        -        - │
-  └────────────────────────────────────────────────────────────────────────────────────────────────┘
-    ✔  All specs passed!                        XX:XX        3        3        -        -        -  
-
-
 `
 
 exports['e2e plugins does not report more screenshots than exist if user overwrites previous screenshot in afterScreenshot 1'] = `
