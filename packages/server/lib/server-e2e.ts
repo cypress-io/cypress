@@ -2,7 +2,6 @@
 
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import evilDns from 'evil-dns'
 import httpProxy from 'http-proxy'
 import isHtml from 'is-html'
 import la from 'lazy-ass'
@@ -46,6 +45,14 @@ const isResponseHtml = function (contentType, responseBuffer) {
 }
 
 export class ServerE2E extends ServerBase {
+  private _urlResolver: Bluebird<Record<string, any>> | null
+
+  constructor () {
+    super()
+
+    this._urlResolver = null
+  }
+
   open (config = {}, project, onError, onWarning) {
     debug('server open')
 
@@ -106,16 +113,16 @@ export class ServerE2E extends ServerBase {
       }
 
       const callListeners = (req, res) => {
-        const listeners = this._server.listeners('request').slice(0)
+        const listeners = _server.listeners('request').slice(0)
 
-        return this._callRequestListeners(this._server, listeners, req, res)
+        return this._callRequestListeners(_server, listeners, req, res)
       }
 
       const onSniUpgrade = (req, socket, head) => {
-        const upgrades = this._server.listeners('upgrade').slice(0)
+        const upgrades = _server.listeners('upgrade').slice(0)
 
         return upgrades.map((upgrade) => {
-          return upgrade.call(this._server, req, socket, head)
+          return upgrade.call(_server, req, socket, head)
         })
       }
 
@@ -189,8 +196,8 @@ export class ServerE2E extends ServerBase {
     options.netStubbingState = this._netStubbingState
 
     options.onResetServerState = () => {
-      this._networkProxy.reset()
-      this._netStubbingState.reset()
+      this._networkProxy?.reset()
+      this._netStubbingState?.reset()
     }
 
     this._socket.startListening(this._server, automation, config, options)
@@ -209,7 +216,7 @@ export class ServerE2E extends ServerBase {
 
     // always clear buffers - reduces the possibility of a random HTTP request
     // accidentally retrieving buffered content at the wrong time
-    this._networkProxy.reset()
+    this._networkProxy?.reset()
 
     const startTime = new Date()
 
@@ -247,10 +254,10 @@ export class ServerE2E extends ServerBase {
         // TODO: add `body` here once bodies can be statically matched
       }
 
-      return !!getRouteForRequest(this._netStubbingState.routes, proxiedReq)
+      return !!getRouteForRequest(this._netStubbingState?.routes, proxiedReq)
     }
 
-    return this._urlResolver = (p = new Bluebird((resolve, reject, onCancel) => {
+    return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {
       let urlFile
 
       onCancel(() => {
@@ -376,7 +383,7 @@ export class ServerE2E extends ServerBase {
 
                   responseBufferStream.end(responseBuffer)
 
-                  this._networkProxy.setHttpBuffer({
+                  this._networkProxy?.setHttpBuffer({
                     url: newUrl,
                     stream: responseBufferStream,
                     details,
@@ -457,52 +464,6 @@ export class ServerE2E extends ServerBase {
     }))
   }
 
-  _onDomainSet (fullyQualifiedUrl, options = {}) {
-    const l = (type, val) => {
-      return debug('Setting', type, val)
-    }
-
-    this._remoteAuth = options.auth
-
-    l('remoteAuth', this._remoteAuth)
-
-    // if this isn't a fully qualified url
-    // or if this came to us as <root> in our tests
-    // then we know to go back to our default domain
-    // which is the localhost server
-    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
-      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
-      this._remoteStrategy = 'file'
-      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
-      this._remoteDomainName = DEFAULT_DOMAIN_NAME
-      this._remoteProps = null
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteStrategy', this._remoteStrategy)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-      l('remoteFileServer', this._remoteFileServer)
-    } else {
-      this._remoteOrigin = origin(fullyQualifiedUrl)
-
-      this._remoteStrategy = 'http'
-
-      this._remoteFileServer = null
-
-      // set an object with port, tld, and domain properties
-      // as the remoteHostAndPort
-      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
-
-      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
-
-      l('remoteOrigin', this._remoteOrigin)
-      l('remoteHostAndPort', this._remoteProps)
-      l('remoteDocDomain', this._remoteDomainName)
-    }
-
-    return this._getRemoteState()
-  }
-
   _retryBaseUrlCheck (baseUrl, onWarning) {
     return ensureUrl.retryIsListening(baseUrl, {
       retryIntervals: [3000, 3000, 4000],
@@ -516,25 +477,6 @@ export class ServerE2E extends ServerBase {
 
         return onWarning(warning)
       },
-    })
-  }
-
-  _close () {
-    this.reset()
-
-    logger.unsetSettings()
-
-    evilDns.clear()
-
-    // bail early we dont have a server or we're not
-    // currently listening
-    if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
-    }
-
-    return this._server.destroyAsync()
-    .then(() => {
-      this.isListening = false
     })
   }
 }

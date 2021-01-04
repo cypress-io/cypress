@@ -2,7 +2,11 @@
 
 import Bluebird from 'bluebird'
 import Debug from 'debug'
+import httpProxy from 'http-proxy'
+import httpsProxy from '@packages/https-proxy'
+import logger from '@packages/server/lib/logger'
 import { ServerBase } from '@packages/server/lib/server-base'
+import appData from '@packages/server/lib/util/app_data'
 import { initializeRoutes } from './routes-ct'
 import { Socket } from './socket-ct'
 
@@ -132,10 +136,6 @@ export class ServerCt extends ServerBase {
     .then(() => {
       this.isListening = false
     })
-  }
-
-  reset () {
-    // TODO: implement this
   }
 
   sendSpecList (specs) {

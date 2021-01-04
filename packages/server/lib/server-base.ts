@@ -8,15 +8,18 @@ import Debug from 'debug'
 import evilDns from 'evil-dns'
 import express from 'express'
 import http from 'http'
+import httpProxy from 'http-proxy'
 import _ from 'lodash'
 import url from 'url'
-import { netStubbingState } from '@packages/net-stubbing'
+import httpsProxy from '@packages/https-proxy'
+import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, uri } from '@packages/network'
 import { NetworkProxy } from '@packages/proxy'
 import errors from './errors'
 import Request from './request'
 import Socket from './socket'
 import templateEngine from './template_engine'
+import origin from './util/origin'
 import allowDestroy, { DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 
@@ -80,30 +83,32 @@ const notSSE = (req, res) => {
 }
 
 export class ServerBase {
-  private automation
-  private isListening: boolean
-  private _request: Request
-  private _server: http.Server | null
-  private _socket: Socket
-  private _baseUrl: string | null
-  private _socketAllowed: SocketAllowed
-  private _nodeProxy
   private _middleware
-  private _fileServer
-  private _httpsProxy
-  private _urlResolver
+  protected _netStubbingState: NetStubbingState | null
+  protected _baseUrl: string | null
+  protected _fileServer
+  protected isListening: boolean
+  protected _socketAllowed: SocketAllowed
+  protected _httpsProxy: httpsProxy | null
+  protected _server: DestroyableHttpServer | null
+  protected _socket: Socket
+  protected _request: Request
+  protected _nodeProxy: httpProxy | null
+  protected _networkProxy: NetworkProxy | null
 
   constructor () {
+    this.isListening = false
     this._socketAllowed = new SocketAllowed()
     this._request = Request()
     this._middleware = null
+    this._networkProxy = null
+    this._netStubbingState = null
     this._server = null
     this._socket = null
     this._baseUrl = null
     this._nodeProxy = null
     this._fileServer = null
     this._httpsProxy = null
-    this._urlResolver = null
   }
 
   createExpressApp (config) {
@@ -370,19 +375,38 @@ export class ServerBase {
   }
 
   reset () {
-    if (this._networkProxy != null) {
-      this._networkProxy.reset()
+    this._networkProxy?.reset()
+
+    const baseUrl = this._baseUrl ?? '<root>'
+
+    return this._onDomainSet(baseUrl)
+  }
+
+  _close () {
+    this.reset()
+
+    logger.unsetSettings()
+
+    evilDns.clear()
+
+    // bail early we dont have a server or we're not
+    // currently listening
+    if (!this._server || !this.isListening) {
+      return Bluebird.resolve()
     }
 
-    return this._onDomainSet(this._baseUrl != null ? this._baseUrl : '<root>')
+    return this._server.destroyAsync()
+    .then(() => {
+      this.isListening = false
+    })
   }
 
   close () {
     return Bluebird.join(
       this._close(),
-      this._socket != null ? this._socket.close() : undefined,
-      this._fileServer != null ? this._fileServer.close() : undefined,
-      this._httpsProxy != null ? this._httpsProxy.close() : undefined,
+      this._socket?.close(),
+      this._fileServer?.close(),
+      this._httpsProxy?.close(),
     )
     .then(() => {
       this._middleware = null
