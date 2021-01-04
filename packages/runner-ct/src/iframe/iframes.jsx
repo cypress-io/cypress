@@ -91,6 +91,7 @@ export default class Iframes extends Component {
     this._disposers.push(autorun(() => {
       const spec = this.props.state.spec
 
+      // throw Error('spec is', this.props.state.spec)
       if (this.props.state.spec) {
         this._run(spec, config)
       }

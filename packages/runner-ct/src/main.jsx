@@ -5,7 +5,7 @@ import { utils as driverUtils } from '@packages/driver'
 import { state } from './lib/state'
 import defaultEvents from '@packages/reporter/src/lib/events'
 
-const Container = React.lazy(() => import(/* webpackChunkName: "ctChunk-RunnerContainer" */ './app/container'))
+const Container = React.lazy(() => import(/* webpackMode: "eager" */ './app/container'))
 
 // to support async/await
 import 'regenerator-runtime/runtime'

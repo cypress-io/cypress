@@ -228,7 +228,7 @@ export class State {
   }
 
   runMultiMode = async () => {
-    const eventManager = await import(/* webpackChunkName: "ctChunk-EventManager" */'./event-manager').then((module) => module.default)
+    const eventManager = await import(/* webpackMode: "eager" */'./event-manager').then((module) => module.default)
     const waitForRunEnd = () => new Promise((res) => eventManager.on('run:end', res))
 
     this.setSpec(null)
