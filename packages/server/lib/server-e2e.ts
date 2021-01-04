@@ -72,6 +72,9 @@ export class ServerE2E extends ServerBase {
 
       this.createNetworkProxy(config, getRemoteState)
 
+      // TODO: this does not look like a good idea
+      // since we would be spawning new workers on every
+      // open + close of a project...
       if (config.experimentalSourceRewriting) {
         createInitialWorkers()
       }
