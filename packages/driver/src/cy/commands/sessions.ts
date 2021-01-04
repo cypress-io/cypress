@@ -210,11 +210,11 @@ export default function (Commands, Cypress, cy) {
       }
 
       if (!name) {
-        throw new Error('cy.defineSession requires a name')
+        $errUtils.throwErrByPath(errs.sessions.defineSession.missing_argument, { args: { name: 'name' } })
       }
 
       if (!stepsFn) {
-        throw new Error('cy.defineSession requires a steps function')
+        $errUtils.throwErrByPath(errs.sessions.defineSession.missing_argument, { args: { name: 'steps function' } })
       }
 
       const sess_state = {
@@ -231,7 +231,7 @@ export default function (Commands, Cypress, cy) {
       if (getActiveSession(sess_state.name)) {
         const invocationStack = $stackUtils.getInvocationDetails(cy.state('specWindow'), Cypress.config)?.stack
 
-        throw $errUtils.errByPath(errs.sessions.duplicateName, { name: sess_state.name })
+        throw $errUtils.errByPath(errs.sessions.defineSession.duplicateName, { name: sess_state.name })
         .setUserInvocationStack(invocationStack)
       }
 
@@ -446,10 +446,12 @@ export default function (Commands, Cypress, cy) {
 
       if (_.isString(sessionReference)) {
         sess_state = getActiveSession(sessionReference)
-        if (!sess_state) throw new Error(`No session found with name: ${sessionReference}`)
+        if (!sess_state) {
+          $errUtils.throwErrByPath(errs.sessions.useSession.not_found, { args: { name: sessionReference } })
+        }
       } else {
         if (!_.isObject(sessionReference)) {
-          throw new Error('invalid session reference given to cy.useSession')
+          $errUtils.throwErrByPath(errs.sessions.useSession.invalid_argument, { args: { value: sessionReference } })
         }
 
         sess_state = sessionReference

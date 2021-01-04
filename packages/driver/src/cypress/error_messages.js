@@ -1409,10 +1409,25 @@ module.exports = {
   },
 
   sessions: {
-    duplicateName: {
-      message: `${cmd('defineSession')} has already been called with the name **{{name}}**. You may not define multiple Sessions with the same name.`,
-      docsUrl: 'https://on.cypress.io/defineSession',
-
+    defineSession: {
+      missing_argument: {
+        message: `${cmd('defineSession')} requires a {{name}}.`,
+        docsUrl: 'https://on.cypress.io/defineSession',
+      },
+      duplicateName: {
+        message: `${cmd('defineSession')} has already been called with the name **{{name}}**. You may not define multiple Sessions with the same name.`,
+        docsUrl: 'https://on.cypress.io/defineSession',
+      },
+    },
+    useSession: {
+      not_found: {
+        message: `No session found with name: {{name}}`,
+        docsUrl: 'https://on.cypress.io/useSession',
+      },
+      invalid_argument: {
+        message: `${cmd('useSession')} must be passed a string or the return value from \`cy.defineSession\`. You passed:\n\n\`{{value}}\``,
+        docsUrl: 'https://on.cypress.io/useSession',
+      },
     },
   },
 
