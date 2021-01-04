@@ -8,7 +8,7 @@ const { connect } = require('@packages/network')
 const config = require(`${root}lib/config`)
 const logger = require(`${root}lib/logger`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const Socket = require(`${root}lib/socket`)
+const { Socket } = require(`${root}lib/socket`)
 const fileServer = require(`${root}lib/file_server`)
 const ensureUrl = require(`${root}lib/util/ensure-url`)
 

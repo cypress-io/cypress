@@ -1,21 +1,22 @@
-const _ = require('lodash')
-const path = require('path')
-const debug = require('debug')('cypress:server:socket')
-const Promise = require('bluebird')
-const socketIo = require('@packages/socket')
+import Bluebird from 'bluebird'
+import Debug from 'debug'
+import _ from 'lodash'
+import path from 'path'
+import { onNetEvent } from '@packages/net-stubbing'
+import socketIo from '@packages/socket'
+import firefoxUtil from './browsers/firefox-util'
+import errors from './errors'
+import exec from './exec'
+import files from './files'
+import fixture from './fixture'
+import preprocessor from './plugins/preprocessor'
+import task from './task'
+import * as editors from './util/editors'
+import { openFile } from './util/file-opener'
+import fs from './util/fs'
+import open from './util/open'
 
-const editors = require('./util/editors')
-const { openFile } = require('./util/file-opener')
-const fs = require('./util/fs')
-const open = require('./util/open')
-const exec = require('./exec')
-const task = require('./task')
-const files = require('./files')
-const fixture = require('./fixture')
-const errors = require('./errors')
-const preprocessor = require('./plugins/preprocessor')
-const netStubbing = require('@packages/net-stubbing')
-const firefoxUtil = require('./browsers/firefox-util').default
+const debug = Debug('cypress:server:socket')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -41,14 +42,14 @@ const reporterEvents = [
 ]
 
 const retry = (fn) => {
-  return Promise.delay(25).then(fn)
+  return Bluebird.delay(25).then(fn)
 }
 
 const isSpecialSpec = (name) => {
   return name.endsWith('__all')
 }
 
-class Socket {
+export class Socket {
   constructor (config) {
     this.ended = false
 
@@ -223,7 +224,7 @@ class Socket {
           }
 
           // if we are in headless mode then log out an error and maybe exit with process.exit(1)?
-          return Promise.delay(2000)
+          return Bluebird.delay(2000)
           .then(() => {
             // bail if we've swapped to a new automationClient
             if (automationClient !== socket) {
@@ -345,7 +346,7 @@ class Socket {
         }
 
         const tryConnected = () => {
-          return Promise
+          return Bluebird
           .try(isConnected)
           .catch(() => {
             return retry(tryConnected)
@@ -354,12 +355,12 @@ class Socket {
 
         // retry for up to data.timeout
         // or 1 second
-        return Promise
+        return Bluebird
         .try(tryConnected)
         .timeout(data.timeout != null ? data.timeout : 1000)
         .then(() => {
           return cb(true)
-        }).catch(Promise.TimeoutError, (err) => {
+        }).catch(Bluebird.TimeoutError, (err) => {
           return cb(false)
         })
       })
@@ -396,7 +397,7 @@ class Socket {
             case 'write:file':
               return files.writeFile(config.projectRoot, args[0], args[1], args[2])
             case 'net':
-              return netStubbing.onNetEvent({
+              return onNetEvent({
                 eventName: args[0],
                 frame: args[1],
                 state: options.netStubbingState,
@@ -415,7 +416,7 @@ class Socket {
           }
         }
 
-        return Promise.try(backendRequest)
+        return Bluebird.try(backendRequest)
         .then((resp) => {
           return cb({ response: resp })
         }).catch((err) => {
@@ -497,5 +498,3 @@ class Socket {
     return (this.io != null ? this.io.close() : undefined)
   }
 }
-
-module.exports = Socket

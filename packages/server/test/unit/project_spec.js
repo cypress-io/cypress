@@ -18,7 +18,7 @@ const plugins = require(`${root}lib/plugins`)
 const fs = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
-const Socket = require(`${root}lib/socket`)
+const { Socket } = require(`${root}lib/socket`)
 
 describe('lib/project-e2e', () => {
   beforeEach(function () {
