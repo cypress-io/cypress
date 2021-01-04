@@ -2,9 +2,7 @@
 
 import Bluebird from 'bluebird'
 import Debug from 'debug'
-import http from 'http'
 import { ServerBase } from '@packages/server/lib/server-base'
-import allowDestroy from '@packages/server/lib/util/server_destroy'
 import { initializeRoutes } from './routes-ct'
 import { Socket } from './socket-ct'
 
@@ -41,9 +39,8 @@ export class ServerCt extends ServerBase {
     return new Bluebird((resolve, reject) => {
       const { port } = config
 
-      this._server = http.createServer(app)
 
-      allowDestroy(this._server)
+      const _server = this._server = this._createHttpServer(app)
 
       const onError = (err) => {
         // if the server bombs before starting

@@ -3,7 +3,6 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import evilDns from 'evil-dns'
-import http from 'http'
 import httpProxy from 'http-proxy'
 import isHtml from 'is-html'
 import la from 'lazy-ass'
@@ -23,7 +22,6 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import origin from './util/origin'
-import allowDestroy from './util/server_destroy'
 import statusCode from './util/status_code'
 
 const DEFAULT_DOMAIN_NAME = 'localhost'
@@ -92,9 +90,7 @@ export class ServerE2E extends ServerBase {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      this._server = http.createServer(app)
-
-      allowDestroy(this._server)
+      const _server = this._server = this._createHttpServer(app)
 
       const onError = (err) => {
         // if the server bombs before starting

@@ -17,6 +17,7 @@ import errors from './errors'
 import Request from './request'
 import Socket from './socket'
 import templateEngine from './template_engine'
+import allowDestroy, { DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
@@ -179,6 +180,14 @@ export class ServerBase {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
     })
+  }
+
+  _createHttpServer (app): DestroyableHttpServer {
+    const svr = http.createServer(app)
+
+    allowDestroy(svr)
+
+    return svr
   }
 
   _port () {
