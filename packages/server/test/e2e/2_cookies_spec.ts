@@ -338,6 +338,7 @@ describe('cross-origin cookies, set:cookies', () => {
 
   })
 
+  // https://github.com/cypress-io/cypress/issues/6375
   e2e.it('set:cookies', {
     config: {
       video: false,

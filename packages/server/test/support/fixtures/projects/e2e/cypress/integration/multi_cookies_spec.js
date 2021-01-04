@@ -150,8 +150,6 @@ describe('set:cookies', () => {
       })
     }
 
-    console.log('dsfsfdds')
-
     await Cypress.session.clearCookies()
 
     expect(await Cypress.session.getCookies()).deep.eq([])
@@ -170,7 +168,6 @@ describe('set:cookies', () => {
 
     expect(cleared_cookies).deep.eq([])
 
-    console.log('ffffS', initial_cookies)
     await Cypress.session.setCookies(initial_cookies)
 
     const restored_cookies = await Cypress.session.getCookies()

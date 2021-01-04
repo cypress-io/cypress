@@ -1,4 +1,3 @@
-import './sessions.scss'
 import _ from 'lodash'
 import cs from 'classnames'
 import React from 'react'

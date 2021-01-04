@@ -55,20 +55,20 @@ describe('cross origin automations', function () {
     .then(() => {
       localStorage.key1 = 'val1'
     })
-
-    Cypress.session.setLocalStorage({ value: { key1: 'val1' } })
+    .then(() => Cypress.session.setLocalStorage({ value: { key1: 'val1' } }))
     .then(() => {
       expect(window.localStorage.key1).eq('val1')
     })
 
-    Cypress.session.setLocalStorage([
-      // set localStorage on different origin
-      { origin: 'https://127.0.0.2:44665', value: { key2: 'val' }, clear: true },
-      // set localStorage on current origin
-      { value: { key3: 'val' }, clear: true },
-    ])
-
-    Cypress.session.getLocalStorage({ origin: ['current_url', 'https://127.0.0.2:44665'] })
+    .then(() => {
+      return Cypress.session.setLocalStorage([
+        // set localStorage on different origin
+        { origin: 'https://127.0.0.2:44665', value: { key2: 'val' }, clear: true },
+        // set localStorage on current origin
+        { value: { key3: 'val' }, clear: true },
+      ])
+    })
+    .then(() => Cypress.session.getLocalStorage({ origin: ['current_url', 'https://127.0.0.2:44665'] }))
     .then((result) => {
       expect(result).deep.eq([
         { origin: 'https://localhost:4466', value: { key3: 'val' } },
@@ -83,7 +83,7 @@ describe('cross origin automations', function () {
       localStorage.key1 = 'val1'
     })
 
-    Cypress.session.getLocalStorage({ origin: '*' })
+    .then(() => Cypress.session.getLocalStorage({ origin: '*' }))
     .then((result) => {
       expect(result).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }, { origin: 'https://127.0.0.2:44665', value: { foo: 'bar' } }])
     })
@@ -95,7 +95,7 @@ describe('cross origin automations', function () {
       localStorage.key1 = 'val1'
     })
 
-    Cypress.session.getLocalStorage({ origin: '*' })
+    .then(() => Cypress.session.getLocalStorage({ origin: '*' }))
     .then((result) => {
       expect(result).deep.eq([{ origin: 'https://localhost:4466', value: { key1: 'val1' } }])
     })
@@ -398,7 +398,6 @@ describe('consoleProps', () => {
   })
 
   it('t1', () => {
-    cy.wait(2000)
     const renderedConsoleProps = Cypress._.omit(log.get('consoleProps')(), 'Snapshot')
 
     renderedConsoleProps.table = renderedConsoleProps.table.map((v) => v())
