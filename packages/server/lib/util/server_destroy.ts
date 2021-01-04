@@ -1,6 +1,6 @@
 import Bluebird from 'bluebird'
 import http from 'http'
-import { allowDestroy } from '@packages/network'
+import * as network from '@packages/network'
 
 export interface DestroyableHttpServer extends http.Server {
   /** asynchronously destroys the http server, waiting
@@ -9,8 +9,8 @@ export interface DestroyableHttpServer extends http.Server {
   destroyAsync (): Bluebird<void>
 }
 
-export default (server) => {
-  allowDestroy(server)
+export const allowDestroy = (server) => {
+  network.allowDestroy(server)
 
   server.destroyAsync = () => {
     return Bluebird.promisify(server.destroy)()

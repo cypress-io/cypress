@@ -20,7 +20,7 @@ import Request from './request'
 import Socket from './socket'
 import templateEngine from './template_engine'
 import origin from './util/origin'
-import allowDestroy, { DestroyableHttpServer } from './util/server_destroy'
+import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
 
 const ALLOWED_PROXY_BYPASS_URLS = [
