@@ -2,6 +2,7 @@ import Debug from 'debug'
 import { ErrorRequestHandler, Express } from 'express'
 import httpProxy from 'http-proxy'
 import send from 'send'
+import { NetworkProxy } from '@packages/proxy'
 import { handle, serve } from '@packages/runner-ct'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
@@ -14,12 +15,12 @@ interface InitializeRoutes {
   specsStore: SpecsStore
   config: Record<string, any>
   project: ProjectCt
+  nodeProxy: httpProxy
+  networkProxy: NetworkProxy
   onError: (...args: unknown[]) => any
 }
 
-export function initializeRoutes ({ app, config, specsStore, project }: InitializeRoutes) {
-  const proxy = httpProxy.createProxyServer()
-
+export function initializeRoutes ({ app, config, specsStore, nodeProxy, networkProxy, project }: InitializeRoutes) {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
@@ -30,17 +31,14 @@ export function initializeRoutes ({ app, config, specsStore, project }: Initiali
   })
 
   app.get('/__cypress/iframes/*', (req, res) => {
-    req.url = '/'
-    proxy.web(req, res, { target: config.webpackDevServerUrl })
-    // localhost:myPort/index.html
-    // res.send(config.webpackDevServerUrl)
-    // const extraOptions = {
-    //   specFilter: _.get(project, 'spec.specFilter'),
-    // }
-    //
-    // const getRemoteState = _.constant({ domainName: null })
-    //
-    // files.handleIframe(req, res, config, getRemoteState, extraOptions)
+    // always proxy to the index.html file
+    req.url = '/index.html'
+
+    // user the node proxy here instead of the network proxy
+    // to avoid the user accidentally intercepting and modifying
+    // our internal index.html handler
+    nodeProxy.web(req, res)
+  })
   })
 
   app.get(config.clientRoute, (req, res) => {
@@ -54,14 +52,7 @@ export function initializeRoutes ({ app, config, specsStore, project }: Initiali
   })
 
   app.all('*', (req, res) => {
-    proxy.web(req, res, { target: config.webpackDevServerUrl })
-    // proxy.web(req, res, { target: webpack, function(e) { ... });
-
-    // const to = net.createConnection({
-    //   host: config.
-    //   port: config.webpackDevServerUrl
-    // }
-    // res.sendStatus(200)
+    networkProxy.handleHttpRequest(req, res)
   })
 
   // when we experience uncaught errors
