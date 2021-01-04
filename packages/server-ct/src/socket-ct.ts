@@ -1,8 +1,5 @@
-// @ts-nocheck
-// copied from server/lib/socket.js
-
 import Bluebird from 'bluebird'
-import _debug from 'debug'
+import Debug from 'debug'
 import _ from 'lodash'
 import * as netStubbing from '@packages/net-stubbing'
 import { GetFixtureFn } from '@packages/net-stubbing/lib/server/types'
@@ -13,7 +10,7 @@ import { openFile } from '@packages/server/lib/util/file-opener'
 import open from '@packages/server/lib/util/open'
 import socketIo from '@packages/socket'
 
-const debug = _debug('cypress:server-ct:socket')
+const debug = Debug('cypress:server-ct:socket')
 
 type RunnerEvent =
   'reporter:restart:test:run'
