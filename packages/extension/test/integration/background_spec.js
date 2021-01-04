@@ -470,15 +470,17 @@ describe('app/background', () => {
         return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'should.throw', name: 'shouldThrow' }])
       })
 
-      it('rejects when no details', function (done) {
+      it('doesnt fail when no found cookie', function (done) {
+        const cookieArr = [{ domain: 'no.details', name: 'noDetails' }]
+
         this.socket.on('automation:response', (id, obj = {}) => {
           expect(id).to.eq(123)
-          expect(obj.__error).to.eq(`Removing cookie failed for: ${JSON.stringify({ url: 'http://no.details', name: 'noDetails' })}`)
+          expect(obj.response).to.deep.eq(cookieArr)
 
           return done()
         })
 
-        return this.server.emit('automation:request', 123, 'clear:cookies', [{ domain: 'no.details', name: 'noDetails' }])
+        return this.server.emit('automation:request', 123, 'clear:cookies', cookieArr)
       })
     })
 
