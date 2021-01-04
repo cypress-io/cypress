@@ -21,10 +21,8 @@ import Socket from './socket'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
-import origin from './util/origin'
 import statusCode from './util/status_code'
 
-const DEFAULT_DOMAIN_NAME = 'localhost'
 const fullyQualifiedRe = /^https?:\/\//
 const textHtmlContentTypeRe = /^text\/html/i
 
@@ -198,41 +196,6 @@ export class ServerE2E extends ServerBase {
     this._socket.startListening(this._server, automation, config, options)
 
     return this._normalizeReqUrl(this._server)
-  }
-
-  _getRemoteState () {
-    // {
-    //   origin: "http://localhost:2020"
-    //   fileServer:
-    //   strategy: "file"
-    //   domainName: "localhost"
-    //   props: null
-    // }
-
-    // {
-    //   origin: "https://foo.google.com"
-    //   strategy: "http"
-    //   domainName: "google.com"
-    //   props: {
-    //     port: 443
-    //     tld: "com"
-    //     domain: "google"
-    //   }
-    // }
-
-    const props = _.extend({}, {
-      auth: this._remoteAuth,
-      props: this._remoteProps,
-      origin: this._remoteOrigin,
-      strategy: this._remoteStrategy,
-      visiting: this._remoteVisitingUrl,
-      domainName: this._remoteDomainName,
-      fileServer: this._remoteFileServer,
-    })
-
-    debug('Getting remote state: %o', props)
-
-    return props
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {

@@ -26,6 +26,8 @@ const ALLOWED_PROXY_BYPASS_URLS = [
   '/__cypress/runner/cypress_runner.js', // TODO: fix this
   '/__cypress/static/favicon.ico',
 ]
+const DEFAULT_DOMAIN_NAME = 'localhost'
+const fullyQualifiedRe = /^https?:\/\//
 
 const debug = Debug('cypress:server:server-base')
 
@@ -240,6 +242,87 @@ export class ServerBase {
 
       return this._callRequestListeners(server, listeners, req, res)
     })
+  }
+
+  _getRemoteState () {
+    // {
+    //   origin: "http://localhost:2020"
+    //   fileServer:
+    //   strategy: "file"
+    //   domainName: "localhost"
+    //   props: null
+    // }
+
+    // {
+    //   origin: "https://foo.google.com"
+    //   strategy: "http"
+    //   domainName: "google.com"
+    //   props: {
+    //     port: 443
+    //     tld: "com"
+    //     domain: "google"
+    //   }
+    // }
+
+    const props = _.extend({}, {
+      auth: this._remoteAuth,
+      props: this._remoteProps,
+      origin: this._remoteOrigin,
+      strategy: this._remoteStrategy,
+      visiting: this._remoteVisitingUrl,
+      domainName: this._remoteDomainName,
+      fileServer: this._remoteFileServer,
+    })
+
+    debug('Getting remote state: %o', props)
+
+    return props
+  }
+
+  _onDomainSet (fullyQualifiedUrl, options = {}) {
+    const l = (type, val) => {
+      return debug('Setting', type, val)
+    }
+
+    this._remoteAuth = options.auth
+
+    l('remoteAuth', this._remoteAuth)
+
+    // if this isn't a fully qualified url
+    // or if this came to us as <root> in our tests
+    // then we know to go back to our default domain
+    // which is the localhost server
+    if ((fullyQualifiedUrl === '<root>') || !fullyQualifiedRe.test(fullyQualifiedUrl)) {
+      this._remoteOrigin = `http://${DEFAULT_DOMAIN_NAME}:${this._port()}`
+      this._remoteStrategy = 'file'
+      this._remoteFileServer = `http://${DEFAULT_DOMAIN_NAME}:${(this._fileServer != null ? this._fileServer.port() : undefined)}`
+      this._remoteDomainName = DEFAULT_DOMAIN_NAME
+      this._remoteProps = null
+
+      l('remoteOrigin', this._remoteOrigin)
+      l('remoteStrategy', this._remoteStrategy)
+      l('remoteHostAndPort', this._remoteProps)
+      l('remoteDocDomain', this._remoteDomainName)
+      l('remoteFileServer', this._remoteFileServer)
+    } else {
+      this._remoteOrigin = origin(fullyQualifiedUrl)
+
+      this._remoteStrategy = 'http'
+
+      this._remoteFileServer = null
+
+      // set an object with port, tld, and domain properties
+      // as the remoteHostAndPort
+      this._remoteProps = cors.parseUrlIntoDomainTldPort(this._remoteOrigin)
+
+      this._remoteDomainName = _.compact([this._remoteProps.domain, this._remoteProps.tld]).join('.')
+
+      l('remoteOrigin', this._remoteOrigin)
+      l('remoteHostAndPort', this._remoteProps)
+      l('remoteDocDomain', this._remoteDomainName)
+    }
+
+    return this._getRemoteState()
   }
 
   proxyWebsockets (proxy, socketIoRoute, req, socket, head) {
