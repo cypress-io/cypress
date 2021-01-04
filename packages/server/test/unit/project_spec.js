@@ -18,7 +18,7 @@ const plugins = require(`${root}lib/plugins`)
 const fs = require(`${root}lib/util/fs`)
 const settings = require(`${root}lib/util/settings`)
 const Watchers = require(`${root}lib/watchers`)
-const { Socket } = require(`${root}lib/socket`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 
 describe('lib/project-e2e', () => {
   beforeEach(function () {
@@ -278,7 +278,7 @@ describe('lib/project-e2e', () => {
       const options = {}
 
       return this.server.open(options).then(() => {
-        const { startListening } = Socket.prototype
+        const { startListening } = SocketE2E.prototype
 
         expect(startListening.getCall(0).args[0]).to.be.instanceof(Watchers)
 

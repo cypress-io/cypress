@@ -10,13 +10,14 @@ import exec from './exec'
 import files from './files'
 import fixture from './fixture'
 import preprocessor from './plugins/preprocessor'
+import { SocketBase } from './socket-base'
 import task from './task'
 import * as editors from './util/editors'
 import { openFile } from './util/file-opener'
 import fs from './util/fs'
 import open from './util/open'
 
-const debug = Debug('cypress:server:socket')
+const debug = Debug('cypress:server:socket-e2e')
 
 const runnerEvents = [
   'reporter:restart:test:run',
@@ -49,7 +50,7 @@ const isSpecialSpec = (name) => {
   return name.endsWith('__all')
 }
 
-export class Socket {
+export class SocketE2E extends SocketBase {
   constructor (config) {
     this.ended = false
 

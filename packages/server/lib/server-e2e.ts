@@ -16,7 +16,7 @@ import errors from './errors'
 import fileServer from './file_server'
 import logger from './logger'
 import { ServerBase } from './server-base'
-import { Socket } from './socket'
+import { SocketE2E } from './socket-e2e'
 import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
@@ -64,7 +64,7 @@ export class ServerE2E extends ServerBase {
       logger.setSettings(config)
 
       this._nodeProxy = httpProxy.createProxyServer()
-      this._socket = new Socket(config)
+      this._socket = new SocketE2E(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()

@@ -18,7 +18,7 @@ import { NetworkProxy } from '@packages/proxy'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
-import { Socket } from './socket'
+import { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
@@ -92,7 +92,7 @@ export class ServerBase {
   protected _socketAllowed: SocketAllowed
   protected _httpsProxy: httpsProxy | null
   protected _server: DestroyableHttpServer | null
-  protected _socket: Socket
+  protected _socket: SocketE2E
   protected _request: Request
   protected _nodeProxy: httpProxy | null
   protected _networkProxy: NetworkProxy | null

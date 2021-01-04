@@ -7,7 +7,7 @@ const socketIo = require('@packages/socket')
 const httpsAgent = require('https-proxy-agent')
 const errors = require(`${root}lib/errors`)
 const config = require(`${root}lib/config`)
-const { Socket } = require(`${root}lib/socket`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
 const Automation = require(`${root}lib/automation`)
 const exec = require(`${root}lib/exec`)
@@ -546,7 +546,7 @@ describe('lib/socket', () => {
         close: sinon.stub(),
       }
 
-      sinon.stub(Socket.prototype, 'createIo').returns(this.io)
+      sinon.stub(SocketE2E.prototype, 'createIo').returns(this.io)
       sinon.stub(preprocessor.emitter, 'on')
 
       return this.server.open(this.cfg)
@@ -562,7 +562,7 @@ describe('lib/socket', () => {
     context('constructor', () => {
       it('listens for \'file:updated\' on preprocessor', function () {
         this.cfg.watchForFileChanges = true
-        new Socket(this.cfg)
+        new SocketE2E(this.cfg)
 
         expect(preprocessor.emitter.on).to.be.calledWith('file:updated')
       })
@@ -570,7 +570,7 @@ describe('lib/socket', () => {
       it('does not listen for \'file:updated\' if config.watchForFileChanges is false', function () {
         preprocessor.emitter.on.reset()
         this.cfg.watchForFileChanges = false
-        new Socket(this.cfg)
+        new SocketE2E(this.cfg)
 
         expect(preprocessor.emitter.on).not.to.be.called
       })

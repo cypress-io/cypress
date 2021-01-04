@@ -8,7 +8,7 @@ const { connect } = require('@packages/network')
 const config = require(`${root}lib/config`)
 const logger = require(`${root}lib/logger`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const { Socket } = require(`${root}lib/socket`)
+const { SocketE2E } = require(`${root}lib/socket-e2e`)
 const fileServer = require(`${root}lib/file_server`)
 const ensureUrl = require(`${root}lib/util/ensure-url`)
 
@@ -236,7 +236,7 @@ describe('lib/server', () => {
 
   context('#startWebsockets', () => {
     beforeEach(function () {
-      this.startListening = sinon.stub(Socket.prototype, 'startListening')
+      this.startListening = sinon.stub(SocketE2E.prototype, 'startListening')
     })
 
     it('sets _socket and calls _socket#startListening', function () {
