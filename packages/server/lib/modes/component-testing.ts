@@ -14,7 +14,7 @@ type Options = Cypress.PluginConfigOptions & Cypress.InternalConfigOptions
 // No sure on the complete interface for `options`. It at least contains the union of the above two interfaces.
 export const run = (options: Options) => {
   // we are in run mode
-  if (options.runProject) {
+  if (options.runProject && !process.env.E2E_OVER_COMPONENT_TESTS) {
     // set options.browser to chrome unless already set
     options.browser = options.browser || DEFAULT_BROWSER_NAME
     api.ready(options)
