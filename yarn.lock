@@ -1962,17 +1962,6 @@
     debug "3.1.0"
     lazy-ass "1.6.0"
 
-"@cypress/eslint-plugin-dev@*":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@cypress/eslint-plugin-dev/-/eslint-plugin-dev-5.0.2.tgz#b7b59a836d55afd59f15b6410e37d4c624f5adad"
-  integrity sha512-VlmFYfCo8HnrKRBUOmkzOvtTvCNALNAei4fF5+TdUgmofU13nUxDccmB/SArhExMgSuAikHGQGPDFC2+NKJ0ew==
-  dependencies:
-    bluebird "^3.5.5"
-    chalk "^2.4.2"
-    eslint-rule-composer "^0.3.0"
-    lodash "^4.17.15"
-    shelljs "^0.8.3"
-
 "@cypress/get-windows-proxy@1.6.1":
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/@cypress/get-windows-proxy/-/get-windows-proxy-1.6.1.tgz#61a29d0271b38deaafc24b22a661bab684b6743f"
@@ -2128,36 +2117,6 @@
   integrity sha512-eTzoodaUESR8lAJkgvTVnF9bs7M1P4aiDsH4jbywcszb3IjJRLLvrMRZp7VDWID33to79EiqyfOudOzXXpuJjQ==
   dependencies:
     css.escape "^1.5.1"
-
-"@cypress/webpack-batteries-included-preprocessor@*":
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-batteries-included-preprocessor/-/webpack-batteries-included-preprocessor-2.1.3.tgz#da6a21e7634f78b0939e97581cd6b95d200bc743"
-  integrity sha512-fTktM5ZY4oL53sJWgehehOmkIV7/6l8nZm83gd4M6s/psw7V/rrr7W4mfZvDPECAadO0Ov0nnOPvlBhO9IYpLg==
-  dependencies:
-    "@babel/core" "^7.11.1"
-    "@babel/plugin-proposal-class-properties" "^7.10.4"
-    "@babel/plugin-proposal-object-rest-spread" "^7.11.0"
-    "@babel/plugin-transform-runtime" "^7.11.0"
-    "@babel/preset-env" "^7.11.0"
-    "@babel/preset-react" "^7.10.4"
-    "@babel/runtime" "^7.11.2"
-    babel-loader "^8.1.0"
-    babel-plugin-add-module-exports "^1.0.2"
-    coffee-loader "^0.9.0"
-    coffeescript "^1.12.7"
-    ts-loader "^8.0.2"
-    tsconfig-package "npm:tsconfig@^7.0.0"
-    tsconfig-paths-webpack-plugin "^3.3.0"
-    webpack "^4.44.1"
-
-"@cypress/webpack-preprocessor@*":
-  version "5.4.5"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.5.tgz#a3e5f7172c2a11348da3afa8821d1a4cd0bfcfcd"
-  integrity sha512-KH9B//f5DanvnO4RxyEq9RRGqeFqbzsk/wvINWhJAZcyCSZ9iD/J5E1picHt7UZxw9iXw3hzJWcuKNxdR4nk5w==
-  dependencies:
-    bluebird "^3.7.1"
-    debug "^4.1.1"
-    lodash "^4.17.20"
 
 "@cypress/webpack-preprocessor@5.4.2":
   version "5.4.2"
@@ -12254,6 +12213,50 @@ cypress-react-unit-test@4.11.2:
     find-webpack "2.0.0"
     mime-types "2.1.26"
     unfetch "4.1.0"
+
+cypress@*:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-6.1.0.tgz#af2596cb110aa98eaf75fef3d8ab379ca0ff2413"
+  integrity sha512-uQnSxRcZ6hkf9R5cr8KpRBTzN88QZwLIImbf5DWa5RIxH6o5Gpff58EcjiYhAR8/8p9SGv7O6SRygq4H+k0Qpw==
+  dependencies:
+    "@cypress/listr-verbose-renderer" "^0.4.1"
+    "@cypress/request" "^2.88.5"
+    "@cypress/xvfb" "^1.2.4"
+    "@types/sinonjs__fake-timers" "^6.0.1"
+    "@types/sizzle" "^2.3.2"
+    arch "^2.1.2"
+    blob-util "2.0.2"
+    bluebird "^3.7.2"
+    cachedir "^2.3.0"
+    chalk "^4.1.0"
+    check-more-types "^2.24.0"
+    cli-table3 "~0.6.0"
+    commander "^5.1.0"
+    common-tags "^1.8.0"
+    debug "^4.1.1"
+    eventemitter2 "^6.4.2"
+    execa "^4.0.2"
+    executable "^4.1.1"
+    extract-zip "^1.7.0"
+    fs-extra "^9.0.1"
+    getos "^3.2.1"
+    is-ci "^2.0.0"
+    is-installed-globally "^0.3.2"
+    lazy-ass "^1.6.0"
+    listr "^0.14.3"
+    lodash "^4.17.19"
+    log-symbols "^4.0.0"
+    minimist "^1.2.5"
+    moment "^2.27.0"
+    ospath "^1.2.2"
+    pretty-bytes "^5.4.1"
+    ramda "~0.26.1"
+    request-progress "^3.0.0"
+    supports-color "^7.2.0"
+    tmp "~0.2.1"
+    untildify "^4.0.0"
+    url "^0.11.0"
+    yauzl "^2.10.0"
 
 d3-array@^1.2.0:
   version "1.2.4"
@@ -32249,11 +32252,6 @@ typescript@3.7.4:
   version "3.7.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.7.4.tgz#1743a5ec5fef6a1fa9f3e4708e33c81c73876c19"
   integrity sha512-A25xv5XCtarLwXpcDNZzCGvW2D1S3/bACratYBx2sax8PefsFhlYmkQicKHvpYflFS8if4zne5zT5kpJ7pzuvw==
-
-typescript@3.8.3:
-  version "3.8.3"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.8.3.tgz#409eb8544ea0335711205869ec458ab109ee1061"
-  integrity sha512-MYlEfn5VrLNsgudQTVJeNaQFUAI7DkhnOjdpAp4T+ku1TfQClewlbSuTVHiA+8skNBgaf02TL/kLOvig4y3G8w==
 
 typescript@3.9.6, typescript@^3.0.3, typescript@^3.8.3:
   version "3.9.6"
