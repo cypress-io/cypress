@@ -444,10 +444,6 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     return this._socket && this._socket.changeToUrl(url)
   }
 
-  onTestFileChange (filePath) {
-    return this._socket && this._socket.onTestFileChange(filePath)
-  }
-
   onRequest (fn) {
     this._middleware = fn
   }

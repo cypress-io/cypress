@@ -467,6 +467,10 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     }))
   }
 
+  onTestFileChange (filePath) {
+    return this.socket.onTestFileChange(filePath)
+  }
+
   _retryBaseUrlCheck (baseUrl, onWarning) {
     return ensureUrl.retryIsListening(baseUrl, {
       retryIntervals: [3000, 3000, 4000],
