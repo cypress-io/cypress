@@ -345,3 +345,17 @@
     }
   }
 }
+
+
+.reporter.multiSpecs {
+  overflow-y: auto;
+
+  .container {
+    flex-grow: 0;
+    overflow-y: unset;
+
+    .wrap {
+      margin-bottom: 0;
+    }
+  }
+}
