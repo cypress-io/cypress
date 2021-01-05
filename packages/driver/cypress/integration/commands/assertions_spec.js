@@ -408,6 +408,48 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/9644
+    describe('calledOnceWith', () => {
+      it('be.calledOnceWith', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' }, 1234)
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWith',
+          {
+            bar: 'test',
+          },
+        )
+      })
+
+      it('be.calledOnceWithExactly', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' })
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+
+        const spy2 = cy.spy().as('spy2')
+
+        setTimeout(() => {
+          spy2({ bar: 'test' }, 12345)
+        }, 100)
+
+        cy.get('@spy2').should(
+          'not.be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 50,
     }, () => {
