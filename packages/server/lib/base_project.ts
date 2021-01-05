@@ -51,6 +51,12 @@ export class BaseProject extends EventEmitter {
     return url
   }
 
+  getAutomation = () => {
+    return {
+      use: () => {}
+    }
+  }
+
   getSpecUrl (options: GetSpecUrl) {
     // debug('get spec url: %s for spec type %s', options.absoluteSpecPath, options.specType)
 

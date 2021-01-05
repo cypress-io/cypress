@@ -7,6 +7,9 @@ import allowDestroy from '@packages/server/lib/util/server_destroy'
 import templateEngine from '@packages/server/lib/template_engine'
 import { Socket } from './socket-ct'
 import { initializeRoutes } from './routes-ct'
+import {
+  uri,
+} from '@packages/network'
 
 const debug = _debug('cypress:server-ct:server')
 
@@ -218,7 +221,52 @@ export class Server {
     })
   }
 
+  _normalizeReqUrl(server) {
+    const setProxiedUrl = function (req) {
+      console.log(`REQ: ${req.url}`)
+      // proxiedUrl is the full URL with scheme, host, and port
+      // it will only be fully-qualified if the request was proxied.
+
+      // this function will set the URL of the request to be the path
+      // only, which can then be used to proxy the request.
+
+      // bail if we've already proxied the url
+      if (req.proxiedUrl) {
+        return
+      }
+
+      // backup the original proxied url
+      // and slice out the host/origin
+      // and only leave the path which is
+      // how browsers would normally send
+      // use their url
+      req.proxiedUrl = uri.removeDefaultPort(req.url).format()
+
+      req.url = uri.getPath(req.url)
+      console.log(`PROXIED: ${req.url}`)
+    }
+
+    // because socket.io removes all of our request
+    // events, it forces the socket.io traffic to be
+    // handled first.
+    // however we need to basically do the same thing
+    // it does and after we call into socket.io go
+    // through and remove all request listeners
+    // and change the req.url by slicing out the host
+    // because the browser is in proxy mode
+    const listeners = server.listeners('request').slice(0)
+
+    server.removeAllListeners('request')
+
+    return server.on('request', (req, res) => {
+      setProxiedUrl(req)
+
+      return this._callRequestListeners(server, listeners, req, res)
+    })
+  }
+
   startWebsockets (config, options = {}) {
     this._socket.startListening(this._server, config, options)
+    return this._normalizeReqUrl(this._server)
   }
 }
