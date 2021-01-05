@@ -7,14 +7,14 @@ exports['e2e promises / failing1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (promises_spec.coffee)                                                     │
-  │ Searched:   cypress/integration/promises_spec.coffee                                           │
+  │ Specs:      1 found (promises_spec.js)                                                         │
+  │ Searched:   cypress/integration/promises_spec.js                                               │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  promises_spec.coffee                                                            (1 of 1)
+  Running:  promises_spec.js                                                                (1 of 1)
 
 
   1) catches regular promise errors
@@ -45,22 +45,22 @@ exports['e2e promises / failing1'] = `
   │ Screenshots:  2                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     promises_spec.coffee                                                             │
+  │ Spec Ran:     promises_spec.js                                                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches regular promise er     (1280x720)
-     rors (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.coffee/catches promise errors and     (1280x720)
-      calls done with err even when async (failed).png                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.js/catches regular promise errors     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/promises_spec.js/catches promise errors and cal     (1280x720)
+     ls done with err even when async (failed).png                                                  
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises_spec.coffee.mp4            (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/promises_spec.js.mp4                (X second)
 
 
 ====================================================================================================
@@ -70,7 +70,7 @@ exports['e2e promises / failing1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  promises_spec.coffee                     XX:XX        2        -        2        -        - │
+  │ ✖  promises_spec.js                         XX:XX        2        -        2        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        2        -        2        -        -  
 

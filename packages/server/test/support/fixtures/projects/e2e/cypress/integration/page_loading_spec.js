@@ -1,14 +1,4 @@
-/* eslint-disable
-    brace-style,
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 describe('page_loading', () => {
   it('sets __cypress.initial, properly injects, and avoids json injection', () => {
     // this tests that __cypress.initial is set correctly whilst navigating
@@ -19,23 +9,22 @@ describe('page_loading', () => {
     const promise1 = Cypress.Promise.pending()
     const promise2 = Cypress.Promise.pending()
 
-    return cy
-    .visit('http://localhost:1717/first')
-    .get('h1').should('contain', 'first')
-    .get('a').click()
-    .url().should('match', /second/)
-    .get('h1').should('contain', 'second')
-    .get('#count').should('contain', 1)
-    .reload(true) // force hard reload to increment count
-    .get('#count').should('contain', 2)
-    .window().then((win) => {
+    cy.visit('http://localhost:1717/first')
+    cy.get('h1').should('contain', 'first')
+    cy.get('a').click()
+    cy.url().should('match', /second/)
+    cy.get('h1').should('contain', 'second')
+    cy.get('#count').should('contain', 1)
+    cy.reload(true) // force hard reload to increment count
+    cy.get('#count').should('contain', 2)
+    cy.window().then((win) => {
       const a = Cypress.$('a')
 
-      return a.click(() => // we are delaying here because normally when cypress
+      // we are delaying here because normally when cypress
       // detects page:loading event it will cancel all outstanding
       // XHR requests.
       // so by delaying we force those to go out correctly
-      {
+      a.click(() => {
         return Cypress.Promise
         .delay(500)
         .then(() => {
@@ -59,23 +48,22 @@ describe('page_loading', () => {
           return xhr2.send()
         })
       })
-    }).get('a').click()
+    })
+
+    cy.get('a').click()
     .then(() => {
       return Cypress.Promise.all([promise1.promise, promise2.promise])
     }).spread((resp1, resp2) => {
       expect(resp1).to.deep.eq({ body: { foo: 'bar' } })
-
       expect(resp2).to.include('document.domain = \'localhost\'')
-
       expect(resp2).to.include('content')
     })
   })
 
   describe('issue #258: opener is undefined during snapshot', () => {
     it('causes the xhr to be aborted while in flight', () => {
-      return cy
-      .visit('http://localhost:1717/form')
-      .get('form').submit()
+      cy.visit('http://localhost:1717/form')
+      cy.get('form').submit()
     })
   })
 })
