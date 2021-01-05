@@ -13,7 +13,7 @@
     "test-debug": "yarn test-unit --inspect-brk=5566",
     "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
-    "watch": "gulp watch"
+    "watch": "webpack --watch --progress"
   },
   "dependencies": {
     "bluebird": "3.5.3",
@@ -22,7 +22,6 @@
   "devDependencies": {
     "@cypress/icons": "0.7.0",
     "@packages/socket": "*",
-    "browserify": "16.3.0",
     "chai": "3.5.0",
     "coffeescript": "1.12.7",
     "cross-env": "6.0.3",
@@ -36,8 +35,9 @@
     "rimraf": "3.0.2",
     "sinon": "7.3.2",
     "sinon-chai": "3.3.0",
-    "vinyl-source-stream": "2.0.0",
-    "webextension-polyfill": "0.4.0"
+    "ts-loader": "8.0.13",
+    "webextension-polyfill": "0.4.0",
+    "webpack": "4.44.2"
   },
   "files": [
     "app",

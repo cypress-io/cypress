@@ -1,17 +1,11 @@
-import browserify from 'browserify'
 import fs from 'fs-extra'
 import gulp from 'gulp'
 import rimraf from 'rimraf'
-import source from 'vinyl-source-stream'
+import webpack from 'webpack'
 import cypressIcons from '@cypress/icons'
-import { getPathToClientSource } from '@packages/socket'
+import webpackConfig from './webpack.config.js'
 
 const pkg = require('./package.json')
-
-const copySocketClient = () => {
-  return gulp.src(getPathToClientSource())
-  .pipe(gulp.dest('dist'))
-}
 
 const clean = (done) => {
   rimraf('dist', done)
@@ -31,13 +25,10 @@ const manifest = (done) => {
   return null
 }
 
-const background = () => {
-  return browserify({
-    entries: 'app/init.js',
-  })
-  .bundle()
-  .pipe(source('background.js'))
-  .pipe(gulp.dest('dist'))
+const background = (cb) => {
+  const compiler = webpack(webpackConfig as webpack.Configuration)
+
+  compiler.run(cb)
 }
 
 const html = () => {
@@ -71,7 +62,6 @@ const logos = () => {
 const build = gulp.series(
   clean,
   gulp.parallel(
-    copySocketClient,
     icons,
     logos,
     manifest,
