@@ -1,6 +1,6 @@
 {
   "name": "@packages/runner",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "src/index.js",
   "scripts": {
@@ -18,12 +18,12 @@
   },
   "devDependencies": {
     "@cypress/react-tooltip": "0.5.3",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fortawesome/fontawesome-free": "5.12.1",
-    "@packages/driver": "*",
-    "@packages/reporter": "*",
-    "@packages/socket": "*",
-    "@packages/web-config": "*",
+    "@packages/driver": "0.0.0-development",
+    "@packages/reporter": "0.0.0-development",
+    "@packages/socket": "0.0.0-development",
+    "@packages/web-config": "0.0.0-development",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",
     "ansi-to-html": "0.6.14",

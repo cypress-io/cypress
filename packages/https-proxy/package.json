@@ -1,6 +1,6 @@
 {
   "name": "@packages/https-proxy",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -25,8 +25,8 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/request": "2.88.5",
     "@cypress/request-promise": "4.2.6",
-    "@packages/network": "*",
-    "@packages/ts": "*",
+    "@packages/network": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
     "chai": "3.5.0",
     "cross-env": "6.0.3",
     "mocha": "3.5.3",

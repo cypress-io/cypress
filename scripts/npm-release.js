@@ -114,7 +114,7 @@ const injectVersions = (packagesToRelease, versions, packages) => {
 
     if (packageJson.dependencies) {
       for (const dependency in packageJson.dependencies) {
-        if (packageJson.dependencies[dependency] === '*') {
+        if (packageJson.dependencies[dependency] === '0.0.0-development' || packageJson.dependencies[dependency] === '*') {
           const version = versions[dependency].nextVersion || versions[dependency].currentVersion
 
           if (!version) {
