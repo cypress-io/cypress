@@ -1908,6 +1908,20 @@ describe('src/cy/commands/assertions', () => {
           expect($els).to.include.value('foo')
         }).should('contain.value', 'oo2')
       })
+
+      // https://github.com/cypress-io/cypress/issues/14359
+      it('shows undefined correctly', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+            expect(log.get('message')).to.eq('expected **undefined** to have value **somevalue**')
+
+            done()
+          }
+        })
+
+        cy.wrap(undefined).should('have.value', 'somevalue')
+      })
     })
 
     context('descendants', () => {
