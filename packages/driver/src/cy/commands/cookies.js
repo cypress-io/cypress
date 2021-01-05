@@ -65,6 +65,20 @@ function cookieValidatesSecurePrefix (options) {
   return options.secure === false
 }
 
+// TODO: do something with the hostOnly property. Right now we dont return it
+// to prevent changes to the API. We will rework cookies in the future.
+function removeHostOnly (cookie) {
+  if (!cookie) return cookie
+
+  if (_.isArray(cookie)) {
+    return cookie.map(removeHostOnly)
+  }
+
+  delete cookie.hostOnly
+
+  return cookie
+}
+
 module.exports = function (Commands, Cypress, cy, state, config) {
   const automateCookies = function (event, obj = {}, log, timeout) {
     const automate = () => {
@@ -109,6 +123,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       return automateCookies('clear:cookies', cookies, log, timeout)
     })
+    .then(removeHostOnly)
   }
 
   const handleBackendError = (command, action, onFail) => {
@@ -187,6 +202,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookie', { name }, options._log, options.timeout)
+      .then(removeHostOnly)
       .then((resp) => {
         options.cookie = resp
 
@@ -224,6 +240,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('get:cookies', _.pick(options, 'domain'), options._log, options.timeout)
+      .then(removeHostOnly)
       .then((resp) => {
         options.cookies = resp
 
@@ -241,7 +258,6 @@ module.exports = function (Commands, Cypress, cy, state, config) {
         path: '/',
         secure: false,
         httpOnly: false,
-        hostOnly: false,
         log: true,
         expiry: $utils.addTwentyYears(),
         timeout: config('responseTimeout'),
@@ -306,6 +322,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
       }
 
       return automateCookies('set:cookie', cookie, options._log, options.timeout)
+      .then(removeHostOnly)
       .then((resp) => {
         options.cookie = resp
 
@@ -352,6 +369,7 @@ module.exports = function (Commands, Cypress, cy, state, config) {
 
       // TODO: prevent clearing a cypress namespace
       return automateCookies('clear:cookie', { name }, options._log, options.timeout)
+      .then(removeHostOnly)
       .then((resp) => {
         options.cookie = resp
 

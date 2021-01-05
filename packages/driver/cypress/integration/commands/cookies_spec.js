@@ -176,7 +176,7 @@ describe('src/cy/commands/cookies', () => {
         Cypress.automation
         .withArgs('get:cookies', { domain: 'localhost' })
         .resolves([
-          { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false },
+          { name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false },
         ])
       })
 
@@ -219,7 +219,7 @@ describe('src/cy/commands/cookies', () => {
   context('#getCookie', () => {
     it('returns single cookie by name', () => {
       Cypress.automation.withArgs('get:cookie').resolves({
-        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+        name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true,
       })
 
       cy.getCookie('foo').should('deep.eq', {
@@ -450,7 +450,7 @@ describe('src/cy/commands/cookies', () => {
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'set:cookie',
-          { domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined, hostOnly: false },
+          { domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined },
         )
       })
     })
@@ -466,7 +466,7 @@ describe('src/cy/commands/cookies', () => {
       .then(() => {
         expect(Cypress.automation).to.be.calledWith(
           'set:cookie',
-          { domain: 'brian.dev.local', name: 'foo', value: 'bar', path: '/foo', secure: true, httpOnly: true, expiry: 987, sameSite: undefined, hostOnly: false },
+          { domain: 'brian.dev.local', name: 'foo', value: 'bar', path: '/foo', secure: true, httpOnly: true, expiry: 987, sameSite: undefined },
         )
       })
     })
@@ -700,10 +700,10 @@ describe('src/cy/commands/cookies', () => {
 
         Cypress.automation
         .withArgs('set:cookie', {
-          domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined, hostOnly: false,
+          domain: 'localhost', name: 'foo', value: 'bar', path: '/', secure: false, httpOnly: false, expiry: 12345, sameSite: undefined,
         })
         .resolves({
-          name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+          name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: true,
         })
       })
 
@@ -877,7 +877,7 @@ describe('src/cy/commands/cookies', () => {
         Cypress.automation
         .withArgs('clear:cookie', { domain: 'localhost', name: 'foo' })
         .resolves({
-          name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false,
+          name: 'foo', value: 'bar', domain: 'localhost', path: '/', secure: true, httpOnly: false, hostOnly: false,
         })
         .withArgs('clear:cookie', { domain: 'localhost', name: 'bar' })
         .resolves(null)

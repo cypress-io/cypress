@@ -239,7 +239,7 @@
       "git add"
     ],
     "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix --max-warnings=0",
+      "eslint --fix",
       "git add"
     ]
   },

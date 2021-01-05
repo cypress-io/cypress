@@ -276,8 +276,8 @@ export default function (Commands, Cypress, cy) {
       return Cypress.automation('set:cookies', data)
     },
 
-    clearCookies () {
-      return Cypress.automation('clear:cookies', null)
+    async clearCookies () {
+      return Cypress.automation('clear:cookies', await sessions.getCookies())
     },
 
     async getCurrentSessionData () {

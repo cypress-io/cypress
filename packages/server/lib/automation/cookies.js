@@ -157,7 +157,7 @@ let cookies = function (cyNamespace, cookieNamespace) {
     },
 
     async clearCookies (data, automate) {
-      const cookiesToClear = data || await this.getCookies({}, automate)
+      const cookiesToClear = data
 
       cookies = _.reject(normalizeCookies(cookiesToClear), isNamespaced)
 

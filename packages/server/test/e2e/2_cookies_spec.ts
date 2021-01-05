@@ -4,6 +4,8 @@ import e2e from '../support/helpers/e2e'
 import humanInterval from 'human-interval'
 import cors from 'cors'
 
+const it = e2e.it
+
 const onServer = function (app) {
   app.use(parser())
 
@@ -193,7 +195,7 @@ describe('e2e cookies', () => {
 
     // once browsers are shipping with the options in FORCED_SAMESITE_ENV as default,
     // we can remove this extra test case
-    e2e.it('with forced SameSite strictness', {
+    it('with forced SameSite strictness', {
       config: {
         baseUrl,
         env: {
@@ -246,7 +248,7 @@ describe('e2e cookies', () => {
           https,
         ],
       ) => {
-        e2e.it(`passes with baseurl: ${baseUrl}`, {
+        it(`passes with baseurl: ${baseUrl}`, {
           config: {
             baseUrl,
             env: {
@@ -269,7 +271,7 @@ describe('e2e cookies', () => {
         })
       })
 
-      e2e.it('passes with no baseurl', {
+      it('passes with no baseurl', {
         config: {
           env: {
             httpUrl,
@@ -317,6 +319,10 @@ describe('cross-origin cookies, set:cookies', () => {
 
       res.send(`<h1>${name}</h1>`)
     })
+
+    app.get('*', (req, res) => {
+      res.json(req.cookies)
+    })
   }
 
   e2e.setup({
@@ -339,7 +345,7 @@ describe('cross-origin cookies, set:cookies', () => {
   })
 
   // https://github.com/cypress-io/cypress/issues/6375
-  e2e.it('set:cookies', {
+  it('set:cookies', {
     config: {
       video: false,
       baseUrl: `http://127.0.0.3:${httpPort}`,

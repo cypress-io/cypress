@@ -2819,7 +2819,6 @@ declare namespace Cypress {
     httpOnly: boolean
     expiry: number
     sameSite: SameSiteStatus
-    hostOnly?: true
   }
 
   interface ShadowDomOptions {
@@ -5255,7 +5254,6 @@ declare namespace Cypress {
     value: string
     path: string
     domain: string
-    hostOnly?: true
     httpOnly: boolean
     secure: boolean
     expiry?: number

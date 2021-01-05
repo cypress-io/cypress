@@ -662,7 +662,6 @@ namespace CypressCookieTests {
   cy.setCookie('foo', 'val', { // $ExpectType Chainable<Cookie>
     log: false,
     domain: 'example.com',
-    hostOnly: true,
     expiry: 123,
     secure: true,
     sameSite: 'no_restriction',
@@ -671,7 +670,6 @@ namespace CypressCookieTests {
 
   const cookie: Cypress.Cookie = {} as unknown as Cypress.Cookie
 
-  cookie.hostOnly
   cookie.domain
   cookie.expiry
   cookie.httpOnly

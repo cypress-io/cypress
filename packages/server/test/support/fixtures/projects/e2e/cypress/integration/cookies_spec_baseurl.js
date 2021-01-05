@@ -334,15 +334,13 @@ describe('cookies', () => {
 
                 _.times(n + 1, (i) => {
                   ['foo', 'bar'].forEach((tag) => {
-                    const domain = (i % 2) === (8 - n) ? expectedDomain : altDomain
                     const expectedCookie = {
                       'name': `name${tag}${i}`,
                       'value': `val${tag}${i}`,
                       'path': '/',
-                      domain,
+                      'domain': (i % 2) === (8 - n) ? expectedDomain : altDomain,
                       'secure': false,
                       'httpOnly': false,
-                      ...((domain === 'localhost' || domain.startsWith('127.')) ? {} : { hostOnly: true }),
                     }
 
                     if (defaultSameSite) {
