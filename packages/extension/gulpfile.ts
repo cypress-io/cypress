@@ -1,13 +1,15 @@
-const fs = require('fs-extra')
+import browserify from 'browserify'
+import fs from 'fs-extra'
+import gulp from 'gulp'
+import rimraf from 'rimraf'
+import source from 'vinyl-source-stream'
+import cypressIcons from '@cypress/icons'
+import { getPathToClientSource } from '@packages/socket'
+
 const pkg = require('./package.json')
-const gulp = require('gulp')
-const rimraf = require('rimraf')
-const source = require('vinyl-source-stream')
-const browserify = require('browserify')
-const cypressIcons = require('@cypress/icons')
 
 const copySocketClient = () => {
-  return gulp.src(require('../socket').getPathToClientSource())
+  return gulp.src(getPathToClientSource())
   .pipe(gulp.dest('dist'))
 }
 
