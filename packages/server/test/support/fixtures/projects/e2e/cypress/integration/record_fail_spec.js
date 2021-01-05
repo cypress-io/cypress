@@ -1,14 +1,16 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("record fails", function() {
-  beforeEach(function() {
-    throw new Error("foo");
-  });
+describe('record fails', () => {
+  beforeEach(() => {
+    throw new Error('foo')
+  })
 
-  it("fails 1", function() {});
+  it('fails 1', () => {})
 
-  return it("is skipped", function() {});
-});
+  it('is skipped', () => {})
+})
