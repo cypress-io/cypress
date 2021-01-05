@@ -1,3 +1,10 @@
+# [@cypress/vue-v1.1.0-alpha.2](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.1.0-alpha.1...@cypress/vue-v1.1.0-alpha.2) (2021-01-05)
+
+
+### Bug Fixes
+
+* **Component Testing:** Broken links in docs ([#14251](https://github.com/cypress-io/cypress/issues/14251)) ([a72529f](https://github.com/cypress-io/cypress/commit/a72529f396baee669c9b112d9296d314177f8cc1))
+
 # [@cypress/vue-v1.1.0-alpha.1](https://github.com/cypress-io/cypress/compare/@cypress/vue-v1.0.1-alpha.7...@cypress/vue-v1.1.0-alpha.1) (2020-11-30)
 
 
