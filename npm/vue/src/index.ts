@@ -1,4 +1,3 @@
-/// <reference types="cypress" />
 import Vue from 'vue'
 import {
   createLocalVue,
@@ -278,8 +277,8 @@ type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUti
 // when we mount a Vue component, we add it to the global Cypress object
 // so here we extend the global Cypress namespace and its Cypress interface
 declare global {
-  // eslint-disable-next-line no-redeclare
   // eslint-disable-next-line @typescript-eslint/no-namespace
+  // eslint-disable-next-line no-redeclare
   namespace Cypress {
     interface Cypress {
       /**

@@ -19,10 +19,6 @@ export class SpecsController {
   watcher: FSWatcher | null = null
   specFiles: SpecFiles = []
 
-  constructor (private cypressConfig) {
-
-  }
-
   get specDirectory () {
     return this.cypressConfig.componentFolder || '.'
   }
