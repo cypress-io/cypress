@@ -33,5 +33,5 @@ Consider opening a new issue.
 ----------
 
 Platform: darwin (Foo-OsVersion)
-Cypress Version: 0.0.0
+Cypress Version: 0.0.0-development
 `

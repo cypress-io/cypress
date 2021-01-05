@@ -24,8 +24,8 @@
     "webpack": "^4.44.1"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "*",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/eslint-plugin-dev": "0.0.0-development",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^4.41.21",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
