@@ -5,7 +5,7 @@ const debug = require('debug')('cypress:server:plugins:child')
 const Promise = require('bluebird')
 
 const preprocessor = require('./preprocessor')
-const devserver = require('./devserver')
+const devserver = require('./dev-server')
 const resolve = require('../../util/resolve')
 const browserLaunch = require('./browser_launch')
 const task = require('./task')
@@ -120,7 +120,7 @@ const execute = (ipc, event, ids, args = []) => {
       browserLaunch.wrap(ipc, invoke, ids, args)
     },
     'before:run': wrapChildPromise,
-    'devserver:start' () {
+    'dev-server:start' () {
       devserver.wrap(ipc, invoke, ids, args)
     },
     'before:spec': wrapChildPromise,
