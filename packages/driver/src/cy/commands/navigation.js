@@ -350,10 +350,13 @@ const normalizeTimeoutOptions = (options) => {
 module.exports = (Commands, Cypress, cy, state, config) => {
   reset()
 
-  Cypress.on('test:before:run:async', () => {
+  if (!config('componentTesting')) {
+    Cypress.on('test:before:run:async', () => {
     // reset any state on the backend
-    Cypress.backend('reset:server:state')
-  })
+    // TODO: this is a bug in e2e it needs to be returned
+      Cypress.backend('reset:server:state')
+    })
+  }
 
   Cypress.on('test:before:run', reset)
 
