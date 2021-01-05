@@ -44,7 +44,7 @@ const isResponseHtml = function (contentType, responseBuffer) {
   return false
 }
 
-export class ServerE2E extends ServerBase {
+export class ServerE2E extends ServerBase<SocketE2E> {
   private _urlResolver: Bluebird<Record<string, any>> | null
 
   constructor () {
@@ -90,7 +90,7 @@ export class ServerE2E extends ServerBase {
         project,
       })
 
-      return this.createServer(app, config, project, this._request, onWarning)
+      return this.createServer(app, config, project, this.request, onWarning)
     })
   }
 
@@ -98,7 +98,7 @@ export class ServerE2E extends ServerBase {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
-      const _server = this._server = this._createHttpServer(app)
+      this._server = this._createHttpServer(app)
 
       const onError = (err) => {
         // if the server bombs before starting
@@ -112,34 +112,34 @@ export class ServerE2E extends ServerBase {
       const onUpgrade = (req, socket, head) => {
         debug('Got UPGRADE request from %s', req.url)
 
-        return this.proxyWebsockets(this._nodeProxy, socketIoRoute, req, socket, head)
+        return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
       }
 
       const callListeners = (req, res) => {
-        const listeners = _server.listeners('request').slice(0)
+        const listeners = this.server.listeners('request').slice(0)
 
-        return this._callRequestListeners(_server, listeners, req, res)
+        return this._callRequestListeners(this.server, listeners, req, res)
       }
 
       const onSniUpgrade = (req, socket, head) => {
-        const upgrades = _server.listeners('upgrade').slice(0)
+        const upgrades = this.server.listeners('upgrade').slice(0)
 
         return upgrades.map((upgrade) => {
-          return upgrade.call(_server, req, socket, head)
+          return upgrade.call(this.server, req, socket, head)
         })
       }
 
-      this._server.on('connect', (req, socket, head) => {
+      this.server.on('connect', (req, socket, head) => {
         debug('Got CONNECT request from %s', req.url)
 
-        socket.once('upstream-connected', this._socketAllowed.add)
+        socket.once('upstream-connected', this.socketAllowed.add)
 
-        return this._httpsProxy.connect(req, socket, head)
+        return this.httpsProxy.connect(req, socket, head)
       })
 
-      this._server.on('upgrade', onUpgrade)
+      this.server.on('upgrade', onUpgrade)
 
-      this._server.once('error', onError)
+      this.server.once('error', onError)
 
       return this._listen(port, onError)
       .then((port) => {
@@ -203,9 +203,9 @@ export class ServerE2E extends ServerBase {
       this._netStubbingState?.reset()
     }
 
-    this._socket.startListening(this._server, automation, config, options)
+    this.socket.startListening(this.server, automation, config, options)
 
-    return this._normalizeReqUrl(this._server)
+    return this._normalizeReqUrl(this.server)
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
@@ -229,7 +229,7 @@ export class ServerE2E extends ServerBase {
       this._urlResolver.cancel()
     }
 
-    const request = this._request
+    const request = this.request
 
     let handlingLocalFile = false
     const previousState = _.clone(this._getRemoteState())
@@ -257,7 +257,7 @@ export class ServerE2E extends ServerBase {
         // TODO: add `body` here once bodies can be statically matched
       }
 
-      return !!getRouteForRequest(this._netStubbingState?.routes, proxiedReq)
+      return !!getRouteForRequest(this.netStubbingState?.routes, proxiedReq)
     }
 
     return this._urlResolver = (p = new Bluebird<Record<string, any>>((resolve, reject, onCancel) => {

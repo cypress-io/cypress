@@ -14,12 +14,12 @@ type WarningErr = Record<string, any>
 
 const debug = Debug('cypress:server-ct:server')
 
-export class ServerCt extends ServerBase {
   createRoutes (...args: unknown[]) {
     return initializeRoutes.apply(null, args)
   }
 
   open (config = {}, specsStore, project, onError, onWarning) {
+export class ServerCt extends ServerBase<SocketCt> {
     debug('server open')
 
     return Bluebird.try(() => {
@@ -47,21 +47,21 @@ export class ServerCt extends ServerBase {
         app,
         config,
         specsStore,
-        nodeProxy: this._nodeProxy,
-        networkProxy: this._networkProxy,
+        nodeProxy: this.nodeProxy,
+        networkProxy: this.networkProxy,
         onError,
         project,
       })
 
-      return this.createServer(app, config, project, this._request, onWarning)
+      return this.createServer(app, config, project, this.request, onWarning)
     })
   }
 
-  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr]> {
+  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, socketIoRoute, baseUrl } = config
 
-      const _server = this._server = this._createHttpServer(app)
+      this._server = this._createHttpServer(app)
 
       const onError = (err) => {
         // if the server bombs before starting
@@ -75,34 +75,34 @@ export class ServerCt extends ServerBase {
       const onUpgrade = (req, socket, head) => {
         debug('Got UPGRADE request from %s', req.url)
 
-        return this.proxyWebsockets(this._nodeProxy, socketIoRoute, req, socket, head)
+        return this.proxyWebsockets(this.nodeProxy, socketIoRoute, req, socket, head)
       }
 
       const callListeners = (req, res) => {
-        const listeners = _server.listeners('request').slice(0)
+        const listeners = this.server.listeners('request').slice(0)
 
-        return this._callRequestListeners(_server, listeners, req, res)
+        return this._callRequestListeners(this.server, listeners, req, res)
       }
 
       const onSniUpgrade = (req, socket, head) => {
-        const upgrades = _server.listeners('upgrade').slice(0)
+        const upgrades = this.server.listeners('upgrade').slice(0)
 
         return upgrades.map((upgrade) => {
-          return upgrade.call(_server, req, socket, head)
+          return upgrade.call(this.server, req, socket, head)
         })
       }
 
       this._server.on('connect', (req, socket, head) => {
         debug('Got CONNECT request from %s', req.url)
 
-        socket.once('upstream-connected', this._socketAllowed.add)
+        socket.once('upstream-connected', this.socketAllowed.add)
 
-        return this._httpsProxy.connect(req, socket, head)
+        return this.httpsProxy.connect(req, socket, head)
       })
 
-      this._server.on('upgrade', onUpgrade)
+      this.server.on('upgrade', onUpgrade)
 
-      this._server.once('error', onError)
+      this.server.once('error', onError)
 
       return this._listen(port, onError)
       .then((port) => {
@@ -139,10 +139,10 @@ export class ServerCt extends ServerBase {
   }
 
   sendSpecList (specs) {
-    return this._socket && this._socket.sendSpecList(specs)
+    return this.socket.sendSpecList(specs)
   }
 
   startWebsockets (automation, config, options = {}) {
-    this._socket.startListening(this._server, automation, config, options)
+    this.socket.startListening(this.server, automation, config, options)
   }
 }

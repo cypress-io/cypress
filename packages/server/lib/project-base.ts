@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import check from 'check-more-types'
 import Debug from 'debug'
@@ -23,6 +21,7 @@ import savedState from './saved_state'
 import scaffold from './scaffold'
 import { ServerE2E } from './server-e2e'
 import user from './user'
+import { ensureProp } from './util/class-helpers'
 import { escapeFilenameInUrl } from './util/escape_filename'
 import fs from './util/fs'
 import keys from './util/keys'
@@ -49,14 +48,14 @@ const multipleForwardSlashesRe = /[^:\/\/](\/{2,})/g
 const debug = Debug('cypress:server:project')
 const debugScaffold = Debug('cypress:server:scaffold')
 
-export class ProjectBase extends EE {
-  protected cfg: Cfg | null
+export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
-  protected server: ServerE2E | ServerCt | null
   protected options?: Record<string, any>
   protected spec: Cypress.Cypress['spec'] | null
-  protected automation: any
+  protected _cfg?: Cfg
+  protected _server?: TServer
+  protected _automation?: Automation
 
   public browser: any
 
@@ -73,12 +72,8 @@ export class ProjectBase extends EE {
 
     this.projectRoot = path.resolve(projectRoot)
     this.watchers = new Watchers()
-    this.cfg = null
     this.spec = null
     this.browser = null
-    this.server = null
-    this.automation = null
-    this.getConfig = this.getConfig.bind(this)
 
     debug('Project created %o', {
       projectType: this.projectType,
@@ -86,12 +81,26 @@ export class ProjectBase extends EE {
     })
   }
 
+  protected ensureProp = ensureProp
+
   get projectType () {
     if (this.constructor === ProjectBase) {
       return 'base'
     }
 
     throw new Error('Project#projectType must be defined')
+  }
+
+  get server () {
+    return this.ensureProp(this._server, 'open')
+  }
+
+  get automation () {
+    return this.ensureProp(this._automation, 'open')
+  }
+
+  get cfg () {
+    return this.ensureProp(this._cfg, 'open')
   }
 
   open (options = {}, callbacks: OpenOptions) {
@@ -147,7 +156,7 @@ export class ProjectBase extends EE {
     .then(({ cfg, port, warning }) => {
       // store the cfg from
       // opening the server
-      this.cfg = cfg
+      this._cfg = cfg
 
       debug('project config: %o', _.omit(cfg, 'resolved'))
 
@@ -188,24 +197,19 @@ export class ProjectBase extends EE {
     this.browser = null
 
     return Bluebird.try(() => {
-      if (this.automation) {
-        this.automation.reset()
+      if (this._automation) {
+        this._automation.reset()
       }
 
-      let state
-
-      if (this.server) {
-        state = this.server.reset()
+      if (this._server) {
+        return this._server.reset()
       }
-
-      return state
     })
   }
 
   close (options?: CloseOptions) {
     debug('closing project instance %s', this.projectRoot)
 
-    this.cfg = null
     this.spec = null
     this.browser = null
 
@@ -322,7 +326,7 @@ export class ProjectBase extends EE {
       reporter = Reporter.create(reporter, cfg.reporterOptions, projectRoot)
     }
 
-    this.automation = Automation.create(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
+    this._automation = new Automation(cfg.namespace, cfg.socketIoCookie, cfg.screenshotsFolder)
 
     this.server.startWebsockets(this.automation, cfg, {
       onReloadBrowser: options.onReloadBrowser,
@@ -413,15 +417,15 @@ export class ProjectBase extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig (options = {}): Bluebird<Cfg> {
+  getConfig = (options = {}): Bluebird<Cfg> => {
     if (options == null) {
       options = this.options
     }
 
-    if (this.cfg) {
-      debug('project has config %o', this.cfg)
+    if (this._cfg) {
+      debug('project has config %o', this._cfg)
 
-      return Bluebird.resolve(this.cfg)
+      return Bluebird.resolve(this._cfg)
     }
 
     const setNewProject = (cfg) => {

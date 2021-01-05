@@ -15,11 +15,13 @@ import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
 import { agent, cors, uri } from '@packages/network'
 import { NetworkProxy } from '@packages/proxy'
+import { SocketCt } from '@packages/server-ct'
 import errors from './errors'
 import logger from './logger'
 import Request from './request'
 import { SocketE2E } from './socket-e2e'
 import templateEngine from './template_engine'
+import { ensureProp } from './util/class-helpers'
 import origin from './util/origin'
 import { allowDestroy, DestroyableHttpServer } from './util/server_destroy'
 import { SocketAllowed } from './util/socket_allowed'
@@ -83,33 +85,53 @@ const notSSE = (req, res) => {
   return (req.headers.accept !== 'text/event-stream') && compression.filter(req, res)
 }
 
-export class ServerBase {
+export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   private _middleware
-  protected _netStubbingState: NetStubbingState | null
-  protected _baseUrl: string | null
-  protected _fileServer
+  protected request: Request
   protected isListening: boolean
-  protected _socketAllowed: SocketAllowed
-  protected _httpsProxy: httpsProxy | null
-  protected _server: DestroyableHttpServer | null
-  protected _socket: SocketE2E
-  protected _request: Request
-  protected _nodeProxy: httpProxy | null
-  protected _networkProxy: NetworkProxy | null
+  protected socketAllowed: SocketAllowed
+  protected _fileServer
+  protected _baseUrl: string | null
+  protected _server?: DestroyableHttpServer
+  protected _socket?: TSocket
+  protected _nodeProxy?: httpProxy
+  protected _networkProxy?: NetworkProxy
+  protected _netStubbingState?: NetStubbingState
+  protected _httpsProxy?: httpsProxy
 
   constructor () {
     this.isListening = false
-    this._socketAllowed = new SocketAllowed()
-    this._request = Request()
+    this.request = Request()
+    this.socketAllowed = new SocketAllowed()
     this._middleware = null
-    this._networkProxy = null
-    this._netStubbingState = null
-    this._server = null
-    this._socket = null
     this._baseUrl = null
-    this._nodeProxy = null
     this._fileServer = null
-    this._httpsProxy = null
+  }
+
+  ensureProp = ensureProp
+
+  get server () {
+    return this.ensureProp(this._server, 'open')
+  }
+
+  get socket () {
+    return this.ensureProp(this._socket, 'open')
+  }
+
+  get nodeProxy () {
+    return this.ensureProp(this._nodeProxy, 'open')
+  }
+
+  get networkProxy () {
+    return this.ensureProp(this._networkProxy, 'open')
+  }
+
+  get netStubbingState () {
+    return this.ensureProp(this._netStubbingState, 'open')
+  }
+
+  get httpsProxy () {
+    return this.ensureProp(this._httpsProxy, 'open')
   }
 
   createExpressApp (config) {
@@ -178,9 +200,9 @@ export class ServerBase {
       config,
       getRemoteState,
       getFileServerToken,
-      socket: this._socket,
-      netStubbingState: this._netStubbingState,
-      request: this._request,
+      socket: this.socket,
+      netStubbingState: this.netStubbingState,
+      request: this.request,
     })
   }
 
@@ -211,17 +233,17 @@ export class ServerBase {
 
         debug('Server listening on ', address)
 
-        this._server.removeListener('error', onError)
+        this.server.removeListener('error', onError)
 
         return resolve(address.port)
       }
 
-      return this._server.listen(port || 0, '127.0.0.1', listener)
+      return this.server.listen(port || 0, '127.0.0.1', listener)
     })
   }
 
   _onRequest (headers, automationRequest, options) {
-    return this._request.sendPromise(headers, automationRequest, options)
+    return this.request.sendPromise(headers, automationRequest, options)
   }
 
   _callRequestListeners (server, listeners, req, res) {
@@ -335,7 +357,7 @@ export class ServerBase {
     // bail if this is our own namespaced socket.io request
 
     if (req.url.startsWith(socketIoRoute)) {
-      if (!this._socketAllowed.isRequestAllowed(req)) {
+      if (!this.socketAllowed.isRequestAllowed(req)) {
         socket.write('HTTP/1.1 400 Bad Request\r\n\r\nRequest not made via a Cypress-launched browser.')
         socket.end()
       }

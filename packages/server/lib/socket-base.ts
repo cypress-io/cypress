@@ -9,6 +9,7 @@ import exec from './exec'
 import files from './files'
 import fixture from './fixture'
 import task from './task'
+import { ensureProp } from './util/class-helpers'
 import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
 import open from './util/open'
@@ -77,12 +78,10 @@ export class SocketBase {
     this.testsDir = null
   }
 
-  protected get io () {
-    if (!this._io) {
-      throw new Error('Socket#startListening must first be called before accessing this.io')
-    }
+  protected ensureProp = ensureProp
 
-    return this._io
+  get io () {
+    return this.ensureProp(this._io, 'startListening')
   }
 
   toReporter (event: string, data: any) {

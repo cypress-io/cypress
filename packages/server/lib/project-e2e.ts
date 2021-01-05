@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Debug from 'debug'
 import browsers from './browsers'
 import config from './config'
@@ -11,13 +9,13 @@ import settings from './util/settings'
 
 const debug = Debug('cypress:server:project')
 
-export class ProjectE2E extends ProjectBase {
+export class ProjectE2E extends ProjectBase<ServerE2E> {
   get projectType () {
     return 'e2e'
   }
 
-  open (options = {}) {
-    this.server = new ServerE2E()
+  open (options) {
+    this._server = new ServerE2E()
 
     return super.open(options, {
       onOpen: (cfg) => {

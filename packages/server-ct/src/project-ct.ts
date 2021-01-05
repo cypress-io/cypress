@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Debug from 'debug'
 import config from '@packages/server/lib/config'
 import plugins from '@packages/server/lib/plugins'
@@ -14,21 +12,19 @@ export * from '@packages/server/lib/project-base'
 
 const debug = Debug('cypress:server-ct:project')
 
-export class ProjectCt extends ProjectBase {
-  protected server: ServerCt
-
+export class ProjectCt extends ProjectBase<ServerCt> {
   get projectType () {
     return 'ct'
   }
 
-  open (options = {}) {
-    this.server = new ServerCt()
+  open (options) {
+    this._server = new ServerCt()
 
     return super.open(options, {
       onOpen: (cfg) => {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore }) => {
-          return this.server!.open(cfg, specsStore, this, options.onError, options.onWarning)
+          return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
           .spread((port, warning) => {
             return {
               cfg,
