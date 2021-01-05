@@ -7,6 +7,7 @@ import { handle, serve } from '@packages/runner-ct'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
 import { SpecsStore } from './specs-store'
+import xhrs from '@packages/server/lib/controllers/xhrs'
 
 const debug = Debug('cypress:server:routes')
 
@@ -51,6 +52,10 @@ export function initializeRoutes ({ app, config, specsStore, nodeProxy, networkP
     // to avoid the user accidentally intercepting and modifying
     // their own app.js files + spec.js files
     nodeProxy.web(req, res)
+  })
+
+  app.all('/__cypress/xhrs/*', (req, res, next) => {
+    xhrs.handle(req, res, config, next)
   })
 
   app.get(config.clientRoute, (req, res) => {
