@@ -2,6 +2,7 @@
 - Read our contributing guidelines: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md 
 - Read our Code Review Checklist on coding standards and what needs to be done before a PR can be merged: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#Code-Review-Checklist
 - Mark this PR as "Draft" if it is not ready for review.
+- Make sure you set the correct base branch based on what packages you're changing: https://github.com/cypress-io/cypress/blob/develop/CONTRIBUTING.md#branches
 -->
 
 - Closes <!-- issue number here. e.g. "Closes #1234" -->
