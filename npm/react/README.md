@@ -325,21 +325,6 @@ For a larger Do-It-Yourself example with an hour long list of explanation videos
 
 ## Common problems
 
-<details id="node-sass">
-  <summary>Node Sass</summary>
-
-When using Node Sass styles, tell Cypress to use [the system NodeJS](https://on.cypress.io/configuration#Node-version) rather than its bundled version. In `cypress.json` set option:
-
-```json
-{
-  "nodeVersion": "system"
-}
-```
-
-Find full example in [sass-and-ts](examples/sass-and-ts) folder.
-
-</details>
-
 <details id="fast-enough">
   <summary>Slower than Jest</summary>
 
