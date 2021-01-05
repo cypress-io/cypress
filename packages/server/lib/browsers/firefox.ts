@@ -306,7 +306,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}): Bluebird<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}): Promise<BrowserInstance> {
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
@@ -397,7 +397,7 @@ export async function open (browser: Browser, url, options: any = {}): Bluebird<
   }
 
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
-  for (let pref in launchOptions.preferences) {
+  for (const pref in launchOptions.preferences) {
     const value = launchOptions.preferences[pref]
 
     profile.setPreference(pref, value)

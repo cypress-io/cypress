@@ -1,9 +1,21 @@
 import fs from 'fs'
-import server, { Server as SocketIOServer } from 'socket.io'
+import server, { Server as SocketIOBaseServer, ServerOptions } from 'socket.io'
 import { client } from './browser'
+import http from 'http'
 
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
+
+export { ServerOptions }
+
+// socket.io types are incorrect
+type PatchedServerOptions = ServerOptions & { cookie: { name: string | boolean } }
+
+class SocketIOServer extends SocketIOBaseServer {
+  constructor (srv: http.Server, opts?: Partial<PatchedServerOptions>) {
+    super(srv, opts)
+  }
+}
 
 export {
   client,
