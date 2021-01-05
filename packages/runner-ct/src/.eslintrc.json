@@ -1,25 +1,26 @@
 {
-  "parser": "@typescript-eslint/parser",
   "extends": [
     "plugin:@cypress/dev/react",
     "plugin:@cypress/dev/tests"
   ],
-  "plugins": [
-    "cypress"
-  ],
+  "parser": "@typescript-eslint/parser",
+  "settings": {
+    "react": {
+      "version": "16.12"
+    }
+  },
   "rules": {
-    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "arrow-body-style": "off",
+    "no-unused-vars": "off",
     "react/jsx-filename-extension": [
-      0,
+      "warn",
       {
         "extensions": [
           ".js",
-          ".jsx"
+          ".jsx",
+          ".tsx"
         ]
       }
     ]
-  },
-  "env": {
-    "cypress/globals": true
   }
 }

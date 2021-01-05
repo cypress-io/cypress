@@ -264,6 +264,8 @@ const getMochaItFn = function (only, skip, browser, specifiedBrowser) {
   }
 
   if (only) {
+    // eslint:disable-next-line
+    // eslint-disable-next-line
     return it.only
   }
 

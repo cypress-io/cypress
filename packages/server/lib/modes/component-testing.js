@@ -1,5 +1,4 @@
 const serverCt = require('@packages/server-ct')
-const runMode = require('./run')
 
 const DEFAULT_BROWSER_NAME = 'chrome'
 

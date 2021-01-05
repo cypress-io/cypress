@@ -279,7 +279,6 @@ type MountOptionsArgument = Partial<ComponentOptions & MountOptions & VueTestUti
 // so here we extend the global Cypress namespace and its Cypress interface
 declare global {
   // eslint-disable-next-line no-redeclare
-  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Cypress {
       /**
