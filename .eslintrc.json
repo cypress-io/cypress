@@ -1,21 +1,18 @@
 {
-  "parser": "@typescript-eslint/parser",
   "plugins": [
-    "@typescript-eslint",
-    "@cypress/dev"
+    "@cypress/dev",
+    "no-only-tests"
   ],
   "extends": [
-    "plugin:@typescript-eslint/recommended",
     "plugin:@cypress/dev/general"
   ],
   "rules": {
     "@typescript-eslint/no-var-requires": "off",
-    "no-useless-constructor": "off",
     "@typescript-eslint/no-useless-constructor": "off",
+    "no-only-tests/no-only-tests": "warn",
     "prefer-spread": "off",
     "prefer-rest-params": "off",
-    "@typescript-eslint/ban-ts-comment": "off",
-    "@typescript-eslint/no-empty-function": "off"
+    "no-useless-constructor": "off"
   },
   "settings": {
     "react": {

@@ -1,11 +1,12 @@
 import * as React from 'react'
 import { observer } from 'mobx-react'
 import State from '../lib/state'
+import { SpecFile as SF } from './make-spec-hierarchy'
 
 interface SpecFileProps {
   state: State,
   // eslint-disable-next-line
-  spec: import('./make-spec-hierarchy').SpecFile
+  spec: SF
 }
 
 export const SpecFile = observer(

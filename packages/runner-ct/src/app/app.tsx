@@ -15,11 +15,12 @@ import Message from '../message/message'
 import './app.scss'
 import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
+import EventManager from '../lib/event-manager'
 
 interface AppProps {
   state: State;
   // eslint-disable-next-line
-  eventManager: typeof import('../lib/event-manager').default
+  eventManager: typeof EventManager
   config: Cypress.ConfigOptions
 }
 

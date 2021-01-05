@@ -1,12 +1,23 @@
 {
+  "parser": "@typescript-eslint/parser",
   "extends": [
+    "plugin:@cypress/dev/react",
     "plugin:@cypress/dev/tests"
   ],
   "plugins": [
     "cypress"
   ],
   "rules": {
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "react/jsx-filename-extension": [
+      0,
+      {
+        "extensions": [
+          ".js",
+          ".jsx"
+        ]
+      }
+    ]
   },
   "env": {
     "cypress/globals": true
