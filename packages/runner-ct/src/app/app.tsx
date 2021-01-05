@@ -59,6 +59,7 @@ const App: React.FC<AppProps> = observer(
                   runMode={state.runMode}
                   runner={eventManager.reporterBus}
                   spec={state.spec}
+                  specRunId={state.runId}
                   allSpecs={state.multiSpecs}
                   // @ts-ignore
                   autoScrollingEnabled={config.state.autoScrollingEnabled}
