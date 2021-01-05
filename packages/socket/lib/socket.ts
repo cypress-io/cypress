@@ -1,6 +1,6 @@
 import fs from 'fs'
 import server, { Server as SocketIOServer } from 'socket.io'
-import { circularParser, client } from './browser'
+import { client } from './browser'
 
 const { version } = require('socket.io-client/package.json')
 const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
@@ -8,7 +8,7 @@ const clientSource = require.resolve('socket.io-client/dist/socket.io.js')
 export {
   client,
   server,
-  circularParser,
+  // circularParser,
   SocketIOServer,
 }
 

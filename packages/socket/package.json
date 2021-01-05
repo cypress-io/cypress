@@ -2,7 +2,8 @@
   "name": "@packages/socket",
   "version": "0.0.0",
   "private": true,
-  "main": "index.js",
+  "main": "index.ts",
+  "browser": "lib/browser.ts",
   "scripts": {
     "clean-deps": "rm -rf node_modules",
     "postinstall": "patch-package",
@@ -12,9 +13,9 @@
     "test-watch": "cross-env NODE_ENV=test mocha --watch"
   },
   "dependencies": {
-    "socket.io": "2.3.0",
+    "socket.io": "3.0.4",
     "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#unpatched-has-binary-2",
-    "socket.io-client": "2.3.0"
+    "socket.io-client": "3.0.4"
   },
   "devDependencies": {
     "chai": "3.5.0",
