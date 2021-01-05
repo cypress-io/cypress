@@ -31,7 +31,7 @@ export class ProjectE2E extends ProjectBase<ServerE2E> {
         })
         .then((cfg) => {
           return this.server.open(cfg, this, options.onError, options.onWarning)
-          .spread((port, warning) => {
+          .then(([port, warning]) => {
             return {
               cfg,
               port,

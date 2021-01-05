@@ -1,7 +1,6 @@
 // @ts-nocheck
 
-require('./cwd')
-
+import './cwd'
 import Bluebird from 'bluebird'
 import compression from 'compression'
 import Debug from 'debug'
@@ -10,6 +9,7 @@ import express from 'express'
 import http from 'http'
 import httpProxy from 'http-proxy'
 import _ from 'lodash'
+import { AddressInfo } from 'net'
 import url from 'url'
 import httpsProxy from '@packages/https-proxy'
 import { netStubbingState, NetStubbingState } from '@packages/net-stubbing'
@@ -221,13 +221,13 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
   }
 
   _port () {
-    return this._server?.address()?.port
+    return (this.server.address() as AddressInfo).port
   }
 
   _listen (port, onError) {
-    return new Bluebird((resolve) => {
+    return new Bluebird<number>((resolve) => {
       const listener = () => {
-        const address = this._server.address()
+        const address = this.server.address() as AddressInfo
 
         this.isListening = true
 

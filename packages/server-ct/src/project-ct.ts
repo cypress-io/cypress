@@ -25,7 +25,7 @@ export class ProjectCt extends ProjectBase<ServerCt> {
         return this._initPlugins(cfg, options)
         .then(({ cfg, specsStore }) => {
           return this.server.open(cfg, specsStore, this, options.onError, options.onWarning)
-          .spread((port, warning) => {
+          .then(([port, warning]) => {
             return {
               cfg,
               port,

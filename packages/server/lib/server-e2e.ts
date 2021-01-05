@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import httpProxy from 'http-proxy'
@@ -21,6 +19,8 @@ import appData from './util/app_data'
 import * as ensureUrl from './util/ensure-url'
 import headersUtil from './util/headers'
 import statusCode from './util/status_code'
+
+type WarningErr = Record<string, any>
 
 const fullyQualifiedRe = /^https?:\/\//
 const textHtmlContentTypeRe = /^text\/html/i
@@ -94,7 +94,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     })
   }
 
-  createServer (app, config, project, request, onWarning) {
+  createServer (app, config, project, request, onWarning): Bluebird<[number, WarningErr?]> {
     return new Bluebird((resolve, reject) => {
       const { port, fileServerFolder, socketIoRoute, baseUrl } = config
 
@@ -221,7 +221,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
     // accidentally retrieving buffered content at the wrong time
     this._networkProxy?.reset()
 
-    const startTime = new Date()
+    const startTime = Date.now()
 
     // if we have an existing url resolver
     // in flight then cancel it

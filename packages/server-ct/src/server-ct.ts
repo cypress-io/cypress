@@ -1,5 +1,3 @@
-// @ts-nocheck
-
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import httpProxy from 'http-proxy'
@@ -18,8 +16,8 @@ const debug = Debug('cypress:server-ct:server')
     return initializeRoutes.apply(null, args)
   }
 
-  open (config = {}, specsStore, project, onError, onWarning) {
 export class ServerCt extends ServerBase<SocketCt> {
+  open (config, specsStore, project, onError, onWarning) {
     debug('server open')
 
     return Bluebird.try(() => {
