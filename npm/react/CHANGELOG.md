@@ -1,3 +1,10 @@
+# [@cypress/react-v4.16.3](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.2...@cypress/react-v4.16.3) (2021-01-05)
+
+
+### Bug Fixes
+
+* typo in `@types/react` peer dependency package name ([#14261](https://github.com/cypress-io/cypress/issues/14261)) ([b87519d](https://github.com/cypress-io/cypress/commit/b87519d4f141a45b053ecd9c96facb792a47e2da))
+
 # [@cypress/react-v4.16.2](https://github.com/cypress-io/cypress/compare/@cypress/react-v4.16.1...@cypress/react-v4.16.2) (2021-01-05)
 
 
