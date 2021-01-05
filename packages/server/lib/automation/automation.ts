@@ -140,11 +140,11 @@ export class Automation {
     }
   }
 
-  push (message, data) {
+  push (message: string, data: unknown) {
     return this.normalize(message, data)
     .then((data) => {
       if (data) {
-        return this.invokeAsync('onPush', message, data)
+        this.invokeAsync('onPush', message, data)
       }
     })
   }
