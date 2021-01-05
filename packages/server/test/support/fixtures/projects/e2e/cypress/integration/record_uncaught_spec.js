@@ -1,1 +1,1 @@
-throw new Error('instantly fails')
+throw new Error('instantly fails');

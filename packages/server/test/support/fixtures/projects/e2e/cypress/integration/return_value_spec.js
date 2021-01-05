@@ -1,16 +1,22 @@
-it "errors when invoking commands and return a different value", ->
-  cy.wrap(null)
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+it("errors when invoking commands and return a different value", function() {
+  cy.wrap(null);
 
-  return [{}, 1, 2, "foo", (->)]
+  return [{}, 1, 2, "foo", (function() {})];
+});
 
-it "errors when invoking commands in custom command and returning different value", ->
-  Cypress.Commands.add "foo", ->
-    cy.wrap(null)
+it("errors when invoking commands in custom command and returning different value", function() {
+  Cypress.Commands.add("foo", function() {
+    cy.wrap(null);
 
-    return "bar"
+    return "bar";
+  });
 
-  cy.foo()
+  return cy.foo();
+});
 
-it "errors when not invoking commands, invoking done callback, and returning a promise", (done) ->
-  return Promise.resolve(null).then ->
-    done()
+it("errors when not invoking commands, invoking done callback, and returning a promise", done => Promise.resolve(null).then(() => done()));

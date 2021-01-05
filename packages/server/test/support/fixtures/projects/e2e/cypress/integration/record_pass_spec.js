@@ -1,9 +1,16 @@
-describe "record pass", ->
-  it "passes", ->
-    cy.visit("/scrollable.html")
-    cy
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("record pass", function() {
+  it("passes", function() {
+    cy.visit("/scrollable.html");
+    return cy
       .viewport(400, 400)
       .get("#box")
-      .screenshot('yay it passes')
+      .screenshot('yay it passes');
+  });
 
-  it "is pending"
+  return it("is pending");
+});

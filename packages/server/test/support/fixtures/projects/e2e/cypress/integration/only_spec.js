@@ -1,13 +1,18 @@
-it "t1", ->
-it "t2", ->
-it "t3", ->
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+it("t1", function() {});
+it("t2", function() {});
+it("t3", function() {});
 
-describe "s1", ->
-  it.only "t3", ->
+describe("s1", function() {
+  it.only("t3", function() {});
 
-  it "t4"
+  it("t4");
 
-  it "t5", ->
+  return it("t5", function() {});
+});
 
-describe "s2", ->
-  it "t3", ->
+describe("s2", () => it("t3", function() {}));
