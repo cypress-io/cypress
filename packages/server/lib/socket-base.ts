@@ -118,12 +118,13 @@ export class SocketBase {
   }
 
   createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
-    return socketIo.server(server, {
+    return new socketIo.SocketIOServer(server, {
       path,
-      cookie,
+      cookie: {
+        name: cookie,
+      },
       destroyUpgrade: false,
       serveClient: false,
-      // parser: socketIo.circularParser as any,
       transports: ['websocket'],
     })
   }
