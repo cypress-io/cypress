@@ -4,15 +4,7 @@
   "description": "Cypress preprocessor for bundling JavaScript via webpack with dependencies included and support for various ES features, TypeScript, and CoffeeScript",
   "private": false,
   "scripts": {
-    "lint": "eslint --ext .js,.jsx,.json,.ts,.tsx .",
-    "lint-fix": "yarn lint --fix",
-    "semantic-release": "semantic-release",
     "test": "mocha test/e2e/*.spec.* --timeout 4000"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "dependencies": {
     "@babel/core": "^7.11.1",
@@ -32,9 +24,8 @@
     "webpack": "^4.44.1"
   },
   "devDependencies": {
-    "@cypress/eslint-plugin-dev": "^5.0.0",
-    "@cypress/webpack-preprocessor": "^5.4.4",
-    "@fellow/eslint-plugin-coffee": "^0.4.13",
+    "@cypress/eslint-plugin-dev": "*",
+    "@cypress/webpack-preprocessor": "*",
     "@types/mocha": "^8.0.2",
     "@types/webpack": "^4.41.21",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
@@ -42,16 +33,13 @@
     "babel-eslint": "^10.1.0",
     "chai": "^4.2.0",
     "eslint": "^7.6.0",
-    "eslint-plugin-cypress": "^2.11.1",
     "eslint-plugin-json-format": "^2.0.1",
     "eslint-plugin-mocha": "^8.0.0",
     "eslint-plugin-react": "^7.20.6",
     "fs-extra": "^9.0.1",
     "graphql": "14.0.0",
-    "lint-staged": "^10.2.11",
     "mocha": "^8.1.1",
     "react": "^16.13.1",
-    "semantic-release": "^17.1.1",
     "typescript": "^3.9.7"
   },
   "peerDependencies": {
@@ -64,23 +52,21 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cypress-io/cypress-webpack-batteries-included-preprocessor.git"
+    "url": "https://github.com/cypress-io/cypress.git"
   },
-  "homepage": "https://github.com/cypress-io/cypress-webpack-batteries-included-preprocessor#readme",
+  "homepage": "https://github.com/cypress-io/cypress/tree/master/npm/webpack-batteries-included-preprocessor#readme",
   "author": "Chris Breiding <chris@cypress.io>",
-  "bugs": "https://github.com/cypress-io/cypress-webpack-batteries-included-preprocessor/issues",
+  "bugs": "https://github.com/cypress-io/cypress/issues/new?assignees=&labels=npm%3A%20webpack-batteries-included-preprocessor&template=1-bug-report.md&title=",
   "keywords": [
     "cypress",
     "cypress-plugin",
     "cypress-preprocessor",
     "webpack"
   ],
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json}": [
-      "yarn lint"
-    ]
-  },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "ciJobs": [
+    "npm-webpack-batteries-included-preprocessor"
+  ]
 }

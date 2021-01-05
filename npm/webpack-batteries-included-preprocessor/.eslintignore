@@ -1,6 +1,0 @@
-!.*
-**/node_modules
-test/_test-output
-tsconfig.json
-.vscode
-.history
