@@ -397,7 +397,7 @@ export async function open (browser: Browser, url, options: any = {}): Promise<B
   }
 
   launchOptions.preferences['browser.cache.disk.parent_directory'] = cacheDir
-  for (let pref in launchOptions.preferences) {
+  for (const pref in launchOptions.preferences) {
     const value = launchOptions.preferences[pref]
 
     profile.setPreference(pref, value)
