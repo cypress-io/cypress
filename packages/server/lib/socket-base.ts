@@ -1,24 +1,35 @@
 import Bluebird from 'bluebird'
 import Debug from 'debug'
 import _ from 'lodash'
-import path from 'path'
 import { onNetEvent } from '@packages/net-stubbing'
-import socketIo from '@packages/socket'
+import * as socketIo from '@packages/socket'
 import firefoxUtil from './browsers/firefox-util'
 import errors from './errors'
 import exec from './exec'
 import files from './files'
 import fixture from './fixture'
-import preprocessor from './plugins/preprocessor'
 import task from './task'
-import * as editors from './util/editors'
+import { getUserEditor, setUserEditor } from './util/editors'
 import { openFile } from './util/file-opener'
-import fs from './util/fs'
 import open from './util/open'
+import { DestroyableHttpServer } from './util/server_destroy'
 
-const debug = Debug('cypress:server:socket')
+type StartListeningCallbacks = {
+  onSocketConnection: (socket: any) => void
+}
 
-const runnerEvents = [
+type RunnerEvent =
+  'reporter:restart:test:run'
+  | 'runnables:ready'
+  | 'run:start'
+  | 'test:before:run:async'
+  | 'reporter:log:add'
+  | 'reporter:log:state:changed'
+  | 'paused'
+  | 'test:after:hooks'
+  | 'run:end'
+
+const runnerEvents: RunnerEvent[] = [
   'reporter:restart:test:run',
   'runnables:ready',
   'run:start',
@@ -30,7 +41,16 @@ const runnerEvents = [
   'run:end',
 ]
 
-const reporterEvents = [
+type ReporterEvent =
+  'runner:restart'
+ | 'runner:abort'
+ | 'runner:console:log'
+ | 'runner:console:error'
+ | 'runner:show:snapshot'
+ | 'runner:hide:snapshot'
+ | 'reporter:restarted'
+
+const reporterEvents: ReporterEvent[] = [
   // "go:to:file"
   'runner:restart',
   'runner:abort',
@@ -41,81 +61,35 @@ const reporterEvents = [
   'reporter:restarted',
 ]
 
-const retry = (fn) => {
+const debug = Debug('cypress:server:socket-base')
+
+const retry = (fn: (res: any) => void) => {
   return Bluebird.delay(25).then(fn)
 }
 
-const isSpecialSpec = (name) => {
-  return name.endsWith('__all')
-}
-
 export class SocketBase {
-  constructor (config) {
+  protected ended: boolean
+  protected _io?: socketIo.SocketIOServer
+  protected testsDir: string | null
+
+  constructor (config: Record<string, any>) {
     this.ended = false
-
-    this.onTestFileChange = this.onTestFileChange.bind(this)
-
-    if (config.watchForFileChanges) {
-      preprocessor.emitter.on('file:updated', this.onTestFileChange)
-    }
+    this.testsDir = null
   }
 
-  onTestFileChange (filePath) {
-    debug('test file changed %o', filePath)
+  protected get io () {
+    if (!this._io) {
+      throw new Error('Socket#startListening must first be called before accessing this.io')
+    }
 
-    return fs.statAsync(filePath)
-    .then(() => {
-      return this.io.emit('watched:file:changed')
-    }).catch(() => {
-      return debug('could not find test file that changed %o', filePath)
-    })
+    return this._io
   }
 
-  watchTestFileByPath (config, specConfig, options) {
-    debug('watching spec with config %o', specConfig)
-
-    const cleanIntegrationPrefix = (s) => {
-      const removedIntegrationPrefix = path.join(config.integrationFolder, s.replace(`integration${path.sep}`, ''))
-
-      return path.relative(config.projectRoot, removedIntegrationPrefix)
-    }
-
-    // previously we have assumed that we pass integration spec path with "integration/" prefix
-    // now we pass spec config object that tells what kind of spec it is, has relative path already
-    // so the only special handling remains for special paths like "integration/__all"
-    const filePath = typeof specConfig === 'string' ? cleanIntegrationPrefix(specConfig) : specConfig.relative
-
-    // bail if this is special path like "__all"
-    // maybe the client should not ask to watch non-spec files?
-    if (isSpecialSpec(filePath)) {
-      return
-    }
-
-    // bail if we're already watching this exact file
-    if (filePath === this.testFilePath) {
-      return
-    }
-
-    // remove the existing file by its path
-    if (this.testFilePath) {
-      preprocessor.removeFile(this.testFilePath, config)
-    }
-
-    // store this location
-    this.testFilePath = filePath
-    debug('will watch test file path %o', filePath)
-
-    return preprocessor.getFile(filePath, config)
-    // ignore errors b/c we're just setting up the watching. errors
-    // are handled by the spec controller
-    .catch(() => {})
-  }
-
-  toReporter (event, data) {
+  toReporter (event: string, data: any) {
     return this.io && this.io.to('reporter').emit(event, data)
   }
 
-  toRunner (event, data) {
+  toRunner (event: string, data: any) {
     return this.io && this.io.to('runner').emit(event, data)
   }
 
@@ -143,18 +117,24 @@ export class SocketBase {
     throw new Error(`Could not process '${message}'. No automation clients connected.`)
   }
 
-  createIo (server, path, cookie) {
+  createIo (server: DestroyableHttpServer, path: string, cookie: string | boolean) {
     return socketIo.server(server, {
       path,
+      cookie,
       destroyUpgrade: false,
       serveClient: false,
-      cookie,
-      parser: socketIo.circularParser,
+      parser: socketIo.circularParser as any,
       transports: ['websocket'],
     })
   }
 
-  startListening (server, automation, config, options) {
+  startListening (
+    server: DestroyableHttpServer,
+    automation,
+    config,
+    options,
+    callbacks: StartListeningCallbacks,
+  ) {
     let existingState = null
 
     _.defaults(options, {
@@ -175,13 +155,11 @@ export class SocketBase {
       onCaptureVideoFrames () {},
     })
 
-    let automationClient = null
+    let automationClient
 
-    const { integrationFolder, socketIoRoute, socketIoCookie } = config
+    const { socketIoRoute, socketIoCookie } = config
 
-    this.testsDir = integrationFolder
-
-    this.io = this.createIo(server, socketIoRoute, socketIoCookie)
+    this._io = this.createIo(server, socketIoRoute, socketIoCookie)
 
     automation.use({
       onPush: (message, data) => {
@@ -193,18 +171,18 @@ export class SocketBase {
       return this.onAutomation(automationClient, message, data, id)
     }
 
-    const automationRequest = (message, data) => {
+    const automationRequest = (message: string, data: Record<string, unknown>) => {
       return automation.request(message, data, onAutomationClientRequestCallback)
     }
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    return this.io.on('connection', (socket) => {
+    return this.io.on('connection', (socket: any) => {
       debug('socket connected')
 
       // cache the headers so we can access
       // them at any time
-      const headers = (socket.request != null ? socket.request.headers : undefined) != null ? (socket.request != null ? socket.request.headers : undefined) : {}
+      const headers = socket.request?.headers ?? {}
 
       socket.on('automation:client:connected', () => {
         if (automationClient === socket) {
@@ -246,7 +224,11 @@ export class SocketBase {
           })
         })
 
-        socket.on('automation:push:request', (message, data, cb) => {
+        socket.on('automation:push:request', (
+          message: string,
+          data: Record<string, unknown>,
+          cb: (...args: unknown[]) => any,
+        ) => {
           automation.push(message, data)
 
           // just immediately callback because there
@@ -256,7 +238,7 @@ export class SocketBase {
           }
         })
 
-        return socket.on('automation:response', automation.response)
+        socket.on('automation:response', automation.response)
       })
 
       socket.on('automation:request', (message, data, cb) => {
@@ -298,15 +280,6 @@ export class SocketBase {
         return options.onSpecChanged(spec)
       })
 
-      socket.on('watch:test:file', (specInfo, cb = function () { }) => {
-        debug('watch:test:file %o', specInfo)
-
-        this.watchTestFileByPath(config, specInfo, options)
-
-        // callback is only for testing purposes
-        return cb()
-      })
-
       socket.on('app:connect', (socketId) => {
         return options.onConnect(socketId, socket)
       })
@@ -317,7 +290,7 @@ export class SocketBase {
         return cb()
       })
 
-      socket.on('mocha', (...args) => {
+      socket.on('mocha', (...args: unknown[]) => {
         return options.onMocha.apply(options, args)
       })
 
@@ -332,7 +305,7 @@ export class SocketBase {
         return options.onCaptureVideoFrames(data)
       })
 
-      socket.on('reload:browser', (url, browser) => {
+      socket.on('reload:browser', (url: string, browser: any) => {
         return options.onReloadBrowser(url, browser)
       })
 
@@ -340,7 +313,10 @@ export class SocketBase {
         return options.onFocusTests()
       })
 
-      socket.on('is:automation:client:connected', (data = {}, cb) => {
+      socket.on('is:automation:client:connected', (
+        data: Record<string, any>,
+        cb: (...args: unknown[]) => void,
+      ) => {
         const isConnected = () => {
           return automationRequest('is:automation:client:connected', data)
         }
@@ -360,12 +336,12 @@ export class SocketBase {
         .timeout(data.timeout != null ? data.timeout : 1000)
         .then(() => {
           return cb(true)
-        }).catch(Bluebird.TimeoutError, (err) => {
+        }).catch(Bluebird.TimeoutError, (_err) => {
           return cb(false)
         })
       })
 
-      socket.on('backend:request', (eventName, ...args) => {
+      socket.on('backend:request', (eventName: string, ...args) => {
         // cb is always the last argument
         const cb = args.pop()
 
@@ -425,9 +401,7 @@ export class SocketBase {
       })
 
       socket.on('get:existing:run:state', (cb) => {
-        let s
-
-        s = existingState
+        const s = existingState
 
         if (s) {
           existingState = null
@@ -454,12 +428,12 @@ export class SocketBase {
       })
 
       socket.on('get:user:editor', (cb) => {
-        editors.getUserEditor(false)
+        getUserEditor(false)
         .then(cb)
       })
 
       socket.on('set:user:editor', (editor) => {
-        editors.setUserEditor(editor)
+        setUserEditor(editor)
       })
 
       socket.on('open:file', (fileDetails) => {
@@ -467,16 +441,18 @@ export class SocketBase {
       })
 
       reporterEvents.forEach((event) => {
-        return socket.on(event, (data) => {
-          return this.toRunner(event, data)
+        socket.on(event, (data) => {
+          this.toRunner(event, data)
         })
       })
 
-      return runnerEvents.forEach((event) => {
-        return socket.on(event, (data) => {
-          return this.toReporter(event, data)
+      runnerEvents.forEach((event) => {
+        socket.on(event, (data) => {
+          this.toReporter(event, data)
         })
       })
+
+      callbacks.onSocketConnection(socket)
     })
   }
 
@@ -485,7 +461,7 @@ export class SocketBase {
 
     // TODO: we need an 'ack' from this end
     // event from the other side
-    return this.io && this.io.emit('tests:finished')
+    return this.io.emit('tests:finished')
   }
 
   changeToUrl (url) {
@@ -493,8 +469,6 @@ export class SocketBase {
   }
 
   close () {
-    preprocessor.emitter.removeListener('file:updated', this.onTestFileChange)
-
-    return (this.io != null ? this.io.close() : undefined)
+    return this.io.close()
   }
 }

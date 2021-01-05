@@ -8,7 +8,7 @@ import logger from '@packages/server/lib/logger'
 import { ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
 import { initializeRoutes } from './routes-ct'
-import { Socket } from './socket-ct'
+import { SocketCt } from './socket-ct'
 
 type WarningErr = Record<string, any>
 
@@ -35,7 +35,7 @@ export class ServerCt extends ServerBase {
         target: config.baseUrl,
       })
 
-      this._socket = new Socket(config)
+      this._socket = new SocketCt(config)
 
       const getRemoteState = () => {
         return this._getRemoteState()
