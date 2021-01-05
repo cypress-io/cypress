@@ -123,7 +123,7 @@ export class SocketBase {
       cookie,
       destroyUpgrade: false,
       serveClient: false,
-      parser: socketIo.circularParser as any,
+      // parser: socketIo.circularParser as any,
       transports: ['websocket'],
     })
   }
