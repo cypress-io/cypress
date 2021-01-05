@@ -306,7 +306,7 @@ export function _createDetachedInstance (browserInstance: BrowserInstance): Brow
   return detachedInstance
 }
 
-export async function open (browser: Browser, url, options: any = {}): Bluebird<BrowserInstance> {
+export async function open (browser: Browser, url, options: any = {}): Promise<BrowserInstance> {
   const defaultLaunchOptions = utils.getDefaultLaunchOptions({
     extensions: [] as string[],
     preferences: _.extend({}, defaultPreferences),
