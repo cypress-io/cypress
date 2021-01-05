@@ -5,16 +5,12 @@ import httpsProxy from '@packages/https-proxy'
 import logger from '@packages/server/lib/logger'
 import { ServerBase } from '@packages/server/lib/server-base'
 import appData from '@packages/server/lib/util/app_data'
-import { initializeRoutes } from './routes-ct'
+import { createRoutes } from './routes-ct'
 import { SocketCt } from './socket-ct'
 
 type WarningErr = Record<string, any>
 
 const debug = Debug('cypress:server-ct:server')
-
-  createRoutes (...args: unknown[]) {
-    return initializeRoutes.apply(null, args)
-  }
 
 export class ServerCt extends ServerBase<SocketCt> {
   open (config, specsStore, project, onError, onWarning) {
@@ -41,7 +37,7 @@ export class ServerCt extends ServerBase<SocketCt> {
 
       this.createNetworkProxy(config, getRemoteState)
 
-      this.createRoutes({
+      createRoutes({
         app,
         config,
         specsStore,

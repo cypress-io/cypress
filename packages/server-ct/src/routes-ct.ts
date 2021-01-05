@@ -4,10 +4,10 @@ import httpProxy from 'http-proxy'
 import send from 'send'
 import { NetworkProxy } from '@packages/proxy'
 import { handle, serve } from '@packages/runner-ct'
+import xhrs from '@packages/server/lib/controllers/xhrs'
 import staticPkg from '@packages/static'
 import { ProjectCt } from './project-ct'
 import { SpecsStore } from './specs-store'
-import xhrs from '@packages/server/lib/controllers/xhrs'
 
 const debug = Debug('cypress:server:routes')
 
@@ -21,7 +21,14 @@ interface InitializeRoutes {
   onError: (...args: unknown[]) => any
 }
 
-export function initializeRoutes ({ app, config, specsStore, nodeProxy, networkProxy, project }: InitializeRoutes) {
+export const createRoutes = ({
+  app,
+  config,
+  specsStore,
+  nodeProxy,
+  networkProxy,
+  project,
+}: InitializeRoutes) => {
   app.get('/__cypress/runner/*', handle)
 
   app.get('/__cypress/static/*', (req, res) => {
