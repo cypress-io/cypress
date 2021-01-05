@@ -99,7 +99,7 @@ class ErrorMessage extends Component {
             {err.stack2 && (
               <details className='stacktrace'>
                 <summary>Stack trace</summary>
-                <pre>{err.stack2}</pre>
+                <pre className="p-2">{err.stack2}</pre>
               </details>
             )}
           </span>
