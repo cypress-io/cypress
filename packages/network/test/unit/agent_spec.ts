@@ -338,7 +338,7 @@ describe('lib/agent', function () {
         })
       })
 
-      it.only('#addRequest does not go to proxy if domain in NO_PROXY', function () {
+      it('#addRequest does not go to proxy if domain in NO_PROXY', function () {
         const spy = sinon.spy(this.agent.httpAgent, '_addProxiedRequest')
 
         process.env.HTTP_PROXY = process.env.HTTPS_PROXY = 'http://0.0.0.0:0'
