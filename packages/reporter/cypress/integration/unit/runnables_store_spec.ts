@@ -280,7 +280,7 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [createTest('1')] })
       instance.setRunningSpec('previous')
       instance.reset()
-      expect(Object.keys(instance.runnablesHistory).length).to.equal(0)
+      expect(instance.runnablesHistory).to.be.empty
     })
   })
 })
