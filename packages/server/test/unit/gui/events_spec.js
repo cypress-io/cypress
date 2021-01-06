@@ -9,6 +9,7 @@ const chromePolicyCheck = require(`${root}../lib/util/chrome_policy_check`)
 const cache = require(`${root}../lib/cache`)
 const logger = require(`${root}../lib/logger`)
 const { ProjectE2E } = require(`${root}../lib/project-e2e`)
+const { ProjectBase } = require(`${root}../lib/project-base`)
 const Updater = require(`${root}../lib/updater`)
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
@@ -498,7 +499,7 @@ describe('lib/gui/events', () => {
 
     describe('get:project:status', () => {
       it('returns project returned by Project.getProjectStatus', function () {
-        sinon.stub(ProjectE2E, 'getProjectStatus').resolves('project')
+        sinon.stub(ProjectBase, 'getProjectStatus').resolves('project')
 
         return this.handleEvent('get:project:status').then((assert) => {
           return assert.sendCalledWith('project')
@@ -508,7 +509,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectE2E, 'getProjectStatus').rejects(err)
+        sinon.stub(ProjectBase, 'getProjectStatus').rejects(err)
 
         return this.handleEvent('get:project:status').then((assert) => {
           return assert.sendErrCalledWith(err)
