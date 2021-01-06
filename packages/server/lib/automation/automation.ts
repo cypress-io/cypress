@@ -3,12 +3,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 
-type NullableMiddlewareHook = (() => void) | undefined
+type NullableMiddlewareHook = (() => void) | null
 
 interface IMiddleware {
   onPush: NullableMiddlewareHook
   onBeforeRequest: NullableMiddlewareHook
-  onRequest: ((msg: string, data: unknown) => void) | undefined
+  onRequest: ((msg: string, data: unknown) => void) | null
   onResponse: NullableMiddlewareHook
   onAfterResponse: NullableMiddlewareHook
 }
@@ -23,20 +23,24 @@ export class Automation {
     this.requests = {}
 
     // set the middleware
-    this.middleware = this.reset()
+    this.middleware = this.initializeMiddleware()
 
     this.cookies = new Cookies(cyNamespace, cookieNamespace)
     this.screenshot = new Screenshot(screenshotsFolder)
   }
 
-  reset (): IMiddleware {
+  initializeMiddleware = (): IMiddleware => {
     return {
-      onPush: this.middleware?.onPush,
-      onBeforeRequest: undefined,
-      onRequest: undefined,
-      onResponse: undefined,
-      onAfterResponse: undefined,
+      onPush: this.middleware?.onPush || null,
+      onBeforeRequest: null,
+      onRequest: null,
+      onResponse: null,
+      onAfterResponse: null,
     }
+  }
+
+  reset () {
+    this.middleware = this.initializeMiddleware()
   }
 
   automationValve (message, fn) {
@@ -160,7 +164,7 @@ export class Automation {
     })
   }
 
-  response (id, resp) {
+  response = (id, resp) => {
     const request = this.requests[id]
 
     if (request) {

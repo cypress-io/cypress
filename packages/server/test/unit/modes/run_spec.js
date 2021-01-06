@@ -6,6 +6,7 @@ const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const R = require('ramda')
 const pkg = require('@packages/root')
+const { ProjectBase } = require('../../../lib/project-base')
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const config = require(`${root}../lib/config`)
@@ -23,7 +24,7 @@ const { experimental } = require(`${root}../lib/experiments`)
 
 describe('lib/modes/run', () => {
   beforeEach(function () {
-    this.projectInstance = new ProjectE2E('/_test-output/path/to/project-e2e')
+    this.projectInstance = new ProjectBase('/_test-output/path/to/project-e2e')
   })
 
   context('.getProjectId', () => {
@@ -618,6 +619,7 @@ describe('lib/modes/run', () => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
       sinon.stub(ProjectE2E, 'ensureExists').resolves()
+      sinon.stub(ProjectBase, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(runMode, 'waitForSocketConnection').resolves()
@@ -691,6 +693,7 @@ describe('lib/modes/run', () => {
       sinon.stub(electron.app, 'on').withArgs('ready').yieldsAsync()
       sinon.stub(user, 'ensureAuthToken')
       sinon.stub(ProjectE2E, 'ensureExists').resolves()
+      sinon.stub(ProjectBase, 'ensureExists').resolves()
       sinon.stub(random, 'id').returns(1234)
       sinon.stub(openProject, 'create').resolves(openProject)
       sinon.stub(system, 'info').resolves({ osName: 'osFoo', osVersion: 'fooVersion' })
