@@ -1,3 +1,4 @@
+const Promise = require('bluebird')
 const $scriptUtils = require('@packages/driver/src/cypress/script_utils')
 const $networkUtils = require('@packages/driver/src/cypress/network_utils')
 const $sourceMapUtils = require('@packages/driver/src/cypress/source_map_utils')
@@ -45,6 +46,15 @@ describe('src/cypress/script_utils', () => {
         expect(scriptWindow.eval).to.be.calledTwice
         expect(scriptWindow.eval).to.be.calledWith(Cypress.sinon.match(/^the script contents/))
       })
+    })
+  })
+
+  context('#runPromises', () => {
+    it('handles promises and doesnt try to fetch + eval manually', async () => {
+      const scriptsAsPromises = [Promise.resolve(), Promise.resolve()]
+      const result = await $scriptUtils.runScripts({}, scriptsAsPromises)
+
+      expect(result).to.have.length(scriptsAsPromises.length)
     })
   })
 })
