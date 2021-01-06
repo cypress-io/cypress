@@ -45,6 +45,7 @@ export async function start (initialWebpackConfig, { specs, config, devServerEve
   const webpackDevServerConfig = {
     ...webpackConfig.devServer,
     hot: true,
+    inline: false,
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)
