@@ -919,7 +919,8 @@ jobs:
           command: yarn workspace @cypress/vue build
       - run:
           name: Run tests
-          command: yarn workspace @cypress/vue test
+          command: yarn test
+          working_directory: npm/vue
       - store-npm-logs
 
   npm-react:
