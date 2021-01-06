@@ -78,7 +78,7 @@ class Reporter extends Component<ReporterProps> {
       error,
       events,
       statsStore,
-      renderReporterHeader = (props) => <Header {...props}/>,
+      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
     return (
