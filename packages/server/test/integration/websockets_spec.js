@@ -263,7 +263,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.on('connect_error', () => {
+          return this.wsClient.io.on('error', () => {
             return done()
           })
         })
@@ -281,7 +281,7 @@ describe('Web Sockets', () => {
             return done(new Error('should not have been able to connect'))
           })
 
-          return this.wsClient.on('connect_error', () => {
+          return this.wsClient.io.on('error', () => {
             return done()
           })
         })
