@@ -187,7 +187,7 @@ export default class Header extends Component {
   }
 
   _cancelStudio = () => {
-    eventManager.emit('studio:cancel:reporter:restart')
+    eventManager.emit('studio:cancel')
   }
 
   @action _toggleViewportMenu = () => {

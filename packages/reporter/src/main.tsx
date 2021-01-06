@@ -3,6 +3,7 @@ import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
+import cs from 'classnames'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
@@ -28,7 +29,7 @@ export interface ReporterProps {
   events: Events
   error?: RunnablesErrorModel
   spec: Cypress.Cypress['spec']
-  studioEnabled: boolean
+  experimentalStudioEnabled: boolean
 }
 
 @observer
@@ -50,7 +51,7 @@ class Reporter extends Component<ReporterProps> {
       relative: PropTypes.string.isRequired,
       absolute: PropTypes.string.isRequired,
     }),
-    studioEnabled: PropTypes.bool,
+    experimentalStudioEnabled: PropTypes.bool,
   }
 
   static defaultProps = {
@@ -62,10 +63,10 @@ class Reporter extends Component<ReporterProps> {
   }
 
   render () {
-    const { appState, events } = this.props
+    const { appState, events, experimentalStudioEnabled } = this.props
 
     return (
-      <div className='reporter'>
+      <div className={cs('reporter', { 'experimental-studio-enabled': experimentalStudioEnabled })}>
         <Header appState={appState} statsStore={this.props.statsStore} />
         <Runnables
           appState={appState}
@@ -83,14 +84,10 @@ class Reporter extends Component<ReporterProps> {
   }
 
   componentDidMount () {
-    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore, studioEnabled } = this.props
+    const { appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(autoScrollingEnabled)
-    })()
-
-    action('set:studio:enabled', () => {
-      appState.setStudioEnabled(studioEnabled)
     })()
 
     this.props.events.init({

@@ -252,7 +252,7 @@
     visibility: visible;
   }
 
-  .runnable-studio-enabled .runnable-controls .runnable-controls-studio {
+  &.experimental-studio-enabled .runnable-controls .runnable-controls-studio {
     visibility: visible;
   }
 

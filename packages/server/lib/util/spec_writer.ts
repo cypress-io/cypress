@@ -166,7 +166,7 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
     const ast = recast.parse(contents, {
-      wrapColumn: 180,
+      wrapColumn: 360,
       parser: {
         parse (source) {
           return parse(source, {

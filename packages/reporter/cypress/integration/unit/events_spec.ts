@@ -28,7 +28,6 @@ type AppStateStub = AppState & {
   setFirefoxGcInterval: SinonSpy
   setForcingGc: SinonSpy
   setStudioActive: SinonSpy
-  setStudioEnabled: SinonSpy
   stop: SinonSpy
 }
 
@@ -43,7 +42,6 @@ const appStateStub = () => {
     setFirefoxGcInterval: sinon.spy(),
     setForcingGc: sinon.spy(),
     setStudioActive: sinon.spy(),
-    setStudioEnabled: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }

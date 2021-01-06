@@ -81,7 +81,6 @@ class Runnable extends Component<RunnableProps> {
         className={cs(`${model.type} runnable runnable-${model.state}`, {
           'runnable-retried': model.hasRetried,
           'runnable-studio': appState.studioActive,
-          'runnable-studio-enabled': appState.studioEnabled,
         })}
       >
         {model.type === 'test' ? <Test model={model as TestModel} /> : <Suite model={model as SuiteModel} />}
