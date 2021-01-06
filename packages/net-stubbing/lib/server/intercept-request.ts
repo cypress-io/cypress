@@ -17,7 +17,7 @@ import {
   NetEventFrames,
   SERIALIZABLE_REQ_PROPS,
 } from '../types'
-import { getRouteForRequest } from './route-matching'
+import { getRouteForRequest, matchesRoutePreflight } from './route-matching'
 import {
   sendStaticResponse,
   emit,
@@ -30,12 +30,22 @@ const debug = Debug('cypress:net-stubbing:server:intercept-request')
 
 /**
  * Called when a new request is received in the proxy layer.
- * @param project
- * @param req
- * @param res
- * @param cb Can be called to resume the proxy's normal behavior. If `res` is not handled and this is not called, the request will hang.
  */
 export const InterceptRequest: RequestMiddleware = function () {
+  if (matchesRoutePreflight(this.netStubbingState.routes, this.req)) {
+    // send positive CORS preflight response
+    return sendStaticResponse(this, {
+      statusCode: 204,
+      headers: {
+        'access-control-max-age': '-1',
+        'access-control-allow-credentials': 'true',
+        'access-control-allow-origin': this.req.headers.origin || '*',
+        'access-control-allow-methods': this.req.headers['access-control-request-method'] || '*',
+        'access-control-allow-headers': this.req.headers['access-control-request-headers'] || '*',
+      },
+    })
+  }
+
   const route = getRouteForRequest(this.netStubbingState.routes, this.req)
 
   if (!route) {
@@ -51,6 +61,7 @@ export const InterceptRequest: RequestMiddleware = function () {
     requestId,
     route,
     continueRequest: this.next,
+    onError: this.onError,
     onResponse: (incomingRes, resStream) => {
       setDefaultHeaders(this.req, incomingRes)
       this.onResponse(incomingRes, resStream)
@@ -99,7 +110,10 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
     }
 
     request.req.pipe(concatStream((reqBody) => {
-      request.req.body = frame.req.body = reqBody.toString()
+      const contentType = frame.req.headers['content-type']
+      const isMultipart = contentType && contentType.includes('multipart/form-data')
+
+      request.req.body = frame.req.body = isMultipart ? reqBody : reqBody.toString()
       cb()
     }))
   }
@@ -109,7 +123,7 @@ function _interceptRequest (state: NetStubbingState, request: BackendRequest, ro
 
     return ensureBody(() => {
       emitReceived()
-      sendStaticResponse(request.res, staticResponse, request.onResponse!)
+      sendStaticResponse(request, staticResponse)
     })
   }
 
@@ -183,7 +197,7 @@ export async function onRequestContinue (state: NetStubbingState, frame: NetEven
   if (frame.staticResponse) {
     await setResponseFromFixture(backendRequest.route.getFixture, frame.staticResponse)
 
-    return sendStaticResponse(backendRequest.res, frame.staticResponse, backendRequest.onResponse!)
+    return sendStaticResponse(backendRequest, frame.staticResponse)
   }
 
   backendRequest.continueRequest()

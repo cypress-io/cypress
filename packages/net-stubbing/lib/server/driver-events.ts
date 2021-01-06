@@ -62,7 +62,7 @@ export function _restoreMatcherOptionsTypes (options: AnnotatedRouteMatcherOptio
     _.set(ret, field, value)
   })
 
-  const noAnnotationRequiredFields = ['https', 'port', 'webSocket']
+  const noAnnotationRequiredFields: (keyof AnnotatedRouteMatcherOptions)[] = ['https', 'port', 'matchUrlAgainstPath']
 
   _.extend(ret, _.pick(options, noAnnotationRequiredFields))
 

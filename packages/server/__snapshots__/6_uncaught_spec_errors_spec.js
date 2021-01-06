@@ -368,14 +368,14 @@ exports['e2e uncaught errors / failing5'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (caught_async_sync_test_spec.coffee)                                       │
-  │ Searched:   cypress/integration/caught_async_sync_test_spec.coffee                             │
+  │ Specs:      1 found (caught_async_sync_test_spec.js)                                           │
+  │ Searched:   cypress/integration/caught_async_sync_test_spec.js                                 │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  caught_async_sync_test_spec.coffee                                              (1 of 1)
+  Running:  caught_async_sync_test_spec.js                                                  (1 of 1)
 
 
   foo
@@ -426,27 +426,27 @@ exports['e2e uncaught errors / failing5'] = `
   │ Screenshots:  4                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     caught_async_sync_test_spec.coffee                                               │
+  │ Spec Ran:     caught_async_sync_test_spec.js                                                   │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- baz f     (1280x720)
-     ails (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- bar f     (1280x720)
-     ails (failed).png                                                                              
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux      (1280x720)
-     fails (failed).png                                                                             
-  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.coffee/foo -- quux2     (1280x720)
-      fails (failed).png                                                                            
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.js/foo -- baz fails     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.js/foo -- bar fails     (1280x720)
+      (failed).png                                                                                  
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.js/foo -- quux fail     (1280x720)
+     s (failed).png                                                                                 
+  -  /XXX/XXX/XXX/cypress/screenshots/caught_async_sync_test_spec.js/foo -- quux2 fai     (1280x720)
+     ls (failed).png                                                                                
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.cof     (X second)
-                          fee.mp4                                                                   
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/caught_async_sync_test_spec.js.     (X second)
+                          mp4                                                                       
 
 
 ====================================================================================================
@@ -456,7 +456,7 @@ exports['e2e uncaught errors / failing5'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  caught_async_sync_test_spec.coffee       XX:XX        8        4        4        -        - │
+  │ ✖  caught_async_sync_test_spec.js           XX:XX        8        4        4        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        8        4        4        -        -  
 

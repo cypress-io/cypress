@@ -1,3 +1,5 @@
+/// <reference path="./cypress-npm-api.d.ts" />
+
 declare namespace Cypress {
   type FileContents = string | any[] | object
   type HistoryDirection = 'back' | 'forward'
@@ -117,6 +119,17 @@ declare namespace Cypress {
   type CypressSpecType = 'integration' | 'component'
 
   /**
+   * A Cypress spec.
+   */
+  interface Spec {
+    name: string // "config_passing_spec.js"
+    relative: string // "cypress/integration/config_passing_spec.js" or "__all" if clicked all specs button
+    absolute: string // "/Users/janelane/app/cypress/integration/config_passing_spec.js"
+    specFilter?: string // optional spec filter used by the user
+    specType?: CypressSpecType
+  }
+
+  /**
    * Window type for Application Under Test(AUT)
    */
   type AUTWindow = Window & typeof globalThis & ApplicationWindow
@@ -227,23 +240,17 @@ declare namespace Cypress {
     /**
      * Currently executing spec file.
      * @example
-    ```
-    Cypress.spec
-    // {
-    //  name: "config_passing_spec.coffee",
-    //  relative: "cypress/integration/config_passing_spec.coffee",
-    //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
-    //  specType: "integration"
-    // }
-    ```
+     * ```
+     * Cypress.spec
+     * // {
+     * //  name: "config_passing_spec.coffee",
+     * //  relative: "cypress/integration/config_passing_spec.coffee",
+     * //  absolute: "/users/smith/projects/web/cypress/integration/config_passing_spec.coffee"
+     * //  specType: "integration"
+     * // }
+     * ```
      */
-    spec: {
-      name: string // "config_passing_spec.coffee"
-      relative: string // "cypress/integration/config_passing_spec.coffee" or "__all" if clicked all specs button
-      absolute: string
-      specFilter?: string // optional spec filter used by the user
-      specType?: CypressSpecType
-    }
+    spec: Spec
 
     /**
      * Information about the browser currently running the tests
@@ -2570,6 +2577,11 @@ declare namespace Cypress {
      */
     firefoxGcInterval: Nullable<number | { runMode: Nullable<number>, openMode: Nullable<number> }>
     /**
+     * Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.
+     * @default false
+     */
+    experimentalRunEvents: boolean
+    /**
      * Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement
      * algorithm.
      * @default false
@@ -2592,7 +2604,7 @@ declare namespace Cypress {
     includeShadowDom: boolean
   }
 
-  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'baseUrl' | 'defaultCommandTimeout' | 'taskTimeout' | 'animationDistanceThreshold' | 'waitForAnimations' | 'viewportHeight' | 'viewportWidth' | 'requestTimeout' | 'execTimeout' | 'env' | 'responseTimeout' | 'retries' | 'includeShadowDom'>> {
+  interface TestConfigOverrides extends Partial<Pick<ConfigOptions, 'animationDistanceThreshold' | 'baseUrl' | 'defaultCommandTimeout' | 'env' | 'execTimeout' | 'includeShadowDom' | 'requestTimeout' | 'responseTimeout' | 'retries' | 'scrollBehavior' | 'taskTimeout' | 'viewportHeight' | 'viewportWidth' | 'waitForAnimations'>> {
     browser?: IsBrowserMatcher | IsBrowserMatcher[]
   }
 
@@ -4970,7 +4982,7 @@ declare namespace Cypress {
     dimensions?: Dimensions
   }
 
-  interface FileObject {
+  interface FileObject extends NodeEventEmitter {
     filePath: string
     outputPath: string
     shouldWatch: boolean
@@ -4987,9 +4999,31 @@ declare namespace Cypress {
     [key: string]: Task
   }
 
+  interface SystemDetails {
+    osName: string
+    osVersion: string
+  }
+
+  interface BeforeRunDetails {
+    browser: Browser
+    config: ConfigOptions
+    cypressVersion: string
+    group?: string
+    parallel: boolean
+    runUrl?: string
+    specs: Spec[]
+    specPattern: string[]
+    system: SystemDetails
+    tag?: string
+  }
+
   interface PluginEvents {
-    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
+    (action: 'after:run', fn: (results: CypressCommandLine.CypressRunResult | CypressCommandLine.CypressFailedRunResult) => void | Promise<void>): void
     (action: 'after:screenshot', fn: (details: ScreenshotDetails) => void | AfterScreenshotReturnObject | Promise<AfterScreenshotReturnObject>): void
+    (action: 'after:spec', fn: (spec: Spec, results: CypressCommandLine.RunResult) => void | Promise<void>): void
+    (action: 'before:run', fn: (runDetails: BeforeRunDetails) => void | Promise<void>): void
+    (action: 'before:spec', fn: (spec: Spec) => void | Promise<void>): void
+    (action: 'before:browser:launch', fn: (browser: Browser, browserLaunchOptions: BrowserLaunchOptions) => void | BrowserLaunchOptions | Promise<BrowserLaunchOptions>): void
     (action: 'file:preprocessor', fn: (file: FileObject) => string | Promise<string>): void
     (action: 'task', tasks: Tasks): void
   }

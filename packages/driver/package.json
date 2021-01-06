@@ -1,6 +1,6 @@
 {
   "name": "@packages/driver",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "scripts": {
     "clean-deps": "rm -rf node_modules",
@@ -13,14 +13,14 @@
   "devDependencies": {
     "@babel/code-frame": "7.8.3",
     "@cypress/bower-kendo-ui": "0.0.2",
-    "@cypress/sinon-chai": "1.1.0",
+    "@cypress/sinon-chai": "2.9.1",
     "@cypress/unique-selector": "0.4.2",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@cypress/what-is-circular": "1.0.1",
-    "@packages/network": "*",
-    "@packages/runner": "*",
-    "@packages/server": "*",
-    "@packages/ts": "*",
+    "@packages/network": "0.0.0-development",
+    "@packages/runner": "0.0.0-development",
+    "@packages/server": "0.0.0-development",
+    "@packages/ts": "0.0.0-development",
     "@types/chalk": "^2.2.0",
     "@types/common-tags": "^1.8.0",
     "@types/lodash": "^4.14.123",
