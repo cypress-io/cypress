@@ -2,30 +2,22 @@
     mocha/no-global-tests,
     no-undef,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 const { devicePixelRatio } = window
 
 it('takes consistent element captures', () => {
-  return cy
-  .viewport(600, 200)
-  .visit('http://localhost:3322/element')
-  .get('.capture-me')
+  cy.viewport(600, 200)
+  cy.visit('http://localhost:3322/element')
+  cy.get('.capture-me')
   .screenshot('element-original')
   .then(() => {
   // take 10 screenshots and check that they're all the same
   // to ensure element screenshots are consistent
-    const fn = function (index) {
+    const fn = function () {
       cy.get('.capture-me').screenshot('element-compare')
 
-      return cy.task('compare:screenshots', {
-        a: 'screenshot_element_capture_spec.coffee/element-original',
-        b: 'screenshot_element_capture_spec.coffee/element-compare', devicePixelRatio,
+      cy.task('compare:screenshots', {
+        a: 'screenshot_element_capture_spec.js/element-original',
+        b: 'screenshot_element_capture_spec.js/element-compare', devicePixelRatio,
       })
     }
 

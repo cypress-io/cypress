@@ -1,13 +1,4 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 const urlErrors = (win, url) => {
   return new Promise((resolve, reject) => {
     const es = new win.EventSource(url)
@@ -26,7 +17,7 @@ const urlErrors = (win, url) => {
 
 describe('server sent events', () => {
   beforeEach(() => {
-    return cy.visit('http://localhost:3038/foo')
+    cy.visit('http://localhost:3038/foo')
   })
 
   it('does not crash', () => {
@@ -37,9 +28,8 @@ describe('server sent events', () => {
       ])
     })
 
-    return cy
-    .log('should be able to receive server sent events')
-    .window()
+    cy.log('should be able to receive server sent events')
+    cy.window()
     .then((win) => {
       return new Promise((resolve, reject) => {
         const received = []
@@ -63,12 +53,10 @@ describe('server sent events', () => {
 
   it('aborts proxied connections to prevent client connection buildup', () => {
     // there shouldn't be any leftover connections either
-    cy
-    .request('http://localhost:3038/clients')
+    cy.request('http://localhost:3038/clients')
     .its('body').should('deep.eq', { clients: 0 })
 
-    return cy
-    .window()
+    cy.window()
     .then((win) => {
       return new Promise((resolve, reject) => {
         const es = new win.EventSource('http://127.0.0.1:3039/sse')
@@ -80,15 +68,15 @@ describe('server sent events', () => {
         es.onerror = reject
       })
     }).then((es) => {
-      return cy
-      .request('http://localhost:3038/clients')
+      cy.request('http://localhost:3038/clients')
       .its('body').should('deep.eq', { clients: 1 })
       .then(() => {
-        return es.close()
-      }).wait(100)
+        es.close()
+      })
+
+      cy.wait(100)
       .then(() => {
-        return cy
-        .request('http://localhost:3038/clients')
+        cy.request('http://localhost:3038/clients')
         .its('body').should('deep.eq', { clients: 0 })
       })
     })

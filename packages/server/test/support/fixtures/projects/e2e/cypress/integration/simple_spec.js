@@ -1,6 +1,2 @@
-/* eslint-disable
-    mocha/no-global-tests,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
+/* eslint-disable mocha/no-global-tests */
 it('is true', () => {})

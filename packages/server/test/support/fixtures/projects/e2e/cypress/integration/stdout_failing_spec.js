@@ -1,18 +1,9 @@
-/* eslint-disable
-    no-undef,
-*/
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
+/* eslint-disable no-undef */
 describe('stdout_failing_spec', () => {
   it('passes', () => {})
 
   it('fails', () => {
-    return cy.then(() => {
+    cy.then(() => {
       throw new Error('foo')
     })
   })
@@ -21,7 +12,7 @@ describe('stdout_failing_spec', () => {
 
   context('failing hook', () => {
     beforeEach(() => {
-      return cy.visit('/does-not-exist.html')
+      cy.visit('/does-not-exist.html')
     })
 
     it('is failing', () => {})
@@ -29,11 +20,11 @@ describe('stdout_failing_spec', () => {
 
   context('passing hook', () => {
     beforeEach(() => {
-      return cy.wrap({})
+      cy.wrap({})
     })
 
     it('is failing', () => {
-      return cy.visit('/does-not-exist.html')
+      cy.visit('/does-not-exist.html')
     })
   })
 })

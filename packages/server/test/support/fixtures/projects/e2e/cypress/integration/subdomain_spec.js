@@ -1,47 +1,38 @@
 /* eslint-disable
     @cypress/dev/skip-comment,
-    brace-style,
     no-undef,
 */
-// TODO: This file was created by bulk-decaffeinate.
-// Fix any style issues and re-enable lint.
-/*
- * decaffeinate suggestions:
- * DS102: Remove unnecessary code created because of implicit returns
- * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
- */
 describe('subdomains', () => {
   beforeEach(() => {
-    return cy.visit('http://www.foobar.com:2292')
+    cy.visit('http://www.foobar.com:2292')
   })
 
   it('can swap to help.foobar.com:2292', () => {
-    return cy
-    .get('a').click()
-    .get('h1').should('contain', 'Help')
+    cy.get('a').click()
+    cy.get('h1').should('contain', 'Help')
   })
 
   it('can directly visit a subdomain in another test', () => {
-    return cy
-    .visit('http://help.foobar.com:2292')
-    .get('h1').should('contain', 'Help')
-    .document().then((document) => {
+    cy.visit('http://help.foobar.com:2292')
+    cy.get('h1').should('contain', 'Help')
+    cy.document().then((document) => {
     // set cookies that are just on this subdomain
     // and cookies on the superdomain
     // and then regular cookies too
       document.cookie = 'help=true; domain=help.foobar.com'
       document.cookie = 'asdf=asdf; domain=foobar.com'
       document.cookie = 'foo=bar'
-    }).getCookies().then((cookies) => {
+    })
+
+    cy.getCookies().then((cookies) => {
       expect(cookies.length).to.eq(3)
     })
   })
 
   it('issue: #207: does not duplicate or hostOnly cookies as a domain cookie', () => {
-    return cy
-    .visit('http://session.foobar.com:2292')
-    .getCookies().should('have.length', 1)
-    .window().then((win) => {
+    cy.visit('http://session.foobar.com:2292')
+    cy.getCookies().should('have.length', 1)
+    cy.window().then((win) => {
       return new Cypress.Promise((resolve) => {
         const xhr = new win.XMLHttpRequest
 
@@ -61,10 +52,9 @@ describe('subdomains', () => {
   })
 
   it('correctly sets domain based cookies', () => {
-    return cy
-    .visit('http://domain.foobar.com:2292')
-    .getCookies().should('have.length', 1)
-    .getCookie('nomnom').should('include', {
+    cy.visit('http://domain.foobar.com:2292')
+    cy.getCookies().should('have.length', 1)
+    cy.getCookie('nomnom').should('include', {
       domain: '.foobar.com',
       name: 'nomnom',
       value: 'good',
@@ -72,7 +62,8 @@ describe('subdomains', () => {
       secure: false,
       httpOnly: false,
     })
-    .window().then((win) => {
+
+    cy.window().then((win) => {
       return new Cypress.Promise((resolve) => {
         const xhr = new win.XMLHttpRequest
 
@@ -83,66 +74,61 @@ describe('subdomains', () => {
           return resolve(JSON.parse(xhr.response).cookie)
         }
       })
-    }).then((cookie) => // only a single nomnom cookie should have been sent
-    // since we set a domain cookie that matches this request
-    {
+    }).then((cookie) => {
+      // only a single nomnom cookie should have been sent
+      // since we set a domain cookie that matches this request
       expect(cookie).to.eq('nomnom=good')
     })
   })
 
   it.skip('issue #362: do not set domain based (non hostOnly) cookies by default', () => {
-    return cy
-    .setCookie('foobar', '1', {
+    cy.setCookie('foobar', '1', {
       domain: 'subdomain.foobar.com',
     })
 
     // send a request to localhost but get
     // redirected back to foobar
-    .request('http://localhost:2292/redirect')
+    cy.request('http://localhost:2292/redirect')
     .its('body.cookie')
     .should('not.exist')
   })
 
   it.skip('sets a hostOnly cookie by default', () => {
-    return cy
     // this should set a hostOnly cookie for
     // www.foobar.com
-    .setCookie('foobar', '1')
+    cy.setCookie('foobar', '1')
 
-    .request('http://domain.foobar.com:2292/cookies')
+    cy.request('http://domain.foobar.com:2292/cookies')
     .its('body.cookie')
     .should('not.exist')
   })
 
   it('issue #361: incorrect cookie synchronization between cy.request redirects', () => {
-    return cy
     // start with a cookie on foobar
-    .setCookie('foobar', '1')
+    cy.setCookie('foobar', '1')
 
     // send a request to localhost but get
     // redirected back to foobar
-    .request('http://localhost:2292/redirect')
+    cy.request('http://localhost:2292/redirect')
     .its('body.cookie')
     .should('eq', 'foobar=1')
   })
 
   it('issue #362: incorrect cookie synchronization between cy.visit redirects', () => {
-    return cy
     // start with a cookie on foobar specifically for www
-    .setCookie('foobar', '1', { domain: 'www.foobar.com' })
+    cy.setCookie('foobar', '1', { domain: 'www.foobar.com' })
 
     // send a request to domain.foobar but get
     // redirected back to www.foobar.com
-    .visit('http://domain.foobar.com:2292/domainRedirect')
-    .get('#cookie')
+    cy.visit('http://domain.foobar.com:2292/domainRedirect')
+    cy.get('#cookie')
     .should('have.text', 'foobar=1')
   })
 
   it('issue #600 can visit between nested subdomains', () => {
-    return cy
-    .visit('http://qa.sub.foobar.com:2292')
-    .contains('Nested Subdomains')
-    .visit('http://staging.sub.foobar.com:2292')
-    .contains('Nested Subdomains')
+    cy.visit('http://qa.sub.foobar.com:2292')
+    cy.contains('Nested Subdomains')
+    cy.visit('http://staging.sub.foobar.com:2292')
+    cy.contains('Nested Subdomains')
   })
 })
