@@ -169,4 +169,8 @@ export class Automation {
       return request(resp)
     }
   }
+
+  get = (fn: keyof IMiddleware) => {
+    return this.middleware[fn]
+  }
 }
