@@ -1,26 +1,39 @@
+/* eslint-disable
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("stdout_failing_spec", function() {
-  it("passes", function() {});
+describe('stdout_failing_spec', () => {
+  it('passes', () => {})
 
-  it("fails", () => cy.then(function() {
-    throw new Error("foo");
-  }));
+  it('fails', () => {
+    return cy.then(() => {
+      throw new Error('foo')
+    })
+  })
 
-  it("doesnt fail", function() {});
+  it('doesnt fail', () => {})
 
-  context("failing hook", function() {
-    beforeEach(() => cy.visit("/does-not-exist.html"));
+  context('failing hook', () => {
+    beforeEach(() => {
+      return cy.visit('/does-not-exist.html')
+    })
 
-    return it("is failing", function() {});
-  });
+    it('is failing', () => {})
+  })
 
-  return context("passing hook", function() {
-    beforeEach(() => cy.wrap({}));
+  context('passing hook', () => {
+    beforeEach(() => {
+      return cy.wrap({})
+    })
 
-    return it("is failing", () => cy.visit("/does-not-exist.html"));
-  });
-});
+    it('is failing', () => {
+      return cy.visit('/does-not-exist.html')
+    })
+  })
+})

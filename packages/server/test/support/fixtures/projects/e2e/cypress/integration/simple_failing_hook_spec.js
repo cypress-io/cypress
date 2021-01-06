@@ -1,36 +1,40 @@
+// TODO: This file was created by bulk-decaffeinate.
+// Sanity-check the conversion and remove this comment.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("simple failing hook spec", function() {
-  context("beforeEach hooks", function() {
-    beforeEach(function() {
-      throw new Error("fail1");
-    });
+describe('simple failing hook spec', () => {
+  context('beforeEach hooks', () => {
+    beforeEach(() => {
+      throw new Error('fail1')
+    })
 
-    return it("never gets here", function() {});
-  });
+    it('never gets here', () => {})
+  })
 
-  context("pending", () => it("is pending"));
+  context('pending', () => {
+    it('is pending')
+  })
 
-  context("afterEach hooks", function() {
-    afterEach(function() {
-      throw new Error("fail2");
-    });
+  context('afterEach hooks', () => {
+    afterEach(() => {
+      throw new Error('fail2')
+    })
 
-    it("runs this", function() {});
+    it('runs this', () => {})
 
-    return it("does not run this", function() {});
-  });
+    it('does not run this', () => {})
+  })
 
-  return context("after hooks", function() {
-    after(function() {
-      throw new Error("fail3");
-    });
+  context('after hooks', () => {
+    after(() => {
+      throw new Error('fail3')
+    })
 
-    it("runs this", function() {});
+    it('runs this', () => {})
 
-    return it("fails on this", function() {});
-  });
-});
+    it('fails on this', () => {})
+  })
+})

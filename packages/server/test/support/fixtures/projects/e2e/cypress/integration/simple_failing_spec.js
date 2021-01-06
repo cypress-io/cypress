@@ -1,12 +1,19 @@
+/* eslint-disable
+    no-undef,
+*/
+// TODO: This file was created by bulk-decaffeinate.
+// Fix any style issues and re-enable lint.
 /*
  * decaffeinate suggestions:
  * DS102: Remove unnecessary code created because of implicit returns
  * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
  */
-describe("simple failing spec", function() {
-  it("fails1", () => cy.wrap(true, {timeout: 100}).should("be.false"));
+describe('simple failing spec', () => {
+  it('fails1', () => {
+    return cy.wrap(true, { timeout: 100 }).should('be.false')
+  })
 
-  return it("fails2", function() {
-    throw new Error("fails2");
-  });
-});
+  it('fails2', () => {
+    throw new Error('fails2')
+  })
+})
