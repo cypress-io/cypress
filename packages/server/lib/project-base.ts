@@ -419,7 +419,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   // returns project config (user settings + defaults + cypress.json)
   // with additional object "state" which are transient things like
   // window width and height, DevTools open or not, etc.
-  getConfig = (options = {}): Bluebird<Cfg> => {
+  getConfig (options = {}): Bluebird<Cfg> {
     if (options == null) {
       options = this.options
     }

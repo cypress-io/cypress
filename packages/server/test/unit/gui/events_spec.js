@@ -441,7 +441,7 @@ describe('lib/gui/events', () => {
       it('works even after project is opened (issue #227)', function () {
         sinon.stub(open, 'opn').resolves('okay')
         sinon.stub(ProjectE2E.prototype, 'open').resolves()
-        // sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
+        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({ some: 'config' })
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')
         .then(() => {
@@ -720,7 +720,7 @@ describe('lib/gui/events', () => {
       })
 
       it('closes down open project and returns null', function () {
-        // sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({})
+        sinon.stub(ProjectE2E.prototype, 'getConfig').resolves({})
         sinon.stub(ProjectE2E.prototype, 'open').resolves()
 
         return this.handleEvent('open:project', '/_test-output/path/to/project-e2e')

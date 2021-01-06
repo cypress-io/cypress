@@ -24,7 +24,7 @@ describe('lib/open_project', () => {
     sinon.stub(ProjectE2E.prototype, 'open').resolves()
     sinon.stub(ProjectE2E.prototype, 'reset').resolves()
     sinon.stub(ProjectE2E.prototype, 'getSpecUrl').resolves()
-    // sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
+    sinon.stub(ProjectE2E.prototype, 'getConfig').resolves(this.config)
     sinon.stub(ProjectE2E.prototype, 'getAutomation').returns(this.automation)
     sinon.stub(preprocessor, 'removeFile')
 
