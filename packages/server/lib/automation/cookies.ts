@@ -60,7 +60,7 @@ export class Cookies {
 
   constructor (private cyNamespace, private cookieNamespace) {}
 
-  isNamespaced (cookie) {
+  isNamespaced = (cookie: Cypress.Cookie) => {
     const name = cookie && cookie.name
 
     // if the cookie has no name, return false
