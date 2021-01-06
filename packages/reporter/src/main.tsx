@@ -20,7 +20,7 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
-export type ReporterProps = {
+interface BaseReporterProps {
   appState: AppState
   autoScrollingEnabled?: boolean
   runnablesStore: RunnablesStore
@@ -32,15 +32,19 @@ export type ReporterProps = {
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
-} & ({
+}
+
+export interface SingleReporterProps extends BaseReporterProps{
   runMode: 'single',
-} | {
+}
+
+export interface MultiReporterProps extends BaseReporterProps{
   runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
-})
+}
 
 @observer
-class Reporter extends Component<ReporterProps> {
+class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   static propTypes = {
     autoScrollingEnabled: PropTypes.bool,
     error: PropTypes.shape({
@@ -112,7 +116,7 @@ class Reporter extends Component<ReporterProps> {
 
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
-  componentDidUpdate (newProps: ReporterProps) {
+  componentDidUpdate (newProps: BaseReporterProps) {
     this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
 
     if (
@@ -155,7 +159,7 @@ declare global {
   interface Window {
     Cypress: any
     state: AppState
-    render: ((props: Partial<ReporterProps>) => void)
+    render: ((props: Partial<BaseReporterProps>) => void)
   }
 }
 
