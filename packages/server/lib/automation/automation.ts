@@ -164,7 +164,7 @@ export class Automation {
     })
   }
 
-  response (id, resp) {
+  response = (id, resp) => {
     const request = this.requests[id]
 
     if (request) {
