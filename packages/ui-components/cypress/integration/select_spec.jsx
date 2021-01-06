@@ -121,7 +121,7 @@ describe('<Select />', () => {
       })
     })
 
-    // requires native event tab support
+    // NOTE: requires native event tab support
     // cypress-plugin-tab does not mimic the behavior of tabbing in this context exactly as the browser does
     it.skip('tabbing moves focus to the next element with a tabIndex', () => {
       cy.render(render, (
