@@ -27,6 +27,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -206,6 +207,7 @@ exports['src/cypress/runner retries mochaEvents simple retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -284,6 +286,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -368,7 +371,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -454,7 +457,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -481,7 +484,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -497,7 +500,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -549,7 +552,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -617,7 +620,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -634,7 +637,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -651,7 +654,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -667,7 +670,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -703,14 +706,14 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -748,14 +751,14 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -776,6 +779,7 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -806,14 +810,14 @@ exports['src/cypress/runner retries mochaEvents test retry with hooks #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -870,11 +874,12 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "suite",
     {
-      "id": "r4",
+      "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -882,7 +887,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before all\" hook",
       "hookName": "before all",
       "hookId": "h1",
@@ -898,8 +903,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
-      "id": "r5",
-      "order": 2,
+      "id": "r4",
+      "order": 1,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
@@ -914,7 +919,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before all\" hook",
       "hookName": "before all",
       "hookId": "h1",
@@ -931,8 +936,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test",
     {
-      "id": "r5",
-      "order": 2,
+      "id": "r4",
+      "order": 1,
       "title": "test 2",
       "body": "[body]",
       "type": "test",
@@ -959,7 +964,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -975,7 +980,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before each\" hook",
       "hookName": "before each",
       "hookId": "h2",
@@ -991,7 +996,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before each\" hook",
       "hookName": "before each",
       "hookId": "h2",
@@ -1008,8 +1013,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "retry",
     {
-      "id": "r5",
-      "order": 2,
+      "id": "r4",
+      "order": 1,
       "title": "test 2",
       "err": {
         "message": "[error message]",
@@ -1045,7 +1050,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1069,10 +1074,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -1085,10 +1090,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1102,8 +1107,8 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
-      "id": "r5",
-      "order": 2,
+      "id": "r4",
+      "order": 1,
       "title": "test 2",
       "err": {
         "message": "[error message]",
@@ -1140,7 +1145,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1157,7 +1162,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before each\" hook",
       "hookName": "before each",
       "hookId": "h2",
@@ -1174,7 +1179,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:before:run",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "test 2",
       "body": "[body]",
       "type": "test",
@@ -1188,7 +1193,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"before each\" hook",
       "hookName": "before each",
       "hookId": "h2",
@@ -1205,10 +1210,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1222,10 +1227,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1239,10 +1244,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -1255,10 +1260,10 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "hook end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1272,7 +1277,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "pass",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1294,14 +1299,14 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1317,7 +1322,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test end",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1339,14 +1344,14 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1362,11 +1367,12 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "suite end",
     {
-      "id": "r4",
+      "id": "r2",
       "title": "suite 1",
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -1374,7 +1380,7 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
     "mocha",
     "test:after:run",
     {
-      "id": "r5",
+      "id": "r4",
       "title": "test 2",
       "state": "passed",
       "body": "[body]",
@@ -1397,14 +1403,14 @@ exports['src/cypress/runner retries mochaEvents test retry with [only] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1466,6 +1472,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -1555,7 +1562,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1713,7 +1720,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1740,7 +1747,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -1756,7 +1763,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1815,7 +1822,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -1950,7 +1957,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1967,7 +1974,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -1984,7 +1991,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h5",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -2000,7 +2007,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h5",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -2046,14 +2053,14 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -2101,14 +2108,14 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -2129,6 +2136,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -2169,14 +2177,14 @@ exports['src/cypress/runner retries mochaEvents can retry from [beforeEach] #1']
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -2238,6 +2246,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -2327,7 +2336,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -2417,7 +2426,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -2433,7 +2442,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -2507,7 +2516,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -2605,7 +2614,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -2712,7 +2721,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -2729,7 +2738,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -2818,7 +2827,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -2866,7 +2875,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -2915,7 +2924,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3038,7 +3047,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3055,7 +3064,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3145,7 +3154,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3195,7 +3204,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3246,7 +3255,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3370,7 +3379,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r5",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3387,7 +3396,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r5",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3452,7 +3461,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r5",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h5",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -3468,7 +3477,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "id": "r5",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h5",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3510,7 +3519,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3522,7 +3531,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -3567,7 +3576,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3579,7 +3588,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -3625,7 +3634,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         },
         "after each": [
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
@@ -3637,7 +3646,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
         ],
         "after all": [
           {
-            "hookId": "h5",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -3659,6 +3668,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -3671,6 +3681,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4331,6 +4342,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4343,6 +4355,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4500,6 +4513,7 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4587,6 +4601,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4662,7 +4677,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h4",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -4678,7 +4693,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h4",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4697,6 +4712,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4732,7 +4748,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         ],
         "after all": [
           {
-            "hookId": "h4",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -4778,7 +4794,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [before] #1'] = 
         ],
         "after all": [
           {
-            "hookId": "h4",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -4841,6 +4857,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -4930,19 +4947,19 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h5",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h4",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5027,7 +5044,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h5",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -5043,7 +5060,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h5",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5060,7 +5077,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -5076,7 +5093,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h6",
+      "hookId": "h5",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5093,7 +5110,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h4",
+      "hookId": "h6",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -5109,7 +5126,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "id": "r3",
       "title": "\"after all\" hook for \"test 1\"",
       "hookName": "after all",
-      "hookId": "h4",
+      "hookId": "h6",
       "err": {
         "message": "[error message]",
         "name": "AssertionError",
@@ -5151,7 +5168,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         "parsedStack": "match.array"
       },
       "state": "failed",
-      "failedFromHookId": "h4",
+      "failedFromHookId": "h6",
       "body": "[body]",
       "type": "test",
       "duration": "match.number",
@@ -5183,19 +5200,19 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h5",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h4",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5217,6 +5234,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -5236,7 +5254,7 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         "parsedStack": "match.array"
       },
       "state": "failed",
-      "failedFromHookId": "h4",
+      "failedFromHookId": "h6",
       "body": "[body]",
       "type": "test",
       "duration": "match.number",
@@ -5269,19 +5287,19 @@ exports['src/cypress/runner retries mochaEvents cant retry from [after] #1'] = [
         },
         "after each": [
           {
-            "hookId": "h5",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           },
           {
-            "hookId": "h6",
+            "hookId": "h5",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h4",
+            "hookId": "h6",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5344,6 +5362,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -5428,7 +5447,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5480,7 +5499,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -5496,7 +5515,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r3",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5540,7 +5559,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5587,7 +5606,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5635,7 +5654,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5747,7 +5766,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5774,7 +5793,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5791,7 +5810,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5836,7 +5855,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5930,7 +5949,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -5956,7 +5975,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -5973,7 +5992,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6017,7 +6036,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6084,7 +6103,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6101,7 +6120,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r4",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6137,7 +6156,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6175,7 +6194,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6214,7 +6233,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6298,7 +6317,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r5",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6315,7 +6334,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r5",
       "title": "\"after each\" hook",
       "hookName": "after each",
-      "hookId": "h4",
+      "hookId": "h3",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6332,7 +6351,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r5",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "file": null,
@@ -6348,7 +6367,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "id": "r5",
       "title": "\"after all\" hook",
       "hookName": "after all",
-      "hookId": "h3",
+      "hookId": "h4",
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -6385,14 +6404,14 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6432,14 +6451,14 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
@@ -6461,6 +6480,7 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
       "root": false,
       "type": "suite",
       "file": null,
+      "invocationDetails": "{Object 8}",
       "retries": -1
     }
   ],
@@ -6492,14 +6512,14 @@ exports['src/cypress/runner retries mochaEvents three tests with retry #1'] = [
         },
         "after each": [
           {
-            "hookId": "h4",
+            "hookId": "h3",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }
         ],
         "after all": [
           {
-            "hookId": "h3",
+            "hookId": "h4",
             "fnDuration": "match.number",
             "afterFnDuration": "match.number"
           }

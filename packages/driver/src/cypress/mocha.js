@@ -20,6 +20,7 @@ const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
 const testRetries = Test.prototype.retries
 const testClone = Test.prototype.clone
+const suiteConstructor = Suite
 const suiteAddTest = Suite.prototype.addTest
 const suiteAddSuite = Suite.prototype.addSuite
 const suiteRetries = Suite.prototype.retries
@@ -231,6 +232,10 @@ const restoreRunnerRunTests = () => {
   Runner.prototype.runTests = runnerRunTests
 }
 
+const restoreSuiteConstructor = () => {
+  Mocha.Suite = suiteConstructor
+}
+
 const restoreSuiteAddTest = () => {
   Suite.prototype.addTest = suiteAddTest
 }
@@ -375,6 +380,21 @@ const patchRunnableClearTimeout = () => {
     runnableClearTimeout.apply(this, args)
 
     this.timer = null
+  }
+}
+
+// note: this isn't really the correct way to patch a constructor
+// but due to the way that mocha calls the constructor internally it works
+// (only really used to set the id of the root runnable)
+const patchSuiteConstructor = (getId) => {
+  Mocha.Suite = function (...args) {
+    const suite = new suiteConstructor(...args)
+
+    if (!suite.id) {
+      suite.id = getId()
+    }
+
+    return suite
   }
 }
 
@@ -531,6 +551,7 @@ const restore = () => {
   restoreRunnableRun()
   restoreRunnableClearTimeout()
   restoreRunnableResetTimeout()
+  restoreSuiteConstructor()
   restoreSuiteRetries()
   restoreHookRetries()
   restoreRunnerRunTests()
@@ -561,6 +582,7 @@ const override = (specWindow, Cypress, config) => {
   patchHookRetries()
   patchRunnerRunTests()
   patchTestClone()
+  patchSuiteConstructor(getId)
   patchSuiteAddTest()
   patchSuiteAdd(specWindow, config, getId)
   patchSuiteHooks(specWindow, config, getHookId)
