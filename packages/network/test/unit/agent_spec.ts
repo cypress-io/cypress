@@ -3,19 +3,19 @@ import chai from 'chai'
 import http from 'http'
 import https from 'https'
 import net from 'net'
-import request from '@cypress/request-promise'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import tls from 'tls'
 import url from 'url'
 import DebuggingProxy from '@cypress/debugging-proxy'
-import Io from '@packages/socket'
+import request from '@cypress/request-promise'
+import * as socketIo from '@packages/socket'
 import {
-  buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
-  regenerateRequestHead, CombinedAgent,
+    buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
+    regenerateRequestHead, CombinedAgent
 } from '../../lib/agent'
-import { AsyncServer, Servers } from '../support/servers'
 import { allowDestroy } from '../../lib/allow-destroy'
+import { AsyncServer, Servers } from '../support/servers'
 
 const expect = chai.expect
 
@@ -180,7 +180,7 @@ describe('lib/agent', function () {
         })
 
         it('HTTP websocket connections can be established and used', function () {
-          const socket = Io.client(`http://localhost:${HTTP_PORT}`, {
+          const socket = socketIo.client(`http://localhost:${HTTP_PORT}`, {
             agent: this.agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -201,7 +201,7 @@ describe('lib/agent', function () {
         })
 
         it('HTTPS websocket connections can be established and used', function () {
-          const socket = Io.client(`https://localhost:${HTTPS_PORT}`, {
+          const socket = socketIo.client(`https://localhost:${HTTPS_PORT}`, {
             agent: this.agent,
             transports: ['websocket'],
             rejectUnauthorized: false,
@@ -452,7 +452,7 @@ describe('lib/agent', function () {
 
       it(`detects correctly from ${testCase.protocol} websocket requests`, () => {
         const spy = sinon.spy(testCase.agent, 'addRequest')
-        const socket = Io.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
+        const socket = socketIo.client(`${testCase.protocol}://foo.bar.baz.invalid`, {
           agent: <any>testCase.agent,
           transports: ['websocket'],
           timeout: 1,
@@ -460,9 +460,8 @@ describe('lib/agent', function () {
         })
 
         return new Bluebird((resolve, reject) => {
-          socket
-          .on('message', reject)
-          .on('connect_error', resolve)
+          socket.on('message', reject)
+          socket.io.on('error', resolve)
         })
         .then(() => {
           const requestOptions = spy.getCall(0).args[1]
