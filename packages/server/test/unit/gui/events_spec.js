@@ -400,7 +400,7 @@ describe('lib/gui/events', () => {
   context('user events', () => {
     describe('get:orgs', () => {
       it('returns array of orgs', function () {
-        sinon.stub(ProjectE2E, 'getOrgs').resolves([])
+        sinon.stub(ProjectBase, 'getOrgs').resolves([])
 
         return this.handleEvent('get:orgs').then((assert) => {
           return assert.sendCalledWith([])
@@ -410,7 +410,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectE2E, 'getOrgs').rejects(err)
+        sinon.stub(ProjectBase, 'getOrgs').rejects(err)
 
         return this.handleEvent('get:orgs').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -459,7 +459,7 @@ describe('lib/gui/events', () => {
   context('project events', () => {
     describe('get:projects', () => {
       it('returns array of projects', function () {
-        sinon.stub(ProjectE2E, 'getPathsAndIds').resolves([])
+        sinon.stub(ProjectBase, 'getPathsAndIds').resolves([])
 
         return this.handleEvent('get:projects').then((assert) => {
           return assert.sendCalledWith([])
@@ -469,7 +469,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectE2E, 'getPathsAndIds').rejects(err)
+        sinon.stub(ProjectBase, 'getPathsAndIds').rejects(err)
 
         return this.handleEvent('get:projects').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -479,7 +479,7 @@ describe('lib/gui/events', () => {
 
     describe('get:project:statuses', () => {
       it('returns array of projects with statuses', function () {
-        sinon.stub(ProjectE2E, 'getProjectStatuses').resolves([])
+        sinon.stub(ProjectBase, 'getProjectStatuses').resolves([])
 
         return this.handleEvent('get:project:statuses').then((assert) => {
           return assert.sendCalledWith([])
@@ -489,7 +489,7 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectE2E, 'getProjectStatuses').rejects(err)
+        sinon.stub(ProjectBase, 'getProjectStatuses').rejects(err)
 
         return this.handleEvent('get:project:statuses').then((assert) => {
           return assert.sendErrCalledWith(err)
@@ -519,9 +519,9 @@ describe('lib/gui/events', () => {
 
     describe('add:project', () => {
       it('adds project + returns result', function () {
-        sinon.stub(ProjectE2E, 'add').withArgs('/_test-output/path/to/project', this.options).resolves('result')
+        sinon.stub(ProjectBase, 'add').withArgs('/_test-output/path/to/project', this.options).resolves('result')
 
-        return this.handleEvent('add:project', '/_test-output/path/to/project-e2e').then((assert) => {
+        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
           return assert.sendCalledWith('result')
         })
       })
@@ -529,9 +529,9 @@ describe('lib/gui/events', () => {
       it('catches errors', function () {
         const err = new Error('foo')
 
-        sinon.stub(ProjectE2E, 'add').withArgs('/_test-output/path/to/project', this.options).rejects(err)
+        sinon.stub(ProjectBase, 'add').withArgs('/_test-output/path/to/project', this.options).rejects(err)
 
-        return this.handleEvent('add:project', '/_test-output/path/to/project-e2e').then((assert) => {
+        return this.handleEvent('add:project', '/_test-output/path/to/project').then((assert) => {
           return assert.sendErrCalledWith(err)
         })
       })
