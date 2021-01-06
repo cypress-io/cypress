@@ -44,7 +44,8 @@ describe('src/cypress/script_utils', () => {
       return $scriptUtils.runScripts(scriptWindow, scripts)
       .then(() => {
         expect(scriptWindow.eval).to.be.calledTwice
-        expect(scriptWindow.eval).to.be.calledWith(Cypress.sinon.match(/^the script contents/))
+        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script1.js')
+        expect(scriptWindow.eval).to.be.calledWith('the script contents\n//# sourceURL=http://localhost:3500cypress/integration/script2.js')
       })
     })
   })
