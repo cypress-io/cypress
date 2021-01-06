@@ -1,5 +1,6 @@
 import { action, computed, observable } from 'mobx'
 import automation from './automation'
+import { nanoid } from 'nanoid'
 
 interface Defaults {
   messageTitle: string | null
@@ -84,9 +85,9 @@ export class State {
 
   @observable.ref scriptError = null
 
+  @observable runId: string | null = null
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
-  /** @type {"single" | "multi"} */
   @observable runMode: 'single' | 'multi' = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
@@ -199,15 +200,19 @@ export class State {
   }
 
   @action setSingleSpec (spec) {
+    this.runId = nanoid()
+
     if (this.runMode === 'multi') {
       this.runMode = 'single'
       this.multiSpecs = []
     }
 
+    this.setSpec(null)
     this.setSpec(spec)
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {
+    this.runId = nanoid()
     const isAlreadyRunningNewSpec = this.multiSpecs.some(
       (existingSpec) => existingSpec.relative === newSpec.relative,
     )

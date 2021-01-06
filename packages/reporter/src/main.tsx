@@ -33,6 +33,8 @@ type ReporterProps = {
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
+  /** Used for component testing front-end */
+  specRunId?: string | null
 } & ({
   runMode: 'single',
 } | {
@@ -118,7 +120,7 @@ class Reporter extends Component<ReporterProps> {
 
     if (
       this.props.resetStatsOnSpecChange &&
-      this.props.spec.relative !== newProps.spec.relative
+      this.props.specRunId !== newProps.specRunId
     ) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
