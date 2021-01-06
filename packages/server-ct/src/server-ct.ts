@@ -119,24 +119,7 @@ export class ServerCt extends ServerBase<SocketCt> {
     })
   }
 
-  _close () {
-    // bail early we dont have a server or we're not
-    // currently listening
-    if (!this._server || !this.isListening) {
-      return Bluebird.resolve()
-    }
-
-    return this._server.destroyAsync()
-    .then(() => {
-      this.isListening = false
-    })
-  }
-
   sendSpecList (specs) {
     return this.socket.sendSpecList(specs)
-  }
-
-  startWebsockets (automation, config, options = {}) {
-    this.socket.startListening(this.server, automation, config, options)
   }
 }

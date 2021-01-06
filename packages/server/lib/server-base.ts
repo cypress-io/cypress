@@ -206,6 +206,22 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
     })
   }
 
+  startWebsockets (automation, config, options = {}) {
+    options.onRequest = this._onRequest.bind(this)
+    options.netStubbingState = this.netStubbingState
+
+    options.onResetServerState = () => {
+      this.networkProxy.reset()
+      this.netStubbingState.reset()
+    }
+
+    const io = this.socket.startListening(this.server, automation, config, options)
+
+    this._normalizeReqUrl(this.server)
+
+    return io
+  }
+
   createHosts (hosts = {}) {
     return _.each(hosts, (ip, host) => {
       return evilDns.add(host, ip)
@@ -265,10 +281,10 @@ export class ServerBase<TSocket extends SocketE2E | SocketCt> {
 
     server.removeAllListeners('request')
 
-    return server.on('request', (req, res) => {
+    server.on('request', (req, res) => {
       setProxiedUrl(req)
 
-      return this._callRequestListeners(server, listeners, req, res)
+      this._callRequestListeners(server, listeners, req, res)
     })
   }
 
