@@ -77,7 +77,7 @@ export class Cookies {
     return automate(data)
     .then((cookies) => {
       cookies = normalizeGetCookies(cookies)
-      cookies = _.reject(cookies, this.isNamespaced)
+      cookies = _.reject(cookies, (cookie) => this.isNamespaced(cookie))
 
       debug('received get:cookies %o', cookies)
 
