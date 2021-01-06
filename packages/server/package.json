@@ -80,6 +80,7 @@
     "marionette-client": "cypress-io/marionette-client#2cddf7d791cca7be5191d7fe103d58be7283957d",
     "md5": "2.3.0",
     "mime": "2.4.4",
+    "mime-db": "1.45.0",
     "minimatch": "3.0.4",
     "minimist": "1.2.5",
     "mocha-7.0.1": "npm:mocha@7.0.1",
