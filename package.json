@@ -47,6 +47,8 @@
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.ts,cypress-tests.ts",
+    "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
@@ -185,6 +187,7 @@
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
     "start-server-and-test": "1.10.8",
+    "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "term-to-html": "1.2.0",
     "terminal-banner": "1.1.0",
@@ -235,6 +238,7 @@
   },
   "lint-staged": {
     "*.coffee": [
+      "yarn stop-only --folder",
       "git add"
     ],
     "*.{js,jsx,ts,tsx,json,eslintrc}": [
