@@ -143,7 +143,7 @@ export class Cookies {
   }
 
   clearCookies (data, automate) {
-    const cookies = _.reject(normalizeCookies(data), this.isNamespaced)
+    const cookies = _.reject(normalizeCookies(data), (cookie) => this.isNamespaced(cookie))
 
     debug('clear:cookies %o', cookies)
 
