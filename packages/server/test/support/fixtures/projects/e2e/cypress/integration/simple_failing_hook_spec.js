@@ -1,25 +1,36 @@
-describe "simple failing hook spec", ->
-  context "beforeEach hooks", ->
-    beforeEach ->
-      throw new Error("fail1")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("simple failing hook spec", function() {
+  context("beforeEach hooks", function() {
+    beforeEach(function() {
+      throw new Error("fail1");
+    });
 
-    it "never gets here", ->
+    return it("never gets here", function() {});
+  });
 
-  context "pending", ->
-    it "is pending"
+  context("pending", () => it("is pending"));
 
-  context "afterEach hooks", ->
-    afterEach ->
-      throw new Error("fail2")
+  context("afterEach hooks", function() {
+    afterEach(function() {
+      throw new Error("fail2");
+    });
 
-    it "runs this", ->
+    it("runs this", function() {});
 
-    it "does not run this", ->
+    return it("does not run this", function() {});
+  });
 
-  context "after hooks", ->
-    after ->
-      throw new Error("fail3")
+  return context("after hooks", function() {
+    after(function() {
+      throw new Error("fail3");
+    });
 
-    it "runs this", ->
+    it("runs this", function() {});
 
-    it "fails on this", ->
+    return it("fails on this", function() {});
+  });
+});

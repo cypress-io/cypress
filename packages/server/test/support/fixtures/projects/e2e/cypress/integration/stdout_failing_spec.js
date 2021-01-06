@@ -1,21 +1,26 @@
-describe "stdout_failing_spec", ->
-  it "passes", ->
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("stdout_failing_spec", function() {
+  it("passes", function() {});
 
-  it "fails", ->
-    cy.then ->
-      throw new Error("foo")
+  it("fails", () => cy.then(function() {
+    throw new Error("foo");
+  }));
 
-  it "doesnt fail", ->
+  it("doesnt fail", function() {});
 
-  context "failing hook", ->
-    beforeEach ->
-      cy.visit("/does-not-exist.html")
+  context("failing hook", function() {
+    beforeEach(() => cy.visit("/does-not-exist.html"));
 
-    it "is failing", ->
+    return it("is failing", function() {});
+  });
 
-  context "passing hook", ->
-    beforeEach ->
-      cy.wrap({})
+  return context("passing hook", function() {
+    beforeEach(() => cy.wrap({}));
 
-    it "is failing", ->
-      cy.visit("/does-not-exist.html")
+    return it("is failing", () => cy.visit("/does-not-exist.html"));
+  });
+});

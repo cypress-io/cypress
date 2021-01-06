@@ -1,6 +1,10 @@
-describe "simple passing spec", ->
-  beforeEach ->
-    cy.wait(1000)
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("simple passing spec", function() {
+  beforeEach(() => cy.wait(1000));
 
-  it "passes", ->
-    cy.wrap(true).should("be.true")
+  return it("passes", () => cy.wrap(true).should("be.true"));
+});

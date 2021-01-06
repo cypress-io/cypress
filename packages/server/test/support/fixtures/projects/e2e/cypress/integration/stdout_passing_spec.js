@@ -1,26 +1,30 @@
-describe "stdout_passing_spec", ->
-  context "file", ->
-    it "visits file", ->
-      cy.visit("/index.html")
+/*
+ * decaffeinate suggestions:
+ * DS102: Remove unnecessary code created because of implicit returns
+ * Full docs: https://github.com/decaffeinate/decaffeinate/blob/master/docs/suggestions.md
+ */
+describe("stdout_passing_spec", function() {
+  context("file", () => it("visits file", () => cy.visit("/index.html")));
 
-  context "google", ->
-    it "visits google", ->
-      cy.visit("https://www.google.com")
+  context("google", function() {
+    it("visits google", () => cy.visit("https://www.google.com"));
 
-    it "google2", ->
+    return it("google2", function() {});
+  });
 
-  context "apple", ->
-    it "apple1", ->
+  context("apple", function() {
+    it("apple1", function() {});
 
-    it "visits apple", ->
-      cy.visit("https://www.apple.com")
+    return it("visits apple", () => cy.visit("https://www.apple.com"));
+  });
 
-  context "subdomains", ->
-    it "cypress1", ->
+  return context("subdomains", function() {
+    it("cypress1", function() {});
 
-    it "visits cypress", ->
-      cy
-        .visit("https://www.cypress.io")
-        .visit("https://docs.cypress.io")
+    it("visits cypress", () => cy
+      .visit("https://www.cypress.io")
+      .visit("https://docs.cypress.io"));
 
-    it "cypress3", ->
+    return it("cypress3", function() {});
+  });
+});
