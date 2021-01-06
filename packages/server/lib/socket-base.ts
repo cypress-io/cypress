@@ -177,7 +177,7 @@ export class SocketBase {
 
     const getFixture = (path, opts) => fixture.get(config.fixturesFolder, path, opts)
 
-    return this.io.on('connection', (socket: any) => {
+    this.io.on('connection', (socket: any) => {
       debug('socket connected')
 
       // cache the headers so we can access
@@ -454,6 +454,8 @@ export class SocketBase {
 
       callbacks.onSocketConnection(socket)
     })
+
+    return this.io
   }
 
   end () {

@@ -197,17 +197,8 @@ export class ServerE2E extends ServerBase<SocketE2E> {
 
   startWebsockets (automation, config, options = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
-    options.onRequest = this._onRequest.bind(this)
-    options.netStubbingState = this._netStubbingState
 
-    options.onResetServerState = () => {
-      this._networkProxy?.reset()
-      this._netStubbingState?.reset()
-    }
-
-    this.socket.startListening(this.server, automation, config, options)
-
-    return this._normalizeReqUrl(this.server)
+    return super.startWebSockets(automation, config, options)
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
