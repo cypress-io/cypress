@@ -485,7 +485,7 @@ jobs:
           command: |
             . ./scripts/load-nvm.sh
             git clean -df
-            yarn lint --max-warnings=0
+            yarn lint
       - run:
           name: cypress info (dev)
           command: node cli/bin/cypress info --dev
