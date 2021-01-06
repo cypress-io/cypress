@@ -11,8 +11,12 @@ import DebuggingProxy from '@cypress/debugging-proxy'
 import request from '@cypress/request-promise'
 import * as socketIo from '@packages/socket'
 import {
-    buildConnectReqHead, createProxySock, isRequestHttps, isResponseStatusCode200,
-    regenerateRequestHead, CombinedAgent
+  buildConnectReqHead,
+  createProxySock,
+  isRequestHttps,
+  isResponseStatusCode200,
+  regenerateRequestHead,
+  CombinedAgent,
 } from '../../lib/agent'
 import { allowDestroy } from '../../lib/allow-destroy'
 import { AsyncServer, Servers } from '../support/servers'
@@ -241,7 +245,7 @@ describe('lib/agent', function () {
         this.agent = new CombinedAgent()
 
         this.request = request.defaults({
-          agent: <any> this.agent,
+          agent: this.agent as any,
           proxy: null,
         })
       })
@@ -333,7 +337,7 @@ describe('lib/agent', function () {
         this.agent = new CombinedAgent()
 
         this.request = request.defaults({
-          agent: <any> this.agent,
+          agent: this.agent as any,
           proxy: null,
         })
       })
