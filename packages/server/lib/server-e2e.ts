@@ -198,7 +198,7 @@ export class ServerE2E extends ServerBase<SocketE2E> {
   startWebsockets (automation, config, options = {}) {
     options.onResolveUrl = this._onResolveUrl.bind(this)
 
-    return super.startWebSockets(automation, config, options)
+    return super.startWebsockets(automation, config, options)
   }
 
   _onResolveUrl (urlStr, headers, automationRequest, options = { headers: {} }) {
