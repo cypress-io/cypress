@@ -42,9 +42,8 @@ describe('src/cypress/script_utils', () => {
     it('evals each script', () => {
       return $scriptUtils.runScripts(scriptWindow, scripts)
       .then(() => {
-        expect($sourceMapUtils.extractSourceMap).to.be.calledTwice
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[0], 'the script contents')
-        expect($sourceMapUtils.extractSourceMap).to.be.calledWith(scripts[1], 'the script contents')
+        expect(scriptWindow.eval).to.be.calledTwice
+        expect(scriptWindow.eval).to.be.calledWith(Cypress.sinon.match(/^the script contents/))
       })
     })
   })
