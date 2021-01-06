@@ -20,6 +20,7 @@ class SocketIOServer extends SocketIOBaseServer {
     //
     // previous commit for reference:
     // https://github.com/socketio/engine.io/blame/61b949259ed966ef6fc8bfd61f14d1a2ef06d319/lib/server.js#L29
+    opts = opts ?? {}
     opts.maxHttpBufferSize = opts.maxHttpBufferSize ?? HUNDRED_MEGABYTES
 
     super(srv, opts)
