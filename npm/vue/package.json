@@ -8,7 +8,7 @@
     "build-prod": "yarn build",
     "cy:open": "node ../../scripts/start.js --component-testing --project ${PWD}",
     "cy:run": "node ../../scripts/start.js --component-testing --run-project ${PWD}",
-    "test": "echo \"no tests setup\""
+    "test": "yarn cy:run"
   },
   "dependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
