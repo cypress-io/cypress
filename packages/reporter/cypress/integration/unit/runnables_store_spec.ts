@@ -234,6 +234,22 @@ describe('runnables store', () => {
     })
   })
 
+  context('#setRunningSpec', () => {
+    it('sets the current runnable as the path passed', () => {
+      instance.setRunnables({ tests: [createTest('1')] })
+      instance.setRunningSpec('specPath')
+      expect(instance.runningSpec).to.equal('specPath')
+    })
+
+    it('add the previous path to the spec history', () => {
+      instance.setRunnables({ tests: [createTest('1')] })
+      instance.setRunningSpec('previousSpecPath')
+      instance.setRunningSpec('nextSpecPath')
+      expect(instance.runningSpec).to.equal('nextSpecPath')
+      expect(instance.runnablesHistory['previousSpecPath']).not.to.be.undefined
+    })
+  })
+
   context('#reset', () => {
     it('resets flags to default values', () => {
       instance.setRunnables({ tests: [createTest('1')] })
@@ -258,6 +274,13 @@ describe('runnables store', () => {
       instance.setRunnables({ tests: [createTest('1')] })
       instance.reset()
       expect(instance.testById('1')).to.be.undefined
+    })
+
+    it('resets runnablesHistory', () => {
+      instance.setRunnables({ tests: [createTest('1')] })
+      instance.setRunningSpec('previous')
+      instance.reset()
+      expect(Object.keys(instance.runnablesHistory).length).to.equal(0)
     })
   })
 })
