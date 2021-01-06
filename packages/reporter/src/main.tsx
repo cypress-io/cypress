@@ -21,6 +21,7 @@ import Runnables from './runnables/runnables'
 export interface ReporterProps {
   appState: AppState
   autoScrollingEnabled?: boolean
+  isInteractive: boolean
   runnablesStore: RunnablesStore
   runner: Runner
   scroller: Scroller
@@ -34,6 +35,7 @@ export interface ReporterProps {
 class Reporter extends Component<ReporterProps> {
   static propTypes = {
     autoScrollingEnabled: PropTypes.bool,
+    isInteractive: PropTypes.bool.isRequired,
     error: PropTypes.shape({
       title: PropTypes.string.isRequired,
       link: PropTypes.string,
@@ -59,6 +61,14 @@ class Reporter extends Component<ReporterProps> {
     statsStore,
   }
 
+  constructor (props: ReporterProps) {
+    super(props)
+
+    this.updateIsInteractive = this.updateIsInteractive.bind(this)
+
+    this.updateIsInteractive()
+  }
+
   render () {
     const { appState } = this.props
 
@@ -77,6 +87,10 @@ class Reporter extends Component<ReporterProps> {
           events={this.props.events}/>
       </div>
     )
+  }
+
+  componentDidUpdate () {
+    this.updateIsInteractive()
   }
 
   componentDidMount () {
@@ -101,6 +115,17 @@ class Reporter extends Component<ReporterProps> {
 
   componentWillUnmount () {
     shortcuts.stop()
+  }
+
+  // This component is loaded twice with isInteractive `undefined` and `true` in "open" mode
+  // Because of that, it should be called in constructor and componentDidUpdate
+  // to satisfy both e2e-tests and real use.
+  updateIsInteractive () {
+    const { appState, isInteractive } = this.props
+
+    action('set:config:values', () => {
+      appState.setIsInteractive(isInteractive)
+    })()
   }
 }
 

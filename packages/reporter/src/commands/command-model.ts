@@ -21,6 +21,7 @@ export interface CommandProps extends InstrumentProps {
   visible?: boolean
   wallClockStartedAt: string
   hookId: string
+  options?: Record<string, any>
 }
 
 export default class Command extends Instrument {
@@ -36,6 +37,7 @@ export default class Command extends Instrument {
   @observable duplicates: Array<Command> = []
   @observable isDuplicate = false
   @observable hookId: string
+  @observable options?: Record<string, any> = {}
 
   private _prevState: string | null | undefined = null
   private _pendingTimeout?: TimeoutID = undefined
@@ -65,6 +67,7 @@ export default class Command extends Instrument {
     this.visible = props.visible
     this.wallClockStartedAt = props.wallClockStartedAt
     this.hookId = props.hookId
+    this.options = props.options
 
     this._checkLongRunning()
   }

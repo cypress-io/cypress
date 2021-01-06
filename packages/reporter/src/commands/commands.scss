@@ -312,8 +312,8 @@
     white-space: nowrap;
 
     > span {
-      align-items: center;
       display: flex;
+      flex-direction: column;
     }
   }
 
@@ -322,6 +322,25 @@
     flex-grow: 2;
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+
+  .command-message-options {
+    display: block;
+    white-space: initial;
+
+    .object-viewer {
+      line-height: 1.2;
+      margin: 4px 8px 4px 0;
+    }
+
+    .option-item {
+      margin-left: 16px;
+    }
+
+    .collapsible-indicator {
+      top: 1px;
+      position: relative;
+    }
   }
 
   .command-wrapper .fa-circle {

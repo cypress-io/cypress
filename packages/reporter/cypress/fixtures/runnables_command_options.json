@@ -1,0 +1,136 @@
+{
+  "id": "r1",
+  "title": "",
+  "root": true,
+  "hooks": [],
+  "tests": [],
+  "suites": [
+    {
+      "id": "r2",
+      "title": "suite 1",
+      "root": false,
+      "hooks": [],
+      "tests": [
+        {
+          "id": "r3",
+          "title": "test 1",
+          "state": "passed"
+        },
+        {
+          "id": "r4",
+          "title": "test 2",
+          "state": "failed",
+          "commands": [
+            {
+              "hookId": "r4",
+              "id": "c1",
+              "instrument": "command",
+              "message": "x: 2, y: 3",
+              "name": "click",
+              "state": "passed",
+              "testId": "r4",
+              "options": {
+                "foo": "bar, baz:dev",
+                "timeout": 4000
+              },
+              "type": "parent"
+            },
+            {
+              "hookId": "r4",
+              "id": "c2",
+              "instrument": "command",
+              "message": "good",
+              "name": "scrollIntoView",
+              "state": "passed",
+              "testId": "r4",
+              "options": {
+                "foo": "Long text. Old good lorem ipsum. lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec urna risus, laoreet eu elit in, efficitur convallis diam. Suspendisse aliquam tristique commodo. Fusce vel vestibulum ligula. Morbi ut sodales ex, vitae elementum mi."
+              },
+              "type": "parent"
+            },
+            {
+              "hookId": "r4",
+              "id": "c3",
+              "instrument": "command",
+              "message": "",
+              "name": "clearCookies",
+              "state": "passed",
+              "options": {
+                "one": {
+                  "two": {
+                    "three": {
+                      "four": {
+                        "five": {
+                          "six": {
+                            "seven": {
+                              "eight": {
+                                "nine": {
+                                  "ten": {
+                                    "eleven": {
+                                      "twelve": "end"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "testId": "r4",
+              "type": "parent"
+            },
+            {
+              "hookId": "r4",
+              "id": "c5",
+              "instrument": "command",
+              "message": "value",
+              "name": "empty option obj",
+              "state": "passed",
+              "testId": "r4",
+              "options": {},
+              "type": "parent"
+            }
+          ]
+        }
+      ],
+      "suites": [
+        {
+          "id": "r5",
+          "title": "nested suite 1",
+          "root": false,
+          "hooks": [],
+          "tests": [
+            {
+              "id": "r6",
+              "title": "test 1",
+              "state": "pending"
+            },
+            {
+              "id": "r7",
+              "title": "test 2",
+              "state": "active",
+              "commands": [
+                {
+                  "hookId": "r7",
+                  "id": "c1",
+                  "instrument": "command",
+                  "message": "http://localhost:3000",
+                  "name": "visit",
+                  "state": "pending",
+                  "testId": "r7",
+                  "timeout": 4000,
+                  "type": "parent",
+                  "wallClockStartedAt": "2020-01-01T00:00:00.000Z"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

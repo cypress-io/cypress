@@ -98,6 +98,11 @@ module.exports = (Commands, Cypress, cy) => {
         options = arg2
       }
 
+      // jQuery or DOM object is not an option
+      if ($dom.isJquery(options) || $dom.isElement(options)) {
+        options = {}
+      }
+
       const userOptions = options || {}
 
       options = _.defaults({}, userOptions, { log: true })
@@ -119,6 +124,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: getSelector(),
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },

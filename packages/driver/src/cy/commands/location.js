@@ -14,6 +14,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: '',
           timeout: options.timeout,
+          options: userOptions,
         })
       }
 
@@ -41,6 +42,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: '',
           timeout: options.timeout,
+          options: userOptions,
         })
       }
 
@@ -86,6 +88,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: key != null ? key : '',
           timeout: options.timeout,
+          options: userOptions,
         })
       }
 

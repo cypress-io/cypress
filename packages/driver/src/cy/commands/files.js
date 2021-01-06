@@ -24,6 +24,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: file,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },
@@ -99,6 +100,7 @@ module.exports = (Commands, Cypress, cy) => {
         options._log = Cypress.log({
           message: fileName,
           timeout: 0,
+          options: userOptions,
           consoleProps () {
             return consoleProps
           },

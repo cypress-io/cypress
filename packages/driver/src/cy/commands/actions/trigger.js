@@ -70,6 +70,7 @@ module.exports = (Commands, Cypress, cy, state, config) => {
         options._log = Cypress.log({
           $el: subject,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             return {
               'Yielded': subject,

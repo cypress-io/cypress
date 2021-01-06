@@ -57,9 +57,6 @@ module.exports = (Commands, Cypress, cy, state) => {
         axis: 'xy',
       })
 
-      // figure out the options which actually change the behavior of clicks
-      let deltaOptions = $utils.filterOutOptions(options)
-
       // here we want to figure out what has to actually
       // be scrolled to get to this element, cause we need
       // to scrollTo passing in that element.
@@ -85,12 +82,10 @@ module.exports = (Commands, Cypress, cy, state) => {
       }
 
       if (options.log) {
-        deltaOptions = $utils.filterOutOptions(options, { duration: 0, easing: 'swing', offset: { left: 0, top: 0 } })
-
         const log = {
           $el: options.$el,
-          message: deltaOptions,
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             const obj = {
               // merge into consoleProps without mutating it
@@ -302,13 +297,10 @@ module.exports = (Commands, Cypress, cy, state) => {
           messageArgs.push(y)
         }
 
-        if (deltaOptions) {
-          messageArgs.push(deltaOptions)
-        }
-
         const log = {
           message: messageArgs.join(', '),
           timeout: options.timeout,
+          options: userOptions,
           consoleProps () {
             // merge into consoleProps without mutating it
             const obj = {}
