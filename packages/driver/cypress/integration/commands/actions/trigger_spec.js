@@ -366,6 +366,34 @@ describe('src/cy/commands/actions/trigger', () => {
         })
       })
 
+      it('issues event to descendent when waitForAnimations is false', { waitForAnimations: false }, () => {
+        let mouseovers = 0
+
+        const $btn = $('<div>', {
+          id: 'div-covered-in-span',
+        })
+        .css({ padding: 10, margin: 0, border: 'solid 1px #000' })
+        .prependTo(cy.$$('body'))
+
+        const $span = $('<span>span covering div</span>')
+        .css({ padding: 5, display: 'block', backgroundColor: 'yellow' })
+        .appendTo($btn)
+
+        $btn.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        $span.on('mouseover', () => {
+          mouseovers += 1
+        })
+
+        cy
+        .get('#div-covered-in-span').trigger('mouseover')
+        .should(() => {
+          expect(mouseovers).to.eq(2)
+        })
+      })
+
       it('scrolls the window past a fixed position element when being covered', () => {
         $('<button>button covered</button>')
         .attr('id', 'button-covered-in-nav')
