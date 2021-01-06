@@ -3,12 +3,14 @@ import { v4 as uuidv4 } from 'uuid'
 import { Cookies } from './cookies'
 import { Screenshot } from './screenshot'
 
+type NullableMiddlewareHook = (() => void) | undefined
+
 interface IMiddleware {
-  onPush?: () => void
-  onBeforeRequest?: () => void
-  onRequest?: () => void
-  onResponse?: () => void
-  onAfterResponse?: () => void
+  onPush: NullableMiddlewareHook
+  onBeforeRequest: NullableMiddlewareHook
+  onRequest: ((msg: string, data: unknown) => void) | undefined
+  onResponse: NullableMiddlewareHook
+  onAfterResponse: NullableMiddlewareHook
 }
 
 export class Automation {
@@ -27,16 +29,14 @@ export class Automation {
     this.screenshot = new Screenshot(screenshotsFolder)
   }
 
-  reset () {
-    const onPush = this.middleware?.onPush
-
-    this.middleware = {}
-
-    if (onPush) {
-      this.middleware.onPush = onPush
+  reset (): IMiddleware {
+    return {
+      onPush: this.middleware?.onPush,
+      onBeforeRequest: undefined,
+      onRequest: undefined,
+      onResponse: undefined,
+      onAfterResponse: undefined,
     }
-
-    return this.middleware
   }
 
   automationValve (message, fn) {
@@ -123,10 +123,6 @@ export class Automation {
 
   getRequests () {
     return this.requests
-  }
-
-  get (fn) {
-    return this.middleware[fn]
   }
 
   getMiddleware () {
