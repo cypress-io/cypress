@@ -1,7 +1,7 @@
 import screenshots from '../screenshots'
 
 export class Screenshot {
-  constructor (private screenshotsFolder) { }
+  constructor (private screenshotsFolder: string) { }
 
   capture (data, automate) {
     return screenshots.capture(data, automate)
