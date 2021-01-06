@@ -27,7 +27,7 @@ class StudioControls extends Component<StudioControlsProps> {
   _cancel = (e: MouseEvent) => {
     e.preventDefault()
 
-    this.props.events.emit('studio:cancel:reporter:restart')
+    this.props.events.emit('studio:cancel')
   }
 
   _save = (e: MouseEvent) => {

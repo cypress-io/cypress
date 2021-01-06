@@ -218,7 +218,7 @@ const eventManager = {
       studioInit()
     })
 
-    reporterBus.on('studio:cancel:runner:restart', () => {
+    reporterBus.on('studio:cancel', () => {
       studioRecorder.cancel()
       rerun()
     })
@@ -246,8 +246,9 @@ const eventManager = {
       })
     })
 
-    localBus.on('studio:cancel:reporter:restart', () => {
-      reporterBus.emit('studio:cancel:reporter:restart')
+    localBus.on('studio:cancel', () => {
+      studioRecorder.cancel()
+      rerun()
     })
 
     const $window = $(window)
@@ -520,7 +521,7 @@ const eventManager = {
   _restart () {
     return new Promise((resolve) => {
       reporterBus.once('reporter:restarted', resolve)
-      reporterBus.emit('reporter:restart:test:run', studioRecorder.hasRunnableId)
+      reporterBus.emit('reporter:restart:test:run')
     })
   },
 

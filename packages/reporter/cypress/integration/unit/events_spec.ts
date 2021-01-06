@@ -27,6 +27,8 @@ type AppStateStub = AppState & {
   temporarilySetAutoScrolling: SinonSpy
   setFirefoxGcInterval: SinonSpy
   setForcingGc: SinonSpy
+  setStudioActive: SinonSpy
+  setStudioEnabled: SinonSpy
   stop: SinonSpy
 }
 
@@ -40,6 +42,8 @@ const appStateStub = () => {
     temporarilySetAutoScrolling: sinon.spy(),
     setFirefoxGcInterval: sinon.spy(),
     setForcingGc: sinon.spy(),
+    setStudioActive: sinon.spy(),
+    setStudioEnabled: sinon.spy(),
     stop: sinon.spy(),
   } as AppStateStub
 }
@@ -53,6 +57,7 @@ type RunnablesStoreStub = RunnablesStore & {
   setRunnables: SinonSpy
   testById: SinonStub
   updateLog: SinonSpy
+  removeLog: SinonSpy
 }
 
 const runnablesStoreStub = () => {
@@ -65,6 +70,7 @@ const runnablesStoreStub = () => {
     setRunnables: sinon.spy(),
     testById: sinon.stub(),
     updateLog: sinon.spy(),
+    removeLog: sinon.spy(),
   } as RunnablesStoreStub
 }
 
@@ -136,6 +142,11 @@ describe('events', () => {
       expect(runnablesStore.updateLog).to.have.been.calledWith('the updated log')
     })
 
+    it('deletes log on reporter:log:remove', () => {
+      runner.on.withArgs('reporter:log:remove').callArgWith(1, 'the deleted log')
+      expect(runnablesStore.removeLog).to.have.been.calledWith('the deleted log')
+    })
+
     it('resets runnables on reporter:restart:test:run', () => {
       runner.on.withArgs('reporter:restart:test:run').callArgWith(1)
       expect(runnablesStore.reset).to.have.been.called
@@ -190,6 +201,11 @@ describe('events', () => {
       expect(appState.setFirefoxGcInterval).to.have.been.calledWith(111)
     })
 
+    it('sets studioActive on the app state on reporter:start', () => {
+      runner.on.withArgs('reporter:start').callArgWith(1, { studioActive: true })
+      expect(appState.setStudioActive).to.have.been.calledWith(true)
+    })
+
     it('sets forcingGc & firefoxGcInterval on the app state on before:firefox:force:gc', () => {
       runner.on.withArgs('before:firefox:force:gc').callArgWith(1, { gcInterval: 222 })
       expect(appState.setFirefoxGcInterval).to.have.been.calledWith(222)
@@ -202,7 +218,7 @@ describe('events', () => {
       expect(appState.setForcingGc).to.have.been.calledWith(false)
     })
 
-    it('sets initial crollTop on the scroller on reporter:start', () => {
+    it('sets initial scrollTop on the scroller on reporter:start', () => {
       runner.on.withArgs('reporter:start').callArgWith(1, { scrollTop: 123 })
       expect(runnablesStore.setInitialScrollTop).to.have.been.calledWith(123)
     })
@@ -375,6 +391,31 @@ describe('events', () => {
       expect(runner.emit).to.have.been.calledWith('save:state', {
         autoScrollingEnabled: false,
       })
+    })
+
+    it('emits studio:init:test with test id on studio:init:test', () => {
+      events.emit('studio:init:test', 'test id')
+      expect(runner.emit).to.have.been.calledWith('studio:init:test', 'test id')
+    })
+
+    it('emits studio:init:suite with test id on studio:init:suite', () => {
+      events.emit('studio:init:suite', 'suite id')
+      expect(runner.emit).to.have.been.calledWith('studio:init:suite', 'suite id')
+    })
+
+    it('emits studio:remove:command with command id on studio:remove:command', () => {
+      events.emit('studio:remove:command', 'command id')
+      expect(runner.emit).to.have.been.calledWith('studio:remove:command', 'command id')
+    })
+
+    it('emits studio:cancel on studio:cancel', () => {
+      events.emit('studio:cancel')
+      expect(runner.emit).to.have.been.calledWith('studio:cancel')
+    })
+
+    it('emits studio:save on studio:save', () => {
+      events.emit('studio:save')
+      expect(runner.emit).to.have.been.calledWith('studio:save')
     })
   })
 })

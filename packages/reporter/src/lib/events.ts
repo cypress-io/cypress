@@ -1,6 +1,5 @@
 import { EventEmitter } from 'events'
 import { action } from 'mobx'
-import { FileDetails } from '@packages/ui-components'
 import appState, { AppState } from './app-state'
 import runnablesStore, { RunnablesStore, RootRunnable, LogProps } from '../runnables/runnables-store'
 import statsStore, { StatsStore, StatsStoreStartInfo } from '../header/stats-store'
@@ -77,13 +76,10 @@ const events: Events = {
       runnablesStore.removeLog(log)
     }))
 
-    runner.on('reporter:restart:test:run', action('restart:test:run', (studioActive) => {
+    runner.on('reporter:restart:test:run', action('restart:test:run', () => {
       appState.reset()
       runnablesStore.reset()
       statsStore.reset()
-
-      appState.setStudioActive(studioActive)
-
       runner.emit('reporter:restarted')
     }))
 
@@ -148,14 +144,6 @@ const events: Events = {
       appState.setForcingGc(false)
       appState.setFirefoxGcInterval(gcInterval)
     }))
-
-    runner.on('studio:cancel', () => {
-      appState.setStudioActive(false)
-    })
-
-    runner.on('studio:cancel:reporter:restart', () => {
-      localBus.emit('studio:cancel:reporter:restart')
-    })
 
     localBus.on('resume', action('resume', () => {
       appState.resume()
@@ -239,20 +227,16 @@ const events: Events = {
       runner.emit('studio:init:suite', suiteId)
     })
 
-    localBus.on('studio:cancel:reporter:restart', action('studio:cancel:reporter:restart', () => {
-      appState.setStudioActive(false)
-      runner.emit('studio:cancel:runner:restart')
-    }))
-
     localBus.on('studio:remove:command', (commandId) => {
       runner.emit('studio:remove:command', commandId)
     })
 
-    localBus.on('studio:save', (fileDetails: FileDetails, closeStudio: boolean) => {
-      runner.emit('studio:save', {
-        fileDetails,
-        closeStudio,
-      })
+    localBus.on('studio:cancel', () => {
+      runner.emit('studio:cancel')
+    })
+
+    localBus.on('studio:save', () => {
+      runner.emit('studio:save')
     })
   },
 
