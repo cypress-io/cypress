@@ -1,7 +1,7 @@
 const { expect } = require('../spec_helper')
 
 const EE = require('events')
-const { Server } = require('../../lib/server')
+const Server = require('../../lib/server')
 
 describe('lib/server', () => {
   beforeEach(function () {
