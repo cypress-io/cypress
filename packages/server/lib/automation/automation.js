@@ -1,48 +1,51 @@
-import Bluebird from 'bluebird'
-import { v4 as uuidv4 } from 'uuid'
-import { Cookies } from './cookies'
-import { screenshot } from './screenshot'
-
-type NullableMiddlewareHook = (() => void) | null
-
-interface IMiddleware {
-  onPush: NullableMiddlewareHook
-  onBeforeRequest: NullableMiddlewareHook
-  onRequest: ((msg: string, data: unknown) => void) | null
-  onResponse: NullableMiddlewareHook
-  onAfterResponse: NullableMiddlewareHook
+'use strict'
+let __importDefault = (this && this.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { 'default': mod }
 }
 
-export class Automation {
-  private requests: Record<number, (any) => void>
-  private middleware: IMiddleware
-  private cookies: Cookies
-  private screenshot: { capture: (data: any, automate: any) => any }
+Object.defineProperty(exports, '__esModule', { value: true })
+const bluebird_1 = __importDefault(require('bluebird'))
+const uuid_1 = require('uuid')
+const cookies_1 = require('./cookies')
+const screenshot_1 = require('./screenshot')
 
-  constructor (cyNamespace: string, cookieNamespace: string, screenshotsFolder: string) {
+class Automation {
+  constructor (cyNamespace, cookieNamespace, screenshotsFolder) {
+    this.initializeMiddleware = () => {
+      let _a
+
+      return {
+        onPush: ((_a = this.middleware) === null || _a === void 0 ? void 0 : _a.onPush) || null,
+        onBeforeRequest: null,
+        onRequest: null,
+        onResponse: null,
+        onAfterResponse: null,
+      }
+    }
+
+    this.response = (id, resp) => {
+      const request = this.requests[id]
+
+      if (request) {
+        delete request[id]
+
+        return request(resp)
+      }
+    }
+
+    this.get = (fn) => {
+      return this.middleware[fn]
+    }
+
     this.requests = {}
-
     // set the middleware
     this.middleware = this.initializeMiddleware()
-
-    this.cookies = new Cookies(cyNamespace, cookieNamespace)
-    this.screenshot = screenshot(screenshotsFolder)
+    this.cookies = new cookies_1.Cookies(cyNamespace, cookieNamespace)
+    this.screenshot = screenshot_1.screenshot(screenshotsFolder)
   }
-
-  initializeMiddleware = (): IMiddleware => {
-    return {
-      onPush: this.middleware?.onPush || null,
-      onBeforeRequest: null,
-      onRequest: null,
-      onResponse: null,
-      onAfterResponse: null,
-    }
-  }
-
   reset () {
     this.middleware = this.initializeMiddleware()
   }
-
   automationValve (message, fn) {
     return (msg, data) => {
       // enable us to omit message
@@ -64,10 +67,9 @@ export class Automation {
       return this.requestAutomationResponse(msg, data, fn)
     }
   }
-
   requestAutomationResponse (message, data, fn) {
-    return new Bluebird((resolve, reject) => {
-      const id = uuidv4()
+    return new bluebird_1.default((resolve, reject) => {
+      const id = uuid_1.v4()
 
       this.requests[id] = function (obj) {
         // normalize the error from automation responses
@@ -90,20 +92,17 @@ export class Automation {
       return fn(message, data, id)
     })
   }
-
   invokeAsync (fn, ...args) {
-    return Bluebird
+    return bluebird_1.default
     .try(() => {
       fn = this.get(fn)
-
       if (fn) {
         return fn(...args)
       }
     })
   }
-
-  normalize (message, data, automate?) {
-    return Bluebird.try(() => {
+  normalize (message, data, automate) {
+    return bluebird_1.default.try(() => {
       switch (message) {
         case 'take:screenshot':
           return this.screenshot.capture(data, automate)
@@ -124,23 +123,16 @@ export class Automation {
       }
     })
   }
-
   getRequests () {
     return this.requests
   }
-
   getMiddleware () {
     return this.middleware
   }
-
-  use (middlewares: IMiddleware) {
-    return this.middleware = {
-      ...this.middleware,
-      ...middlewares,
-    }
+  use (middlewares) {
+    return this.middleware = Object.assign(Object.assign({}, this.middleware), middlewares)
   }
-
-  push (message: string, data: unknown) {
+  push (message, data) {
     return this.normalize(message, data)
     .then((data) => {
       if (data) {
@@ -148,7 +140,6 @@ export class Automation {
       }
     })
   }
-
   request (message, data, fn) {
     // curry in the message + callback function
     // for obtaining the external automation data
@@ -163,18 +154,5 @@ export class Automation {
       return this.invokeAsync('onAfterResponse', message, data, resp)
     })
   }
-
-  response = (id, resp) => {
-    const request = this.requests[id]
-
-    if (request) {
-      delete request[id]
-
-      return request(resp)
-    }
-  }
-
-  get = (fn: keyof IMiddleware) => {
-    return this.middleware[fn]
-  }
 }
+exports.Automation = Automation

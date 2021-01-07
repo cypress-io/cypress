@@ -1,6 +1,6 @@
 import screenshots from '../screenshots'
 
-export const screenshot = (screenshotsFolder: string) => {
+export function screenshot (screenshotsFolder: string) {
   return {
     capture (data, automate) {
       return screenshots.capture(data, automate)
