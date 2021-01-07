@@ -8,7 +8,7 @@ jobs:
   issue-reply:
     runs-on: ubuntu-latest
     steps:
-      - name: help wanted
+      - name: needs information
         if: github.event.label.name == 'stage: needs information'
         uses: actions-cool/issues-helper@v1.8
         with:
