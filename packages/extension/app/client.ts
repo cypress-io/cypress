@@ -4,7 +4,6 @@ export const connect = (host, path, extraOpts = {}) => {
   return client(host, {
     path,
     transports: ['websocket'],
-    // parser: circularParser,
     ...extraOpts,
   })
 }

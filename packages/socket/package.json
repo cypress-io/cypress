@@ -14,7 +14,6 @@
   },
   "dependencies": {
     "socket.io": "3.0.4",
-    "socket.io-circular-parser": "cypress-io/socket.io-circular-parser#unpatched-has-binary-2",
     "socket.io-client": "3.0.4"
   },
   "devDependencies": {
@@ -29,7 +28,8 @@
   ],
   "workspaces": {
     "nohoist": [
-      "**"
+      "socket.io",
+      "socket.io-client"
     ]
   }
 }

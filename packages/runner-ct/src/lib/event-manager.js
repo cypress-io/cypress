@@ -13,7 +13,6 @@ import $Cypress, { $ } from '@packages/driver'
 const ws = client.connect({
   path: '/__socket.io',
   transports: ['websocket'],
-  // parser: circularParser,
 })
 
 ws.on('connect', () => {
