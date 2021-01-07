@@ -9,8 +9,8 @@
     "postinstall": "patch-package",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
-    "test-watch": "cross-env NODE_ENV=test mocha --watch"
+    "test-unit": "cross-env NODE_ENV=test TS_NODE_PROJECT=../ts/tsconfig.json ts-mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-watch": "cross-env NODE_ENV=test TS_NODE_PROJECT=../ts/tsconfig.json ts-mocha --watch"
   },
   "dependencies": {
     "socket.io": "3.0.4",
