@@ -454,7 +454,9 @@ export class ServerE2E extends ServerBase<SocketE2E> {
       return runPhase(() => {
         return request.sendStream(headers, automationRequest, options)
         .then((createReqStream) => {
-          return onReqStreamReady(createReqStream())
+          const stream = createReqStream()
+
+          return onReqStreamReady(stream)
         }).catch(onReqError)
       })
     }))

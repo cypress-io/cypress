@@ -180,7 +180,7 @@ describe('Server', () => {
       })
 
       it('buffers the response', function () {
-        sinon.spy(this.server._request, 'sendStream')
+        sinon.spy(this.server.request, 'sendStream')
 
         return this.server._onResolveUrl('/index.html', {}, this.automationRequest)
         .then((obj = {}) => {
@@ -214,7 +214,7 @@ describe('Server', () => {
               cookies: [],
             })
 
-            expect(this.server._request.sendStream).to.be.calledTwice
+            expect(this.server.request.sendStream).to.be.calledTwice
           })
         }).then(() => {
           return this.rp('http://localhost:2000/index.html')
@@ -589,7 +589,7 @@ describe('Server', () => {
       })
 
       it('buffers the http response', function () {
-        sinon.spy(this.server._request, 'sendStream')
+        sinon.spy(this.server.request, 'sendStream')
 
         nock('http://espn.com')
         .get('/')
@@ -646,7 +646,7 @@ describe('Server', () => {
               ],
             })
 
-            expect(this.server._request.sendStream).to.be.calledTwice
+            expect(this.server.request.sendStream).to.be.calledTwice
           })
         }).then(() => {
           return this.rp('http://espn.go.com/')
@@ -662,7 +662,7 @@ describe('Server', () => {
       })
 
       it('does not buffer \'bad\' responses', function () {
-        sinon.spy(this.server._request, 'sendStream')
+        sinon.spy(this.server.request, 'sendStream')
 
         nock('http://espn.com')
         .get('/')
@@ -713,7 +713,7 @@ describe('Server', () => {
               ],
             })
 
-            expect(this.server._request.sendStream).to.be.calledTwice
+            expect(this.server.request.sendStream).to.be.calledTwice
           })
         })
       })
