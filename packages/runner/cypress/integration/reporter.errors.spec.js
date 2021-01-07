@@ -595,4 +595,11 @@ describe('errors ui', () => {
       method: 'cy.expect',
     })
   })
+
+  verify.it.only('uncaught error during onRunnable w/ onlySuite', {
+    file: 'uncaught_onRunnable_spec.js',
+    message: 'my error',
+    codeFrameText: `my error`,
+    column: 7,
+  })
 })
