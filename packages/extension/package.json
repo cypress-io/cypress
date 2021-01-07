@@ -11,7 +11,7 @@
     "postinstall": "echo '@packages/extension needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "cross-env NODE_ENV=test mocha --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
+    "test-unit": "cross-env NODE_ENV=test mocha -r @packages/ts/register --reporter mocha-multi-reporters --reporter-options configFile=../../mocha-reporter-config.json",
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
