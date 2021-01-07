@@ -191,7 +191,7 @@ const $chaiJquery = (chai, chaiUtils, callbacks = {}) => {
 
     // some elements return a number for the .value property
     // in this case, we don't want to cast the expected value to a string
-    if (!$elements.isValueNumberTypeElement($el[0])) {
+    if ($el[0] && !$elements.isValueNumberTypeElement($el[0])) {
       value = maybeCastNumberToString(value)
     }
 
