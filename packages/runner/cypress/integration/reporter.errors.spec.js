@@ -596,7 +596,7 @@ describe('errors ui', () => {
     })
   })
 
-  verify.it.only('uncaught error during onRunnable w/ onlySuite', {
+  verify.it('uncaught error during onRunnable w/ onlySuite', {
     file: 'uncaught_onRunnable_spec.js',
     message: 'my error',
     codeFrameText: `my error`,
