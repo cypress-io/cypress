@@ -12,7 +12,7 @@
     "postinstall": "echo '@packages/runner needs: yarn build'",
     "test": "yarn test-unit",
     "test-debug": "yarn test-unit --inspect-brk=5566",
-    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.*",
+    "test-unit": "mocha --config test/.mocharc.json src/**/*.spec.* --exit",
     "test-watch": "yarn test-unit --watch",
     "watch": "webpack --watch --progress"
   },
