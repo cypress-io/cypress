@@ -82,7 +82,12 @@ describe('Server', () => {
             (this.server = new ServerE2E()),
 
             this.server.open(cfg)
-            .spread((port) => {
+            .spread(async (port) => {
+              const automationStub = {
+                use: () => { },
+              }
+
+              await this.server.startWebsockets(automationStub, config, {})
               if (initialUrl) {
                 this.server._onDomainSet(initialUrl)
               }

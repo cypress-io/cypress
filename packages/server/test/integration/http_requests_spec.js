@@ -1,4 +1,4 @@
-require('../spec_helper')
+('../spec_helper')
 
 const _ = require('lodash')
 let r = require('@cypress/request')
@@ -132,7 +132,13 @@ describe('Routes', () => {
             (this.server = new ServerE2E(new Watchers())),
 
             this.server.open(cfg, this.project)
-            .spread((port) => {
+            .spread(async (port) => {
+              const automationStub = {
+                use: () => { },
+              }
+
+              await this.server.startWebsockets(automationStub, config, {})
+
               if (initialUrl) {
                 this.server._onDomainSet(initialUrl)
               }
