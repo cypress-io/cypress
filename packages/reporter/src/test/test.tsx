@@ -40,12 +40,10 @@ class StudioControls extends Component<StudioControlsProps> {
     const { studioIsNotEmpty } = this.props.model
 
     return (
-      <>
-        <div className='studio-controls'>
-          <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
-          <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
-        </div>
-      </>
+      <div className='studio-controls'>
+        <button className='studio-cancel' onClick={this._cancel}>Cancel</button>
+        <button className='studio-save' disabled={!studioIsNotEmpty} onClick={this._save}>Save Commands</button>
+      </div>
     )
   }
 }

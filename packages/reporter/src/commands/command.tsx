@@ -319,7 +319,10 @@ class Command extends Component<Props> {
     }
   }
 
-  _removeStudioCommand = () => {
+  _removeStudioCommand = (e: MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
     const { model, events } = this.props
 
     if (!model.isStudio) return
