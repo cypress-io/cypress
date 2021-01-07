@@ -28,7 +28,8 @@
   ],
   "workspaces": {
     "nohoist": [
-      "**"
+      "socket.io",
+      "socket.io-client"
     ]
   }
 }
