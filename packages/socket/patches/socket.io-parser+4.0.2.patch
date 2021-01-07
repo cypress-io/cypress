@@ -16,7 +16,7 @@ index a908023..2612470 100644
      const pack = packet;
 -    pack.data = _deconstructPacket(packetData, buffers);
 +    pack.data = CircularJSON.stringify(packetData, function(_, data) {
-+        var isDataBuf = is_binary_1(data)
++        var isDataBuf = is_binary_1.isBinary(data)
 +
 +        if (isDataBuf || (data && typeof data === 'object' && Object.keys(data).length === 2 && data.type === 'Buffer' && data.data)) {
 +            var placeholder = { _placeholder: true, num: buffers.length };
@@ -68,7 +68,7 @@ index a908023..2612470 100644
 +        if (data && data._placeholder) {
 +          return buffers[data.num]
 +        }
-+    
++
 +        return data
 +    })
      packet.attachments = undefined; // no longer useful
