@@ -5,12 +5,7 @@ import { mount } from '@cypress/react'
 
 // looking at the clock control from component's hook
 // https://github.com/bahmutov/cypress-react-unit-test/issues/200
-it('should select null after timing out (fast)', {
-  retries: {
-    runMode: 2,
-    openMode: 2,
-  },
-}, () => {
+it('should select null after timing out (fast)', () => {
   const onSelect = cy.stub()
 
   // https://on.cypress.io/clock
@@ -46,7 +41,7 @@ it('should select null after timing out (fast)', {
   })
 
   cy.log('5 seconds passed')
-  cy.tick(6000).then(() => {
+  cy.tick(6000).should(() => {
     // NOW
     expect(onSelect).to.have.been.calledWith(null)
   })
