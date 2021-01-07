@@ -11429,11 +11429,6 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-circular-json@0.5.9:
-  version "0.5.9"
-  resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.5.9.tgz#932763ae88f4f7dead7a0d09c8a51a4743a53b1d"
-  integrity sha512-4ivwqHpIFJZBuhN3g/pEcdbnGUywkBblloGbkglyloVjjR3uT6tieI89MVOfbP2tHX5sgb01FuLgAOzebNlJNQ==
-
 circular-json@^0.3.1:
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/circular-json/-/circular-json-0.3.3.tgz#815c99ea84f6809529d2f45791bdf82711352d66"
@@ -31126,15 +31121,6 @@ socket.io-adapter@~2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/socket.io-adapter/-/socket.io-adapter-2.0.3.tgz#372b7cde7a535fc4f4f0d5ac7f73952a3062d438"
   integrity sha512-2wo4EXgxOGSFueqvHAdnmi5JLZzWqMArjuP4nqC26AtLh5PoCPsaRbRdah2xhcwTAMooZfjYiNVNkkmmSMaxOQ==
-
-socket.io-circular-parser@cypress-io/socket.io-circular-parser#unpatched-has-binary-2:
-  version "3.1.2-patch1"
-  resolved "https://codeload.github.com/cypress-io/socket.io-circular-parser/tar.gz/e274585ec04d1840fd1211dd3061d6dba2160475"
-  dependencies:
-    circular-json "0.5.9"
-    component-emitter "1.2.1"
-    debug "~4.1.0"
-    has-binary2 "~1.0.2"
 
 socket.io-client@2.3.0:
   version "2.3.0"
