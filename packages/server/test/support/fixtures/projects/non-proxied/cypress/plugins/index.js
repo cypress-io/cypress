@@ -12,7 +12,6 @@ module.exports = (on) => {
       const wsClient = socketIo.client(proxyUrl, {
         path: socketIoRoute,
         transports: ['websocket'],
-        // parser: socketIo.circularParser,
       })
 
       return new Promise((resolve, reject) => {
@@ -34,7 +33,6 @@ module.exports = (on) => {
         agent,
         path: socketIoRoute,
         transports: ['websocket'],
-        // parser: socketIo.circularParser,
       })
 
       return new Promise((resolve, reject) => {

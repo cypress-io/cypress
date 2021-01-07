@@ -30,7 +30,6 @@ class SocketIOServer extends SocketIOBaseServer {
 export {
   client,
   server,
-  // circularParser,
   SocketIOServer,
 }
 

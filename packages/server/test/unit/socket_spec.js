@@ -69,7 +69,6 @@ describe('lib/socket', () => {
           agent: this.agent,
           path: socketIoRoute,
           transports: ['websocket'],
-          parser: socketIo.circularParser,
         })
       })
     })
@@ -79,7 +78,7 @@ describe('lib/socket', () => {
     })
 
     // https://github.com/cypress-io/cypress/issues/4346
-    xit('can emit a circular object without crashing', function (done) {
+    it('can emit a circular object without crashing', function (done) {
       const foo = {
         bar: {},
       }

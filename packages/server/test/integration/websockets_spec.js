@@ -219,7 +219,6 @@ describe('Web Sockets', () => {
             agent,
             path: this.cfg.socketIoRoute,
             transports: ['websocket'],
-            parser: socketIo.circularParser,
             rejectUnauthorized: false,
           })
 
@@ -254,7 +253,6 @@ describe('Web Sockets', () => {
           this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
             path: this.cfg.socketIoRoute,
             transports: ['websocket'],
-            parser: socketIo.circularParser,
             rejectUnauthorized: false,
             reconnection: false,
           })
@@ -272,7 +270,6 @@ describe('Web Sockets', () => {
           this.wsClient = socketIo.client(wsUrl || this.cfg.proxyUrl, {
             path: this.cfg.socketIoRoute,
             transports: ['polling'],
-            parser: socketIo.circularParser,
             rejectUnauthorized: false,
             reconnection: false,
           })
