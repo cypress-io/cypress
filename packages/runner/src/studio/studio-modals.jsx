@@ -27,7 +27,7 @@ const StudioInitModal = observer(() => {
         <div className='gif'>
           <img src={require('../../static/studio.gif')} alt='Studio' />
         </div>
-        <div className='center'>
+        <div className='content center'>
           <div className='text'>
             Generate Cypress commands by interacting with your site on the right. Then, save these commands directly to your test file.
           </div>
