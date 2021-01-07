@@ -9,7 +9,7 @@ const socketIo = require(`${root}../socket`)
 const httpsServer = require(`${root}../https-proxy/test/helpers/https_server`)
 const config = require(`${root}lib/config`)
 const { ServerE2E } = require(`${root}lib/server-e2e`)
-const Automation = require(`${root}lib/automation`)
+const { Automation } = require(`${root}lib/automation`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 
 const cyPort = 12345
@@ -33,7 +33,13 @@ describe('Web Sockets', () => {
       this.server = new ServerE2E()
 
       return this.server.open(this.cfg)
-      .then(() => {
+      .then(async () => {
+        const automationStub = {
+          use: () => { },
+        }
+
+        await this.server.startWebsockets(automationStub, config, {})
+
         return httpsServer.start(wssPort)
       }).then((httpsSrv) => {
         this.wss = new ws.Server({ server: httpsSrv })
@@ -200,7 +206,7 @@ describe('Web Sockets', () => {
 
   context('socket.io handling', () => {
     beforeEach(function () {
-      this.automation = Automation.create(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
+      this.automation = new Automation(this.cfg.namespace, this.cfg.socketIoCookie, this.cfg.screenshotsFolder)
 
       return this.server.startWebsockets(this.automation, this.cfg, {})
     })
