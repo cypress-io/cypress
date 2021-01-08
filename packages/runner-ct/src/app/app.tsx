@@ -17,11 +17,18 @@ import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 
+// Cypress.ConfigOptions only appears to have internal options.
+// TODO: figure out where the "source of truth" should be for
+// an internal options interface.
+export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
+  projectName: string
+}
+
 interface AppProps {
   state: State;
   // eslint-disable-next-line
   eventManager: typeof EventManager
-  config: Cypress.ConfigOptions
+  config: ExtendedConfigOptions
 }
 
 const App: React.FC<AppProps> = observer(

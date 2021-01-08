@@ -1,9 +1,15 @@
 import { expect } from 'chai'
 import { makeSpecHierarchy, SpecFolderOrSpecFile } from './make-spec-hierarchy'
 
+const baseVals: Cypress.Cypress['spec'] = {
+  absolute: '/',
+  relative: '/',
+  name: '',
+}
+
 const files = [
-  { name: 'forOfStatement.js' },
-  { name: 'foo/y/bar.js' },
+  { ...baseVals, name: 'forOfStatement.js' },
+  { ...baseVals, name: 'foo/y/bar.js' },
 ]
 
 describe('makeSpecHierarchy', () => {
@@ -12,6 +18,7 @@ describe('makeSpecHierarchy', () => {
 
     const expected: SpecFolderOrSpecFile[] = [
       {
+        ...baseVals,
         name: 'forOfStatement.js',
         shortName: 'forOfStatement.js',
         type: 'file',
@@ -25,6 +32,7 @@ describe('makeSpecHierarchy', () => {
             type: 'folder',
             specs: [
               {
+                ...baseVals,
                 shortName: 'bar.js',
                 name: 'foo/y/bar.js',
                 type: 'file',

@@ -3,10 +3,11 @@ import { observer } from 'mobx-react'
 import State from '../lib/state'
 import { makeSpecHierarchy } from './make-spec-hierarchy'
 import { SpecItem } from './spec-item'
+import { ExtendedConfigOptions } from '../app/app'
 
 interface SpecsListProps {
   state: State
-  config: Cypress.ConfigOptions
+  config: ExtendedConfigOptions
 }
 
 export const SpecsList: React.FC<SpecsListProps> = observer(
@@ -17,9 +18,7 @@ export const SpecsList: React.FC<SpecsListProps> = observer(
       <div className="specs-list">
         <header>
           <h1>
-            { // @ts-expect-error config.project name is not typed
-              config.projectName ?? document.title ?? 'Cypress'
-            }
+            {config.projectName ?? document.title ?? 'Cypress'}
           </h1>
 
         </header>
