@@ -33,7 +33,7 @@ export default class Header extends Component {
         <div className='sel-url-wrap'>
           <Tooltip
             title='Open Selector Playground'
-            visible={selectorPlaygroundModel.isOpen || studioRecorder.isActive ? false : null}
+            visible={selectorPlaygroundModel.isOpen || studioRecorder.isOpen ? false : null}
             wrapperClassName='selector-playground-toggle-tooltip-wrapper'
             className='cy-tooltip'
           >
@@ -41,7 +41,7 @@ export default class Header extends Component {
               aria-label='Open Selector Playground'
               className='header-button selector-playground-toggle'
               onClick={this._togglePlaygroundOpen}
-              disabled={state.isLoading || state.isRunning || studioRecorder.isActive}
+              disabled={state.isLoading || state.isRunning || studioRecorder.isOpen}
             >
               <i aria-hidden="true" className='fas fa-crosshairs' />
             </button>

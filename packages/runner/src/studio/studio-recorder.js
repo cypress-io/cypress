@@ -34,17 +34,14 @@ export class StudioRecorder {
   @observable _hasStarted = false
 
   fileDetails = null
+  _currentId = 1
 
   @computed get hasRunnableId () {
     return !!this.testId || !!this.suiteId
   }
 
-  @computed get isFinished () {
-    return this._hasStarted && !this.isActive
-  }
-
   @computed get isOpen () {
-    return this.isActive || this.isLoading || this.isFinished
+    return this.isActive || this.isLoading || this._hasStarted
   }
 
   @computed get isEmpty () {
@@ -74,22 +71,14 @@ export class StudioRecorder {
     this.testId = testId
   }
 
-  @action clearTestId = () => {
+  @action setSuiteId = (suiteId) => {
+    this.suiteId = suiteId
     this.testId = null
   }
 
-  @action setSuiteId = (suiteId) => {
-    this.clearTestId()
-    this.suiteId = suiteId
-  }
-
-  @action clearSuiteId = () => {
-    this.suiteId = null
-  }
-
   @action clearRunnableIds = () => {
-    this.clearTestId()
-    this.clearSuiteId()
+    this.testId = null
+    this.suiteId = null
   }
 
   @action showInitModal = () => {
@@ -153,16 +142,11 @@ export class StudioRecorder {
   }
 
   @action cancel = () => {
-    this.stop()
+    this.reset()
     this.clearRunnableIds()
-
-    this.url = null
-    this._hasStarted = false
   }
 
   @action startSave = () => {
-    this.stop()
-
     if (this.suiteId) {
       this.showSaveModal()
     } else {
@@ -172,6 +156,7 @@ export class StudioRecorder {
 
   @action save = (testName = null) => {
     this.closeSaveModal()
+    this.stop()
 
     eventManager.emit('studio:save', {
       fileDetails: this.fileDetails,
@@ -337,7 +322,6 @@ export class StudioRecorder {
     }
 
     const Cypress = eventManager.getCypress()
-
     const selector = Cypress.SelectorPlayground.getSelector($el)
 
     const name = this._getName(event, $el)
@@ -431,7 +415,7 @@ export class StudioRecorder {
     const { length } = this.logs
 
     if (!length) {
-      return
+      return null
     }
 
     const lastLog = this.logs[length - 1]
@@ -443,6 +427,8 @@ export class StudioRecorder {
         return lastLog
       }
 
+      // for select events we'll get both a click and select event
+      // and the click event always comes first
       if (name === 'select' && lastLog.name === 'click') {
         lastLog.name = 'select'
         lastLog.message = message

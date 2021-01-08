@@ -109,11 +109,11 @@ describe('<Header />', () => {
   })
 
   describe('viewport info', () => {
-    it('has open class on button click', () => {
+    it('has menu-open class on button click', () => {
       const component = shallow(<Header {...propsWithState()} />)
 
       component.find('.viewport-info button').simulate('click')
-      expect(component.find('.viewport-info')).to.have.className('open')
+      expect(component.find('.viewport-info')).to.have.className('menu-open')
     })
 
     it('displays width, height, and display scale', () => {
