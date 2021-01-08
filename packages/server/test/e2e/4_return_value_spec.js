@@ -5,7 +5,7 @@ describe('e2e return value', () => {
 
   it('failing1', function () {
     return e2e.exec(this, {
-      spec: 'return_value_spec.coffee',
+      spec: 'return_value_spec.js',
       snapshot: true,
       expectedExitCode: 3,
     })

@@ -7,14 +7,14 @@ exports['e2e page_loading / passes'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (page_loading_spec.coffee)                                                 │
-  │ Searched:   cypress/integration/page_loading_spec.coffee                                       │
+  │ Specs:      1 found (page_loading_spec.js)                                                     │
+  │ Searched:   cypress/integration/page_loading_spec.js                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  page_loading_spec.coffee                                                        (1 of 1)
+  Running:  page_loading_spec.js                                                            (1 of 1)
 
 
   page_loading
@@ -37,14 +37,14 @@ exports['e2e page_loading / passes'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     page_loading_spec.coffee                                                         │
+  │ Spec Ran:     page_loading_spec.js                                                             │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/page_loading_spec.coffee.mp4        (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/page_loading_spec.js.mp4            (X second)
 
 
 ====================================================================================================
@@ -54,7 +54,7 @@ exports['e2e page_loading / passes'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  page_loading_spec.coffee                 XX:XX        2        2        -        -        - │
+  │ ✔  page_loading_spec.js                     XX:XX        2        2        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        2        2        -        -        -  
 

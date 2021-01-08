@@ -7,14 +7,14 @@ exports['e2e stdout displays errors from failures 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_failing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/stdout_failing_spec.coffee                                     │
+  │ Specs:      1 found (stdout_failing_spec.js)                                                   │
+  │ Searched:   cypress/integration/stdout_failing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_failing_spec.coffee                                                      (1 of 1)
+  Running:  stdout_failing_spec.js                                                          (1 of 1)
 
 
   stdout_failing_spec
@@ -83,24 +83,24 @@ The internal Cypress web server responded with:
   │ Screenshots:  3                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     stdout_failing_spec.coffee                                                       │
+  │ Spec Ran:     stdout_failing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
-     -- fails (failed).png                                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
-     -- failing hook -- is failing -- before each hook (failed).png                                 
-  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.coffee/stdout_failing_spec      (1280x720)
-     -- passing hook -- is failing (failed).png                                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- f     (1280x720)
+     ails (failed).png                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- f     (1280x720)
+     ailing hook -- is failing -- before each hook (failed).png                                     
+  -  /XXX/XXX/XXX/cypress/screenshots/stdout_failing_spec.js/stdout_failing_spec -- p     (1280x720)
+     assing hook -- is failing (failed).png                                                         
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_failing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -110,7 +110,7 @@ The internal Cypress web server responded with:
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  stdout_failing_spec.coffee               XX:XX        5        2        3        -        - │
+  │ ✖  stdout_failing_spec.js                   XX:XX        5        2        3        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✖  1 of 1 failed (100%)                     XX:XX        5        2        3        -        -  
 
@@ -202,14 +202,14 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (stdout_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/stdout_passing_spec.coffee                                     │
+  │ Specs:      1 found (stdout_passing_spec.js)                                                   │
+  │ Searched:   cypress/integration/stdout_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  stdout_passing_spec.coffee                                                      (1 of 1)
+  Running:  stdout_passing_spec.js                                                          (1 of 1)
 
 
   stdout_passing_spec
@@ -241,14 +241,14 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     stdout_passing_spec.coffee                                                       │
+  │ Spec Ran:     stdout_passing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/stdout_passing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -258,7 +258,7 @@ exports['e2e stdout does not duplicate suites or tests between visits 1'] = `
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  stdout_passing_spec.coffee               XX:XX        8        8        -        -        - │
+  │ ✔  stdout_passing_spec.js                   XX:XX        8        8        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        8        8        -        -        -  
 
