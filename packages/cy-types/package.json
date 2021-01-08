@@ -1,0 +1,9 @@
+{
+  "name": "@packages/cy-types",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "dependencies": {},
+  "devDependencies": {},
+  "types": "./src/index.ts"
+}

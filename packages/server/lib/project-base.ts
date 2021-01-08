@@ -9,6 +9,7 @@ import _ from 'lodash'
 import path from 'path'
 import R from 'ramda'
 import commitInfo from '@cypress/commit-info'
+import { CypressSpec } from '@packages/cy-types'
 import { RunnablesStore } from '@packages/reporter'
 import { ServerCt } from '@packages/server-ct'
 import api from './api'
@@ -54,7 +55,7 @@ export class ProjectBase<TServer extends ServerE2E | ServerCt> extends EE {
   protected projectRoot: string
   protected watchers: Watchers
   protected options?: Record<string, any>
-  protected spec: Cypress.Cypress['spec'] | null
+  protected spec: CypressSpec | null
   protected _cfg?: Cfg
   protected _server?: TServer
   protected _automation?: Automation
