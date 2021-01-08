@@ -6398,6 +6398,11 @@
   resolved "https://registry.yarnpkg.com/@types/sizzle/-/sizzle-2.3.2.tgz#a811b8c18e2babab7d542b3365887ae2e4d9de47"
   integrity sha512-7EJYyKTL7tFR8+gDbB6Wwz/arpGa0Mywk1TJbNzKzHtzbwVmY4HR9WqS5VV7dsBUKQmPNr192jHr/VpBluj/hg==
 
+"@types/sockjs-client@1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@types/sockjs-client/-/sockjs-client-1.1.0.tgz#978e7ae2a0a54af366c2cb0cdb73fdbf0d7a9c8f"
+  integrity sha512-F3gD7AakaPGzzdTmvN8HYxlNL+vTnMykYSUoukRTRGUntH4lwjxG5wx3ZwdYBTA3sTo4duxHY+rRZMbIEBxhRQ==
+
 "@types/source-list-map@*":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@types/source-list-map/-/source-list-map-0.1.2.tgz#0078836063ffaf17412349bba364087e0ac02ec9"
