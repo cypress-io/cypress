@@ -46,6 +46,8 @@ const addSyncFileSystemWarnings = (fs) => {
 
 addSyncFileSystemWarnings(fs)
 
-const promisifiedFs = Promise.promisifyAll(fs)
+const promisifiedFs = Promise.promisifyAll(fs) as PromisifiedFsExtra & typeof fs
 
-export default promisifiedFs as PromisifiedFsExtra & typeof fs
+export = {
+  fs: promisifiedFs,
+}

@@ -2,7 +2,7 @@ import Debug from 'debug'
 import path from 'path'
 import preprocessor from './plugins/preprocessor'
 import { SocketBase } from './socket-base'
-import fs from './util/fs'
+import { fs } from './util/fs'
 import { DestroyableHttpServer } from './util/server_destroy'
 
 const debug = Debug('cypress:server:socket-e2e')
