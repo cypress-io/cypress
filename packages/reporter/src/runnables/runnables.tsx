@@ -38,14 +38,14 @@ const RunnablesList = observer(({ runnables }: RunnablesListProps) => (
   </div>
 ))
 
-interface RunnablesContentProps {
+export interface RunnablesContentProps {
   runnablesStore: RunnablesStore
   specPath: string
   error?: RunnablesErrorModel
 }
 
 const RunnablesContent = observer(({ runnablesStore, specPath, error }: RunnablesContentProps) => {
-  const { isReady, runnables } = runnablesStore
+  const { isReady, runnables, runnablesHistory } = runnablesStore
 
   if (!isReady) {
     return <Loading />
@@ -57,10 +57,16 @@ const RunnablesContent = observer(({ runnablesStore, specPath, error }: Runnable
     error = noTestsError(specPath)
   }
 
-  return error ? <RunnablesError error={error} /> : <RunnablesList runnables={runnables} />
+  if (error) {
+    return <RunnablesError error={error} />
+  }
+
+  const isRunning = specPath === runnablesStore.runningSpec
+
+  return <RunnablesList runnables={isRunning ? runnables : runnablesHistory[specPath]} />
 })
 
-interface RunnablesProps {
+export interface RunnablesProps {
   error?: RunnablesErrorModel
   runnablesStore: RunnablesStore
   spec: Cypress.Cypress['spec']

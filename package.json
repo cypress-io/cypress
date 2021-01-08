@@ -47,6 +47,8 @@
     "set-next-ci-version": "node ./scripts/binary.js setNextVersion",
     "prestart": "yarn ensure-deps",
     "start": "node $(yarn bin cypress) open --dev --global",
+    "stop-only": "npx stop-only --skip .cy,.publish,.projects,node_modules,dist,dist-test,fixtures,lib,bower_components,src --exclude e2e.ts,cypress-tests.ts",
+    "stop-only-all": "yarn stop-only --folder packages",
     "pretest": "yarn ensure-deps",
     "test": "yarn lerna exec yarn test --scope cypress --scope \"'@packages/{electron,extension,https-proxy,launcher,net-stubbing,network,proxy,rewriter,runner,socket}'\"",
     "test-debug": "lerna exec yarn test-debug --ignore \"'@packages/{desktop-gui,driver,root,static,web-config}'\"",
@@ -131,7 +133,6 @@
     "eslint-plugin-cypress": "2.11.1",
     "eslint-plugin-json-format": "2.0.0",
     "eslint-plugin-mocha": "6.1.0",
-    "eslint-plugin-no-only-tests": "^2.4.0",
     "eslint-plugin-react": "7.18.3",
     "execa": "4.0.0",
     "execa-wrap": "1.4.0",
@@ -186,6 +187,7 @@
     "sinon": "7.3.2",
     "snap-shot-it": "7.9.3",
     "start-server-and-test": "1.10.8",
+    "stop-only": "3.0.1",
     "strip-ansi": "4.0.0",
     "term-to-html": "1.2.0",
     "terminal-banner": "1.1.0",
@@ -236,10 +238,11 @@
   },
   "lint-staged": {
     "*.coffee": [
+      "yarn stop-only --folder",
       "git add"
     ],
     "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "eslint --fix --max-warnings=0",
+      "eslint --fix",
       "git add"
     ]
   },
