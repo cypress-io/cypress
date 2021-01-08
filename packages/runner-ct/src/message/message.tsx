@@ -1,19 +1,22 @@
 import cs from 'classnames'
 import { observer } from 'mobx-react'
 import React, { forwardRef } from 'react'
+import State from '../lib/state'
 
-export default observer(forwardRef(({ state }, ref) => {
+interface MessageProps {
+  state: State
+}
+
+export default observer(forwardRef<HTMLDivElement, MessageProps>(({ state }, ref) => {
   if (!state.messageTitle) return null
 
-  function controls () {
-    if (!state.messageControls) return null
-
-    return (
+  const controls = state.messageControls
+    ? (
       <div className='message-controls'>
-        {state.messageControls}
+        {state.messageControls as any}
       </div>
     )
-  }
+    : null
 
   return (
     <div
@@ -30,7 +33,7 @@ export default observer(forwardRef(({ state }, ref) => {
         <span className='title'>{state.messageTitle}</span>
         <span className='description'>{state.messageDescription}</span>
       </div>
-      {controls()}
+      {controls}
     </div>
   )
 }))

@@ -1,27 +1,11 @@
 {
-  "compilerOptions": {
-    "target": "es2015",
-    "module": "commonjs",
-    "allowJs": true,
-    "jsx": "react",
-    "outDir": "dist",
-    "noImplicitAny": true,
-    "noImplicitThis": true,
-    "preserveWatchOutput": true,
-    "sourceMap": true,
-    "importHelpers": true,
-    "strictNullChecks": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "noErrorTruncation": true,
-    "experimentalDecorators": true
-  },
-  "exclude": [
-    "dist"
+  "extends": "./../ts/tsconfig.json",
+  "include": [
+    "src/*.ts",
+    "./src/**/*.ts"
+  ],
+  "files": [
+    "./../ts/index.d.ts"
   ]
 }
+

@@ -2,7 +2,7 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
-import { Reporter } from '@packages/reporter'
+import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
 import State from '../lib/state'
@@ -61,7 +61,6 @@ const App: React.FC<AppProps> = observer(
                   runner={eventManager.reporterBus}
                   spec={state.spec}
                   allSpecs={state.multiSpecs}
-                  autoScrollingEnabled={config.state.autoScrollingEnabled}
                   // @ts-ignore
                   error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                   firefoxGcInterval={config.firefoxGcInterval}
