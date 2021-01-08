@@ -5,7 +5,7 @@ import React from 'react'
 import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
-import State from '../lib/state'
+import State, { RunMode } from '../lib/state'
 
 import { SpecsList } from '../specs/specs-list'
 import SplitPane from 'react-split-pane'
@@ -25,6 +25,7 @@ export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
 }
 
 interface AppProps {
+  runMode: RunMode
   state: State;
   // eslint-disable-next-line
   eventManager: typeof EventManager
@@ -95,7 +96,7 @@ const App: React.FC<AppProps> = observer(
 )
 
 App.propTypes = {
-  runMode: PropTypes.oneOf(['single', 'multi']),
+  runMode: PropTypes.oneOf<RunMode>(['single', 'multi']).isRequired,
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -111,14 +112,16 @@ App.propTypes = {
     viewportHeight: PropTypes.number.isRequired,
     viewportWidth: PropTypes.number.isRequired,
   }).isRequired,
-  // @ts-expect-error
-  eventManager: PropTypes.shape({
-    notifyRunningSpec: PropTypes.func.isRequired,
-    reporterBus: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-  }).isRequired,
+  // TODO: figure out why ts-expect-error isn't working.
+  // Do we even need this anymore? We have TypeSrfipt.
+  // eventManager: PropTypes.shape({
+  //   getCypress: PropTypes.object,
+  //   notifyRunningSpec: PropTypes.func.isRequired,
+  //   reporterBus: PropTypes.shape({
+  //     emit: PropTypes.func.isRequired,
+  //     on: PropTypes.func.isRequired,
+  //   }).isRequired,
+  // }).isRequired,
   state: PropTypes.instanceOf(State).isRequired,
 }
 

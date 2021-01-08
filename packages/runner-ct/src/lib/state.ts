@@ -2,6 +2,8 @@ import { action, computed, observable } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
 
+export type RunMode = 'single' | 'multi'
+
 interface Defaults {
   messageTitle: string | null
   messageDescription: string | null
@@ -88,7 +90,7 @@ export default class State {
   @observable spec = _defaults.spec
   @observable specs = _defaults.specs
   /** @type {"single" | "multi"} */
-  @observable runMode: 'single' | 'multi' = 'single'
+  @observable runMode: RunMode = 'single'
   @observable multiSpecs: Cypress.Cypress['spec'][] = [];
 
   constructor ({
