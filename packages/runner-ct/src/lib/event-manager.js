@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { EventEmitter } from 'events'
 import Promise from 'bluebird'
 import { action, runInAction } from 'mobx'
-
+import { connectWebpackHmr, closeWebpackHmr } from './webpack-hmr-client'
 import { client, circularParser } from '@packages/socket/lib/browser'
 
 import automation from './automation'
@@ -207,6 +207,11 @@ const eventManager = {
       this._clearAllCookies()
     })
 
+    const hmrSocket = connectWebpackHmr({
+      url: `${window.location.origin}/cypress-webpack-hmr-socket`,
+      onReload: rerun,
+    })
+
     // when our window triggers beforeunload
     // we know we've change the URL and we need
     // to clear our cookies
@@ -218,6 +223,7 @@ const eventManager = {
 
       this._clearAllCookies()
       this._setUnload()
+      closeWebpackHmr(hmrSocket)
     })
   },
 

@@ -26,5 +26,10 @@ export async function start (initialWebpackConfig, { specs, config, devserverEve
 
   debug('starting webpack dev server')
 
-  return new WebpackDevServer(compiler, { hot: true, inline: false, noInfo: !debug.enabled })
+  return new WebpackDevServer(compiler, {
+    hot: true,
+    inline: false,
+    sockPath: '/cypress-webpack-hmr-socket',
+    noInfo: !debug.enabled,
+  })
 }
