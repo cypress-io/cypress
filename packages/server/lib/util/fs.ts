@@ -1,15 +1,15 @@
 /* eslint-disable no-console */
 
-import fs from 'fs-extra'
+import fsExtra from 'fs-extra'
 import Promise from 'bluebird'
 
 type Promisified<T extends (...args: any) => any>
   = (...params: Parameters<T>) => Promise<ReturnType<T>>
 
 interface PromisifiedFsExtra {
-  statAsync: (path: string | Buffer) => Promise<ReturnType<typeof fs.statSync>>
-  removeAsync: Promisified<typeof fs.removeSync>
-  writeFileAsync: Promisified<typeof fs.writeFileSync>
+  statAsync: (path: string | Buffer) => Promise<ReturnType<typeof fsExtra.statSync>>
+  removeAsync: Promisified<typeof fsExtra.removeSync>
+  writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
 }
 
 // warn users if somehow synchronous file methods are invoked
@@ -44,10 +44,6 @@ const addSyncFileSystemWarnings = (fs) => {
   }
 }
 
-addSyncFileSystemWarnings(fs)
+addSyncFileSystemWarnings(fsExtra)
 
-const promisifiedFs = Promise.promisifyAll(fs) as PromisifiedFsExtra & typeof fs
-
-export = {
-  fs: promisifiedFs,
-}
+export const fs = Promise.promisifyAll(fsExtra) as PromisifiedFsExtra & typeof fsExtra
