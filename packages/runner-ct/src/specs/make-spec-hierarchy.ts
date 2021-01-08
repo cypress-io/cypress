@@ -1,9 +1,10 @@
 export type SpecFolderOrSpecFile = SpecFile | SpecFolder
 
-export interface SpecFile {
+type CypressSpec = Cypress.Cypress['spec']
+
+export interface SpecFile extends CypressSpec {
 	type: 'file'
-	name: string
-	shortName: string
+  shortName: string
 }
 
 export interface SpecFolder {
@@ -18,7 +19,8 @@ export interface SpecFolder {
  *
  * @param {Array<{name: string}>} specs
  */
-export function makeSpecHierarchy (specs: { name: string }[]) {
+// export function makeSpecHierarchy (specs: { name: string }[]) {
+export function makeSpecHierarchy (specs: Cypress.Cypress['spec'][]) {
   // to save the existing folder paths
   const kvpGroups: { [fullPath: string]: SpecFolder } = {}
 

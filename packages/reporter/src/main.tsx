@@ -22,7 +22,6 @@ import Runnables from './runnables/runnables'
 
 type ReporterProps = {
   appState: AppState
-  autoScrollingEnabled?: boolean
   runnablesStore: RunnablesStore
   runner: Runner
   scroller: Scroller
@@ -42,7 +41,6 @@ type ReporterProps = {
 @observer
 class Reporter extends Component<ReporterProps> {
   static propTypes = {
-    autoScrollingEnabled: PropTypes.bool,
     error: PropTypes.shape({
       title: PropTypes.string.isRequired,
       link: PropTypes.string,
@@ -126,10 +124,10 @@ class Reporter extends Component<ReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
 
     action('set:scrolling', () => {
-      appState.setAutoScrolling(autoScrollingEnabled)
+      appState.setAutoScrolling(appState.autoScrollingEnabled)
     })()
 
     this.props.events.init({

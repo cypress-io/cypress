@@ -2,10 +2,10 @@ import cs from 'classnames'
 import { observer } from 'mobx-react'
 import PropTypes from 'prop-types'
 import React from 'react'
-import { Reporter } from '@packages/reporter'
+import { Reporter } from '@packages/reporter/src/main'
 
 import errorMessages from '../errors/error-messages'
-import State from '../lib/state'
+import State, { RunMode } from '../lib/state'
 
 import { SpecsList } from '../specs/specs-list'
 import SplitPane from 'react-split-pane'
@@ -17,11 +17,19 @@ import { ReporterHeader } from './ReporterHeader'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 
+// Cypress.ConfigOptions only appears to have internal options.
+// TODO: figure out where the "source of truth" should be for
+// an internal options interface.
+export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
+  projectName: string
+}
+
 interface AppProps {
+  runMode: RunMode
   state: State;
   // eslint-disable-next-line
   eventManager: typeof EventManager
-  config: Cypress.ConfigOptions
+  config: ExtendedConfigOptions
 }
 
 const App: React.FC<AppProps> = observer(
@@ -61,7 +69,6 @@ const App: React.FC<AppProps> = observer(
                   runner={eventManager.reporterBus}
                   spec={state.spec}
                   allSpecs={state.multiSpecs}
-                  autoScrollingEnabled={config.state.autoScrollingEnabled}
                   // @ts-ignore
                   error={errorMessages.reporterError(state.scriptError, state.spec.relative)}
                   firefoxGcInterval={config.firefoxGcInterval}
@@ -89,7 +96,7 @@ const App: React.FC<AppProps> = observer(
 )
 
 App.propTypes = {
-  runMode: PropTypes.oneOf(['single', 'multi']),
+  runMode: PropTypes.oneOf<RunMode>(['single', 'multi']).isRequired,
   config: PropTypes.shape({
     browsers: PropTypes.arrayOf(PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -105,14 +112,16 @@ App.propTypes = {
     viewportHeight: PropTypes.number.isRequired,
     viewportWidth: PropTypes.number.isRequired,
   }).isRequired,
-  // @ts-expect-error
-  eventManager: PropTypes.shape({
-    notifyRunningSpec: PropTypes.func.isRequired,
-    reporterBus: PropTypes.shape({
-      emit: PropTypes.func.isRequired,
-      on: PropTypes.func.isRequired,
-    }).isRequired,
-  }).isRequired,
+  // TODO: figure out why ts-expect-error isn't working.
+  // Do we even need this anymore? We have TypeSrfipt.
+  // eventManager: PropTypes.shape({
+  //   getCypress: PropTypes.object,
+  //   notifyRunningSpec: PropTypes.func.isRequired,
+  //   reporterBus: PropTypes.shape({
+  //     emit: PropTypes.func.isRequired,
+  //     on: PropTypes.func.isRequired,
+  //   }).isRequired,
+  // }).isRequired,
   state: PropTypes.instanceOf(State).isRequired,
 }
 

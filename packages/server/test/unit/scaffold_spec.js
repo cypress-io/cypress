@@ -7,7 +7,7 @@ const snapshot = require('snap-shot-it')
 const config = require(`${root}lib/config`)
 const { ProjectE2E } = require(`${root}lib/project-e2e`)
 const scaffold = require(`${root}lib/scaffold`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const glob = require(`${root}lib/util/glob`)
 const Fixtures = require(`${root}/test/support/helpers/fixtures`)
 

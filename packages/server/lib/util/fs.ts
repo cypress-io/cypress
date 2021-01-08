@@ -1,7 +1,16 @@
 /* eslint-disable no-console */
 
-const fs = require('fs-extra')
-const Promise = require('bluebird')
+import fsExtra from 'fs-extra'
+import Promise from 'bluebird'
+
+type Promisified<T extends (...args: any) => any>
+  = (...params: Parameters<T>) => Promise<ReturnType<T>>
+
+interface PromisifiedFsExtra {
+  statAsync: (path: string | Buffer) => Promise<ReturnType<typeof fsExtra.statSync>>
+  removeAsync: Promisified<typeof fsExtra.removeSync>
+  writeFileAsync: Promisified<typeof fsExtra.writeFileSync>
+}
 
 // warn users if somehow synchronous file methods are invoked
 // these methods due to "too many files" errors are a huge pain
@@ -35,8 +44,6 @@ const addSyncFileSystemWarnings = (fs) => {
   }
 }
 
-addSyncFileSystemWarnings(fs)
+addSyncFileSystemWarnings(fsExtra)
 
-const promisifiedFs = Promise.promisifyAll(fs)
-
-module.exports = promisifiedFs
+export const fs = Promise.promisifyAll(fsExtra) as PromisifiedFsExtra & typeof fsExtra
