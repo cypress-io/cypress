@@ -58,6 +58,21 @@ describe('runnables', () => {
     cy.percySnapshot()
   })
 
+  it('displays multi-spec reporters', () => {
+    start({ runMode: 'multi', allSpecs: [
+      {
+        relative: 'fizz',
+      },
+      {
+        relative: 'buzz',
+      },
+    ] })
+
+    // ensure the page is loaded before taking snapshot
+    cy.contains('buzz').should('be.visible')
+    cy.percySnapshot()
+  })
+
   it('displays the "No test" error when there are no tests', () => {
     runnables.suites = []
     start()
