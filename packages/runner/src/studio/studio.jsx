@@ -30,7 +30,7 @@ class Studio extends Component {
             visible={model.isLoading ? false : null}
           >
             <button
-              className='header-button button-studio'
+              className='header-button button-studio button-studio-close'
               disabled={model.isLoading}
               onClick={this._close}
             >
@@ -43,7 +43,7 @@ class Studio extends Component {
             visible={model.isLoading ? false : null}
           >
             <button
-              className='header-button button-studio'
+              className='header-button button-studio button-studio-restart'
               disabled={model.isLoading}
               onClick={this._restart}
             >
@@ -56,7 +56,7 @@ class Studio extends Component {
             visible={model.isLoading ? false : null}
           >
             <button
-              className='header-button button-studio'
+              className='header-button button-studio button-studio-save'
               disabled={model.isLoading}
               onClick={this._save}
             >
