@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import { client } from '@packages/socket'
+import { connectWebpackHmr, closeWebpackHmr } from './webpack-hmr-client'
 
 import automation from './automation'
 import logger from './logger'
@@ -217,6 +218,7 @@ const eventManager = {
 
       this._clearAllCookies()
       this._setUnload()
+      closeWebpackHmr(hmrSocket)
     })
   },
 
