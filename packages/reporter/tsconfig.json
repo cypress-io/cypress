@@ -1,11 +1,18 @@
 {
-  "extends": "./../ts/tsconfig.json",
+  "extends": "../ts/tsconfig.json",
+  "compilerOptions": {
+    "types": [
+      "node",
+      "cypress"
+    ] /* Type declaration files to be included in compilation. */
+  },
   "include": [
     "src/*.ts",
-    "./src/**/*.ts"
+    "src/*.tsx",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
   ],
   "files": [
     "./../ts/index.d.ts"
   ]
 }
-
