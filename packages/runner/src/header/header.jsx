@@ -52,31 +52,25 @@ export default class Header extends Component {
               'loading': state.isLoadingUrl,
               'highlighted': state.highlightUrl,
               'menu-open': this._studioNeedsUrl,
-              'url-prefix-enabled': !!this._baseUrl,
             })}
             onSubmit={this._studioNeedsUrl ? this._visitUrlInput : undefined}
           >
-            <span className='url-addon url-prefix'>
-              {`${this._baseUrl}/`}
-            </span>
-            <span className='url-input-wrapper'>
-              <input
-                ref={this.urlInputRef}
-                className={cs('url', { 'input-active': this._studioNeedsUrl })}
-                value={this._studioNeedsUrl ? this.urlInput : state.url}
-                readOnly={!this._studioNeedsUrl}
-                onChange={this._studioNeedsUrl ? this._onUrlInput : undefined}
-                onClick={!this._studioNeedsUrl ? this._openUrl : undefined}
-              />
-              <div className='popup-menu url-menu'>
-                <p><strong>Please enter a valid URL to visit.</strong></p>
-                <div className='menu-buttons'>
-                  <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
-                  <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
-                </div>
+            <input
+              ref={this.urlInputRef}
+              className={cs('url', { 'input-active': this._studioNeedsUrl })}
+              value={this._studioNeedsUrl ? this.urlInput || `${config.baseUrl}/` : state.url}
+              readOnly={!this._studioNeedsUrl}
+              onChange={this._studioNeedsUrl ? this._onUrlInput : undefined}
+              onClick={!this._studioNeedsUrl ? this._openUrl : undefined}
+            />
+            <div className='popup-menu url-menu'>
+              <p><strong>Please enter a valid URL to visit.</strong></p>
+              <div className='menu-buttons'>
+                <button type='button' className='btn-cancel' onClick={this._cancelStudio}>Cancel</button>
+                <button type='submit' className='btn-submit' disabled={!this.urlInput}>Go <i className='fas fa-arrow-right' /></button>
               </div>
-            </span>
-            <span className='url-addon loading-container'>
+            </div>
+            <span className='loading-container'>
               ...loading <i className='fas fa-spinner fa-pulse' />
             </span>
           </form>
@@ -106,7 +100,7 @@ export default class Header extends Component {
           </li>
         </ul>
         <SelectorPlayground model={selectorPlaygroundModel} />
-        <Studio model={studioRecorder} />
+        <Studio model={studioRecorder} hasUrl={!!state.url} />
       </header>
     )
   }
@@ -169,16 +163,11 @@ export default class Header extends Component {
 
     const reHttp = /^https?:\/\//
 
-    let url
+    // copy url so we don't rerender if it changes
+    let url = this.urlInput
 
-    if (this._baseUrl) {
-      url = new UrlParse(this.urlInput, this._baseUrl).toString()
-    } else {
-      url = this.urlInput
-
-      if (!reHttp.test(url)) {
-        url = `http://${url}`
-      }
+    if (!this.props.config.baseUrl && !reHttp.test(url)) {
+      url = `http://${url}`
     }
 
     studioRecorder.visitUrl(url)

@@ -6,12 +6,12 @@ import eventManager from '../lib/event-manager'
 
 class Studio extends Component {
   render () {
-    const { model } = this.props
+    const { model, hasUrl } = this.props
 
     return (
       <div className='header-popup studio'>
         <div className='text-block'>
-          <span className={cs('icon', { 'is-active': model.isActive })}>
+          <span className={cs('icon', { 'is-active': model.isActive && hasUrl })}>
             <i className='fas' />
           </span>{' '}
           <span className='title'>Studio</span>{' '}

@@ -16,12 +16,9 @@ export interface HookHeaderProps {
 }
 
 const HookHeader = ({ model, number }: HookHeaderProps) => (
-  <span>
-    <span className='hook-name'>
-      {model.hookName} {number && `(${number})`}{' '}
-      <span className='hook-studio-icon'><i className='fas fa-magic' /></span>
-      <span className='hook-failed-message'>(failed)</span>{' '}
-    </span>
+  <span className='hook-name'>
+    {model.hookName} {number && `(${number})`}{' '}
+    <span className='hook-failed-message'>(failed)</span>{' '}
   </span>
 )
 
@@ -36,23 +33,21 @@ const HookOpenInIDE = ({ invocationDetails }: HookOpenInIDEProps) => (
 )
 
 const StudioNoCommands = () => (
-  <li className='studio-command-group studio-no-commands'>
-    <div className='command command-name-get command-state-pending command-type-parent'>
-      <span>
-        <div className='command-wrapper'>
-          <div className='command-wrapper-text'>
-            <span className='command-message'>
-              <span className='command-message-text'>
+  <li className='command command-name-get command-state-pending command-type-parent studio-no-commands'>
+    <span>
+      <div className='command-wrapper'>
+        <div className='command-wrapper-text'>
+          <span className='command-message'>
+            <span className='command-message-text'>
               Interact with your site to add test commands.
-              </span>
             </span>
-            <span className='command-controls'>
-              <i className='fa fa-arrow-right' />
-            </span>
-          </div>
+          </span>
+          <span className='command-controls'>
+            <i className='fa fa-arrow-right' />
+          </span>
         </div>
-      </span>
-    </div>
+      </div>
+    </span>
   </li>
 )
 

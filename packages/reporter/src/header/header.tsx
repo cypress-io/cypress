@@ -20,7 +20,7 @@ const Header = observer(({ appState, events = defaultEvents, statsStore }: Props
   <header>
     <Tooltip placement='bottom' title={<p>View All Tests <span className='kbd'>F</span></p>} wrapperClassName='focus-tests' className='cy-tooltip'>
       <button onClick={() => events.emit('focus:tests')}>
-        <i className='fas fa-chevron-left'></i>
+        <i className='fas fa-chevron-left' />
         <span className='focus-tests-text'>Tests</span>
       </button>
     </Tooltip>

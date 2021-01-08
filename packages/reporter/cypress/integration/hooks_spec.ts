@@ -186,10 +186,6 @@ describe('hooks', () => {
         .contains('studio commands').should('not.exist')
       })
 
-      it('displays the studio icon in the header', () => {
-        cy.get('.hook-studio').find('.hook-studio-icon').should('be.visible')
-      })
-
       it('displays a prompt when there are no commands', () => {
         cy.get('.hook-studio').find('.studio-no-commands').should('exist')
       })

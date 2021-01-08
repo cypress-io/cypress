@@ -241,6 +241,12 @@ describe('events', () => {
       expect(statsStore.incrementCount).not.to.have.been.called
     })
 
+    it('does not increment the stats count if studio is active', () => {
+      appState.studioActive = true
+      runner.on.withArgs('test:after:run').callArgWith(1, { state: 'passed', final: true })
+      expect(statsStore.incrementCount).not.to.have.been.calledWith('passed')
+    })
+
     it('pauses the appState with next command name on paused', () => {
       runner.on.withArgs('paused').callArgWith(1, 'next command')
       expect(appState.pause).to.have.been.calledWith('next command')

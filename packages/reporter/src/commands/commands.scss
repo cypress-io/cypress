@@ -37,6 +37,22 @@
     }
   }
 
+  .hook-studio {
+    .command-wrapper:hover {
+      background-color: #eef1f4;
+    }
+
+    .command-type-parent {
+      &:hover {
+        border-top: 1px solid #e3e3e3;
+      }
+
+      &:first-child {
+        border-top: 0;
+      }
+    }
+  }
+
   .command-is-event {
     font-style: italic;
 
@@ -595,59 +611,24 @@
     }
   }
 
-  .studio-command-group {
-    border-top: 1px solid #e3e3e3;
-
-    &:hover {
-      border-top: 1px solid #eef1f4;
-
-      .command-state-passed .command-wrapper {
-        background-color: #E0E5E7;
-      }
-    }
-
-    &:first-child {
-      border-top: 0;
-    }
-
-    .command {
-      cursor: auto;
-
-      &:hover {
-        .command-number {
-          display: block;
-        }
-      }
-
-      .command-message {
-        text-overflow: ellipsis;
-      }
-
-      .command-controls i {
-        padding-left: 5px;
-
-        &:hover {
-          color: #565554;
-        }
-      }
-    }
-  }
-
-  .studio-command-group.studio-no-commands {
+  .studio-no-commands {
     .command-wrapper {
-      cursor: auto;
       padding: 5px 10px;
 
-      .command-message {
-        text-align: center;
-      }
+      .command-wrapper-text {
+        align-items: center;
 
-      .command-controls i {
-        color: $pending;
+        .command-message {
+          text-align: center;
+        }
 
-        &:hover {
+        .command-controls i {
           color: $pending;
-          cursor: auto;
+
+          &:hover {
+            color: $pending;
+            cursor: auto;
+          }
         }
       }
     }

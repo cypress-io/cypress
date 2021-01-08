@@ -50,7 +50,7 @@ export const generateCypressCommand = (cmd: Command) => {
 }
 
 export const generateTest = (name: string, body: n.BlockStatement) => {
-  return b.expressionStatement(
+  const stmt = b.expressionStatement(
     b.callExpression(
       b.identifier('it'),
       [
@@ -63,6 +63,10 @@ export const generateTest = (name: string, body: n.BlockStatement) => {
       ],
     ),
   )
+
+  stmt.comments = [b.block(' === Test Created with Cypress Studio === ', true, false)]
+
+  return stmt
 }
 
 export const addCommentToBody = (body: Array<{}>, comment: string) => {
@@ -166,7 +170,6 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
   return fs.readFile(path)
   .then((contents) => {
     const ast = recast.parse(contents, {
-      wrapColumn: 360,
       parser: {
         parse (source) {
           return parse(source, {
@@ -183,7 +186,10 @@ export const rewriteSpec = (path: string, astRules: Visitor<{}>) => {
 
     visit(ast, astRules)
 
-    const { code } = recast.print(ast)
+    const { code } = recast.print(ast, {
+      quote: 'single',
+      wrapColumn: 360,
+    })
 
     return fs.writeFile(path, code)
   })
