@@ -4,6 +4,7 @@ import Promise from 'bluebird'
 import { action } from 'mobx'
 
 import { client } from '@packages/socket'
+import { connectWebpackHmr, closeWebpackHmr } from './webpack-hmr-client'
 
 import automation from './automation'
 import logger from './logger'
@@ -195,6 +196,11 @@ const eventManager = {
       this._clearAllCookies()
     })
 
+    const hmrSocket = connectWebpackHmr({
+      url: `${window.location.origin}/cypress-webpack-hmr-socket`,
+      onReload: rerun,
+    })
+
     // when our window triggers beforeunload
     // we know we've change the URL and we need
     // to clear our cookies
@@ -206,6 +212,7 @@ const eventManager = {
 
       this._clearAllCookies()
       this._setUnload()
+      closeWebpackHmr(hmrSocket)
     })
   },
 
