@@ -9,7 +9,7 @@ const sizeOf = require('image-size')
 const Fixtures = require('../support/helpers/fixtures')
 const config = require(`${root}lib/config`)
 const screenshots = require(`${root}lib/screenshots`)
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const plugins = require(`${root}lib/plugins`)
 const { screenshot } = require(`${root}lib/automation/screenshot`)
 

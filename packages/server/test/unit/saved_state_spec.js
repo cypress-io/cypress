@@ -2,7 +2,7 @@ require('../spec_helper')
 
 const path = require('path')
 const Promise = require('bluebird')
-const fs = require(`${root}lib/util/fs`)
+const { fs } = require(`${root}lib/util/fs`)
 const FileUtil = require(`${root}lib/util/file`)
 const appData = require(`${root}lib/util/app_data`)
 
