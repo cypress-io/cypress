@@ -4,7 +4,6 @@ import { observer } from 'mobx-react'
 import React, { Component, createRef } from 'react'
 import Tooltip from '@cypress/react-tooltip'
 import { $ } from '@packages/driver'
-import UrlParse from 'url-parse'
 
 import { configFileFormatted } from '../lib/config-file-formatted'
 import SelectorPlayground from '../selector-playground/selector-playground'
@@ -53,15 +52,16 @@ export default class Header extends Component {
               'highlighted': state.highlightUrl,
               'menu-open': this._studioNeedsUrl,
             })}
-            onSubmit={this._studioNeedsUrl ? this._visitUrlInput : undefined}
+            onSubmit={this._visitUrlInput}
           >
             <input
               ref={this.urlInputRef}
+              type='text'
               className={cs('url', { 'input-active': this._studioNeedsUrl })}
-              value={this._studioNeedsUrl ? this.urlInput || `${config.baseUrl}/` : state.url}
+              value={this._studioNeedsUrl ? this.urlInput : state.url}
               readOnly={!this._studioNeedsUrl}
-              onChange={this._studioNeedsUrl ? this._onUrlInput : undefined}
-              onClick={!this._studioNeedsUrl ? this._openUrl : undefined}
+              onChange={this._onUrlInput}
+              onClick={this._openUrl}
             />
             <div className='popup-menu url-menu'>
               <p><strong>Please enter a valid URL to visit.</strong></p>
@@ -105,9 +105,11 @@ export default class Header extends Component {
     )
   }
 
-  componentDidMount () {
+  @action componentDidMount () {
     this.previousSelectorPlaygroundOpen = selectorPlaygroundModel.isOpen
     this.previousRecorderIsOpen = studioRecorder.isOpen
+
+    this.urlInput = this.props.config.baseUrl ? `${this.props.config.baseUrl}/` : ''
   }
 
   componentDidUpdate () {
@@ -137,6 +139,8 @@ export default class Header extends Component {
   }
 
   _openUrl = () => {
+    if (this._studioNeedsUrl) return
+
     window.open(this.props.state.url)
   }
 
@@ -144,22 +148,16 @@ export default class Header extends Component {
     return studioRecorder.isActive && !studioRecorder.url && !this.props.state.url
   }
 
-  @computed get _baseUrl () {
+  @action _onUrlInput = (e) => {
     if (!this._studioNeedsUrl) return
 
-    const url = new UrlParse()
-
-    if (parseInt(url.port) !== this.props.config.port) {
-      return url.origin
-    }
-  }
-
-  @action _onUrlInput = (e) => {
     this.urlInput = e.target.value
   }
 
   @action _visitUrlInput = (e) => {
     e.preventDefault()
+
+    if (!this._studioNeedsUrl) return
 
     const reHttp = /^https?:\/\//
 

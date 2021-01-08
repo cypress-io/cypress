@@ -1,6 +1,6 @@
 import sinon from 'sinon'
 import $ from 'jquery'
-import driverMock from '@packages/driver'
+import driver from '@packages/driver'
 
 import studioRecorder, { StudioRecorder } from './studio-recorder'
 import eventManager from '../lib/event-manager'
@@ -28,7 +28,7 @@ describe('StudioRecorder', () => {
     sinon.stub(instance, 'attachListeners')
     sinon.stub(instance, 'removeListeners')
 
-    driverMock.$ = sinon.stub().returnsArg(0)
+    driver.$ = sinon.stub().returnsArg(0)
 
     sinon.stub(eventManager, 'emit')
     sinon.stub(eventManager, 'getCypress').returns({
@@ -135,7 +135,7 @@ describe('StudioRecorder', () => {
       expect(instance.removeListeners).to.be.called
     })
 
-    it('sets isActive to false and isOpen is true', () => {
+    it('sets isActive, isLoading to false and isOpen is true', () => {
       instance.stop()
 
       expect(instance.isActive).to.be.false

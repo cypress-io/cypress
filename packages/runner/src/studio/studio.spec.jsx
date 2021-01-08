@@ -1,5 +1,5 @@
 import React from 'react'
-import { mount, shallow } from 'enzyme'
+import { shallow } from 'enzyme'
 import sinon from 'sinon'
 
 import Tooltip from '@cypress/react-tooltip'
@@ -48,15 +48,15 @@ describe('<Studio />', () => {
     })
 
     it('disables all controls while studio is loading', () => {
-      const component = mount(<Studio model={createModel({ isLoading: true })} />)
+      const component = shallow(<Studio model={createModel({ isLoading: true })} />)
 
-      expect(component.find('.button-studio-close')).to.have.prop('disabled')
-      expect(component.find('.button-studio-restart')).to.have.prop('disabled')
-      expect(component.find('.button-studio-save')).to.have.prop('disabled')
+      expect(component.find('.button-studio-close')).to.have.prop('disabled', true)
+      expect(component.find('.button-studio-restart')).to.have.prop('disabled', true)
+      expect(component.find('.button-studio-save')).to.have.prop('disabled', true)
     })
 
     it('renders tooltips', () => {
-      const component = mount(<Studio model={createModel({ isActive: true })} />)
+      const component = shallow(<Studio model={createModel({ isActive: true })} />)
 
       expect(component.find(Tooltip).at(0)).to.have.prop('title', 'Close Studio')
       expect(component.find(Tooltip).at(1)).to.have.prop('title', 'Restart')
@@ -64,7 +64,7 @@ describe('<Studio />', () => {
     })
 
     it('hides all tooltips while studio is loading', () => {
-      const component = mount(<Studio model={createModel({ isLoading: true })} />)
+      const component = shallow(<Studio model={createModel({ isLoading: true })} />)
 
       expect(component.find(Tooltip).at(0)).to.have.prop('visible', false)
       expect(component.find(Tooltip).at(1)).to.have.prop('visible', false)
@@ -72,7 +72,7 @@ describe('<Studio />', () => {
     })
 
     it('emits studio:cancel when close button is clicked', () => {
-      const component = mount(<Studio model={createModel({ isActive: true })} />)
+      const component = shallow(<Studio model={createModel({ isActive: true })} />)
 
       component.find('.button-studio-close').simulate('click')
 
@@ -81,7 +81,7 @@ describe('<Studio />', () => {
 
     it('resets studio recorder and emits restart when restart button is clicked', () => {
       const model = createModel({ isActive: true })
-      const component = mount(<Studio model={model} />)
+      const component = shallow(<Studio model={model} />)
 
       component.find('.button-studio-restart').simulate('click')
 
@@ -91,7 +91,7 @@ describe('<Studio />', () => {
 
     it('starts studio recorder saving when save button is clicked', () => {
       const model = createModel({ isActive: true })
-      const component = mount(<Studio model={model} />)
+      const component = shallow(<Studio model={model} />)
 
       component.find('.button-studio-save').simulate('click')
 

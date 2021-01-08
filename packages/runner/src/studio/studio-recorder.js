@@ -131,6 +131,7 @@ export class StudioRecorder {
     this.removeListeners()
 
     this.isActive = false
+    this.isLoading = false
   }
 
   @action reset = () => {
