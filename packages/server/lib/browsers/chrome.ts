@@ -238,6 +238,8 @@ const _disableRestorePagesPrompt = function (userDir) {
         return fs.outputJson(prefsPath, preferences)
       }
     }
+
+    return
   })
   .catch(() => { })
 }
