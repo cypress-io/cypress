@@ -2588,7 +2588,7 @@ declare namespace Cypress {
      */
     experimentalSourceRewriting: boolean
     /**
-     * Enables Cypress Studio, a feature which generates Cypress commands from user interactions with a site.
+     * Generate and save commands directly to your test suite by interacting with your app as an end user would.
      * @default false
      */
     experimentalStudio: boolean
