@@ -5,7 +5,7 @@ describe('e2e only spec', () => {
 
   it('failing', function () {
     return e2e.exec(this, {
-      spec: 'only*.coffee',
+      spec: 'only*.js',
       snapshot: true,
     })
   })
