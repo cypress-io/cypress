@@ -198,7 +198,13 @@ const eventManager = {
 
     const hmrSocket = connectWebpackHmr({
       url: `${window.location.origin}/cypress-webpack-hmr-socket`,
-      onReload: rerun,
+      onReload: () => {
+        if (!state.isInitialBuildSucceed) {
+          state.initialBuildFired()
+        } else {
+          rerun()
+        }
+      },
     })
 
     // when our window triggers beforeunload
