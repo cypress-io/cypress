@@ -1,7 +1,7 @@
 /* eslint-disable
     mocha/no-exclusive-tests,
     mocha/no-global-tests,
-    no-only-tests/no-only-tests,
+    mocha/no-exclusive-tests,
 */
 it('t1', () => {})
 it('t2', () => {})

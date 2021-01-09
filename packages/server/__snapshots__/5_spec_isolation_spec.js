@@ -7,15 +7,15 @@ exports['e2e spec_isolation / failing with retries enabled'] = `
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      2 found (simple_failing_hook_spec.coffee, simple_retrying_spec.js)                 │
-  │ Searched:   cypress/integration/simple_failing_hook_spec.coffee, cypress/integration/simple_re │
-  │             trying_spec.js                                                                     │
+  │ Specs:      2 found (simple_failing_hook_spec.js, simple_retrying_spec.js)                     │
+  │ Searched:   cypress/integration/simple_failing_hook_spec.js, cypress/integration/simple_retryi │
+  │             ng_spec.js                                                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_failing_hook_spec.coffee                                                 (1 of 2)
+  Running:  simple_failing_hook_spec.js                                                     (1 of 2)
 
 
   simple failing hook spec
@@ -76,24 +76,24 @@ Although you have test retries enabled, we do not retry tests when \`before all\
   │ Screenshots:  5                                                                                │
   │ Video:        false                                                                            │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_failing_hook_spec.coffee                                                  │
+  │ Spec Ran:     simple_failing_hook_spec.js                                                      │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Screenshots)
 
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- beforeEach hooks -- never gets here (failed).png                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (a               
-     ttempt 2).png                                                                                  
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- afterEach hooks -- runs this -- after each hook (failed).png                      
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2               
-     ).png                                                                                          
-  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing      (1280x720)
-     hook spec -- after hooks -- fails on this -- after all hook (failed).png                       
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- beforeEach hooks -- never gets here (failed).png                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attem               
+     pt 2).png                                                                                      
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- afterEach hooks -- runs this -- after each hook (failed).png                          
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).pn               
+     g                                                                                              
+  -  /XXX/XXX/XXX/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook     (1280x720)
+      spec -- after hooks -- fails on this -- after all hook (failed).png                           
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ Although you have test retries enabled, we do not retry tests when \`before all\
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✖  simple_failing_hook_spec.coffee          XX:XX        6        1        3        1        1 │
+  │ ✖  simple_failing_hook_spec.js              XX:XX        6        1        3        1        1 │
   ├────────────────────────────────────────────────────────────────────────────────────────────────┤
   │ ✖  simple_retrying_spec.js                  XX:XX        2        1        1        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
@@ -197,21 +197,21 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -222,7 +222,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -234,11 +234,11 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -248,7 +248,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -283,7 +283,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -293,13 +293,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -309,7 +309,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -324,7 +324,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -344,7 +344,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -364,7 +364,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -374,13 +374,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -390,7 +390,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -402,9 +402,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -440,7 +440,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
+          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -450,13 +450,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 3,
-                  "column": 35,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  1 | describe \"simple failing spec\", ->\n  2 |   it \"fails1\", ->\n> 3 |     cy.wrap(true, {timeout: 100}).should(\"be.false\")\n    |                                   ^\n  4 | \n  5 |   it \"fails2\", ->\n  6 |     throw new Error(\"fails2\")",
-                  "language": "coffee"
+                  "line": 4,
+                  "column": 37,
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -466,7 +466,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails1 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -480,7 +480,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function() {\n    throw new Error(\"fails2\");\n  }",
+          "body": "function () {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -490,13 +490,13 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 "message": "fails2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 6,
+                  "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  4 | \n  5 |   it \"fails2\", ->\n> 6 |     throw new Error(\"fails2\")\n    |           ^",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -506,7 +506,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails2 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -518,9 +518,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_spec.coffee",
-        "relative": "cypress/integration/simple_failing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
+        "name": "simple_failing_spec.js",
+        "relative": "cypress/integration/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -554,28 +554,28 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -585,7 +585,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n  }",
+          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -604,7 +604,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n  }",
+          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -623,7 +623,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n  }",
+          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -640,9 +640,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_hooks_spec.coffee",
-        "relative": "cypress/integration/simple_hooks_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
+        "name": "simple_hooks_spec.js",
+        "relative": "cypress/integration/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -676,7 +676,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(1000);\n  }"
+          "body": "function () {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -686,7 +686,7 @@ exports['e2e spec_isolation fails [electron] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(true).should(\"be.true\");\n  }",
+          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -703,9 +703,9 @@ exports['e2e spec_isolation fails [electron] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_passing_spec.coffee",
-        "relative": "cypress/integration/simple_passing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
+        "name": "simple_passing_spec.js",
+        "relative": "cypress/integration/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -761,21 +761,21 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -786,7 +786,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -798,11 +798,11 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -812,7 +812,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -847,7 +847,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -857,13 +857,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -873,7 +873,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -888,7 +888,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -908,7 +908,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -928,7 +928,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -938,13 +938,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -954,7 +954,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -966,9 +966,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1004,7 +1004,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
+          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -1014,13 +1014,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 3,
-                  "column": 35,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  1 | describe \"simple failing spec\", ->\n  2 |   it \"fails1\", ->\n> 3 |     cy.wrap(true, {timeout: 100}).should(\"be.false\")\n    |                                   ^\n  4 | \n  5 |   it \"fails2\", ->\n  6 |     throw new Error(\"fails2\")",
-                  "language": "coffee"
+                  "line": 4,
+                  "column": 37,
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1030,7 +1030,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails1 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1044,7 +1044,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function() {\n    throw new Error(\"fails2\");\n  }",
+          "body": "function () {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -1054,13 +1054,13 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 "message": "fails2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 6,
+                  "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  4 | \n  5 |   it \"fails2\", ->\n> 6 |     throw new Error(\"fails2\")\n    |           ^",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1070,7 +1070,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails2 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1082,9 +1082,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_spec.coffee",
-        "relative": "cypress/integration/simple_failing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
+        "name": "simple_failing_spec.js",
+        "relative": "cypress/integration/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1118,28 +1118,28 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -1149,7 +1149,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n  }",
+          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1168,7 +1168,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n  }",
+          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1187,7 +1187,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n  }",
+          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1204,9 +1204,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_hooks_spec.coffee",
-        "relative": "cypress/integration/simple_hooks_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
+        "name": "simple_hooks_spec.js",
+        "relative": "cypress/integration/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1240,7 +1240,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(1000);\n  }"
+          "body": "function () {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -1250,7 +1250,7 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(true).should(\"be.true\");\n  }",
+          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1267,9 +1267,9 @@ exports['e2e spec_isolation fails [chrome] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_passing_spec.coffee",
-        "relative": "cypress/integration/simple_passing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
+        "name": "simple_passing_spec.js",
+        "relative": "cypress/integration/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1325,21 +1325,21 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -1350,7 +1350,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1362,11 +1362,11 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1376,7 +1376,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1411,7 +1411,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1421,13 +1421,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1437,7 +1437,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1452,7 +1452,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -1472,7 +1472,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -1492,7 +1492,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1502,13 +1502,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1518,7 +1518,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1530,9 +1530,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1568,7 +1568,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails1"
           ],
           "state": "failed",
-          "body": "function() {\n    return cy.wrap(true, {\n      timeout: 100\n    }).should(\"be.false\");\n  }",
+          "body": "function () {\n    cy.wrap(true, {\n      timeout: 100\n    }).should('be.false');\n  }",
           "displayError": "AssertionError: Timed out retrying after 100ms: expected true to be false\n      [stack trace lines]",
           "attempts": [
             {
@@ -1578,13 +1578,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "message": "Timed out retrying after 100ms: expected true to be false",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 3,
-                  "column": 35,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  1 | describe \"simple failing spec\", ->\n  2 |   it \"fails1\", ->\n> 3 |     cy.wrap(true, {timeout: 100}).should(\"be.false\")\n    |                                   ^\n  4 | \n  5 |   it \"fails2\", ->\n  6 |     throw new Error(\"fails2\")",
-                  "language": "coffee"
+                  "line": 4,
+                  "column": 37,
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "  2 | describe('simple failing spec', () => {\n  3 |   it('fails1', () => {\n> 4 |     cy.wrap(true, { timeout: 100 }).should('be.false')\n    |                                     ^\n  5 |   })\n  6 | \n  7 |   it('fails2', () => {",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1594,7 +1594,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails1 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails1 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1608,7 +1608,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "fails2"
           ],
           "state": "failed",
-          "body": "function() {\n    throw new Error(\"fails2\");\n  }",
+          "body": "function () {\n    throw new Error('fails2');\n  }",
           "displayError": "Error: fails2\n      [stack trace lines]",
           "attempts": [
             {
@@ -1618,13 +1618,13 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 "message": "fails2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 6,
+                  "line": 8,
                   "column": 11,
-                  "originalFile": "cypress/integration/simple_failing_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
-                  "frame": "  4 | \n  5 |   it \"fails2\", ->\n> 6 |     throw new Error(\"fails2\")\n    |           ^",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
+                  "frame": "   6 | \n   7 |   it('fails2', () => {\n>  8 |     throw new Error('fails2')\n     |           ^\n   9 |   })\n  10 | })\n  11 | ",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1634,7 +1634,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.coffee/simple failing spec -- fails2 (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_spec.js/simple failing spec -- fails2 (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1646,9 +1646,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_spec.coffee",
-        "relative": "cypress/integration/simple_failing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.coffee",
+        "name": "simple_failing_spec.js",
+        "relative": "cypress/integration/simple_failing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1682,28 +1682,28 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         },
         {
           "hookName": "before each",
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(200);\n  }"
+          "body": "function () {\n    cy.wait(200);\n  }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n    return cy.wait(100);\n  }"
+          "body": "function () {\n    cy.wait(100);\n  }"
         }
       ],
       "tests": [
@@ -1713,7 +1713,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t1"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t1\").should(\"eq\", \"t1\");\n  }",
+          "body": "function () {\n    cy.wrap('t1').should('eq', 't1');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1732,7 +1732,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t2"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t2\").should(\"eq\", \"t2\");\n  }",
+          "body": "function () {\n    cy.wrap('t2').should('eq', 't2');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1751,7 +1751,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "t3"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(\"t3\").should(\"eq\", \"t3\");\n  }",
+          "body": "function () {\n    cy.wrap('t3').should('eq', 't3');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1768,9 +1768,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_hooks_spec.coffee",
-        "relative": "cypress/integration/simple_hooks_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.coffee",
+        "name": "simple_hooks_spec.js",
+        "relative": "cypress/integration/simple_hooks_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_hooks_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1804,7 +1804,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n    return cy.wait(1000);\n  }"
+          "body": "function () {\n    cy.wait(1000);\n  }"
         }
       ],
       "tests": [
@@ -1814,7 +1814,7 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
             "passes"
           ],
           "state": "passed",
-          "body": "function() {\n    return cy.wrap(true).should(\"be.true\");\n  }",
+          "body": "function () {\n    cy.wrap(true).should('be.true');\n  }",
           "displayError": null,
           "attempts": [
             {
@@ -1831,9 +1831,9 @@ exports['e2e spec_isolation fails [firefox] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_passing_spec.coffee",
-        "relative": "cypress/integration/simple_passing_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.coffee",
+        "name": "simple_passing_spec.js",
+        "relative": "cypress/integration/simple_passing_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_passing_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -1889,21 +1889,21 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -1914,7 +1914,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -1926,11 +1926,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1940,7 +1940,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -1955,11 +1955,11 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -1969,7 +1969,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2004,7 +2004,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2014,13 +2014,13 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "message": "fail2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2030,7 +2030,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2043,13 +2043,13 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2059,7 +2059,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2074,7 +2074,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -2094,7 +2094,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -2114,7 +2114,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -2124,13 +2124,13 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2140,7 +2140,7 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2152,9 +2152,9 @@ exports['e2e spec_isolation failing with retries enabled [electron] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -2334,21 +2334,21 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -2359,7 +2359,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2371,11 +2371,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2385,7 +2385,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2400,11 +2400,11 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2414,7 +2414,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2449,7 +2449,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2459,13 +2459,13 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "message": "fail2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2475,7 +2475,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2488,13 +2488,13 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2504,7 +2504,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2519,7 +2519,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -2539,7 +2539,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -2559,7 +2559,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -2569,13 +2569,13 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2585,7 +2585,7 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2597,9 +2597,9 @@ exports['e2e spec_isolation failing with retries enabled [chrome] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
@@ -2779,21 +2779,21 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
           "title": [
             "\"before each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail1\");\n    }"
+          "body": "function () {\n      throw new Error('fail1');\n    }"
         },
         {
           "hookName": "after each",
           "title": [
             "\"after each\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail2\");\n    }"
+          "body": "function () {\n      throw new Error('fail2');\n    }"
         },
         {
           "hookName": "after all",
           "title": [
             "\"after all\" hook"
           ],
-          "body": "function() {\n      throw new Error(\"fail3\");\n    }"
+          "body": "function () {\n      throw new Error('fail3');\n    }"
         }
       ],
       "tests": [
@@ -2804,7 +2804,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "never gets here"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail1\n\nBecause this error occurred during a `before each` hook we are skipping the remaining tests in the current suite: `beforeEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2816,11 +2816,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2830,7 +2830,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2845,11 +2845,11 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "codeFrame": {
                   "line": 4,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  2 |   context \"beforeEach hooks\", ->\n  3 |     beforeEach ->\n> 4 |       throw new Error(\"fail1\")\n    |             ^\n  5 | \n  6 |     it \"never gets here\", ->\n  7 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  2 |   context('beforeEach hooks', () => {\n  3 |     beforeEach(() => {\n> 4 |       throw new Error('fail1')\n    |             ^\n  5 |     })\n  6 | \n  7 |     it('never gets here', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2859,7 +2859,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- beforeEach hooks -- never gets here -- before each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2894,7 +2894,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "runs this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`\n      [stack trace lines]",
           "attempts": [
             {
@@ -2904,13 +2904,13 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "message": "fail2",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2920,7 +2920,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2933,13 +2933,13 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "message": "fail2\n\nBecause this error occurred during a `after each` hook we are skipping the remaining tests in the current suite: `afterEach hooks`",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 13,
+                  "line": 16,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  11 |   context \"afterEach hooks\", ->\n  12 |     afterEach ->\n> 13 |       throw new Error(\"fail2\")\n     |             ^\n  14 | \n  15 |     it \"runs this\", ->\n  16 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  14 |   context('afterEach hooks', () => {\n  15 |     afterEach(() => {\n> 16 |       throw new Error('fail2')\n     |             ^\n  17 |     })\n  18 | \n  19 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -2949,7 +2949,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- afterEach hooks -- runs this -- after each hook (failed) (attempt 2).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -2964,7 +2964,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "does not run this"
           ],
           "state": "skipped",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -2984,7 +2984,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "runs this"
           ],
           "state": "passed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": null,
           "attempts": [
             {
@@ -3004,7 +3004,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
             "fails on this"
           ],
           "state": "failed",
-          "body": "function() {}",
+          "body": "function () {}",
           "displayError": "Error: fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail\n      [stack trace lines]",
           "attempts": [
             {
@@ -3014,13 +3014,13 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 "message": "fail3\n\nBecause this error occurred during a `after all` hook we are skipping the remaining tests in the current suite: `after hooks`\n\nAlthough you have test retries enabled, we do not retry tests when `before all` or `after all` hooks fail",
                 "stack": "[stack trace lines]",
                 "codeFrame": {
-                  "line": 21,
+                  "line": 26,
                   "column": 13,
-                  "originalFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "relativeFile": "cypress/integration/simple_failing_hook_spec.coffee",
-                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
-                  "frame": "  19 |   context \"after hooks\", ->\n  20 |     after ->\n> 21 |       throw new Error(\"fail3\")\n     |             ^\n  22 | \n  23 |     it \"runs this\", ->\n  24 | ",
-                  "language": "coffee"
+                  "originalFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "relativeFile": "cypress/integration/simple_failing_hook_spec.js",
+                  "absoluteFile": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
+                  "frame": "  24 |   context('after hooks', () => {\n  25 |     after(() => {\n> 26 |       throw new Error('fail3')\n     |             ^\n  27 |     })\n  28 | \n  29 |     it('runs this', () => {})",
+                  "language": "js"
                 }
               },
               "videoTimestamp": null,
@@ -3030,7 +3030,7 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
                 {
                   "name": null,
                   "takenAt": "2018-02-01T20:14:19.323Z",
-                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.coffee/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
+                  "path": "/foo/bar/.projects/e2e/cypress/screenshots/simple_failing_hook_spec.js/simple failing hook spec -- after hooks -- fails on this -- after all hook (failed).png",
                   "height": 720,
                   "width": 1280
                 }
@@ -3042,9 +3042,9 @@ exports['e2e spec_isolation failing with retries enabled [firefox] 1'] = {
       "error": null,
       "video": null,
       "spec": {
-        "name": "simple_failing_hook_spec.coffee",
-        "relative": "cypress/integration/simple_failing_hook_spec.coffee",
-        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.coffee",
+        "name": "simple_failing_hook_spec.js",
+        "relative": "cypress/integration/simple_failing_hook_spec.js",
+        "absolute": "/foo/bar/.projects/e2e/cypress/integration/simple_failing_hook_spec.js",
         "specType": "integration"
       },
       "shouldUploadVideo": true
