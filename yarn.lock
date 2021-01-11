@@ -10374,9 +10374,9 @@ chrome-remote-interface@^0.25.7:
     commander "2.11.x"
     ws "3.3.x"
 
-chrome-remote-interface@cypress-io/chrome-remote-interface#8146ca360bb68bfdabe3f031b71b612498c59745:
+chrome-remote-interface@cypress-io/chrome-remote-interface#147192810f29951cd96c5e406495e9b4d740ba95:
   version "0.28.2"
-  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/8146ca360bb68bfdabe3f031b71b612498c59745"
+  resolved "https://codeload.github.com/cypress-io/chrome-remote-interface/tar.gz/147192810f29951cd96c5e406495e9b4d740ba95"
   dependencies:
     commander "2.11.x"
     ws "^7.2.0"
