@@ -25,7 +25,7 @@ const ProjectListItem = observer(({ project, onSelect, onRemove }) => (
 @observer
 class ProjectsList extends Component {
   componentDidMount () {
-    projectsApi.loadProjects()
+    projectsApi.getLocalProjects()
   }
 
   render () {

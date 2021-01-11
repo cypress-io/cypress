@@ -13,12 +13,30 @@ const saveToLocalStorage = () => {
   localData.set('projects', projectsStore.serializeProjects())
 }
 
-const loadProjects = (shouldLoad = true) => {
+const getProjects = () => {
+  ipc.getProjects()
+  .then((projects = []) => {
+    projectsStore.setProjects(projects)
+    projectsStore.setLoading(false)
+
+    return null
+  })
+  .catch(ipc.isUnauthed, ipc.handleUnauthed)
+  .catch((err) => {
+    projectsStore.setError(err)
+
+    return null
+  })
+
+  return null
+}
+
+const getLocalProjects = (shouldLoad = true) => {
   if (!projectsStore.projects.length && shouldLoad) {
     projectsStore.setLoading(true)
   }
 
-  return ipc.getProjects()
+  return ipc.getLocalProjects()
   .then((ipcProjects) => {
     // extend the projects with data cached in local storage
     const cacheIndex = _.keyBy(localData.get('projects'), 'path')
@@ -237,7 +255,8 @@ const getRecordKeys = () => {
 }
 
 export default {
-  loadProjects,
+  getProjects,
+  getLocalProjects,
   openProject,
   reopenProject,
   closeProject,

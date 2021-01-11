@@ -7,10 +7,13 @@ import { observer } from 'mobx-react'
 import BootstrapModal from 'react-bootstrap-modal'
 
 import OrgSelector from './org-selector'
+import ProjectSelector from './project-selector'
 import authStore from '../auth/auth-store'
 import ipc from '../lib/ipc'
 import orgsStore from '../organizations/organizations-store'
 import orgsApi from '../organizations/organizations-api'
+import projectsStore from '../projects/projects-store'
+import projectsApi from '../projects/projects-api'
 
 @observer
 class SetupProject extends Component {
@@ -27,6 +30,7 @@ class SetupProject extends Component {
       projectName: this.props.project.displayName,
       public: null,
       selectedOrgId: null,
+      selectedProjectId: null,
       showNameMissingError: false,
       isSubmitting: false,
     }
@@ -70,6 +74,7 @@ class SetupProject extends Component {
 
     orgsApi.getOrgs()
     orgsApi.pollOrgs()
+    projectsApi.getProjects()
   }
 
   _stopPolling () {
@@ -87,11 +92,11 @@ class SetupProject extends Component {
       <div className='setup-project-modal modal-body os-dialog'>
         <BootstrapModal.Dismiss className='btn btn-link close'>x</BootstrapModal.Dismiss>
         <h4>Set up project</h4>
-        <form
-          onSubmit={this._submit}>
+        <form onSubmit={this._submit}>
           {this._nameField()}
           <hr />
-          {this._ownerSelector()}
+          {this._orgSelector()}
+          {this._projectSelector()}
           {this._accessSelector()}
           {this._error()}
           <div className='actions form-group'>
@@ -139,11 +144,11 @@ class SetupProject extends Component {
     )
   }
 
-  _ownerSelector () {
+  _orgSelector () {
     return (
       <div className='form-group'>
         <div className='label-title'>
-          <label htmlFor='projectName' className='control-label pull-left'>
+          <label className='control-label pull-left'>
             Who should own this project?
             {' '}
             <a onClick={this._openOrgDocs}>
@@ -158,8 +163,8 @@ class SetupProject extends Component {
             Manage organizations
           </a>
         </div>
-        <div className='owner-parts'>
-          <div className='select-orgs'>
+        <div className='org-parts'>
+          <div className='select-org'>
             <OrgSelector
               orgs={orgsStore.orgs}
               isLoaded={orgsStore.isLoaded}
@@ -173,8 +178,35 @@ class SetupProject extends Component {
     )
   }
 
+  _projectSelector () {
+    return (
+      <div className='form-group'>
+        <div className='label-title'>
+          <label className='control-label pull-left'>
+            Select a project
+          </label>
+        </div>
+        <div className='project-parts'>
+          <div className='select-project'>
+            <ProjectSelector
+              projects={projectsStore.projects.filter((project) => project.orgId === this.state.selectedOrgId)}
+              isLoaded={!projectsStore.isLoading}
+              selectedProjectId={this.state.selectedProjectId}
+              onUpdateSelectedProjectId={this._updateSelectedProjectId}
+              onCreateProject={this._createProject}
+            />
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   _hasOrgs () {
     return orgsStore.orgs.length
+  }
+
+  _hasProjects () {
+    return this.state.selectedOrgId && projectsStore.projects.some((project) => project.orgId === this.state.selectedOrgId)
   }
 
   _accessSelector () {
@@ -239,6 +271,11 @@ class SetupProject extends Component {
     ipc.externalOpen('https://on.cypress.io/dashboard/organizations')
   }
 
+  _createProject = (e) => {
+    e.preventDefault()
+    // TODO
+  }
+
   _formNotFilled () {
     return _.isNull(this.state.public) || !this.state.projectName
   }
@@ -286,6 +323,22 @@ class SetupProject extends Component {
     // deselect their choice for access
     // if they didn't select anything
     if (orgIsNotSelected) {
+      this.setState({
+        public: null,
+      })
+    }
+  }
+
+  _updateSelectedProjectId = (selectedProjectId) => {
+    const projectIsNotSelected = _.isNull(selectedProjectId)
+
+    this.setState({
+      selectedProjectId,
+    })
+
+    // deselect their choice for access
+    // if they didn't select anything
+    if (projectIsNotSelected) {
       this.setState({
         public: null,
       })

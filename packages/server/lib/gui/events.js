@@ -231,8 +231,13 @@ const handleEvent = function (options, bus, event, id, type, arg) {
       .then(send)
       .catch(sendErr)
 
-    case 'get:projects':
+    case 'get:local:projects':
       return Project.getPathsAndIds()
+      .then(send)
+      .catch(sendErr)
+
+    case 'get:projects':
+      return Project.getProjects()
       .then(send)
       .catch(sendErr)
 

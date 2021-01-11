@@ -661,6 +661,12 @@ class Project extends EE {
     })
   }
 
+  static getProjects () {
+    return user.ensureAuthToken().then((authToken) => {
+      return api.getProjects(authToken)
+    })
+  }
+
   static paths () {
     return cache.getProjectRoots()
   }
