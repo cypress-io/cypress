@@ -233,6 +233,9 @@ module.exports = {
       // enabling can only happen once the window has loaded
       return this._enableDebugger(win.webContents)
     })
+    .then(() => {
+      return this._setDownloadsDir(win.webContents, options.downloadsFolder)
+    })
     .return(win)
   },
 
@@ -285,6 +288,13 @@ module.exports = {
     debug('debugger: enable Console and Network')
 
     return webContents.debugger.sendCommand('Console.enable')
+  },
+
+  _setDownloadsDir (webContents, dir) {
+    return webContents.debugger.sendCommand('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: dir,
+    })
   },
 
   _getPartition (options) {
