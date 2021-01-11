@@ -28,17 +28,19 @@ interface BaseReporterProps {
   statsStore: StatsStore
   events: Events
   error?: RunnablesErrorModel
-  resetStatsOnSpecChange?: boolean
-  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
+  runMode: 'single' | 'multi'
+  resetStatsOnSpecChange?: boolean
+  /** Used for component testing front-end */
   specRunId?: string | null
+  renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
 }
 
-export interface SingleReporterProps extends BaseReporterProps{
-  runMode: 'single',
+export interface SingleReporterProps extends BaseReporterProps {
+  runMode: 'single'
 }
 
-export interface MultiReporterProps extends BaseReporterProps{
+export interface MultiReporterProps extends BaseReporterProps {
   runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
 }
@@ -129,7 +131,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, spec } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(appState.autoScrollingEnabled)
