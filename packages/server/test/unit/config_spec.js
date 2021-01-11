@@ -352,6 +352,20 @@ describe('lib/config', () => {
         })
       })
 
+      context('downloadsFolder', () => {
+        it('passes if a string', function () {
+          this.setup({ downloadsFolder: '_downloads' })
+
+          return this.expectValidationPasses()
+        })
+
+        it('fails if not a string', function () {
+          this.setup({ downloadsFolder: true })
+
+          return this.expectValidationFails('be a string')
+        })
+      })
+
       context('userAgent', () => {
         it('passes if a string', function () {
           this.setup({ userAgent: '_tests' })
@@ -1228,6 +1242,7 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             env: {},
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
@@ -1308,6 +1323,7 @@ describe('lib/config', () => {
             chromeWebSecurity: { value: true, from: 'default' },
             componentFolder: { value: 'cypress/component', from: 'default' },
             defaultCommandTimeout: { value: 4000, from: 'default' },
+            downloadsFolder: { value: 'cypress/downloads', from: 'default' },
             execTimeout: { value: 60000, from: 'default' },
             experimentalComponentTesting: { value: false, from: 'default' },
             experimentalFetchPolyfill: { value: false, from: 'default' },

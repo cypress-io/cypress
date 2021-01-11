@@ -53,6 +53,11 @@ export const options = [
     defaultValue: 4000,
     validation: v.isNumber,
   }, {
+    name: 'downloadsFolder',
+    defaultValue: 'cypress/downloads',
+    validation: v.isString,
+    isFolder: true,
+  }, {
     name: 'env',
     validation: v.isPlainObject,
   }, {
