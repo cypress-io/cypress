@@ -10,7 +10,7 @@ const wrap = (ipc, invoke, ids, [options]) => {
 
   options.devServerEvents = devServerEvents
 
-  util.wrapChildPromise(ipc, invoke, ids, options)
+  util.wrapChildPromise(ipc, invoke, ids, [options])
 }
 
 module.exports = { wrap }

@@ -2,7 +2,7 @@ const _ = require('lodash')
 const util = require('../util')
 const errors = require('../../errors')
 
-const getBody = (ipc, events, ids, event) => {
+const getBody = (ipc, events, ids, [event]) => {
   const taskEvent = _.find(events, { event: 'task' }).handler
   const invoke = () => {
     const fn = taskEvent[event]
