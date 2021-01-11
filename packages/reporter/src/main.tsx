@@ -30,7 +30,6 @@ interface BaseReporterProps {
   runMode: RunMode
   events: Events
   error?: RunnablesErrorModel
-  runMode: RunMode
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
