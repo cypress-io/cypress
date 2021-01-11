@@ -4,8 +4,13 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+<<<<<<< HEAD
 const { ProjectCt } = require('@packages/server-ct/src/project-ct')
 const { ProjectE2E } = require('./project-e2e')
+=======
+
+const Project = require('./project')
+>>>>>>> develop
 const browsers = require('./browsers')
 const specsUtil = require('./util/specs')
 const preprocessor = require('./plugins/preprocessor')

@@ -2771,13 +2771,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3073,13 +3066,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3097,13 +3083,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3405,13 +3384,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3429,13 +3401,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3807,13 +3772,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -3831,13 +3789,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4017,13 +3968,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4041,13 +3985,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4149,13 +4086,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h7",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4173,13 +4103,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4197,13 +4120,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4385,13 +4301,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",
@@ -4409,13 +4318,6 @@ exports['src/cypress/runner retries mochaEvents can retry from [afterEach] #1'] 
       "title": "\"after each\" hook",
       "hookName": "after each",
       "hookId": "h1",
-      "err": {
-        "message": "[error message]",
-        "name": "AssertionError",
-        "stack": "match.string",
-        "sourceMappedStack": "match.string",
-        "parsedStack": "match.array"
-      },
       "body": "[body]",
       "type": "hook",
       "duration": "match.number",

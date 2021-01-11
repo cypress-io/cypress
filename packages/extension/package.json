@@ -1,6 +1,6 @@
 {
   "name": "@packages/extension",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.js",
   "scripts": {
@@ -21,7 +21,12 @@
   },
   "devDependencies": {
     "@cypress/icons": "0.7.0",
+<<<<<<< HEAD
     "@packages/socket": "*",
+=======
+    "@packages/socket": "0.0.0-development",
+    "browserify": "16.3.0",
+>>>>>>> develop
     "chai": "3.5.0",
     "coffeescript": "1.12.7",
     "cross-env": "6.0.3",

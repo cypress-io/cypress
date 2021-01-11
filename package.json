@@ -1,6 +1,6 @@
 {
   "name": "cypress",
-  "version": "6.1.0",
+  "version": "6.2.1",
   "description": "Cypress.io end to end testing tool",
   "private": true,
   "scripts": {
@@ -243,7 +243,6 @@
       "git add"
     ],
     "*.{js,jsx,ts,tsx,json,eslintrc}": [
-      "yarn stop-only --folder",
       "eslint --fix",
       "git add"
     ]

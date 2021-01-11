@@ -37,6 +37,8 @@ function findSpecsOfType (searchOptions, specPattern) {
 
   const searchFolderPath = searchOptions.searchFolder
 
+  la(check.unemptyString(searchFolderPath), 'expected spec folder path in', searchOptions)
+
   debug(
     'looking for test specs in the folder:',
     searchFolderPath,
@@ -53,12 +55,16 @@ function findSpecsOfType (searchOptions, specPattern) {
   // coded. the rest is simply whatever is in
   // the javascripts array
 
-  if (searchOptions.fixturesFolder) {
-    fixturesFolderPath = path.join(
-      searchOptions.fixturesFolder,
-      '**',
-      '*',
-    )
+  if (check.unemptyString(searchOptions.fixturesFolder)) {
+    // users should be allowed to set the fixtures folder
+    // the same as the specs folder
+    if (searchOptions.fixturesFolder !== searchFolderPath) {
+      fixturesFolderPath = path.join(
+        searchOptions.fixturesFolder,
+        '**',
+        '*',
+      )
+    }
   }
 
   const supportFilePath = searchOptions.supportFile || []

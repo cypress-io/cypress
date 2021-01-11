@@ -6,7 +6,7 @@ describe('e2e task', () => {
 
   it('handles undefined return and includes stack trace in error', function () {
     return e2e.exec(this, {
-      spec: 'task_spec.coffee',
+      spec: 'task_spec.js',
       snapshot: true,
       expectedExitCode: 2,
     })

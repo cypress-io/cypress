@@ -51,9 +51,10 @@ interface StringValues {
   ```
 */
 const _summaries: StringValues = {
-  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs',
+  experimentalComponentTesting: 'Framework-specific component testing, uses `componentFolder` to load component specs.',
+  experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing.',
+  experimentalRunEvents: 'Allows listening to the `before:run`, `after:run`, `before:spec`, and `after:spec` events in the plugins file.',
   experimentalSourceRewriting: 'Enables AST-based JS/HTML rewriting. This may fix issues caused by the existing regex-based JS/HTML replacement algorithm.',
-  experimentalFetchPolyfill: 'Polyfills `window.fetch` to enable Network spying and stubbing',
 }
 
 /**
@@ -68,8 +69,9 @@ const _summaries: StringValues = {
 */
 const _names: StringValues = {
   experimentalComponentTesting: 'Component Testing',
-  experimentalSourceRewriting: 'Improved source rewriting',
   experimentalFetchPolyfill: 'Fetch polyfill',
+  experimentalRunEvents: 'Run Events',
+  experimentalSourceRewriting: 'Improved source rewriting',
 }
 
 /**

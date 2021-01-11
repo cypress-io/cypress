@@ -67,7 +67,7 @@ describe('e2e server sent events', () => {
 
   // https://github.com/cypress-io/cypress/issues/1440
   e2e.it('passes', {
-    spec: 'server_sent_events_spec.coffee',
+    spec: 'server_sent_events_spec.js',
     snapshot: true,
   })
 })

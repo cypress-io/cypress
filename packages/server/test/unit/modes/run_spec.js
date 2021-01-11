@@ -6,7 +6,11 @@ const stripAnsi = require('strip-ansi')
 const snapshot = require('snap-shot-it')
 const R = require('ramda')
 const pkg = require('@packages/root')
+<<<<<<< HEAD
 const { ProjectBase } = require('../../../lib/project-base')
+=======
+const fs = require(`${root}../lib/util/fs`)
+>>>>>>> develop
 const user = require(`${root}../lib/user`)
 const errors = require(`${root}../lib/errors`)
 const config = require(`${root}../lib/config`)
@@ -351,9 +355,22 @@ describe('lib/modes/run', () => {
 
   context('.waitForTestsToFinishRunning', () => {
     beforeEach(function () {
+      sinon.stub(fs, 'pathExists').resolves(true)
       sinon.stub(this.projectInstance, 'getConfig').resolves({})
       sinon.spy(runMode, 'getVideoRecordingDelay')
       sinon.spy(errors, 'warning')
+
+      this.setupProjectEnd = (results) => {
+        results = results || {
+          stats: {
+            failures: 0,
+          },
+        }
+
+        process.nextTick(() => {
+          this.projectInstance.emit('end', results)
+        })
+      }
     })
 
     it('end event resolves with obj, displays stats, displays screenshots, sets video timestamps', function () {
@@ -377,9 +394,7 @@ describe('lib/modes/run', () => {
       sinon.spy(runMode, 'displayScreenshots')
       sinon.spy(Promise.prototype, 'delay')
 
-      process.nextTick(() => {
-        return this.projectInstance.emit('end', results)
-      })
+      this.setupProjectEnd(results)
 
       return runMode.waitForTestsToFinishRunning({
         project: this.projectInstance,
@@ -495,13 +510,7 @@ describe('lib/modes/run', () => {
     })
 
     it('logs warning and resolves on failed video end', async function () {
-      process.nextTick(() => {
-        return this.projectInstance.emit('end', {
-          stats: {
-            failures: 0,
-          },
-        })
-      })
+      this.setupProjectEnd()
 
       sinon.spy(videoCapture, 'process')
       const endVideoCapture = sinon.stub().rejects()
@@ -522,13 +531,7 @@ describe('lib/modes/run', () => {
     })
 
     it('logs warning and resolves on failed video compression', async function () {
-      process.nextTick(() => {
-        return this.projectInstance.emit('end', {
-          stats: {
-            failures: 0,
-          },
-        })
-      })
+      this.setupProjectEnd()
 
       const endVideoCapture = sinon.stub().resolves()
 
@@ -547,14 +550,8 @@ describe('lib/modes/run', () => {
       expect(errors.warning).to.be.calledWith('VIDEO_POST_PROCESSING_FAILED')
     })
 
-    it('should not upload video when videoUploadOnPasses is false and no failures', function () {
-      process.nextTick(() => {
-        return this.projectInstance.emit('end', {
-          stats: {
-            failures: 0,
-          },
-        })
-      })
+    it('does not upload video when videoUploadOnPasses is false and no failures', function () {
+      this.setupProjectEnd()
 
       sinon.spy(runMode, 'postProcessRecording')
       sinon.spy(videoCapture, 'process')
@@ -569,7 +566,7 @@ describe('lib/modes/run', () => {
         gui: false,
         endVideoCapture,
       })
-      .then((obj) => {
+      .then(() => {
         expect(runMode.postProcessRecording).to.be.calledWith('foo.mp4', 'foo-compressed.mp4', 32, false)
 
         expect(videoCapture.process).not.to.be.called
@@ -584,6 +581,54 @@ describe('lib/modes/run', () => {
       })
       .then(() => {
         expect(runMode.getVideoRecordingDelay).to.have.returned(0)
+      })
+    })
+
+    describe('when video is deleted in after:spec event', function () {
+      beforeEach(function () {
+        this.setupProjectEnd()
+        sinon.spy(runMode, 'postProcessRecording')
+        sinon.spy(videoCapture, 'process')
+
+        fs.pathExists.resolves(false)
+      })
+
+      it('logs warning', function () {
+        return runMode.waitForTestsToFinishRunning({
+          project: this.projectInstance,
+          startedVideoCapture: new Date(),
+          videoName: 'foo.mp4',
+          endVideoCapture: sinon.stub().resolves(),
+        })
+        .then(() => {
+          expect(errors.warning).to.be.calledWith('VIDEO_DOESNT_EXIST', 'foo.mp4')
+        })
+      })
+
+      it('does not process or upload video', function () {
+        return runMode.waitForTestsToFinishRunning({
+          project: this.projectInstance,
+          startedVideoCapture: new Date(),
+          videoName: 'foo.mp4',
+          endVideoCapture: sinon.stub().resolves(),
+        })
+        .then((results) => {
+          expect(runMode.postProcessRecording).not.to.be.called
+          expect(videoCapture.process).not.to.be.called
+          expect(results.shouldUploadVideo).to.be.false
+        })
+      })
+
+      it('nulls out video value from results', function () {
+        return runMode.waitForTestsToFinishRunning({
+          project: this.projectInstance,
+          startedVideoCapture: new Date(),
+          videoName: 'foo.mp4',
+          endVideoCapture: sinon.stub().resolves(),
+        })
+        .then((results) => {
+          expect(results.video).to.be.null
+        })
       })
     })
   })
