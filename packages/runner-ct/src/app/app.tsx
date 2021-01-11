@@ -13,7 +13,7 @@ import Header from '../header/header'
 import Iframes from '../iframe/iframes'
 import Message from '../message/message'
 import './app.scss'
-import { ReporterHeader } from './ReporterHeader'
+import { ReporterHeader } from './reporter-header'
 import { useWindowSize } from '../lib/useWindowSize'
 import EventManager from '../lib/event-manager'
 
@@ -24,7 +24,7 @@ export interface ExtendedConfigOptions extends Cypress.ConfigOptions {
   projectName: string
 }
 
-interface AppProps {
+export interface AppProps {
   runMode: RunMode
   state: State;
   // eslint-disable-next-line
