@@ -114,32 +114,24 @@ const execute = (ipc, event, ids, args = []) => {
 
   switch (event) {
     case 'dev-server:start':
-      devServer.wrap(ipc, invoke, ids, args)
-      break
+      return devServer.wrap(ipc, invoke, ids, args)
     case 'after:screenshot':
-      util.wrapChildPromise(ipc, invoke, ids, args)
-      break
+      return util.wrapChildPromise(ipc, invoke, ids, args)
     case 'file:preprocessor':
-      preprocessor.wrap(ipc, invoke, ids, args)
-      break
+      return preprocessor.wrap(ipc, invoke, ids, args)
     case 'after:run':
     case 'before:run':
     case 'before:spec':
     case 'after:spec':
-      wrapChildPromise()
-      break
+      return wrapChildPromise()
     case 'task':
-      task.wrap(ipc, registeredEventsById, ids, args)
-      break
+      return task.wrap(ipc, registeredEventsById, ids, args)
     case '_get:task:keys':
-      task.getKeys(ipc, registeredEventsById, ids)
-      break
+      return task.getKeys(ipc, registeredEventsById, ids)
     case '_get:task:body':
-      task.getBody(ipc, registeredEventsById, ids, args[0])
-      break
+      return task.getBody(ipc, registeredEventsById, ids, args[0])
     case 'before:browser:launch':
-      browserLaunch.wrap(ipc, invoke, ids, args)
-      break
+      return browserLaunch.wrap(ipc, invoke, ids, args)
     default:
       debug('unexpected execute message:', event, args)
   }
