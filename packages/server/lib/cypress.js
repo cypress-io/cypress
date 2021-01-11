@@ -144,6 +144,10 @@ module.exports = {
 
     debug('from argv %o got options %o', argv, options)
 
+    if (options.componentTesting) {
+      throw new Error('Component testing mode is not implemented. But coming 🥳.')
+    }
+
     if (options.headless) {
       // --headless is same as --headed false
       if (options.headed) {

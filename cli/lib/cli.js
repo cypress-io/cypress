@@ -137,6 +137,7 @@ const knownCommands = [
   '--help',
   'install',
   'open',
+  'open-ct',
   'run',
   'verify',
   '-v',
@@ -384,6 +385,27 @@ module.exports = {
       require('./exec/run')
       .start(parseVariableOpts(fnArgs, args))
       .then(util.exit)
+      .catch(util.logErrorExit1)
+    })
+
+    program
+    // TODO make this command public once CT will be merged completely
+    .command('open-ct', { hidden: true })
+    .usage('[options]')
+    .description('Opens Cypress component testing interactive mode.')
+    .option('-b, --browser <browser-path>', text('browserOpenMode'))
+    .option('-c, --config <config>', text('config'))
+    .option('-C, --config-file <config-file>', text('configFile'))
+    .option('-d, --detached [bool]', text('detached'), coerceFalse)
+    .option('-e, --env <env>', text('env'))
+    .option('--global', text('global'))
+    .option('-p, --port <port>', text('port'))
+    .option('-P, --project <project-path>', text('project'))
+    .option('--dev', text('dev'), coerceFalse)
+    .action((opts) => {
+      debug('opening Cypress')
+      require('./exec/open')
+      .start(util.parseOpts(opts), { isComponentTesting: true })
       .catch(util.logErrorExit1)
     })
 
