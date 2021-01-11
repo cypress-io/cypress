@@ -1286,6 +1286,11 @@ const create = (specWindow, mocha, Cypress, cy) => {
           }
 
           runnable.err = $errUtils.wrapErr(err)
+        } else {
+          // https://github.com/cypress-io/cypress/issues/9209
+          // Mocha reuses runnable object. Because of that, runnable.err isn't undefined even when err is undefined.
+          // It causes Cypress to take superfluous screenshots.
+          delete runnable.err
         }
 
         err = maybeHandleRetry(runnable, err)

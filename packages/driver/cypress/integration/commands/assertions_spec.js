@@ -408,6 +408,48 @@ describe('src/cy/commands/assertions', () => {
       })
     })
 
+    // https://github.com/cypress-io/cypress/issues/9644
+    describe('calledOnceWith', () => {
+      it('be.calledOnceWith', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' }, 1234)
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWith',
+          {
+            bar: 'test',
+          },
+        )
+      })
+
+      it('be.calledOnceWithExactly', () => {
+        const spy = cy.spy().as('spy')
+
+        setTimeout(() => {
+          spy({ bar: 'test' })
+        }, 100)
+
+        cy.get('@spy').should(
+          'be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+
+        const spy2 = cy.spy().as('spy2')
+
+        setTimeout(() => {
+          spy2({ bar: 'test' }, 12345)
+        }, 100)
+
+        cy.get('@spy2').should(
+          'not.be.calledOnceWithExactly',
+          { bar: 'test' },
+        )
+      })
+    })
+
     describe('errors', {
       defaultCommandTimeout: 50,
     }, () => {
@@ -490,7 +532,7 @@ describe('src/cy/commands/assertions', () => {
 
       it('throws when eventually times out', (done) => {
         cy.on('fail', (err) => {
-          expect(err.message).to.eq('Timed out retrying: expected \'<button>\' to have class \'does-not-have-class\'')
+          expect(err.message).to.eq('Timed out retrying after 50ms: expected \'<button>\' to have class \'does-not-have-class\'')
 
           done()
         })
@@ -1865,6 +1907,20 @@ describe('src/cy/commands/assertions', () => {
 
           expect($els).to.include.value('foo')
         }).should('contain.value', 'oo2')
+      })
+
+      // https://github.com/cypress-io/cypress/issues/14359
+      it('shows undefined correctly', (done) => {
+        cy.on('log:added', (attrs, log) => {
+          if (attrs.name === 'assert') {
+            cy.removeAllListeners('log:added')
+            expect(log.get('message')).to.eq('expected **undefined** to have value **somevalue**')
+
+            done()
+          }
+        })
+
+        cy.wrap(undefined).should('have.value', 'somevalue')
       })
     })
 
