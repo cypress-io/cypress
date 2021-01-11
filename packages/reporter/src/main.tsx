@@ -95,7 +95,8 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
         multiSpecs: runMode === 'multi',
         'experimental-studio-enabled': experimentalStudioEnabled,
         'studio-active': appState.studioActive,
-      })}>
+      })} data-testid="reporter"
+      >
         {renderReporterHeader({ appState, statsStore })}
         {this.props.runMode === 'single' ? (
           <Runnables

@@ -2,7 +2,6 @@ import React from 'react'
 import { render, screen } from '@testing-library/react'
 import App, { AppProps } from './app'
 import State from '../lib/state'
-import { relative } from 'path'
 
 function createProps (): AppProps {
   return {
@@ -44,5 +43,13 @@ describe('<App/>', () => {
     render(<App {...props}/>)
 
     screen.getByText('specName.ts')
+  })
+
+  it('renders a reporter', () => {
+    const props = createProps()
+
+    render(<App {...props}/>)
+
+    screen.getByTestId('reporter')
   })
 })
