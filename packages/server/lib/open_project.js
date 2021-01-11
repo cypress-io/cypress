@@ -4,6 +4,7 @@ const debug = require('debug')('cypress:server:open_project')
 const Promise = require('bluebird')
 const chokidar = require('chokidar')
 const pluralize = require('pluralize')
+const path = require('path')
 
 const Project = require('./project')
 const browsers = require('./browsers')
