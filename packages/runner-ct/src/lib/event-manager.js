@@ -199,10 +199,10 @@ const eventManager = {
     const hmrSocket = connectWebpackHmr({
       url: `${window.location.origin}/cypress-webpack-hmr-socket`,
       onReload: () => {
-        if (!state.isInitialBuildSucceed) {
-          state.initialBuildFired()
-        } else {
+        if (state.isInitialBuildSucceed) {
           rerun()
+        } else {
+          state.initialBuildFired()
         }
       },
     })
