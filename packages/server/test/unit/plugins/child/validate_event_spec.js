@@ -21,7 +21,6 @@ describe('lib/plugins/child/validate_event', () => {
 You passed: \`undefined\`
 
 The following are valid events:
-<<<<<<< HEAD
 - dev-server:start
 - after:screenshot
 - before:browser:launch
@@ -46,7 +45,6 @@ The following are valid events:
 You passed: \`invalid:event:name\`
 
 The following are valid events:
-<<<<<<< HEAD
 - dev-server:start
 - after:screenshot
 - before:browser:launch
