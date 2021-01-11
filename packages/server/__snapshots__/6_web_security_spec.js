@@ -224,14 +224,14 @@ exports['e2e web security / firefox / displays warning when firefox and chromeWe
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
   │ Cypress:    1.2.3                                                                              │
   │ Browser:    FooBrowser 88                                                                      │
-  │ Specs:      1 found (simple_passing_spec.coffee)                                               │
-  │ Searched:   cypress/integration/simple_passing_spec.coffee                                     │
+  │ Specs:      1 found (simple_passing_spec.js)                                                   │
+  │ Searched:   cypress/integration/simple_passing_spec.js                                         │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────
                                                                                                     
-  Running:  simple_passing_spec.coffee                                                      (1 of 1)
+  Running:  simple_passing_spec.js                                                          (1 of 1)
 
 Your project has set the configuration option: \`chromeWebSecurity: false\`
 
@@ -256,14 +256,14 @@ This option will not have an effect in Firefox. Tests that rely on web security 
   │ Screenshots:  0                                                                                │
   │ Video:        true                                                                             │
   │ Duration:     X seconds                                                                        │
-  │ Spec Ran:     simple_passing_spec.coffee                                                       │
+  │ Spec Ran:     simple_passing_spec.js                                                           │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 
   (Video)
 
   -  Started processing:  Compressing to 32 CRF                                                     
-  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.coffee.mp4      (X second)
+  -  Finished processing: /XXX/XXX/XXX/cypress/videos/simple_passing_spec.js.mp4          (X second)
 
 
 ====================================================================================================
@@ -273,7 +273,7 @@ This option will not have an effect in Firefox. Tests that rely on web security 
 
        Spec                                              Tests  Passing  Failing  Pending  Skipped  
   ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │ ✔  simple_passing_spec.coffee               XX:XX        1        1        -        -        - │
+  │ ✔  simple_passing_spec.js                   XX:XX        1        1        -        -        - │
   └────────────────────────────────────────────────────────────────────────────────────────────────┘
     ✔  All specs passed!                        XX:XX        1        1        -        -        -  
 
