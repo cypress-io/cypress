@@ -83,41 +83,40 @@ const getMajorMinorVersion = (version: string): Version => {
 
 const maybeDebugCdpMessages = (cri) => {
   if (debugVerboseReceive.enabled) {
-    cri._ws.on('message', (data) => {
-      data = _
-      .chain(JSON.parse(data))
-      .tap((data) => {
-        ([
-          'params.data', // screencast frame data
-          'result.data', // screenshot data
-        ]).forEach((truncatablePath) => {
-          const str = _.get(data, truncatablePath)
+    const handleMessage = cri._handleMessage
 
-          if (!_.isString(str)) {
-            return
-          }
+    cri._handleMessage = (message) => {
+      const formatted = _.cloneDeep(message)
 
-          _.set(data, truncatablePath, _.truncate(str, {
-            length: 100,
-            omission: `... [truncated string of total bytes: ${str.length}]`,
-          }))
-        })
+      ;([
+        'params.data', // screencast frame data
+        'result.data', // screenshot data
+      ]).forEach((truncatablePath) => {
+        const str = _.get(formatted, truncatablePath)
 
-        return data
+        if (!_.isString(str)) {
+          return
+        }
+
+        _.set(formatted, truncatablePath, _.truncate(str, {
+          length: 100,
+          omission: `... [truncated string of total bytes: ${str.length}]`,
+        }))
       })
-      .value()
 
-      debugVerboseReceive('received CDP message %o', data)
-    })
+      debugVerboseReceive('received CDP message %o', formatted)
+
+      return handleMessage.call(cri, message)
+    }
   }
 
   if (debugVerboseSend.enabled) {
-    const send = cri._ws.send
+    const send = cri._send
 
-    cri._ws.send = (data, callback) => {
+    cri._send = (data, callback) => {
       debugVerboseSend('sending CDP command %o', JSON.parse(data))
 
-      return send.call(cri._ws, data, callback)
+      return send.call(cri, data, callback)
     }
   }
 }
