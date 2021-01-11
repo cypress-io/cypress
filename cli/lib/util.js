@@ -197,6 +197,7 @@ const parseOpts = (opts) => {
     'cacheClear',
     'cachePrune',
     'ciBuildId',
+    'componentTesting',
     'config',
     'configFile',
     'cypressVersion',
