@@ -224,15 +224,14 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
     return new Promise<void>((resolve, reject) => {
       const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
 
-      const attachToTarget = _.once(async ({ targetId }) => {
-        const result = await cri.send('Target.attachToTarget', {
+      const attachToTarget = _.once(({ targetId }) => {
+        cri.send('Target.attachToTarget', {
           targetId,
           flatten: true, // enable selecting via sessionId
+        }).then((result) => {
+          sessionId = result.sessionId
+          resolve()
         }).catch(reject)
-
-        sessionId = result.sessionId
-
-        resolve()
       })
 
       cri.send('Target.setDiscoverTargets', { discover: true })
