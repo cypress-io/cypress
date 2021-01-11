@@ -13,8 +13,8 @@
     "test-watch": "cross-env NODE_ENV=test ts-mocha --watch"
   },
   "dependencies": {
-    "socket.io": "3.0.4",
-    "socket.io-client": "3.0.4"
+    "socket.io": "~3.0.5",
+    "socket.io-client": "~3.0.5"
   },
   "devDependencies": {
     "chai": "3.5.0",
@@ -29,7 +29,9 @@
   "workspaces": {
     "nohoist": [
       "socket.io",
-      "socket.io-client"
+      "socket.io/socket.io-parser",
+      "socket.io-client",
+      "socket.io-client/socket.io-parser"
     ]
   }
 }
