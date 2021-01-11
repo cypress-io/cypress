@@ -1,11 +1,10 @@
 /* eslint-disable no-console */
-// sockjs is used by webpack-dev-server as default socket client
-import SockJS from 'sockjs-client/dist/sockjs'
 import stripAnsi from 'strip-ansi'
+import SockJS from 'sockjs-client/dist/sockjs' // sockjs is used by webpack-dev-server as default socket client
 
 export interface WebpackHmrClientOptions {
-  url: string;
-  onReload: () => void;
+  url: string
+  onReload: () => void
 }
 
 /**
