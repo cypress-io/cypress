@@ -1,4 +1,4 @@
-exports['e2e cdp / handles disconnections as expected'] = `
+exports['e2e cdp / with TCP transport / handles disconnections as expected'] = `
 
 ====================================================================================================
 
