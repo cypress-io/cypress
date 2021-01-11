@@ -1,4 +1,4 @@
-exports['captures mocha output 1'] = `
+exports['mocha snapshot captures mocha output 1'] = `
 
   command: npm run test-mocha
   code: 0

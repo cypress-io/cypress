@@ -119,7 +119,7 @@ describe('e2e subdomain', () => {
   })
 
   e2e.it('passes', {
-    spec: 'subdomain_spec.coffee',
+    spec: 'subdomain_spec.js',
     snapshot: true,
     config: {
       hosts: {

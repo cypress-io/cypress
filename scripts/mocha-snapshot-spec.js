@@ -13,8 +13,10 @@ function normalize (s) {
 }
 
 /* eslint-env mocha */
-it('captures mocha output', () => {
-  return execa('npm', ['run', 'test-mocha'])
-  .then(normalize)
-  .then(snapshot)
+describe('mocha snapshot', () => {
+  it('captures mocha output', () => {
+    return execa('npm', ['run', 'test-mocha'])
+    .then(normalize)
+    .then(snapshot)
+  })
 })

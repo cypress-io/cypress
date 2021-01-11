@@ -5,6 +5,7 @@ import cs from 'classnames'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
+import { RunMode } from '@packages/runner-ct'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
@@ -20,7 +21,7 @@ import shortcuts from './lib/shortcuts'
 import Header, { ReporterHeaderProps } from './header/header'
 import Runnables from './runnables/runnables'
 
-type ReporterProps = {
+interface BaseReporterProps {
   appState: AppState
   runnablesStore: RunnablesStore
   runner: Runner
@@ -28,18 +29,25 @@ type ReporterProps = {
   statsStore: StatsStore
   events: Events
   error?: RunnablesErrorModel
+  runMode: RunMode
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
-} & ({
-  runMode: 'single',
-} | {
+  /** Used for component testing front-end */
+  specRunId?: string | null
+}
+
+export interface SingleReporterProps extends BaseReporterProps {
+  runMode: 'single'
+}
+
+export interface MultiReporterProps extends BaseReporterProps {
   runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
-})
+}
 
 @observer
-class Reporter extends Component<ReporterProps> {
+class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   static propTypes = {
     error: PropTypes.shape({
       title: PropTypes.string.isRequired,
@@ -76,7 +84,7 @@ class Reporter extends Component<ReporterProps> {
       error,
       events,
       statsStore,
-      renderReporterHeader = (props) => <Header {...props}/>,
+      renderReporterHeader = (props: ReporterHeaderProps) => <Header {...props}/>,
     } = this.props
 
     return (
@@ -110,12 +118,12 @@ class Reporter extends Component<ReporterProps> {
 
   // this hook will only trigger if we switch spec file at runtime
   // it never happens in normal e2e but can happen in component-testing mode
-  componentDidUpdate (newProps: ReporterProps) {
+  componentDidUpdate (newProps: BaseReporterProps) {
     this.props.runnablesStore.setRunningSpec(this.props.spec.relative)
 
     if (
       this.props.resetStatsOnSpecChange &&
-      this.props.spec.relative !== newProps.spec.relative
+      this.props.specRunId !== newProps.specRunId
     ) {
       runInAction('reporter:stats:reset', () => {
         this.props.statsStore.reset()
@@ -124,7 +132,7 @@ class Reporter extends Component<ReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, spec } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(appState.autoScrollingEnabled)
@@ -153,7 +161,7 @@ declare global {
   interface Window {
     Cypress: any
     state: AppState
-    render: ((props: Partial<ReporterProps>) => void)
+    render: ((props: Partial<BaseReporterProps>) => void)
   }
 }
 

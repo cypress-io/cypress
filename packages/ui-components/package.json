@@ -1,6 +1,6 @@
 {
   "name": "@packages/ui-components",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "src/index.tsx",
   "scripts": {
@@ -19,7 +19,7 @@
     "@babel/plugin-proposal-decorators": "7.8.3",
     "@babel/preset-env": "7.9.0",
     "@babel/preset-react": "7.9.4",
-    "@cypress/webpack-preprocessor": "*",
+    "@cypress/webpack-preprocessor": "0.0.0-development",
     "@fortawesome/fontawesome-free": "5.12.1",
     "@reach/dialog": "0.10.5",
     "@reach/visually-hidden": "0.10.4",

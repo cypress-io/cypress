@@ -1,6 +1,6 @@
 {
   "name": "@packages/socket",
-  "version": "0.0.0",
+  "version": "0.0.0-development",
   "private": true,
   "main": "index.ts",
   "browser": "lib/browser.ts",

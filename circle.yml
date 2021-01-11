@@ -908,6 +908,16 @@ jobs:
           working_directory: npm/webpack-preprocessor/examples/react-app
       - store-npm-logs
 
+  npm-webpack-batteries-included-preprocessor:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/
+      - check-conditional-ci
+      - run:
+          name: Run tests
+          command: yarn workspace @cypress/webpack-batteries-included-preprocessor test
+
   npm-vue:
     <<: *defaults
     steps:
@@ -1726,6 +1736,9 @@ linux-workflow: &linux-workflow
           - build
 
     - npm-webpack-preprocessor:
+        requires:
+          - build
+    - npm-webpack-batteries-included-preprocessor:
         requires:
           - build
     - npm-vue:

@@ -4,7 +4,8 @@
     "no-only-tests"
   ],
   "extends": [
-    "plugin:@cypress/dev/general"
+    "plugin:@cypress/dev/general",
+    "plugin:@cypress/dev/tests"
   ],
   "rules": {
     "@typescript-eslint/no-var-requires": "off",

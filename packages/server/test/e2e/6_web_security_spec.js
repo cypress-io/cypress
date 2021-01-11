@@ -88,7 +88,7 @@ describe('e2e web security', () => {
 
   context('firefox', () => {
     e2e.it('displays warning when firefox and chromeWebSecurity:false', {
-      spec: 'simple_passing_spec.coffee',
+      spec: 'simple_passing_spec.js',
       snapshot: true,
       browser: 'firefox',
       config: {
