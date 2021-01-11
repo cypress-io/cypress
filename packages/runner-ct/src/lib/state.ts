@@ -1,4 +1,4 @@
-import { action, computed, observable } from 'mobx'
+import { action, computed, observable, when } from 'mobx'
 import _ from 'lodash'
 import automation from './automation'
 
@@ -53,6 +53,8 @@ export default class State {
 
   @observable isLoading = true
   @observable isRunning = false
+  @observable isInitialBuildSucessful = false
+  @observable waitingForInitialBuild = false
 
   @observable messageTitle = _defaults.messageTitle
   @observable messageDescription = _defaults.messageDescription
@@ -194,7 +196,20 @@ export default class State {
   }
 
   @action setSpec (spec: Cypress.Cypress['spec'] | null) {
-    this.spec = spec
+    if (this.isInitialBuildSucessful) {
+      this.spec = spec
+    } else {
+      this.waitingForInitialBuild = true
+      when(() => this.isInitialBuildSucessful).then(() => {
+        // it looks like event that builds passed coming to us before files are saved to disk
+        // so adding small delay before load them
+        // Will be cool to find more reliable solution
+        return setTimeout(action(() => {
+          this.waitingForInitialBuild = false
+          this.spec = spec
+        }), 500)
+      })
+    }
   }
 
   @action setSpecs (specs) {
@@ -216,6 +231,10 @@ export default class State {
     }
 
     this.setSpec(spec)
+  }
+
+  @action initialBuildFired () {
+    this.isInitialBuildSucessful = true
   }
 
   @action addSpecToMultiMode (newSpec: Cypress.Cypress['spec']) {

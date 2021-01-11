@@ -5,13 +5,13 @@ import cs from 'classnames'
 import PropTypes from 'prop-types'
 import React, { Component } from 'react'
 import { render } from 'react-dom'
+import { RunMode } from '@packages/runner-ct'
 // @ts-ignore
 import EQ from 'css-element-queries/src/ElementQueries'
 
 import { RunnablesErrorModel } from './runnables/runnable-error'
 import appState, { AppState } from './lib/app-state'
 import events, { Runner, Events } from './lib/events'
-import { RunMode } from '@packages/runner-ct'
 import ForcedGcWarning from './lib/forced-gc-warning'
 import runnablesStore, { RunnablesStore } from './runnables/runnables-store'
 import scroller, { Scroller } from './lib/scroller'
@@ -30,18 +30,19 @@ interface BaseReporterProps {
   runMode: RunMode
   events: Events
   error?: RunnablesErrorModel
-  /** Used for component testing front-end */
-  specRunId?: string | null
+  runMode: RunMode
   resetStatsOnSpecChange?: boolean
   renderReporterHeader?: (props: ReporterHeaderProps) => JSX.Element;
   spec: Cypress.Cypress['spec']
+  /** Used for component testing front-end */
+  specRunId?: string | null
 }
 
-export interface SingleReporterProps extends BaseReporterProps{
-  runMode: 'single',
+export interface SingleReporterProps extends BaseReporterProps {
+  runMode: 'single'
 }
 
-export interface MultiReporterProps extends BaseReporterProps{
+export interface MultiReporterProps extends BaseReporterProps {
   runMode: 'multi',
   allSpecs: Array<Cypress.Cypress['spec']>
 }
@@ -132,7 +133,7 @@ class Reporter extends Component<SingleReporterProps | MultiReporterProps> {
   }
 
   componentDidMount () {
-    const { spec, appState, autoScrollingEnabled, runnablesStore, runner, scroller, statsStore } = this.props
+    const { appState, runnablesStore, runner, scroller, statsStore, spec } = this.props
 
     action('set:scrolling', () => {
       appState.setAutoScrolling(appState.autoScrollingEnabled)

@@ -45,6 +45,8 @@ export async function start (initialWebpackConfig, { specs, config, devServerEve
   const webpackDevServerConfig = {
     ...webpackConfig.devServer,
     hot: true,
+    inline: false,
+    sockPath: '/cypress-webpack-hmr-socket',
   }
 
   return new WebpackDevServer(compiler, webpackDevServerConfig)

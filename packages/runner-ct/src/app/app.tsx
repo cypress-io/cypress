@@ -63,6 +63,13 @@ const App: React.FC<AppProps> = observer(
           >
             <SpecsList state={state} config={config} />
             <div>
+              {state.waitingForInitialBuild && (
+                // TODO style this message
+                <div>
+                  Waiting for initial webpack build...
+                </div>
+              )}
+
               {state.spec && (
                 <Reporter
                   runMode={state.runMode}
