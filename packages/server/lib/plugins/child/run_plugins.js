@@ -108,44 +108,31 @@ const load = (ipc, config, pluginsFile) => {
 const execute = (ipc, event, ids, args = []) => {
   debug(`execute plugin event: ${event} (%o)`, ids)
 
-<<<<<<< HEAD
-  switch (event) {
-    case 'dev-server:start':
-      devServer.wrap(ipc, invoke, ids, args)
-
-      return
-    case 'after:screenshot':
-      util.wrapChildPromise(ipc, invoke, ids, args)
-=======
   const wrapChildPromise = () => {
     util.wrapChildPromise(ipc, invoke, ids, args)
   }
->>>>>>> develop
 
-  const handlers = {
-    'after:run': wrapChildPromise,
-    'after:screenshot': wrapChildPromise,
-    'after:spec': wrapChildPromise,
-    'before:browser:launch' () {
-      browserLaunch.wrap(ipc, invoke, ids, args)
-    },
-    'before:run': wrapChildPromise,
-    'before:spec': wrapChildPromise,
-    'file:preprocessor' () {
-      preprocessor.wrap(ipc, invoke, ids, args)
-    },
-    'task' () {
-      task.wrap(ipc, registeredEventsById, ids, args)
-    },
-    '_get:task:keys' () {
-      task.getKeys(ipc, registeredEventsById, ids)
-    },
-    '_get:task:body' () {
-      task.getBody(ipc, registeredEventsById, ids, args)
-    },
-    'default' () {
+  switch (event) {
+    case 'dev-server:start':
+      return devServer.wrap(ipc, invoke, ids, args)
+    case 'file:preprocessor':
+      return preprocessor.wrap(ipc, invoke, ids, args)
+    case 'after:run':
+    case 'before:run':
+    case 'before:spec':
+    case 'after:spec':
+    case 'after:screenshot':
+      return wrapChildPromise()
+    case 'task':
+      return task.wrap(ipc, registeredEventsById, ids, args)
+    case '_get:task:keys':
+      return task.getKeys(ipc, registeredEventsById, ids)
+    case '_get:task:body':
+      return task.getBody(ipc, registeredEventsById, ids, args[0])
+    case 'before:browser:launch':
+      return browserLaunch.wrap(ipc, invoke, ids, args)
+    default:
       debug('unexpected execute message:', event, args)
-    },
   }
 
   ;(handlers[event] || handlers['default'])()
