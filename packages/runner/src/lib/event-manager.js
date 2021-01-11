@@ -281,24 +281,24 @@ const eventManager = {
   },
 
   setup (config) {
-    return new Promise((resolve) => {
-      ws.emit('get:existing:run:state', (state = {}) => {
-        this._restoreStudioFromState(state)
+    // return new Promise((resolve) => {
+    //   ws.emit('get:existing:run:state', (state = {}) => {
+    //     this._restoreStudioFromState(state)
 
-        config = this._modifyConfigForStudio(config)
+    // config = this._modifyConfigForStudio(config)
 
-        Cypress = this.Cypress = $Cypress.create(config)
+    Cypress = this.Cypress = $Cypress.create(config)
 
-        // expose Cypress globally
-        window.Cypress = Cypress
+    // expose Cypress globally
+    window.Cypress = Cypress
 
-        this._addListeners()
+    this._addListeners()
 
-        ws.emit('watch:test:file', config.spec)
+    ws.emit('watch:test:file', config.spec)
 
-        resolve()
-      })
-    })
+    // resolve()
+    // })
+    // })
   },
 
   isBrowser (browserName) {
@@ -310,7 +310,7 @@ const eventManager = {
   initialize ($autIframe, config) {
     performance.mark('initialize-start')
 
-    Cypress.initialize({
+    return Cypress.initialize({
       $autIframe,
       onSpecReady: () => {
         // get the current runnable in case we reran mid-test due to a visit
@@ -321,7 +321,16 @@ const eventManager = {
             return
           }
 
+          this._restoreStudioFromState(state)
+
           const runnables = Cypress.runner.normalizeAll(state.tests)
+
+          const run = () => {
+            performance.mark('initialize-end')
+            performance.measure('initialize', 'initialize-start', 'initialize-end')
+
+            this._runDriver(state)
+          }
 
           reporterBus.emit('runnables:ready', runnables)
 
@@ -341,20 +350,13 @@ const eventManager = {
           }
 
           if (config.isTextTerminal && !state.currentId) {
-            ws.emit('set:runnables', runnables, () => this._run(state))
+            ws.emit('set:runnables', runnables, run)
           } else {
-            this._run(state)
+            run()
           }
         })
       },
     })
-  },
-
-  _run (state) {
-    performance.mark('initialize-end')
-    performance.measure('initialize', 'initialize-start', 'initialize-end')
-
-    this._runDriver(state)
   },
 
   _addListeners () {

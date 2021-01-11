@@ -139,7 +139,7 @@ const wrapAll = (runnable) => {
   )
 }
 
-const condenseHooks = (runnable) => {
+const condenseHooks = (runnable, getHookId) => {
   runnable._condensedHooks = true
   const hooks = _.compact(_.concat(
     runnable._beforeAll,
@@ -149,6 +149,10 @@ const condenseHooks = (runnable) => {
   ))
 
   return _.map(hooks, (hook) => {
+    if (!hook.hookId) {
+      hook.hookId = getHookId()
+    }
+
     if (!hook.hookName) {
       hook.hookName = getHookName(hook)
     }
@@ -427,7 +431,7 @@ const hasOnly = (suite) => {
   )
 }
 
-const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById) => {
+const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnable, onLogsById, getRunnableId, getHookId) => {
   let hasTests = false
 
   // only loop until we find the first test
@@ -445,7 +449,7 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   // create optimized lookups for the tests without
   // traversing through it multiple times
   const tests = {}
-  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById)
+  const normalizedSuite = normalize(suite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId)
 
   if (setTestsById) {
     // use callback here to hand back
@@ -469,8 +473,10 @@ const normalizeAll = (suite, initialTests = {}, setTestsById, setTests, onRunnab
   return normalizedSuite
 }
 
-const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
+const normalize = (runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId) => {
   const normalizeRunnable = (runnable) => {
+    runnable.id = getRunnableId()
+
     // tests have a type of 'test' whereas suites do not have a type property
     if (runnable.type == null) {
       runnable.type = 'suite'
@@ -511,7 +517,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
     }
 
     // merge all hooks into single array
-    runnable.hooks = condenseHooks(runnable)
+    runnable.hooks = condenseHooks(runnable, getHookId)
 
     // reduce this runnable down to its props
     // and collections
@@ -539,7 +545,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
     _.each({ tests: runnable.tests, suites: runnable.suites }, (_runnables, type) => {
       if (runnable[type]) {
         return normalizedRunnable[type] = _.map(_runnables, (runnable) => {
-          return normalize(runnable, tests, initialTests, onRunnable, onLogsById)
+          return normalize(runnable, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId)
         })
       }
     })
@@ -553,7 +559,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
     if (suite._onlyTests.length) {
       suite.tests = suite._onlyTests
       normalizedSuite.tests = _.map(suite._onlyTests, (test) => {
-        const normalizedTest = normalizeRunnable(test, initialTests, onRunnable, onLogsById)
+        const normalizedTest = normalizeRunnable(test)
 
         push(test)
 
@@ -566,7 +572,7 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
       suite.tests = []
       normalizedSuite.tests = []
       _.each(suite._onlySuites, (onlySuite) => {
-        const normalizedOnlySuite = normalizeRunnable(onlySuite, initialTests, onRunnable, onLogsById)
+        const normalizedOnlySuite = normalizeRunnable(onlySuite)
 
         if (hasOnly(onlySuite)) {
           return filterOnly(normalizedOnlySuite, onlySuite)
@@ -574,12 +580,12 @@ const normalize = (runnable, tests, initialTests, onRunnable, onLogsById) => {
       })
 
       suite.suites = _.filter(suite.suites, (childSuite) => {
-        const normalizedChildSuite = normalizeRunnable(childSuite, initialTests, onRunnable, onLogsById)
+        const normalizedChildSuite = normalizeRunnable(childSuite)
 
         return (suite._onlySuites.indexOf(childSuite) !== -1) || filterOnly(normalizedChildSuite, childSuite)
       })
 
-      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById))
+      normalizedSuite.suites = _.map(suite.suites, (childSuite) => normalize(childSuite, tests, initialTests, onRunnable, onLogsById, getRunnableId, getHookId))
     }
 
     return suite.tests.length || suite.suites.length
@@ -849,6 +855,8 @@ const _runnerListeners = (_runner, Cypress, _emissions, getTestById, getTest, se
 }
 
 const create = (specWindow, mocha, Cypress, cy) => {
+  let _runnableId = 0
+  let _hookId = 0
   let _uncaughtFn = null
   let _resumedAtTestIndex = null
 
@@ -941,6 +949,14 @@ const create = (specWindow, mocha, Cypress, cy) => {
   }
   let _startTime = null
 
+  const getRunnableId = () => {
+    return `${++_runnableId}`
+  }
+
+  const getHookId = () => {
+    return `${++_hookId}`
+  }
+
   const setTestsById = (tbid) => {
     return _testsById = tbid
   }
@@ -955,7 +971,7 @@ const create = (specWindow, mocha, Cypress, cy) => {
 
   const onRunnable = (r) => {
     // set defualt retries at onRunnable time instead of onRunnableRun
-    _runnables.push(r)
+    return _runnables.push(r)
   }
 
   const onLogsById = (l) => {
@@ -1103,6 +1119,8 @@ const create = (specWindow, mocha, Cypress, cy) => {
         setTests,
         onRunnable,
         onLogsById,
+        getRunnableId,
+        getHookId,
       )
     },
 

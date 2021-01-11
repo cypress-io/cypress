@@ -20,19 +20,15 @@ const runnableClearTimeout = Runnable.prototype.clearTimeout
 const runnableResetTimeout = Runnable.prototype.resetTimeout
 const testRetries = Test.prototype.retries
 const testClone = Test.prototype.clone
-const suiteConstructor = Suite
 const suiteAddTest = Suite.prototype.addTest
-const suiteAddSuite = Suite.prototype.addSuite
 const suiteRetries = Suite.prototype.retries
 const hookRetries = Hook.prototype.retries
 const suiteBeforeAll = Suite.prototype.beforeAll
 const suiteBeforeEach = Suite.prototype.beforeEach
 const suiteAfterAll = Suite.prototype.afterAll
 const suiteAfterEach = Suite.prototype.afterEach
-const suiteAppendOnlyTest = Suite.prototype.appendOnlyTest
-const suiteAppendOnlySuite = Suite.prototype.appendOnlySuite
 
-// don't let mocha polute the global namespace
+// don't let mocha pollute the global namespace
 delete window.mocha
 delete window.Mocha
 
@@ -232,16 +228,8 @@ const restoreRunnerRunTests = () => {
   Runner.prototype.runTests = runnerRunTests
 }
 
-const restoreSuiteConstructor = () => {
-  Mocha.Suite = suiteConstructor
-}
-
 const restoreSuiteAddTest = () => {
   Suite.prototype.addTest = suiteAddTest
-}
-
-const restoreSuiteAddSuite = () => {
-  Suite.prototype.addSuite = suiteAddSuite
 }
 
 const restoreHookRetries = () => {
@@ -253,11 +241,6 @@ const restoreSuiteHooks = () => {
   Suite.prototype.beforeEach = suiteBeforeEach
   Suite.prototype.afterAll = suiteAfterAll
   Suite.prototype.afterEach = suiteAfterEach
-}
-
-const restoreSuiteAppendOnly = () => {
-  Suite.prototype.appendOnlyTest = suiteAppendOnlyTest
-  Suite.prototype.appendOnlySuite = suiteAppendOnlySuite
 }
 
 const patchSuiteRetries = () => {
@@ -383,24 +366,13 @@ const patchRunnableClearTimeout = () => {
   }
 }
 
-// note: this isn't really the correct way to patch a constructor
-// but due to the way that mocha calls the constructor internally it works
-// (only really used to set the id of the root runnable)
-const patchSuiteConstructor = (getId) => {
-  Mocha.Suite = function (...args) {
-    const suite = new suiteConstructor(...args)
-
-    if (!suite.id) {
-      suite.id = getId()
-    }
-
-    return suite
-  }
-}
-
-const patchSuiteAddTest = () => {
+const patchSuiteAddTest = (specWindow, config) => {
   Suite.prototype.addTest = function (...args) {
     const test = args[0]
+
+    if (!test.invocationDetails) {
+      test.invocationDetails = getInvocationDetails(specWindow, config).details
+    }
 
     const ret = suiteAddTest.apply(this, args)
 
@@ -424,37 +396,6 @@ const patchSuiteAddTest = () => {
 
     return ret
   }
-}
-
-const patchSuiteAdd = (specWindow, config, getId) => {
-  _.each(['addTest', 'addSuite'], (fnName) => {
-    const _fn = Suite.prototype[fnName]
-
-    Suite.prototype[fnName] = function (runnable) {
-      if (!runnable.id) {
-        runnable.id = getId()
-      }
-
-      if (!runnable.invocationDetails) {
-        runnable.invocationDetails = getInvocationDetails(specWindow, config).details
-      }
-
-      const ret = _fn.call(this, runnable)
-
-      if (runnable.id === config('onlyNewTestInSuiteId')) {
-        const newTest = new Test('New Test', _.noop)
-
-        newTest.id = getId()
-        config('onlyTestId', newTest.id)
-
-        runnable.addTest(newTest)
-      } else if (runnable.id === config('onlyTestId')) {
-        this.appendOnlyTest(runnable)
-      }
-
-      return ret
-    }
-  })
 }
 
 const patchRunnableResetTimeout = () => {
@@ -487,15 +428,11 @@ const patchRunnableResetTimeout = () => {
   }
 }
 
-const patchSuiteHooks = (specWindow, config, getHookId) => {
+const patchSuiteHooks = (specWindow, config) => {
   _.each(['beforeAll', 'beforeEach', 'afterAll', 'afterEach'], (fnName) => {
     const _fn = Suite.prototype[fnName]
 
     Suite.prototype[fnName] = function (title, fn) {
-      if (config('disableAfterHooks') && (fnName === 'afterEach' || fnName === 'afterAll')) {
-        return
-      }
-
       const _createHook = this._createHook
 
       this._createHook = function (title, fn) {
@@ -515,10 +452,6 @@ const patchSuiteHooks = (specWindow, config, getHookId) => {
           .setUserInvocationStack(invocationStack)
         }
 
-        if (!hook.hookId) {
-          hook.hookId = getHookId()
-        }
-
         return hook
       }
 
@@ -531,49 +464,21 @@ const patchSuiteHooks = (specWindow, config, getHookId) => {
   })
 }
 
-const patchSuiteAppendOnly = (specWindow, config) => {
-  _.each([['appendOnlyTest', '_onlyTests'], ['appendOnlySuite', '_onlySuites']], ([fnName, propName]) => {
-    const _fn = Suite.prototype[fnName]
-
-    Suite.prototype[fnName] = function (runnable) {
-      const onlyId = config('onlyTestId')
-
-      if (!onlyId || (runnable.id === onlyId && !_.find(this[propName], { id: onlyId }))) {
-        return _fn.call(this, runnable)
-      }
-    }
-  })
-}
-
 const restore = () => {
   restoreRunnerRun()
   restoreRunnerFail()
   restoreRunnableRun()
   restoreRunnableClearTimeout()
   restoreRunnableResetTimeout()
-  restoreSuiteConstructor()
   restoreSuiteRetries()
   restoreHookRetries()
   restoreRunnerRunTests()
   restoreTestClone()
   restoreSuiteAddTest()
-  restoreSuiteAddSuite()
   restoreSuiteHooks()
-  restoreSuiteAppendOnly()
 }
 
 const override = (specWindow, Cypress, config) => {
-  let _id = 0
-  let _hookId = 0
-
-  // increment the id counter
-  const getId = () => {
-    return `r${++_id}`
-  }
-  const getHookId = () => {
-    return `h${++_hookId}`
-  }
-
   patchRunnerFail()
   patchRunnableRun(Cypress)
   patchRunnableClearTimeout()
@@ -582,11 +487,8 @@ const override = (specWindow, Cypress, config) => {
   patchHookRetries()
   patchRunnerRunTests()
   patchTestClone()
-  patchSuiteConstructor(getId)
-  patchSuiteAddTest()
-  patchSuiteAdd(specWindow, config, getId)
-  patchSuiteHooks(specWindow, config, getHookId)
-  patchSuiteAppendOnly(specWindow, config)
+  patchSuiteAddTest(specWindow, config)
+  patchSuiteHooks(specWindow, config)
 }
 
 const create = (specWindow, Cypress, config) => {
