@@ -1,4 +1,4 @@
-import Bluebird from 'bluebird'
+import Promise from 'bluebird'
 import debugModule from 'debug'
 import _ from 'lodash'
 import { ChildProcess } from 'child_process'
@@ -44,17 +44,17 @@ interface CRIWrapper {
   /**
    * Get the `protocolVersion` supported by the browser.
    */
-  getProtocolVersion (): Bluebird<Version>
+  getProtocolVersion (): Promise<Version>
   /**
    * Rejects if `protocolVersion` is less than the current version.
    * @param protocolVersion CDP version string (ex: 1.3)
    */
-  ensureMinimumProtocolVersion(protocolVersion: string): Bluebird<void>
+  ensureMinimumProtocolVersion(protocolVersion: string): Promise<void>
   /**
    * Sends a command to the Chrome remote interface.
    * @example client.send('Page.navigate', { url })
   */
-  send (command: CRI.Command, params?: object): Bluebird<any>
+  send (command: CRI.Command, params?: object): Promise<any>
   /**
    * Registers callback for particular event.
    * @see https://github.com/cyrus-and/chrome-remote-interface#class-cdp
@@ -63,7 +63,7 @@ interface CRIWrapper {
   /**
    * Calls underlying remote interface client close
   */
-  close (): Bluebird<void>
+  close (): Promise<void>
 }
 
 interface Version {
@@ -143,7 +143,7 @@ type Message = {
   sessionId?: string
 }
 
-export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Function): Bluebird<CRIWrapper> => {
+export const create = Promise.method((opts: CreateOpts, onAsynchronousError: Function): Promise<CRIWrapper> => {
   const subscriptions: {eventName: CRI.EventName, cb: Function}[] = []
   let enqueuedCommands: {message: Message, params: any, p: DeferredPromise }[] = []
 
@@ -204,8 +204,8 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
 
       maybeDebugCdpMessages(cri)
 
-      cri.send = Bluebird.promisify(cri.send, { context: cri })
-      cri.close = Bluebird.promisify(cri.close, { context: cri })
+      cri.send = Promise.promisify(cri.send, { context: cri })
+      cri.close = Promise.promisify(cri.close, { context: cri })
 
       // @see https://github.com/cyrus-and/chrome-remote-interface/issues/72
       cri._notifier.on('disconnect', reconnect)
@@ -220,14 +220,18 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
   }
 
   const findTarget = () => {
+    debug('finding CDP target...')
+
     return new Promise<void>((resolve, reject) => {
       const isAboutBlank = (target) => target.type === 'page' && target.url === 'about:blank'
 
       const attachToTarget = _.once(({ targetId }) => {
+        debug('attaching to target %o', { targetId })
         cri.send('Target.attachToTarget', {
           targetId,
           flatten: true, // enable selecting via sessionId
         }).then((result) => {
+          debug('attached to target %o', result)
           sessionId = result.sessionId
           resolve()
         }).catch(reject)
@@ -273,7 +277,7 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
     client = {
       ensureMinimumProtocolVersion,
       getProtocolVersion,
-      send: Bluebird.method((command: CRI.Command, params?: object) => {
+      send: Promise.method((command: CRI.Command, params?: object) => {
         const message: Message = {
           method: command,
           params,
@@ -284,7 +288,7 @@ export const create = Bluebird.method((opts: CreateOpts, onAsynchronousError: Fu
         }
 
         const enqueue = () => {
-          return new Bluebird((resolve, reject) => {
+          return new Promise((resolve, reject) => {
             enqueuedCommands.push({ message, params, p: { resolve, reject } })
           })
         }

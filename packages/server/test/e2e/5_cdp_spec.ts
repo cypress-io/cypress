@@ -48,5 +48,17 @@ describe('e2e cdp', function () {
       browser: 'chrome',
       expectedExitCode: 0,
     })
+
+    e2e.it('falls back to connecting via tcp when stdio cannot be connected', {
+      project: Fixtures.projectPath('remote-debugging-port-removed'),
+      processEnv: {
+        CY_REMOVE_PIPE: '1',
+        CYPRESS_CDP_TARGET_TIMEOUT: '1000',
+      },
+      spec: 'spec.ts',
+      browser: 'chrome',
+      expectedExitCode: 0,
+      snapshot: true,
+    })
   })
 })

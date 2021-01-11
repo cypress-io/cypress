@@ -5,6 +5,7 @@ const chalk = require('chalk')
 const AU = require('ansi_up')
 const Promise = require('bluebird')
 const { stripIndent } = require('./util/strip_indent')
+const humanTime = require('./util/human_time')
 
 const ansi_up = new AU.default
 
@@ -853,6 +854,8 @@ const getMsgByType = function (type, arg1 = {}, arg2, arg3) {
         ${arg1.stack}`
     case 'CDP_STDIO_ERROR':
       return 'The connection between Cypress and Chrome has unexpectedly ended. Please restart the browser.'
+    case 'CDP_STDIO_TIMEOUT':
+      return `Warning: Cypress failed to connect to ${arg1} via stdio after ${humanTime.long(arg2)}. Falling back to TCP...`
     case 'CDP_RETRYING_CONNECTION':
       return `Failed to connect to Chrome, retrying in 1 second (attempt ${chalk.yellow(arg1)}/62)`
     case 'DEPRECATED_BEFORE_BROWSER_LAUNCH_ARGS':

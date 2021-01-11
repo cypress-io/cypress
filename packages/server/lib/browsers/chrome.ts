@@ -13,6 +13,7 @@ import * as CriClient from './cri-client'
 import * as protocol from './protocol'
 import utils from './utils'
 import { Browser } from './types'
+import errors from '../errors'
 
 // TODO: this is defined in `cypress-npm-api` but there is currently no way to get there
 type CypressConfiguration = any
@@ -36,6 +37,7 @@ type ChromePreferences = {
 }
 
 const staticCdpPort = Number(process.env.CYPRESS_REMOTE_DEBUGGING_PORT)
+const stdioTimeoutMs = Number(process.env.CYPRESS_CDP_TARGET_TIMEOUT) || 15000
 
 const pathToExtension = extension.getPathToExtension()
 const pathToTheme = extension.getPathToTheme()
@@ -256,20 +258,30 @@ const useStdioCdp = (browser) => {
 // After the browser has been opened, we can connect to
 // its remote interface via a websocket.
 const _connectToChromeRemoteInterface = function (browser, process, port, onError) {
-  if (useStdioCdp(browser)) {
-    return CriClient.create({ process }, onError)
+  const connectTcp = () => {
+    // @ts-ignore
+    la(check.userPort(port), 'expected port number to connect CRI to', port)
+
+    debug('connecting to Chrome remote interface at random port %d', port)
+
+    return protocol.getWsTargetFor(port)
+    .then((wsUrl) => {
+      debug('received wsUrl %s for port %d', wsUrl, port)
+
+      return CriClient.create({ target: wsUrl }, onError)
+    })
   }
 
-  // @ts-ignore
-  la(check.userPort(port), 'expected port number to connect CRI to', port)
+  if (!useStdioCdp(browser)) {
+    return connectTcp()
+  }
 
-  debug('connecting to Chrome remote interface at random port %d', port)
+  return CriClient.create({ process }, onError)
+  .timeout(stdioTimeoutMs)
+  .catch(Bluebird.TimeoutError, () => {
+    errors.warning('CDP_STDIO_TIMEOUT', browser.displayName, stdioTimeoutMs)
 
-  return protocol.getWsTargetFor(port)
-  .then((wsUrl) => {
-    debug('received wsUrl %s for port %d', wsUrl, port)
-
-    return CriClient.create({ target: wsUrl }, onError)
+    return connectTcp()
   })
 }
 
